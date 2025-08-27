@@ -8,7 +8,11 @@ export function createWooCommerceClient() {
   const consumerSecret = process.env.WOOCOMMERCE_CONSUMER_SECRET;
 
   if (!url || !consumerKey || !consumerSecret) {
-    throw new Error('WooCommerce credentials are not properly configured');
+    // Return null during build time to allow builds without WooCommerce
+    if (process.env.NODE_ENV === 'production' && !process.env.BUILDING) {
+      throw new Error('WooCommerce credentials are not properly configured');
+    }
+    return null;
   }
 
   return new WooCommerceRestApi({

@@ -43,8 +43,7 @@ RUN npm config set fetch-timeout 300000 && \
 # Copy built application from builder
 COPY --from=builder --chown=nextjs:nodejs /app/.next ./.next
 COPY --from=builder --chown=nextjs:nodejs /app/public ./public
-COPY --from=builder --chown=nextjs:nodejs /app/next.config.ts ./
-COPY --from=builder --chown=nextjs:nodejs /app/tsconfig.json ./
+COPY --from=builder --chown=nextjs:nodejs /app/next.config.js ./
 
 # Switch to non-root user
 USER nextjs
