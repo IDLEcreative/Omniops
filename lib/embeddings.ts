@@ -92,7 +92,7 @@ export async function generateEmbeddingVectors(chunks: string[]): Promise<number
           texts: batch
         };
       } catch (error) {
-        console.error(`Error generating embeddings for batch starting at ${startIdx}:`, error);
+        console.error(`Error generating embeddings for batch:`, error);
         // Retry once on failure
         try {
           await new Promise(resolve => setTimeout(resolve, 1000)); // Wait 1 second before retry
@@ -101,8 +101,9 @@ export async function generateEmbeddingVectors(chunks: string[]): Promise<number
             input: batch,
           });
           return {
-            startIdx,
-            embeddings: response.data.map(item => item.embedding)
+            indices,
+            embeddings: response.data.map(item => item.embedding),
+            texts: batch
           };
         } catch (retryError) {
           console.error(`Retry failed for batch:`, retryError);
@@ -116,14 +117,16 @@ export async function generateEmbeddingVectors(chunks: string[]): Promise<number
     
     // Place embeddings in correct positions and update cache
     for (const result of results) {
-      for (let j = 0; j < result.embeddings.length; j++) {
-        const embedding = result.embeddings[j];
-        const originalIndex = result.indices[j];
-        const text = result.texts[j];
-        if (embedding) {
-          embeddings[originalIndex] = embedding;
-          // Cache the new embedding
-          embeddingCache.set(text, embedding);
+      if (result.indices && result.texts && result.embeddings) {
+        for (let j = 0; j < result.embeddings.length; j++) {
+          const embedding = result.embeddings[j];
+          const originalIndex = result.indices[j];
+          const text = result.texts[j];
+          if (embedding && originalIndex !== undefined && text) {
+            embeddings[originalIndex] = embedding;
+            // Cache the new embedding
+            embeddingCache.set(text, embedding);
+          }
         }
       }
     }
