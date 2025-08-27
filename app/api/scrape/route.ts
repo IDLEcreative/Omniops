@@ -287,6 +287,7 @@ async function processCrawlResults(jobId: string, supabase: any) {
             await new Promise(resolve => setTimeout(resolve, 100));
           }
         }
+        } // Close the if (batchPageError) block
         
         console.log(`Crawl processing completed. Processed: ${stats.processed}, Failed: ${stats.failed}`);
         completed = true;
