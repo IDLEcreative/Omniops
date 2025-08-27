@@ -27,29 +27,37 @@ export async function GET(request: NextRequest) {
     }
     
     // Direct SQL query to search embeddings using cosine similarity
-    const { data: searchResults, error: searchError } = await supabase.rpc('direct_search', {
-      query_text: `
-        SELECT 
-          pe.chunk_text,
-          pe.metadata,
-          1 - (pe.embedding <=> ARRAY[${queryEmbedding.join(',')}]::vector) as similarity
-        FROM page_embeddings pe
-        WHERE 1 - (pe.embedding <=> ARRAY[${queryEmbedding.join(',')}]::vector) > 0.5
-        ORDER BY pe.embedding <=> ARRAY[${queryEmbedding.join(',')}]::vector
-        LIMIT 5
-      `
-    }).catch(() => ({ data: null, error: 'RPC not available' }));
+    let searchResults, searchError;
+    try {
+      const result = await supabase.rpc('direct_search', {
+        query_text: `
+          SELECT 
+            pe.chunk_text,
+            pe.metadata,
+            1 - (pe.embedding <=> ARRAY[${queryEmbedding.join(',')}]::vector) as similarity
+          FROM page_embeddings pe
+          WHERE 1 - (pe.embedding <=> ARRAY[${queryEmbedding.join(',')}]::vector) > 0.5
+          ORDER BY pe.embedding <=> ARRAY[${queryEmbedding.join(',')}]::vector
+          LIMIT 5
+        `
+      });
+      searchResults = result.data;
+      searchError = result.error;
+    } catch (err) {
+      searchResults = null;
+      searchError = 'RPC not available';
+    }
     
     // Alternative: Try raw query without RPC
     let manualResults = null;
     if (!searchResults || searchError) {
       // Since we can't do raw SQL, let's fetch all embeddings and calculate similarity in JS
-      const { data: allEmbeddings } = await supabase
+      const { data: allEmbeddings, error: embeddingsError } = await supabase
         .from('page_embeddings')
         .select('id, chunk_text, metadata')
         .limit(20); // Get first 20 for testing
       
-      if (allEmbeddings) {
+      if (!embeddingsError && allEmbeddings) {
         // Since we can't access the embedding vectors directly from the client,
         // let's at least show what content is available
         manualResults = allEmbeddings.map(item => ({

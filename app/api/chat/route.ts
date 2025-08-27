@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { createServiceRoleClient } from '@/lib/supabase/server';
-import { ChatRequest, ChatResponse } from '@/types';
+import { ChatResponse } from '@/types';
 import OpenAI from 'openai';
 import { z } from 'zod';
 import { checkDomainRateLimit } from '@/lib/rate-limit';
@@ -80,11 +80,11 @@ export async function POST(request: NextRequest) {
       });
 
     // Prepare parallel context gathering operations
-    const contextPromises: Promise<any>[] = [];
-    let embeddingSearchPromise: Promise<any> | null = null;
-    let wooCommerceSearchPromise: Promise<any> | null = null;
+    const contextPromises: Promise<unknown>[] = [];
+    let embeddingSearchPromise: Promise<Array<{content: string; url: string; title: string; similarity: number}>> | null = null;
+    let wooCommerceSearchPromise: Promise<any[]> | null = null;
     // Start fetching conversation history immediately
-    const historyPromise: Promise<any> = (async () => {
+    const historyPromise = (async () => {
       return await adminSupabase
         .from('messages')
         .select('role, content')
@@ -115,15 +115,20 @@ export async function POST(request: NextRequest) {
           const embedding = embeddingResponse.data[0]?.embedding;
 
           if (embedding) {
-            const { data: relevantChunks } = await adminSupabase.rpc('search_embeddings', {
+            const { data: relevantChunks, error } = await adminSupabase.rpc('search_embeddings', {
               query_embedding: embedding,
               similarity_threshold: 0.7,
               match_count: 5,
             });
             
+            if (error) {
+              console.error('RPC search_embeddings error:', error);
+              return [];
+            }
+            
             // Transform to match expected format
             if (relevantChunks && relevantChunks.length > 0) {
-              return relevantChunks.map((chunk: any) => ({
+              return relevantChunks.map((chunk: {content: string; url?: string; title?: string; similarity?: number}) => ({
                 content: chunk.content,
                 url: chunk.url || '',
                 title: chunk.title || 'Untitled',
@@ -141,7 +146,7 @@ export async function POST(request: NextRequest) {
 
     // 3. Customer query detection and simple verification
     const isCustomerQuery = /order|tracking|delivery|account|email|invoice|receipt|refund|return|my purchase|my order|where is|when will|status/i.test(message);
-    let customerVerificationPromise: Promise<any> | null = null;
+    let customerVerificationPromise: Promise<{context: string; prompt?: string; level?: string} | null> | null = null;
     let customerContext = '';
     let verificationPrompt = '';
     
@@ -272,7 +277,7 @@ export async function POST(request: NextRequest) {
     if (embeddingSearchPromise) {
       const embeddingResult = contextResults[contextIndex++];
       if (embeddingResult && embeddingResult.status === 'fulfilled' && 'value' in embeddingResult && embeddingResult.value) {
-        const embeddingResults = embeddingResult.value;
+        const embeddingResults = embeddingResult.value as Array<{content: string; url: string; title: string; similarity: number}>;
         if (embeddingResults.length > 0) {
           context += '\n\nRelevant website content:\n';
           for (const result of embeddingResults) {
@@ -291,20 +296,21 @@ export async function POST(request: NextRequest) {
     if (customerVerificationPromise) {
       const customerResult = contextResults[contextIndex++];
       if (customerResult && customerResult.status === 'fulfilled' && customerResult.value) {
-        if (customerResult.value?.context) {
+        const verificationData = customerResult.value as {context: string; prompt?: string; level?: string} | null;
+        if (verificationData?.context) {
           // Customer context retrieved
-          customerContext = customerResult.value.context;
+          customerContext = verificationData.context;
           context += customerContext;
           
           // Add verification prompt if needed
-          if (customerResult.value.prompt) {
-            verificationPrompt = customerResult.value.prompt;
+          if (verificationData.prompt) {
+            verificationPrompt = verificationData.prompt;
           }
-        } else if (typeof customerResult.value === 'string') {
+        } else if (typeof verificationData === 'string') {
           // Old-style context (fallback)
-          customerContext = customerResult.value;
+          customerContext = verificationData;
           context += customerContext;
-        } else if (customerResult.value?.needsVerification) {
+        } else if ((customerResult.value as any)?.needsVerification) {
           // Customer needs verification (old style)
           needsCustomerVerification = true;
         }
@@ -315,10 +321,10 @@ export async function POST(request: NextRequest) {
     if (wooCommerceSearchPromise) {
       const wooResult = contextResults[contextIndex++];
       if (wooResult && wooResult.status === 'fulfilled' && wooResult.value) {
-        const products = wooResult.value;
+        const products = wooResult.value as any[];
         if (products.length > 0) {
           context += '\n\nRelevant products:\n';
-          products.forEach((product: any) => {
+          products.forEach((product: {name: string; price: string; stock_status: string}) => {
             context += `- ${product.name}: $${product.price} (${product.stock_status})\n`;
           });
         }
@@ -327,7 +333,7 @@ export async function POST(request: NextRequest) {
 
     // Process conversation history
     const historyResult = contextResults[contextResults.length - 1];
-    const history = historyResult && historyResult.status === 'fulfilled' ? historyResult.value.data : null;
+    const history = historyResult && historyResult.status === 'fulfilled' ? (historyResult.value as any)?.data : null;
 
     // Prepare messages for AI
     const messages: OpenAI.Chat.ChatCompletionMessageParam[] = [
@@ -375,7 +381,7 @@ export async function POST(request: NextRequest) {
 
     // Add conversation history
     if (history && history.length > 0) {
-      history.forEach((msg: any) => {
+      history.forEach((msg: {role: string; content: string}) => {
         messages.push({
           role: msg.role as 'user' | 'assistant',
           content: msg.content,

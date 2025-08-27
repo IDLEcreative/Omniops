@@ -85,7 +85,7 @@ export class URLDeduplicator {
       }
       
       return urlObj.toString().toLowerCase();
-    } catch (error) {
+    } catch {
       // If URL parsing fails, return original
       return url.toLowerCase();
     }
@@ -167,7 +167,7 @@ export class URLDeduplicator {
       
       // Weighted average (path is more important)
       return pathSimilarity * 0.7 + paramSimilarity * 0.3;
-    } catch (error) {
+    } catch {
       // If URL parsing fails, use string similarity
       return 1 - this.levenshteinDistance(url1, url2) / Math.max(url1.length, url2.length);
     }

@@ -37,13 +37,15 @@ export async function GET(request: NextRequest) {
     // Step 3: Try the old search method that the chat API falls back to
     let fallbackSearchResults = null;
     try {
-      const { data: relevantChunks } = await supabase.rpc('search_embeddings', {
+      const { data: relevantChunks, error: rpcError } = await supabase.rpc('search_embeddings', {
         query_embedding: queryEmbedding,
         similarity_threshold: 0.5,
         match_count: 5,
       });
       
-      if (relevantChunks && relevantChunks.length > 0) {
+      if (rpcError) {
+        console.log('RPC search error:', rpcError);
+      } else if (relevantChunks && relevantChunks.length > 0) {
         fallbackSearchResults = relevantChunks.map((chunk: any) => ({
           content: chunk.content || chunk.chunk_text,
           url: chunk.url || chunk.metadata?.url || '',

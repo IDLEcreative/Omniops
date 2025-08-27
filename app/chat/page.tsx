@@ -85,7 +85,9 @@ export default function ChatPage() {
         conversation_id: data.conversation_id,
         role: 'assistant',
         content: data.message,
-        metadata: data.sources ? { sources: data.sources.map((s: any) => s.url) } : undefined,
+        metadata: data.sources ? { 
+          sources: data.sources.map((s: { url: string; title?: string; relevance?: number }) => s.url) 
+        } : undefined,
         created_at: new Date().toISOString(),
       };
       setMessages(prev => [...prev, assistantMessage]);

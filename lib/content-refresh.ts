@@ -329,7 +329,7 @@ export async function discoverNewPages(
       const allowMatches = robotsText.match(/^allow:\s*(.+)$/gim);
       if (allowMatches) {
         allowMatches.forEach(match => {
-          let path = match.replace(/^allow:\s*/i, '').trim();
+          const path = match.replace(/^allow:\s*/i, '').trim();
           if (path && path !== '/') {
             // Convert path to full URL
             if (path.startsWith('/')) {

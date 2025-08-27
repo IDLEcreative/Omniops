@@ -9,7 +9,6 @@ import {
   Shield, 
   Settings,
   LogOut,
-  ChevronRight,
   MessageSquare,
   BarChart3
 } from 'lucide-react';

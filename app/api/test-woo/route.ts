@@ -38,23 +38,23 @@ export async function GET(request: NextRequest) {
     console.log('✅ WooCommerce client created successfully');
     
     // Try to fetch products
-    const products = await client.get('products', {
+    const products: any = await client.get('products', {
       per_page: 3,
       status: 'publish'
     });
     
-    console.log('📦 Products fetched:', products.length);
+    console.log('📦 Products fetched:', Array.isArray(products) ? products.length : 0);
     
     return NextResponse.json({
       success: true,
       domain,
-      products: products.map((p: any) => ({
+      products: Array.isArray(products) ? products.map((p: any) => ({
         id: p.id,
         name: p.name,
         price: p.price,
         sku: p.sku
-      })),
-      count: products.length
+      })) : [],
+      count: Array.isArray(products) ? products.length : 0
     });
     
   } catch (error) {

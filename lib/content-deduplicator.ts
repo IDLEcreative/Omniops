@@ -135,15 +135,15 @@ class LZString {
   private static _compress(uncompressed: string, bitsPerChar: number, getCharFromInt: (val: number) => string): string {
     if (uncompressed === null) return "";
     let i, value;
-    let context_dictionary: { [key: string]: number } = {};
-    let context_dictionaryToCreate: { [key: string]: boolean } = {};
+    const context_dictionary: { [key: string]: number } = {};
+    const context_dictionaryToCreate: { [key: string]: boolean } = {};
     let context_c = "";
     let context_wc = "";
     let context_w = "";
     let context_enlargeIn = 2;
     let context_dictSize = 3;
     let context_numBits = 2;
-    let context_data: string[] = [];
+    const context_data: string[] = [];
     let context_data_val = 0;
     let context_data_position = 0;
     let ii;
@@ -341,18 +341,18 @@ class LZString {
   }
 
   private static _decompress(length: number, resetValue: number, getNextValue: (index: number) => number): string {
-    let dictionary: string[] = [];
+    const dictionary: string[] = [];
     let next: number;
     let enlargeIn = 4;
     let dictSize = 4;
     let numBits = 3;
     let entry = "";
-    let result: string[] = [];
+    const result: string[] = [];
     let i: number;
     let w: string = "";
     let bits: number, resb: number, maxpower: number, power: number;
     let c: string = "";
-    let data = { val: getNextValue(0), position: resetValue, index: 1 };
+    const data = { val: getNextValue(0), position: resetValue, index: 1 };
 
     for (i = 0; i < 3; i += 1) {
       dictionary[i] = String(i);
@@ -823,7 +823,7 @@ export class ContentDeduplicator {
     }
     
     // Check existing storage
-    let existingHash = this.storage.commonElements.get(hash);
+    const existingHash = this.storage.commonElements.get(hash);
     if (existingHash) {
       existingHash.frequency++;
       if (!existingHash.pages.includes(url)) {
@@ -862,7 +862,7 @@ export class ContentDeduplicator {
     this.storage.commonElements.set(finalHash, contentHash);
     
     // Update references
-    let pageRefs = this.storage.references.get(url) || [];
+    const pageRefs = this.storage.references.get(url) || [];
     pageRefs.push(finalHash);
     this.storage.references.set(url, pageRefs);
     
@@ -935,7 +935,7 @@ export class ContentDeduplicator {
     }
     
     // Detect patterns across all content
-    let patterns: Pattern[] = [];
+    const patterns: Pattern[] = [];
     if (options.detectTemplates && batchContents.length > 1) {
       const detectedPattern = this.detectTemplatePattern(batchContents);
       if (detectedPattern) {

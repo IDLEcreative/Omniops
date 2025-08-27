@@ -56,16 +56,17 @@ export async function POST(request: NextRequest) {
             error: 'Failed to connect to WooCommerce',
           });
         }
-      } catch (wcError: any) {
+      } catch (wcError) {
         console.error('WooCommerce connection error:', wcError);
         
         // Parse error message
         let errorMessage = 'Failed to connect to WooCommerce';
-        if (wcError.response?.status === 401) {
+        const error = wcError as {response?: {status?: number}, code?: string};
+        if (error.response?.status === 401) {
           errorMessage = 'Invalid API credentials. Please check your Consumer Key and Secret.';
-        } else if (wcError.response?.status === 404) {
+        } else if (error.response?.status === 404) {
           errorMessage = 'WooCommerce REST API not found. Please ensure it\'s enabled.';
-        } else if (wcError.code === 'ECONNREFUSED') {
+        } else if (error.code === 'ECONNREFUSED') {
           errorMessage = 'Could not connect to the store. Please check the URL.';
         }
 

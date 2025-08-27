@@ -42,7 +42,7 @@ export async function GET(request: NextRequest) {
         per_page: 20, 
         orderby: 'date', 
         order: 'desc',
-        status: ['processing', 'completed', 'pending', 'on-hold']
+        status: 'any' as any
       }),
       wc.getProducts({ per_page: 100, stock_status: 'instock' }),
       wc.getSalesReport({ period: 'month' })

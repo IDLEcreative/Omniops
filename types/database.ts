@@ -28,7 +28,7 @@ export interface ScrapedPage {
   url: string;
   title: string;
   content: string;
-  metadata?: Record<string, any>;
+  metadata?: Record<string, unknown>;
   last_scraped_at: string;
   created_at: string;
 }
@@ -40,7 +40,7 @@ export interface PageEmbedding {
   embedding: number[];
   metadata?: {
     chunk_index?: number;
-    [key: string]: any;
+    [key: string]: string | number | boolean | null | undefined;
   };
   created_at: string;
 }
@@ -49,7 +49,7 @@ export interface Conversation {
   id: string;
   customer_id: string;
   session_id: string;
-  metadata?: Record<string, any>;
+  metadata?: Record<string, unknown>;
   created_at: string;
   updated_at: string;
 }
@@ -61,7 +61,9 @@ export interface Message {
   content: string;
   metadata?: {
     sources?: string[];
-    [key: string]: any;
+    products?: number[];
+    orders?: number[];
+    [key: string]: string[] | number[] | string | number | boolean | null | undefined;
   };
   created_at: string;
 }

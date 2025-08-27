@@ -61,7 +61,7 @@ export async function GET(request: NextRequest) {
     // Test 3: Get pending/draft orders (these might represent abandoned carts)
     try {
       const pendingOrders = await wc.getOrders({
-        status: ['pending', 'on-hold', 'processing'],
+        status: 'pending' as any,
         per_page: 5,
         orderby: 'date',
         order: 'desc'

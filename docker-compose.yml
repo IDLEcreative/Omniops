@@ -1,6 +1,37 @@
 version: '3.8'
 
 services:
+  # Next.js Application
+  app:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: customer-service-app
+    ports:
+      - "3000:3000"
+    environment:
+      - NODE_ENV=production
+      - REDIS_URL=redis://redis:6379
+      # Add your environment variables here (without sensitive data)
+      # These should be provided via .env file or docker-compose override
+      - NEXT_PUBLIC_SUPABASE_URL=${NEXT_PUBLIC_SUPABASE_URL}
+      - NEXT_PUBLIC_SUPABASE_ANON_KEY=${NEXT_PUBLIC_SUPABASE_ANON_KEY}
+      - SUPABASE_SERVICE_ROLE_KEY=${SUPABASE_SERVICE_ROLE_KEY}
+      - OPENAI_API_KEY=${OPENAI_API_KEY}
+    depends_on:
+      redis:
+        condition: service_healthy
+    restart: unless-stopped
+    networks:
+      - app-network
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:3000/api/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 40s
+
+  # Redis Service
   redis:
     image: redis:7-alpine
     container_name: customer-service-redis
@@ -10,6 +41,8 @@ services:
       - redis-data:/data
     command: redis-server --appendonly yes
     restart: unless-stopped
+    networks:
+      - app-network
     healthcheck:
       test: ["CMD", "redis-cli", "ping"]
       interval: 10s
@@ -19,3 +52,7 @@ services:
 volumes:
   redis-data:
     driver: local
+
+networks:
+  app-network:
+    driver: bridge

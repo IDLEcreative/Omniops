@@ -4,7 +4,7 @@ export interface ScrapedPage {
   url: string;
   title?: string;
   content: string;
-  metadata?: Record<string, any>;
+  metadata?: Record<string, unknown>;
   last_scraped_at: string;
   created_at: string;
 }
@@ -35,7 +35,7 @@ export interface PageEmbedding {
   page_id: string;
   chunk_text: string;
   embedding: number[];
-  metadata?: Record<string, any>;
+  metadata?: Record<string, unknown>;
   created_at: string;
 }
 
@@ -72,10 +72,62 @@ export interface ScrapeResponse {
 export interface WooCommerceSearchRequest {
   query?: string;
   type: 'products' | 'orders' | 'customer';
-  filters?: Record<string, any>;
+  filters?: Record<string, string | number | boolean | string[] | number[]>;
 }
 
+// Define proper types for WooCommerce results
+export type WooCommerceProduct = {
+  id: number;
+  name: string;
+  slug: string;
+  type: string;
+  status: string;
+  description: string;
+  price: string;
+  regular_price: string;
+  sale_price?: string;
+  sku?: string;
+  stock_status?: string;
+  stock_quantity?: number;
+  categories?: Array<{ id: number; name: string; slug: string }>;
+  images?: Array<{ id: number; src: string; name: string; alt: string }>;
+  [key: string]: unknown;
+};
+
+export type WooCommerceOrder = {
+  id: number;
+  parent_id: number;
+  number: string;
+  order_key: string;
+  created_via: string;
+  status: string;
+  currency: string;
+  date_created: string;
+  date_modified: string;
+  total: string;
+  customer_id: number;
+  billing?: Record<string, string>;
+  shipping?: Record<string, string>;
+  line_items?: Array<Record<string, unknown>>;
+  [key: string]: unknown;
+};
+
+export type WooCommerceCustomer = {
+  id: number;
+  date_created: string;
+  date_modified: string;
+  email: string;
+  first_name: string;
+  last_name: string;
+  role: string;
+  username: string;
+  billing?: Record<string, string>;
+  shipping?: Record<string, string>;
+  is_paying_customer: boolean;
+  [key: string]: unknown;
+};
+
 export interface WooCommerceSearchResponse {
-  results: any[];
+  results: Array<WooCommerceProduct | WooCommerceOrder | WooCommerceCustomer>;
   total: number;
 }

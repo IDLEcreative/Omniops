@@ -14,8 +14,7 @@ import {
   Lock, 
   Eye, 
   EyeOff, 
-  Database, 
-  AlertCircle,
+  Database,
   CheckCircle,
   Download,
   Trash2,
@@ -91,7 +90,7 @@ export default function PrivacyPage() {
     }, 1000);
   };
 
-  const updateSettings = (category: keyof PrivacySettings, key: string, value: any) => {
+  const updateSettings = (category: keyof PrivacySettings, key: string, value: boolean | number) => {
     setSettings(prev => ({
       ...prev,
       [category]: {

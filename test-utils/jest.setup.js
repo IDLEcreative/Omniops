@@ -12,6 +12,32 @@ process.env.SUPABASE_SERVICE_ROLE_KEY = 'test-service-role-key'
 process.env.OPENAI_API_KEY = 'test-openai-key'
 process.env.ENCRYPTION_KEY = 'test-encryption-key-32-chars-long'
 
+// Mock OpenAI to avoid browser detection issues in tests
+jest.mock('openai', () => {
+  return jest.fn().mockImplementation(() => ({
+    chat: {
+      completions: {
+        create: jest.fn().mockResolvedValue({
+          choices: [{
+            message: {
+              content: 'Mocked response',
+              role: 'assistant',
+            },
+            finish_reason: 'stop',
+          }],
+        }),
+      },
+    },
+    embeddings: {
+      create: jest.fn().mockResolvedValue({
+        data: [{
+          embedding: Array(1536).fill(0.1),
+        }],
+      }),
+    },
+  }));
+});
+
 // Mock Next.js router
 jest.mock('next/navigation', () => ({
   useRouter: () => ({

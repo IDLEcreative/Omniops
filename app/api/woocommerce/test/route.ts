@@ -1,5 +1,52 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { WooCommerceAPI } from '@/lib/woocommerce-api';
+import { Product } from '@/lib/woocommerce-full';
+
+interface TestResult {
+  success: boolean;
+  error?: string;
+  [key: string]: unknown;
+}
+
+interface StoreInfoTest extends TestResult {
+  environment?: {
+    home_url?: string;
+    site_url?: string;
+    wc_version?: string;
+  };
+  settings?: {
+    currency?: string;
+    currency_symbol?: string;
+    thousand_separator?: string;
+    decimal_separator?: string;
+  };
+}
+
+interface ProductsTest extends TestResult {
+  count?: number;
+  sample?: Array<{
+    id: number;
+    name: string;
+    price: string;
+    stock_status?: string;
+  }>;
+}
+
+interface CategoriesTest extends TestResult {
+  count?: number;
+  sample?: Array<{
+    id: number;
+    name: string;
+    count?: number;
+  }>;
+}
+
+interface TestResults {
+  storeInfo: StoreInfoTest | null;
+  products: ProductsTest | null;
+  categories: CategoriesTest | null;
+  errors: string[];
+}
 
 export async function GET(request: NextRequest) {
   try {
@@ -89,11 +136,11 @@ export async function GET(request: NextRequest) {
     };
 
     // Test the connection by fetching store info and products
-    const tests = {
-      storeInfo: null as any,
-      products: null as any,
-      categories: null as any,
-      errors: [] as string[],
+    const tests: TestResults = {
+      storeInfo: null,
+      products: null,
+      categories: null,
+      errors: [],
     };
 
     const TIMEOUT_MS = 5000; // 5 second timeout for each test
@@ -119,12 +166,12 @@ export async function GET(request: NextRequest) {
           decimal_separator: systemStatus.settings?.decimal_separator,
         },
       };
-    } catch (error: any) {
+    } catch (error) {
       tests.storeInfo = {
         success: false,
-        error: error.message || 'Failed to fetch store info',
+        error: error instanceof Error ? error.message : 'Failed to fetch store info',
       };
-      tests.errors.push(`Store info: ${error.message}`);
+      tests.errors.push(`Store info: ${error instanceof Error ? error.message : 'Unknown error'}`);
     }
 
     // Test 2: Get products
@@ -137,24 +184,24 @@ export async function GET(request: NextRequest) {
       tests.products = {
         success: true,
         count: products.length,
-        sample: products.slice(0, 2).map((p: any) => ({
+        sample: products.slice(0, 2).map((p) => ({
           id: p.id,
           name: p.name,
           price: p.price,
           stock_status: p.stock_status,
         })),
       };
-    } catch (error: any) {
+    } catch (error) {
       tests.products = {
         success: false,
-        error: error.message || 'Failed to fetch products',
+        error: error instanceof Error ? error.message : 'Failed to fetch products',
       };
-      tests.errors.push(`Products: ${error.message}`);
+      tests.errors.push(`Products: ${error instanceof Error ? error.message : 'Unknown error'}`);
     }
 
     // Test 3: Get categories
     try {
-      const categories = await withTimeout(
+      const categories: any = await withTimeout(
         wc.get('products/categories', { per_page: 5 }),
         TIMEOUT_MS,
         'Categories fetch'
@@ -168,12 +215,12 @@ export async function GET(request: NextRequest) {
           count: c.count,
         })),
       };
-    } catch (error: any) {
+    } catch (error) {
       tests.categories = {
         success: false,
-        error: error.message || 'Failed to fetch categories',
+        error: error instanceof Error ? error.message : 'Failed to fetch categories',
       };
-      tests.errors.push(`Categories: ${error.message}`);
+      tests.errors.push(`Categories: ${error instanceof Error ? error.message : 'Unknown error'}`);
     }
 
     // Test 4: Search products
@@ -191,14 +238,14 @@ export async function GET(request: NextRequest) {
         success: true,
         query: 'test',
         resultCount: searchResults.length,
-        results: searchResults.map((p: any) => p.name),
+        results: searchResults.map((p) => p.name),
       };
-    } catch (error: any) {
+    } catch (error) {
       searchTest = {
         success: false,
-        error: error.message || 'Failed to search products',
+        error: error instanceof Error ? error.message : 'Failed to search products',
       };
-      tests.errors.push(`Search: ${error.message}`);
+      tests.errors.push(`Search: ${error instanceof Error ? error.message : 'Unknown error'}`);
     }
 
     // Determine overall success
@@ -219,12 +266,12 @@ export async function GET(request: NextRequest) {
       },
     }, { status: overallSuccess ? 200 : 207 });
 
-  } catch (error: any) {
+  } catch (error) {
     console.error('WooCommerce test error:', error);
     return NextResponse.json({
       success: false,
-      error: error.message || 'Internal server error',
-      details: error.stack,
+      error: error instanceof Error ? error.message : 'Internal server error',
+      details: error instanceof Error ? error.stack : undefined,
     }, { status: 500 });
   }
 }

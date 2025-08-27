@@ -48,13 +48,17 @@ export async function POST() {
     `;
     
     // Execute the SQL to create the function
-    const { error: functionError } = await supabase.rpc('exec_sql', {
-      sql: createFunctionSQL
-    }).catch(async () => {
+    let functionError;
+    try {
+      const result = await supabase.rpc('exec_sql', {
+        sql: createFunctionSQL
+      });
+      functionError = result.error;
+    } catch (err) {
       // If exec_sql doesn't exist, try another approach
       // We'll create a simple API endpoint to handle this
-      return { error: 'Cannot create function via RPC' };
-    });
+      functionError = 'Cannot create function via RPC';
+    }
     
     if (functionError) {
       // Try alternative: Create a simpler version

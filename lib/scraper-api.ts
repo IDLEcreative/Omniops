@@ -485,7 +485,7 @@ export async function scrapePage(
           if (aiOptimization?.enabled) {
             const optimizationStartTime = Date.now();
             let wasError = false;
-            let wasCacheHit = false;
+            const wasCacheHit = false;
             let wasDeduplicated = false;
             let originalTokens = 0;
             let optimizedTokens = 0;

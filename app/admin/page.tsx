@@ -78,7 +78,7 @@ export default function AdminPage() {
 
       setSaved(true);
       setTimeout(() => setSaved(false), 3000);
-    } catch (error) {
+    } catch {
       setError('Failed to save configuration. Please try again.');
     } finally {
       setLoading(false);
@@ -115,7 +115,7 @@ export default function AdminPage() {
       } else {
         setError(data.error || 'Connection test failed');
       }
-    } catch (error) {
+    } catch {
       setError('Failed to test connection');
     } finally {
       setLoading(false);

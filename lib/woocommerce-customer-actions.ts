@@ -276,7 +276,7 @@ export class WooCommerceCustomerActions {
       }
       
       // Check for tracking information
-      let trackingData = {
+      const trackingData = {
         status: orderDetails.status,
         date_shipped: null as string | null,
         carrier: null as string | null,

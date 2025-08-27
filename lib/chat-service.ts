@@ -1,4 +1,5 @@
 import { createServiceRoleClient } from '@/lib/supabase/server';
+import type { SupabaseClient } from '@supabase/supabase-js';
 
 interface ChatSession {
   id?: string;
@@ -7,7 +8,7 @@ interface ChatSession {
   started_at?: string;
   ended_at?: string;
   title?: string;
-  metadata?: any;
+  metadata?: Record<string, unknown>;
   created_at?: string;
   updated_at?: string;
 }
@@ -20,13 +21,13 @@ interface ChatMessage {
   user_id?: string;
   role: 'user' | 'assistant' | 'system';
   content: string;
-  metadata?: any;
+  metadata?: Record<string, unknown>;
   created_at?: string;
   updated_at?: string;
 }
 
 export class ChatService {
-  private supabase: any;
+  private supabase: SupabaseClient | null = null;
 
   constructor() {
     this.initializeClient();
@@ -36,7 +37,7 @@ export class ChatService {
     this.supabase = await createServiceRoleClient();
   }
 
-  async createSession(userId?: string, metadata?: any): Promise<ChatSession> {
+  async createSession(userId?: string, metadata?: Record<string, unknown>): Promise<ChatSession> {
     if (!this.supabase) await this.initializeClient();
     
     const sessionData = {
@@ -47,7 +48,7 @@ export class ChatService {
       updated_at: new Date().toISOString()
     };
 
-    const { data, error } = await this.supabase
+    const { data, error } = await this.supabase!
       .from('conversations')
       .insert(sessionData)
       .select()
@@ -65,7 +66,7 @@ export class ChatService {
     if (!this.supabase) await this.initializeClient();
 
     // Try both id and session_id fields
-    const { data, error } = await this.supabase
+    const { data, error } = await this.supabase!
       .from('conversations')
       .select('*')
       .or(`id.eq.${sessionId},session_id.eq.${sessionId}`)
@@ -84,7 +85,7 @@ export class ChatService {
     sessionId: string, 
     role: 'user' | 'assistant' | 'system', 
     content: string, 
-    metadata?: any
+    metadata?: Record<string, unknown>
   ): Promise<ChatMessage> {
     if (!this.supabase) await this.initializeClient();
 
@@ -98,7 +99,7 @@ export class ChatService {
       updated_at: new Date().toISOString()
     };
 
-    const { data, error } = await this.supabase
+    const { data, error } = await this.supabase!
       .from('messages')
       .insert(messageData)
       .select()
@@ -121,7 +122,7 @@ export class ChatService {
     if (!this.supabase) await this.initializeClient();
 
     // Try both conversation_id and session_id fields
-    const { data, error } = await this.supabase
+    const { data, error } = await this.supabase!
       .from('messages')
       .select('*')
       .or(`conversation_id.eq.${sessionId},session_id.eq.${sessionId}`)
@@ -139,7 +140,7 @@ export class ChatService {
   async updateSessionMetadata(sessionId: string, updates: Partial<ChatSession>): Promise<void> {
     if (!this.supabase) await this.initializeClient();
 
-    const { error } = await this.supabase
+    const { error } = await this.supabase!
       .from('conversations')
       .update({
         ...updates,
@@ -158,7 +159,12 @@ export class ChatService {
     return Math.ceil(text.length / 4);
   }
 
-  async storeWordPressContext(sessionId: string, context: any): Promise<void> {
+  async storeWordPressContext(sessionId: string, context: {
+    userData?: unknown;
+    pageContext?: unknown;
+    cartData?: unknown;
+    orderContext?: unknown;
+  }): Promise<void> {
     const metadata = {
       wordpress_context: {
         user_data: context.userData,
@@ -174,7 +180,7 @@ export class ChatService {
     });
   }
 
-  async getOrCreateSession(sessionId: string, userId?: string, metadata?: any): Promise<ChatSession> {
+  async getOrCreateSession(sessionId: string, userId?: string, metadata?: Record<string, unknown>): Promise<ChatSession> {
     let session = await this.getSession(sessionId);
     
     if (!session) {
@@ -201,7 +207,7 @@ export class ChatService {
     const cutoffDate = new Date();
     cutoffDate.setDate(cutoffDate.getDate() - daysOld);
 
-    const { error } = await this.supabase
+    const { error } = await this.supabase!
       .from('conversations')
       .delete()
       .lt('created_at', cutoffDate.toISOString())

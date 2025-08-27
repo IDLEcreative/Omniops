@@ -102,7 +102,7 @@ export class SmartRequestInterceptor {
         default:
           return false;
       }
-    } catch (error) {
+    } catch {
       // If URL parsing fails, don't block
       return false;
     }

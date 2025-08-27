@@ -112,14 +112,14 @@ export default function ScrapingPage() {
         setStatus('success');
         
         // Poll for status
-        pollJobStatus(data.job_id);
+        pollJobStatus();
       } else {
         setMessage(data.message || 'Page scraped successfully!');
         setStatus('success');
         setProgress(100);
       }
-    } catch (error: any) {
-      setMessage(error.message || 'Failed to scrape website');
+    } catch (error) {
+      setMessage((error as Error).message || 'Failed to scrape website');
       setStatus('error');
     } finally {
       if (!jobId) {
@@ -128,7 +128,7 @@ export default function ScrapingPage() {
     }
   };
 
-  const pollJobStatus = async (jobId: string) => {
+  const pollJobStatus = async () => {
     let simulatedProgress = 0;
     const interval = setInterval(async () => {
       try {

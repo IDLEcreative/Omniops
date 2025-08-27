@@ -17,18 +17,26 @@ export async function GET(request: NextRequest) {
   
   try {
     // Step 1: Get available domains with embeddings
-    const { data: domains } = await supabase
+    const { data: domains, error: domainsError } = await supabase
       .from('scraped_pages')
       .select('domain')
       .not('domain', 'is', null);
     
+    if (domainsError) {
+      console.error('Error fetching domains:', domainsError);
+    }
+    
     const uniqueDomains = [...new Set(domains?.map(d => d.domain) || [])];
     
     // Step 2: Get sample embeddings to verify structure
-    const { data: sampleEmbedding } = await supabase
+    const { data: sampleEmbedding, error: sampleError } = await supabase
       .from('page_embeddings')
       .select('*')
       .limit(1);
+    
+    if (sampleError) {
+      console.error('Error fetching sample embedding:', sampleError);
+    }
     
     // Step 3: Test the search function with the first available domain
     let searchResults = null;
@@ -80,13 +88,21 @@ export async function GET(request: NextRequest) {
     }
     
     // Step 5: Check table structures
-    const { data: pageEmbeddingsCount } = await supabase
+    const { data: pageEmbeddingsCount, error: pageCountError } = await supabase
       .from('page_embeddings')
       .select('*', { count: 'exact', head: true });
     
-    const { data: contentEmbeddingsCount } = await supabase
+    if (pageCountError) {
+      console.error('Error counting page embeddings:', pageCountError);
+    }
+    
+    const { data: contentEmbeddingsCount, error: contentCountError } = await supabase
       .from('content_embeddings')
       .select('*', { count: 'exact', head: true });
+    
+    if (contentCountError) {
+      console.error('Error counting content embeddings:', contentCountError);
+    }
     
     return NextResponse.json({
       test_query: query,

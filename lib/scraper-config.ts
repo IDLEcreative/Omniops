@@ -9,7 +9,7 @@
  * - Performance tuning parameters
  */
 
-import { z } from 'zod';
+import { z, ZodError } from 'zod';
 import * as fs from 'fs';
 import * as path from 'path';
 import * as yaml from 'js-yaml';
@@ -298,8 +298,8 @@ enum ConfigPriority {
 export interface ConfigChangeEvent {
   section: string;
   key: string;
-  oldValue: any;
-  newValue: any;
+  oldValue: unknown;
+  newValue: unknown;
   source: string;
 }
 
@@ -313,7 +313,7 @@ export class ScraperConfigManager extends EventEmitter {
   private fileWatcher?: fs.FSWatcher;
   private supabase?: SupabaseClient;
   private customerId?: string;
-  private configCache: Map<string, any> = new Map();
+  private configCache: Map<string, unknown> = new Map();
   private lastReload: number = 0;
   private reloadInterval: number = 60000; // 1 minute
 
@@ -529,7 +529,7 @@ export class ScraperConfigManager extends EventEmitter {
       if (fs.existsSync(configPath)) {
         try {
           const fileContent = fs.readFileSync(configPath, 'utf-8');
-          let parsedConfig: any;
+          let parsedConfig: unknown;
           
           if (configPath.endsWith('.json')) {
             parsedConfig = JSON.parse(fileContent);
@@ -553,7 +553,7 @@ export class ScraperConfigManager extends EventEmitter {
    * Load configuration from environment variables
    */
   private loadFromEnvironment(): void {
-    const envConfig: any = {};
+    const envConfig: Record<string, unknown> = {};
     
     // Map environment variables to configuration
     const envMappings = {
@@ -698,8 +698,8 @@ export class ScraperConfigManager extends EventEmitter {
   /**
    * Deep merge two objects
    */
-  private deepMerge(target: any, source: any): any {
-    const result = { ...target };
+  private deepMerge<T extends Record<string, any>>(target: T, source: Partial<T>): T {
+    const result: any = { ...target };
     
     for (const key in source) {
       if (source[key] !== undefined) {
@@ -717,9 +717,9 @@ export class ScraperConfigManager extends EventEmitter {
   /**
    * Set nested property in object
    */
-  private setNestedProperty(obj: any, path: string, value: any): void {
+  private setNestedProperty(obj: Record<string, any>, path: string, value: unknown): void {
     const keys = path.split('.');
-    let current = obj;
+    let current: any = obj;
     
     for (let i = 0; i < keys.length - 1; i++) {
       const key = keys[i];
@@ -737,17 +737,18 @@ export class ScraperConfigManager extends EventEmitter {
             current[arrayKey] = [];
           }
           
-          if (!current[arrayKey][index]) {
-            current[arrayKey][index] = {};
+          const arr = current[arrayKey] as any[];
+          if (!arr[index]) {
+            arr[index] = {};
           }
           
-          current = current[arrayKey][index] || {};
+          current = arr[index] as Record<string, unknown> || {};
         }
       } else if (key) {
         if (!current[key]) {
           current[key] = {};
         }
-        current = current[key] || {};
+        current = (current[key] as Record<string, unknown>) || {};
       }
     }
     
@@ -764,7 +765,7 @@ export class ScraperConfigManager extends EventEmitter {
         }
         
         if (!isNaN(index)) {
-          current[arrayKey][index] = value;
+          (current[arrayKey] as any[])[index] = value;
         }
       }
     } else if (lastKey) {
@@ -775,7 +776,7 @@ export class ScraperConfigManager extends EventEmitter {
   /**
    * Parse environment variable value
    */
-  private parseEnvValue(value: string): any {
+  private parseEnvValue(value: string): unknown {
     // Try to parse as JSON
     try {
       return JSON.parse(value);
@@ -853,13 +854,13 @@ export class ScraperConfigManager extends EventEmitter {
   /**
    * Detect and emit change events
    */
-  private detectAndEmitChanges(oldConfig: any, newConfig: any, path: string = ''): void {
+  private detectAndEmitChanges(oldConfig: Record<string, unknown>, newConfig: Record<string, unknown>, path: string = ''): void {
     for (const key in newConfig) {
       const currentPath = path ? `${path}.${key}` : key;
       
       if (typeof newConfig[key] === 'object' && !Array.isArray(newConfig[key]) && newConfig[key] !== null) {
-        if (oldConfig && typeof oldConfig[key] === 'object') {
-          this.detectAndEmitChanges(oldConfig[key], newConfig[key], currentPath);
+        if (oldConfig && typeof oldConfig[key] === 'object' && oldConfig[key] !== null && !Array.isArray(oldConfig[key])) {
+          this.detectAndEmitChanges(oldConfig[key] as Record<string, unknown>, newConfig[key] as Record<string, unknown>, currentPath);
         }
       } else {
         if (!oldConfig || oldConfig[key] !== newConfig[key]) {
@@ -896,9 +897,9 @@ export class ScraperConfigManager extends EventEmitter {
   /**
    * Get a configuration value by path
    */
-  get(path: string): any {
+  get(path: string): unknown {
     const keys = path.split('.');
-    let current: any = this.config;
+    let current: unknown = this.config;
     
     for (const key of keys) {
       if (current && typeof current === 'object' && key in current) {
@@ -914,7 +915,7 @@ export class ScraperConfigManager extends EventEmitter {
   /**
    * Set a runtime configuration override
    */
-  set(path: string, value: any): void {
+  set(path: string, value: unknown): void {
     const runtimeConfig = this.configSources.get(ConfigPriority.RUNTIME) || {};
     this.setNestedProperty(runtimeConfig, path, value);
     this.configSources.set(ConfigPriority.RUNTIME, runtimeConfig);
@@ -944,7 +945,7 @@ export class ScraperConfigManager extends EventEmitter {
   /**
    * Validate a configuration object
    */
-  validate(config: any): { valid: boolean; errors?: any } {
+  validate(config: unknown): { valid: boolean; errors?: ZodError } {
     try {
       ScraperConfigSchema.parse(config);
       return { valid: true };
@@ -972,14 +973,14 @@ export class ScraperConfigManager extends EventEmitter {
   /**
    * Get platform-specific configuration
    */
-  getPlatformConfig(platform: string): any {
+  getPlatformConfig(platform: string): PlatformConfig | undefined {
     return this.config.extraction.platformOverrides[platform] || {};
   }
 
   /**
    * Set platform-specific configuration
    */
-  setPlatformConfig(platform: string, config: any): void {
+  setPlatformConfig(platform: string, config: PlatformConfig): void {
     this.set(`extraction.platformOverrides.${platform}`, config);
   }
 

@@ -16,8 +16,16 @@ const customJestConfig = {
     '^@/(.*)$': '<rootDir>/$1',
   },
   testMatch: [
-    '**/__tests__/**/*.(ts|tsx|js)',
-    '**/*.(test|spec).(ts|tsx|js)'
+    '**/__tests__/**/*.test.(ts|tsx|js)',
+    '**/__tests__/**/*.spec.(ts|tsx|js)',
+    '**/*.test.(ts|tsx|js)',
+    '**/*.spec.(ts|tsx|js)'
+  ],
+  testPathIgnorePatterns: [
+    '/node_modules/',
+    '/__tests__/utils/',
+    '/__tests__/mocks/',
+    '/__tests__/fixtures/'
   ],
   collectCoverageFrom: [
     'app/**/*.{js,jsx,ts,tsx}',

@@ -23,8 +23,33 @@ import {
   SalesReportSchema, TopSellersReportSchema, CouponsReportSchema, CustomersReportSchema, StockReportSchema, ReviewsReportSchema
 } from './woocommerce-full';
 
+import {
+  ProductAttributeTerm,
+  ProductCategory,
+  ProductReview,
+  ShippingZoneLocation,
+  ShippingZoneMethod,
+  SettingsGroup,
+  SettingOption,
+  SystemStatusTool,
+  CustomerDownload,
+  CountryData,
+  CurrencyData,
+  ContinentData,
+  OrdersReportData,
+  ProductsReportData,
+  WooCommerceClient,
+  ListParams,
+  ProductListParams,
+  OrderListParams,
+  CustomerListParams,
+  CouponListParams,
+  ReportParams,
+  SettingUpdateData
+} from './woocommerce-types';
+
 export class WooCommerceAPI {
-  private wc: any;
+  private wc: WooCommerceClient;
 
   constructor(config?: { url?: string; consumerKey?: string; consumerSecret?: string }) {
     this.wc = createWooCommerceClient(config);
@@ -33,38 +58,9 @@ export class WooCommerceAPI {
   // ==================== PRODUCTS ====================
   
   // Get all products with filtering
-  async getProducts(params?: {
-    context?: 'view' | 'edit';
-    page?: number;
-    per_page?: number;
-    search?: string;
-    after?: string;
-    before?: string;
-    exclude?: number[];
-    include?: number[];
-    offset?: number;
-    order?: 'asc' | 'desc';
-    orderby?: 'date' | 'id' | 'include' | 'title' | 'slug' | 'price' | 'popularity' | 'rating';
-    parent?: number[];
-    parent_exclude?: number[];
-    slug?: string;
-    status?: 'any' | 'draft' | 'pending' | 'private' | 'publish';
-    type?: 'simple' | 'grouped' | 'external' | 'variable';
-    sku?: string;
-    featured?: boolean;
-    category?: string;
-    tag?: string;
-    shipping_class?: string;
-    attribute?: string;
-    attribute_term?: string;
-    tax_class?: string;
-    on_sale?: boolean;
-    min_price?: string;
-    max_price?: string;
-    stock_status?: 'instock' | 'outofstock' | 'onbackorder';
-  }): Promise<Product[]> {
+  async getProducts(params?: ProductListParams): Promise<Product[]> {
     const response = await this.wc.get('products', params);
-    return response.data.map((item: any) => ProductSchema.parse(item));
+    return (response.data as unknown[]).map((item) => ProductSchema.parse(item));
   }
 
   // Get single product
@@ -102,7 +98,7 @@ export class WooCommerceAPI {
   }
 
   // Product variations
-  async getProductVariations(productId: number, params?: any): Promise<ProductVariation[]> {
+  async getProductVariations(productId: number, params?: ListParams): Promise<ProductVariation[]> {
     const response = await this.wc.get(`products/${productId}/variations`, params);
     return response.data.map((item: any) => ProductVariationSchema.parse(item));
   }
@@ -137,7 +133,7 @@ export class WooCommerceAPI {
   }
 
   // Product attributes
-  async getProductAttributes(params?: any): Promise<ProductAttribute[]> {
+  async getProductAttributes(params?: ListParams): Promise<ProductAttribute[]> {
     const response = await this.wc.get('products/attributes', params);
     return response.data.map((item: any) => ProductAttributeSchema.parse(item));
   }
@@ -163,59 +159,59 @@ export class WooCommerceAPI {
   }
 
   // Product attribute terms
-  async getProductAttributeTerms(attributeId: number, params?: any): Promise<any[]> {
+  async getProductAttributeTerms(attributeId: number, params?: ListParams): Promise<ProductAttributeTerm[]> {
     const response = await this.wc.get(`products/attributes/${attributeId}/terms`, params);
     return response.data;
   }
 
-  async getProductAttributeTerm(attributeId: number, termId: number): Promise<any> {
+  async getProductAttributeTerm(attributeId: number, termId: number): Promise<ProductAttributeTerm> {
     const response = await this.wc.get(`products/attributes/${attributeId}/terms/${termId}`);
     return response.data;
   }
 
-  async createProductAttributeTerm(attributeId: number, data: any): Promise<any> {
+  async createProductAttributeTerm(attributeId: number, data: Partial<ProductAttributeTerm>): Promise<ProductAttributeTerm> {
     const response = await this.wc.post(`products/attributes/${attributeId}/terms`, data);
     return response.data;
   }
 
-  async updateProductAttributeTerm(attributeId: number, termId: number, data: any): Promise<any> {
+  async updateProductAttributeTerm(attributeId: number, termId: number, data: Partial<ProductAttributeTerm>): Promise<ProductAttributeTerm> {
     const response = await this.wc.put(`products/attributes/${attributeId}/terms/${termId}`, data);
     return response.data;
   }
 
-  async deleteProductAttributeTerm(attributeId: number, termId: number, force: boolean = false): Promise<any> {
+  async deleteProductAttributeTerm(attributeId: number, termId: number, force: boolean = false): Promise<ProductAttributeTerm> {
     const response = await this.wc.delete(`products/attributes/${attributeId}/terms/${termId}`, { force });
     return response.data;
   }
 
   // Product categories
-  async getProductCategories(params?: any): Promise<any[]> {
+  async getProductCategories(params?: ListParams): Promise<ProductCategory[]> {
     const response = await this.wc.get('products/categories', params);
     return response.data;
   }
 
-  async getProductCategory(id: number): Promise<any> {
+  async getProductCategory(id: number): Promise<ProductCategory> {
     const response = await this.wc.get(`products/categories/${id}`);
     return response.data;
   }
 
-  async createProductCategory(data: any): Promise<any> {
+  async createProductCategory(data: Partial<ProductCategory>): Promise<ProductCategory> {
     const response = await this.wc.post('products/categories', data);
     return response.data;
   }
 
-  async updateProductCategory(id: number, data: any): Promise<any> {
+  async updateProductCategory(id: number, data: Partial<ProductCategory>): Promise<ProductCategory> {
     const response = await this.wc.put(`products/categories/${id}`, data);
     return response.data;
   }
 
-  async deleteProductCategory(id: number, force: boolean = false): Promise<any> {
+  async deleteProductCategory(id: number, force: boolean = false): Promise<ProductCategory> {
     const response = await this.wc.delete(`products/categories/${id}`, { force });
     return response.data;
   }
 
   // Product tags
-  async getProductTags(params?: any): Promise<ProductTag[]> {
+  async getProductTags(params?: ListParams): Promise<ProductTag[]> {
     const response = await this.wc.get('products/tags', params);
     return response.data.map((item: any) => ProductTagSchema.parse(item));
   }
@@ -241,33 +237,33 @@ export class WooCommerceAPI {
   }
 
   // Product reviews
-  async getProductReviews(params?: any): Promise<any[]> {
+  async getProductReviews(params?: ListParams): Promise<ProductReview[]> {
     const response = await this.wc.get('products/reviews', params);
     return response.data;
   }
 
-  async getProductReview(id: number): Promise<any> {
+  async getProductReview(id: number): Promise<ProductReview> {
     const response = await this.wc.get(`products/reviews/${id}`);
     return response.data;
   }
 
-  async createProductReview(data: any): Promise<any> {
+  async createProductReview(data: Partial<ProductReview>): Promise<ProductReview> {
     const response = await this.wc.post('products/reviews', data);
     return response.data;
   }
 
-  async updateProductReview(id: number, data: any): Promise<any> {
+  async updateProductReview(id: number, data: Partial<ProductReview>): Promise<ProductReview> {
     const response = await this.wc.put(`products/reviews/${id}`, data);
     return response.data;
   }
 
-  async deleteProductReview(id: number, force: boolean = false): Promise<any> {
+  async deleteProductReview(id: number, force: boolean = false): Promise<ProductReview> {
     const response = await this.wc.delete(`products/reviews/${id}`, { force });
     return response.data;
   }
 
   // Product shipping classes
-  async getProductShippingClasses(params?: any): Promise<ProductShippingClass[]> {
+  async getProductShippingClasses(params?: ListParams): Promise<ProductShippingClass[]> {
     const response = await this.wc.get('products/shipping_classes', params);
     return response.data.map((item: any) => ProductShippingClassSchema.parse(item));
   }
@@ -295,25 +291,7 @@ export class WooCommerceAPI {
   // ==================== ORDERS ====================
   
   // Get all orders
-  async getOrders(params?: {
-    context?: 'view' | 'edit';
-    page?: number;
-    per_page?: number;
-    search?: string;
-    after?: string;
-    before?: string;
-    exclude?: number[];
-    include?: number[];
-    offset?: number;
-    order?: 'asc' | 'desc';
-    orderby?: 'date' | 'id' | 'include' | 'title' | 'slug';
-    parent?: number[];
-    parent_exclude?: number[];
-    status?: string[];
-    customer?: number;
-    product?: number;
-    dp?: number;
-  }): Promise<Order[]> {
+  async getOrders(params?: OrderListParams): Promise<Order[]> {
     const response = await this.wc.get('orders', params);
     return response.data.map((item: any) => OrderSchema.parse(item));
   }
@@ -353,7 +331,7 @@ export class WooCommerceAPI {
   }
 
   // Order notes
-  async getOrderNotes(orderId: number, params?: any): Promise<OrderNote[]> {
+  async getOrderNotes(orderId: number, params?: ListParams): Promise<OrderNote[]> {
     const response = await this.wc.get(`orders/${orderId}/notes`, params);
     return response.data.map((item: any) => OrderNoteSchema.parse(item));
   }
@@ -374,7 +352,7 @@ export class WooCommerceAPI {
   }
 
   // Order refunds
-  async getOrderRefunds(orderId: number, params?: any): Promise<Refund[]> {
+  async getOrderRefunds(orderId: number, params?: ListParams): Promise<Refund[]> {
     const response = await this.wc.get(`orders/${orderId}/refunds`, params);
     return response.data.map((item: any) => RefundSchema.parse(item));
   }
@@ -395,7 +373,7 @@ export class WooCommerceAPI {
   }
 
   // New standalone refunds endpoint (WooCommerce 9.0+)
-  async getRefunds(params?: any): Promise<Refund[]> {
+  async getRefunds(params?: ListParams): Promise<Refund[]> {
     const response = await this.wc.get('refunds', params);
     return response.data.map((item: any) => RefundSchema.parse(item));
   }
@@ -408,19 +386,7 @@ export class WooCommerceAPI {
   // ==================== CUSTOMERS ====================
   
   // Get all customers
-  async getCustomers(params?: {
-    context?: 'view' | 'edit';
-    page?: number;
-    per_page?: number;
-    search?: string;
-    exclude?: number[];
-    include?: number[];
-    offset?: number;
-    order?: 'asc' | 'desc';
-    orderby?: 'id' | 'include' | 'name' | 'registered_date';
-    email?: string;
-    role?: string;
-  }): Promise<Customer[]> {
+  async getCustomers(params?: CustomerListParams): Promise<Customer[]> {
     const response = await this.wc.get('customers', params);
     return response.data.map((item: any) => CustomerSchema.parse(item));
   }
@@ -466,7 +432,7 @@ export class WooCommerceAPI {
   }
 
   // Get customer downloads
-  async getCustomerDownloads(customerId: number): Promise<any[]> {
+  async getCustomerDownloads(customerId: number): Promise<CustomerDownload[]> {
     const response = await this.wc.get(`customers/${customerId}/downloads`);
     return response.data;
   }
@@ -474,20 +440,7 @@ export class WooCommerceAPI {
   // ==================== COUPONS ====================
   
   // Get all coupons
-  async getCoupons(params?: {
-    context?: 'view' | 'edit';
-    page?: number;
-    per_page?: number;
-    search?: string;
-    after?: string;
-    before?: string;
-    exclude?: number[];
-    include?: number[];
-    offset?: number;
-    order?: 'asc' | 'desc';
-    orderby?: 'date' | 'id' | 'include' | 'title' | 'slug';
-    code?: string;
-  }): Promise<Coupon[]> {
+  async getCoupons(params?: CouponListParams): Promise<Coupon[]> {
     const response = await this.wc.get('coupons', params);
     return response.data.map((item: any) => CouponSchema.parse(item));
   }
@@ -535,53 +488,43 @@ export class WooCommerceAPI {
   // ==================== REPORTS ====================
   
   // Get sales report
-  async getSalesReport(params?: {
-    context?: 'view';
-    period?: 'week' | 'month' | 'last_month' | 'year';
-    date_min?: string;
-    date_max?: string;
-  }): Promise<SalesReport> {
+  async getSalesReport(params?: ReportParams): Promise<SalesReport> {
     const response = await this.wc.get('reports/sales', params);
     return SalesReportSchema.parse(response.data[0]);
   }
 
   // Get top sellers report
-  async getTopSellersReport(params?: {
-    context?: 'view';
-    period?: 'week' | 'month' | 'last_month' | 'year';
-    date_min?: string;
-    date_max?: string;
-  }): Promise<TopSellersReport[]> {
+  async getTopSellersReport(params?: ReportParams): Promise<TopSellersReport[]> {
     const response = await this.wc.get('reports/top_sellers', params);
     return response.data.map((item: any) => TopSellersReportSchema.parse(item));
   }
 
   // Get coupons report
-  async getCouponsReport(params?: any): Promise<CouponsReport[]> {
+  async getCouponsReport(params?: ReportParams): Promise<CouponsReport[]> {
     const response = await this.wc.get('reports/coupons/totals', params);
     return response.data.map((item: any) => CouponsReportSchema.parse(item));
   }
 
   // Get customers report
-  async getCustomersReport(params?: any): Promise<CustomersReport[]> {
+  async getCustomersReport(params?: ReportParams): Promise<CustomersReport[]> {
     const response = await this.wc.get('reports/customers/totals', params);
     return response.data.map((item: any) => CustomersReportSchema.parse(item));
   }
 
   // Get orders report
-  async getOrdersReport(params?: any): Promise<any> {
+  async getOrdersReport(params?: ReportParams): Promise<OrdersReportData> {
     const response = await this.wc.get('reports/orders/totals', params);
     return response.data;
   }
 
   // Get products report
-  async getProductsReport(params?: any): Promise<any> {
+  async getProductsReport(params?: ReportParams): Promise<ProductsReportData[]> {
     const response = await this.wc.get('reports/products/totals', params);
     return response.data;
   }
 
   // Get reviews report
-  async getReviewsReport(params?: any): Promise<ReviewsReport[]> {
+  async getReviewsReport(params?: ReportParams): Promise<ReviewsReport[]> {
     const response = await this.wc.get('reports/reviews/totals', params);
     return response.data.map((item: any) => ReviewsReportSchema.parse(item));
   }
@@ -589,7 +532,7 @@ export class WooCommerceAPI {
   // ==================== TAXES ====================
   
   // Get tax rates
-  async getTaxRates(params?: any): Promise<TaxRate[]> {
+  async getTaxRates(params?: ListParams): Promise<TaxRate[]> {
     const response = await this.wc.get('taxes', params);
     return response.data.map((item: any) => TaxRateSchema.parse(item));
   }
@@ -669,43 +612,43 @@ export class WooCommerceAPI {
   }
 
   // Get shipping zone locations
-  async getShippingZoneLocations(zoneId: number): Promise<any[]> {
+  async getShippingZoneLocations(zoneId: number): Promise<ShippingZoneLocation[]> {
     const response = await this.wc.get(`shipping/zones/${zoneId}/locations`);
     return response.data;
   }
 
   // Update shipping zone locations
-  async updateShippingZoneLocations(zoneId: number, locations: any[]): Promise<any[]> {
+  async updateShippingZoneLocations(zoneId: number, locations: ShippingZoneLocation[]): Promise<ShippingZoneLocation[]> {
     const response = await this.wc.put(`shipping/zones/${zoneId}/locations`, locations);
     return response.data;
   }
 
   // Get shipping zone methods
-  async getShippingZoneMethods(zoneId: number): Promise<any[]> {
+  async getShippingZoneMethods(zoneId: number): Promise<ShippingZoneMethod[]> {
     const response = await this.wc.get(`shipping/zones/${zoneId}/methods`);
     return response.data;
   }
 
   // Get single shipping zone method
-  async getShippingZoneMethod(zoneId: number, instanceId: number): Promise<any> {
+  async getShippingZoneMethod(zoneId: number, instanceId: number): Promise<ShippingZoneMethod> {
     const response = await this.wc.get(`shipping/zones/${zoneId}/methods/${instanceId}`);
     return response.data;
   }
 
   // Create shipping zone method
-  async createShippingZoneMethod(zoneId: number, data: any): Promise<any> {
+  async createShippingZoneMethod(zoneId: number, data: Partial<ShippingZoneMethod>): Promise<ShippingZoneMethod> {
     const response = await this.wc.post(`shipping/zones/${zoneId}/methods`, data);
     return response.data;
   }
 
   // Update shipping zone method
-  async updateShippingZoneMethod(zoneId: number, instanceId: number, data: any): Promise<any> {
+  async updateShippingZoneMethod(zoneId: number, instanceId: number, data: Partial<ShippingZoneMethod>): Promise<ShippingZoneMethod> {
     const response = await this.wc.put(`shipping/zones/${zoneId}/methods/${instanceId}`, data);
     return response.data;
   }
 
   // Delete shipping zone method
-  async deleteShippingZoneMethod(zoneId: number, instanceId: number, force: boolean = false): Promise<any> {
+  async deleteShippingZoneMethod(zoneId: number, instanceId: number, force: boolean = false): Promise<ShippingZoneMethod> {
     const response = await this.wc.delete(`shipping/zones/${zoneId}/methods/${instanceId}`, { force });
     return response.data;
   }
@@ -745,31 +688,31 @@ export class WooCommerceAPI {
   // ==================== SETTINGS ====================
   
   // Get all settings groups
-  async getSettingsGroups(): Promise<any[]> {
+  async getSettingsGroups(): Promise<SettingsGroup[]> {
     const response = await this.wc.get('settings');
     return response.data;
   }
 
   // Get settings options for a group
-  async getSettingsOptions(groupId: string): Promise<any[]> {
+  async getSettingsOptions(groupId: string): Promise<SettingOption[]> {
     const response = await this.wc.get(`settings/${groupId}`);
     return response.data;
   }
 
   // Get single setting option
-  async getSettingOption(groupId: string, optionId: string): Promise<any> {
+  async getSettingOption(groupId: string, optionId: string): Promise<SettingOption> {
     const response = await this.wc.get(`settings/${groupId}/${optionId}`);
     return response.data;
   }
 
   // Update setting option
-  async updateSettingOption(groupId: string, optionId: string, value: any): Promise<any> {
+  async updateSettingOption(groupId: string, optionId: string, value: unknown): Promise<SettingOption> {
     const response = await this.wc.put(`settings/${groupId}/${optionId}`, { value });
     return response.data;
   }
 
   // Batch update settings
-  async batchUpdateSettings(groupId: string, updates: Array<{ id: string; value: any }>): Promise<any> {
+  async batchUpdateSettings(groupId: string, updates: SettingUpdateData[]): Promise<SettingOption[]> {
     const response = await this.wc.post(`settings/${groupId}/batch`, { update: updates });
     return response.data;
   }
@@ -783,19 +726,19 @@ export class WooCommerceAPI {
   }
 
   // Get system status tools
-  async getSystemStatusTools(): Promise<any[]> {
+  async getSystemStatusTools(): Promise<SystemStatusTool[]> {
     const response = await this.wc.get('system_status/tools');
     return response.data;
   }
 
   // Get single system status tool
-  async getSystemStatusTool(id: string): Promise<any> {
+  async getSystemStatusTool(id: string): Promise<SystemStatusTool> {
     const response = await this.wc.get(`system_status/tools/${id}`);
     return response.data;
   }
 
   // Run system status tool
-  async runSystemStatusTool(id: string): Promise<any> {
+  async runSystemStatusTool(id: string): Promise<SystemStatusTool> {
     const response = await this.wc.put(`system_status/tools/${id}`, { action: 'run' });
     return response.data;
   }
@@ -858,31 +801,31 @@ export class WooCommerceAPI {
   // ==================== DATA ====================
   
   // Generic get method for direct API access
-  async get(path: string, params?: any): Promise<any> {
+  async get(path: string, params?: Record<string, unknown>): Promise<unknown> {
     const response = await this.wc.get(path, params);
     return response.data;
   }
   
   // Get countries
-  async getCountries(): Promise<any[]> {
+  async getCountries(): Promise<CountryData[]> {
     const response = await this.wc.get('data/countries');
     return response.data;
   }
 
   // Get currencies
-  async getCurrencies(): Promise<any[]> {
+  async getCurrencies(): Promise<CurrencyData[]> {
     const response = await this.wc.get('data/currencies');
     return response.data;
   }
 
   // Get current currency
-  async getCurrentCurrency(): Promise<any> {
+  async getCurrentCurrency(): Promise<CurrencyData> {
     const response = await this.wc.get('data/currencies/current');
     return response.data;
   }
 
   // Get continents
-  async getContinents(): Promise<any[]> {
+  async getContinents(): Promise<ContinentData[]> {
     const response = await this.wc.get('data/continents');
     return response.data;
   }

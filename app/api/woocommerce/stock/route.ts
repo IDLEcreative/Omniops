@@ -43,7 +43,7 @@ export async function POST(request: NextRequest) {
     
     if (productId) {
       // Get by product ID
-      const product = await wc.get(`products/${productId}`);
+      const product: any = await wc.get(`products/${productId}`);
       stockInfo = {
         id: product.id,
         name: product.name,
@@ -56,7 +56,7 @@ export async function POST(request: NextRequest) {
       };
     } else if (sku) {
       // Search by SKU
-      const products = await wc.get('products', { sku });
+      const products: any = await wc.get('products', { sku });
       if (products.length > 0) {
         const product = products[0];
         stockInfo = {
@@ -72,7 +72,7 @@ export async function POST(request: NextRequest) {
       }
     } else if (productName) {
       // Search by product name
-      const products = await wc.get('products', { search: productName, per_page: 1 });
+      const products: any = await wc.get('products', { search: productName, per_page: 1 });
       if (products.length > 0) {
         const product = products[0];
         stockInfo = {

@@ -89,9 +89,31 @@ export const GDPRRequestSchema = z.object({
 export type GDPRRequest = z.infer<typeof GDPRRequestSchema>;
 
 export interface GDPRExportResponse {
-  conversations: any[];
-  messages: any[];
-  support_tickets: any[];
+  conversations: Array<{
+    id: string;
+    session_id: string;
+    user_email?: string;
+    created_at: string;
+    updated_at: string;
+    metadata?: Record<string, unknown>;
+  }>;
+  messages: Array<{
+    id: string;
+    conversation_id: string;
+    role: 'user' | 'assistant' | 'system';
+    content: string;
+    metadata?: Record<string, unknown>;
+    created_at: string;
+  }>;
+  support_tickets: Array<{
+    id: string;
+    conversation_id: string;
+    email: string;
+    summary: string;
+    status: 'open' | 'in_progress' | 'resolved' | 'closed';
+    created_at: string;
+    updated_at: string;
+  }>;
 }
 
 export interface GDPRDeleteResponse {
@@ -115,5 +137,5 @@ export type SupportTicketRequest = z.infer<typeof SupportTicketRequestSchema>;
 // Error Response
 export interface ErrorResponse {
   error: string;
-  details?: any;
+  details?: Record<string, unknown> | string | unknown[];
 }

@@ -8,22 +8,34 @@ export async function GET() {
   
   try {
     // Get scraped pages with their IDs
-    const { data: scrapedPages } = await supabase
+    const { data: scrapedPages, error: pagesError } = await supabase
       .from('scraped_pages')
       .select('id, url, title, domain')
       .limit(5);
     
+    if (pagesError) {
+      console.error('Error fetching scraped pages:', pagesError);
+    }
+    
     // Get page embeddings with their page_ids
-    const { data: pageEmbeddings } = await supabase
+    const { data: pageEmbeddings, error: embeddingsError } = await supabase
       .from('page_embeddings')
       .select('id, page_id, chunk_text, metadata')
       .limit(5);
     
+    if (embeddingsError) {
+      console.error('Error fetching page embeddings:', embeddingsError);
+    }
+    
     // Get customer configs to see available domains
-    const { data: customerConfigs } = await supabase
+    const { data: customerConfigs, error: configsError } = await supabase
       .from('customer_configs')
       .select('id, domain, company_name, woocommerce_enabled')
       .limit(5);
+    
+    if (configsError) {
+      console.error('Error fetching customer configs:', configsError);
+    }
     
     // Check if there's a function for searching
     let functions = null;
@@ -37,13 +49,21 @@ export async function GET() {
     // Try to find embeddings linked to scraped pages
     let linkedData = null;
     if (scrapedPages && scrapedPages.length > 0 && pageEmbeddings && pageEmbeddings.length > 0) {
-      const pageId = scrapedPages[0].id;
-      const { data: linked } = await supabase
-        .from('page_embeddings')
-        .select('*')
-        .eq('page_id', pageId)
-        .limit(1);
-      linkedData = linked;
+      const firstPage = scrapedPages[0];
+      if (firstPage) {
+        const pageId = firstPage.id;
+        const { data: linked, error: linkedError } = await supabase
+          .from('page_embeddings')
+          .select('*')
+          .eq('page_id', pageId)
+          .limit(1);
+        
+        if (linkedError) {
+          console.error('Error fetching linked embeddings:', linkedError);
+        } else {
+          linkedData = linked;
+        }
+      }
     }
     
     return NextResponse.json({

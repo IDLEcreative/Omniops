@@ -991,7 +991,7 @@ export class PerformanceHelpers {
         memoryBefore,
         memoryAfter
       };
-    } catch (error) {
+    } catch {
       this.timers.delete(name); // Clean up timer on error
       throw error;
     }
@@ -1020,7 +1020,7 @@ export class TestUtilities {
     for (let attempt = 0; attempt < maxRetries; attempt++) {
       try {
         return await operation();
-      } catch (error) {
+      } catch {
         lastError = error as Error;
         
         if (attempt < maxRetries - 1) {

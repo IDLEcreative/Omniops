@@ -18,7 +18,7 @@ export function MessageContent({ content, className = '' }: MessageContentProps)
       /(?<!\S)((?:www\.)?[a-zA-Z0-9-]+\.[a-zA-Z]{2,}(?:\/[^\s]*)?)/g
     ];
 
-    let processedText = text;
+    const processedText = text;
     const elements: React.ReactNode[] = [];
     let lastIndex = 0;
 
