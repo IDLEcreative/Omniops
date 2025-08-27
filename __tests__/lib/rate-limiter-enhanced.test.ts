@@ -361,6 +361,7 @@ describe('Rate Limiter Integration', () => {
         burstSize: 20,
         jitterEnabled: false,
         randomizeTimings: false,
+        rotateUserAgents: true,
         useRedis: false,
       });
       

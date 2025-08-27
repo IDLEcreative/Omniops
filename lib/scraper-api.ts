@@ -269,20 +269,36 @@ export async function scrapePage(
     aiOptimization?: AIOptimizationConfig;
   }
 ): Promise<ScrapedPage | AIOptimizedResult> {
+  const scrapeStartTime = Date.now();
+  console.log(`[SCRAPER] Starting single page scrape for: ${url}`);
+  console.log(`[SCRAPER] Config options:`, {
+    turboMode: config?.turboMode !== false,
+    ecommerceMode: config?.ecommerceMode,
+    useNewConfig: config?.useNewConfig,
+    configPreset: config?.configPreset,
+    aiOptimizationEnabled: config?.aiOptimization?.enabled
+  });
+
   if (!PlaywrightCrawler) {
-    throw new Error('PlaywrightCrawler not available - cannot scrape single pages in this environment');
+    const error = 'PlaywrightCrawler not available - cannot scrape single pages in this environment';
+    console.error(`[SCRAPER] Fatal error: ${error}`);
+    throw new Error(error);
   }
   
   // Use new configuration system if requested or by default in production
   let finalConfig: any;
   if (config?.useNewConfig !== false && process.env.NODE_ENV === 'production') {
+    console.log(`[SCRAPER] Using new configuration system`);
+    
     // Apply preset if specified
     if (config?.configPreset) {
+      console.log(`[SCRAPER] Applying config preset: ${config.configPreset}`);
       applyConfigPreset(config.configPreset);
     }
     
     // Get configuration from new system
     const scraperConfig = configManager.getEffectiveConfig(url);
+    console.log(`[SCRAPER] Loaded effective config for URL: ${url}`);
     
     // Map new config structure to old crawler config structure for compatibility
     finalConfig = {
@@ -326,150 +342,212 @@ export async function scrapePage(
       ...config, // Allow direct overrides
     };
   } else {
+    console.log(`[SCRAPER] Using legacy configuration system`);
+    
     // Use old configuration system
     const crawlerConfig = getCrawlerConfig();
     finalConfig = { ...crawlerConfig, ...config };
   }
   
+  console.log(`[SCRAPER] Final config timeouts:`, finalConfig.timeouts);
   const turboMode = config?.turboMode !== false; // Default to true
+  console.log(`[SCRAPER] Turbo mode: ${turboMode ? 'ENABLED' : 'DISABLED'}`)
   
   return new Promise(async (resolve, reject) => {
     let result: ScrapedPage | null = null;
     
-    const crawler = new PlaywrightCrawler({
-      maxRequestsPerCrawl: 1,
-      requestHandlerTimeoutSecs: finalConfig.timeouts.request / 1000,
-      navigationTimeoutSecs: finalConfig.timeouts.navigation / 1000,
-      
-      browserPoolOptions: {
-        useFingerprints: true,
-        fingerprintOptions: {
-          fingerprintGeneratorOptions: {
-            browsers: ['chrome'],
-            devices: ['desktop'],
-            operatingSystems: ['windows', 'macos', 'linux'],
+    console.log(`[SCRAPER] Creating PlaywrightCrawler instance`);
+    console.log(`[SCRAPER] Browser settings: headless=${finalConfig.browser.headless}, userAgent=${finalConfig.browser.userAgent}`);
+    
+    try {
+      const crawler = new PlaywrightCrawler({
+        maxRequestsPerCrawl: 1,
+        requestHandlerTimeoutSecs: finalConfig.timeouts.request / 1000,
+        navigationTimeoutSecs: finalConfig.timeouts.navigation / 1000,
+        
+        browserPoolOptions: {
+          useFingerprints: true,
+          fingerprintOptions: {
+            fingerprintGeneratorOptions: {
+              browsers: ['chrome'],
+              devices: ['desktop'],
+              operatingSystems: ['windows', 'macos', 'linux'],
+            },
           },
         },
-      },
-      
-      launchContext: {
-        launchOptions: {
-          headless: finalConfig.browser.headless,
+        
+        launchContext: {
+          launchOptions: {
+            headless: finalConfig.browser.headless,
+          },
+          userAgent: finalConfig.browser.userAgent,
         },
-        userAgent: finalConfig.browser.userAgent,
-      },
       
       preNavigationHooks: [
         async ({ page }: any) => {
-          // Set viewport
-          await page.setViewportSize(finalConfig.browser.viewport);
+          console.log(`[SCRAPER] Pre-navigation hook started`);
           
-          // Set custom headers if any
-          if (Object.keys(finalConfig.advanced.customHeaders).length > 0) {
-            await page.setExtraHTTPHeaders(finalConfig.advanced.customHeaders);
-          }
-          
-          // Turbo mode: Use intelligent request blocking
-          if (turboMode) {
-            await page.route('**/*', (route: any) => {
-              const url = route.request().url();
-              const resourceType = route.request().resourceType();
-              
-              // Block unnecessary resources for speed
-              const blockedTypes = ['image', 'media', 'font', 'stylesheet'];
-              const blockedDomains = ['googletagmanager.com', 'google-analytics.com', 'facebook.com'];
-              
-              if (blockedTypes.includes(resourceType) || 
-                  blockedDomains.some(domain => url.includes(domain))) {
-                route.abort();
-              } else {
-                route.continue();
-              }
-            });
-          } else if (finalConfig.browser.blockResources.length > 0) {
-            // Legacy mode: Block configured resources
-            await page.route('**/*', (route: any) => {
-              const resourceType = route.request().resourceType();
-              if (finalConfig.browser.blockResources.includes(resourceType as any)) {
-                route.abort();
-              } else {
-                route.continue();
-              }
-            });
+          try {
+            // Set viewport
+            console.log(`[SCRAPER] Setting viewport to:`, finalConfig.browser.viewport);
+            await page.setViewportSize(finalConfig.browser.viewport);
+            
+            // Set custom headers if any
+            if (Object.keys(finalConfig.advanced.customHeaders).length > 0) {
+              console.log(`[SCRAPER] Setting custom headers:`, finalConfig.advanced.customHeaders);
+              await page.setExtraHTTPHeaders(finalConfig.advanced.customHeaders);
+            }
+            
+            // Turbo mode: Use intelligent request blocking
+            if (turboMode) {
+              console.log(`[SCRAPER] Setting up turbo mode request blocking`);
+              await page.route('**/*', (route: any) => {
+                const url = route.request().url();
+                const resourceType = route.request().resourceType();
+                
+                // Block unnecessary resources for speed
+                const blockedTypes = ['image', 'media', 'font', 'stylesheet'];
+                const blockedDomains = ['googletagmanager.com', 'google-analytics.com', 'facebook.com'];
+                
+                if (blockedTypes.includes(resourceType) || 
+                    blockedDomains.some(domain => url.includes(domain))) {
+                  // Only log first few blocks to avoid spam
+                  if (Math.random() < 0.05) { // Log 5% of blocks
+                    console.log(`[SCRAPER] Blocked resource: type=${resourceType}, domain=${new URL(url).hostname}`);
+                  }
+                  route.abort();
+                } else {
+                  route.continue();
+                }
+              });
+              console.log(`[SCRAPER] Turbo mode blocking configured for: images, media, fonts, stylesheets, tracking domains`);
+            } else if (finalConfig.browser.blockResources.length > 0) {
+              // Legacy mode: Block configured resources
+              console.log(`[SCRAPER] Setting up legacy resource blocking for:`, finalConfig.browser.blockResources);
+              await page.route('**/*', (route: any) => {
+                const resourceType = route.request().resourceType();
+                if (finalConfig.browser.blockResources.includes(resourceType as any)) {
+                  route.abort();
+                } else {
+                  route.continue();
+                }
+              });
+            } else {
+              console.log(`[SCRAPER] No resource blocking configured`);
+            }
+            
+            console.log(`[SCRAPER] Pre-navigation hook completed successfully`);
+          } catch (preNavError) {
+            console.error(`[SCRAPER] Error in pre-navigation hook:`, preNavError);
+            throw preNavError;
           }
         },
       ],
       
       requestHandler: async ({ page, request }: any) => {
         const startTime = Date.now();
+        console.log(`[SCRAPER] Request handler started for: ${request.url}`);
         
         try {
           // Wait for content to load
+          console.log(`[SCRAPER] Waiting for DOM content loaded (timeout: ${finalConfig.timeouts.navigation}ms)`);
           await page.waitForLoadState('domcontentloaded', { 
             timeout: finalConfig.timeouts.navigation 
           });
+          console.log(`[SCRAPER] DOM content loaded successfully`);
           
           // Wait for specific selector if configured
           if (finalConfig.advanced.waitForSelector) {
+            console.log(`[SCRAPER] Waiting for custom selector: ${finalConfig.advanced.waitForSelector}`);
             try {
               await page.waitForSelector(finalConfig.advanced.waitForSelector, { 
                 timeout: finalConfig.timeouts.resourceLoad 
               });
-            } catch {
-              console.log(`Selector ${finalConfig.advanced.waitForSelector} not found, continuing...`);
+              console.log(`[SCRAPER] Custom selector found: ${finalConfig.advanced.waitForSelector}`);
+            } catch (selectorError) {
+              console.warn(`[SCRAPER] Custom selector not found within ${finalConfig.timeouts.resourceLoad}ms: ${finalConfig.advanced.waitForSelector}`);
+              console.warn(`[SCRAPER] Continuing without custom selector...`);
             }
           } else {
             // Try to wait for common content selectors
+            console.log(`[SCRAPER] Waiting for common content selectors...`);
             try {
               await page.waitForSelector('main, article, [role="main"], .content', { 
                 timeout: finalConfig.timeouts.resourceLoad 
               });
-            } catch {
-              // Continue if selectors not found
+              console.log(`[SCRAPER] Common content selector found`);
+            } catch (contentSelectorError) {
+              console.warn(`[SCRAPER] No common content selectors found within ${finalConfig.timeouts.resourceLoad}ms`);
+              console.warn(`[SCRAPER] Continuing with page as-is...`);
             }
           }
           
           // Get the full HTML
+          console.log(`[SCRAPER] Extracting page HTML content...`);
           const html = await page.content();
+          console.log(`[SCRAPER] Page HTML extracted, length: ${html.length} characters`);
           
           // Check page size
           const pageSizeBytes = new TextEncoder().encode(html).length;
           const pageSizeMB = pageSizeBytes / (1024 * 1024);
+          console.log(`[SCRAPER] Page size: ${pageSizeMB.toFixed(2)}MB (limit: ${finalConfig.content.maxPageSizeMB}MB)`);
           
           if (pageSizeMB > finalConfig.content.maxPageSizeMB) {
-            throw new Error(`Page too large: ${pageSizeMB.toFixed(2)}MB exceeds limit of ${finalConfig.content.maxPageSizeMB}MB`);
+            const error = `Page too large: ${pageSizeMB.toFixed(2)}MB exceeds limit of ${finalConfig.content.maxPageSizeMB}MB`;
+            console.error(`[SCRAPER] ${error}`);
+            throw new Error(error);
           }
           
           // Extract content - use e-commerce extractor if enabled or auto-detected
           let extracted: ExtractedContent | EcommerceExtractedContent;
           
           if (config?.ecommerceMode !== false) {
+            console.log(`[SCRAPER] Attempting e-commerce extraction...`);
             // Try e-commerce extraction first
             extracted = await EcommerceExtractor.extractEcommerce(html, request.url);
             
             // If no e-commerce platform detected, fall back to regular extraction
             if (!(extracted as EcommerceExtractedContent).platform) {
+              console.log(`[SCRAPER] No e-commerce platform detected, falling back to regular extraction`);
               extracted = ContentExtractor.extractWithReadability(html, request.url);
+            } else {
+              console.log(`[SCRAPER] E-commerce platform detected: ${(extracted as EcommerceExtractedContent).platform}`);
             }
           } else {
+            console.log(`[SCRAPER] Using regular content extraction`);
             // Use regular extraction
             extracted = ContentExtractor.extractWithReadability(html, request.url);
           }
           
+          console.log(`[SCRAPER] Content extracted:`, {
+            wordCount: extracted.wordCount,
+            title: extracted.title,
+            hasImages: extracted.images?.length > 0,
+            imageCount: extracted.images?.length || 0,
+            contentLength: extracted.content?.length || 0
+          });
+          
           // Check if content meets minimum requirements (skip for product pages)
           const isProductPage = (extracted as EcommerceExtractedContent).pageType === 'product';
+          console.log(`[SCRAPER] Page type: ${isProductPage ? 'PRODUCT' : 'REGULAR'}`);
+          
           if (!isProductPage && extracted.wordCount < finalConfig.content.minWordCount) {
-            throw new Error(`Insufficient content: ${extracted.wordCount} words < ${finalConfig.content.minWordCount} minimum`);
+            const error = `Insufficient content: ${extracted.wordCount} words < ${finalConfig.content.minWordCount} minimum`;
+            console.error(`[SCRAPER] ${error}`);
+            throw new Error(error);
           }
           
           // Check if content is valid
           if (!isProductPage && !ContentExtractor.isValidContent(extracted)) {
-            throw new Error('Invalid or error page content detected');
+            const error = 'Invalid or error page content detected';
+            console.error(`[SCRAPER] ${error} - page might be an error page, login page, or have insufficient content`);
+            throw new Error(error);
           }
           
           // Update rate limit based on response time
           const responseTime = Date.now() - startTime;
           const domain = new URL(request.url).hostname;
+          console.log(`[SCRAPER] Page processed in ${responseTime}ms for domain: ${domain}`);
           
           if (finalConfig.rateLimit.adaptiveDelay) {
             await jobManager.updateRateLimitDelay(domain, responseTime);
@@ -597,8 +675,27 @@ export async function scrapePage(
             // Extend with AI optimization data if available
             ...aiOptimizedData
           } as ScrapedPage | AIOptimizedResult;
+          
+          console.log(`[SCRAPER] Successfully created result object for: ${request.url}`);
+          console.log(`[SCRAPER] Result summary:`, {
+            url: result.url,
+            title: result.title,
+            wordCount: result.wordCount,
+            hasAIOptimization: 'aiOptimized' in result,
+            totalProcessingTime: `${Date.now() - scrapeStartTime}ms`
+          });
         } catch (error) {
-          console.error(`Error scraping ${request.url}:`, error);
+          const errorMessage = error instanceof Error ? error.message : String(error);
+          const errorStack = error instanceof Error ? error.stack : undefined;
+          
+          console.error(`[SCRAPER] ERROR in requestHandler for ${request.url}:`);
+          console.error(`[SCRAPER] Error message: ${errorMessage}`);
+          if (errorStack) {
+            console.error(`[SCRAPER] Error stack:`, errorStack);
+          }
+          console.error(`[SCRAPER] Error occurred at: ${new Date().toISOString()}`);
+          console.error(`[SCRAPER] Processing time before error: ${Date.now() - startTime}ms`);
+          
           throw error;
         }
       },

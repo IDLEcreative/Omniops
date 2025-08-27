@@ -1,0 +1,253 @@
+{
+  "timestamp": "2025-08-27T20:25:58.780Z",
+  "tests": [
+    {
+      "name": "DNS Lookup",
+      "status": "pass",
+      "message": "Resolved www.thompsonseparts.co.uk to 141.193.213.10",
+      "details": {
+        "ip": "141.193.213.10",
+        "family": 4,
+        "resolutionTime": "20.20ms"
+      },
+      "timestamp": "2025-08-27T20:25:58.802Z"
+    },
+    {
+      "name": "DNS A Records",
+      "status": "pass",
+      "message": "Found 2 A record(s)",
+      "details": {
+        "records": [
+          "141.193.213.11",
+          "141.193.213.10"
+        ]
+      },
+      "timestamp": "2025-08-27T20:25:58.805Z"
+    },
+    {
+      "name": "HTTP Request",
+      "status": "pass",
+      "message": "HTTP 200 response received",
+      "details": {
+        "statusCode": 200,
+        "headers": {
+          "date": "Wed, 27 Aug 2025 20:25:58 GMT",
+          "content-type": "text/html; charset=UTF-8",
+          "transfer-encoding": "chunked",
+          "connection": "keep-alive",
+          "cf-ray": "975e4d1f1a6dd23c-LHR",
+          "vary": "Accept-Encoding, Accept-Encoding, Accept-Encoding, Accept-Encoding,Cookie",
+          "accept-ch": "Sec-CH-UA-Mobile",
+          "link": "<https://www.thompsonseparts.co.uk/nitropack_static>; rel=preconnect, <https://www.thompsonseparts.co.uk/wp-json/>; rel=\"https://api.w.org/\", <https://www.thompsonseparts.co.uk/wp-json/wp/v2/pages/17489>; rel=\"alternate\"; title=\"JSON\"; type=\"application/json\"",
+          "x-cache-ctime": "1756312526",
+          "x-nitro-cache": "HIT",
+          "x-nitro-cache-from": "plugin",
+          "x-nitro-rev": "4121d94",
+          "x-powered-by": "WP Engine",
+          "x-cacheable": "SHORT",
+          "cache-control": "max-age=600, must-revalidate",
+          "x-cache": "HIT: 4",
+          "x-cache-group": "normal",
+          "cf-cache-status": "DYNAMIC",
+          "set-cookie": [
+            "__cf_bm=iSkbox.01IlBLdG4G_4E_e07eC8Ylh_iFsyOtp.PWnI-1756326358-1.0.1.1-TVyzuuM6ErkcWoQIgagEep_XP7KfFx0X_.d.CNWcZtbV2PbJrR4CWzjRHm5J5yB_pnUNO8NhENv.iDmxaHRi76qfF1PQ2dJdYsQ8wxyto7I; path=/; expires=Wed, 27-Aug-25 20:55:58 GMT; domain=.www.thompsonseparts.co.uk; HttpOnly; Secure; SameSite=None"
+          ],
+          "server": "cloudflare",
+          "alt-svc": "h3=\":443\"; ma=86400"
+        },
+        "responseTime": "130.53ms",
+        "contentLength": 317341,
+        "contentType": "text/html; charset=UTF-8"
+      },
+      "timestamp": "2025-08-27T20:25:59.001Z"
+    },
+    {
+      "name": "Proxy Configuration",
+      "status": "pass",
+      "message": "No proxy configuration detected in environment",
+      "details": {
+        "checked": [
+          "HTTP_PROXY",
+          "HTTPS_PROXY",
+          "http_proxy",
+          "https_proxy",
+          "NO_PROXY",
+          "no_proxy"
+        ]
+      },
+      "timestamp": "2025-08-27T20:25:59.002Z"
+    },
+    {
+      "name": "DNS Servers",
+      "status": "pass",
+      "message": "Using 2 DNS server(s)",
+      "details": {
+        "servers": [
+          "fe80::a6ce:daff:fe0d:6040",
+          "192.168.1.254"
+        ]
+      },
+      "timestamp": "2025-08-27T20:25:59.002Z"
+    },
+    {
+      "name": "Connectivity Test",
+      "status": "pass",
+      "message": "Successfully connected to https://google.com",
+      "details": {
+        "site": "https://google.com",
+        "status": 200,
+        "responseTime": "163.68ms"
+      },
+      "timestamp": "2025-08-27T20:25:59.166Z"
+    },
+    {
+      "name": "Connectivity Test",
+      "status": "pass",
+      "message": "Successfully connected to https://github.com",
+      "details": {
+        "site": "https://github.com",
+        "status": 200,
+        "responseTime": "65.71ms"
+      },
+      "timestamp": "2025-08-27T20:25:59.232Z"
+    },
+    {
+      "name": "Module Check",
+      "status": "pass",
+      "message": "playwright module is available",
+      "details": {
+        "module": "playwright"
+      },
+      "timestamp": "2025-08-27T20:25:59.232Z"
+    },
+    {
+      "name": "Module Check",
+      "status": "pass",
+      "message": "crawlee module is available",
+      "details": {
+        "module": "crawlee"
+      },
+      "timestamp": "2025-08-27T20:25:59.965Z"
+    },
+    {
+      "name": "System Resources",
+      "status": "pass",
+      "message": "System resource check completed",
+      "details": {
+        "memory": {
+          "used": "76 MB",
+          "total": "95 MB"
+        },
+        "nodeVersion": "v22.11.0",
+        "platform": "darwin",
+        "arch": "arm64"
+      },
+      "timestamp": "2025-08-27T20:25:59.965Z"
+    },
+    {
+      "name": "Browser Launch",
+      "status": "pass",
+      "message": "Chromium browser launched successfully",
+      "details": {
+        "version": "140.0.7339.16",
+        "launchTime": "111.85ms"
+      },
+      "timestamp": "2025-08-27T20:26:00.077Z"
+    },
+    {
+      "name": "Page Navigation",
+      "status": "pass",
+      "message": "Successfully navigated to https://www.thompsonseparts.co.uk",
+      "details": {
+        "finalUrl": "https://www.thompsonseparts.co.uk/",
+        "statusCode": 200,
+        "title": "Trailer, Hookloader, Truck & Tipper Body Parts Suppliers",
+        "navigationTime": "184.90ms",
+        "headers": {
+          "accept-ch": "Sec-CH-UA-Mobile",
+          "alt-svc": "h3=\":443\"; ma=86400",
+          "cache-control": "max-age=600, must-revalidate",
+          "cf-cache-status": "DYNAMIC",
+          "cf-ray": "975e4d275e1cb6d8-LHR",
+          "content-encoding": "br",
+          "content-type": "text/html; charset=UTF-8",
+          "date": "Wed, 27 Aug 2025 20:26:00 GMT",
+          "link": "<https://www.thompsonseparts.co.uk/nitropack_static>; rel=preconnect, <https://www.thompsonseparts.co.uk/wp-json/>; rel=\"https://api.w.org/\", <https://www.thompsonseparts.co.uk/wp-json/wp/v2/pages/17489>; rel=\"alternate\"; title=\"JSON\"; type=\"application/json\"",
+          "server": "cloudflare",
+          "set-cookie": "__cf_bm=zwmICsDHjOvTc..CEe3Apslgx6YnHzpUC1IIXGpEbuE-1756326360-1.0.1.1-jXo34lMBsNIUDHZnylzEGK.VU4EKMd71wOpaX_07C98FlDAYw6EZAwU9vU3itePEZyI4.nc6a45V5wXJ27esO6Foz_Kg3RNo39.gl5k_tV8; path=/; expires=Wed, 27-Aug-25 20:56:00 GMT; domain=.www.thompsonseparts.co.uk; HttpOnly; Secure; SameSite=None",
+          "vary": "Accept-Encoding, Accept-Encoding, Accept-Encoding, Accept-Encoding,Cookie",
+          "x-cache": "HIT: 5",
+          "x-cache-ctime": "1756312526",
+          "x-cache-group": "normal",
+          "x-cacheable": "SHORT",
+          "x-nitro-cache": "HIT",
+          "x-nitro-cache-from": "plugin",
+          "x-nitro-rev": "4121d94",
+          "x-powered-by": "WP Engine"
+        }
+      },
+      "timestamp": "2025-08-27T20:26:00.317Z"
+    },
+    {
+      "name": "Content Extraction",
+      "status": "warning",
+      "message": "Could not extract content",
+      "details": {
+        "error": "page.textContent: Timeout 30000ms exceeded.\nCall log:\n\u001b[2m  - waiting for locator('h1')\u001b[22m\n"
+      },
+      "timestamp": "2025-08-27T20:26:30.318Z"
+    },
+    {
+      "name": "User Agent Test",
+      "status": "pass",
+      "message": "Accepted user agent: Mozilla/5.0 (compatible; bot/1.0)...",
+      "details": {
+        "userAgent": "Mozilla/5.0 (compatible; bot/1.0)",
+        "status": 200,
+        "title": "Trailer, Hookloader, Truck & Tipper Body Parts Suppliers"
+      },
+      "timestamp": "2025-08-27T20:26:30.567Z"
+    },
+    {
+      "name": "User Agent Test",
+      "status": "warning",
+      "message": "Potential blocking detected for user agent",
+      "details": {
+        "userAgent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/91.0.4472.124 Safari/537.36",
+        "status": 403,
+        "title": "Just a moment..."
+      },
+      "timestamp": "2025-08-27T20:26:31.743Z"
+    },
+    {
+      "name": "User Agent Test",
+      "status": "pass",
+      "message": "Accepted user agent: Mozilla/5.0 (compatible; Googlebot/2.1; +http://ww...",
+      "details": {
+        "userAgent": "Mozilla/5.0 (compatible; Googlebot/2.1; +http://www.google.com/bot.html)",
+        "status": 200,
+        "title": "Trailer, Hookloader, Truck & Tipper Body Parts Suppliers"
+      },
+      "timestamp": "2025-08-27T20:26:33.036Z"
+    },
+    {
+      "name": "Bot Detection Check",
+      "status": "warning",
+      "message": "Potential anti-bot measures detected",
+      "details": {
+        "cloudflareChallenge": false,
+        "captcha": false,
+        "blockingMessage": false,
+        "accessDenied": false,
+        "jsChallenge": true
+      },
+      "timestamp": "2025-08-27T20:26:34.295Z"
+    }
+  ],
+  "summary": {
+    "total": 17,
+    "passed": 14,
+    "failed": 0,
+    "warnings": 3
+  }
+}
