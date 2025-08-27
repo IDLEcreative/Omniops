@@ -702,23 +702,54 @@ export async function scrapePage(
       
       failedRequestHandler: ({ request, error }: any, crawlingContext: any) => {
         const errorMessage = error.message || String(error);
-        console.error(`Failed to scrape ${request.url}: ${errorMessage}`);
+        const errorStack = error.stack || undefined;
+        
+        console.error(`[SCRAPER] FAILED REQUEST HANDLER triggered for: ${request.url}`);
+        console.error(`[SCRAPER] Error type: ${error.name || 'Unknown'}`);
+        console.error(`[SCRAPER] Error message: ${errorMessage}`);
+        if (errorStack) {
+          console.error(`[SCRAPER] Error stack:`, errorStack);
+        }
+        console.error(`[SCRAPER] Failed at: ${new Date().toISOString()}`);
+        console.error(`[SCRAPER] Total time before failure: ${Date.now() - scrapeStartTime}ms`);
         
         // Check if it's a timeout error
-        if (errorMessage.includes('timeout')) {
-          reject(new Error(`Timeout scraping ${url}: Page took too long to load`));
+        if (errorMessage.includes('timeout') || errorMessage.includes('Timeout')) {
+          const timeoutError = `Timeout scraping ${url}: Page took too long to load (exceeded ${finalConfig.timeouts.navigation}ms)`;
+          console.error(`[SCRAPER] Identified as TIMEOUT error`);
+          reject(new Error(timeoutError));
+        } else if (errorMessage.includes('net::') || errorMessage.includes('NS_ERROR')) {
+          const networkError = `Network error scraping ${url}: ${errorMessage}`;
+          console.error(`[SCRAPER] Identified as NETWORK error`);
+          reject(new Error(networkError));
         } else {
+          console.error(`[SCRAPER] Identified as GENERAL error`);
           reject(new Error(`Failed to scrape ${url}: ${errorMessage}`));
         }
       },
     });
     
+    console.log(`[SCRAPER] Crawler instance created successfully`);
+    console.log(`[SCRAPER] Starting crawler.run() for URL: ${url}`);
+    
     await crawler.run([url]);
     
+    console.log(`[SCRAPER] Crawler.run() completed`);
+    
     if (result) {
+      console.log(`[SCRAPER] SUCCESS: Scraping completed for ${url}`);
+      console.log(`[SCRAPER] Total scraping time: ${Date.now() - scrapeStartTime}ms`);
       resolve(result);
     } else {
-      reject(new Error(`Failed to scrape ${url}: No result`));
+      const noResultError = `Failed to scrape ${url}: No result was produced`;
+      console.error(`[SCRAPER] ERROR: ${noResultError}`);
+      reject(new Error(noResultError));
+    }
+  } catch (crawlerError) {
+      const errorMessage = crawlerError instanceof Error ? crawlerError.message : String(crawlerError);
+      console.error(`[SCRAPER] FATAL ERROR during crawler initialization or execution:`, errorMessage);
+      console.error(`[SCRAPER] Full error:`, crawlerError);
+      reject(new Error(`Crawler initialization/execution failed: ${errorMessage}`));
     }
   });
 }
@@ -745,18 +776,46 @@ export async function crawlWebsite(
   const maxPages = options?.maxPages || 50;
   const crawlEntireSite = options?.maxPages === -1;
   
+  console.log(`[CRAWLER] Starting website crawl with job ID: ${jobId}`);
+  console.log(`[CRAWLER] Target URL: ${url}`);
+  console.log(`[CRAWLER] Max pages: ${crawlEntireSite ? 'UNLIMITED (entire site)' : maxPages}`);
+  console.log(`[CRAWLER] Options:`, {
+    includePaths: options?.includePaths,
+    excludePaths: options?.excludePaths,
+    configPreset: options?.configPreset,
+    turboMode: options?.turboMode !== false,
+    ownSite: options?.ownSite,
+    customerId: options?.customerId,
+    useNewConfig: options?.useNewConfig,
+    newConfigPreset: options?.newConfigPreset,
+    aiOptimizationEnabled: options?.aiOptimization?.enabled
+  });
+  
   // Load customer's owned domains if customerId provided
   if (options?.customerId) {
-    await CustomerConfigLoader.initializeForScraping(options.customerId);
+    console.log(`[CRAWLER] Loading customer configuration for ID: ${options.customerId}`);
+    try {
+      await CustomerConfigLoader.initializeForScraping(options.customerId);
+      console.log(`[CRAWLER] Customer owned domains loaded successfully`);
+    } catch (customerLoadError) {
+      console.error(`[CRAWLER] Failed to load customer configuration:`, customerLoadError);
+    }
     
     // Load customer-specific configuration from database if using new config
     if (options?.useNewConfig) {
-      await loadCustomerConfig(options.customerId);
+      console.log(`[CRAWLER] Loading customer-specific scraper configuration from database`);
+      try {
+        await loadCustomerConfig(options.customerId);
+        console.log(`[CRAWLER] Customer scraper configuration loaded successfully`);
+      } catch (configLoadError) {
+        console.error(`[CRAWLER] Failed to load customer scraper configuration:`, configLoadError);
+      }
     }
   }
   
   // Get configuration
   let crawlerConfig: any;
+  console.log(`[CRAWLER] Determining configuration approach...`);
   
   // Use new configuration system if requested
   if (options?.useNewConfig) {
@@ -824,30 +883,47 @@ export async function crawlWebsite(
   }
   
   // Auto-detect if this is an owned site
+  console.log(`[CRAWLER] Checking if URL is an owned site...`);
   const isOwnSite = options?.ownSite || await OwnSiteDetector.isOwnSite(url);
+  console.log(`[CRAWLER] Own-site detection result: ${isOwnSite ? 'YES (owned)' : 'NO (external)'}`);
   
   // Apply own-site optimizations if enabled or detected
   if (isOwnSite) {
+    console.log(`[CRAWLER] Applying own-site optimizations...`);
+    
     // Enable higher limits in job limiter
     jobLimiter.enableOwnSiteMode();
+    console.log(`[CRAWLER] Job limiter set to own-site mode (higher limits)`);
     
     // Import and apply own-site config
-    const { ownSiteConfig } = await import('./scraper-config-own-site');
-    crawlerConfig = { ...crawlerConfig, ...ownSiteConfig };
-    console.log(`[${jobId}] Own-site mode ${options?.ownSite ? 'enabled' : 'auto-detected'} with optimized configuration`);
+    try {
+      const { ownSiteConfig } = await import('./scraper-config-own-site');
+      crawlerConfig = { ...crawlerConfig, ...ownSiteConfig };
+      console.log(`[${jobId}] Own-site mode ${options?.ownSite ? 'explicitly enabled' : 'auto-detected'} with optimized configuration`);
+      console.log(`[CRAWLER] Own-site config applied successfully`);
+    } catch (ownSiteConfigError) {
+      console.error(`[CRAWLER] Failed to apply own-site configuration:`, ownSiteConfigError);
+    }
   }
   
   const finalConfig = { ...crawlerConfig, ...options?.config };
   const turboMode = options?.turboMode !== false; // Default to true
   
+  console.log(`[CRAWLER] Final configuration prepared`);
+  console.log(`[CRAWLER] Turbo mode: ${turboMode ? 'ENABLED' : 'DISABLED'}`);
+  
   // Check if we can start a new job
   // Temporarily disabled for testing - normally prevents high memory usage
+  // console.log(`[CRAWLER] Checking job limiter...`);
   // const { allowed, reason } = await jobLimiter.canStartNewJob();
   // if (!allowed) {
+  //   console.error(`[CRAWLER] Job limiter prevented new job: ${reason}`);
   //   throw new Error(`Cannot start new job: ${reason}`);
   // }
+  // console.log(`[CRAWLER] Job limiter check passed`);
   
   // Initialize job in Redis
+  console.log(`[CRAWLER] Creating job in Redis/memory store...`);
   const initialJob: CrawlJob = {
     jobId,
     status: 'processing',
@@ -860,15 +936,27 @@ export async function crawlWebsite(
     config: finalConfig,
   };
   
-  await jobManager.createJob(jobId, initialJob);
+  try {
+    await jobManager.createJob(jobId, initialJob);
+    console.log(`[CRAWLER] Job created successfully with ID: ${jobId}`);
+  } catch (jobCreateError) {
+    console.error(`[CRAWLER] Failed to create job in store:`, jobCreateError);
+    throw jobCreateError;
+  }
   
   // Start memory monitoring
+  console.log(`[CRAWLER] Starting memory monitoring for job ${jobId}`);
   memoryMonitor.startMonitoring(async (stats) => {
+    // Log memory status periodically (only when significant change)
+    if (Math.random() < 0.1) { // Log 10% of memory updates to avoid spam
+      console.log(`[CRAWLER] Memory update - Heap: ${(stats.heapUsed / 1024 / 1024).toFixed(2)}MB / ${(stats.heapTotal / 1024 / 1024).toFixed(2)}MB (${(stats.percentUsed * 100).toFixed(1)}% used)`);
+    }
+    
     await jobManager.updateJob(jobId, { memoryStats: stats });
     
     // Pause crawl if memory pressure is too high
     if (stats.percentUsed > 0.9) {
-      console.warn('Memory pressure critical, pausing crawl...');
+      console.warn(`[CRAWLER] CRITICAL: Memory pressure at ${(stats.percentUsed * 100).toFixed(1)}%, pausing crawl...`);
       await jobManager.updateJob(jobId, { 
         status: 'paused',
         pausedAt: new Date().toISOString(),
@@ -877,12 +965,20 @@ export async function crawlWebsite(
   });
   
   // Start crawling in background using child process
-  console.log(`[${jobId}] Spawning crawler worker process...`);
+  console.log(`[${jobId}] Preparing to spawn crawler worker process...`);
   
   // Use the scraper worker process from lib directory
   const crawlerPath = join(process.cwd(), 'lib', 'scraper-worker.js');
+  console.log(`[${jobId}] Worker script path: ${crawlerPath}`);
   
-  const child = spawn('node', [
+  // Check if worker file exists
+  const fs = require('fs');
+  if (!fs.existsSync(crawlerPath)) {
+    console.error(`[${jobId}] ERROR: Worker script not found at ${crawlerPath}`);
+    throw new Error(`Worker script not found at ${crawlerPath}`);
+  }
+  
+  const workerArgs = [
     crawlerPath,
     jobId,
     url,
@@ -890,33 +986,92 @@ export async function crawlWebsite(
     turboMode.toString(),
     options?.configPreset || 'memoryEfficient', // Better default for large sites
     isOwnSite ? 'true' : 'false' // Pass own-site flag (detected or explicit)
-  ], {
-    cwd: process.cwd(),
-    env: { ...process.env },
-    stdio: 'inherit'
-  });
+  ];
   
-  child.on('error', (error) => {
-    console.error(`[${jobId}] Failed to spawn crawler worker:`, error);
-    jobManager.updateJob(jobId, {
-      status: 'failed',
-      completedAt: new Date().toISOString(),
-      errors: [{
-        url: url,
-        error: `Failed to spawn worker: ${error.message}`,
-        timestamp: new Date().toISOString(),
-      }],
-    }).catch(console.error);
-  });
+  console.log(`[${jobId}] Spawning worker with arguments:`, workerArgs);
+  console.log(`[${jobId}] Worker environment: NODE_ENV=${process.env.NODE_ENV}`);
   
-  child.on('exit', (code, signal) => {
-    if (code !== 0) {
-      console.error(`[${jobId}] Crawler worker exited with code ${code}, signal ${signal}`);
-    } else {
-      console.log(`[${jobId}] Crawler worker completed successfully`);
-    }
-    memoryMonitor.stopMonitoring();
-  });
+  try {
+    const child = spawn('node', workerArgs, {
+      cwd: process.cwd(),
+      env: { ...process.env },
+      stdio: 'inherit'
+    });
+    
+    console.log(`[${jobId}] Worker process spawned with PID: ${child.pid}`);
+    
+    child.on('error', (error) => {
+      console.error(`[${jobId}] ERROR: Failed to spawn crawler worker:`);
+      console.error(`[${jobId}] Error message: ${error.message}`);
+      console.error(`[${jobId}] Error stack:`, error.stack);
+      console.error(`[${jobId}] Error details:`, error);
+      
+      jobManager.updateJob(jobId, {
+        status: 'failed',
+        completedAt: new Date().toISOString(),
+        errors: [{
+          url: url,
+          error: `Failed to spawn worker: ${error.message}`,
+          timestamp: new Date().toISOString(),
+        }],
+      }).catch((updateError) => {
+        console.error(`[${jobId}] Failed to update job status after spawn error:`, updateError);
+      });
+    });
+    
+    child.on('exit', async (code, signal) => {
+      console.log(`[${jobId}] Worker process exited with code: ${code}, signal: ${signal}`);
+      
+      if (code !== 0) {
+        console.error(`[${jobId}] WARNING: Crawler worker exited with non-zero code ${code}`);
+        if (signal) {
+          console.error(`[${jobId}] Worker was terminated by signal: ${signal}`);
+        }
+        
+        // Check Redis for the actual error message from the worker
+        try {
+          const job = await jobManager.getJob(jobId);
+          if (job && job.status === 'failed' && job.error) {
+            console.error(`[${jobId}] ========================================`);
+            console.error(`[${jobId}] WORKER REPORTED ERROR: ${job.error}`);
+            console.error(`[${jobId}] ========================================`);
+            
+            // Check if it's an environment variable error
+            if (job.error.includes('environment variable') || job.error.includes('Missing')) {
+              console.error(`[${jobId}] ACTION REQUIRED: Please configure the required environment variables:`);
+              console.error(`[${jobId}]   - NEXT_PUBLIC_SUPABASE_URL`);
+              console.error(`[${jobId}]   - SUPABASE_SERVICE_ROLE_KEY`);
+              console.error(`[${jobId}]   - OPENAI_API_KEY`);
+              console.error(`[${jobId}] See .env.example for more details`);
+            }
+          } else if (code === 1 && (!job || job.status !== 'failed')) {
+            // Worker exited with error but no specific error in Redis
+            console.error(`[${jobId}] Worker process failed without reporting specific error`);
+            await jobManager.updateJob(jobId, {
+              status: 'failed',
+              completedAt: new Date().toISOString(),
+              error: 'Worker process failed to initialize. Check environment variables and logs.',
+            });
+          }
+        } catch (error) {
+          console.error(`[${jobId}] Failed to check worker status in Redis:`, error);
+        }
+      } else {
+        console.log(`[${jobId}] Crawler worker completed successfully`);
+      }
+      
+      console.log(`[${jobId}] Stopping memory monitoring`);
+      memoryMonitor.stopMonitoring();
+    });
+    
+    child.on('close', (code, signal) => {
+      console.log(`[${jobId}] Worker process closed with code: ${code}, signal: ${signal}`);
+    });
+    
+  } catch (spawnError) {
+    console.error(`[${jobId}] FATAL ERROR: Failed to spawn worker process:`, spawnError);
+    throw spawnError;
+  }
   
   // The rest of the crawling logic is now in crawler-worker.ts
   
@@ -932,31 +1087,79 @@ export async function checkCrawlStatus(
     limit?: number; 
   }
 ): Promise<CrawlJob & { data?: (ScrapedPage | AIOptimizedResult)[]; resultCount?: number }> {
-  const job = await jobManager.getJob(jobId);
+  console.log(`[STATUS] Checking status for job: ${jobId}`);
+  console.log(`[STATUS] Options:`, {
+    includeResults: options?.includeResults,
+    offset: options?.offset,
+    limit: options?.limit
+  });
   
-  if (!job) {
-    throw new Error(`Job ${jobId} not found`);
+  try {
+    const job = await jobManager.getJob(jobId);
+    
+    if (!job) {
+      const error = `Job ${jobId} not found`;
+      console.error(`[STATUS] ERROR: ${error}`);
+      throw new Error(error);
+    }
+    
+    console.log(`[STATUS] Job found:`, {
+      jobId: job.jobId,
+      status: job.status,
+      progress: job.progress,
+      total: job.total,
+      completed: job.completed,
+      failed: job.failed
+    });
+    
+    // Get total result count
+    const resultCount = await jobManager.getResultCount(jobId);
+    console.log(`[STATUS] Total results in storage: ${resultCount}`);
+    
+    // If completed and results requested, include paginated results
+    if (job.status === 'completed' && options?.includeResults) {
+      console.log(`[STATUS] Fetching results: offset=${options.offset || 0}, limit=${options.limit || 100}`);
+      
+      try {
+        const results = await jobManager.getJobResults(
+          jobId, 
+          options.offset || 0, 
+          options.limit || 100
+        );
+        
+        console.log(`[STATUS] Retrieved ${results.length} results from storage`);
+        return { ...job, data: results, resultCount };
+      } catch (resultsError) {
+        console.error(`[STATUS] Failed to fetch results:`, resultsError);
+        throw resultsError;
+      }
+    }
+    
+    return { ...job, resultCount };
+  } catch (statusError) {
+    console.error(`[STATUS] Error checking job status:`, statusError);
+    throw statusError;
   }
-  
-  // Get total result count
-  const resultCount = await jobManager.getResultCount(jobId);
-  
-  // If completed and results requested, include paginated results
-  if (job.status === 'completed' && options?.includeResults) {
-    const results = await jobManager.getJobResults(
-      jobId, 
-      options.offset || 0, 
-      options.limit || 100
-    );
-    return { ...job, data: results, resultCount };
-  }
-  
-  return { ...job, resultCount };
 }
 
 // Stream results for very large crawls
 export async function* streamCrawlResults(jobId: string): AsyncGenerator<ScrapedPage | AIOptimizedResult, void, unknown> {
-  yield* jobManager.streamJobResults(jobId);
+  console.log(`[STREAM] Starting to stream results for job: ${jobId}`);
+  
+  try {
+    let count = 0;
+    for await (const result of jobManager.streamJobResults(jobId)) {
+      count++;
+      if (count % 10 === 0) { // Log every 10th result to avoid spam
+        console.log(`[STREAM] Streamed ${count} results so far`);
+      }
+      yield result;
+    }
+    console.log(`[STREAM] Finished streaming ${count} total results`);
+  } catch (streamError) {
+    console.error(`[STREAM] Error streaming results:`, streamError);
+    throw streamError;
+  }
 }
 
 // Utility functions for AI optimization
@@ -1099,20 +1302,47 @@ export async function getHealthStatus(): Promise<{
   crawlerReady: boolean;
   aiOptimization?: any;
 }> {
-  const redisHealth = await jobManager.getHealthStatus();
-  const memoryStats = memoryMonitor.getMemoryStats();
-  const aiMetrics = aiOptimizationMonitor.getMetrics();
+  console.log(`[HEALTH] Checking system health status...`);
   
-  return {
-    redis: redisHealth.redis,
-    memory: memoryStats,
-    fallbackActive: redisHealth.fallbackActive,
-    crawlerReady: true,
-    aiOptimization: {
-      metrics: aiMetrics,
-      insights: aiOptimizationMonitor.getInsights()
-    }
-  };
+  try {
+    const redisHealth = await jobManager.getHealthStatus();
+    console.log(`[HEALTH] Redis status:`, {
+      connected: redisHealth.redis,
+      fallbackActive: redisHealth.fallbackActive
+    });
+    
+    const memoryStats = memoryMonitor.getMemoryStats();
+    console.log(`[HEALTH] Memory stats:`, {
+      heapUsed: `${(memoryStats.heapUsed / 1024 / 1024).toFixed(2)}MB`,
+      heapTotal: `${(memoryStats.heapTotal / 1024 / 1024).toFixed(2)}MB`,
+      percentUsed: `${(memoryStats.percentUsed * 100).toFixed(1)}%`
+    });
+    
+    const aiMetrics = aiOptimizationMonitor.getMetrics();
+    console.log(`[HEALTH] AI optimization metrics:`, {
+      totalOptimizations: aiMetrics.totalOptimizations,
+      cacheHits: aiMetrics.cacheHits,
+      cacheMisses: aiMetrics.cacheMisses,
+      averageReduction: aiMetrics.averageTokenReduction
+    });
+    
+    const healthStatus = {
+      redis: redisHealth.redis,
+      memory: memoryStats,
+      fallbackActive: redisHealth.fallbackActive,
+      crawlerReady: true,
+      aiOptimization: {
+        metrics: aiMetrics,
+        insights: aiOptimizationMonitor.getInsights()
+      }
+    };
+    
+    console.log(`[HEALTH] Health check complete`);
+    return healthStatus;
+  } catch (healthError) {
+    console.error(`[HEALTH] Error checking health status:`, healthError);
+    throw healthError;
+  }
 }
 
 // Get detailed AI optimization metrics
