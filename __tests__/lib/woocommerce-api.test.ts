@@ -2,16 +2,7 @@ import { describe, it, expect, jest, beforeEach } from '@jest/globals'
 import { WooCommerceAPI } from '@/lib/woocommerce-api'
 
 // Mock the woocommerce-full module
-jest.mock('@/lib/woocommerce-full', () => ({
-  createWooCommerceClient: jest.fn(),
-  ProductSchema: { parse: (data: any) => data },
-  OrderSchema: { parse: (data: any) => data },
-  CustomerSchema: { parse: (data: any) => data },
-  CouponSchema: { parse: (data: any) => data },
-  SalesReportSchema: { parse: (data: any) => data },
-  TopSellersReportSchema: { parse: (data: any) => data },
-  SystemStatusSchema: { parse: (data: any) => data }
-}))
+jest.mock('@/lib/woocommerce-full')
 
 import { createWooCommerceClient } from '@/lib/woocommerce-full'
 

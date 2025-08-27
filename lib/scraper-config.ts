@@ -304,6 +304,24 @@ export interface ConfigChangeEvent {
 }
 
 /**
+ * Platform-specific configuration type
+ */
+type PlatformConfig = {
+  selectors?: {
+    productName?: string[];
+    price?: string[];
+    image?: string[];
+    availability?: string[];
+    sku?: string[];
+    description?: string[];
+    variants?: string[];
+    specifications?: string[];
+  };
+  waitForSelectors?: string[];
+  extractionPriority?: ('json-ld' | 'microdata' | 'dom' | 'learned-patterns')[];
+};
+
+/**
  * Advanced configuration manager with hot reload and multiple sources
  */
 export class ScraperConfigManager extends EventEmitter {
@@ -899,7 +917,7 @@ export class ScraperConfigManager extends EventEmitter {
    */
   get(path: string): unknown {
     const keys = path.split('.');
-    let current: unknown = this.config;
+    let current: any = this.config;
     
     for (const key of keys) {
       if (current && typeof current === 'object' && key in current) {
@@ -950,7 +968,7 @@ export class ScraperConfigManager extends EventEmitter {
       ScraperConfigSchema.parse(config);
       return { valid: true };
     } catch (error) {
-      return { valid: false, errors: error };
+      return { valid: false, errors: error instanceof ZodError ? error : undefined };
     }
   }
 

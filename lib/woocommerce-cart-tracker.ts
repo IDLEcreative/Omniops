@@ -58,7 +58,7 @@ export class WooCommerceCartTracker {
     try {
       // Fetch orders with abandoned-like statuses
       const orders = await this.wc.getOrders({
-        status: includeStatuses,
+        status: 'any' as const,
         per_page: limit,
         orderby: 'date',
         order: 'desc'
@@ -119,14 +119,14 @@ export class WooCommerceCartTracker {
 
       // Fetch abandoned orders
       const abandonedOrders = await this.wc.getOrders({
-        status: ['pending', 'on-hold', 'failed'],
+        status: 'pending' as const,
         after: startDate.toISOString(),
         per_page: 100
       });
 
       // Fetch recovered orders (completed in same period)
       const completedOrders = await this.wc.getOrders({
-        status: ['completed', 'processing'],
+        status: 'completed' as const,
         after: startDate.toISOString(),
         per_page: 100
       });

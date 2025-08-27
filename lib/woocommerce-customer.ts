@@ -270,7 +270,7 @@ export class WooCommerceCustomer {
         per_page: limit,
         orderby: 'date',
         order: 'desc',
-        status: ['completed', 'processing']
+        status: 'completed' as const
       });
 
       const purchases: any[] = [];

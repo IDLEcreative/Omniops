@@ -56,7 +56,11 @@ export function encrypt(text: string): string {
     
     // Return base64 encoded string
     return combined.toString('base64');
-  } catch (error) {
+  } catch (error: any) {
+    // Re-throw specific errors from getEncryptionKey
+    if (error.message.includes('ENCRYPTION_KEY')) {
+      throw error;
+    }
     console.error('Encryption error:', error);
     throw new Error('Failed to encrypt data');
   }

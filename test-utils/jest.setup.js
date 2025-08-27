@@ -10,7 +10,7 @@ process.env.NEXT_PUBLIC_SUPABASE_URL = 'https://test.supabase.co'
 process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY = 'test-anon-key'
 process.env.SUPABASE_SERVICE_ROLE_KEY = 'test-service-role-key'
 process.env.OPENAI_API_KEY = 'test-openai-key'
-process.env.ENCRYPTION_KEY = 'test-encryption-key-32-chars-long'
+process.env.ENCRYPTION_KEY = 'test-encryption-key-exactly-32ch'
 
 // Mock OpenAI to avoid browser detection issues in tests
 jest.mock('openai', () => {

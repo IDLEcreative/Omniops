@@ -43,45 +43,45 @@ export async function POST(request: NextRequest) {
     
     if (productId) {
       // Get by product ID
-      const product: any = await wc.get(`products/${productId}`);
+      const product = await wc.getProduct(productId);
       stockInfo = {
         id: product.id,
         name: product.name,
         sku: product.sku,
         stock_status: product.stock_status,
         stock_quantity: product.stock_quantity,
-        in_stock: product.in_stock,
+        in_stock: product.stock_status === 'instock',
         managing_stock: product.manage_stock,
         backorders: product.backorders,
       };
     } else if (sku) {
       // Search by SKU
-      const products: any = await wc.get('products', { sku });
+      const products = await wc.getProducts({ sku });
       if (products.length > 0) {
-        const product = products[0];
+        const product = products[0]!;
         stockInfo = {
           id: product.id,
           name: product.name,
           sku: product.sku,
           stock_status: product.stock_status,
           stock_quantity: product.stock_quantity,
-          in_stock: product.in_stock,
+          in_stock: product.stock_status === 'instock',
           managing_stock: product.manage_stock,
           backorders: product.backorders,
         };
       }
     } else if (productName) {
       // Search by product name
-      const products: any = await wc.get('products', { search: productName, per_page: 1 });
+      const products = await wc.getProducts({ search: productName, per_page: 1 });
       if (products.length > 0) {
-        const product = products[0];
+        const product = products[0]!;
         stockInfo = {
           id: product.id,
           name: product.name,
           sku: product.sku,
           stock_status: product.stock_status,
           stock_quantity: product.stock_quantity,
-          in_stock: product.in_stock,
+          in_stock: product.stock_status === 'instock',
           managing_stock: product.manage_stock,
           backorders: product.backorders,
         };

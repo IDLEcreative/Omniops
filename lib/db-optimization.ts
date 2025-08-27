@@ -117,6 +117,8 @@ class DatabaseOptimizer {
       Array.from(groupedQueries.entries()).map(async ([key, group]) => {
         const [table, operation] = key.split('-');
         
+        if (!table) return [];
+        
         if (operation === 'select') {
           // Combine select queries with OR conditions
           const filters = group.map(q => q.filters).filter(Boolean);
@@ -160,6 +162,7 @@ class DatabaseOptimizer {
           const updateResults = await Promise.all(
             Array.from(updateGroups.entries()).map(async ([dataKey, updateGroup]) => {
               const data = JSON.parse(dataKey);
+              if (!table) return [];
               let query = supabase.from(table).update(data);
               
               // Apply filters
@@ -406,10 +409,12 @@ export class QueryBuilder {
       );
 
       results.forEach((result, index) => {
+        const query = queries[index];
+        if (!query) return;
         if (result.status === 'fulfilled') {
-          queries[index].resolve(result.value);
+          query.resolve(result.value);
         } else {
-          queries[index].reject(result.reason);
+          query.reject(result.reason);
         }
       });
 

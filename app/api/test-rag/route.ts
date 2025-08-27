@@ -3,11 +3,10 @@ import { createClient } from '@supabase/supabase-js';
 import { searchSimilarContent } from '@/lib/embeddings';
 import OpenAI from 'openai';
 
-const openai = new OpenAI({
-  apiKey: process.env.OPENAI_API_KEY!,
-});
-
 export async function GET(request: NextRequest) {
+  const openai = new OpenAI({
+    apiKey: process.env.OPENAI_API_KEY!,
+  });
   const searchParams = request.nextUrl.searchParams;
   const query = searchParams.get('query') || 'What products do you offer?';
   

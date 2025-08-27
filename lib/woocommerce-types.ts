@@ -188,10 +188,10 @@ export interface ProductsReportData {
 
 // Type for generic WooCommerce API client
 export type WooCommerceClient = {
-  get: (path: string, params?: Record<string, unknown>) => Promise<{ data: unknown }>;
-  post: (path: string, data?: unknown) => Promise<{ data: unknown }>;
-  put: (path: string, data?: unknown) => Promise<{ data: unknown }>;
-  delete: (path: string, params?: Record<string, unknown>) => Promise<{ data: unknown }>;
+  get: <T = any>(path: string, params?: any) => Promise<{ data: T }>;
+  post: <T = any>(path: string, data?: any) => Promise<{ data: T }>;
+  put: <T = any>(path: string, data?: any) => Promise<{ data: T }>;
+  delete: <T = any>(path: string, params?: any) => Promise<{ data: T }>;
 };
 
 // Common parameter types

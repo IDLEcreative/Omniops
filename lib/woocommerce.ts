@@ -129,6 +129,7 @@ export async function getProducts(params?: {
   stock_status?: 'instock' | 'outofstock' | 'onbackorder';
 }): Promise<Product[]> {
   const wc = createWooCommerceClient();
+  if (!wc) throw new Error('Failed to create WooCommerce client');
   
   try {
     const response = await wc.get('products', {
@@ -147,6 +148,7 @@ export async function getProducts(params?: {
 // Get single product by ID
 export async function getProduct(id: number): Promise<Product> {
   const wc = createWooCommerceClient();
+  if (!wc) throw new Error('Failed to create WooCommerce client');
   
   try {
     const response = await wc.get(`products/${id}`);
@@ -167,6 +169,7 @@ export async function getOrders(params?: {
   page?: number;
 }): Promise<Order[]> {
   const wc = createWooCommerceClient();
+  if (!wc) throw new Error('Failed to create WooCommerce client');
   
   try {
     const response = await wc.get('orders', {
@@ -185,6 +188,7 @@ export async function getOrders(params?: {
 // Get single order by ID
 export async function getOrder(id: number): Promise<Order> {
   const wc = createWooCommerceClient();
+  if (!wc) throw new Error('Failed to create WooCommerce client');
   
   try {
     const response = await wc.get(`orders/${id}`);
@@ -198,6 +202,7 @@ export async function getOrder(id: number): Promise<Order> {
 // Get customer by email
 export async function getCustomerByEmail(email: string): Promise<Customer | null> {
   const wc = createWooCommerceClient();
+  if (!wc) throw new Error('Failed to create WooCommerce client');
   
   try {
     const response = await wc.get('customers', {
@@ -219,6 +224,7 @@ export async function getCustomerByEmail(email: string): Promise<Customer | null
 // Get product categories
 export async function getCategories() {
   const wc = createWooCommerceClient();
+  if (!wc) throw new Error('Failed to create WooCommerce client');
   
   try {
     const response = await wc.get('products/categories', {
@@ -246,6 +252,7 @@ export async function getProductStock(productId: number) {
 // Search products using the Store API approach
 export async function searchProducts(query: string, limit: number = 10): Promise<Product[]> {
   const wc = createWooCommerceClient();
+  if (!wc) throw new Error('Failed to create WooCommerce client');
   
   try {
     const response = await wc.get('products', {

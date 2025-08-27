@@ -205,25 +205,21 @@ export class WooCommerceCustomerActions {
       }
 
       // First, find the customer
-      const customers = await wc.get('customers', { email });
-      if (!customers || customers.length === 0) {
+      const customer = await wc.getCustomerByEmail(email);
+      if (!customer) {
         return {
           success: false,
           message: 'Customer not found'
         };
       }
 
-      const customer = customers[0];
-      
-      // Update shipping address using the raw WooCommerce client
-      const response = await (wc as any).put(`customers/${customer.id}`, {
+      // Update shipping address
+      const updatedCustomer = await wc.updateCustomer(customer.id, {
         shipping: {
           ...customer.shipping,
           ...newAddress
         }
       });
-      
-      const updatedCustomer = response.data;
 
       return {
         success: true,
@@ -343,11 +339,11 @@ export class WooCommerceCustomerActions {
         };
       }
 
-      // Find the order
-      const orders = await wc.get('orders', { search: orderNumber });
-      const order = orders.find((o: any) => 
+      // Find the order by searching
+      const orders = await wc.getOrders({ search: orderNumber });
+      const order = Array.isArray(orders) ? orders.find((o: any) => 
         o.number === orderNumber && o.billing.email === email
-      );
+      ) : undefined;
 
       if (!order) {
         return {
@@ -366,11 +362,10 @@ export class WooCommerceCustomerActions {
       }
 
       // Cancel the order
-      const response = await (wc as any).put(`orders/${order.id}`, {
+      const updatedOrder = await wc.updateOrder(order.id, {
         status: 'cancelled',
         customer_note: reason || 'Cancelled by customer request'
       });
-      const updatedOrder = response.data;
 
       return {
         success: true,

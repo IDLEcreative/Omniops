@@ -258,7 +258,9 @@ export class ResourceMonitor {
   } | null {
     if (this.memorySnapshots.length === 0) return null;
 
-    const current = this.memorySnapshots[this.memorySnapshots.length - 1].usage;
+    const lastSnapshot = this.memorySnapshots[this.memorySnapshots.length - 1];
+    if (!lastSnapshot) return null;
+    const current = lastSnapshot.usage;
     
     const heapUsed = this.memorySnapshots.map(s => s.usage.heapUsed);
     const average = heapUsed.reduce((a, b) => a + b, 0) / heapUsed.length;

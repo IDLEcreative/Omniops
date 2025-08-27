@@ -62,7 +62,7 @@ export async function generateEmbeddingVectors(chunks: string[]): Promise<number
   const embeddings: number[][] = new Array(chunks.length);
   
   // Get chunks that need processing
-  const missingChunks = missing.map(i => chunks[i]);
+  const missingChunks = missing.map(i => chunks[i]).filter((chunk): chunk is string => chunk !== undefined);
   const missingIndices = missing;
   
   // Create batches for missing chunks only

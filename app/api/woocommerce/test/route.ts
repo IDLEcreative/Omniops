@@ -201,15 +201,15 @@ export async function GET(request: NextRequest) {
 
     // Test 3: Get categories
     try {
-      const categories: any = await withTimeout(
-        wc.get('products/categories', { per_page: 5 }),
+      const categories = await withTimeout(
+        wc.getProductCategories({ per_page: 5 }),
         TIMEOUT_MS,
         'Categories fetch'
       );
       tests.categories = {
         success: true,
         count: categories.length,
-        sample: categories.slice(0, 3).map((c: any) => ({
+        sample: categories.slice(0, 3).map((c) => ({
           id: c.id,
           name: c.name,
           count: c.count,

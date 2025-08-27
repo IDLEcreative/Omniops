@@ -38,7 +38,7 @@ describe('WooCommerce Integration', () => {
     }
 
     // Mock the constructor
-    ;(WooCommerceRestApi as jest.MockedClass<typeof WooCommerceRestApi>).mockImplementation(
+    ;(WooCommerceRestApi as any).mockImplementation(
       () => mockWooCommerceInstance
     )
   })

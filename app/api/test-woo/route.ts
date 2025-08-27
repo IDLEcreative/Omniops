@@ -38,7 +38,7 @@ export async function GET(request: NextRequest) {
     console.log('✅ WooCommerce client created successfully');
     
     // Try to fetch products
-    const products: any = await client.get('products', {
+    const products = await client.getProducts({
       per_page: 3,
       status: 'publish'
     });
