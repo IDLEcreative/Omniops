@@ -1,0 +1,141 @@
+{
+  "version": "1.0.0",
+  "name": "E-commerce Scraper Configuration",
+  "description": "JSON configuration example for e-commerce scraping",
+  "environment": "production",
+  
+  "extraction": {
+    "platformOverrides": {
+      "shopify": {
+        "selectors": {
+          "productName": [".product__title", "h1.product-single__title"],
+          "price": [".price__regular", ".product__price"],
+          "availability": [".product__availability"]
+        },
+        "extractionPriority": ["json-ld", "microdata", "dom"]
+      },
+      "amazon": {
+        "selectors": {
+          "productName": ["#productTitle", "h1.a-size-large"],
+          "price": [".a-price-whole", ".priceblock_dealprice"],
+          "availability": ["#availability span", ".a-size-medium.a-color-success"]
+        },
+        "waitForSelectors": ["#productTitle"],
+        "extractionPriority": ["dom", "json-ld"]
+      }
+    },
+    "strategies": {
+      "jsonLdEnabled": true,
+      "microdataEnabled": true,
+      "domScrapingEnabled": true,
+      "patternLearningEnabled": true,
+      "fallbackChain": ["json-ld", "microdata", "learned-patterns", "dom"]
+    },
+    "filters": {
+      "minPrice": 0,
+      "maxPrice": 50000,
+      "excludeCategories": ["gift-cards"],
+      "excludeOutOfStock": false,
+      "requireImages": true,
+      "requirePrice": true
+    },
+    "enrichment": {
+      "normalizeProductNames": true,
+      "inferCategories": true,
+      "detectDuplicates": true
+    }
+  },
+  
+  "performance": {
+    "concurrency": {
+      "maxConcurrentPages": 5,
+      "maxConcurrentDomains": 2,
+      "queueSize": 1000,
+      "priorityQueuing": true
+    },
+    "delays": {
+      "minRequestDelay": 1000,
+      "maxRequestDelay": 3000,
+      "adaptiveDelayEnabled": true
+    },
+    "timeouts": {
+      "pageLoad": 30000,
+      "navigation": 30000,
+      "selector": 10000
+    },
+    "resources": {
+      "blockImages": false,
+      "blockFonts": true,
+      "blockMedia": true,
+      "blockAnalytics": true
+    }
+  },
+  
+  "patternLearning": {
+    "enabled": true,
+    "thresholds": {
+      "minConfidence": 0.7,
+      "minSamples": 3,
+      "successRateThreshold": 0.75
+    },
+    "patterns": {
+      "maxPatternsPerDomain": 50,
+      "autoCleanupEnabled": true
+    },
+    "behavior": {
+      "learnFromFailures": true,
+      "adaptToChanges": true,
+      "persistToDatabase": true
+    }
+  },
+  
+  "rateLimiting": {
+    "perDomain": {
+      "requestsPerSecond": 1,
+      "requestsPerMinute": 30,
+      "burstSize": 5
+    },
+    "global": {
+      "maxRequestsPerSecond": 10,
+      "respectRobotsTxt": true
+    },
+    "backoff": {
+      "strategy": "exponential",
+      "initialDelayMs": 1000,
+      "maxDelayMs": 30000,
+      "multiplier": 2
+    },
+    "userAgents": {
+      "rotationEnabled": true,
+      "rotationInterval": 5,
+      "agents": [
+        "Mozilla/5.0 (compatible; CustomerServiceBot/1.0)",
+        "Mozilla/5.0 (Windows NT 10.0; Win64; x64) Chrome/91.0"
+      ]
+    }
+  },
+  
+  "browser": {
+    "headless": true,
+    "viewport": {
+      "width": 1920,
+      "height": 1080
+    },
+    "stealth": {
+      "enabled": true
+    }
+  },
+  
+  "features": {
+    "enableEcommerce": true,
+    "enablePatternLearning": true,
+    "enableAdaptiveDelays": true,
+    "enableMemoryManagement": true
+  },
+  
+  "logging": {
+    "level": "info",
+    "logToFile": false,
+    "logRotation": true
+  }
+}
