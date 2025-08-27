@@ -4,9 +4,19 @@ import { scrapePage, crawlWebsite, checkCrawlStatus, getHealthStatus } from '@/l
 import OpenAI from 'openai';
 import { z } from 'zod';
 
-const openai = new OpenAI({
-  apiKey: process.env.OPENAI_API_KEY!,
-});
+// Lazy load OpenAI client to avoid build-time errors
+let openai: OpenAI | null = null;
+
+function getOpenAIClient(): OpenAI {
+  if (!openai) {
+    const apiKey = process.env.OPENAI_API_KEY;
+    if (!apiKey) {
+      throw new Error('OPENAI_API_KEY is not configured');
+    }
+    openai = new OpenAI({ apiKey });
+  }
+  return openai;
+}
 
 // Request validation
 const ScrapeRequestSchema = z.object({
@@ -46,7 +56,7 @@ async function generateEmbeddings(chunks: string[]) {
   const batchSize = 20;
   for (let i = 0; i < chunks.length; i += batchSize) {
     const batch = chunks.slice(i, i + batchSize);
-    const response = await openai.embeddings.create({
+    const response = await getOpenAIClient().embeddings.create({
       model: 'text-embedding-3-small',
       input: batch,
     });
@@ -167,11 +177,14 @@ export async function POST(request: NextRequest) {
 // Background job to process crawl results with optimized batch operations
 async function processCrawlResults(jobId: string, supabase: any) {
   try {
+    // Performance: Mark start time
+    const startTime = performance.now();
+    
     let completed = false;
     let retries = 0;
     const maxRetries = 60; // 5 minutes with 5-second intervals
-    const BATCH_SIZE = 5; // Process 5 pages concurrently
-
+    const BATCH_SIZE = 10; // Increased batch size for better throughput
+    
     while (!completed && retries < maxRetries) {
       const crawlStatus = await checkCrawlStatus(jobId);
       
@@ -179,26 +192,43 @@ async function processCrawlResults(jobId: string, supabase: any) {
         const pages = crawlStatus.data;
         const stats = { processed: 0, failed: 0 };
         
-        // Process pages in parallel batches
-        for (let i = 0; i < pages.length; i += BATCH_SIZE) {
-          const batch = pages.slice(i, i + BATCH_SIZE);
-          
-          // Process batch in parallel
-          const batchResults = await Promise.allSettled(
-            batch.map(async (page) => {
-              try {
-                // Save page
-                const { data: savedPage, error: pageError } = await supabase
-                  .from('scraped_pages')
-                  .upsert({
-                    url: page.url,
-                    title: page.title,
-                    content: page.content,
-                    metadata: page.metadata,
-                    last_scraped_at: new Date().toISOString(),
-                  })
-                  .select()
-                  .single();
+        // Prepare all pages for batch insert
+        const pageRecords = pages.map(page => ({
+          url: page.url,
+          title: page.title,
+          content: page.content,
+          metadata: page.metadata,
+          last_scraped_at: new Date().toISOString(),
+        }));
+        
+        // Batch upsert all pages at once
+        const { data: savedPages, error: batchPageError } = await supabase
+          .from('scraped_pages')
+          .upsert(pageRecords, { onConflict: 'url' })
+          .select();
+        
+        if (batchPageError) {
+          console.error('Batch page insert error:', batchPageError);
+          // Fall back to individual processing
+          for (let i = 0; i < pages.length; i += BATCH_SIZE) {
+            const batch = pages.slice(i, i + BATCH_SIZE);
+            
+            // Process batch in parallel
+            const batchResults = await Promise.allSettled(
+              batch.map(async (page) => {
+                try {
+                  // Save page
+                  const { data: savedPage, error: pageError } = await supabase
+                    .from('scraped_pages')
+                    .upsert({
+                      url: page.url,
+                      title: page.title,
+                      content: page.content,
+                      metadata: page.metadata,
+                      last_scraped_at: new Date().toISOString(),
+                    })
+                    .select()
+                    .single();
 
                 if (pageError) {
                   throw new Error(`Error saving page: ${pageError.message}`);
@@ -274,29 +304,45 @@ async function processCrawlResults(jobId: string, supabase: any) {
   }
 }
 
-// Status check endpoint
+// Status check endpoint with caching
 export async function GET(request: NextRequest) {
+  // Performance: Mark start time
+  const startTime = performance.now();
+  
   const searchParams = request.nextUrl.searchParams;
   const jobId = searchParams.get('job_id');
   const health = searchParams.get('health');
 
-  // Health check endpoint
+  // Health check endpoint with caching
   if (health === 'true') {
     try {
       const healthStatus = await getHealthStatus();
+      const endTime = performance.now();
+      
       return NextResponse.json({
         status: 'ok',
         ...healthStatus,
         timestamp: new Date().toISOString(),
+      }, {
+        headers: {
+          'Cache-Control': 'public, max-age=10, stale-while-revalidate=5',
+          'X-Response-Time': `${(endTime - startTime).toFixed(2)}ms`
+        }
       });
     } catch (error) {
+      const endTime = performance.now();
       return NextResponse.json(
         { 
           status: 'error',
           error: 'Failed to get health status',
           timestamp: new Date().toISOString(),
         },
-        { status: 500 }
+        { 
+          status: 500,
+          headers: {
+            'X-Response-Time': `${(endTime - startTime).toFixed(2)}ms`
+          }
+        }
       );
     }
   }

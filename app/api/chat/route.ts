@@ -6,10 +6,19 @@ import { z } from 'zod';
 import { checkDomainRateLimit } from '@/lib/rate-limit';
 import { searchSimilarContent } from '@/lib/embeddings';
 
-// Initialize OpenAI
-const openai = new OpenAI({
-  apiKey: process.env.OPENAI_API_KEY!,
-});
+// Lazy load OpenAI client to avoid build-time errors
+let openai: OpenAI | null = null;
+
+function getOpenAIClient(): OpenAI {
+  if (!openai) {
+    const apiKey = process.env.OPENAI_API_KEY;
+    if (!apiKey) {
+      throw new Error('OPENAI_API_KEY is not configured');
+    }
+    openai = new OpenAI({ apiKey });
+  }
+  return openai;
+}
 
 // Request validation
 const ChatRequestSchema = z.object({
@@ -108,7 +117,7 @@ export async function POST(request: NextRequest) {
         console.error('Search error:', searchError);
         // Fall back to old method if new search fails
         try {
-          const embeddingResponse = await openai.embeddings.create({
+          const embeddingResponse = await getOpenAIClient().embeddings.create({
             model: 'text-embedding-3-small',
             input: message,
           });
@@ -393,7 +402,7 @@ export async function POST(request: NextRequest) {
     messages.push({ role: 'user', content: message });
 
     // Get AI response
-    const completion = await openai.chat.completions.create({
+    const completion = await getOpenAIClient().chat.completions.create({
       model: 'gpt-4o-mini',
       messages,
       temperature: 0.7,

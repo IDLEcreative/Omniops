@@ -1,13 +1,14 @@
-import React from 'react';
+import React, { useMemo } from 'react';
 
 interface MessageContentProps {
   content: string;
   className?: string;
 }
 
-export function MessageContent({ content, className = '' }: MessageContentProps) {
-  // Function to convert URLs in text to clickable links
-  const renderContentWithLinks = (text: string) => {
+// Memoized component to prevent unnecessary re-renders
+export const MessageContent = React.memo(({ content, className = '' }: MessageContentProps) => {
+  // Memoized function to convert URLs in text to clickable links
+  const renderContentWithLinks = useMemo(() => (text: string) => {
     // Regex patterns for different URL formats
     const patterns = [
       // [text](url) markdown style
@@ -74,10 +75,10 @@ export function MessageContent({ content, className = '' }: MessageContentProps)
     }
 
     return elements;
-  };
+  }, []);
 
   // Function to process plain URLs in text
-  const processPlainUrls = (text: string): React.ReactNode => {
+  const processPlainUrls = useMemo(() => (text: string): React.ReactNode => {
     const urlRegex = /(https?:\/\/[^\s]+)|((?:www\.)?[a-zA-Z0-9-]+\.[a-zA-Z]{2,}(?:\/[^\s]*)?)/g;
     const parts = text.split(urlRegex);
     
@@ -102,11 +103,19 @@ export function MessageContent({ content, className = '' }: MessageContentProps)
       
       return part;
     });
-  };
+  }, []);
+
+  // Memoize the rendered content
+  const renderedContent = useMemo(() => renderContentWithLinks(content), [content, renderContentWithLinks]);
 
   return (
     <div className={`whitespace-pre-wrap ${className}`}>
-      {renderContentWithLinks(content)}
+      {renderedContent}
     </div>
   );
-}
+}, (prevProps, nextProps) => {
+  // Custom comparison function for React.memo
+  return prevProps.content === nextProps.content && prevProps.className === nextProps.className;
+});
+
+MessageContent.displayName = 'MessageContent';

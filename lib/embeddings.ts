@@ -1,9 +1,20 @@
 import OpenAI from 'openai';
 import { createClient, createServiceRoleClient } from '@/lib/supabase/server';
+import { embeddingCache, contentDeduplicator } from '@/lib/embedding-cache';
 
-const openai = new OpenAI({
-  apiKey: process.env.OPENAI_API_KEY!,
-});
+// Lazy load OpenAI client to avoid build-time errors
+let openai: OpenAI | null = null;
+
+function getOpenAIClient(): OpenAI {
+  if (!openai) {
+    const apiKey = process.env.OPENAI_API_KEY;
+    if (!apiKey) {
+      throw new Error('OPENAI_API_KEY is not configured');
+    }
+    openai = new OpenAI({ apiKey });
+  }
+  return openai;
+}
 
 // Split text into chunks for embedding
 export function splitIntoChunks(text: string, maxChunkSize: number = 1000): string[] {
@@ -28,18 +39,38 @@ export function splitIntoChunks(text: string, maxChunkSize: number = 1000): stri
   return chunks;
 }
 
-// Generate embeddings for text chunks with parallel processing
+// Generate embeddings for text chunks with caching and parallel processing
 export async function generateEmbeddingVectors(chunks: string[]): Promise<number[][]> {
+  // Performance: Mark start time
+  const startTime = performance.now();
+  
+  // Check cache first
+  const { cached, missing } = embeddingCache.getMultiple(chunks);
+  
+  // If all embeddings are cached, return immediately
+  if (missing.length === 0) {
+    const embeddings = chunks.map((_, index) => cached.get(index)!);
+    const endTime = performance.now();
+    console.log(`[Performance] All ${chunks.length} embeddings from cache: ${(endTime - startTime).toFixed(2)}ms`);
+    return embeddings;
+  }
+  
+  console.log(`[Performance] Cache hits: ${cached.size}/${chunks.length}`);
+  
   const batchSize = 20; // Max items per API call
   const concurrentBatches = 3; // Process 3 batches concurrently
   const embeddings: number[][] = new Array(chunks.length);
   
-  // Create batches
-  const batches: { startIdx: number; batch: string[] }[] = [];
-  for (let i = 0; i < chunks.length; i += batchSize) {
+  // Get chunks that need processing
+  const missingChunks = missing.map(i => chunks[i]);
+  const missingIndices = missing;
+  
+  // Create batches for missing chunks only
+  const batches: { indices: number[]; batch: string[] }[] = [];
+  for (let i = 0; i < missingChunks.length; i += batchSize) {
     batches.push({
-      startIdx: i,
-      batch: chunks.slice(i, Math.min(i + batchSize, chunks.length))
+      indices: missingIndices.slice(i, Math.min(i + batchSize, missingChunks.length)),
+      batch: missingChunks.slice(i, Math.min(i + batchSize, missingChunks.length))
     });
   }
   
@@ -48,23 +79,24 @@ export async function generateEmbeddingVectors(chunks: string[]): Promise<number
     const currentBatches = batches.slice(i, i + concurrentBatches);
     
     // Process current set of batches in parallel
-    const batchPromises = currentBatches.map(async ({ startIdx, batch }) => {
+    const batchPromises = currentBatches.map(async ({ indices, batch }) => {
       try {
-        const response = await openai.embeddings.create({
+        const response = await getOpenAIClient().embeddings.create({
           model: 'text-embedding-3-small',
           input: batch,
         });
         
         return {
-          startIdx,
-          embeddings: response.data.map(item => item.embedding)
+          indices,
+          embeddings: response.data.map(item => item.embedding),
+          texts: batch
         };
       } catch (error) {
         console.error(`Error generating embeddings for batch starting at ${startIdx}:`, error);
         // Retry once on failure
         try {
           await new Promise(resolve => setTimeout(resolve, 1000)); // Wait 1 second before retry
-          const response = await openai.embeddings.create({
+          const response = await getOpenAIClient().embeddings.create({
             model: 'text-embedding-3-small',
             input: batch,
           });
@@ -73,7 +105,7 @@ export async function generateEmbeddingVectors(chunks: string[]): Promise<number
             embeddings: response.data.map(item => item.embedding)
           };
         } catch (retryError) {
-          console.error(`Retry failed for batch starting at ${startIdx}:`, retryError);
+          console.error(`Retry failed for batch:`, retryError);
           throw retryError;
         }
       }
@@ -82,12 +114,16 @@ export async function generateEmbeddingVectors(chunks: string[]): Promise<number
     // Wait for all current batches to complete
     const results = await Promise.all(batchPromises);
     
-    // Place embeddings in correct positions
+    // Place embeddings in correct positions and update cache
     for (const result of results) {
       for (let j = 0; j < result.embeddings.length; j++) {
         const embedding = result.embeddings[j];
+        const originalIndex = result.indices[j];
+        const text = result.texts[j];
         if (embedding) {
-          embeddings[result.startIdx + j] = embedding;
+          embeddings[originalIndex] = embedding;
+          // Cache the new embedding
+          embeddingCache.set(text, embedding);
         }
       }
     }
@@ -97,6 +133,15 @@ export async function generateEmbeddingVectors(chunks: string[]): Promise<number
       await new Promise(resolve => setTimeout(resolve, 100));
     }
   }
+  
+  // Fill in cached embeddings
+  cached.forEach((embedding, index) => {
+    embeddings[index] = embedding;
+  });
+  
+  const endTime = performance.now();
+  console.log(`[Performance] Generated ${missing.length} new embeddings, used ${cached.size} cached, total time: ${(endTime - startTime).toFixed(2)}ms`);
+  console.log(`[Performance] Cache stats:`, embeddingCache.getStats());
   
   return embeddings;
 }
@@ -147,10 +192,17 @@ export async function generateEmbeddings(params: {
   }
 }
 
-// Generate a single embedding for a query
+// Generate a single embedding for a query with caching
 export async function generateQueryEmbedding(query: string): Promise<number[]> {
+  // Check cache first
+  const cached = embeddingCache.get(query);
+  if (cached) {
+    console.log('[Performance] Query embedding from cache');
+    return cached;
+  }
+  
   try {
-    const response = await openai.embeddings.create({
+    const response = await getOpenAIClient().embeddings.create({
       model: 'text-embedding-3-small',
       input: query,
     });
@@ -159,6 +211,9 @@ export async function generateQueryEmbedding(query: string): Promise<number[]> {
     if (!embedding) {
       throw new Error('No embedding returned from OpenAI API');
     }
+    
+    // Cache the query embedding
+    embeddingCache.set(query, embedding);
     return embedding;
   } catch (error) {
     console.error('Error generating query embedding:', error);

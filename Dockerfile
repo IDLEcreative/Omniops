@@ -27,8 +27,8 @@ RUN npm run build || npx next build
 FROM node:20-alpine AS runner
 WORKDIR /app
 
-# Install production dependencies
-RUN apk add --no-cache libc6-compat
+# Install production dependencies and curl for health checks
+RUN apk add --no-cache libc6-compat curl
 
 # Add non-root user for security
 RUN addgroup -g 1001 -S nodejs && \
@@ -57,9 +57,9 @@ ENV HOSTNAME="0.0.0.0"
 ENV NODE_ENV=production
 ENV NEXT_TELEMETRY_DISABLED=1
 
-# Health check
+# Health check using curl
 HEALTHCHECK --interval=30s --timeout=3s --start-period=5s --retries=3 \
-  CMD node -e "require('http').get('http://localhost:3000/api/health', (r) => {if(r.statusCode !== 200) throw new Error()})" || exit 1
+  CMD curl -f http://localhost:3000/api/health || exit 1
 
 # Start the application
 CMD ["npm", "start"]
