@@ -1,0 +1,12 @@
+{
+  "buildCommand": "cd Omniops && npm run build",
+  "outputDirectory": "Omniops/.next",
+  "installCommand": "cd Omniops && npm install",
+  "framework": "nextjs",
+  "regions": ["iad1"],
+  "functions": {
+    "Omniops/app/api/**/*": {
+      "maxDuration": 60
+    }
+  }
+}
