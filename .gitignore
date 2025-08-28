@@ -1,31 +1,58 @@
-# Mac
-.DS_Store
+# See https://help.github.com/articles/ignoring-files/ for more about ignoring files.
 
-# Dependencies
+# dependencies
+/node_modules
 node_modules/
-.pnp
-.pnp.js
+/.pnp
+.pnp.*
+.yarn/*
+!.yarn/patches
+!.yarn/plugins
+!.yarn/releases
+!.yarn/versions
 
-# Testing
+# testing
+/coverage
 coverage/
 
-# Production builds
-build/
-dist/
+# next.js
+/.next/
 .next/
+/out/
 out/
 
-# Misc
-*.log
+# production
+/build
+build/
+dist/
+
+# misc
+.DS_Store
+*.pem
+
+# debug
 npm-debug.log*
 yarn-debug.log*
 yarn-error.log*
+.pnpm-debug.log*
+*.log
+dev-server.log
+dev.log
 
-# Environment files
+# env files (can opt-in for committing if needed)
+.env*
+!.env.example
 .env
 .env.local
 .env.production
 .env.development
+
+# vercel
+.vercel
+
+# typescript
+*.tsbuildinfo
+next-env.d.ts
 
 # IDEs
 .vscode/
@@ -37,6 +64,8 @@ yarn-error.log*
 *.tmp
 temp/
 tmp/
+screenshot-*.png
+live-browser-*.png
 
 # Archives and backups
 *.tar.gz
@@ -48,8 +77,12 @@ tmp/
 supabase/.temp/
 supabase/.branches/
 
-# Vercel
-.vercel/
-
 # Claude
 .claude/
+
+# crawlee storage
+/storage/
+
+# MCP configuration (contains sensitive credentials)
+mcp-supabase-config.json
+*-mcp-config.json

@@ -1,0 +1,227 @@
+# Example Scraper Configuration File
+# Copy this to scraper-config.yaml and customize for your needs
+
+version: "1.0.0"
+name: "E-commerce Scraper Configuration"
+description: "Configuration for advanced e-commerce scraping"
+environment: "production"
+
+# ============================================================================
+# EXTRACTION SETTINGS
+# ============================================================================
+extraction:
+  # Platform-specific selector overrides
+  platformOverrides:
+    shopify:
+      selectors:
+        productName: [".product__title", "h1.product-single__title"]
+        price: [".price__regular", ".product__price"]
+        availability: [".product__availability", ".product-single__availability"]
+      waitForSelectors: [".product__info"]
+      extractionPriority: ["json-ld", "microdata", "dom"]
+    
+    woocommerce:
+      selectors:
+        productName: ["h1.product_title", ".product-title"]
+        price: [".woocommerce-Price-amount", ".price ins"]
+        sku: [".sku_wrapper .sku", ".product_meta .sku"]
+      extractionPriority: ["microdata", "json-ld", "dom"]
+    
+    magento:
+      selectors:
+        productName: [".page-title", "h1.product-name"]
+        price: [".price-box .price", "[data-price-type='finalPrice']"]
+      waitForSelectors: [".product-info-main"]
+  
+  # Extraction strategies
+  strategies:
+    jsonLdEnabled: true
+    microdataEnabled: true
+    domScrapingEnabled: true
+    patternLearningEnabled: true
+    fallbackChain:
+      - "json-ld"
+      - "microdata" 
+      - "learned-patterns"
+      - "dom"
+  
+  # Content filters
+  filters:
+    minPrice: 0
+    maxPrice: 100000
+    excludeCategories:
+      - "gift-cards"
+      - "digital-downloads"
+    excludeOutOfStock: false
+    requireImages: true
+    requirePrice: true
+    minDescriptionLength: 20
+    maxDescriptionLength: 10000
+  
+  # Data enrichment
+  enrichment:
+    normalizeProductNames: true
+    extractColorFromImages: false
+    inferCategories: true
+    calculatePriceHistory: false
+    detectDuplicates: true
+
+# ============================================================================
+# PERFORMANCE TUNING
+# ============================================================================
+performance:
+  # Concurrency settings
+  concurrency:
+    maxConcurrentPages: 10
+    maxConcurrentDomains: 3
+    queueSize: 5000
+    priorityQueuing: true
+  
+  # Request delays
+  delays:
+    minRequestDelay: 500
+    maxRequestDelay: 2000
+    delayBetweenBatches: 5000
+    adaptiveDelayEnabled: true
+    delayMultiplier: 1.5
+  
+  # Timeouts (in milliseconds)
+  timeouts:
+    pageLoad: 30000
+    navigation: 30000
+    selector: 10000
+    script: 10000
+    idle: 2000
+  
+  # Resource management
+  resources:
+    maxMemoryMB: 2048
+    maxCpuPercent: 80
+    blockImages: false      # Keep false for product images
+    blockStyles: false      # Keep false for layout detection
+    blockFonts: true
+    blockMedia: true
+    blockAnalytics: true
+  
+  # Caching
+  caching:
+    enableResponseCache: true
+    cacheValidityMinutes: 60
+    maxCacheSize: 1000
+    cacheStrategy: "lru"
+
+# ============================================================================
+# PATTERN LEARNING
+# ============================================================================
+patternLearning:
+  enabled: true
+  
+  # Learning thresholds
+  thresholds:
+    minConfidence: 0.75
+    minSamples: 5
+    successRateThreshold: 0.8
+    patternAgeMaxDays: 30
+  
+  # Pattern management
+  patterns:
+    maxPatternsPerDomain: 100
+    maxPatternsTotal: 10000
+    autoCleanupEnabled: true
+    mergeSimilarPatterns: true
+  
+  # Learning behavior
+  behavior:
+    learnFromFailures: true
+    adaptToChanges: true
+    shareAcrossDomains: false
+    persistToDatabase: true
+
+# ============================================================================
+# RATE LIMITING
+# ============================================================================
+rateLimiting:
+  # Per-domain limits
+  perDomain:
+    requestsPerSecond: 2
+    requestsPerMinute: 60
+    burstSize: 10
+    cooldownMs: 1000
+  
+  # Global limits
+  global:
+    maxRequestsPerSecond: 20
+    maxActiveDoamins: 10
+    respectRobotsTxt: true
+    respectCrawlDelay: true
+  
+  # Backoff strategies
+  backoff:
+    strategy: "exponential"  # exponential, linear, constant, adaptive
+    initialDelayMs: 1000
+    maxDelayMs: 60000
+    multiplier: 2
+    jitter: true
+  
+  # User agent rotation
+  userAgents:
+    rotationEnabled: true
+    rotationInterval: 10
+    agents:
+      - "Mozilla/5.0 (compatible; CustomerServiceBot/1.0; +https://yoursite.com/bot)"
+      - "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/91.0.4472.124 Safari/537.36"
+      - "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/91.0.4472.124 Safari/537.36"
+
+# ============================================================================
+# BROWSER SETTINGS
+# ============================================================================
+browser:
+  headless: true
+  
+  viewport:
+    width: 1920
+    height: 1080
+    deviceScaleFactor: 1
+    isMobile: false
+  
+  stealth:
+    enabled: true
+    evasions:
+      - "chrome.runtime"
+      - "navigator.webdriver"
+      - "navigator.plugins"
+      - "iframe.contentWindow"
+  
+  cookies:
+    acceptCookies: true
+    persistCookies: false
+    # cookieFile: "./cookies.json"
+  
+  proxy:
+    enabled: false
+    # url: "http://proxy.example.com:8080"
+    # username: "proxyuser"
+    # password: "proxypass"
+    rotateProxies: false
+    proxyList: []
+
+# ============================================================================
+# FEATURES
+# ============================================================================
+features:
+  enableEcommerce: true
+  enablePatternLearning: true
+  enableAdaptiveDelays: true
+  enableMemoryManagement: true
+  enableErrorRecovery: true
+  enableMetrics: true
+
+# ============================================================================
+# LOGGING
+# ============================================================================
+logging:
+  level: "info"  # debug, info, warn, error
+  logToFile: false
+  # logFile: "./logs/scraper.log"
+  logRotation: true
+  maxLogSizeMB: 100
