@@ -243,12 +243,10 @@ export async function searchSimilarContent(
     const queryEmbedding = await generateQueryEmbedding(query);
     
     // Search for similar content
-    // Using the correct parameter names as expected by the database function
     const { data, error } = await supabase.rpc('search_embeddings', {
       query_embedding: queryEmbedding,
       similarity_threshold: similarityThreshold,
       match_count: limit
-      // p_domain_id is optional - omitting it searches all embeddings
     });
     
     if (error) {
@@ -256,8 +254,37 @@ export async function searchSimilarContent(
       throw error;
     }
     
-    console.log(`Search found ${data?.length || 0} results for query: "${query}"`);
-    return data || [];
+    // Filter results by domain if specified
+    let filteredData = data || [];
+    if (domain && filteredData.length > 0) {
+      // Filter results to only include URLs from the specified domain
+      filteredData = filteredData.filter((result: any) => {
+        if (result.url) {
+          try {
+            const url = new URL(result.url);
+            const resultDomain = url.hostname.replace('www.', '');
+            const targetDomain = domain.replace('www.', '');
+            return resultDomain === targetDomain;
+          } catch {
+            return false;
+          }
+        }
+        return false;
+      });
+      
+      console.log(`Filtered ${data?.length || 0} results to ${filteredData.length} for domain "${domain}"`);
+    }
+    
+    console.log(`Search found ${filteredData.length} results for domain "${domain}" and query: "${query}"`);
+    
+    // If no results found for the specific domain, return empty array
+    // This prevents generic responses when domain has no content
+    if (filteredData.length === 0) {
+      console.log(`No embeddings found for domain: ${domain}`);
+      return [];
+    }
+    
+    return filteredData;
   } catch (error) {
     console.error('Error searching similar content:', error);
     throw error;
