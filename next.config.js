@@ -31,9 +31,13 @@ const nextConfig = {
     scrollRestoration: true, // Better scroll restoration  
   },
   
-  // Simplified webpack configuration
+  // Webpack configuration with explicit alias resolution
   webpack: (config) => {
-    // Keep it simple to avoid build issues
+    // Explicitly set up @ alias for module resolution
+    config.resolve.alias = {
+      ...config.resolve.alias,
+      '@': path.resolve(__dirname),
+    };
     return config;
   },
   
