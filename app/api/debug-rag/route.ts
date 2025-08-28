@@ -3,11 +3,13 @@ import { createClient } from '@supabase/supabase-js';
 import OpenAI from 'openai';
 
 export async function GET() {
-  const openai = new OpenAI({
-    apiKey: process.env.OPENAI_API_KEY!,
-  });
-  const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL!;
-  const supabaseServiceRoleKey = process.env.SUPABASE_SERVICE_ROLE_KEY!;
+  const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL;
+  const supabaseServiceRoleKey = process.env.SUPABASE_SERVICE_ROLE_KEY;
+  
+  if (!supabaseUrl || !supabaseServiceRoleKey) {
+    return NextResponse.json({ error: 'Missing environment variables' }, { status: 500 });
+  }
+  
   const supabase = createClient(supabaseUrl, supabaseServiceRoleKey);
   
   const debug: any = {};
