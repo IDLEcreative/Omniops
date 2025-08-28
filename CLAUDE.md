@@ -86,6 +86,8 @@ The application follows a service-oriented architecture with clear separation of
 
 ## Database Structure
 
+**📚 Complete Schema Reference: See [SUPABASE_SCHEMA.md](SUPABASE_SCHEMA.md) for authoritative database documentation**
+
 Main tables:
 - `customer_configs`: Customer settings and encrypted credentials
 - `scraped_pages` / `website_content`: Indexed website content

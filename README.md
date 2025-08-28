@@ -681,6 +681,7 @@ npm run test:coverage
 - **[Component Documentation](components/)**: Individual component guides
 - **[API Documentation](#api-documentation)**: Complete API reference
 - **[Type Documentation](TYPE_DOCUMENTATION_INDEX.md)**: TypeScript type definitions
+- **[Database Schema](SUPABASE_SCHEMA.md)**: Complete Supabase database schema reference
 
 ### Getting Help
 

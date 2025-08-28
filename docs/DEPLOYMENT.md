@@ -1,485 +1,244 @@
-# Deployment Guide
+# Omniops Deployment Guide
 
-This guide covers deploying the Customer Service Agent to production.
+## Architecture Overview
 
-## Table of Contents
+The improved architecture includes:
+- **Unified Redis Client**: Resilient Redis client with circuit breaker and fallback
+- **Worker Services**: Separated worker containers for different job types
+- **Comprehensive Monitoring**: Enhanced health checks and metrics
+- **Optimized Queue System**: Namespaced queues with priorities and deduplication
 
-- [Prerequisites](#prerequisites)
-- [Deployment Options](#deployment-options)
-- [Environment Setup](#environment-setup)
-- [Database Setup](#database-setup)
-- [Vercel Deployment](#vercel-deployment)
-- [Self-Hosting](#self-hosting)
-- [Post-Deployment](#post-deployment)
-- [Monitoring](#monitoring)
-- [Troubleshooting](#troubleshooting)
+## Quick Start
 
-## Prerequisites
-
-Before deploying, ensure you have:
-
-1. **Accounts Created**:
-   - [ ] Supabase account
-   - [ ] OpenAI account with API access
-   - [ ] Firecrawl account
-   - [ ] Vercel account (if using Vercel)
-
-2. **API Keys Ready**:
-   - [ ] OpenAI API key
-   - [ ] Firecrawl API key
-   - [ ] Supabase project URL and keys
-
-3. **Domain Setup**:
-   - [ ] Domain name configured
-   - [ ] SSL certificate (automatic with Vercel)
-
-## Deployment Options
-
-### Option 1: Vercel (Recommended)
-
-Best for: Quick deployment, automatic scaling, built-in CI/CD
-
-### Option 2: Self-Hosting
-
-Best for: Full control, on-premise requirements, custom infrastructure
-
-## Environment Setup
-
-### 1. Create Production Environment File
+### Development Environment
 
 ```bash
-# .env.production
-NEXT_PUBLIC_SUPABASE_URL=https://your-project.supabase.co
-NEXT_PUBLIC_SUPABASE_ANON_KEY=your-anon-key
-SUPABASE_SERVICE_ROLE_KEY=your-service-role-key
-OPENAI_API_KEY=sk-your-openai-key
-FIRECRAWL_API_KEY=your-firecrawl-key
-ENCRYPTION_KEY=your-32-character-encryption-key
+# Start all services (including development tools)
+docker-compose -f docker-compose.workers.yml --profile development up -d
+
+# View logs
+docker-compose -f docker-compose.workers.yml logs -f
+
+# Scale workers
+docker-compose -f docker-compose.workers.yml up -d --scale worker-scraping=3
 ```
 
-### 2. Generate Encryption Key
+### Production Environment
 
 ```bash
-# Generate a secure 32-character key
-openssl rand -base64 32 | head -c 32
+# Start production services only
+docker-compose -f docker-compose.workers.yml up -d
+
+# Monitor health
+curl http://localhost:3000/api/health/comprehensive?verbose=true
 ```
 
-### 3. Configure Production URLs
-
-Update `next.config.js` if needed:
-
-```javascript
-module.exports = {
-  env: {
-    NEXT_PUBLIC_APP_URL: process.env.NEXT_PUBLIC_APP_URL || 'https://your-domain.com',
-  },
-}
-```
-
-## Database Setup
-
-### 1. Create Supabase Project
-
-1. Go to [Supabase Dashboard](https://app.supabase.com)
-2. Create new project
-3. Note the project URL and keys
-
-### 2. Enable pgvector Extension
-
-```sql
--- Run in Supabase SQL Editor
-CREATE EXTENSION IF NOT EXISTS vector;
-```
-
-### 3. Run Database Migrations
-
-Execute in order:
-
-```sql
--- 1. Create schema
-\i supabase-schema.sql
-
--- 2. Create vector search functions
-\i supabase-vector-search.sql
-
--- 3. Enable Row Level Security
-\i supabase-rls-policies.sql
-```
-
-### 4. Verify Setup
-
-```sql
--- Check tables exist
-SELECT table_name FROM information_schema.tables 
-WHERE table_schema = 'public';
-
--- Check RLS is enabled
-SELECT tablename, rowsecurity 
-FROM pg_tables 
-WHERE schemaname = 'public';
-```
-
-## Vercel Deployment
-
-### 1. Install Vercel CLI
-
-```bash
-npm i -g vercel
-```
-
-### 2. Connect to GitHub
-
-1. Push your code to GitHub
-2. Go to [Vercel Dashboard](https://vercel.com/dashboard)
-3. Click "Import Project"
-4. Select your GitHub repository
-
-### 3. Configure Environment Variables
-
-In Vercel Dashboard:
-
-1. Go to Project Settings → Environment Variables
-2. Add all variables from `.env.production`
-3. Select "Production" environment
-
-### 4. Deploy
-
-```bash
-# Deploy to production
-vercel --prod
-
-# Or use GitHub integration for automatic deploys
-```
-
-### 5. Configure Domains
-
-1. Go to Project Settings → Domains
-2. Add your custom domain
-3. Update DNS records as instructed
-
-## Self-Hosting
-
-### 1. Build Application
-
-```bash
-# Install dependencies
-npm install
-
-# Build for production
-npm run build
-```
-
-### 2. Set Up Server
-
-#### Using Node.js
-
-```bash
-# Install PM2
-npm install -g pm2
-
-# Start application
-pm2 start npm --name "customer-service-agent" -- start
-
-# Save PM2 configuration
-pm2 save
-pm2 startup
-```
-
-#### Using Docker
-
-Create `Dockerfile`:
-
-```dockerfile
-FROM node:18-alpine
-
-WORKDIR /app
-
-COPY package*.json ./
-RUN npm ci --only=production
-
-COPY . .
-RUN npm run build
-
-EXPOSE 3000
-
-CMD ["npm", "start"]
-```
-
-Build and run:
-
-```bash
-docker build -t customer-service-agent .
-docker run -p 3000:3000 --env-file .env.production customer-service-agent
-```
-
-### 3. Configure Reverse Proxy (Nginx)
-
-```nginx
-server {
-    listen 443 ssl http2;
-    server_name your-domain.com;
-
-    ssl_certificate /path/to/cert.pem;
-    ssl_certificate_key /path/to/key.pem;
-
-    location / {
-        proxy_pass http://localhost:3000;
-        proxy_http_version 1.1;
-        proxy_set_header Upgrade $http_upgrade;
-        proxy_set_header Connection 'upgrade';
-        proxy_set_header Host $host;
-        proxy_cache_bypass $http_upgrade;
-        proxy_set_header X-Real-IP $remote_addr;
-        proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
-        proxy_set_header X-Forwarded-Proto $scheme;
-    }
-}
-```
-
-### 4. Set Up SSL
-
-```bash
-# Using Certbot
-sudo certbot --nginx -d your-domain.com
-```
-
-## Post-Deployment
-
-### 1. Verify Deployment
-
-```bash
-# Check application health
-curl https://your-domain.com/api/health
-
-# Expected response
-{"status":"ok","timestamp":"2024-01-01T00:00:00.000Z"}
-```
-
-### 2. Test Core Functionality
-
-- [ ] Visit homepage
-- [ ] Test embedding script
-- [ ] Send test message
-- [ ] Check admin panel
-- [ ] Verify rate limiting
-
-### 3. Configure Monitoring
-
-#### Vercel Analytics
-
-Automatically included with Vercel deployment.
-
-#### Custom Monitoring
-
-```javascript
-// Add to your application
-import * as Sentry from "@sentry/nextjs";
-
-Sentry.init({
-  dsn: process.env.SENTRY_DSN,
-  environment: process.env.NODE_ENV,
-});
-```
-
-### 4. Set Up Backups
-
-#### Database Backups
-
-In Supabase Dashboard:
-1. Go to Settings → Backups
-2. Enable automatic backups
-3. Configure retention period
-
-#### Manual Backup Script
-
-```bash
-#!/bin/bash
-# backup.sh
-pg_dump $DATABASE_URL > backup_$(date +%Y%m%d_%H%M%S).sql
-```
+## Service Configuration
+
+### Main Application (Web)
+- Port: 3000
+- Health Check: `/api/health` and `/api/health/comprehensive`
+- Resources: 2 CPU cores, 2GB memory
+
+### Worker Services
+
+#### Scraping Worker
+- Type: `WORKER_TYPE=scraping`
+- Concurrency: 5 jobs
+- Replicas: 2 (scalable)
+- Memory: 1GB per worker
+
+#### Embeddings Worker
+- Type: `WORKER_TYPE=embeddings`
+- Concurrency: 3 jobs
+- Replicas: 1
+- Memory: 512MB per worker
+
+#### WooCommerce Worker
+- Type: `WORKER_TYPE=woocommerce`
+- Concurrency: 2 jobs
+- Replicas: 1
+- Memory: 512MB per worker
+
+### Redis Configuration
+- Persistence: AOF + RDB
+- Memory: 512MB max
+- Optimized for queue workloads
+- Configuration: `redis.conf`
 
 ## Monitoring
 
-### 1. Application Monitoring
+### Health Endpoints
 
-- **Uptime**: Use services like UptimeRobot or Pingdom
-- **Performance**: Vercel Analytics or custom APM
-- **Errors**: Sentry or LogRocket
+1. **Basic Health Check**
+   ```bash
+   GET /api/health
+   ```
 
-### 2. Database Monitoring
+2. **Comprehensive Health Check**
+   ```bash
+   GET /api/health/comprehensive?verbose=true
+   ```
 
-Monitor in Supabase Dashboard:
-- Query performance
-- Connection count
-- Storage usage
-- Replication lag
+### Development Tools
 
-### 3. API Usage Monitoring
+1. **Redis Commander** (Port 8081)
+   - Web UI for Redis inspection
+   - Only in development profile
 
-Track usage of:
-- OpenAI API calls and tokens
-- Firecrawl API requests
-- Rate limit hits
+2. **Queue Dashboard** (Port 8082)
+   - BullMQ board for queue monitoring
+   - Only in development profile
 
-### 4. Business Metrics
+## Queue Management
 
-Create dashboard for:
-- Active conversations
-- Messages per day
-- Customer count
-- Response times
-
-## Troubleshooting
-
-### Common Issues
-
-#### 1. Database Connection Errors
-
-```bash
-# Check connection
-psql $DATABASE_URL -c "SELECT 1"
-
-# Verify environment variables
-echo $SUPABASE_URL
-```
-
-#### 2. Rate Limiting Issues
-
-```javascript
-// Increase limits in production
-const limits = {
-  default: { requests: 100, window: 60 * 1000 },
-  premium: { requests: 500, window: 60 * 1000 },
-};
-```
-
-#### 3. CORS Errors
-
-```javascript
-// Add to next.config.js
-module.exports = {
-  async headers() {
-    return [
-      {
-        source: '/api/:path*',
-        headers: [
-          { key: 'Access-Control-Allow-Origin', value: '*' },
-        ],
-      },
-    ];
-  },
-};
-```
-
-#### 4. Memory Issues
-
-```bash
-# Increase Node.js memory
-NODE_OPTIONS="--max-old-space-size=4096" npm start
-```
-
-### Debug Mode
-
-Enable debug logging:
-
-```javascript
-// Set in environment
-DEBUG=customer-service:* npm start
-```
-
-### Health Checks
-
-Implement health check endpoint:
+### Queue Namespaces
 
 ```typescript
-// app/api/health/route.ts
-export async function GET() {
-  try {
-    // Check database
-    await supabase.from('conversations').select('id').limit(1);
-    
-    // Check external services
-    await fetch('https://api.openai.com/v1/models');
-    
-    return Response.json({ 
-      status: 'healthy',
-      services: {
-        database: 'ok',
-        openai: 'ok',
-      }
-    });
-  } catch (error) {
-    return Response.json({ 
-      status: 'unhealthy',
-      error: error.message 
-    }, { status: 503 });
+QUEUE_NAMESPACES = {
+  SCRAPE: {
+    HIGH_PRIORITY: 'queue:scrape:high',
+    NORMAL: 'queue:scrape:normal',
+    LOW_PRIORITY: 'queue:scrape:low',
+  },
+  WOOCOMMERCE: {
+    SYNC: 'queue:woocommerce:sync',
+    WEBHOOK: 'queue:woocommerce:webhook',
+  },
+  EMBEDDINGS: {
+    GENERATE: 'queue:embeddings:generate',
+    UPDATE: 'queue:embeddings:update',
   }
 }
 ```
 
-## Security Checklist
+### Priority System
 
-Before going live:
+Jobs are processed based on priority:
+- CRITICAL: 10
+- HIGH: 7
+- NORMAL: 5
+- LOW: 3
+- BACKGROUND: 1
 
-- [ ] Enable Supabase RLS policies
-- [ ] Set strong encryption key
-- [ ] Configure CORS properly
-- [ ] Enable HTTPS only
-- [ ] Set secure headers
-- [ ] Remove debug endpoints
-- [ ] Update dependencies
-- [ ] Configure firewall rules
-- [ ] Set up DDoS protection
-- [ ] Enable audit logging
+### Deduplication
 
-## Scaling Considerations
+Automatic job deduplication prevents duplicate processing:
+- Default window: 1 hour
+- Configurable per job type
+
+## Redis Client Features
+
+### Circuit Breaker
+- Opens after 5 failed connections
+- Timeout: 30 seconds
+- Automatic recovery attempts
+
+### Fallback Storage
+- In-memory fallback when Redis is unavailable
+- Seamless operation continuity
+- Data syncs when Redis recovers
+
+### Rate Limiting
+- Per-domain scraping limits
+- API rate limiting
+- Configurable windows and thresholds
+
+## Scaling Guidelines
 
 ### Horizontal Scaling
 
-1. **Multiple Instances**: Run multiple Node.js processes
-2. **Load Balancer**: Distribute traffic evenly
-3. **Session Affinity**: Not required (stateless)
+```bash
+# Scale scraping workers
+docker-compose -f docker-compose.workers.yml up -d --scale worker-scraping=5
 
-### Database Scaling
+# Scale embeddings workers
+docker-compose -f docker-compose.workers.yml up -d --scale worker-embeddings=3
+```
 
-1. **Connection Pooling**: Use PgBouncer
-2. **Read Replicas**: For heavy read loads
-3. **Partitioning**: For large tables
+### Resource Limits
 
-### Caching Strategy
+Each service has configured resource limits:
+- CPU limits prevent runaway processes
+- Memory limits ensure stability
+- Health checks restart unhealthy containers
 
-1. **CDN**: Cache static assets
-2. **API Cache**: Cache frequent queries
-3. **Database Cache**: Use Redis for hot data
+## Troubleshooting
+
+### Check Service Health
+```bash
+# Overall health
+curl http://localhost:3000/api/health/comprehensive
+
+# Worker status
+docker-compose -f docker-compose.workers.yml ps
+
+# View logs
+docker-compose -f docker-compose.workers.yml logs worker-scraping
+```
+
+### Common Issues
+
+1. **Redis Connection Failed**
+   - Check Redis container status
+   - Verify REDIS_URL environment variable
+   - Fallback storage will activate automatically
+
+2. **Worker Not Processing Jobs**
+   - Check worker health via comprehensive health endpoint
+   - Verify queue has jobs: Redis Commander on port 8081
+   - Check worker logs for errors
+
+3. **High Memory Usage**
+   - Workers auto-restart when exceeding memory limits
+   - Adjust MAX_WORKER_MEMORY environment variable
+   - Scale horizontally instead of vertically
+
+## Performance Optimization
+
+### Redis Optimization
+- Configured for queue workloads
+- IO threading enabled (4 threads)
+- Lazy freeing for better performance
+- Optimized persistence settings
+
+### Queue Optimization
+- Batch processing for large result sets
+- Memory-aware job management
+- Streaming for large crawls
+- Intelligent caching and deduplication
+
+### Worker Optimization
+- Concurrency tuned per worker type
+- Memory monitoring and auto-restart
+- Health checks every 30 seconds
+- Graceful shutdown handling
+
+## Security Notes
+
+- Redis is not password protected in default config
+- Add `requirepass` in redis.conf for production
+- Use environment variables for sensitive data
+- Network isolation via Docker networks
+- Non-root user in worker containers
 
 ## Maintenance
 
-### Regular Tasks
-
-- [ ] Weekly: Check error logs
-- [ ] Monthly: Review API usage
-- [ ] Quarterly: Update dependencies
-- [ ] Yearly: Security audit
-
-### Update Process
-
+### Backup
 ```bash
-# 1. Test in staging
-git checkout staging
-npm update
-npm test
-npm run build
-
-# 2. Deploy to production
-git checkout main
-git merge staging
-vercel --prod
+# Backup Redis data
+docker exec omniops-redis redis-cli BGSAVE
+docker cp omniops-redis:/data/dump.rdb ./backup/
 ```
 
-## Support
+### Cleanup Old Data
+- Maintenance worker runs cleanup jobs
+- Automatic expiry for temporary data
+- Configurable TTLs for different data types
 
-For deployment issues:
-
-1. Check [Troubleshooting](#troubleshooting) section
-2. Review logs in Vercel/server
-3. Contact support@your-domain.com
+### Updates
+```bash
+# Update and restart services
+docker-compose -f docker-compose.workers.yml pull
+docker-compose -f docker-compose.workers.yml up -d --force-recreate
+```

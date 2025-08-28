@@ -126,7 +126,7 @@ export async function POST(request: NextRequest) {
           if (embedding) {
             const { data: relevantChunks, error } = await adminSupabase.rpc('search_embeddings', {
               query_embedding: embedding,
-              similarity_threshold: 0.7,
+              match_threshold: 0.7,
               match_count: 5,
             });
             
