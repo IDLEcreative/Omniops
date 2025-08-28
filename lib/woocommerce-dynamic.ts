@@ -1,5 +1,5 @@
 import { WooCommerceAPI } from './woocommerce-api';
-import { createServiceRoleClient } from '@/lib/supabase/server';
+import { createServiceRoleClient } from '@/lib/supabase-server';
 import { decryptWooCommerceConfig } from '@/lib/encryption';
 
 // Product interface

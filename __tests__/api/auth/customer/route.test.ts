@@ -92,7 +92,7 @@ Response.json = function(data: any, init?: ResponseInit) {
 
 // Mock the module before importing anything that uses it
 const mockCreateClient = jest.fn()
-jest.mock('@/lib/supabase/server', () => ({
+jest.mock('@/lib/supabase-server', () => ({
   createClient: mockCreateClient
 }))
 

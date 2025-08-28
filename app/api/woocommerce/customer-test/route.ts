@@ -2,7 +2,7 @@ import { NextRequest, NextResponse } from 'next/server';
 import { WooCommerceAPI } from '@/lib/woocommerce-api';
 import { WooCommerceCustomer } from '@/lib/woocommerce-customer';
 import { CustomerVerification, DataMasker } from '@/lib/customer-verification';
-import { createServiceRoleClient } from '@/lib/supabase/server';
+import { createServiceRoleClient } from '@/lib/supabase-server';
 import { v4 as uuidv4 } from 'uuid';
 
 export async function GET(request: NextRequest) {

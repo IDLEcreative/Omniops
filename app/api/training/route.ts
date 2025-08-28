@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { createClient, createServiceRoleClient } from '@/lib/supabase/server';
+import { createClient, createServiceRoleClient } from '@/lib/supabase-server';
 import { unstable_cache } from 'next/cache';
 
 export async function GET(request: NextRequest) {

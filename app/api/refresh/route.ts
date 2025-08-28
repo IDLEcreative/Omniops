@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { createClient } from '@/lib/supabase/server';
+import { createClient } from '@/lib/supabase-server';
 import { refreshDomainContent, discoverNewPages, refreshPageContent } from '@/lib/content-refresh';
 import { z } from 'zod';
 

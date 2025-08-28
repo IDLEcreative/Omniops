@@ -5,7 +5,7 @@
  * for the customer onboarding and scraping integration system.
  */
 
-import { createClient } from '@/lib/supabase/server'
+import { createClient } from '@/lib/supabase-server'
 import { logger } from '@/lib/logger'
 
 export interface DomainValidationResult {

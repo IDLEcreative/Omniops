@@ -1,5 +1,5 @@
 import OpenAI from 'openai';
-import { createClient, createServiceRoleClient } from '@/lib/supabase/server';
+import { createClient, createServiceRoleClient } from '@/lib/supabase-server';
 import { embeddingCache, contentDeduplicator } from '@/lib/embedding-cache';
 
 // Lazy load OpenAI client to avoid build-time errors

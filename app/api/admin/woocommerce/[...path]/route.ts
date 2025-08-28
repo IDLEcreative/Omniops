@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { WooCommerceAPI } from '@/lib/woocommerce-api';
-import { createClient } from '@/lib/supabase/server';
+import { createClient } from '@/lib/supabase-server';
 
 // Dynamic route handler for all WooCommerce API endpoints
 export async function GET(

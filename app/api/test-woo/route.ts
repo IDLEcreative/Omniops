@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { getDynamicWooCommerceClient } from '@/lib/woocommerce-dynamic';
-import { createServiceRoleClient } from '@/lib/supabase/server';
+import { createServiceRoleClient } from '@/lib/supabase-server';
 
 export async function GET(request: NextRequest) {
   const domain = request.nextUrl.searchParams.get('domain') || 'thompsonseparts.co.uk';

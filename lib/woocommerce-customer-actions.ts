@@ -1,6 +1,6 @@
 import { WooCommerceCustomer } from './woocommerce-customer';
 import { getDynamicWooCommerceClient } from './woocommerce-dynamic';
-import { createServiceRoleClient } from '@/lib/supabase/server';
+import { createServiceRoleClient } from '@/lib/supabase-server';
 
 export interface CustomerActionResult {
   success: boolean;

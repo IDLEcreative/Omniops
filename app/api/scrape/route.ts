@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { createServiceRoleClient, createClient } from '@/lib/supabase/server';
+import { createServiceRoleClient, createClient } from '@/lib/supabase-server';
 import { scrapePage, crawlWebsite, checkCrawlStatus, getHealthStatus } from '@/lib/scraper-api';
 import OpenAI from 'openai';
 import { z } from 'zod';

@@ -3,7 +3,7 @@
  * Helper functions for managing scraping jobs in the database
  */
 
-import { createClient } from '@/lib/supabase/server'
+import { createClient } from '@/lib/supabase-server'
 import { logger } from '@/lib/logger'
 
 export interface ScrapeJob {

@@ -5,7 +5,7 @@
  * Handles triggering scraping jobs when customers add or update their website configurations.
  */
 
-import { createClient } from '@/lib/supabase/server'
+import { createClient } from '@/lib/supabase-server'
 import { logger } from '@/lib/logger'
 import { scrapeJobManager } from '@/lib/scrape-job-manager'
 import { domainValidator } from '@/lib/utils/domain-validator'

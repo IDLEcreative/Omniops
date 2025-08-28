@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { createServiceRoleClient } from '@/lib/supabase/server';
+import { createServiceRoleClient } from '@/lib/supabase-server';
 import { refreshDomainContent } from '@/lib/content-refresh';
 
 // This endpoint can be called by a cron service to refresh content

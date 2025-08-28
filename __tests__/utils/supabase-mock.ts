@@ -37,6 +37,6 @@ jest.mock('@supabase/supabase-js', () => ({
 }))
 
 // Mock the server client
-jest.mock('@/lib/supabase/server', () => ({
+jest.mock('@/lib/supabase-server', () => ({
   createClient: jest.fn(() => Promise.resolve(mockSupabaseClient)),
 }))

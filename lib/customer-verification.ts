@@ -1,4 +1,4 @@
-import { createServiceRoleClient } from '@/lib/supabase/server';
+import { createServiceRoleClient } from '@/lib/supabase-server';
 import crypto from 'crypto';
 
 export interface VerificationRequest {

@@ -1,4 +1,4 @@
-import { createClient } from '@/lib/supabase/server';
+import { createClient } from '@/lib/supabase-server';
 import { scrapePage } from '@/lib/scraper-api';
 import { generateEmbeddings } from '@/lib/embeddings';
 

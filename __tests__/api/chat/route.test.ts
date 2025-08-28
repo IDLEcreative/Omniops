@@ -1,12 +1,12 @@
 import { describe, it, expect, jest, beforeEach } from '@jest/globals'
 import { NextRequest } from 'next/server'
 import { POST } from '@/app/api/chat/route'
-import { createClient, createServiceRoleClient } from '@/lib/supabase/server'
+import { createClient, createServiceRoleClient } from '@/lib/supabase-server'
 import { checkDomainRateLimit } from '@/lib/rate-limit'
 import OpenAI from 'openai'
 
 // Mock dependencies
-jest.mock('@/lib/supabase/server', () => ({
+jest.mock('@/lib/supabase-server', () => ({
   createClient: jest.fn(),
   createServiceRoleClient: jest.fn(),
 }))

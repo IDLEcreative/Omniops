@@ -7,11 +7,11 @@ import {
   searchSimilar
 } from '@/lib/embeddings'
 import OpenAI from 'openai'
-import { createServiceRoleClient } from '@/lib/supabase/server'
+import { createServiceRoleClient } from '@/lib/supabase-server'
 
 // Mock dependencies
 jest.mock('openai')
-jest.mock('@/lib/supabase/server')
+jest.mock('@/lib/supabase-server')
 
 // Mock environment variables
 process.env.OPENAI_API_KEY = 'test-api-key'

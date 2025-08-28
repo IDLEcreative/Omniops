@@ -9,7 +9,7 @@
  */
 
 import { NextRequest, NextResponse } from 'next/server'
-import { createClient } from '@/lib/supabase/server'
+import { createClient } from '@/lib/supabase-server'
 import { logger } from '@/lib/logger'
 import { domainValidator, type DomainValidationResult } from '@/lib/utils/domain-validator'
 import { customerScrapingIntegration, type CustomerScrapingConfig, JobPriority } from '@/lib/integrations/customer-scraping-integration'

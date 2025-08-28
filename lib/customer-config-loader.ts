@@ -1,4 +1,4 @@
-import { createClient } from '@/lib/supabase/server';
+import { createClient } from '@/lib/supabase-server';
 import { OwnSiteDetector } from './own-site-detector';
 
 export class CustomerConfigLoader {

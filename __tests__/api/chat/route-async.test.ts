@@ -1,11 +1,11 @@
 import { POST } from '@/app/api/chat/route';
 import { NextRequest } from 'next/server';
-import { createServiceRoleClient } from '@/lib/supabase/server';
+import { createServiceRoleClient } from '@/lib/supabase-server';
 import { searchSimilarContent } from '@/lib/embeddings';
 import OpenAI from 'openai';
 
 // Mock dependencies
-jest.mock('@/lib/supabase/server', () => ({
+jest.mock('@/lib/supabase-server', () => ({
   createServiceRoleClient: jest.fn(),
 }));
 jest.mock('@/lib/embeddings');
