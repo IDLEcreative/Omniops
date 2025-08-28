@@ -1232,6 +1232,7 @@ export async function POST(request: NextRequest) {
     // Get AI response
     const openaiClient = getOpenAIClient();
     if (!openaiClient) {
+      console.error('[Chat API] OpenAI client initialization failed');
       return NextResponse.json(
         { 
           error: 'AI service unavailable',
@@ -1241,14 +1242,74 @@ export async function POST(request: NextRequest) {
       );
     }
     
-    const completion = await openaiClient.chat.completions.create({
-      model: 'gpt-4.1',
-      messages,
-      temperature: 0.7,
-      max_tokens: 500,
-    });
+    let aiResponse: string;
+    try {
+      const completion = await openaiClient.chat.completions.create({
+        model: 'gpt-4.1',
+        messages,
+        temperature: 0.7,
+        max_tokens: 500,
+      });
 
-    const aiResponse = completion.choices[0]?.message?.content || 'I apologize, but I could not generate a response.';
+      aiResponse = completion.choices[0]?.message?.content || 'I apologize, but I could not generate a response.';
+    } catch (openaiError: any) {
+      console.error('[Chat API] OpenAI completion error:', {
+        error: openaiError?.message || openaiError,
+        status: openaiError?.status,
+        code: openaiError?.code,
+        type: openaiError?.type,
+        model: 'gpt-4.1'
+      });
+      
+      // Check for specific OpenAI errors
+      if (openaiError?.status === 401) {
+        return NextResponse.json(
+          { 
+            error: 'Authentication failed',
+            message: 'Unable to authenticate with AI service. Please contact support.'
+          },
+          { status: 503 }
+        );
+      } else if (openaiError?.status === 429) {
+        return NextResponse.json(
+          { 
+            error: 'Rate limit exceeded',
+            message: 'AI service is currently busy. Please try again in a moment.'
+          },
+          { status: 503 }
+        );
+      } else if (openaiError?.status === 404 || openaiError?.message?.includes('model')) {
+        // Model not found - fallback to a known good model
+        console.log('[Chat API] Falling back to gpt-4o-mini due to model error');
+        try {
+          const fallbackCompletion = await openaiClient.chat.completions.create({
+            model: 'gpt-4o-mini',
+            messages,
+            temperature: 0.7,
+            max_tokens: 500,
+          });
+          aiResponse = fallbackCompletion.choices[0]?.message?.content || 'I apologize, but I could not generate a response.';
+        } catch (fallbackError) {
+          console.error('[Chat API] Fallback model also failed:', fallbackError);
+          return NextResponse.json(
+            { 
+              error: 'AI service error',
+              message: 'Unable to generate a response. Please try again later.'
+            },
+            { status: 503 }
+          );
+        }
+      } else {
+        // Generic OpenAI error
+        return NextResponse.json(
+          { 
+            error: 'AI service error',
+            message: 'Unable to generate a response. Please try again later.'
+          },
+          { status: 503 }
+        );
+      }
+    }
 
     // Save assistant message
     await adminSupabase
