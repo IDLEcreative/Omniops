@@ -1,0 +1,495 @@
+/**
+ * Usage Examples for the Advanced Scraper Configuration System
+ * 
+ * This file demonstrates various ways to use the new configuration management system
+ * for the e-commerce scraper.
+ */
+
+import { 
+  scrapePage, 
+  crawlWebsite,
+  configureOwnedDomains 
+} from './scraper-api';
+
+import { 
+  configManager,
+  ConfigPresets,
+  applyConfigPreset,
+  loadCustomerConfig,
+  saveCustomerConfig,
+  getScraperConfig,
+  updateScraperConfig
+} from './scraper-config';
+
+// ============================================================================
+// EXAMPLE 1: Basic Configuration Usage
+// ============================================================================
+
+async function basicConfigExample() {
+  console.log('📋 Basic Configuration Usage\n');
+  
+  // Get current configuration
+  const config = getScraperConfig();
+  console.log('Current environment:', config.environment);
+  console.log('Max concurrent pages:', config.performance.concurrency.maxConcurrentPages);
+  
+  // Update specific configuration values at runtime
+  // NOTE: This example is commented out as it requires a complete config object
+  // In practice, you would need to provide all required properties
+  /*
+  updateScraperConfig({
+    performance: {
+      concurrency: {
+        maxConcurrentPages: 10,
+        maxConcurrentDomains: 3,
+        queueSize: 100,
+        priorityQueuing: true
+      },
+      delays: {
+        minRequestDelay: 500,
+        maxRequestDelay: 2000,
+        delayBetweenBatches: 5000,
+        adaptiveDelayEnabled: true,
+        delayMultiplier: 1.5
+      }
+      // Missing properties: timeouts, caching, resources
+    }
+  });
+  */
+  
+  console.log('Updated max concurrent pages to 10');
+}
+
+// ============================================================================
+// EXAMPLE 2: Using Configuration Presets
+// ============================================================================
+
+async function presetsExample() {
+  console.log('🎯 Using Configuration Presets\n');
+  
+  // Example 1: Fast extraction for well-structured sites
+  console.log('Applying "fast" preset for quick extraction...');
+  applyConfigPreset('fast');
+  
+  const fastResult = await scrapePage('https://example-shop.com/product/123', {
+    useNewConfig: true,
+    configPreset: 'fast'
+  });
+  
+  // Example 2: Thorough extraction for complex sites
+  console.log('Applying "thorough" preset for detailed extraction...');
+  applyConfigPreset('thorough');
+  
+  const thoroughResult = await scrapePage('https://complex-shop.com/item/456', {
+    useNewConfig: true,
+    configPreset: 'thorough'
+  });
+  
+  // Example 3: Stealth mode for sites with anti-bot measures
+  console.log('Applying "stealth" preset for protected sites...');
+  applyConfigPreset('stealth');
+  
+  const stealthResult = await scrapePage('https://protected-shop.com/product/789', {
+    useNewConfig: true,
+    configPreset: 'stealth'
+  });
+  
+  // Example 4: E-commerce optimized
+  console.log('Applying "ecommerce" preset for product extraction...');
+  const ecommerceResult = await crawlWebsite('https://shop.example.com', {
+    maxPages: 100,
+    useNewConfig: true,
+    newConfigPreset: 'ecommerce'
+  });
+}
+
+// ============================================================================
+// EXAMPLE 3: Platform-Specific Configuration
+// ============================================================================
+
+async function platformSpecificExample() {
+  console.log('🛍️ Platform-Specific Configuration\n');
+  
+  // Configure Shopify-specific selectors
+  configManager.setPlatformConfig('shopify', {
+    selectors: {
+      productName: ['.product__title', 'h1.product-single__title'],
+      price: ['.price__regular', '.product__price', '[data-product-price]'],
+      availability: ['.product__availability', '[data-product-availability]'],
+      sku: ['.product__sku', '[data-product-sku]']
+    },
+    waitForSelectors: ['.product__info', '.product-single__meta'],
+    extractionPriority: ['json-ld', 'microdata', 'dom']
+  });
+  
+  // Configure WooCommerce-specific selectors
+  configManager.setPlatformConfig('woocommerce', {
+    selectors: {
+      productName: ['h1.product_title', '.product-title'],
+      price: ['.woocommerce-Price-amount', '.price ins', '.price > .amount'],
+      availability: ['.stock', '.in-stock', '.out-of-stock'],
+      sku: ['.sku_wrapper .sku', '.product_meta .sku']
+    },
+    extractionPriority: ['microdata', 'json-ld', 'dom']
+  });
+  
+  // Configure Amazon-specific selectors
+  configManager.setPlatformConfig('amazon', {
+    selectors: {
+      productName: ['#productTitle', 'h1.a-size-large'],
+      price: ['.a-price-whole', '.priceblock_dealprice', '.priceblock_ourprice'],
+      availability: ['#availability span', '.a-size-medium.a-color-success'],
+      sku: ['[data-asin]', '.product-facts-detail']
+    },
+    waitForSelectors: ['#productTitle', '#ppd'],
+    extractionPriority: ['dom', 'json-ld']
+  });
+  
+  console.log('Platform-specific configurations set');
+}
+
+// ============================================================================
+// EXAMPLE 4: Customer-Specific Configuration
+// ============================================================================
+
+async function customerConfigExample(customerId: string) {
+  console.log('👤 Customer-Specific Configuration\n');
+  
+  // Load customer configuration from database
+  await loadCustomerConfig(customerId);
+  
+  // Update customer-specific settings
+//   updateScraperConfig({
+//     extraction: {
+//       filters: {
+//         minPrice: 10,
+//         maxPrice: 1000,
+//         excludeCategories: ['accessories', 'gift-cards'],
+//         requireImages: true
+//       },
+//       enrichment: {
+//         normalizeProductNames: true,
+//         inferCategories: true,
+//         detectDuplicates: true
+//       }
+//     },
+//     performance: {
+//       concurrency: {
+//         maxConcurrentPages: 3 // Conservative for this customer
+//       }
+//     }
+//   });
+  
+  // Save updated configuration back to database
+  await saveCustomerConfig(customerId);
+  
+  console.log(`Configuration saved for customer: ${customerId}`);
+  
+  // Crawl with customer-specific configuration
+  const jobId = await crawlWebsite('https://customer-site.com', {
+    maxPages: 500,
+    customerId: customerId,
+    useNewConfig: true
+  });
+  
+  console.log(`Started crawl job: ${jobId}`);
+}
+
+// ============================================================================
+// EXAMPLE 5: Dynamic Configuration with Hot Reload
+// ============================================================================
+
+async function hotReloadExample() {
+  console.log('🔄 Hot Reload Configuration\n');
+  
+  // Listen for configuration changes
+  configManager.on('configChanged', (event) => {
+    console.log(`Configuration changed: ${event.key}`);
+    console.log(`Old value: ${event.oldValue}`);
+    console.log(`New value: ${event.newValue}`);
+  });
+  
+  configManager.on('configReloaded', () => {
+    console.log('Configuration reloaded from file');
+  });
+  
+  // The configuration will automatically reload when the config file changes
+  console.log('Monitoring configuration file for changes...');
+  console.log('Edit scraper-config.yaml to see hot reload in action');
+  
+  // Manually trigger a reload
+  await configManager.reload();
+}
+
+// ============================================================================
+// EXAMPLE 6: Performance Tuning Based on Site Analysis
+// ============================================================================
+
+async function performanceTuningExample(url: string) {
+  console.log('⚡ Performance Tuning Example\n');
+  
+  // Analyze the site to determine optimal configuration
+  const testResult = await scrapePage(url, {
+    useNewConfig: true,
+    configPreset: 'fast'
+  });
+  
+  // Based on the test result, adjust configuration
+  if (testResult.metadata?.responseTimeMs && testResult.metadata.responseTimeMs > 5000) {
+    console.log('Site is slow, adjusting timeouts and delays...');
+    
+    updateScraperConfig({
+      performance: {
+        timeouts: {
+          pageLoad: 60000,
+          navigation: 60000
+        },
+        delays: {
+          minRequestDelay: 2000,
+          maxRequestDelay: 5000,
+          adaptiveDelayEnabled: true
+        },
+        concurrency: {
+          maxConcurrentPages: 2 // Reduce concurrency for slow sites
+        }
+      }
+    });
+  } else {
+    console.log('Site is fast, optimizing for speed...');
+    
+    updateScraperConfig({
+      performance: {
+        timeouts: {
+          pageLoad: 15000,
+          navigation: 15000
+        },
+        delays: {
+          minRequestDelay: 100,
+          maxRequestDelay: 500
+        },
+        concurrency: {
+          maxConcurrentPages: 10
+        }
+      }
+    });
+  }
+  
+  // Crawl with optimized settings
+  const jobId = await crawlWebsite(url, {
+    maxPages: 100,
+    useNewConfig: true
+  });
+  
+  console.log(`Started optimized crawl: ${jobId}`);
+}
+
+// ============================================================================
+// EXAMPLE 7: Rate Limiting and Backoff Strategies
+// ============================================================================
+
+async function rateLimitingExample() {
+  console.log('🚦 Rate Limiting Configuration\n');
+  
+  // Configure aggressive rate limiting for respectful crawling
+  updateScraperConfig({
+    rateLimiting: {
+      perDomain: {
+        requestsPerSecond: 0.5, // One request every 2 seconds
+        requestsPerMinute: 20,
+        burstSize: 3,
+        cooldownMs: 5000
+      },
+      global: {
+        maxRequestsPerSecond: 5,
+        respectRobotsTxt: true,
+        respectCrawlDelay: true
+      },
+      backoff: {
+        strategy: 'exponential',
+        initialDelayMs: 2000,
+        maxDelayMs: 60000,
+        multiplier: 2,
+        jitter: true
+      },
+      userAgents: {
+        rotationEnabled: true,
+        rotationInterval: 5,
+        agents: [
+          'Mozilla/5.0 (compatible; YourBot/1.0; +https://yoursite.com/bot)',
+          'Mozilla/5.0 (Windows NT 10.0; Win64; x64) Chrome/91.0',
+          'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) Chrome/91.0'
+        ]
+      }
+    }
+  });
+  
+  console.log('Rate limiting configured for respectful crawling');
+}
+
+// ============================================================================
+// EXAMPLE 8: Pattern Learning Configuration
+// ============================================================================
+
+async function patternLearningExample() {
+  console.log('🧠 Pattern Learning Configuration\n');
+  
+  // Enable and configure pattern learning
+  updateScraperConfig({
+    patternLearning: {
+      enabled: true,
+      thresholds: {
+        minConfidence: 0.8, // Higher confidence threshold
+        minSamples: 10, // Need more samples before trusting a pattern
+        successRateThreshold: 0.9,
+        patternAgeMaxDays: 7 // Patterns expire after a week
+      },
+      patterns: {
+        maxPatternsPerDomain: 50,
+        maxPatternsTotal: 5000,
+        autoCleanupEnabled: true,
+        mergeSimilarPatterns: true
+      },
+      behavior: {
+        learnFromFailures: true,
+        adaptToChanges: true,
+        shareAcrossDomains: false, // Don't share patterns between domains
+        persistToDatabase: true
+      }
+    }
+  });
+  
+  console.log('Pattern learning configured for adaptive extraction');
+}
+
+// ============================================================================
+// EXAMPLE 9: Own Site Configuration
+// ============================================================================
+
+async function ownSiteExample() {
+  console.log('🏠 Own Site Configuration\n');
+  
+  // Configure owned domains
+  configureOwnedDomains([
+    'myshop.com',
+    'store.mycompany.com',
+    'products.example.com'
+  ]);
+  
+  // Apply own-site preset for maximum performance
+  applyConfigPreset('ownSite');
+  
+  // Override with even more aggressive settings
+  updateScraperConfig({
+    performance: {
+      concurrency: {
+        maxConcurrentPages: 100, // Very high concurrency
+        maxConcurrentDomains: 10
+      },
+      delays: {
+        minRequestDelay: 0,
+        maxRequestDelay: 0,
+        adaptiveDelayEnabled: false
+      }
+    },
+    rateLimiting: {
+      perDomain: {
+        requestsPerSecond: 1000, // No real limit
+        requestsPerMinute: 60000
+      },
+      global: {
+        respectRobotsTxt: false, // Skip robots.txt for own sites
+        respectCrawlDelay: false
+      }
+    }
+  });
+  
+  // Crawl own site with maximum speed
+  const jobId = await crawlWebsite('https://myshop.com', {
+    maxPages: -1, // Crawl entire site
+    ownSite: true,
+    useNewConfig: true
+  });
+  
+  console.log(`Started own-site crawl: ${jobId}`);
+}
+
+// ============================================================================
+// EXAMPLE 10: Export and Import Configuration
+// ============================================================================
+
+async function exportImportExample() {
+  console.log('💾 Export/Import Configuration\n');
+  
+  // Export current configuration to file
+  await configManager.exportToFile('./my-config-backup.yaml', 'yaml');
+  console.log('Configuration exported to my-config-backup.yaml');
+  
+  // Also export as JSON
+  await configManager.exportToFile('./my-config-backup.json', 'json');
+  console.log('Configuration exported to my-config-backup.json');
+  
+  // Validate a configuration before applying
+  const testConfig = {
+    performance: {
+      concurrency: {
+        maxConcurrentPages: 5
+      }
+    }
+  };
+  
+  const validation = configManager.validate(testConfig);
+  if (validation.valid) {
+    console.log('Configuration is valid');
+    configManager.update(testConfig);
+  } else {
+    console.log('Configuration validation failed:', validation.errors);
+  }
+}
+
+// ============================================================================
+// MAIN: Run Examples
+// ============================================================================
+
+async function main() {
+  console.log('='.repeat(80));
+  console.log('SCRAPER CONFIGURATION SYSTEM - USAGE EXAMPLES');
+  console.log('='.repeat(80));
+  console.log('');
+  
+  // Uncomment the examples you want to run:
+  
+  await basicConfigExample();
+  // await presetsExample();
+  // await platformSpecificExample();
+  // await customerConfigExample('customer-123');
+  // await hotReloadExample();
+  // await performanceTuningExample('https://example-shop.com');
+  // await rateLimitingExample();
+  // await patternLearningExample();
+  // await ownSiteExample();
+  // await exportImportExample();
+  
+  console.log('\n' + '='.repeat(80));
+  console.log('Examples completed');
+  
+  // Clean up
+  configManager.dispose();
+}
+
+// Run if executed directly
+if (require.main === module) {
+  main().catch(console.error);
+}
+
+export {
+  basicConfigExample,
+  presetsExample,
+  platformSpecificExample,
+  customerConfigExample,
+  hotReloadExample,
+  performanceTuningExample,
+  rateLimitingExample,
+  patternLearningExample,
+  ownSiteExample,
+  exportImportExample
+};

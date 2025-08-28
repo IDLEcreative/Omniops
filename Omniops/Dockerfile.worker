@@ -1,0 +1,44 @@
+# Worker Service Dockerfile
+FROM node:20-alpine AS base
+
+# Install dependencies for Playwright if scraping worker
+ARG WORKER_TYPE=scraping
+RUN if [ "$WORKER_TYPE" = "scraping" ]; then \
+    apk add --no-cache \
+      chromium \
+      nss \
+      freetype \
+      freetype-dev \
+      harfbuzz \
+      ca-certificates \
+      ttf-freefont \
+      && rm -rf /var/cache/apk/*; \
+  fi
+
+# Set Playwright environment variables for scraping workers
+ENV PUPPETEER_SKIP_CHROMIUM_DOWNLOAD=true \
+    PUPPETEER_EXECUTABLE_PATH=/usr/bin/chromium-browser \
+    PLAYWRIGHT_SKIP_BROWSER_DOWNLOAD=true \
+    PLAYWRIGHT_CHROMIUM_EXECUTABLE_PATH=/usr/bin/chromium-browser
+
+WORKDIR /app
+
+# Copy package files
+COPY package*.json ./
+
+# Install production dependencies only
+RUN npm ci --only=production && \
+    npm cache clean --force
+
+# Copy application code
+COPY . .
+
+# Create non-root user
+RUN addgroup -g 1001 -S nodejs && \
+    adduser -S nodejs -u 1001 && \
+    chown -R nodejs:nodejs /app
+
+USER nodejs
+
+# Worker entry point script
+CMD ["node", "scripts/worker-start-simple.js"]

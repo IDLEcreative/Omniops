@@ -1,0 +1,228 @@
+version: '3.8'
+
+services:
+  # Main Application (Web Service)
+  app:
+    build:
+      context: .
+      dockerfile: Dockerfile
+      args:
+        - NODE_ENV=production
+    container_name: omniops-app
+    ports:
+      - "3000:3000"
+    environment:
+      - NODE_ENV=production
+      - REDIS_URL=redis://redis:6379
+      - SERVICE_TYPE=web
+      # Environment variables from .env file
+      - NEXT_PUBLIC_SUPABASE_URL=${NEXT_PUBLIC_SUPABASE_URL}
+      - NEXT_PUBLIC_SUPABASE_ANON_KEY=${NEXT_PUBLIC_SUPABASE_ANON_KEY}
+      - SUPABASE_SERVICE_ROLE_KEY=${SUPABASE_SERVICE_ROLE_KEY}
+      - OPENAI_API_KEY=${OPENAI_API_KEY}
+    depends_on:
+      redis:
+        condition: service_healthy
+    restart: unless-stopped
+    networks:
+      - omniops-network
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:3000/api/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 40s
+    deploy:
+      resources:
+        limits:
+          cpus: '2'
+          memory: 2G
+        reservations:
+          cpus: '0.5'
+          memory: 512M
+
+  # Worker Service - Scraping & Background Jobs
+  worker-scraping:
+    build:
+      context: .
+      dockerfile: Dockerfile.worker
+      args:
+        - NODE_ENV=production
+        - WORKER_TYPE=scraping
+    environment:
+      - NODE_ENV=production
+      - REDIS_URL=redis://redis:6379
+      - SERVICE_TYPE=worker
+      - WORKER_TYPE=scraping
+      - WORKER_CONCURRENCY=5
+      - MAX_WORKER_MEMORY=1024  # MB
+      # Environment variables from .env file
+      - SUPABASE_SERVICE_ROLE_KEY=${SUPABASE_SERVICE_ROLE_KEY}
+      - OPENAI_API_KEY=${OPENAI_API_KEY}
+    depends_on:
+      redis:
+        condition: service_healthy
+    restart: unless-stopped
+    networks:
+      - omniops-network
+    deploy:
+      replicas: 2  # Scale workers as needed
+      resources:
+        limits:
+          cpus: '1'
+          memory: 1G
+        reservations:
+          cpus: '0.25'
+          memory: 256M
+    healthcheck:
+      test: ["CMD", "node", "scripts/worker-health-check.js"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+
+  # Worker Service - Embeddings Generation
+  worker-embeddings:
+    build:
+      context: .
+      dockerfile: Dockerfile.worker
+      args:
+        - NODE_ENV=production
+        - WORKER_TYPE=embeddings
+    environment:
+      - NODE_ENV=production
+      - REDIS_URL=redis://redis:6379
+      - SERVICE_TYPE=worker
+      - WORKER_TYPE=embeddings
+      - WORKER_CONCURRENCY=3
+      - MAX_WORKER_MEMORY=512  # MB
+      # Environment variables from .env file
+      - SUPABASE_SERVICE_ROLE_KEY=${SUPABASE_SERVICE_ROLE_KEY}
+      - OPENAI_API_KEY=${OPENAI_API_KEY}
+    depends_on:
+      redis:
+        condition: service_healthy
+    restart: unless-stopped
+    networks:
+      - omniops-network
+    deploy:
+      replicas: 1
+      resources:
+        limits:
+          cpus: '0.5'
+          memory: 512M
+        reservations:
+          cpus: '0.1'
+          memory: 128M
+    healthcheck:
+      test: ["CMD", "node", "scripts/worker-health-check.js"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+
+  # Worker Service - WooCommerce Sync
+  worker-woocommerce:
+    build:
+      context: .
+      dockerfile: Dockerfile.worker
+      args:
+        - NODE_ENV=production
+        - WORKER_TYPE=woocommerce
+    environment:
+      - NODE_ENV=production
+      - REDIS_URL=redis://redis:6379
+      - SERVICE_TYPE=worker
+      - WORKER_TYPE=woocommerce
+      - WORKER_CONCURRENCY=2
+      - MAX_WORKER_MEMORY=512  # MB
+      # Environment variables from .env file
+      - SUPABASE_SERVICE_ROLE_KEY=${SUPABASE_SERVICE_ROLE_KEY}
+    depends_on:
+      redis:
+        condition: service_healthy
+    restart: unless-stopped
+    networks:
+      - omniops-network
+    deploy:
+      replicas: 1
+      resources:
+        limits:
+          cpus: '0.5'
+          memory: 512M
+        reservations:
+          cpus: '0.1'
+          memory: 128M
+    healthcheck:
+      test: ["CMD", "node", "scripts/worker-health-check.js"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+
+  # Redis Service with Persistence
+  redis:
+    image: redis:7-alpine
+    container_name: omniops-redis
+    ports:
+      - "6379:6379"
+    volumes:
+      - redis-data:/data
+      - ./redis.conf:/usr/local/etc/redis/redis.conf:ro
+    command: redis-server /usr/local/etc/redis/redis.conf
+    restart: unless-stopped
+    networks:
+      - omniops-network
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+    deploy:
+      resources:
+        limits:
+          cpus: '1'
+          memory: 512M
+        reservations:
+          cpus: '0.1'
+          memory: 128M
+
+  # Redis Commander - Web UI for Redis (Development Only)
+  redis-commander:
+    image: rediscommander/redis-commander:latest
+    container_name: omniops-redis-commander
+    environment:
+      - REDIS_HOSTS=local:redis:6379
+    ports:
+      - "8081:8081"
+    depends_on:
+      - redis
+    networks:
+      - omniops-network
+    profiles:
+      - development  # Only run in development mode
+
+  # Queue Dashboard - BullMQ Board (Development Only)
+  queue-dashboard:
+    image: deadly0/bull-board:latest
+    container_name: omniops-queue-dashboard
+    environment:
+      - REDIS_HOST=redis
+      - REDIS_PORT=6379
+      - REDIS_PASSWORD=
+    ports:
+      - "8082:3000"
+    depends_on:
+      - redis
+    networks:
+      - omniops-network
+    profiles:
+      - development  # Only run in development mode
+
+volumes:
+  redis-data:
+    driver: local
+
+networks:
+  omniops-network:
+    driver: bridge
+    ipam:
+      config:
+        - subnet: 172.20.0.0/16

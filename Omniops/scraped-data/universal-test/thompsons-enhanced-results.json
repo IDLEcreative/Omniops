@@ -1,0 +1,617 @@
+{
+  "homepage": {
+    "url": "https://www.thompsonseparts.co.uk/",
+    "platform": "unknown",
+    "pageType": "other",
+    "products": [],
+    "pagination": null,
+    "breadcrumbs": [],
+    "productCount": 0,
+    "priceStats": {
+      "hasValidPrices": false
+    }
+  },
+  "category": {
+    "url": "https://www.thompsonseparts.co.uk/product-category/featured-hot-deals/",
+    "platform": "woocommerce",
+    "pageType": "category",
+    "products": [
+      {
+        "name": "Complete Pin & Bush Kit to Fit Kinshofer KM602",
+        "link": "https://www.thompsonseparts.co.uk/product/complete-pin-bush-kit-to-fit-kinshofer-km602/",
+        "image": "https://www.thompsonseparts.co.uk/nitropack_static/TKGKnaEJZcwNxoHjZXuFXRnzbCrhhXGn/assets/images/optimized/rev-24494bc/www.thompsonseparts.co.uk/wp-content/uploads/2021/09/fgggggggggggg-300x267.jpg",
+        "sku": "TCPBK-602",
+        "price": {
+          "raw": "£1,000.00£833.33 Original price was: £1,000.00£833.33.£837.60£698.00Current price is: £837.60£698.00. Inc VATExcl VAT Inc VATExcl VAT",
+          "currency": "GBP",
+          "value": 837.6,
+          "salePrice": 837.6,
+          "formatted": "£837.60 (was £1000.00, 16% off)",
+          "regularPrice": 1000,
+          "onSale": true,
+          "discount": 16
+        },
+        "_rawPrice": "£1,000.00£833.33 Original price was: £1,000.00£833.33.£837.60£698.00Current price is: £837.60£698.00. Inc VATExcl VAT Inc VATExcl VAT"
+      },
+      {
+        "name": "Thompsons Foot Kit To Suit M-Series Palfinger",
+        "link": "https://www.thompsonseparts.co.uk/product/thompsons-foot-kit-to-suit-m-series-palfinger/",
+        "image": "https://www.thompsonseparts.co.uk/nitropack_static/TKGKnaEJZcwNxoHjZXuFXRnzbCrhhXGn/assets/images/optimized/rev-24494bc/www.thompsonseparts.co.uk/wp-content/uploads/2024/09/fc-300x267.jpg",
+        "sku": "FOOTCOMPLETE",
+        "price": {
+          "raw": "£391.89£326.58 Original price was: £391.89£326.58.£297.98£248.32Current price is: £297.98£248.32. Inc VATExcl VAT Inc VATExcl VAT",
+          "currency": "GBP",
+          "value": 297.98,
+          "salePrice": 297.98,
+          "formatted": "£297.98 (was £391.89, 24% off)",
+          "regularPrice": 391.89,
+          "onSale": true,
+          "discount": 24
+        },
+        "_rawPrice": "£391.89£326.58 Original price was: £391.89£326.58.£297.98£248.32Current price is: £297.98£248.32. Inc VATExcl VAT Inc VATExcl VAT"
+      },
+      {
+        "name": "(Pair) Thompsons Freestanding Tipper Truck Chassis/Body Props",
+        "link": "https://www.thompsonseparts.co.uk/product/pair-thompsons-freestanding-tipper-truck-chassis-body-props/",
+        "image": "https://www.thompsonseparts.co.uk/nitropack_static/TKGKnaEJZcwNxoHjZXuFXRnzbCrhhXGn/assets/images/optimized/rev-24494bc/www.thompsonseparts.co.uk/wp-content/uploads/2023/03/Props-2-300x267.jpg",
+        "sku": "5012-0001P",
+        "price": {
+          "raw": "£585.00£487.50 Original price was: £585.00£487.50.£552.00£460.00Current price is: £552.00£460.00. Inc VATExcl VAT Inc VATExcl VAT",
+          "currency": "GBP",
+          "value": 552,
+          "salePrice": 552,
+          "formatted": "£552.00 (was £585.00, 6% off)",
+          "regularPrice": 585,
+          "onSale": true,
+          "discount": 6
+        },
+        "_rawPrice": "£585.00£487.50 Original price was: £585.00£487.50.£552.00£460.00Current price is: £552.00£460.00. Inc VATExcl VAT Inc VATExcl VAT"
+      },
+      {
+        "name": "American-Style Creeper 36″ with Steel Frame & 6 Wheels – Red",
+        "link": "https://www.thompsonseparts.co.uk/product/american-style-creeper-36-with-steel-frame-6-wheels-orange/",
+        "image": "https://www.thompsonseparts.co.uk/nitropack_static/TKGKnaEJZcwNxoHjZXuFXRnzbCrhhXGn/assets/images/optimized/rev-24494bc/www.thompsonseparts.co.uk/wp-content/uploads/2023/09/SCR75-RED-300x267.png",
+        "sku": "SCR75",
+        "price": {
+          "raw": "£75.00£62.50 Original price was: £75.00£62.50.£62.95£52.46Current price is: £62.95£52.46. Inc VATExcl VAT Inc VATExcl VAT",
+          "currency": "GBP",
+          "value": 62.95,
+          "salePrice": 62.95,
+          "formatted": "£62.95 (was £75.00, 16% off)",
+          "regularPrice": 75,
+          "onSale": true,
+          "discount": 16
+        },
+        "_rawPrice": "£75.00£62.50 Original price was: £75.00£62.50.£62.95£52.46Current price is: £62.95£52.46. Inc VATExcl VAT Inc VATExcl VAT"
+      },
+      {
+        "name": "1125 LITRE WATER EU HIGHWAY BOWSER",
+        "link": "https://www.thompsonseparts.co.uk/product/1125-litre-water-eu-highway-bowser/",
+        "image": "data:image/svg+xml;nitro-empty-id=MTE1Njo0Mzc=-1;base64,PHN2ZyB2aWV3Qm94PSIwIDAgMzAwIDI2NyIgd2lkdGg9IjMwMCIgaGVpZ2h0PSIyNjciIHhtbG5zPSJodHRwOi8vd3d3LnczLm9yZy8yMDAwL3N2ZyI+PC9zdmc+",
+        "sku": "1125EUWATER",
+        "price": {
+          "raw": "Contact us to order",
+          "formatted": "Contact for price",
+          "value": null,
+          "requiresContact": true
+        },
+        "_rawPrice": "Contact us to order"
+      },
+      {
+        "name": "950 LITRE U.N. APPROVED BUNDED DIESEL EU HIGHWAY  BOWSER, c/w Hand Pump, Yellow",
+        "link": "https://www.thompsonseparts.co.uk/product/950-litre-u-n-approved-bunded-diesel-eu-highway-bowser-c-w-hand-pump-yellow/",
+        "image": "data:image/svg+xml;nitro-empty-id=MTE2NDo0NDI=-1;base64,PHN2ZyB2aWV3Qm94PSIwIDAgMzAwIDI2NyIgd2lkdGg9IjMwMCIgaGVpZ2h0PSIyNjciIHhtbG5zPSJodHRwOi8vd3d3LnczLm9yZy8yMDAwL3N2ZyI+PC9zdmc+",
+        "sku": "950UNDEISELBOWSER",
+        "price": {
+          "raw": "£4,795.00£3,995.83 Original price was: £4,795.00£3,995.83.£4,560.00£3,800.00Current price is: £4,560.00£3,800.00. Inc VATExcl VAT Inc VATExcl VAT",
+          "currency": "GBP",
+          "value": 4560,
+          "salePrice": 4560,
+          "formatted": "£4560.00 (was £4795.00, 5% off)",
+          "regularPrice": 4795,
+          "onSale": true,
+          "discount": 5
+        },
+        "_rawPrice": "£4,795.00£3,995.83 Original price was: £4,795.00£3,995.83.£4,560.00£3,800.00Current price is: £4,560.00£3,800.00. Inc VATExcl VAT Inc VATExcl VAT"
+      },
+      {
+        "name": "BULK & WHOLESALE Complete Pin & Bush Kits to Fit Kinshofer KM602",
+        "link": "https://www.thompsonseparts.co.uk/product/bulk-wholesale-complete-pin-bush-kits-to-fit-kinshofer-km602/",
+        "image": "data:image/svg+xml;nitro-empty-id=MTE3MDo2MTU=-1;base64,PHN2ZyB2aWV3Qm94PSIwIDAgMzAwIDI2NyIgd2lkdGg9IjMwMCIgaGVpZ2h0PSIyNjciIHhtbG5zPSJodHRwOi8vd3d3LnczLm9yZy8yMDAwL3N2ZyI+PC9zdmc+",
+        "sku": "TCPBK-602-BULK",
+        "price": {
+          "raw": "Contact us to order",
+          "formatted": "Contact for price",
+          "value": null,
+          "requiresContact": true
+        },
+        "_rawPrice": "Contact us to order"
+      },
+      {
+        "name": "Tipper Body Hinge Bar & Chassis Bracket Kit- Not pre-drilled",
+        "link": "https://www.thompsonseparts.co.uk/product/tipper-body-hinge-bar-chassis-bracket-kit-not-pre-drilled/",
+        "image": "data:image/svg+xml;nitro-empty-id=MTE3Njo2MTU=-1;base64,PHN2ZyB2aWV3Qm94PSIwIDAgMzAwIDI2NyIgd2lkdGg9IjMwMCIgaGVpZ2h0PSIyNjciIHhtbG5zPSJodHRwOi8vd3d3LnczLm9yZy8yMDAwL3N2ZyI+PC9zdmc+",
+        "sku": "TBCBKIT",
+        "price": {
+          "raw": "£320.00£266.67 Inc VATExcl VAT",
+          "currency": "GBP",
+          "value": 320,
+          "priceIncVAT": 320,
+          "priceExcVAT": 266.67,
+          "formatted": "£320.00 inc VAT",
+          "onSale": false
+        },
+        "_rawPrice": "£320.00£266.67 Inc VATExcl VAT"
+      },
+      {
+        "name": "(Pair) Thompsons Freestanding Trailer Chassis/Body Props",
+        "link": "https://www.thompsonseparts.co.uk/product/pair-thompsons-freestanding-trailer-chassis-body-prop/",
+        "image": "data:image/svg+xml;nitro-empty-id=MTE4NDo0NDE=-1;base64,PHN2ZyB2aWV3Qm94PSIwIDAgMzAwIDI2NyIgd2lkdGg9IjMwMCIgaGVpZ2h0PSIyNjciIHhtbG5zPSJodHRwOi8vd3d3LnczLm9yZy8yMDAwL3N2ZyI+PC9zdmc+",
+        "sku": "5012-0001-TR-P",
+        "price": {
+          "raw": "£565.00£470.83 Original price was: £565.00£470.83.£549.95£458.29Current price is: £549.95£458.29. Inc VATExcl VAT Inc VATExcl VAT",
+          "currency": "GBP",
+          "value": 549.95,
+          "salePrice": 549.95,
+          "formatted": "£549.95 (was £565.00, 3% off)",
+          "regularPrice": 565,
+          "onSale": true,
+          "discount": 3
+        },
+        "_rawPrice": "£565.00£470.83 Original price was: £565.00£470.83.£549.95£458.29Current price is: £549.95£458.29. Inc VATExcl VAT Inc VATExcl VAT"
+      },
+      {
+        "name": "Thompsons Tipper Body Hinge Bar & Chassis Bracket Kit (Pre-Drilled) Unpainted",
+        "link": "https://www.thompsonseparts.co.uk/product/thompsons-tipper-body-hinge-bar-chassis-bracket-kit-pre-drilled-unpainted/",
+        "image": "data:image/svg+xml;nitro-empty-id=MTE5Mjo0NDQ=-1;base64,PHN2ZyB2aWV3Qm94PSIwIDAgMzAwIDI2NyIgd2lkdGg9IjMwMCIgaGVpZ2h0PSIyNjciIHhtbG5zPSJodHRwOi8vd3d3LnczLm9yZy8yMDAwL3N2ZyI+PC9zdmc+",
+        "sku": "THOMP-TBCBKIT-PRED",
+        "price": {
+          "raw": "£425.00£354.17 Original price was: £425.00£354.17.£399.00£332.50Current price is: £399.00£332.50. Inc VATExcl VAT Inc VATExcl VAT",
+          "currency": "GBP",
+          "value": 399,
+          "salePrice": 399,
+          "formatted": "£399.00 (was £425.00, 6% off)",
+          "regularPrice": 425,
+          "onSale": true,
+          "discount": 6
+        },
+        "_rawPrice": "£425.00£354.17 Original price was: £425.00£354.17.£399.00£332.50Current price is: £399.00£332.50. Inc VATExcl VAT Inc VATExcl VAT"
+      },
+      {
+        "name": "Sealey 1500A 12V RoadStart® Emergency Jump Starter",
+        "link": "https://www.thompsonseparts.co.uk/product/sealey-500a-12v-roadstart-emergency-jump-starter/",
+        "image": "data:image/svg+xml;nitro-empty-id=MTE5ODo2MDg=-1;base64,PHN2ZyB2aWV3Qm94PSIwIDAgMzAwIDI2NyIgd2lkdGg9IjMwMCIgaGVpZ2h0PSIyNjciIHhtbG5zPSJodHRwOi8vd3d3LnczLm9yZy8yMDAwL3N2ZyI+PC9zdmc+",
+        "sku": "RS102B",
+        "price": {
+          "raw": "£329.94£274.95 Inc VATExcl VAT",
+          "currency": "GBP",
+          "value": 329.94,
+          "priceIncVAT": 329.94,
+          "priceExcVAT": 274.95,
+          "formatted": "£329.94 inc VAT",
+          "onSale": false
+        },
+        "_rawPrice": "£329.94£274.95 Inc VATExcl VAT"
+      },
+      {
+        "name": "LED USB Rechargeable Workshop Inspection Wand c/w USB Charging Cable",
+        "link": "https://www.thompsonseparts.co.uk/product/led-usb-rechargeable-workshop-inspection-wand-c-w-usb-charging-cable/",
+        "image": "data:image/svg+xml;nitro-empty-id=MTIwNjo0NDI=-1;base64,PHN2ZyB2aWV3Qm94PSIwIDAgMzAwIDI2NyIgd2lkdGg9IjMwMCIgaGVpZ2h0PSIyNjciIHhtbG5zPSJodHRwOi8vd3d3LnczLm9yZy8yMDAwL3N2ZyI+PC9zdmc+",
+        "sku": "HH340",
+        "price": {
+          "raw": "£40.00£33.33 Original price was: £40.00£33.33.£35.00£29.17Current price is: £35.00£29.17. Inc VATExcl VAT Inc VATExcl VAT",
+          "currency": "GBP",
+          "value": 35,
+          "salePrice": 35,
+          "formatted": "£35.00 (was £40.00, 13% off)",
+          "regularPrice": 40,
+          "onSale": true,
+          "discount": 13
+        },
+        "_rawPrice": "£40.00£33.33 Original price was: £40.00£33.33.£35.00£29.17Current price is: £35.00£29.17. Inc VATExcl VAT Inc VATExcl VAT"
+      },
+      {
+        "name": "PSL Code Switch",
+        "link": "https://www.thompsonseparts.co.uk/product/psl-plus-programmable-ignition-code-switch-key/",
+        "image": "data:image/svg+xml;nitro-empty-id=MTIxNDo0MzQ=-1;base64,PHN2ZyB2aWV3Qm94PSIwIDAgMzAwIDI2NyIgd2lkdGg9IjMwMCIgaGVpZ2h0PSIyNjciIHhtbG5zPSJodHRwOi8vd3d3LnczLm9yZy8yMDAwL3N2ZyI+PC9zdmc+",
+        "sku": "123/SYPSL1000",
+        "price": {
+          "raw": "£122.00£101.67 Original price was: £122.00£101.67.£102.00£85.00Current price is: £102.00£85.00. Inc VATExcl VAT Inc VATExcl VAT",
+          "currency": "GBP",
+          "value": 102,
+          "salePrice": 102,
+          "formatted": "£102.00 (was £122.00, 16% off)",
+          "regularPrice": 122,
+          "onSale": true,
+          "discount": 16
+        },
+        "_rawPrice": "£122.00£101.67 Original price was: £122.00£101.67.£102.00£85.00Current price is: £102.00£85.00. Inc VATExcl VAT Inc VATExcl VAT"
+      },
+      {
+        "name": "PSL Plus Code Switch",
+        "link": "https://www.thompsonseparts.co.uk/product/psl-plus-code-switch/",
+        "image": "data:image/svg+xml;nitro-empty-id=MTIyMDo1Nzk=-1;base64,PHN2ZyB2aWV3Qm94PSIwIDAgMzAwIDI2NyIgd2lkdGg9IjMwMCIgaGVpZ2h0PSIyNjciIHhtbG5zPSJodHRwOi8vd3d3LnczLm9yZy8yMDAwL3N2ZyI+PC9zdmc+",
+        "sku": "C63/PSLPLUS",
+        "price": {
+          "raw": "£122.00£101.67 Inc VATExcl VAT",
+          "currency": "GBP",
+          "value": 122,
+          "priceIncVAT": 122,
+          "priceExcVAT": 101.67,
+          "formatted": "£122.00 inc VAT",
+          "onSale": false
+        },
+        "_rawPrice": "£122.00£101.67 Inc VATExcl VAT"
+      },
+      {
+        "name": "2 x (Pair) Thompsons Freestanding Tipper Truck Chassis/Body Props",
+        "link": "https://www.thompsonseparts.co.uk/product/2-x-pair-thompsons-freestanding-tipper-truck-chassis-body-props/",
+        "image": "data:image/svg+xml;nitro-empty-id=MTIyODo0MzY=-1;base64,PHN2ZyB2aWV3Qm94PSIwIDAgMzAwIDI2NyIgd2lkdGg9IjMwMCIgaGVpZ2h0PSIyNjciIHhtbG5zPSJodHRwOi8vd3d3LnczLm9yZy8yMDAwL3N2ZyI+PC9zdmc+",
+        "sku": "5012-0001-(2-PAIR)",
+        "price": {
+          "raw": "£1,090.00£908.33 Original price was: £1,090.00£908.33.£1,050.00£875.00Current price is: £1,050.00£875.00. Inc VATExcl VAT Inc VATExcl VAT",
+          "currency": "GBP",
+          "value": 1050,
+          "salePrice": 1050,
+          "formatted": "£1050.00 (was £1090.00, 4% off)",
+          "regularPrice": 1090,
+          "onSale": true,
+          "discount": 4
+        },
+        "_rawPrice": "£1,090.00£908.33 Original price was: £1,090.00£908.33.£1,050.00£875.00Current price is: £1,050.00£875.00. Inc VATExcl VAT Inc VATExcl VAT"
+      },
+      {
+        "name": "THOMPSONS (EAT-SLEEP-TIP) HOODIE BLACK (EACH)",
+        "link": "https://www.thompsonseparts.co.uk/product/thompsons-eat-sleep-tip-hoodie-black/",
+        "image": "data:image/svg+xml;nitro-empty-id=MTIzNjo0Mzk=-1;base64,PHN2ZyB2aWV3Qm94PSIwIDAgMzAwIDI2NyIgd2lkdGg9IjMwMCIgaGVpZ2h0PSIyNjciIHhtbG5zPSJodHRwOi8vd3d3LnczLm9yZy8yMDAwL3N2ZyI+PC9zdmc+",
+        "sku": "P-EPARTSHOODIExxx",
+        "price": {
+          "raw": "£28.20£23.50 Original price was: £28.20£23.50.£25.00£20.83Current price is: £25.00£20.83. Inc VATExcl VAT Inc VATExcl VAT",
+          "currency": "GBP",
+          "value": 25,
+          "salePrice": 25,
+          "formatted": "£25.00 (was £28.20, 11% off)",
+          "regularPrice": 28.2,
+          "onSale": true,
+          "discount": 11
+        },
+        "_rawPrice": "£28.20£23.50 Original price was: £28.20£23.50.£25.00£20.83Current price is: £25.00£20.83. Inc VATExcl VAT Inc VATExcl VAT"
+      },
+      {
+        "name": "THOMPSONS (EAT-SLEEP-TIP) T-SHIRT BLACK",
+        "link": "https://www.thompsonseparts.co.uk/product/thompsons-eat-sleep-tip-t-shirt-black/",
+        "image": "data:image/svg+xml;nitro-empty-id=MTI0NDo0Mzg=-1;base64,PHN2ZyB2aWV3Qm94PSIwIDAgMzAwIDI2NyIgd2lkdGg9IjMwMCIgaGVpZ2h0PSIyNjciIHhtbG5zPSJodHRwOi8vd3d3LnczLm9yZy8yMDAwL3N2ZyI+PC9zdmc+",
+        "sku": "5000EMBTSHIRTxxx",
+        "price": {
+          "raw": "£15.00£12.50 Original price was: £15.00£12.50.£14.40£12.00Current price is: £14.40£12.00. Inc VATExcl VAT Inc VATExcl VAT",
+          "currency": "GBP",
+          "value": 14.4,
+          "salePrice": 14.4,
+          "formatted": "£14.40 (was £15.00, 4% off)",
+          "regularPrice": 15,
+          "onSale": true,
+          "discount": 4
+        },
+        "_rawPrice": "£15.00£12.50 Original price was: £15.00£12.50.£14.40£12.00Current price is: £14.40£12.00. Inc VATExcl VAT Inc VATExcl VAT"
+      },
+      {
+        "name": "MOTORHOME PADS (4 PK) 300X300X25mm FLAT (BAG)",
+        "link": "https://www.thompsonseparts.co.uk/product/motorhome-pads-4-pk-300x300x25mm-flat-bag/",
+        "image": "data:image/svg+xml;nitro-empty-id=MTI1MDo2MTA=-1;base64,PHN2ZyB2aWV3Qm94PSIwIDAgMzAwIDI2NyIgd2lkdGg9IjMwMCIgaGVpZ2h0PSIyNjciIHhtbG5zPSJodHRwOi8vd3d3LnczLm9yZy8yMDAwL3N2ZyI+PC9zdmc+",
+        "sku": "THCP-303025MP/PK",
+        "price": {
+          "raw": "£102.45£85.38 Inc VATExcl VAT",
+          "currency": "GBP",
+          "value": 102.45,
+          "priceIncVAT": 102.45,
+          "priceExcVAT": 85.38,
+          "formatted": "£102.45 inc VAT",
+          "onSale": false
+        },
+        "_rawPrice": "£102.45£85.38 Inc VATExcl VAT"
+      },
+      {
+        "name": "MOTORHOME PADS (4 PK) 300X300X25mm SQ RECESS (BAG)",
+        "link": "https://www.thompsonseparts.co.uk/product/motorhome-pads-4-pk-300x300x25mm-sq-recess-bag/",
+        "image": "data:image/svg+xml;nitro-empty-id=MTI1Njo2MTY=-1;base64,PHN2ZyB2aWV3Qm94PSIwIDAgMzAwIDI2NyIgd2lkdGg9IjMwMCIgaGVpZ2h0PSIyNjciIHhtbG5zPSJodHRwOi8vd3d3LnczLm9yZy8yMDAwL3N2ZyI+PC9zdmc+",
+        "sku": "THCP-303025RMP/PK",
+        "price": {
+          "raw": "£110.81£92.34 Inc VATExcl VAT",
+          "currency": "GBP",
+          "value": 110.81,
+          "priceIncVAT": 110.81,
+          "priceExcVAT": 92.34,
+          "formatted": "£110.81 inc VAT",
+          "onSale": false
+        },
+        "_rawPrice": "£110.81£92.34 Inc VATExcl VAT"
+      },
+      {
+        "name": "STACKABLE CARAVAN PADS (4 PK) 200X200X20mm (BAG)",
+        "link": "https://www.thompsonseparts.co.uk/product/stackable-caravan-pads-4-pk-200x200x20mm-bag/",
+        "image": "data:image/svg+xml;nitro-empty-id=MTI2Mjo2MTQ=-1;base64,PHN2ZyB2aWV3Qm94PSIwIDAgMzAwIDI2NyIgd2lkdGg9IjMwMCIgaGVpZ2h0PSIyNjciIHhtbG5zPSJodHRwOi8vd3d3LnczLm9yZy8yMDAwL3N2ZyI+PC9zdmc+",
+        "sku": "THCP-202020SCP/PK",
+        "price": {
+          "raw": "£99.98£83.32 Inc VATExcl VAT",
+          "currency": "GBP",
+          "value": 99.98,
+          "priceIncVAT": 99.98,
+          "priceExcVAT": 83.32,
+          "formatted": "£99.98 inc VAT",
+          "onSale": false
+        },
+        "_rawPrice": "£99.98£83.32 Inc VATExcl VAT"
+      },
+      {
+        "name": "STACKABLE MOTORHOME PADS (4 PK) 300X300X25mm (BAG)",
+        "link": "https://www.thompsonseparts.co.uk/product/stackable-motorhome-pads-4-pk-300x300x25mm-bag/",
+        "image": "data:image/svg+xml;nitro-empty-id=MTI2ODo2MTc=-1;base64,PHN2ZyB2aWV3Qm94PSIwIDAgMzAwIDI2NyIgd2lkdGg9IjMwMCIgaGVpZ2h0PSIyNjciIHhtbG5zPSJodHRwOi8vd3d3LnczLm9yZy8yMDAwL3N2ZyI+PC9zdmc+",
+        "sku": "THCP-303025SMP/PK",
+        "price": {
+          "raw": "£109.92£91.60 Inc VATExcl VAT",
+          "currency": "GBP",
+          "value": 109.92,
+          "priceIncVAT": 109.92,
+          "priceExcVAT": 91.6,
+          "formatted": "£109.92 inc VAT",
+          "onSale": false
+        },
+        "_rawPrice": "£109.92£91.60 Inc VATExcl VAT"
+      },
+      {
+        "name": "300x300x30mm Eco-Lift Crane Pad Stowage Kit",
+        "link": "https://www.thompsonseparts.co.uk/product/300x300x30mm-eco-lift-crane-pad-stowage-kit/",
+        "image": "data:image/svg+xml;nitro-empty-id=MTI3Njo0NDM=-1;base64,PHN2ZyB2aWV3Qm94PSIwIDAgMzAwIDI2NyIgd2lkdGg9IjMwMCIgaGVpZ2h0PSIyNjciIHhtbG5zPSJodHRwOi8vd3d3LnczLm9yZy8yMDAwL3N2ZyI+PC9zdmc+",
+        "sku": "THCP-3330BSK",
+        "price": {
+          "raw": "£150.00£125.00 Original price was: £150.00£125.00.£142.59£118.83Current price is: £142.59£118.83. Inc VATExcl VAT Inc VATExcl VAT",
+          "currency": "GBP",
+          "value": 142.59,
+          "salePrice": 142.59,
+          "formatted": "£142.59 (was £150.00, 5% off)",
+          "regularPrice": 150,
+          "onSale": true,
+          "discount": 5
+        },
+        "_rawPrice": "£150.00£125.00 Original price was: £150.00£125.00.£142.59£118.83Current price is: £142.59£118.83. Inc VATExcl VAT Inc VATExcl VAT"
+      },
+      {
+        "name": "400x400x40mm Eco-Lift Crane Pad Stowage Kit",
+        "link": "https://www.thompsonseparts.co.uk/product/400x400x40mm-eco-lift-crane-pad-stowage-kit/",
+        "image": "data:image/svg+xml;nitro-empty-id=MTI4Mjo2NDM=-1;base64,PHN2ZyB2aWV3Qm94PSIwIDAgMzAwIDI2NyIgd2lkdGg9IjMwMCIgaGVpZ2h0PSIyNjciIHhtbG5zPSJodHRwOi8vd3d3LnczLm9yZy8yMDAwL3N2ZyI+PC9zdmc+",
+        "sku": "THCP-4440BSK",
+        "price": {
+          "raw": "£226.98£189.15 Inc VATExcl VAT",
+          "currency": "GBP",
+          "value": 226.98,
+          "priceIncVAT": 226.98,
+          "priceExcVAT": 189.15,
+          "formatted": "£226.98 inc VAT",
+          "onSale": false
+        },
+        "_rawPrice": "£226.98£189.15 Inc VATExcl VAT"
+      },
+      {
+        "name": "500x500x40mm Eco-Lift Crane Pad Stowage Kit",
+        "link": "https://www.thompsonseparts.co.uk/product/500x500x40mm-eco-lift-crane-pad-stowage-kit/",
+        "image": "data:image/svg+xml;nitro-empty-id=MTI4ODo2NDM=-1;base64,PHN2ZyB2aWV3Qm94PSIwIDAgMzAwIDI2NyIgd2lkdGg9IjMwMCIgaGVpZ2h0PSIyNjciIHhtbG5zPSJodHRwOi8vd3d3LnczLm9yZy8yMDAwL3N2ZyI+PC9zdmc+",
+        "sku": "THCP-5550BSK",
+        "price": {
+          "raw": "£258.48£215.40 Inc VATExcl VAT",
+          "currency": "GBP",
+          "value": 258.48,
+          "priceIncVAT": 258.48,
+          "priceExcVAT": 215.4,
+          "formatted": "£258.48 inc VAT",
+          "onSale": false
+        },
+        "_rawPrice": "£258.48£215.40 Inc VATExcl VAT"
+      },
+      {
+        "name": "FHOSS Cycle Lane Warning System",
+        "link": "https://www.thompsonseparts.co.uk/product/fhoss-cycle-lane-warning-system/",
+        "image": "data:image/svg+xml;nitro-empty-id=MTI5Njo0NDc=-1;base64,PHN2ZyB2aWV3Qm94PSIwIDAgMzAwIDI2NyIgd2lkdGg9IjMwMCIgaGVpZ2h0PSIyNjciIHhtbG5zPSJodHRwOi8vd3d3LnczLm9yZy8yMDAwL3N2ZyI+PC9zdmc+",
+        "sku": "FHCLWS",
+        "price": {
+          "raw": "£1,950.00£1,625.00 Original price was: £1,950.00£1,625.00.£1,740.00£1,450.00Current price is: £1,740.00£1,450.00. Inc VATExcl VAT Inc VATExcl VAT",
+          "currency": "GBP",
+          "value": 1740,
+          "salePrice": 1740,
+          "formatted": "£1740.00 (was £1950.00, 11% off)",
+          "regularPrice": 1950,
+          "onSale": true,
+          "discount": 11
+        },
+        "_rawPrice": "£1,950.00£1,625.00 Original price was: £1,950.00£1,625.00.£1,740.00£1,450.00Current price is: £1,740.00£1,450.00. Inc VATExcl VAT Inc VATExcl VAT"
+      },
+      {
+        "name": "Hyva Oil Tank (KIT) 081L/065L-RF-LI Skip/Hook c/w Return filter & Straps",
+        "link": "https://www.thompsonseparts.co.uk/product/hyva-oil-tank-kit-081l-065l-rf-li-skip-hook-c-w-return-filter-straps/",
+        "image": "data:image/svg+xml;nitro-empty-id=MTMwNDo0Mzg=-1;base64,PHN2ZyB2aWV3Qm94PSIwIDAgMzAwIDI2NyIgd2lkdGg9IjMwMCIgaGVpZ2h0PSIyNjciIHhtbG5zPSJodHRwOi8vd3d3LnczLm9yZy8yMDAwL3N2ZyI+PC9zdmc+",
+        "sku": "UK60F-SU-1065",
+        "price": {
+          "raw": "£856.62£713.85 Original price was: £856.62£713.85.£726.00£605.00Current price is: £726.00£605.00. Inc VATExcl VAT Inc VATExcl VAT",
+          "currency": "GBP",
+          "value": 726,
+          "salePrice": 726,
+          "formatted": "£726.00 (was £856.62, 15% off)",
+          "regularPrice": 856.62,
+          "onSale": true,
+          "discount": 15
+        },
+        "_rawPrice": "£856.62£713.85 Original price was: £856.62£713.85.£726.00£605.00Current price is: £726.00£605.00. Inc VATExcl VAT Inc VATExcl VAT"
+      },
+      {
+        "name": "OMFB 135ltr Steel Side Mounted Hydraulic Tank C/W Brackets & Straps",
+        "link": "https://www.thompsonseparts.co.uk/product/omfb-135ltr-steel-side-mounted-hydraulic-tank-c-w-brackets-straps/",
+        "image": "data:image/svg+xml;nitro-empty-id=MTMxMjo3NjM=-1;base64,PHN2ZyB2aWV3Qm94PSIwIDAgMzAwIDI0MCIgd2lkdGg9IjMwMCIgaGVpZ2h0PSIyNDAiIHhtbG5zPSJodHRwOi8vd3d3LnczLm9yZy8yMDAwL3N2ZyI+PC9zdmc+",
+        "sku": "T135.610.11352",
+        "price": {
+          "raw": "£1,150.00£958.33 Original price was: £1,150.00£958.33.£1,000.00£833.33Current price is: £1,000.00£833.33. Inc VATExcl VAT Inc VATExcl VAT",
+          "currency": "GBP",
+          "value": 1000,
+          "salePrice": 1000,
+          "formatted": "£1000.00 (was £1150.00, 13% off)",
+          "regularPrice": 1150,
+          "onSale": true,
+          "discount": 13
+        },
+        "_rawPrice": "£1,150.00£958.33 Original price was: £1,150.00£958.33.£1,000.00£833.33Current price is: £1,000.00£833.33. Inc VATExcl VAT Inc VATExcl VAT"
+      },
+      {
+        "name": "OMFB 135ltr Steel Side Mounted Hydraulic Tank Conversion kit from Padoan",
+        "link": "https://www.thompsonseparts.co.uk/product/omfb-135ltr-steel-side-mounted-hydraulic-tank-conversion-kit-from-padoan/",
+        "image": "data:image/svg+xml;nitro-empty-id=MTMyMDo0MzM=-1;base64,PHN2ZyB2aWV3Qm94PSIwIDAgMzAwIDI2NyIgd2lkdGg9IjMwMCIgaGVpZ2h0PSIyNjciIHhtbG5zPSJodHRwOi8vd3d3LnczLm9yZy8yMDAwL3N2ZyI+PC9zdmc+",
+        "sku": "OMFB-CONVERSION-KIT",
+        "price": {
+          "raw": "£365.00£304.17 Original price was: £365.00£304.17.£330.00£275.00Current price is: £330.00£275.00. Inc VATExcl VAT Inc VATExcl VAT",
+          "currency": "GBP",
+          "value": 330,
+          "salePrice": 330,
+          "formatted": "£330.00 (was £365.00, 10% off)",
+          "regularPrice": 365,
+          "onSale": true,
+          "discount": 10
+        },
+        "_rawPrice": "£365.00£304.17 Original price was: £365.00£304.17.£330.00£275.00Current price is: £330.00£275.00. Inc VATExcl VAT Inc VATExcl VAT"
+      },
+      {
+        "name": "OMFB 200ltr aluminium Side Mounted Hydraulic Bracket kit",
+        "link": "https://www.thompsonseparts.co.uk/product/omfb-200ltr-aluminium-side-mounted-hydraulic-bracket-kit/",
+        "image": "data:image/svg+xml;nitro-empty-id=MTMyNjo2MjA=-1;base64,PHN2ZyB2aWV3Qm94PSIwIDAgMzAwIDI2NyIgd2lkdGg9IjMwMCIgaGVpZ2h0PSIyNjciIHhtbG5zPSJodHRwOi8vd3d3LnczLm9yZy8yMDAwL3N2ZyI+PC9zdmc+",
+        "sku": "135903BRLX0",
+        "price": {
+          "raw": "£320.00£266.67 Inc VATExcl VAT",
+          "currency": "GBP",
+          "value": 320,
+          "priceIncVAT": 320,
+          "priceExcVAT": 266.67,
+          "formatted": "£320.00 inc VAT",
+          "onSale": false
+        },
+        "_rawPrice": "£320.00£266.67 Inc VATExcl VAT"
+      },
+      {
+        "name": "140ltr Steel Side Oil Tank Full Kit SLT 140LT STEEL 57X63X51cm",
+        "link": "https://www.thompsonseparts.co.uk/product/140ltr-steel-side-oil-tank-full-kit-slt-140lt-steel-57x63x51cm-2/",
+        "image": "data:image/svg+xml;nitro-empty-id=MTMzMjo2MjY=-1;base64,PHN2ZyB2aWV3Qm94PSIwIDAgMzAwIDI2NyIgd2lkdGg9IjMwMCIgaGVpZ2h0PSIyNjciIHhtbG5zPSJodHRwOi8vd3d3LnczLm9yZy8yMDAwL3N2ZyI+PC9zdmc+",
+        "sku": "THH1GLBT05120",
+        "price": {
+          "raw": "£839.97£699.98 Inc VATExcl VAT",
+          "currency": "GBP",
+          "value": 839.97,
+          "priceIncVAT": 839.97,
+          "priceExcVAT": 699.98,
+          "formatted": "£839.97 inc VAT",
+          "onSale": false
+        },
+        "_rawPrice": "£839.97£699.98 Inc VATExcl VAT"
+      },
+      {
+        "name": "OMFB 200ltr aluminium Side Mounted Hydraulic (TANK ONLY)",
+        "link": "https://www.thompsonseparts.co.uk/product/tank-strap-for-omfb-200ltr-aluminium-side-mounted-hydraulic/",
+        "image": "data:image/svg+xml;nitro-empty-id=MTM0MDo0MzY=-1;base64,PHN2ZyB2aWV3Qm94PSIwIDAgMTQzIDIzOSIgd2lkdGg9IjE0MyIgaGVpZ2h0PSIyMzkiIHhtbG5zPSJodHRwOi8vd3d3LnczLm9yZy8yMDAwL3N2ZyI+PC9zdmc+",
+        "sku": "H1ANBI04540",
+        "price": {
+          "raw": "£920.00£766.67 Original price was: £920.00£766.67.£840.00£700.00Current price is: £840.00£700.00. Inc VATExcl VAT Inc VATExcl VAT",
+          "currency": "GBP",
+          "value": 840,
+          "salePrice": 840,
+          "formatted": "£840.00 (was £920.00, 9% off)",
+          "regularPrice": 920,
+          "onSale": true,
+          "discount": 9
+        },
+        "_rawPrice": "£920.00£766.67 Original price was: £920.00£766.67.£840.00£700.00Current price is: £840.00£700.00. Inc VATExcl VAT Inc VATExcl VAT"
+      },
+      {
+        "name": "Sight Glass For OMFB Side Mounted Hydraulic Tank",
+        "link": "https://www.thompsonseparts.co.uk/product/sight-glass-for-omfb-side-mounted-hydraulic-tank/",
+        "image": "data:image/svg+xml;nitro-empty-id=MTM0Njo2MDA=-1;base64,PHN2ZyB2aWV3Qm94PSIwIDAgODkgODMiIHdpZHRoPSI4OSIgaGVpZ2h0PSI4MyIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj48L3N2Zz4=",
+        "sku": "50900400105",
+        "price": {
+          "raw": "£21.50£17.92 Inc VATExcl VAT",
+          "currency": "GBP",
+          "value": 21.5,
+          "priceIncVAT": 21.5,
+          "priceExcVAT": 17.92,
+          "formatted": "£21.50 inc VAT",
+          "onSale": false
+        },
+        "_rawPrice": "£21.50£17.92 Inc VATExcl VAT"
+      }
+    ],
+    "pagination": {
+      "current": "1",
+      "total": "Next",
+      "next": "https://www.thompsonseparts.co.uk/product-category/featured-hot-deals/page/2/"
+    },
+    "breadcrumbs": [
+      {
+        "name": "Eparts Home",
+        "url": "https://www.thompsonseparts.co.uk/"
+      }
+    ],
+    "productCount": 32,
+    "priceStats": {
+      "hasValidPrices": true,
+      "average": "537.55",
+      "min": "14.40",
+      "max": "4560.00",
+      "onSaleCount": 18,
+      "contactRequiredCount": 2
+    }
+  },
+  "product": {
+    "url": "https://www.thompsonseparts.co.uk/product/complete-pin-bush-kit-to-fit-kinshofer-km602/",
+    "platform": "woocommerce",
+    "pageType": "product",
+    "products": [
+      {
+        "name": "Complete Pin & Bush Kit to Fit Kinshofer KM602",
+        "sku": "TCPBK-602",
+        "description": "Complete Pin & Bush Kit to Fit Kinshofer KM602",
+        "image": "https://www.thompsonseparts.co.uk/nitropack_static/TKGKnaEJZcwNxoHjZXuFXRnzbCrhhXGn/assets/images/optimized/rev-24494bc/www.thompsonseparts.co.uk/wp-content/uploads/2021/09/fgggggggggggg.jpg",
+        "price": {
+          "raw": "£1,000.00£833.33 Original price was: £1,000.00£833.33.£837.60£698.00Current price is: £837.60£698.00. Inc VATExcl VAT Inc VATExcl VAT",
+          "currency": "GBP",
+          "value": 837.6,
+          "salePrice": 837.6,
+          "formatted": "£837.60 (was £1000.00, 16% off)",
+          "regularPrice": 1000,
+          "onSale": true,
+          "discount": 16
+        },
+        "_rawPrice": "£1,000.00£833.33 Original price was: £1,000.00£833.33.£837.60£698.00Current price is: £837.60£698.00. Inc VATExcl VAT Inc VATExcl VAT"
+      }
+    ],
+    "pagination": null,
+    "breadcrumbs": [
+      {
+        "name": "Eparts Home",
+        "url": "https://www.thompsonseparts.co.uk/"
+      },
+      {
+        "name": "Grab Buckets & Brick Grabs",
+        "url": "https://www.thompsonseparts.co.uk/product-category/grab-buckets-brick-grabs/"
+      },
+      {
+        "name": "Kinshofer Clamshell Buckets & Spares",
+        "url": "https://www.thompsonseparts.co.uk/product-category/grab-buckets-brick-grabs/kinshofer-clamshell-buckets-spares/"
+      },
+      {
+        "name": "KM602 Series",
+        "url": "https://www.thompsonseparts.co.uk/product-category/grab-buckets-brick-grabs/kinshofer-clamshell-buckets-spares/km602-series/"
+      }
+    ],
+    "productCount": 1,
+    "priceStats": {
+      "hasValidPrices": true,
+      "average": "837.60",
+      "min": "837.60",
+      "max": "837.60",
+      "onSaleCount": 1,
+      "contactRequiredCount": 0
+    }
+  }
+}

@@ -1,0 +1,24 @@
+{
+  "pagesScraped": 5,
+  "pagesFailed": 0,
+  "blockedRequests": 81,
+  "startTime": 1756326934801,
+  "urls": [
+    "https://www.thompsonseparts.co.uk/",
+    "https://www.thompsonseparts.co.uk/news/",
+    "https://www.thompsonseparts.co.uk/need-help/",
+    "https://www.thompsonseparts.co.uk/about-us/",
+    "https://www.thompsonseparts.co.uk/become-a-supplier/"
+  ],
+  "errors": [],
+  "userAgents": [
+    "Mozilla/5.0 (compatible; bot/1.0)",
+    "Mozilla/5.0 (compatible; Googlebot/2.1; +http://www.google.com/bot.html)"
+  ],
+  "currentUserAgentIndex": 1,
+  "elapsed": "54.52",
+  "successRate": "100.0",
+  "avgTimePerPage": "10.90",
+  "resourcesBlocked": 81,
+  "completedAt": "2025-08-27T20:36:29.320Z"
+}

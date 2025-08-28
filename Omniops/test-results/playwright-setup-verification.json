@@ -1,0 +1,67 @@
+{
+  "system": {
+    "nodeVersion": "v22.11.0",
+    "platform": "darwin",
+    "architecture": "arm64"
+  },
+  "browsers": {
+    "chromium": {
+      "installed": true,
+      "version": "140.0.7339.16",
+      "functional": true,
+      "error": null
+    },
+    "firefox": {
+      "installed": true,
+      "version": "141.0",
+      "functional": true,
+      "error": null
+    },
+    "webkit": {
+      "installed": true,
+      "version": "26.0",
+      "functional": true,
+      "error": null
+    }
+  },
+  "dependencies": {
+    "playwright": "^1.55.0",
+    "crawlee": "^3.14.1"
+  },
+  "configuration": {
+    "configFile": true,
+    "scrapingConfig": true,
+    "browsers": [
+      "chromium",
+      "firefox",
+      "webkit"
+    ],
+    "contextPool": false
+  },
+  "webScraping": {
+    "tested": true,
+    "browser": "chromium",
+    "results": {
+      "Basic HTML Parsing": true,
+      "JavaScript Execution": true,
+      "Form Interaction": true,
+      "Multiple Elements": true
+    },
+    "passed": 4,
+    "total": 4
+  },
+  "issues": [],
+  "recommendations": [
+    "Playwright is ready for web scraping!",
+    "Consider running the comprehensive test: node playwright-comprehensive-test.js"
+  ],
+  "summary": {
+    "status": "READY",
+    "workingBrowsers": 3,
+    "totalBrowsers": 3,
+    "criticalIssues": 0,
+    "totalIssues": 0,
+    "webScrapingReady": true,
+    "timestamp": "2025-08-27T20:29:32.751Z"
+  }
+}

@@ -1,0 +1,100 @@
+{
+  "browsers": {
+    "chromium": {
+      "headless": true,
+      "headed": true,
+      "version": "140.0.7339.16",
+      "launchTime": 120,
+      "error": null
+    },
+    "firefox": {
+      "headless": true,
+      "headed": true,
+      "version": "141.0",
+      "launchTime": 736,
+      "error": null
+    },
+    "webkit": {
+      "headless": true,
+      "headed": true,
+      "version": "26.0",
+      "launchTime": 233,
+      "error": null
+    }
+  },
+  "scraping": {
+    "Static HTML": {
+      "passed": 3,
+      "failed": 0,
+      "results": [
+        {
+          "selector": "title",
+          "expected": "Test Page",
+          "actual": "Test Page",
+          "passed": true
+        },
+        {
+          "selector": "h1",
+          "expected": "Hello World",
+          "actual": "Hello World",
+          "passed": true
+        },
+        {
+          "selector": "p",
+          "expected": "This is a test",
+          "actual": "This is a test",
+          "passed": true
+        }
+      ]
+    },
+    "E-commerce Elements": {
+      "passed": 2,
+      "failed": 1,
+      "results": [
+        {
+          "selector": ".title",
+          "expected": "Sample Product",
+          "actual": "Sample Product",
+          "passed": true
+        },
+        {
+          "selector": ".price",
+          "expected": "£29.99",
+          "actual": "Â£29.99",
+          "passed": false
+        },
+        {
+          "selector": ".description",
+          "expected": "Great product for testing",
+          "actual": "Great product for testing",
+          "passed": true
+        }
+      ]
+    },
+    "advanced": {
+      "javascript": true,
+      "pageEvaluation": 1756326498719,
+      "multipleSelectors": true,
+      "formInteraction": true
+    },
+    "stealth": {
+      "userAgentSet": true,
+      "webdriverHidden": false,
+      "viewportSet": true
+    }
+  },
+  "performance": {
+    "standardTime": 187,
+    "optimizedTime": 183,
+    "improvement": 4,
+    "improvementPercent": "2.14"
+  },
+  "errors": [],
+  "summary": {
+    "totalTime": 4474,
+    "timestamp": "2025-08-27T20:28:19.321Z",
+    "browsersWorking": 3,
+    "scrapingTests": 4,
+    "errors": 0
+  }
+}

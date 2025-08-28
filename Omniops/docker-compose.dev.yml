@@ -1,0 +1,270 @@
+version: '3.8'
+
+services:
+  # Redis service for job queue and caching
+  redis:
+    image: redis:7.0-alpine
+    container_name: scraper-redis
+    restart: unless-stopped
+    ports:
+      - "6379:6379"
+    volumes:
+      - redis_data:/data
+      - ./redis.conf:/etc/redis/redis.conf:ro
+    command: redis-server /etc/redis/redis.conf --appendonly yes
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 30s
+    environment:
+      - REDIS_REPLICATION_MODE=master
+    networks:
+      - scraper-network
+
+  # Redis Insight for Redis management (optional)
+  redis-insight:
+    image: redislabs/redisinsight:latest
+    container_name: scraper-redis-insight
+    restart: unless-stopped
+    ports:
+      - "8001:8001"
+    volumes:
+      - redisinsight_data:/data
+    depends_on:
+      - redis
+    networks:
+      - scraper-network
+    profiles:
+      - monitoring
+
+  # Scraper worker service
+  scraper-worker:
+    build:
+      context: .
+      dockerfile: Dockerfile.worker
+      target: worker
+    container_name: scraper-worker
+    restart: unless-stopped
+    depends_on:
+      redis:
+        condition: service_healthy
+    environment:
+      # Redis configuration
+      - REDIS_URL=redis://redis:6379
+      
+      # Worker configuration
+      - WORKER_CONCURRENCY=2
+      - WORKER_COUNT=2
+      - QUEUE_NAME=scrape-queue
+      - ENABLE_HEALTH_MONITORING=true
+      - MEMORY_THRESHOLD=0.85
+      - MAX_JOB_DURATION=600000
+      
+      # Database configuration (use existing environment variables)
+      - NEXT_PUBLIC_SUPABASE_URL=${NEXT_PUBLIC_SUPABASE_URL}
+      - SUPABASE_SERVICE_ROLE_KEY=${SUPABASE_SERVICE_ROLE_KEY}
+      - OPENAI_API_KEY=${OPENAI_API_KEY}
+      
+      # Node.js configuration
+      - NODE_ENV=development
+      - NODE_OPTIONS=--max-old-space-size=2048
+      
+      # Debugging
+      - DEBUG=scraper:*
+      - LOG_LEVEL=info
+    volumes:
+      - ./lib:/app/lib:ro
+      - ./node_modules:/app/node_modules:ro
+      - worker_logs:/app/logs
+    healthcheck:
+      test: ["CMD", "node", "-e", "process.exit(0)"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 60s
+    networks:
+      - scraper-network
+    deploy:
+      resources:
+        limits:
+          memory: 2G
+          cpus: '1.0'
+        reservations:
+          memory: 512M
+          cpus: '0.5'
+
+  # Additional worker instance for scaling (optional)
+  scraper-worker-2:
+    build:
+      context: .
+      dockerfile: Dockerfile.worker
+      target: worker
+    container_name: scraper-worker-2
+    restart: unless-stopped
+    depends_on:
+      redis:
+        condition: service_healthy
+    environment:
+      - REDIS_URL=redis://redis:6379
+      - WORKER_CONCURRENCY=2
+      - WORKER_COUNT=2
+      - QUEUE_NAME=scrape-queue
+      - ENABLE_HEALTH_MONITORING=true
+      - MEMORY_THRESHOLD=0.85
+      - MAX_JOB_DURATION=600000
+      - NEXT_PUBLIC_SUPABASE_URL=${NEXT_PUBLIC_SUPABASE_URL}
+      - SUPABASE_SERVICE_ROLE_KEY=${SUPABASE_SERVICE_ROLE_KEY}
+      - OPENAI_API_KEY=${OPENAI_API_KEY}
+      - NODE_ENV=development
+      - NODE_OPTIONS=--max-old-space-size=2048
+      - DEBUG=scraper:*
+      - LOG_LEVEL=info
+    volumes:
+      - ./lib:/app/lib:ro
+      - ./node_modules:/app/node_modules:ro
+      - worker_logs_2:/app/logs
+    healthcheck:
+      test: ["CMD", "node", "-e", "process.exit(0)"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 60s
+    networks:
+      - scraper-network
+    deploy:
+      resources:
+        limits:
+          memory: 2G
+          cpus: '1.0'
+        reservations:
+          memory: 512M
+          cpus: '0.5'
+    profiles:
+      - scaling
+
+  # BullMQ Dashboard for monitoring jobs (optional)
+  bullmq-dashboard:
+    image: deadly0/bull-board
+    container_name: scraper-bullmq-dashboard
+    restart: unless-stopped
+    ports:
+      - "3001:3000"
+    environment:
+      - REDIS_HOST=redis
+      - REDIS_PORT=6379
+      - REDIS_DB=0
+      - REDIS_USE_TLS=false
+      - USER_LOGIN=admin
+      - USER_PASSWORD=admin123
+    depends_on:
+      redis:
+        condition: service_healthy
+    networks:
+      - scraper-network
+    profiles:
+      - monitoring
+
+  # Prometheus for metrics collection (optional)
+  prometheus:
+    image: prom/prometheus:latest
+    container_name: scraper-prometheus
+    restart: unless-stopped
+    ports:
+      - "9090:9090"
+    volumes:
+      - ./monitoring/prometheus.yml:/etc/prometheus/prometheus.yml:ro
+      - prometheus_data:/prometheus
+    command:
+      - '--config.file=/etc/prometheus/prometheus.yml'
+      - '--storage.tsdb.path=/prometheus'
+      - '--web.console.libraries=/etc/prometheus/console_libraries'
+      - '--web.console.templates=/etc/prometheus/consoles'
+      - '--storage.tsdb.retention.time=200h'
+      - '--web.enable-lifecycle'
+    networks:
+      - scraper-network
+    profiles:
+      - monitoring
+
+  # Grafana for metrics visualization (optional)
+  grafana:
+    image: grafana/grafana:latest
+    container_name: scraper-grafana
+    restart: unless-stopped
+    ports:
+      - "3000:3000"
+    environment:
+      - GF_SECURITY_ADMIN_USER=admin
+      - GF_SECURITY_ADMIN_PASSWORD=admin123
+      - GF_USERS_ALLOW_SIGN_UP=false
+    volumes:
+      - grafana_data:/var/lib/grafana
+      - ./monitoring/grafana/provisioning:/etc/grafana/provisioning:ro
+      - ./monitoring/grafana/dashboards:/var/lib/grafana/dashboards:ro
+    depends_on:
+      - prometheus
+    networks:
+      - scraper-network
+    profiles:
+      - monitoring
+
+  # Log aggregator (optional)
+  loki:
+    image: grafana/loki:latest
+    container_name: scraper-loki
+    restart: unless-stopped
+    ports:
+      - "3100:3100"
+    volumes:
+      - ./monitoring/loki.yml:/etc/loki/local-config.yaml:ro
+      - loki_data:/loki
+    command: -config.file=/etc/loki/local-config.yaml
+    networks:
+      - scraper-network
+    profiles:
+      - logging
+
+  # Promtail for log collection (optional)
+  promtail:
+    image: grafana/promtail:latest
+    container_name: scraper-promtail
+    restart: unless-stopped
+    volumes:
+      - ./monitoring/promtail.yml:/etc/promtail/config.yml:ro
+      - /var/log:/var/log:ro
+      - worker_logs:/app/logs:ro
+      - worker_logs_2:/app/logs2:ro
+    command: -config.file=/etc/promtail/config.yml
+    depends_on:
+      - loki
+    networks:
+      - scraper-network
+    profiles:
+      - logging
+
+# Named volumes for data persistence
+volumes:
+  redis_data:
+    driver: local
+  redisinsight_data:
+    driver: local
+  worker_logs:
+    driver: local
+  worker_logs_2:
+    driver: local
+  prometheus_data:
+    driver: local
+  grafana_data:
+    driver: local
+  loki_data:
+    driver: local
+
+# Network for service communication
+networks:
+  scraper-network:
+    driver: bridge
+    ipam:
+      config:
+        - subnet: 172.20.0.0/16
