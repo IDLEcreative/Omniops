@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { createServiceRoleClient } from '../../../lib/supabase/server';
+import { createServiceRoleClient } from '@/lib/supabase/server';
 import { ChatResponse } from '@/types';
 import OpenAI from 'openai';
 import { z } from 'zod';
@@ -253,9 +253,48 @@ export async function POST(request: NextRequest) {
             .single();
           
           if (customerConfig?.woocommerce_url) {
-            // This would fetch order/delivery data after customer verification
-            // Not product data - that comes from scraping
-            console.log('WooCommerce: Ready for order/delivery queries after verification');
+            // Import and use dynamic WooCommerce client
+            const { getDynamicWooCommerceClient } = await import('@/lib/woocommerce-dynamic');
+            const wc = await getDynamicWooCommerceClient(domain);
+            
+            if (wc) {
+              console.log('WooCommerce: Fetching order data for domain', domain);
+              
+              // Extract potential order number from message
+              const orderNumberMatch = message.match(/#?(\d{4,})/);
+              
+              if (orderNumberMatch) {
+                const orderNumber = orderNumberMatch[1];
+                try {
+                  // Fetch specific order
+                  const order = await wc.getOrder(parseInt(orderNumber));
+                  console.log('Found order:', orderNumber);
+                  return [{
+                    type: 'order',
+                    data: order,
+                    summary: `Order #${orderNumber}: ${order.status}, Total: ${order.currency_symbol}${order.total}`
+                  }];
+                } catch (err) {
+                  console.log('Order not found:', orderNumber);
+                  // Try to search for recent orders instead
+                  const recentOrders = await wc.getOrders({ per_page: 5, orderby: 'date', order: 'desc' });
+                  return recentOrders.map((order: any) => ({
+                    type: 'order',
+                    data: order,
+                    summary: `Order #${order.id}: ${order.status}`
+                  }));
+                }
+              } else {
+                // No specific order number, get recent orders
+                console.log('Fetching recent orders for context');
+                const recentOrders = await wc.getOrders({ per_page: 3, orderby: 'date', order: 'desc' });
+                return recentOrders.map((order: any) => ({
+                  type: 'order',
+                  data: order,
+                  summary: `Order #${order.id}: ${order.status}, Date: ${order.date_created}`
+                }));
+              }
+            }
             return [];
           }
           return [];
@@ -341,16 +380,41 @@ export async function POST(request: NextRequest) {
       }
     }
 
-    // Process WooCommerce product search results
+    // Process WooCommerce results (orders or products)
     if (wooCommerceSearchPromise) {
       const wooResult = contextResults[contextIndex++];
       if (wooResult && wooResult.status === 'fulfilled' && wooResult.value) {
-        const products = wooResult.value as any[];
-        if (products.length > 0) {
-          context += '\n\nRelevant products:\n';
-          products.forEach((product: {name: string; price: string; stock_status: string}) => {
-            context += `- ${product.name}: $${product.price} (${product.stock_status})\n`;
-          });
+        const wooData = wooResult.value as any[];
+        if (wooData.length > 0) {
+          // Check if this is order data or product data
+          if (wooData[0].type === 'order') {
+            context += '\n\nOrder Information:\n';
+            wooData.forEach((item: any) => {
+              const order = item.data;
+              context += `Order #${order.id}:\n`;
+              context += `  Status: ${order.status}\n`;
+              context += `  Date: ${order.date_created}\n`;
+              context += `  Total: ${order.currency_symbol || '$'}${order.total}\n`;
+              context += `  Customer: ${order.billing?.first_name} ${order.billing?.last_name}\n`;
+              context += `  Email: ${order.billing?.email}\n`;
+              if (order.shipping) {
+                context += `  Shipping: ${order.shipping.first_name} ${order.shipping.last_name}, ${order.shipping.city}, ${order.shipping.state} ${order.shipping.postcode}\n`;
+              }
+              if (order.line_items && order.line_items.length > 0) {
+                context += `  Items:\n`;
+                order.line_items.forEach((item: any) => {
+                  context += `    - ${item.name} x${item.quantity} - ${order.currency_symbol || '$'}${item.total}\n`;
+                });
+              }
+              context += '\n';
+            });
+          } else {
+            // Legacy product data format
+            context += '\n\nRelevant products:\n';
+            wooData.forEach((product: {name: string; price: string; stock_status: string}) => {
+              context += `- ${product.name}: $${product.price} (${product.stock_status})\n`;
+            });
+          }
         }
       }
     }
