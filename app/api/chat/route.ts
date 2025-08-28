@@ -41,6 +41,26 @@ const ChatRequestSchema = z.object({
 
 export async function POST(request: NextRequest) {
   try {
+    // Check critical environment variables
+    if (!process.env.NEXT_PUBLIC_SUPABASE_URL || 
+        !process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY ||
+        !process.env.SUPABASE_SERVICE_ROLE_KEY ||
+        !process.env.OPENAI_API_KEY) {
+      console.error('POST /api/chat missing critical environment variables', {
+        supabaseUrl: process.env.NEXT_PUBLIC_SUPABASE_URL ? 'present' : 'missing',
+        supabaseAnon: process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY ? 'present' : 'missing',
+        supabaseService: process.env.SUPABASE_SERVICE_ROLE_KEY ? 'present' : 'missing',
+        openai: process.env.OPENAI_API_KEY ? 'present' : 'missing'
+      });
+      return NextResponse.json(
+        { 
+          error: 'Service configuration incomplete',
+          message: 'The chat service is not properly configured. Please contact support.'
+        },
+        { status: 503 }
+      );
+    }
+
     const body = await request.json();
     const validatedData = ChatRequestSchema.parse(body);
     const { message, conversation_id, session_id, domain, config, demoId } = validatedData;

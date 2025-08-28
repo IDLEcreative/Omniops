@@ -2,10 +2,33 @@ import { NextRequest, NextResponse } from 'next/server';
 export const runtime = 'nodejs'
 export const dynamic = 'force-dynamic'
 import { createClient, createServiceRoleClient } from '@/lib/supabase-server';
+import { logger } from '@/lib/logger';
 import { unstable_cache } from 'next/cache';
 
 export async function GET(request: NextRequest) {
   try {
+    // Ensure required env is present for service role operations
+    const hasUrl = Boolean(process.env.NEXT_PUBLIC_SUPABASE_URL);
+    const hasServiceKey = Boolean(process.env.SUPABASE_SERVICE_ROLE_KEY);
+    if (!hasUrl || !hasServiceKey) {
+      console.error('GET /api/training misconfigured Supabase env', {
+        hasUrl,
+        hasServiceKey,
+        url: process.env.NEXT_PUBLIC_SUPABASE_URL ? 'present' : 'missing',
+        serviceKey: process.env.SUPABASE_SERVICE_ROLE_KEY ? 'present' : 'missing'
+      });
+      return NextResponse.json(
+        { 
+          error: 'Service configuration incomplete',
+          message: 'The service is not properly configured. Please contact support.',
+          details: process.env.NODE_ENV === 'development' ? {
+            missingUrl: !hasUrl,
+            missingServiceKey: !hasServiceKey
+          } : undefined
+        },
+        { status: 503 }
+      );
+    }
     // Parse pagination parameters
     const { searchParams } = new URL(request.url);
     const page = parseInt(searchParams.get('page') || '1');
@@ -26,7 +49,17 @@ export async function GET(request: NextRequest) {
       .order('created_at', { ascending: false })
       .range(offset, offset + limit - 1);
 
-    if (error) throw error;
+    if (error) {
+      logger.error('GET /api/training DB query failed', error, {
+        page,
+        limit,
+        offset,
+      });
+      return NextResponse.json(
+        { error: 'Failed to fetch training data from DB' },
+        { status: 500 }
+      );
+    }
 
     // Transform data for frontend - adapting scraped_pages to training data format
     const items = scrapedData?.map(item => ({
@@ -55,7 +88,7 @@ export async function GET(request: NextRequest) {
     
     return response;
   } catch (error) {
-    console.error('Error fetching training data:', error);
+    logger.error('GET /api/training unhandled error', error);
     return NextResponse.json(
       { error: 'Failed to fetch training data' },
       { status: 500 }

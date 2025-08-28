@@ -12,9 +12,9 @@ node_modules
 scraped-data/
 optimized-crawl-test/
 browser-automation/claude-*-screenshots/
-*.png
-*.jpg
-*.jpeg
+# Note: Do NOT globally ignore images. Public assets like `/public/avatars/*.png`
+# must be deployed for the UI. If you need to exclude large image dumps, add
+# directory-specific patterns instead (e.g., `scraped-data/`).
 test-*.js
 test-*.ts
 scripts/

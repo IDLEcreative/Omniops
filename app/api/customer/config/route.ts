@@ -57,6 +57,18 @@ interface CustomerConfig {
  */
 export async function GET(request: NextRequest) {
   try {
+    // Check environment configuration
+    if (!process.env.NEXT_PUBLIC_SUPABASE_URL || !process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY) {
+      console.error('GET /api/customer/config missing Supabase configuration');
+      return NextResponse.json(
+        { 
+          error: 'Service configuration incomplete',
+          message: 'The service is not properly configured. Please contact support.'
+        },
+        { status: 503 }
+      )
+    }
+
     const { searchParams } = new URL(request.url)
     const customerId = searchParams.get('customerId')
     const domain = searchParams.get('domain')

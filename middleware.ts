@@ -122,6 +122,8 @@ export const config = {
      * - _next/image (image optimization files)
      * - favicon.ico (favicon file)
      */
-    '/((?!_next/static|_next/image|favicon.ico).*)',
+    // Exclude Next internals and common static assets so middleware
+    // doesn't run for images, fonts, CSS/JS, and avatar files.
+    '/((?!_next/static|_next/image|favicon.ico|avatars/|.*\\.(?:svg|png|jpg|jpeg|gif|webp|ico|css|js|map|woff|woff2|ttf|otf)).*)',
   ],
 };

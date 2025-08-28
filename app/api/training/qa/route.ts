@@ -2,10 +2,26 @@ import { NextRequest, NextResponse } from 'next/server';
 export const runtime = 'nodejs'
 export const dynamic = 'force-dynamic'
 import { createClient, createServiceRoleClient } from '@/lib/supabase-server';
+import { logger } from '@/lib/logger';
 import { generateEmbeddings } from '@/lib/embeddings';
 
 export async function POST(request: NextRequest) {
   try {
+    // Validate environment configuration early for clearer errors in prod
+    const hasUrl = Boolean(process.env.NEXT_PUBLIC_SUPABASE_URL);
+    const hasAnon = Boolean(process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY);
+    const hasServiceKey = Boolean(process.env.SUPABASE_SERVICE_ROLE_KEY);
+    if (!hasUrl || !hasAnon || !hasServiceKey) {
+      logger.error('POST /api/training/qa misconfigured Supabase env', undefined, {
+        hasUrl,
+        hasAnon,
+        hasServiceKey,
+      });
+      return NextResponse.json(
+        { error: 'Service misconfigured: missing Supabase env' },
+        { status: 503 }
+      );
+    }
     const supabase = await createClient();
     const { data: { user } } = await supabase.auth.getUser();
     
@@ -37,7 +53,10 @@ export async function POST(request: NextRequest) {
       .select()
       .single();
 
-    if (insertError) throw insertError;
+    if (insertError) {
+      logger.error('POST /api/training/qa insert failed', insertError, { userId: user.id });
+      throw insertError;
+    }
 
     // Process embeddings asynchronously for better performance
     // This allows the UI to update immediately while processing continues
@@ -87,7 +106,7 @@ export async function POST(request: NextRequest) {
       }
     });
   } catch (error) {
-    console.error('Error creating Q&A training data:', error);
+    logger.error('POST /api/training/qa unhandled error', error);
     return NextResponse.json(
       { error: 'Failed to create training data' },
       { status: 500 }
