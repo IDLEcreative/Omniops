@@ -128,6 +128,7 @@ export async function POST(request: NextRequest) {
               query_embedding: embedding,
               match_threshold: 0.7,
               match_count: 5,
+              p_domain_id: null,  // Add required parameter
             });
             
             if (error) {
@@ -415,7 +416,7 @@ export async function POST(request: NextRequest) {
 
     // Get AI response
     const completion = await getOpenAIClient().chat.completions.create({
-      model: 'gpt-4o-mini',
+      model: 'gpt-4.1',
       messages,
       temperature: 0.7,
       max_tokens: 500,

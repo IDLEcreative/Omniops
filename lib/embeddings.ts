@@ -168,9 +168,9 @@ export async function generateEmbeddings(params: {
     // Generate embeddings
     const embeddings = await generateEmbeddingVectors(chunks);
     
-    // Prepare data for insertion
+    // Prepare data for insertion (for page_embeddings table)
     const embeddingRecords = chunks.map((chunk, index) => ({
-      content_id: params.contentId,
+      page_id: params.contentId,  // Changed from content_id to page_id
       chunk_text: chunk,
       embedding: embeddings[index],
       metadata: {
@@ -181,9 +181,9 @@ export async function generateEmbeddings(params: {
       },
     }));
     
-    // Store embeddings
+    // Store embeddings in correct table
     const { error } = await supabase
-      .from('content_embeddings')
+      .from('page_embeddings')  // Changed from content_embeddings to page_embeddings
       .insert(embeddingRecords);
     
     if (error) throw error;
@@ -239,14 +239,34 @@ export async function searchSimilarContent(
   const supabase = await createServiceRoleClient();
   
   try {
+    // First, look up the domain_id for this domain
+    let domainId: string | null = null;
+    if (domain) {
+      const { data: domainData, error: domainError } = await supabase
+        .from('domains')
+        .select('id')
+        .eq('domain', domain.replace('www.', ''))
+        .single();
+      
+      if (!domainError && domainData) {
+        domainId = domainData.id;
+        console.log(`Found domain_id ${domainId} for domain "${domain}"`);
+      } else {
+        console.log(`No domain found in database for "${domain}"`);
+        // No domain means no scraped content
+        return [];
+      }
+    }
+    
     // Generate embedding for the query
     const queryEmbedding = await generateQueryEmbedding(query);
     
-    // Search for similar content
+    // Search for similar content using the correct RPC signature
     const { data, error } = await supabase.rpc('search_embeddings', {
       query_embedding: queryEmbedding,
-      similarity_threshold: similarityThreshold,
-      match_count: limit
+      match_threshold: similarityThreshold,
+      match_count: limit,
+      p_domain_id: domainId  // Add the required domain_id parameter
     });
     
     if (error) {
@@ -254,37 +274,17 @@ export async function searchSimilarContent(
       throw error;
     }
     
-    // Filter results by domain if specified
-    let filteredData = data || [];
-    if (domain && filteredData.length > 0) {
-      // Filter results to only include URLs from the specified domain
-      filteredData = filteredData.filter((result: any) => {
-        if (result.url) {
-          try {
-            const url = new URL(result.url);
-            const resultDomain = url.hostname.replace('www.', '');
-            const targetDomain = domain.replace('www.', '');
-            return resultDomain === targetDomain;
-          } catch {
-            return false;
-          }
-        }
-        return false;
-      });
-      
-      console.log(`Filtered ${data?.length || 0} results to ${filteredData.length} for domain "${domain}"`);
-    }
+    const results = data || [];
     
-    console.log(`Search found ${filteredData.length} results for domain "${domain}" and query: "${query}"`);
+    console.log(`Search found ${results.length} results for domain "${domain}" and query: "${query}"`);
     
-    // If no results found for the specific domain, return empty array
-    // This prevents generic responses when domain has no content
-    if (filteredData.length === 0) {
-      console.log(`No embeddings found for domain: ${domain}`);
-      return [];
-    }
-    
-    return filteredData;
+    // Transform results to expected format
+    return results.map((result: any) => ({
+      content: result.content || result.chunk_text || '',
+      url: result.url || '',
+      title: result.title || 'Untitled',
+      similarity: result.similarity || 0
+    }));
   } catch (error) {
     console.error('Error searching similar content:', error);
     throw error;
