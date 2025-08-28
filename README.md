@@ -1,79 +1,24 @@
-# Customer Service Agent
+# AI Customer Service Agent
 
-An AI-powered customer service chat widget that can be embedded on any website. Built with Next.js, OpenAI, and Supabase.
-
-## 🚀 New: Owned Domains for 20x Faster Bot Training
-
-Train your customer service bot on your own website up to 20x faster! See [Quick Start Guide](./docs/QUICK-START-OWNED-DOMAINS.md) or [Full Documentation](./docs/OWNED-DOMAINS-FEATURE.md).
+A modern, AI-powered customer service chat widget that can be embedded on any website. Built with Next.js, TypeScript, and integrated with various AI providers for intelligent customer support.
 
 ## 🚀 Features
 
-### Core Features
-- **AI-Powered Chat**: Intelligent responses using OpenAI GPT-4
-- **Instant Demo**: Single URL input to generate live preview in seconds
-- **Hybrid Search**: Combines vector embeddings with real-time web search for accurate answers
-- **Website Content Learning**: Automatically scrapes and indexes your website content
-- **Content Auto-Refresh**: Keep your knowledge base up-to-date automatically
-- **Structured Data Extraction**: Extract FAQs, products, and contact info from web pages
-- **WooCommerce Full API Access**: Complete read/write access to all WooCommerce endpoints (products, orders, customers, refunds, shipping, taxes, and more)
-- **Easy Embedding**: Simple script tag integration
-- **Multi-tenant**: Support multiple customers with isolated configurations
+### Core Capabilities
+- **AI-Powered Conversations**: Intelligent responses using OpenAI GPT-4 or Anthropic Claude
+- **Embeddable Widget**: Simple script tag integration for any website
+- **Job Queue System**: Redis-based background processing for scalable operations
+- **Real-time Processing**: Asynchronous job processing with status tracking
+- **Multi-tenant Architecture**: Support multiple clients with isolated data
+- **Component-based UI**: Modern React components with TypeScript
 
-### New in v2.1.0 
-- **Owned Domains for 20x Faster Scraping**:
-  - Configure your company's domains in Admin panel
-  - Automatic detection and optimization
-  - Up to 100+ pages/second scraping speed
-  - 20 concurrent jobs with 20 browsers each
-  - No rate limiting on your own sites
-  - Perfect for training bots on large websites
-
-### New in v3.0.0
-- **Customer Verification System**:
-  - Progressive verification (none/basic/full) for minimal friction
-  - Automatic information extraction from messages
-  - Secure access to order history and account details
-  - GDPR-compliant audit logging
-  - Data masking for sensitive information
-  - Quick verification via name + order number
-  - Full verification via email matching
-  - See [Customer Verification Docs](./docs/CUSTOMER_VERIFICATION_SYSTEM.md)
-
-### New in v2.0.0
-- **Full WooCommerce API Integration**:
-  - Complete access to all WooCommerce REST API v3 endpoints
-  - Order management and refund processing
-  - Customer data management with verification
-  - Inventory tracking and updates
-  - Coupon and tax management
-  - Shipping configuration
-  - Real-time webhooks support
-  - Batch operations for bulk updates
-  - **Abandoned Cart Tracking**: Monitor and recover incomplete purchases using pending/on-hold orders
-
-### New in v1.1.0
-- **Enhanced Privacy Controls**: 
-  - 30-day configurable data retention
-  - User opt-out toggle in widget footer
-  - "Your data is never sold" trust signal
-  - GDPR consent management
-  - Data export and deletion tools
-- **Improved User Experience**:
-  - Simplified 2-minute setup with single URL input
-  - Real-time scraping progress indicators
-  - Theme presets (Light/Dark/Brand)
-  - WCAG AA accessibility compliance
-  - Live widget preview
-- **Advanced Configuration**:
-  - Contrast warnings for brand colors
-  - Framework-specific embed code (coming soon)
-  - Sync schedules for content updates
-  - Failed page error logging
-- **Admin Dashboard**:
-  - Unified navigation sidebar
-  - Privacy & Security settings
-  - Analytics dashboard (coming soon)
-  - Conversation monitoring (coming soon)
+### Technical Features
+- **Next.js 15**: Latest React framework with App Router
+- **TypeScript**: Full type safety throughout the application
+- **Redis Queue**: Background job processing and caching
+- **Docker Support**: Containerized deployment with worker services
+- **API-First Design**: RESTful APIs for all functionality
+- **Component Library**: Reusable UI components with documentation
 
 ## 📋 Table of Contents
 
@@ -82,628 +27,667 @@ Train your customer service bot on your own website up to 20x faster! See [Quick
 - [Configuration](#configuration)
 - [Architecture](#architecture)
 - [API Documentation](#api-documentation)
-- [Web Scraping](#web-scraping)
 - [Development](#development)
-- [Testing](#testing)
-- [Deployment](#deployment)
-- [Security](#security)
+- [Docker Deployment](#docker-deployment)
+- [Component Library](#component-library)
 - [Contributing](#contributing)
 
 ## 🏃 Quick Start
 
-### Try the Demo (No Setup Required!)
+### Prerequisites
 
-1. Visit [http://localhost:3000](http://localhost:3000)
-2. Enter your website URL
-3. Click "Generate Demo"
-4. See your AI assistant in action instantly!
+- Node.js 18+
+- Redis server
+- AI API key (OpenAI or Anthropic)
 
-### Enable Customer Verification (WooCommerce)
+### Basic Setup
 
-For customer service with order lookup and account access:
-1. Configure WooCommerce credentials in `.env.local`
-2. Run database setup: [Quick Start Guide](./docs/QUICK_START_CUSTOMER_VERIFICATION.md)
-3. Test with: `curl http://localhost:3000/api/woocommerce/customer-test?test=all`
-
-### Full Installation
-
-1. Clone the repository:
+1. **Clone the repository**:
    ```bash
-   git clone https://github.com/yourusername/customer-service-agent.git
+   git clone <repository-url>
    cd customer-service-agent
    ```
 
-2. Install dependencies:
+2. **Install dependencies**:
    ```bash
    npm install
    ```
 
-3. Set up environment variables:
+3. **Set up environment variables**:
    ```bash
    cp .env.example .env.local
+   # Edit .env.local with your configuration
    ```
 
-4. Set up the database:
+4. **Start Redis** (using Docker):
    ```bash
-   # Run the migrations in order
-   psql -U postgres -d your_database < supabase/migrations/001_initial_migration.sql
-   psql -U postgres -d your_database < supabase/migrations/002_add_auth.sql
-   psql -U postgres -d your_database < supabase/migrations/003_update_customer_configs.sql
-   psql -U postgres -d your_database < supabase/migrations/004_add_owned_domains.sql
-   # Additional migrations if needed
+   docker-compose -f docker-compose.dev.yml up redis -d
    ```
 
-5. Run the development server:
+5. **Run the development server**:
    ```bash
    npm run dev
    ```
 
-6. Open [http://localhost:3000](http://localhost:3000)
+6. **Open** [http://localhost:3000](http://localhost:3000) in your browser
 
 ## 📦 Installation
 
-### Prerequisites
-
-- Node.js 18+ 
-- PostgreSQL with pgvector extension
-- Supabase account
-- OpenAI API key
-- Crawlee and Playwright (for web scraping)
-
 ### Environment Variables
 
-Create a `.env.local` file with the following variables:
+Create a `.env.local` file with the following configuration:
 
 ```bash
-# Supabase
-NEXT_PUBLIC_SUPABASE_URL=your_supabase_url
-NEXT_PUBLIC_SUPABASE_ANON_KEY=your_anon_key
-SUPABASE_SERVICE_ROLE_KEY=your_service_role_key
+# AI Configuration
+OPENAI_API_KEY=sk-your_openai_api_key_here
+ANTHROPIC_API_KEY=sk-ant-your_anthropic_api_key_here  # Optional alternative
 
-# OpenAI
-OPENAI_API_KEY=your_openai_api_key
+# Redis Configuration
+REDIS_URL=redis://localhost:6379
 
-# Web scraping uses Crawlee and Playwright (no API key needed)
+# Security
+ENCRYPTION_KEY=your_32_character_encryption_key_here
+API_SECRET=your_api_secret_key_here
 
-# Encryption (32 characters)
-ENCRYPTION_KEY=your_32_character_encryption_key
+# Application Settings
+NODE_ENV=development
+NEXT_PUBLIC_APP_URL=http://localhost:3000
 
-# WooCommerce (optional)
-WOOCOMMERCE_URL=https://your-store.com
-WOOCOMMERCE_CONSUMER_KEY=your_consumer_key
-WOOCOMMERCE_CONSUMER_SECRET=your_consumer_secret
+# Optional: Database
+DATABASE_URL=your_database_connection_string
 
-# Cron Security (optional, for automated refresh)
-CRON_SECRET=your_cron_secret_key
+# Optional: Webhooks
+WEBHOOK_SECRET=your_webhook_secret_key
+```
+
+### Development Dependencies
+
+```bash
+# Install all dependencies
+npm install
+
+# Install specific dependency groups
+npm install --only=dev        # Development dependencies
+npm install --only=prod       # Production dependencies
 ```
 
 ## ⚙️ Configuration
 
-### Widget Configuration
+### Core Configuration Files
 
-Customers can configure their widget through the admin panel (`/admin`):
-
-- **Basic Settings**: Business name, welcome message
-- **Features**: Enable/disable WooCommerce, website scraping
-- **Appearance**: 
-  - Theme presets (Light/Dark/Brand)
-  - Custom colors with WCAG contrast warnings
-  - Position (bottom-right, bottom-left, top-right, top-left)
-  - Button text and welcome messages
-  - Advanced CSS for developers
-- **Privacy Controls**:
-  - Data retention periods (7-365 days)
-  - User rights (opt-out, data export, deletion)
-  - GDPR/CCPA compliance settings
-  - Encryption and security options
-- **WooCommerce**: 
-  - Full API access with read/write capabilities
-  - Store credentials (encrypted)
-  - Support for all endpoints (products, orders, customers, refunds, etc.)
-  - Real-time webhooks integration
-  - Multi-tenant configuration support
-- **Content Management**: 
-  - Scraping with progress indicators
-  - Sync schedules (daily/weekly/monthly)
-  - Failed page error logs
-
-### Embedding the Widget
-
-Add this script to any website:
-
-```html
-<!-- AI Chat Widget -->
-<script>
-window.ChatWidgetConfig = {
-  // Optional: Configure privacy settings
-  privacy: {
-    allowOptOut: true,
-    showPrivacyNotice: true,
-    retentionDays: 30
-  },
-  // Optional: Customize appearance
-  appearance: {
-    position: 'bottom-right',
-    primaryColor: '#4F46E5'
-  }
-};
-</script>
-<script src="https://your-domain.com/embed.js" async></script>
-<!-- End AI Chat Widget -->
-```
-
-### Widget API
-
-The widget exposes a global API for programmatic control:
+#### Next.js Configuration (`next.config.js`)
 
 ```javascript
-// Open/close the widget
-ChatWidget.open();
-ChatWidget.close();
+/** @type {import('next').NextConfig} */
+const nextConfig = {
+  // TypeScript and ESLint settings
+  typescript: {
+    ignoreBuildErrors: false
+  },
+  eslint: {
+    ignoreDuringBuilds: false
+  },
+  
+  // Performance optimizations
+  reactStrictMode: true,
+  poweredByHeader: false,
+  compress: true,
+  
+  // Security headers
+  async headers() {
+    return [{
+      source: '/(.*)',
+      headers: [
+        { key: 'X-DNS-Prefetch-Control', value: 'on' },
+        { key: 'X-XSS-Protection', value: '1; mode=block' },
+        { key: 'X-Frame-Options', value: 'SAMEORIGIN' },
+        { key: 'X-Content-Type-Options', value: 'nosniff' }
+      ]
+    }];
+  },
+  
+  // Docker deployment
+  output: 'standalone'
+};
 
-// Send a message
-ChatWidget.sendMessage('Hello!');
+module.exports = nextConfig;
+```
 
-// Privacy controls
-ChatWidget.privacy.optOut();      // Disable widget for user
-ChatWidget.privacy.optIn();       // Re-enable widget
-ChatWidget.privacy.clearData();   // Clear local storage
-ChatWidget.privacy.getStatus();   // Get privacy preferences
+#### TypeScript Configuration (`tsconfig.json`)
+
+```json
+{
+  "compilerOptions": {
+    "target": "ES2020",
+    "lib": ["dom", "dom.iterable", "esnext"],
+    "allowJs": true,
+    "skipLibCheck": true,
+    "strict": true,
+    "noEmit": true,
+    "esModuleInterop": true,
+    "module": "esnext",
+    "moduleResolution": "bundler",
+    "resolveJsonModule": true,
+    "isolatedModules": true,
+    "jsx": "preserve",
+    "incremental": true,
+    "plugins": [{ "name": "next" }],
+    "paths": {
+      "@/*": ["./*"]
+    },
+    "forceConsistentCasingInFileNames": true,
+    "noUncheckedIndexedAccess": true
+  },
+  "include": ["next-env.d.ts", "**/*.ts", "**/*.tsx", ".next/types/**/*.ts"],
+  "exclude": ["node_modules"]
+}
+```
+
+#### Docker Configuration
+
+**Main Application Container (`Dockerfile`)**
+```dockerfile
+FROM node:18-alpine AS base
+WORKDIR /app
+COPY package*.json ./
+RUN npm ci --only=production
+COPY . .
+RUN npm run build
+EXPOSE 3000
+CMD ["npm", "start"]
+```
+
+**Worker Service Container (`Dockerfile.worker`)**
+```dockerfile
+FROM node:18-alpine
+WORKDIR /app
+COPY package*.json ./
+RUN npm ci --only=production
+COPY . .
+RUN npm run build
+CMD ["node", "lib/workers/scraper-worker-service.js"]
+```
+
+**Development Environment (`docker-compose.dev.yml`)**
+```yaml
+version: '3.8'
+
+services:
+  # Redis for job queue and caching
+  redis:
+    image: redis:7-alpine
+    container_name: cs-redis
+    ports:
+      - "6379:6379"
+    volumes:
+      - redis-data:/data
+      - ./redis.conf:/usr/local/etc/redis/redis.conf
+    command: redis-server /usr/local/etc/redis/redis.conf
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  # Main application
+  app:
+    build: .
+    container_name: cs-app
+    ports:
+      - "3000:3000"
+    environment:
+      - NODE_ENV=development
+      - REDIS_URL=redis://redis:6379
+    depends_on:
+      redis:
+        condition: service_healthy
+    volumes:
+      - .:/app
+      - /app/node_modules
+
+  # Background worker
+  worker:
+    build:
+      context: .
+      dockerfile: Dockerfile.worker
+    container_name: cs-worker
+    environment:
+      - NODE_ENV=development
+      - REDIS_URL=redis://redis:6379
+    depends_on:
+      redis:
+        condition: service_healthy
+
+volumes:
+  redis-data:
+```
+
+#### Redis Configuration (`redis.conf`)
+
+```conf
+# Redis configuration for Customer Service Agent
+
+# Network and security
+bind 127.0.0.1
+port 6379
+protected-mode yes
+
+# Memory and persistence
+maxmemory 256mb
+maxmemory-policy allkeys-lru
+save 900 1
+save 300 10
+save 60 10000
+
+# Logging
+loglevel notice
+logfile ""
+
+# Performance
+tcp-keepalive 300
+timeout 0
+```
+
+### Package.json Scripts
+
+```json
+{
+  "scripts": {
+    "dev": "next dev",
+    "build": "next build",
+    "start": "next start",
+    "lint": "next lint",
+    "type-check": "tsc --noEmit",
+    
+    "docker:build": "docker-compose -f docker-compose.dev.yml build",
+    "docker:up": "docker-compose -f docker-compose.dev.yml up -d",
+    "docker:down": "docker-compose -f docker-compose.dev.yml down",
+    "docker:logs": "docker-compose -f docker-compose.dev.yml logs -f",
+    
+    "queue:start": "node lib/queue/job-processor.js",
+    "worker:start": "node lib/workers/scraper-worker-service.js",
+    
+    "test": "jest",
+    "test:watch": "jest --watch",
+    "test:coverage": "jest --coverage"
+  }
+}
 ```
 
 ## 🏗️ Architecture
-
-### Tech Stack
-
-- **Frontend**: Next.js 15, React 19, TypeScript, Tailwind CSS
-- **Backend**: Next.js API Routes
-- **Database**: Supabase (PostgreSQL)
-- **AI**: OpenAI GPT-4, Embeddings API
-- **Scraping**: Crawlee + Playwright (Mozilla Readability)
-- **Job Queue**: Redis
-- **E-commerce**: WooCommerce REST API
 
 ### Project Structure
 
 ```
 customer-service-agent/
-├── app/                    # Next.js app directory
-│   ├── api/               # API endpoints
-│   │   ├── chat/         # Chat endpoint
-│   │   ├── scrape/       # Web scraping
-│   │   ├── admin/        # Admin management
-│   │   ├── gdpr/         # GDPR compliance
-│   │   ├── woocommerce/  # E-commerce integration
-│   │   └── demo/         # Demo generation
-│   ├── admin/             # Admin interface
-│   ├── dashboard/         # Customer dashboard
-│   ├── chat/              # Chat interface
-│   ├── embed/             # Embeddable widget
-│   └── (routes)/          # Other pages
-├── components/            # React components
-│   ├── ui/               # shadcn/ui components
-│   ├── auth/             # Authentication
-│   ├── chat/             # Chat components
-│   ├── forms/            # Form components
-│   ├── layout/           # Layout components
-│   └── shared/           # Shared components
-├── lib/                   # Core business logic
-│   ├── supabase/         # Database clients
-│   ├── auth/             # Auth utilities
-│   ├── repositories/     # Data access layer
-│   ├── services/         # Business services
-│   ├── examples/         # Usage examples
-│   ├── redis.ts          # Redis client & job manager
-│   ├── config.ts         # Configuration schema
-│   ├── crawler-config.ts # Web scraping with Crawlee
-│   ├── content-extractor.ts  # Readability extraction
-│   ├── embeddings.ts     # Vector embeddings
-│   ├── encryption.ts     # Data encryption
-│   ├── woocommerce*.ts   # E-commerce integration
-│   └── rate-limit.ts     # Rate limiting
-├── public/                # Static assets
-│   └── embed.js          # Widget loader
-├── types/                 # TypeScript definitions
-│   ├── api/              # API types
-│   ├── database/         # Database types
-│   └── index.ts          # Common types
-├── docs/                  # Documentation
-│   ├── API/              # API documentation
-│   ├── Architecture/     # System design
-│   ├── Guides/           # How-to guides
-│   └── README.md         # Doc index
-├── __tests__/            # Test suite
-│   ├── api/              # API tests
-│   ├── app/              # Page tests
-│   ├── lib/              # Unit tests
-│   └── mocks/            # Test mocks
-├── scripts/              # Utility scripts
-├── supabase/             # Database migrations
-├── hooks/                # React hooks
-└── browser-automation/   # Experimental tools
+├── app/                          # Next.js App Router
+│   ├── api/                      # API routes
+│   │   ├── jobs/                 # Job management endpoints
+│   │   │   ├── [jobId]/         # Individual job operations
+│   │   │   └── route.ts         # Job creation and listing
+│   │   └── queue/               # Queue management
+│   │       └── route.ts         # Queue status and controls
+│   └── globals.css              # Global styles
+├── components/                   # React components
+│   ├── chat/                    # Chat-related components
+│   ├── dashboard/               # Dashboard components
+│   ├── forms/                   # Form components
+│   └── COMPONENT_TYPES.md       # Component documentation
+├── lib/                         # Core business logic
+│   ├── auth/                    # Authentication utilities
+│   ├── queue/                   # Job queue system
+│   │   ├── job-processor.ts     # Job processing logic
+│   │   └── queue-utils.ts       # Queue utilities
+│   ├── workers/                 # Background workers
+│   │   └── scraper-worker-service.ts  # Web scraping worker
+│   └── WOOCOMMERCE_TYPES.md     # WooCommerce type definitions
+├── public/                      # Static assets
+├── docker-compose.dev.yml       # Development Docker setup
+├── Dockerfile.worker            # Worker service container
+├── redis.conf                  # Redis configuration
+└── TYPE_DOCUMENTATION_INDEX.md # Type system documentation
 ```
 
-### Database Schema
+### Core Services
 
-The application uses these main tables:
+#### Job Queue System
+- **Technology**: Redis-based job queue
+- **Purpose**: Background processing of long-running tasks
+- **Components**:
+  - Job creation and management APIs
+  - Worker processes for job execution
+  - Queue monitoring and status tracking
+  - Retry and error handling mechanisms
 
-- `customer_configs` - Customer configuration and settings
-- `scraped_pages` - Indexed website content
-- `page_embeddings` - Vector embeddings for semantic search
-- `website_content` - Unified content storage with change tracking
-- `content_embeddings` - Enhanced embedding storage
-- `structured_extractions` - Extracted FAQs, products, etc.
-- `content_refresh_jobs` - Track refresh operations
-- `conversations` - Chat conversations
-- `messages` - Individual messages
-- `support_tickets` - Support ticket submissions
+#### Component Architecture
+- **Design System**: Modular, reusable components
+- **Documentation**: Each component group has dedicated README
+- **Type Safety**: Full TypeScript integration
+- **Testing**: Component-level testing with Jest
+
+#### Worker Services
+- **Containerized**: Docker-based worker processes
+- **Scalable**: Multiple worker instances supported
+- **Fault Tolerant**: Automatic retry and error recovery
+- **Monitoring**: Built-in job status and performance tracking
 
 ## 📡 API Documentation
 
-### Chat API
+### Job Management API
 
-**POST** `/api/chat`
-
-Send a message and receive an AI response.
+#### Create Job
+**POST** `/api/jobs`
 
 ```typescript
 // Request
 {
-  "message": "Hello, I need help",
-  "conversation_id": "uuid", // Optional
-  "session_id": "string",
-  "domain": "example.com", // Optional
-  "config": {
-    "features": {
-      "woocommerce": { "enabled": true },
-      "websiteScraping": { "enabled": true }
+  "type": "scrape_website",
+  "data": {
+    "url": "https://example.com",
+    "options": {
+      "crawl": true,
+      "maxPages": 50
     }
   }
 }
 
 // Response
 {
-  "message": "AI response text",
-  "conversation_id": "uuid",
-  "sources": [
-    {
-      "url": "https://example.com/page",
-      "title": "Page Title",
-      "relevance": 0.85
-    }
-  ]
+  "jobId": "job_123456_abc",
+  "status": "queued",
+  "createdAt": "2024-01-01T00:00:00Z"
 }
 ```
 
-### Scraping API
-
-**POST** `/api/scrape`
-
-Scrape and index website content. See [Web Scraping Documentation](#web-scraping) for detailed usage.
-
-```typescript
-// Request
-{
-  "url": "https://example.com",
-  "crawl": true, // false for single page
-  "max_pages": 50 // -1 for unlimited
-}
-
-// Response (Single Page)
-{
-  "status": "completed",
-  "pages_scraped": 1,
-  "message": "Successfully indexed page"
-}
-
-// Response (Crawl Job)
-{
-  "status": "started",
-  "job_id": "crawl_123456_abc",
-  "message": "Started crawling website"
-}
-```
-
-**GET** `/api/scrape?job_id={id}`
-
-Check crawl job status.
+#### Get Job Status
+**GET** `/api/jobs/[jobId]`
 
 ```typescript
 // Response
 {
-  "jobId": "crawl_123456_abc",
-  "status": "processing", // "completed" | "failed"
-  "progress": 45,
-  "total": 150,
-  "completed": 68,
-  "failed": 2,
-  "skipped": 5
+  "jobId": "job_123456_abc",
+  "status": "processing",  // queued, processing, completed, failed
+  "progress": {
+    "current": 25,
+    "total": 100,
+    "percentage": 25
+  },
+  "result": null,  // Available when status is "completed"
+  "error": null,   // Available when status is "failed"
+  "createdAt": "2024-01-01T00:00:00Z",
+  "updatedAt": "2024-01-01T00:05:00Z"
 }
 ```
 
-### Search API
+#### List Jobs
+**GET** `/api/jobs`
 
-**POST** `/api/search`
+Query parameters:
+- `status`: Filter by job status
+- `type`: Filter by job type
+- `limit`: Number of results (default: 20)
+- `offset`: Pagination offset
 
-Hybrid search combining embeddings and live web results.
+### Queue Management API
 
-```typescript
-// Request
-{
-  "query": "search terms",
-  "domainId": "uuid",
-  "searchType": "hybrid", // "embeddings" | "web" | "hybrid"
-  "limit": 5
-}
-```
-
-### Extract API
-
-**POST** `/api/extract`
-
-Extract structured data from web pages.
+#### Get Queue Status
+**GET** `/api/queue`
 
 ```typescript
-// Request
+// Response
 {
-  "url": "https://example.com/faq",
-  "domainId": "uuid",
-  "extractType": "faq" // "faq" | "products" | "contact" | "custom"
-}
-```
-
-### Refresh API
-
-**POST** `/api/refresh`
-
-Refresh content to keep embeddings current.
-
-```typescript
-// Request
-{
-  "domainId": "uuid",
-  "refreshType": "incremental", // "full" | "incremental" | "discover"
-  "options": {
-    "maxPages": 50
+  "stats": {
+    "waiting": 5,
+    "active": 2,
+    "completed": 150,
+    "failed": 3,
+    "delayed": 0
+  },
+  "workers": {
+    "active": 2,
+    "total": 4
   }
 }
 ```
 
-### Admin APIs
-
-- **GET/POST** `/api/admin/config` - Manage customer configuration
-- **POST** `/api/admin/test-connection` - Test WooCommerce connection
-- **GET** `/api/cron/refresh` - Automated content refresh endpoint
-
-### Privacy APIs
-
-**POST** `/api/privacy/delete`
-
-Delete all user data (GDPR right to erasure).
+#### Queue Controls
+**POST** `/api/queue`
 
 ```typescript
-// Request
+// Pause queue
 {
-  "userId": "session_123_abc"
+  "action": "pause"
 }
 
-// Response
+// Resume queue
 {
-  "success": true,
-  "message": "All user data has been deleted successfully"
+  "action": "resume"
 }
-```
 
-**GET** `/privacy/export`
-
-Export user data (GDPR right to data portability).
-
-```typescript
-// Query params
-?user=session_123_abc
-
-// Response: JSON file download
+// Clear completed jobs
 {
-  "export_date": "2024-01-01T00:00:00Z",
-  "user_id": "session_123_abc",
-  "conversations": [...],
-  "messages": [...]
+  "action": "clean",
+  "type": "completed",
+  "age": 3600000  // 1 hour in milliseconds
 }
 ```
-
-### Demo API
-
-**POST** `/api/demo`
-
-Generate instant demo from website URL.
-
-```typescript
-// Request
-{
-  "url": "https://example.com"
-}
-
-// Response
-{
-  "demoId": "demo_1234_abc",
-  "widgetUrl": "/demo/demo_1234_abc",
-  "expiresIn": 3600
-}
-```
-
-[View full API documentation →](docs/API.md)
-
-## 🕷️ Web Scraping
-
-The application uses an advanced web scraping system built with Crawlee and Mozilla Readability for content extraction.
-
-### Key Features
-
-- **Full-site crawling** with configurable limits (including unlimited)
-- **Smart content extraction** using Mozilla Readability
-- **Content deduplication** to avoid redundant processing
-- **Adaptive rate limiting** to respect server resources
-- **Redis-backed job management** for scalability
-- **Source attribution** for AI responses
-
-### Quick Start
-
-```bash
-# Start Redis (required for crawling)
-docker-compose up -d
-
-# Single page scraping
-curl -X POST http://localhost:3000/api/scrape \
-  -H "Content-Type: application/json" \
-  -d '{"url": "https://example.com/page"}'
-
-# Full website crawling
-curl -X POST http://localhost:3000/api/scrape \
-  -H "Content-Type: application/json" \
-  -d '{"url": "https://example.com", "crawl": true, "max_pages": -1}'
-```
-
-### Documentation
-
-#### Web Scraping
-- [Web Scraping Guide](docs/WEB_SCRAPING.md) - Complete usage guide
-- [Scraping API Reference](docs/SCRAPING_API.md) - Detailed API documentation
-- [Architecture Overview](docs/SCRAPING_ARCHITECTURE.md) - System design and flow
-
-#### WooCommerce Integration
-- [WooCommerce Full API Documentation](docs/WOOCOMMERCE_FULL_API.md) - Comprehensive API documentation
-- [WooCommerce Integration Guide](docs/WOOCOMMERCE_INTEGRATION_GUIDE.md) - Quick setup guide
-- [WooCommerce Developer Reference](docs/WOOCOMMERCE_DEVELOPER_REFERENCE.md) - Method reference and examples
-- [WooCommerce API Endpoints](docs/woocommerce-api-endpoints.md) - Complete endpoint list
-- [Abandoned Cart Tracking](docs/WOOCOMMERCE_ABANDONED_CARTS.md) - Monitor and recover incomplete purchases
 
 ## 🛠️ Development
 
 ### Running Locally
 
 ```bash
-# Install dependencies
-npm install
-
-# Run development server
+# Start development environment
 npm run dev
 
-# Run tests
-npm test
+# Or with Docker
+npm run docker:up
 
-# Build for production
-npm run build
+# Monitor logs
+npm run docker:logs
+
+# Stop services
+npm run docker:down
 ```
-
-### Code Style
-
-The project uses:
-- ESLint for linting
-- Prettier for formatting
-- TypeScript for type safety
-
-### Project Commands
-
-```bash
-npm run dev          # Start development server
-npm run build        # Build for production
-npm run start        # Start production server
-npm run lint         # Run ESLint
-npm test            # Run all tests
-npm run test:unit   # Run unit tests only
-npm run test:watch  # Run tests in watch mode
-```
-
-## 🧪 Testing
-
-The project includes comprehensive test coverage:
-
-- **Unit Tests**: Business logic and utilities
-- **Integration Tests**: API routes and database operations
-- **Component Tests**: React components
-
-Run tests with:
-
-```bash
-npm test                    # Run all tests
-npm run test:coverage      # Generate coverage report
-npm run test:watch         # Watch mode
-```
-
-## 🚀 Deployment
-
-### Vercel (Recommended)
-
-1. Push to GitHub
-2. Import project in Vercel
-3. Add environment variables
-4. Deploy
-
-### Self-Hosting
-
-1. Build the application:
-   ```bash
-   npm run build
-   ```
-
-2. Set up PostgreSQL with pgvector
-3. Run database migrations
-4. Start the server:
-   ```bash
-   npm start
-   ```
-
-### Production Checklist
-
-- [ ] Set strong encryption key
-- [ ] Enable Supabase RLS policies
-- [ ] Configure CORS for your domains
-- [ ] Set up monitoring (e.g., Sentry)
-- [ ] Configure rate limiting
-- [ ] Enable HTTPS
-- [ ] Set up backups
-
-## 🔒 Security
-
-### Security Features
-
-- **Encrypted Credentials**: Customer WooCommerce credentials are encrypted
-- **Row Level Security**: Database isolation between customers
-- **Rate Limiting**: Prevent API abuse
-- **Input Validation**: All inputs are validated with Zod
-- **CORS Protection**: Restrict widget usage to allowed domains
-- **Privacy Compliance**:
-  - GDPR & CCPA compliant
-  - Configurable data retention (7-365 days)
-  - User opt-out capabilities
-  - Data export and deletion tools
-  - IP anonymization option
-  - Automatic data cleanup
-- **Data Protection**:
-  - AES-256 encryption at rest
-  - TLS 1.3 for data in transit
-  - Sensitive data masking
-  - Consent management
-
-### Best Practices
-
-1. Always use environment variables for secrets
-2. Enable Supabase RLS policies in production
-3. Regularly update dependencies
-4. Monitor for suspicious activity
-5. Implement proper error handling
-
-## 🤝 Contributing
-
-We welcome contributions! Please see our [Contributing Guide](CONTRIBUTING.md) for details.
 
 ### Development Workflow
 
-1. Fork the repository
-2. Create a feature branch (`git checkout -b feature/amazing-feature`)
-3. Commit your changes (`git commit -m 'Add amazing feature'`)
-4. Push to the branch (`git push origin feature/amazing-feature`)
-5. Open a Pull Request
+1. **Code Changes**: Edit files in your IDE
+2. **Hot Reload**: Next.js automatically reloads changes
+3. **Testing**: Run tests with `npm test`
+4. **Type Checking**: Verify types with `npm run type-check`
+5. **Linting**: Check code style with `npm run lint`
+
+### Available Scripts
+
+```bash
+# Development
+npm run dev              # Start dev server
+npm run build           # Build for production
+npm run start           # Start production server
+
+# Code Quality
+npm run lint            # ESLint checking
+npm run type-check      # TypeScript checking
+npm test               # Run tests
+npm run test:watch     # Watch mode testing
+
+# Docker Operations
+npm run docker:build   # Build containers
+npm run docker:up      # Start all services
+npm run docker:down    # Stop all services
+npm run docker:logs    # View container logs
+
+# Background Services
+npm run queue:start    # Start job processor
+npm run worker:start   # Start worker service
+```
+
+## 🐳 Docker Deployment
+
+### Development Environment
+
+```bash
+# Build and start all services
+docker-compose -f docker-compose.dev.yml up --build -d
+
+# View logs from all services
+docker-compose -f docker-compose.dev.yml logs -f
+
+# Stop and remove containers
+docker-compose -f docker-compose.dev.yml down
+```
+
+### Production Deployment
+
+```bash
+# Build production images
+docker build -t cs-agent:latest .
+docker build -f Dockerfile.worker -t cs-worker:latest .
+
+# Run with production configuration
+docker run -d \\
+  --name cs-agent \\
+  -p 3000:3000 \\
+  -e NODE_ENV=production \\
+  -e REDIS_URL=redis://redis:6379 \\
+  cs-agent:latest
+
+# Run worker service
+docker run -d \\
+  --name cs-worker \\
+  -e NODE_ENV=production \\
+  -e REDIS_URL=redis://redis:6379 \\
+  cs-worker:latest
+```
+
+### Container Health Checks
+
+```bash
+# Check application health
+curl http://localhost:3000/api/health
+
+# Check Redis connection
+docker exec cs-redis redis-cli ping
+
+# Monitor container status
+docker ps
+docker stats
+```
+
+## 📚 Component Library
+
+The application uses a component-based architecture with dedicated documentation:
+
+- **[Chat Components](components/chat/README.md)**: Real-time messaging interface
+- **[Dashboard Components](components/dashboard/README.md)**: Admin and analytics interfaces  
+- **[Form Components](components/forms/README.md)**: User input and validation
+- **[Auth Components](lib/auth/README.md)**: Authentication and authorization
+
+### Component Types
+
+See **[COMPONENT_TYPES.md](components/COMPONENT_TYPES.md)** for detailed type definitions and component interfaces.
+
+### TypeScript Integration
+
+- **Full Type Safety**: All components are fully typed
+- **Interface Documentation**: Comprehensive type definitions
+- **IDE Support**: IntelliSense and auto-completion
+- **Build-time Checking**: Type errors caught during build
+
+## 🔒 Security
+
+### Security Measures
+
+- **Environment Variables**: Sensitive data stored securely
+- **HTTPS Only**: Production requires secure connections
+- **Input Validation**: All inputs validated and sanitized
+- **Rate Limiting**: API endpoints protected from abuse
+- **CORS Protection**: Cross-origin requests controlled
+- **Content Security Policy**: XSS and injection protection
+
+### Best Practices
+
+1. **Never commit secrets** to version control
+2. **Use environment variables** for configuration
+3. **Validate all inputs** on both client and server
+4. **Implement proper authentication** and authorization
+5. **Keep dependencies updated** to patch security vulnerabilities
+6. **Monitor for security issues** in production
+
+## 📊 Monitoring
+
+### Application Monitoring
+
+```bash
+# View application logs
+docker logs cs-agent -f
+
+# Monitor job queue
+curl http://localhost:3000/api/queue
+
+# Check worker status
+docker logs cs-worker -f
+```
+
+### Performance Monitoring
+
+- **Redis**: Monitor queue performance and memory usage
+- **Next.js**: Built-in performance metrics
+- **Docker**: Container resource usage
+- **API**: Response times and error rates
+
+## 🤝 Contributing
+
+### Development Setup
+
+1. **Fork the repository**
+2. **Clone your fork**: `git clone <your-fork-url>`
+3. **Install dependencies**: `npm install`
+4. **Create a feature branch**: `git checkout -b feature/amazing-feature`
+5. **Make your changes**
+6. **Run tests**: `npm test`
+7. **Check types**: `npm run type-check`
+8. **Lint code**: `npm run lint`
+9. **Commit changes**: `git commit -m 'Add amazing feature'`
+10. **Push to branch**: `git push origin feature/amazing-feature`
+11. **Open a Pull Request**
+
+### Code Style
+
+- **TypeScript**: Use strict type checking
+- **ESLint**: Follow configured linting rules
+- **Prettier**: Automatic code formatting
+- **Conventional Commits**: Use semantic commit messages
+
+### Testing
+
+```bash
+# Run all tests
+npm test
+
+# Run tests in watch mode
+npm run test:watch
+
+# Generate coverage report
+npm run test:coverage
+```
+
+## 📞 Support
+
+### Documentation
+
+- **[Component Documentation](components/)**: Individual component guides
+- **[API Documentation](#api-documentation)**: Complete API reference
+- **[Type Documentation](TYPE_DOCUMENTATION_INDEX.md)**: TypeScript type definitions
+
+### Getting Help
+
+1. **Check the documentation** first
+2. **Search existing issues** for similar problems  
+3. **Create a new issue** with detailed information
+4. **Provide reproduction steps** and environment details
 
 ## 📄 License
 
@@ -711,17 +695,11 @@ This project is licensed under the MIT License - see the [LICENSE](LICENSE) file
 
 ## 🙏 Acknowledgments
 
-- Built with [Next.js](https://nextjs.org/)
-- AI powered by [OpenAI](https://openai.com/)
-- Database by [Supabase](https://supabase.com/)
-- Web scraping by Crawlee and Playwright
-
-## 📞 Support
-
-- Documentation: [docs/](docs/)
-- Issues: [GitHub Issues](https://github.com/yourusername/customer-service-agent/issues)
-- Email: support@example.com
+- **Next.js**: React framework for production
+- **TypeScript**: Type-safe JavaScript
+- **Redis**: In-memory data structure store
+- **Docker**: Containerization platform
 
 ---
 
-Made with ❤️ by Your Team
+Built with ❤️ using modern web technologies

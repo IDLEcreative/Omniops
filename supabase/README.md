@@ -19,12 +19,20 @@ supabase/
 ## Migrations
 
 ### Migration Files
-SQL files that define database schema changes:
+SQL files that define database schema changes (in chronological order):
 
-1. **002_add_auth.sql** - Authentication tables and policies
-2. **003_update_customer_configs.sql** - Customer configuration updates
-3. **004_add_owned_domains.sql** - Owned domains feature
-4. **20240201_firecrawl_enhancements.sql** - Firecrawl/scraping improvements
+1. **000_complete_schema.sql** - Complete initial database schema
+2. **000_complete_schema_fixed.sql** - Fixed version of complete schema  
+3. **001_initial_migration.sql** - Initial migration setup
+4. **001_remove_redundant_tables.sql** - Clean up redundant database tables
+5. **002_add_auth.sql** - Authentication tables and policies
+6. **003_update_customer_configs.sql** - Customer configuration updates
+7. **004_add_owned_domains.sql** - Owned domains feature
+8. **20240101000000_create_chat_tables.sql** - Chat system tables
+9. **20240201_firecrawl_enhancements.sql** - Firecrawl/scraping improvements
+10. **20250125_add_ai_optimized_tables.sql** - AI optimization tables
+11. **20250125_add_domain_patterns.sql** - Domain pattern matching
+12. **20250127_performance_indexes.sql** - Performance optimization indexes
 
 ### Running Migrations
 
@@ -36,8 +44,19 @@ psql -U postgres -d your_database < supabase/migrations/002_add_auth.sql
 # Or using Supabase CLI
 supabase db push
 
-# Run all migrations in order
-for file in supabase/migrations/*.sql; do
+# Run all migrations in order (recommended sequence)
+psql -U postgres -d your_database < supabase/migrations/000_complete_schema_fixed.sql
+psql -U postgres -d your_database < supabase/migrations/002_add_auth.sql
+psql -U postgres -d your_database < supabase/migrations/003_update_customer_configs.sql
+psql -U postgres -d your_database < supabase/migrations/004_add_owned_domains.sql
+psql -U postgres -d your_database < supabase/migrations/20240101000000_create_chat_tables.sql
+psql -U postgres -d your_database < supabase/migrations/20250125_add_ai_optimized_tables.sql
+psql -U postgres -d your_database < supabase/migrations/20250125_add_domain_patterns.sql
+psql -U postgres -d your_database < supabase/migrations/20250127_performance_indexes.sql
+
+# Or run all in sequence (be careful of order)
+for file in supabase/migrations/000_complete_schema_fixed.sql supabase/migrations/002_add_auth.sql supabase/migrations/003_update_customer_configs.sql supabase/migrations/004_add_owned_domains.sql supabase/migrations/20240101000000_create_chat_tables.sql supabase/migrations/20250125_add_ai_optimized_tables.sql supabase/migrations/20250125_add_domain_patterns.sql supabase/migrations/20250127_performance_indexes.sql; do
+  echo "Running migration: $file"
   psql -U postgres -d your_database < "$file"
 done
 ```

@@ -24,7 +24,7 @@ describe('ChatService', () => {
       }
     }
 
-    ;(createServiceRoleClient as jest.Mock).mockResolvedValue(mockSupabaseClient)
+    ;(createServiceRoleClient as jest.Mock).mockReturnValue(mockSupabaseClient)
     
     chatService = new ChatService()
   })

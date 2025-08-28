@@ -98,6 +98,31 @@ An AI-powered customer service chat system that integrates with WordPress/WooCom
 - [ ] Product recommendations based on history
 - [ ] Automated FAQ generation from chat history
 
+#### 3.4 Smart Periodic Scraper (High Priority - 93% Cost Reduction)
+- [ ] **Phase 1: Core Implementation (Week 1-2)**
+  - [ ] Database schema implementation (5 core tables)
+  - [ ] Change detection engine (HTTP headers, content hashing)
+  - [ ] Incremental scraping logic (15 min vs 7 hours)
+  - [ ] Job queue management with Redis
+  - [ ] Basic UI controls in training dashboard
+- [ ] **Phase 2: Scheduling System (Week 3)**
+  - [ ] Cron-based scheduling service
+  - [ ] Manual, Scheduled, and Smart modes
+  - [ ] Page-type specific schedules (products, news, static)
+  - [ ] Real-time progress monitoring via WebSocket
+  - [ ] Notification system for changes detected
+- [ ] **Phase 3: Analytics & Optimization (Week 4)**
+  - [ ] Change pattern analysis and heatmaps
+  - [ ] Performance metrics dashboard
+  - [ ] Smart mode AI predictions
+  - [ ] Cost savings calculator
+  - [ ] Auto-optimization recommendations
+- [ ] **Documentation**: See `/docs/SMART_PERIODIC_SCRAPER_*.md`
+  - Implementation Plan (1,138 lines)
+  - Migration Scripts (PostgreSQL)
+  - API Examples (Complete request/response)
+  - Deployment Checklist
+
 ### Phase 4: Scale & Optimize (Month 2)
 
 #### 4.1 Performance Optimization
@@ -150,12 +175,17 @@ An AI-powered customer service chat system that integrates with WordPress/WooCom
 - 99.9% uptime
 - Database query time < 100ms
 - Widget load time < 500ms
+- **Scraping efficiency: 93% cost reduction**
+- **Incremental scrape time: < 15 minutes (vs 7 hours full)**
+- **Change detection accuracy: > 99%**
 
 ### Business KPIs
 - Customer satisfaction score > 4.5/5
 - First response time < 30 seconds
 - Resolution rate > 80%
 - Conversion lift > 15%
+- **Bot knowledge freshness: < 2 hours for critical pages**
+- **Scraping cost savings: > $800/month per customer**
 
 ### Usage Targets
 - Month 1: 100 active sites
@@ -168,9 +198,10 @@ An AI-powered customer service chat system that integrates with WordPress/WooCom
 ### Current
 - **Frontend**: Next.js 15, React 19, TypeScript, Tailwind CSS
 - **Backend**: Next.js API Routes, Node.js
-- **Database**: Supabase (PostgreSQL)
+- **Database**: Supabase (PostgreSQL with pgvector)
 - **AI**: OpenAI GPT-4
-- **Cache**: Redis (planned)
+- **Cache**: Redis (for job queues and caching)
+- **Web Scraping**: Crawlee + Playwright, Mozilla Readability
 - **Hosting**: Local development → Vercel (planned)
 
 ### Future Considerations
@@ -220,6 +251,12 @@ An AI-powered customer service chat system that integrates with WordPress/WooCom
 2. **Tomorrow**: Deploy to staging environment
 3. **This Week**: Test with real WooCommerce store
 4. **Next Week**: Launch beta with 10 pilot customers
+5. **Priority Feature**: Implement Smart Periodic Scraper
+   - Run database migrations (5 tables)
+   - Build incremental scraping engine
+   - Add scheduling UI to training dashboard
+   - Expected completion: 4 weeks
+   - ROI: 93% reduction in scraping costs
 
 ## 📝 Notes
 

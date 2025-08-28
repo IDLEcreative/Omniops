@@ -57,6 +57,34 @@ const nextConfig = {
           },
         ],
       },
+      // Ensure Next.js static CSS is served with the correct MIME type
+      {
+        source: '/_next/static/css/:path*',
+        headers: [
+          {
+            key: 'Content-Type',
+            value: 'text/css; charset=utf-8',
+          },
+          {
+            key: 'Cache-Control',
+            value: 'public, max-age=31536000, immutable',
+          },
+        ],
+      },
+      // Ensure Next.js JS chunks are served with the correct MIME type
+      {
+        source: '/_next/static/chunks/:path*',
+        headers: [
+          {
+            key: 'Content-Type',
+            value: 'application/javascript; charset=utf-8',
+          },
+          {
+            key: 'Cache-Control',
+            value: 'public, max-age=31536000, immutable',
+          },
+        ],
+      },
       {
         source: '/(.*)\\.(js|css|woff|woff2|ttf|otf)',
         headers: [

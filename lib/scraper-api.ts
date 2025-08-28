@@ -1320,10 +1320,10 @@ export async function getHealthStatus(): Promise<{
     
     const aiMetrics = aiOptimizationMonitor.getMetrics();
     console.log(`[HEALTH] AI optimization metrics:`, {
-      totalOptimizations: aiMetrics.totalOptimizations,
-      cacheHits: aiMetrics.cacheHits,
-      cacheMisses: aiMetrics.cacheMisses,
-      averageReduction: aiMetrics.averageTokenReduction
+      totalProcessed: aiMetrics.totalProcessed,
+      totalOptimized: aiMetrics.totalOptimized,
+      cacheHitRate: aiMetrics.cacheHitRate,
+      averageCompressionRatio: aiMetrics.averageCompressionRatio
     });
     
     const healthStatus = {

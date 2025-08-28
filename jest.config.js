@@ -13,9 +13,9 @@ const customJestConfig = {
     customExportConditions: [''],
   },
   moduleNameMapper: {
-    '^@/(.*)$': '<rootDir>/$1',
     '^@woocommerce/woocommerce-rest-api$': '<rootDir>/__mocks__/@woocommerce/woocommerce-rest-api.js',
     '^@supabase/supabase-js$': '<rootDir>/__mocks__/@supabase/supabase-js.js',
+    '^@/(.*)$': '<rootDir>/$1',
   },
   testMatch: [
     '**/__tests__/**/*.test.(ts|tsx|js)',

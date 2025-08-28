@@ -127,6 +127,15 @@ Required environment variables (copy `.env.example` to `.env.local`):
 3. Start dev server: `npm run dev`
 4. Access at http://localhost:3000
 
+### Port Configuration
+- **IMPORTANT**: Always ensure the development server runs on port 3000
+- If port 3000 is in use, kill existing processes first:
+  ```bash
+  pkill -f "next dev"  # Kill any Next.js dev servers
+  lsof -i :3000        # Check what's using port 3000
+  ```
+- The application is configured to use port 3000 for consistency
+
 ### Code Conventions
 - Use TypeScript strict mode
 - Follow existing component patterns in `components/ui/`

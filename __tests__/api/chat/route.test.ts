@@ -6,8 +6,13 @@ import { checkDomainRateLimit } from '@/lib/rate-limit'
 import OpenAI from 'openai'
 
 // Mock dependencies
-jest.mock('@/lib/supabase/server')
-jest.mock('@/lib/rate-limit')
+jest.mock('@/lib/supabase/server', () => ({
+  createClient: jest.fn(),
+  createServiceRoleClient: jest.fn(),
+}))
+jest.mock('@/lib/rate-limit', () => ({
+  checkDomainRateLimit: jest.fn(),
+}))
 jest.mock('openai')
 jest.mock('@/lib/woocommerce', () => ({
   searchProducts: jest.fn().mockResolvedValue([]),
@@ -64,8 +69,8 @@ describe('/api/chat', () => {
       rpc: jest.fn().mockResolvedValue({ data: [], error: null }),
     }
 
-    ;(createClient as jest.Mock).mockResolvedValue(mockSupabaseClient)
-    ;(createServiceRoleClient as jest.Mock).mockResolvedValue(mockAdminSupabaseClient)
+    ;(createClient as jest.Mock).mockReturnValue(mockSupabaseClient)
+    ;(createServiceRoleClient as jest.Mock).mockReturnValue(mockAdminSupabaseClient)
 
     // Mock OpenAI
     mockOpenAIInstance = {

@@ -1,8 +1,8 @@
-import Redis from 'ioredis';
-import { getRedisClient } from './redis';
+import { getRedisClient } from './redis-unified';
+import type { ResilientRedisClient } from './redis-unified';
 
 export class WooCommerceDashboardCache {
-  private redis: Redis;
+  private redis: ResilientRedisClient;
   
   // Cache TTLs in seconds - different data needs different freshness
   private readonly TTL = {
@@ -146,11 +146,17 @@ export class WooCommerceDashboardCache {
   async isCacheStale(tenantId: string, maxAge: number = 60): Promise<boolean> {
     try {
       const key = this.getDashboardKey(tenantId);
-      const ttl = await this.redis.ttl(key);
-      
-      // If TTL is less than half of max age, consider it stale
+      // TTL method not available in ResilientRedisClient
+      // Using a different approach - check cached timestamp
+      const cached = await this.redis.get(key);
+      if (!cached) return true;
+      const data = JSON.parse(cached);
+      if (!data.cachedAt) return true;
+      const cachedAt = new Date(data.cachedAt).getTime();
+      const age = (Date.now() - cachedAt) / 1000;
+      // If age is more than half of max age, consider it stale
       // This allows for background refresh before cache expires
-      return ttl < (maxAge / 2);
+      return age > (maxAge / 2);
     } catch (error) {
       return true; // If we can't check, assume it's stale
     }

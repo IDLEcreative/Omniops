@@ -6,7 +6,9 @@ import { scrapePage, crawlWebsite, checkCrawlStatus } from '@/lib/scraper-api'
 import OpenAI from 'openai'
 
 // Mock dependencies
-jest.mock('@/lib/supabase/server')
+jest.mock('@/lib/supabase/server', () => ({
+  createServiceRoleClient: jest.fn(),
+}))
 jest.mock('@/lib/scraper-api')
 jest.mock('openai')
 
@@ -36,7 +38,7 @@ describe('/api/scrape', () => {
         }),
       })),
     }
-    ;(createServiceRoleClient as jest.Mock).mockResolvedValue(mockSupabaseClient)
+    ;(createServiceRoleClient as jest.Mock).mockReturnValue(mockSupabaseClient)
 
     // Mock OpenAI
     

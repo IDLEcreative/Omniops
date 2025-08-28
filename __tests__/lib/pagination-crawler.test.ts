@@ -3,14 +3,12 @@ import { PaginationCrawler, PaginationOptions, CatalogResult } from '@/lib/pagin
 import { NormalizedProduct } from '@/lib/product-normalizer'
 
 // Mock the dependencies
-jest.mock('@/lib/ecommerce-extractor')
-
-const mockEcommerceExtractor = {
-  extractEcommerce: jest.fn()
-}
+const mockExtractEcommerce = jest.fn()
 
 jest.mock('@/lib/ecommerce-extractor', () => ({
-  EcommerceExtractor: mockEcommerceExtractor
+  EcommerceExtractor: {
+    extractEcommerce: mockExtractEcommerce
+  }
 }))
 
 // Mock Playwright page object
@@ -37,7 +35,7 @@ describe('PaginationCrawler', () => {
     mockPage.waitForSelector.mockResolvedValue(true)
     
     // Default extractor response
-    mockEcommerceExtractor.extractEcommerce.mockResolvedValue({
+    mockExtractEcommerce.mockResolvedValue({
       platform: 'generic-ecommerce',
       pageType: 'category',
       products: [
@@ -96,7 +94,7 @@ describe('PaginationCrawler', () => {
 
     it('should crawl a single page successfully', async () => {
       // Mock single page response
-      mockEcommerceExtractor.extractEcommerce.mockResolvedValue({
+      mockExtractEcommerce.mockResolvedValue({
         platform: 'woocommerce',
         pageType: 'category',
         products: [
@@ -169,7 +167,7 @@ describe('PaginationCrawler', () => {
         }
       ]
 
-      mockEcommerceExtractor.extractEcommerce
+      mockExtractEcommerce
         .mockResolvedValueOnce(responses[0])
         .mockResolvedValueOnce(responses[1])
         .mockResolvedValueOnce(responses[2])
@@ -187,7 +185,7 @@ describe('PaginationCrawler', () => {
       const limitedCrawler = new PaginationCrawler({ maxPages: 2 })
 
       // Mock responses for more pages than limit
-      mockEcommerceExtractor.extractEcommerce
+      mockExtractEcommerce
         .mockResolvedValueOnce({
           products: [{ name: 'Product 1', scrapedAt: new Date().toISOString() }],
           pagination: { current: 1, nextUrl: 'https://example.com/page/2' }
@@ -231,7 +229,7 @@ describe('PaginationCrawler', () => {
         }
       ]
 
-      mockEcommerceExtractor.extractEcommerce
+      mockExtractEcommerce
         .mockResolvedValueOnce(responses[0])
         .mockResolvedValueOnce(responses[1])
 
@@ -259,7 +257,7 @@ describe('PaginationCrawler', () => {
         }
       ]
 
-      mockEcommerceExtractor.extractEcommerce
+      mockExtractEcommerce
         .mockResolvedValueOnce(responses[0])
         .mockResolvedValueOnce(responses[1])
 
@@ -274,7 +272,7 @@ describe('PaginationCrawler', () => {
       const onPageScraped = jest.fn()
       const crawler = new PaginationCrawler({ onPageScraped })
 
-      mockEcommerceExtractor.extractEcommerce.mockResolvedValue({
+      mockExtractEcommerce.mockResolvedValue({
         products: [
           { name: 'Product 1', scrapedAt: new Date().toISOString() },
           { name: 'Product 2', scrapedAt: new Date().toISOString() }
@@ -304,7 +302,7 @@ describe('PaginationCrawler', () => {
         }
       ]
 
-      mockEcommerceExtractor.extractEcommerce
+      mockExtractEcommerce
         .mockResolvedValueOnce(responses[0])
         .mockResolvedValueOnce(responses[1])
 
@@ -320,7 +318,7 @@ describe('PaginationCrawler', () => {
     })
 
     it('should find next page using common selectors', async () => {
-      mockEcommerceExtractor.extractEcommerce
+      mockExtractEcommerce
         .mockResolvedValueOnce({
           products: [{ name: 'Product 1', scrapedAt: new Date().toISOString() }],
           pagination: null // No pagination detected by extractor
@@ -344,7 +342,7 @@ describe('PaginationCrawler', () => {
     })
 
     it('should handle load more buttons', async () => {
-      mockEcommerceExtractor.extractEcommerce
+      mockExtractEcommerce
         .mockResolvedValueOnce({
           products: [{ name: 'Product 1', scrapedAt: new Date().toISOString() }],
           pagination: null
@@ -396,7 +394,7 @@ describe('PaginationCrawler', () => {
         }
       ]
 
-      mockEcommerceExtractor.extractEcommerce
+      mockExtractEcommerce
         .mockResolvedValueOnce(responses[0])
         .mockRejectedValueOnce(new Error('Extraction failed'))
 
@@ -419,7 +417,7 @@ describe('PaginationCrawler', () => {
         }
       ]
 
-      mockEcommerceExtractor.extractEcommerce.mockResolvedValue(responses[0])
+      mockExtractEcommerce.mockResolvedValue(responses[0])
 
       const result = await crawler.crawlCatalog('https://example.com/products', mockPage)
 
@@ -434,7 +432,7 @@ describe('PaginationCrawler', () => {
 
     it('should reset crawler state', async () => {
       // First crawl
-      mockEcommerceExtractor.extractEcommerce.mockResolvedValue({
+      mockExtractEcommerce.mockResolvedValue({
         products: [
           { name: 'Product 1', sku: 'P001', scrapedAt: new Date().toISOString() }
         ],
@@ -470,7 +468,7 @@ describe('PaginationCrawler', () => {
         }
       ]
 
-      mockEcommerceExtractor.extractEcommerce
+      mockExtractEcommerce
         .mockResolvedValueOnce(responses[0])
         .mockResolvedValueOnce(responses[1])
 
@@ -490,7 +488,7 @@ describe('PaginationCrawler', () => {
     })
 
     it('should handle empty product arrays', async () => {
-      mockEcommerceExtractor.extractEcommerce.mockResolvedValue({
+      mockExtractEcommerce.mockResolvedValue({
         products: [], // Empty products
         pagination: null
       })
@@ -501,7 +499,7 @@ describe('PaginationCrawler', () => {
     })
 
     it('should handle missing pagination object', async () => {
-      mockEcommerceExtractor.extractEcommerce.mockResolvedValue({
+      mockExtractEcommerce.mockResolvedValue({
         products: [{ name: 'Product 1', scrapedAt: new Date().toISOString() }]
         // Missing pagination property
       })

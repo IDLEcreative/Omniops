@@ -1,10 +1,10 @@
-'use client';
+"use client";
 
-import React, { Component, ReactNode } from 'react';
-import { AlertTriangle, RefreshCw, Home, Bug } from 'lucide-react';
-import { Button } from '@/components/ui/button';
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
-import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert';
+import React, { Component, ReactNode } from "react";
+import { AlertTriangle, RefreshCw, Home, Bug } from "lucide-react";
+import { Button } from "@/components/ui/button";
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
+import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
 
 interface Props {
   children: ReactNode;
@@ -29,8 +29,8 @@ export class ErrorBoundary extends Component<Props, State> {
 
   componentDidCatch(error: Error, errorInfo: React.ErrorInfo) {
     // Log error to console in development
-    if (process.env.NODE_ENV === 'development') {
-      console.error('Error caught by boundary:', error, errorInfo);
+    if (process.env.NODE_ENV === "development") {
+      console.error("Error caught by boundary:", error, errorInfo);
     }
 
     // You can also log to an error reporting service here
@@ -53,7 +53,7 @@ export class ErrorBoundary extends Component<Props, State> {
         return <>{this.props.fallback}</>;
       }
 
-      const isDevelopment = process.env.NODE_ENV === 'development';
+      const isDevelopment = process.env.NODE_ENV === "development";
 
       return (
         <div className="min-h-screen flex items-center justify-center p-4 bg-background">
@@ -73,7 +73,7 @@ export class ErrorBoundary extends Component<Props, State> {
                 <AlertTitle>Error Details</AlertTitle>
                 <AlertDescription className="mt-2">
                   <code className="text-sm bg-muted p-2 rounded block overflow-x-auto">
-                    {this.state.error?.message || 'Unknown error'}
+                    {this.state.error?.message || "Unknown error"}
                   </code>
                 </AlertDescription>
               </Alert>
@@ -102,7 +102,7 @@ export class ErrorBoundary extends Component<Props, State> {
                   Try Again
                 </Button>
                 <Button
-                  onClick={() => window.location.href = '/'}
+                  onClick={() => window.location.href = "/"}
                   variant="outline"
                 >
                   <Home className="mr-2 h-4 w-4" />
@@ -122,10 +122,10 @@ export class ErrorBoundary extends Component<Props, State> {
 // Hook for using error boundary in functional components
 export function useErrorHandler() {
   return (error: Error, errorInfo?: React.ErrorInfo) => {
-    if (process.env.NODE_ENV === 'development') {
-      console.error('Error:', error);
+    if (process.env.NODE_ENV === "development") {
+      console.error("Error:", error);
       if (errorInfo) {
-        console.error('Error Info:', errorInfo);
+        console.error("Error Info:", errorInfo);
       }
     }
     throw error;

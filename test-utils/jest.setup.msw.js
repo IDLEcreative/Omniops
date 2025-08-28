@@ -5,6 +5,13 @@ if (typeof TextEncoder === 'undefined') {
   global.TextDecoder = TextDecoder;
 }
 
+// Polyfill for crypto.randomUUID
+if (typeof crypto === 'undefined' || !crypto.randomUUID) {
+  const { randomUUID } = require('crypto');
+  global.crypto = global.crypto || {};
+  global.crypto.randomUUID = randomUUID;
+}
+
 // Polyfill for TransformStream
 if (typeof TransformStream === 'undefined') {
   const { TransformStream } = require('stream/web');
@@ -124,22 +131,106 @@ if (typeof Response === 'undefined') {
 if (typeof Request === 'undefined') {
   global.Request = class Request {
     constructor(url, init = {}) {
-      this.url = url;
-      this.method = init.method || 'GET';
-      this.headers = new Map(Object.entries(init.headers || {}));
-      this.body = init.body;
-      this.mode = init.mode || 'cors';
-      this.credentials = init.credentials || 'same-origin';
-      this.cache = init.cache || 'default';
-      this.redirect = init.redirect || 'follow';
-      this.referrer = init.referrer || '';
-      this.integrity = init.integrity || '';
+      // Store properties in private fields to avoid conflicts with read-only properties
+      const _url = url;
+      const _method = init.method || 'GET';
+      const _headers = init.headers ? 
+        (init.headers instanceof Headers ? init.headers : new Headers(init.headers)) :
+        new Headers();
+      const _body = init.body;
+      const _mode = init.mode || 'cors';
+      const _credentials = init.credentials || 'same-origin';
+      const _cache = init.cache || 'default';
+      const _redirect = init.redirect || 'follow';
+      const _referrer = init.referrer || '';
+      const _integrity = init.integrity || '';
+      const _signal = init.signal || null;
+      const _duplex = init.duplex || undefined;
+      
+      // Define properties with getters to make them read-only
+      Object.defineProperty(this, 'url', {
+        get: () => _url,
+        enumerable: true,
+        configurable: false
+      });
+      
+      Object.defineProperty(this, 'method', {
+        get: () => _method,
+        enumerable: true,
+        configurable: false
+      });
+      
+      Object.defineProperty(this, 'headers', {
+        get: () => _headers,
+        enumerable: true,
+        configurable: false
+      });
+      
+      Object.defineProperty(this, 'body', {
+        get: () => _body,
+        enumerable: true,
+        configurable: false
+      });
+      
+      Object.defineProperty(this, 'mode', {
+        get: () => _mode,
+        enumerable: true,
+        configurable: false
+      });
+      
+      Object.defineProperty(this, 'credentials', {
+        get: () => _credentials,
+        enumerable: true,
+        configurable: false
+      });
+      
+      Object.defineProperty(this, 'cache', {
+        get: () => _cache,
+        enumerable: true,
+        configurable: false
+      });
+      
+      Object.defineProperty(this, 'redirect', {
+        get: () => _redirect,
+        enumerable: true,
+        configurable: false
+      });
+      
+      Object.defineProperty(this, 'referrer', {
+        get: () => _referrer,
+        enumerable: true,
+        configurable: false
+      });
+      
+      Object.defineProperty(this, 'integrity', {
+        get: () => _integrity,
+        enumerable: true,
+        configurable: false
+      });
+      
+      Object.defineProperty(this, 'signal', {
+        get: () => _signal,
+        enumerable: true,
+        configurable: false
+      });
+      
+      Object.defineProperty(this, 'duplex', {
+        get: () => _duplex,
+        enumerable: true,
+        configurable: false
+      });
     }
 
     clone() {
+      // Convert Headers to plain object for cloning
+      const headerObj = {};
+      this.headers.forEach((value, key) => {
+        headerObj[key] = value;
+      });
+      
       return new Request(this.url, {
         method: this.method,
-        headers: this.headers,
+        headers: headerObj,
         body: this.body,
         mode: this.mode,
         credentials: this.credentials,
@@ -151,15 +242,19 @@ if (typeof Request === 'undefined') {
     }
 
     json() {
-      return Promise.resolve(JSON.parse(this.body));
+      return Promise.resolve(JSON.parse(this.body || '{}'));
     }
 
     text() {
-      return Promise.resolve(this.body);
+      return Promise.resolve(this.body || '');
     }
 
     arrayBuffer() {
       return Promise.resolve(new ArrayBuffer(0));
+    }
+    
+    formData() {
+      return Promise.resolve(new FormData());
     }
   };
 }
@@ -167,16 +262,42 @@ if (typeof Request === 'undefined') {
 // Polyfill for Headers in Node environment
 if (typeof Headers === 'undefined') {
   global.Headers = class Headers {
-    constructor(init = {}) {
-      this.map = new Map(Object.entries(init));
+    constructor(init) {
+      this.map = new Map();
+      
+      if (init) {
+        if (init instanceof Headers) {
+          init.forEach((value, key) => {
+            this.append(key, value);
+          });
+        } else if (Array.isArray(init)) {
+          init.forEach(([key, value]) => {
+            this.append(key, value);
+          });
+        } else if (typeof init === 'object') {
+          Object.entries(init).forEach(([key, value]) => {
+            this.append(key, value);
+          });
+        }
+      }
+    }
+
+    append(name, value) {
+      const key = name.toLowerCase();
+      if (this.map.has(key)) {
+        const existing = this.map.get(key);
+        this.map.set(key, `${existing}, ${value}`);
+      } else {
+        this.map.set(key, String(value));
+      }
     }
 
     get(name) {
-      return this.map.get(name.toLowerCase());
+      return this.map.get(name.toLowerCase()) || null;
     }
 
     set(name, value) {
-      this.map.set(name.toLowerCase(), value);
+      this.map.set(name.toLowerCase(), String(value));
     }
 
     has(name) {
@@ -187,8 +308,22 @@ if (typeof Headers === 'undefined') {
       return this.map.delete(name.toLowerCase());
     }
 
-    forEach(callback) {
-      this.map.forEach(callback);
+    forEach(callback, thisArg) {
+      this.map.forEach((value, key) => {
+        callback.call(thisArg, value, key, this);
+      });
+    }
+    
+    entries() {
+      return this.map.entries();
+    }
+    
+    keys() {
+      return this.map.keys();
+    }
+    
+    values() {
+      return this.map.values();
     }
   };
 }

@@ -1,5 +1,6 @@
 import { describe, it, expect, jest, beforeEach } from '@jest/globals'
 import WooCommerceRestApi from '@woocommerce/woocommerce-rest-api'
+import { z } from 'zod'
 import {
   createWooCommerceClient,
   getProducts,
@@ -56,12 +57,23 @@ describe('WooCommerce Integration', () => {
       })
     })
 
-    it('should throw error when credentials are missing', () => {
+    it('should return null when credentials are missing in test environment', () => {
+      delete process.env.WOOCOMMERCE_URL
+      
+      const client = createWooCommerceClient()
+      expect(client).toBeNull()
+    })
+    
+    it('should throw error when credentials are missing in production', () => {
+      const originalNodeEnv = process.env.NODE_ENV
+      process.env.NODE_ENV = 'production'
       delete process.env.WOOCOMMERCE_URL
       
       expect(() => createWooCommerceClient()).toThrow(
         'WooCommerce credentials are not properly configured'
       )
+      
+      process.env.NODE_ENV = originalNodeEnv
     })
   })
 

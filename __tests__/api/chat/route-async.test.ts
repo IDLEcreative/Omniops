@@ -5,7 +5,9 @@ import { searchSimilarContent } from '@/lib/embeddings';
 import OpenAI from 'openai';
 
 // Mock dependencies
-jest.mock('@/lib/supabase/server');
+jest.mock('@/lib/supabase/server', () => ({
+  createServiceRoleClient: jest.fn(),
+}));
 jest.mock('@/lib/embeddings');
 jest.mock('openai');
 jest.mock('@/lib/rate-limit', () => ({
@@ -100,7 +102,7 @@ describe('Chat API Route - Async Performance', () => {
       rpc: jest.fn()
     };
 
-    (createServiceRoleClient as jest.Mock).mockResolvedValue(mockSupabase);
+    (createServiceRoleClient as jest.Mock).mockReturnValue(mockSupabase);
 
     // Mock search similar content
     (searchSimilarContent as jest.Mock).mockImplementation(async () => {

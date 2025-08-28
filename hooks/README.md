@@ -2,18 +2,25 @@
 
 Custom React hooks and utilities for the Customer Service Agent application.
 
-## Structure
+## Current Status
+
+**⚠️ Directory is currently empty** - This directory is reserved for custom React hooks but does not currently contain any implemented hooks. The hooks described below are examples of what could be implemented based on the application's functionality.
+
+## Structure (Planned)
 
 ```
 hooks/
-├── useAuth.ts          # Authentication hook
-├── useChat.ts          # Chat functionality
-├── useWidget.ts        # Widget configuration
-├── useTheme.ts         # Theme management
-└── useDebounce.ts      # Utility hooks
+├── useAuth.ts          # Authentication hook (not implemented)
+├── useChat.ts          # Chat functionality (not implemented)  
+├── useWidget.ts        # Widget configuration (not implemented)
+├── useTheme.ts         # Theme management (not implemented)
+├── useDebounce.ts      # Utility hooks (not implemented)
+├── useLocalStorage.ts  # Local storage hook (not implemented)
+├── useAsync.ts         # Async operations hook (not implemented)
+└── useOnClickOutside.ts # Click outside detection (not implemented)
 ```
 
-## Common Hooks (To Be Implemented)
+## Potential Hooks (Examples for Future Implementation)
 
 ### useAuth
 Authentication state and methods:

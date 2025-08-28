@@ -6,20 +6,41 @@ Comprehensive test suite for the Customer Service Agent application.
 
 ```
 __tests__/
-├── api/               # API route tests
-│   ├── chat/         # Chat endpoint tests
-│   └── scrape/       # Scraping endpoint tests
-├── app/              # Page component tests
-│   └── chat/         # Chat page tests
-├── lib/              # Business logic tests
+├── api/                    # API route tests
+│   ├── auth/              # Authentication tests
+│   ├── chat/              # Chat endpoint tests
+│   │   ├── route-async.test.ts
+│   │   └── route.test.ts
+│   └── scrape/            # Scraping endpoint tests
+│       └── route.test.ts
+├── app/                   # Page component tests
+│   └── chat/              # Chat page tests
+│       └── page.test.tsx
+├── integration/           # Integration tests
+│   ├── README.md
+│   └── enhanced-scraper-system.test.ts
+├── lib/                   # Business logic tests
+│   ├── chat-service.test.ts
+│   ├── ecommerce-extractor.test.ts
+│   ├── embeddings.test.ts
 │   ├── encryption.test.ts
+│   ├── pagination-crawler.test.ts
+│   ├── pattern-learner.test.ts
+│   ├── product-normalizer.test.ts
 │   ├── rate-limit.test.ts
-│   ├── supabase/
-│   └── woocommerce.test.ts
-├── mocks/            # Mock data and handlers
-│   ├── handlers.ts   # MSW request handlers
-│   └── server.ts     # MSW server setup
-└── utils/            # Test utilities
+│   ├── rate-limiter-enhanced.test.ts
+│   ├── woocommerce-api.test.ts
+│   ├── woocommerce.test.ts
+│   └── supabase/
+│       └── database.test.ts
+├── mocks/                 # Mock data and handlers
+│   ├── handlers.ts        # MSW request handlers
+│   └── server.ts          # MSW server setup
+└── utils/                 # Test utilities
+    ├── global-setup.js
+    ├── global-teardown.js
+    ├── integration-setup.js
+    ├── integration-test-helpers.ts
     ├── supabase-mock.ts
     └── test-utils.tsx
 ```
@@ -58,6 +79,20 @@ describe('POST /api/chat', () => {
 })
 ```
 
+### Integration Tests
+Testing complete system functionality and cross-module interactions:
+
+```typescript
+// integration/enhanced-scraper-system.test.ts
+describe('Enhanced Scraper System', () => {
+  it('should scrape and index content with embeddings', async () => {
+    const result = await scrapeAndIndex(testUrl)
+    expect(result.embeddings).toBeDefined()
+    expect(result.status).toBe('completed')
+  })
+})
+```
+
 ### Component Tests
 Testing React components with React Testing Library:
 
@@ -71,47 +106,84 @@ describe('Chat Page', () => {
 })
 ```
 
+### Business Logic Tests
+Testing specific business logic modules:
+
+```typescript
+// lib/chat-service.test.ts - Chat functionality
+// lib/embeddings.test.ts - Vector embeddings
+// lib/ecommerce-extractor.test.ts - E-commerce data extraction
+// lib/pagination-crawler.test.ts - Paginated content crawling
+// lib/pattern-learner.test.ts - Content pattern recognition
+// lib/product-normalizer.test.ts - Product data normalization
+// lib/rate-limiter-enhanced.test.ts - Advanced rate limiting
+// lib/woocommerce-api.test.ts - WooCommerce API integration
+```
+
 ## Test Configuration
 
 ### Jest Configuration
-Two separate configs for different environments:
+Multiple Jest configurations for different test types:
 
-1. **jest.config.js** - Browser/React tests
-   - Environment: jsdom
-   - Tests: Components, pages
+1. **jest.config.js** - Main configuration for unit tests
+   - Environment: jsdom for browser tests, node for API tests
+   - Tests: Components, pages, business logic
 
-2. **jest.config.node.js** - Node.js tests
+2. **jest.integration.config.js** - Integration tests configuration
    - Environment: node
-   - Tests: API routes, server-side logic
+   - Tests: Full system integration tests
+   - Longer timeouts and setup
 
-### Setup Files
-- `jest.setup.js` - Browser test setup
-- `jest.setup.node.js` - Node test setup
-- `jest.setup.msw.js` - Mock Service Worker setup
+3. **jest.config.node.js** - Node.js specific tests
+   - Environment: node  
+   - Tests: Server-side logic, API routes
+
+### Setup Files and Utilities
+- `test-utils/jest.setup.js` - Main Jest setup
+- `test-utils/jest.setup.node.js` - Node environment setup
+- `test-utils/jest.setup.msw.js` - Mock Service Worker setup
+- `test-utils/test-config.ts` - Test configuration utilities
+- `test-utils/mock-helpers.ts` - Mock helper functions
+- `test-utils/integration-setup.js` - Integration test setup
+- `test-utils/integration-test-helpers.ts` - Integration test utilities
+- `test-utils/global-setup.js` - Global test setup
+- `test-utils/global-teardown.js` - Global test cleanup
 
 ## Running Tests
 
 ```bash
-# Run all tests
+# Run all tests (unit tests only by default)
 npm test
 
-# Run unit tests only
+# Run unit tests only (excludes integration tests)  
 npm run test:unit
 
 # Run integration tests only
 npm run test:integration
 
-# Watch mode for development
+# Run integration tests in watch mode
+npm run test:integration:watch
+
+# Generate integration test coverage
+npm run test:integration:coverage
+
+# Watch mode for unit tests
 npm run test:watch
 
 # Generate coverage report
 npm run test:coverage
+
+# Run all tests (unit + integration)
+npm run test:all
 
 # Run specific test file
 npm test -- encryption.test.ts
 
 # Run tests matching pattern
 npm test -- --testNamePattern="should encrypt"
+
+# Run integration test with specific pattern
+npm run test:integration -- --testNamePattern="scraper"
 ```
 
 ## Mock Service Worker (MSW)

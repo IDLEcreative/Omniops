@@ -345,6 +345,9 @@ export async function POST(request: NextRequest) {
     const history = historyResult && historyResult.status === 'fulfilled' ? (historyResult.value as any)?.data : null;
 
     // Prepare messages for AI
+    // Determine if we have domain-specific content
+    const hasContent = sources.length > 0 || context.trim().length > 0;
+    
     const messages: OpenAI.Chat.ChatCompletionMessageParam[] = [
       {
         role: 'system',
@@ -352,14 +355,23 @@ export async function POST(request: NextRequest) {
         ${context ? `Use this context to answer questions:\n${context}` : ''}
         
         Important guidelines:
-        - For PRODUCT information, prices, and descriptions: Use the website content provided
+        ${hasContent ? 
+        `- For PRODUCT information, prices, and descriptions: Use the website content provided
         - For ORDER status, delivery tracking, and customer data: This requires verification first
         - Only provide information based on the context provided
         - If stock levels are mentioned on the website, use that information
         - Be helpful and suggest alternatives when possible
         - Keep responses concise and to the point
         - When you reference specific information from a webpage, include the link in your response
-        - Format links naturally in your text, for example: "You can find our shipping rates at [example.com/shipping]" or "View our full product catalog here: example.com/products"
+        - Format links naturally in your text, for example: "You can find our shipping rates at [example.com/shipping]" or "View our full product catalog here: example.com/products"`
+        :
+        `- No specific information about this website is available yet
+        - The website content hasn't been indexed for ${domain || 'this domain'}
+        - Inform the user that you don't have access to specific product or service information
+        - Suggest they visit the website directly or contact support for specific details
+        - Be apologetic but helpful about the limitation
+        - Do NOT make up or guess information about products, services, or policies`
+        }
         
         ${needsCustomerVerification ? `
         Customer Verification Required:
