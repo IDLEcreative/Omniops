@@ -4,6 +4,7 @@
   "private": true,
   "scripts": {
     "dev": "next dev",
+    "prebuild": "ls -la lib/supabase/ && echo 'Supabase files found'",
     "build": "next build",
     "start": "next start",
     "lint": "next lint",
