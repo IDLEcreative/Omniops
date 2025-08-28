@@ -76,6 +76,10 @@ live-browser-*.png
 # Supabase
 supabase/.temp/
 supabase/.branches/
+supabase/functions/*/node_modules
+supabase/seed.sql
+supabase/.env
+supabase/.env.local
 
 # Claude
 .claude/

@@ -264,9 +264,9 @@ export async function searchSimilarContent(
     // Search for similar content using the correct RPC signature
     const { data, error } = await supabase.rpc('search_embeddings', {
       query_embedding: queryEmbedding,
+      p_domain_id: domainId,  // Must be second parameter
       match_threshold: similarityThreshold,
-      match_count: limit,
-      p_domain_id: domainId  // Add the required domain_id parameter
+      match_count: limit
     });
     
     if (error) {

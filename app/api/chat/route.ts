@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { createServiceRoleClient } from '@/lib/supabase/server';
+import { createServiceRoleClient } from '../../../lib/supabase/server';
 import { ChatResponse } from '@/types';
 import OpenAI from 'openai';
 import { z } from 'zod';
@@ -117,6 +117,20 @@ export async function POST(request: NextRequest) {
         console.error('Search error:', searchError);
         // Fall back to old method if new search fails
         try {
+          // First, look up the domain_id for fallback search
+          let domainId: string | null = null;
+          if (domain) {
+            const { data: domainData } = await adminSupabase
+              .from('domains')
+              .select('id')
+              .eq('domain', domain.replace('www.', ''))
+              .single();
+            
+            if (domainData) {
+              domainId = domainData.id;
+            }
+          }
+          
           const embeddingResponse = await getOpenAIClient().embeddings.create({
             model: 'text-embedding-3-small',
             input: message,
@@ -126,9 +140,9 @@ export async function POST(request: NextRequest) {
           if (embedding) {
             const { data: relevantChunks, error } = await adminSupabase.rpc('search_embeddings', {
               query_embedding: embedding,
+              p_domain_id: domainId,  // Use proper domain_id
               match_threshold: 0.7,
-              match_count: 5,
-              p_domain_id: null,  // Add required parameter
+              match_count: 5
             });
             
             if (error) {
