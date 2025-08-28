@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { createServiceRoleClient } from '@/lib/supabase/server-exports';
+import { createServiceRoleClient } from '@/lib/supabase/server';
 import { ChatResponse } from '@/types';
 import OpenAI from 'openai';
 import { z } from 'zod';

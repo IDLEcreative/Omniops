@@ -1,7 +1,7 @@
 'use client';
 
 import { useState, useEffect, useRef } from 'react';
-import { ScrollArea } from '@/components/ui/scroll-area';
+// Removed ScrollArea to fix double scrollbar issue
 import { 
   Send, 
   X, 
@@ -58,7 +58,7 @@ export default function ChatWidget({
     retentionDays: 30,
     ...propPrivacySettings
   });
-  const scrollRef = useRef<HTMLDivElement>(null);
+  const messagesContainerRef = useRef<HTMLDivElement>(null);
   
   // WooCommerce settings
   const [woocommerceEnabled, setWoocommerceEnabled] = useState(false);
@@ -235,8 +235,8 @@ export default function ChatWidget({
 
   // Auto-scroll to bottom
   useEffect(() => {
-    if (scrollRef.current) {
-      scrollRef.current.scrollIntoView({ behavior: 'smooth' });
+    if (messagesContainerRef.current) {
+      messagesContainerRef.current.scrollTop = messagesContainerRef.current.scrollHeight;
     }
   }, [messages]);
 
@@ -487,7 +487,12 @@ export default function ChatWidget({
       </div>
 
       {/* Messages */}
-      <ScrollArea className={`flex-1 px-3 py-3 ${highContrast ? 'bg-black' : 'bg-[#0d0d0d]'} overflow-x-hidden`} role="log" aria-live="polite" aria-label="Chat messages">
+      <div 
+        ref={messagesContainerRef}
+        className={`flex-1 px-3 py-3 ${highContrast ? 'bg-black' : 'bg-[#0d0d0d]'} overflow-y-auto overflow-x-hidden`} 
+        role="log" 
+        aria-live="polite" 
+        aria-label="Chat messages">
         {messages.length === 0 && (
           <div className="flex items-center justify-center min-h-[100px]">
             <p className={`${highContrast ? 'text-white' : 'text-gray-300'} ${
@@ -547,9 +552,7 @@ export default function ChatWidget({
             </div>
           </div>
         )}
-        
-        <div ref={scrollRef} />
-      </ScrollArea>
+      </div>
 
 
       {/* Input */}

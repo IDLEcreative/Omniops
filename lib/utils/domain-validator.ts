@@ -30,14 +30,14 @@ export interface DomainCheckResult {
 
 export class DomainValidator {
   private static instance: DomainValidator
-  private supabasePromise: ReturnType<typeof createClient>
 
   constructor() {
-    this.supabasePromise = createClient()
+    // Don't create Supabase client in constructor - it needs request context
   }
 
   private async getSupabase() {
-    return await this.supabasePromise
+    // Create client on-demand during request handling
+    return await createClient()
   }
 
   static getInstance(): DomainValidator {
