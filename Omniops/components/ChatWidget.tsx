@@ -131,7 +131,7 @@ export default function ChatWidget({
     }
   }, [isOpen, mounted]);
 
-  // Generate session ID on mount
+  // Generate session ID on mount and check WooCommerce config
   useEffect(() => {
     const storedSessionId = localStorage.getItem('chat_session_id');
     if (storedSessionId) {
@@ -141,6 +141,27 @@ export default function ChatWidget({
       localStorage.setItem('chat_session_id', newSessionId);
       setSessionId(newSessionId);
     }
+    
+    // Check if WooCommerce is enabled for this domain
+    const checkWooCommerceConfig = async () => {
+      const urlParams = new URLSearchParams(window.location.search);
+      const domain = urlParams.get('domain') || window.location.hostname;
+      
+      try {
+        const response = await fetch(`/api/customer/config?domain=${encodeURIComponent(domain)}`);
+        if (response.ok) {
+          const data = await response.json();
+          if (data.config?.woocommerce_enabled) {
+            setWoocommerceEnabled(true);
+            setStoreDomain(data.config.domain || domain);
+          }
+        }
+      } catch (error) {
+        console.log('Could not load WooCommerce config:', error);
+      }
+    };
+    
+    checkWooCommerceConfig();
 
     // Listen for messages from parent window (for embed mode)
     const handleMessage = (event: MessageEvent) => {
@@ -260,6 +281,16 @@ export default function ChatWidget({
       const urlParams = new URLSearchParams(window.location.search);
       const domain = urlParams.get('domain') || window.location.hostname;
 
+      // Ensure websiteScraping is enabled for RAG capabilities
+      const chatConfig = {
+        features: {
+          websiteScraping: { enabled: true },
+          woocommerce: { enabled: woocommerceEnabled },
+          ...(demoConfig?.features || {})
+        },
+        ...demoConfig
+      };
+
       const response = await fetch('/api/chat', {
         method: 'POST',
         headers: {
@@ -271,7 +302,7 @@ export default function ChatWidget({
           session_id: sessionId,
           domain,
           demoId: demoId || undefined,
-          config: demoConfig || undefined,
+          config: chatConfig,
           woocommerceEnabled: woocommerceEnabled,
           storeDomain: storeDomain || domain,
         }),

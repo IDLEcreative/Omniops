@@ -41,4 +41,4 @@ RUN addgroup -g 1001 -S nodejs && \
 USER nodejs
 
 # Worker entry point script
-CMD ["node", "scripts/worker-start-simple.js"]
+CMD ["node", "lib/worker-start.js"]

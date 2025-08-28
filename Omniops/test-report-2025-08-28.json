@@ -1,0 +1,162 @@
+{
+  "summary": {
+    "total": 24,
+    "passed": 5,
+    "failed": 17,
+    "skipped": 2,
+    "passRate": "20.8",
+    "duration": "0.05"
+  },
+  "results": [
+    {
+      "name": "Module: redis",
+      "status": "fail",
+      "details": "Missing - required module",
+      "timestamp": "2025-08-28T12:56:45.205Z"
+    },
+    {
+      "name": "Module: bullmq",
+      "status": "pass",
+      "details": "Found",
+      "timestamp": "2025-08-28T12:56:45.207Z"
+    },
+    {
+      "name": "Module: @supabase/supabase-js",
+      "status": "pass",
+      "details": "Found",
+      "timestamp": "2025-08-28T12:56:45.207Z"
+    },
+    {
+      "name": "Module: playwright",
+      "status": "pass",
+      "details": "Found",
+      "timestamp": "2025-08-28T12:56:45.210Z"
+    },
+    {
+      "name": "Queue System",
+      "status": "fail",
+      "details": "Cannot find module './lib/queue/queue-manager'\nRequire stack:\n- /Users/jamesguy/Omniops/Omniops/test-all-features.js",
+      "timestamp": "2025-08-28T12:56:45.210Z"
+    },
+    {
+      "name": "Worker System",
+      "status": "fail",
+      "details": "Cannot find module './lib/workers/scraper-worker-service'\nRequire stack:\n- /Users/jamesguy/Omniops/Omniops/test-all-features.js",
+      "timestamp": "2025-08-28T12:56:45.211Z"
+    },
+    {
+      "name": "Basic health endpoint",
+      "status": "fail",
+      "details": "fetch failed",
+      "timestamp": "2025-08-28T12:56:45.237Z"
+    },
+    {
+      "name": "Comprehensive health endpoint",
+      "status": "fail",
+      "details": "fetch failed",
+      "timestamp": "2025-08-28T12:56:45.238Z"
+    },
+    {
+      "name": "Queue health endpoint",
+      "status": "fail",
+      "details": "fetch failed",
+      "timestamp": "2025-08-28T12:56:45.239Z"
+    },
+    {
+      "name": "Scraping monitor endpoint",
+      "status": "fail",
+      "details": "fetch failed",
+      "timestamp": "2025-08-28T12:56:45.241Z"
+    },
+    {
+      "name": "Queue metrics",
+      "status": "fail",
+      "details": "fetch failed",
+      "timestamp": "2025-08-28T12:56:45.242Z"
+    },
+    {
+      "name": "Worker metrics",
+      "status": "fail",
+      "details": "fetch failed",
+      "timestamp": "2025-08-28T12:56:45.243Z"
+    },
+    {
+      "name": "System metrics",
+      "status": "fail",
+      "details": "fetch failed",
+      "timestamp": "2025-08-28T12:56:45.244Z"
+    },
+    {
+      "name": "Customer Config API",
+      "status": "fail",
+      "details": "fetch failed",
+      "timestamp": "2025-08-28T12:56:45.246Z"
+    },
+    {
+      "name": "Scraping triggers",
+      "status": "fail",
+      "details": "fetch failed",
+      "timestamp": "2025-08-28T12:56:45.249Z"
+    },
+    {
+      "name": "WooCommerce integration",
+      "status": "skip",
+      "details": "Not available",
+      "timestamp": "2025-08-28T12:56:45.249Z"
+    },
+    {
+      "name": "Embedding generation",
+      "status": "skip",
+      "details": "OpenAI not configured",
+      "timestamp": "2025-08-28T12:56:45.250Z"
+    },
+    {
+      "name": "Queue throughput",
+      "status": "fail",
+      "details": "Cannot find module './lib/queue/queue-utils'\nRequire stack:\n- /Users/jamesguy/Omniops/Omniops/test-all-features.js",
+      "timestamp": "2025-08-28T12:56:45.250Z"
+    },
+    {
+      "name": "Worker concurrency",
+      "status": "fail",
+      "details": "Cannot find module './lib/workers/scraper-worker-service'\nRequire stack:\n- /Users/jamesguy/Omniops/Omniops/test-all-features.js",
+      "timestamp": "2025-08-28T12:56:45.250Z"
+    },
+    {
+      "name": "Heap memory usage",
+      "status": "pass",
+      "details": "7.52MB / 11.48MB",
+      "timestamp": "2025-08-28T12:56:45.250Z"
+    },
+    {
+      "name": "Total memory (RSS)",
+      "status": "pass",
+      "details": "50.30MB",
+      "timestamp": "2025-08-28T12:56:45.250Z"
+    },
+    {
+      "name": "/api/health response time",
+      "status": "fail",
+      "details": "fetch failed",
+      "timestamp": "2025-08-28T12:56:45.251Z"
+    },
+    {
+      "name": "/api/queue response time",
+      "status": "fail",
+      "details": "fetch failed",
+      "timestamp": "2025-08-28T12:56:45.252Z"
+    },
+    {
+      "name": "/api/jobs response time",
+      "status": "fail",
+      "details": "fetch failed",
+      "timestamp": "2025-08-28T12:56:45.252Z"
+    }
+  ],
+  "errors": [
+    "Missing required module: redis",
+    "Queue System Error: Cannot find module './lib/queue/queue-manager'\nRequire stack:\n- /Users/jamesguy/Omniops/Omniops/test-all-features.js",
+    "Worker System Error: Cannot find module './lib/workers/scraper-worker-service'\nRequire stack:\n- /Users/jamesguy/Omniops/Omniops/test-all-features.js"
+  ],
+  "timestamp": "2025-08-28T12:56:45.253Z"
+}
