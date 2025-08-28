@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { createClient, createServiceRoleClient } from '../../../../lib/supabase/server';
+import { createServerClient as createClient, createServiceRoleClient } from '@/lib/supabase/server-exports';
 import { z } from 'zod';
 import { 
   encryptWooCommerceConfig, 
