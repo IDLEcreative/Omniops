@@ -3,7 +3,49 @@ import type { NextRequest } from 'next/server';
 import { createServerClient } from '@supabase/ssr';
 
 export async function middleware(request: NextRequest) {
-  // Always create a single response instance and attach cookies to it
+  // Handle API routes first with minimal overhead
+  const pathname = request.nextUrl.pathname;
+  const isApiRoute = pathname.startsWith('/api/');
+  const isEmbedRoute = pathname.startsWith('/embed');
+  
+  // For API and embed routes, set up CORS immediately
+  if (isApiRoute || isEmbedRoute) {
+    const response = NextResponse.next();
+    
+    // CORS headers for API/embed routes
+    response.headers.set('Access-Control-Allow-Origin', '*');
+    response.headers.set('Access-Control-Allow-Methods', 'GET, POST, PUT, DELETE, OPTIONS');
+    response.headers.set('Access-Control-Allow-Headers', 'Content-Type, Authorization, X-Requested-With');
+    response.headers.set('Access-Control-Max-Age', '86400');
+    
+    // Security headers
+    response.headers.set('X-Content-Type-Options', 'nosniff');
+    response.headers.set('X-XSS-Protection', '1; mode=block');
+    response.headers.set('Referrer-Policy', 'strict-origin-when-cross-origin');
+    
+    // Allow embedding for embed routes
+    if (isEmbedRoute) {
+      response.headers.set('X-Frame-Options', 'ALLOWALL');
+      response.headers.set('Content-Security-Policy', 
+        "default-src 'self'; " +
+        "script-src 'self' 'unsafe-inline' 'unsafe-eval'; " +
+        "style-src 'self' 'unsafe-inline'; " +
+        "img-src 'self' data: https:; " +
+        "font-src 'self' data:; " +
+        "connect-src 'self' https://*.supabase.co wss://*.supabase.co; " +
+        "frame-ancestors *;"
+      );
+    }
+    
+    // Handle preflight requests
+    if (request.method === 'OPTIONS') {
+      return new Response(null, { status: 200, headers: response.headers });
+    }
+    
+    return response;
+  }
+
+  // For non-API routes, handle authentication
   const response = NextResponse.next({
     request: { headers: request.headers },
   });
@@ -41,7 +83,7 @@ export async function middleware(request: NextRequest) {
       }
     } catch (e) {
       // Fail open: treat as unauthenticated but continue without crashing middleware
-      console.warn('Middleware Supabase auth check skipped:', (e as Error)?.message);
+      console.warn('[Middleware] Supabase auth check skipped:', (e as Error)?.message);
     }
   }
 
@@ -61,55 +103,21 @@ export async function middleware(request: NextRequest) {
     return NextResponse.redirect(new URL('/admin', request.url));
   }
   
-  // Security headers for all routes
+  // Security headers for non-API routes
   response.headers.set('X-Content-Type-Options', 'nosniff');
   response.headers.set('X-XSS-Protection', '1; mode=block');
   response.headers.set('Referrer-Policy', 'strict-origin-when-cross-origin');
   response.headers.set('Permissions-Policy', 'camera=(), microphone=(), geolocation=()');
-  
-  // Enhanced CSP for the main app
-  if (!request.nextUrl.pathname.startsWith('/embed') && !request.nextUrl.pathname.startsWith('/api/')) {
-    response.headers.set('X-Frame-Options', 'DENY');
-    response.headers.set('Content-Security-Policy', 
-      "default-src 'self'; " +
-      "script-src 'self' 'unsafe-inline' 'unsafe-eval' https://vercel.live; " +
-      "style-src 'self' 'unsafe-inline'; " +
-      "img-src 'self' data: https:; " +
-      "font-src 'self' data:; " +
-      "connect-src 'self' https://*.supabase.co wss://*.supabase.co https://api.openai.com; " +
-      "frame-ancestors 'none';"
-    );
-  }
-  
-  // Handle embed and API routes
-  if (request.nextUrl.pathname.startsWith('/embed') || 
-      request.nextUrl.pathname.startsWith('/api/')) {
-    
-    // Allow embedding from any domain for embed routes
-    if (request.nextUrl.pathname.startsWith('/embed')) {
-      response.headers.set('X-Frame-Options', 'ALLOWALL');
-      response.headers.set('Content-Security-Policy', 
-        "default-src 'self'; " +
-        "script-src 'self' 'unsafe-inline' 'unsafe-eval'; " +
-        "style-src 'self' 'unsafe-inline'; " +
-        "img-src 'self' data: https:; " +
-        "font-src 'self' data:; " +
-        "connect-src 'self' https://*.supabase.co wss://*.supabase.co; " +
-        "frame-ancestors *;"
-      );
-    }
-    
-    // CORS headers for API calls from embedded widget
-    response.headers.set('Access-Control-Allow-Origin', '*');
-    response.headers.set('Access-Control-Allow-Methods', 'GET, POST, OPTIONS, DELETE');
-    response.headers.set('Access-Control-Allow-Headers', 'Content-Type, Authorization');
-    response.headers.set('Access-Control-Max-Age', '86400');
-    
-    // Handle preflight requests
-    if (request.method === 'OPTIONS') {
-      return new Response(null, { status: 200, headers: response.headers });
-    }
-  }
+  response.headers.set('X-Frame-Options', 'DENY');
+  response.headers.set('Content-Security-Policy', 
+    "default-src 'self'; " +
+    "script-src 'self' 'unsafe-inline' 'unsafe-eval' https://vercel.live; " +
+    "style-src 'self' 'unsafe-inline'; " +
+    "img-src 'self' data: https:; " +
+    "font-src 'self' data:; " +
+    "connect-src 'self' https://*.supabase.co wss://*.supabase.co https://api.openai.com; " +
+    "frame-ancestors 'none';"
+  );
   
   return response;
 }

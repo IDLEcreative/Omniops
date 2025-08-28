@@ -2,5 +2,8 @@
 // This file should only be imported in server components and API routes
 export { 
   createClient,
-  createServiceRoleClient 
+  createServiceRoleClient,
+  requireClient,
+  requireServiceRoleClient,
+  validateSupabaseEnv
 } from './supabase/server';

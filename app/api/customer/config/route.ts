@@ -11,10 +11,11 @@
 import { NextRequest, NextResponse } from 'next/server'
 export const runtime = 'nodejs'
 export const dynamic = 'force-dynamic'
-import { createClient } from '@/lib/supabase-server'
+import { createClient, validateSupabaseEnv } from '@/lib/supabase-server'
 import { logger } from '@/lib/logger'
 import { domainValidator, type DomainValidationResult } from '@/lib/utils/domain-validator'
 import { customerScrapingIntegration, type CustomerScrapingConfig, JobPriority } from '@/lib/integrations/customer-scraping-integration'
+import { z } from 'zod'
 
 interface CreateConfigRequest {
   domain: string
@@ -51,19 +52,40 @@ interface CustomerConfig {
   updated_at: string
 }
 
+// Schemas for request validation and sane defaults
+const SettingsSchema = z.object({
+  autoScrape: z.boolean().default(true),
+  scrapingFrequency: z.enum(['daily', 'weekly', 'monthly']).default('weekly'),
+  priority: z.enum(['high', 'normal', 'low']).default('normal'),
+  maxPages: z.number().int().positive().max(100000).default(50),
+  includeSubdomains: z.boolean().default(false),
+})
+
+const CreateConfigSchema = z.object({
+  domain: z.string().trim().min(1, 'Domain is required'),
+  customerId: z.string().trim().optional(),
+  settings: SettingsSchema.partial().default({}),
+  metadata: z.record(z.any()).optional().default({}),
+})
+
+const UpdateConfigSchema = z.object({
+  domain: z.string().trim().optional(),
+  settings: SettingsSchema.partial().optional(),
+  metadata: z.record(z.any()).optional(),
+})
+
 /**
  * GET /api/customer/config
  * Get customer configurations (optionally filtered by customer ID or domain)
  */
 export async function GET(request: NextRequest) {
   try {
-    // Check environment configuration
-    if (!process.env.NEXT_PUBLIC_SUPABASE_URL || !process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY) {
-      console.error('GET /api/customer/config missing Supabase configuration');
+    // Validate Supabase configuration
+    if (!validateSupabaseEnv()) {
       return NextResponse.json(
         { 
-          error: 'Service configuration incomplete',
-          message: 'The service is not properly configured. Please contact support.'
+          error: 'Service temporarily unavailable',
+          message: 'The service is currently undergoing maintenance. Please try again later.'
         },
         { status: 503 }
       )
@@ -72,10 +94,19 @@ export async function GET(request: NextRequest) {
     const { searchParams } = new URL(request.url)
     const customerId = searchParams.get('customerId')
     const domain = searchParams.get('domain')
-    const limit = parseInt(searchParams.get('limit') || '50')
-    const offset = parseInt(searchParams.get('offset') || '0')
+    const includeStatus = (searchParams.get('includeStatus') ?? '').toLowerCase() === 'true'
+    const rawLimit = Number(searchParams.get('limit'))
+    const rawOffset = Number(searchParams.get('offset'))
+    const limit = Number.isFinite(rawLimit) ? Math.max(1, Math.min(100, Math.floor(rawLimit))) : 50
+    const offset = Number.isFinite(rawOffset) ? Math.max(0, Math.floor(rawOffset)) : 0
 
     const supabase = await createClient()
+    if (!supabase) {
+      return NextResponse.json(
+        { error: 'Database connection failed' },
+        { status: 503 }
+      )
+    }
 
     let query = supabase
       .from('customer_configs')
@@ -101,29 +132,28 @@ export async function GET(request: NextRequest) {
       )
     }
 
-    // Get scraping status for each configuration
-    const configsWithStatus = await Promise.all(
-      configs?.map(async (config: CustomerConfig) => {
-        try {
-          const scrapingStatus = await customerScrapingIntegration.getIntegrationStatus(config.id)
-          return {
-            ...config,
-            scrapingStatus
-          }
-        } catch (error) {
-          logger.warn('Failed to get scraping status', { configId: config.id, error })
-          return {
-            ...config,
-            scrapingStatus: {
-              hasActiveJobs: false,
-              totalJobs: 0,
-              successfulJobs: 0,
-              failedJobs: 0
+    // Optionally include scraping status to avoid slowing list responses
+    const configsWithStatus = includeStatus
+      ? await Promise.all(
+          configs?.map(async (config: CustomerConfig) => {
+            try {
+              const scrapingStatus = await customerScrapingIntegration.getIntegrationStatus(config.id)
+              return { ...config, scrapingStatus }
+            } catch (error) {
+              logger.warn('Failed to get scraping status', { configId: config.id, error })
+              return {
+                ...config,
+                scrapingStatus: {
+                  hasActiveJobs: false,
+                  totalJobs: 0,
+                  successfulJobs: 0,
+                  failedJobs: 0,
+                },
+              }
             }
-          }
-        }
-      }) || []
-    )
+          }) || []
+        )
+      : configs
 
     return NextResponse.json({
       success: true,
@@ -151,15 +181,26 @@ export async function GET(request: NextRequest) {
  */
 export async function POST(request: NextRequest) {
   try {
-    const body: CreateConfigRequest = await request.json()
-
-    // Validate required fields
-    if (!body.domain) {
+    // Validate Supabase configuration
+    if (!validateSupabaseEnv()) {
       return NextResponse.json(
-        { error: 'Domain is required' }, 
+        { 
+          error: 'Service temporarily unavailable',
+          message: 'The service is currently undergoing maintenance. Please try again later.'
+        },
+        { status: 503 }
+      )
+    }
+    
+    const json = await request.json()
+    const parsed = CreateConfigSchema.safeParse(json)
+    if (!parsed.success) {
+      return NextResponse.json(
+        { error: 'Invalid request body', details: parsed.error.flatten() },
         { status: 400 }
       )
     }
+    const body = parsed.data
 
     // Validate domain format
     const domainValidation = domainValidator.validateUrl(body.domain)
@@ -173,6 +214,12 @@ export async function POST(request: NextRequest) {
 
     const normalizedDomain = domainValidation.domain!
     const supabase = await createClient()
+    if (!supabase) {
+      return NextResponse.json(
+        { error: 'Database connection failed' },
+        { status: 503 }
+      )
+    }
 
     // Check if domain already exists
     const domainStatus = await domainValidator.checkDomainStatus(normalizedDomain)
@@ -184,17 +231,11 @@ export async function POST(request: NextRequest) {
     }
 
     // Prepare configuration data
+    const settings = SettingsSchema.parse(body.settings ?? {})
     const configData = {
       customer_id: body.customerId || null,
       domain: normalizedDomain,
-      settings: {
-        autoScrape: body.settings?.autoScrape ?? true,
-        scrapingFrequency: body.settings?.scrapingFrequency || 'weekly',
-        priority: body.settings?.priority || 'normal',
-        maxPages: body.settings?.maxPages || 50,
-        includeSubdomains: body.settings?.includeSubdomains || false,
-        ...body.settings
-      },
+      settings,
       metadata: {
         originalUrl: body.domain,
         domainValidation,
@@ -284,6 +325,16 @@ export async function POST(request: NextRequest) {
  */
 export async function PUT(request: NextRequest) {
   try {
+    // Validate Supabase configuration
+    if (!validateSupabaseEnv()) {
+      return NextResponse.json(
+        { 
+          error: 'Service temporarily unavailable',
+          message: 'The service is currently undergoing maintenance. Please try again later.'
+        },
+        { status: 503 }
+      )
+    }
     const { searchParams } = new URL(request.url)
     const configId = searchParams.get('id')
     
@@ -294,8 +345,22 @@ export async function PUT(request: NextRequest) {
       )
     }
 
-    const body: UpdateConfigRequest = await request.json()
+    const json = await request.json()
+    const parsed = UpdateConfigSchema.safeParse(json)
+    if (!parsed.success) {
+      return NextResponse.json(
+        { error: 'Invalid request body', details: parsed.error.flatten() },
+        { status: 400 }
+      )
+    }
+    const body = parsed.data
     const supabase = await createClient()
+    if (!supabase) {
+      return NextResponse.json(
+        { error: 'Database connection failed' },
+        { status: 503 }
+      )
+    }
 
     // Get existing configuration
     const { data: existingConfig, error: fetchError } = await supabase
@@ -337,9 +402,10 @@ export async function PUT(request: NextRequest) {
     }
 
     if (body.settings) {
+      const newSettings = SettingsSchema.partial().parse(body.settings)
       updateData.settings = {
         ...existingConfig.settings,
-        ...body.settings
+        ...newSettings
       }
     }
 
@@ -384,7 +450,7 @@ export async function PUT(request: NextRequest) {
           customerId: existingConfig.customer_id,
           customerConfigId: configId,
           domain: normalizedDomain,
-          priority: mapPriorityToJobPriority(updatedConfig.settings.priority || 'normal'),
+          priority: mapPriorityToJobPriority(updatedConfig.settings.priority ?? 'normal'),
           scrapeType: 'refresh',
           config: {
             maxPages: updatedConfig.settings.maxPages,
@@ -422,6 +488,16 @@ export async function PUT(request: NextRequest) {
  */
 export async function DELETE(request: NextRequest) {
   try {
+    // Validate Supabase configuration
+    if (!validateSupabaseEnv()) {
+      return NextResponse.json(
+        { 
+          error: 'Service temporarily unavailable',
+          message: 'The service is currently undergoing maintenance. Please try again later.'
+        },
+        { status: 503 }
+      )
+    }
     const { searchParams } = new URL(request.url)
     const configId = searchParams.get('id')
     
@@ -433,6 +509,12 @@ export async function DELETE(request: NextRequest) {
     }
 
     const supabase = await createClient()
+    if (!supabase) {
+      return NextResponse.json(
+        { error: 'Database connection failed' },
+        { status: 503 }
+      )
+    }
 
     // Get configuration to be deleted
     const { data: config, error: fetchError } = await supabase

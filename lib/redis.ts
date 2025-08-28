@@ -1,45 +1,62 @@
 import Redis from 'ioredis';
+import { getRedisClientWithFallback, RedisClientWithFallback } from './redis-fallback';
+import { logger } from './logger';
 
-// Create Redis client with connection retry logic
-export function createRedisClient() {
-  const redisUrl = process.env.REDIS_URL || 'redis://localhost:6379';
+// Create Redis client with connection retry logic (legacy function for compatibility)
+export function createRedisClient(): Redis | RedisClientWithFallback {
+  const redisUrl = process.env.REDIS_URL;
   
-  const redis = new Redis(redisUrl, {
-    retryStrategy: (times) => {
-      const delay = Math.min(times * 50, 2000);
-      return delay;
-    },
-    reconnectOnError: (err) => {
-      const targetError = 'READONLY';
-      if (err.message.includes(targetError)) {
-        // Only reconnect when the error contains "READONLY"
-        return true;
-      }
-      return false;
-    },
-    maxRetriesPerRequest: 3,
-    enableReadyCheck: true,
-    enableOfflineQueue: true,
-  });
+  // If no Redis URL, return the fallback client
+  if (!redisUrl) {
+    logger.info('[Redis] No REDIS_URL configured, using fallback client');
+    return getRedisClientWithFallback();
+  }
+  
+  try {
+    const redis = new Redis(redisUrl, {
+      retryStrategy: (times) => {
+        if (times > 3) {
+          logger.warn('[Redis] Connection failed, using fallback');
+          return null;
+        }
+        const delay = Math.min(times * 50, 2000);
+        return delay;
+      },
+      reconnectOnError: (err) => {
+        const targetError = 'READONLY';
+        if (err.message.includes(targetError)) {
+          // Only reconnect when the error contains "READONLY"
+          return true;
+        }
+        return false;
+      },
+      maxRetriesPerRequest: 3,
+      enableReadyCheck: true,
+      enableOfflineQueue: true,
+    });
 
-  redis.on('error', (err) => {
-    console.error('Redis connection error:', err);
-  });
+    redis.on('error', (err) => {
+      console.error('[Redis] Connection error:', err);
+    });
 
-  redis.on('connect', () => {
-    console.log('Redis connected successfully');
-  });
+    redis.on('connect', () => {
+      console.log('[Redis] Connected successfully');
+    });
 
-  return redis;
+    return redis;
+  } catch (error) {
+    logger.error('[Redis] Failed to create client, using fallback:', error);
+    return getRedisClientWithFallback();
+  }
 }
 
 // Helper functions for job management
 export class CrawlJobManager {
-  private redis: Redis;
+  private redis: Redis | RedisClientWithFallback;
   private readonly JOB_TTL = 3600; // 1 hour TTL for jobs
   private readonly RESULT_TTL = 86400; // 24 hour TTL for results
 
-  constructor(redis: Redis) {
+  constructor(redis: Redis | RedisClientWithFallback) {
     this.redis = redis;
   }
 
@@ -121,10 +138,10 @@ export class CrawlJobManager {
 }
 
 // Singleton instance
-let redisClient: Redis | null = null;
+let redisClient: Redis | RedisClientWithFallback | null = null;
 let jobManager: CrawlJobManager | null = null;
 
-export function getRedisClient(): Redis {
+export function getRedisClient(): Redis | RedisClientWithFallback {
   if (!redisClient) {
     redisClient = createRedisClient();
   }

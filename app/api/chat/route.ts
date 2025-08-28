@@ -1,7 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server';
 export const runtime = 'nodejs'
 export const dynamic = 'force-dynamic'
-import { createServiceRoleClient } from '@/lib/supabase-server';
+import { createServiceRoleClient, validateSupabaseEnv } from '@/lib/supabase-server';
 import { ChatResponse } from '@/types';
 import OpenAI from 'openai';
 import { z } from 'zod';
@@ -13,13 +13,19 @@ import { SimpleCustomerVerification } from '@/lib/customer-verification-simple';
 // Lazy load OpenAI client to avoid build-time errors
 let openai: OpenAI | null = null;
 
-function getOpenAIClient(): OpenAI {
+function getOpenAIClient(): OpenAI | null {
   if (!openai) {
     const apiKey = process.env.OPENAI_API_KEY;
     if (!apiKey) {
-      throw new Error('OPENAI_API_KEY is not configured');
+      console.error('[Chat API] OpenAI API key is not configured');
+      return null;
     }
-    openai = new OpenAI({ apiKey });
+    try {
+      openai = new OpenAI({ apiKey });
+    } catch (error) {
+      console.error('[Chat API] Failed to initialize OpenAI client:', error);
+      return null;
+    }
   }
   return openai;
 }
@@ -42,20 +48,12 @@ const ChatRequestSchema = z.object({
 export async function POST(request: NextRequest) {
   try {
     // Check critical environment variables
-    if (!process.env.NEXT_PUBLIC_SUPABASE_URL || 
-        !process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY ||
-        !process.env.SUPABASE_SERVICE_ROLE_KEY ||
-        !process.env.OPENAI_API_KEY) {
-      console.error('POST /api/chat missing critical environment variables', {
-        supabaseUrl: process.env.NEXT_PUBLIC_SUPABASE_URL ? 'present' : 'missing',
-        supabaseAnon: process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY ? 'present' : 'missing',
-        supabaseService: process.env.SUPABASE_SERVICE_ROLE_KEY ? 'present' : 'missing',
-        openai: process.env.OPENAI_API_KEY ? 'present' : 'missing'
-      });
+    if (!validateSupabaseEnv() || !process.env.OPENAI_API_KEY) {
+      console.error('[Chat API] Service configuration incomplete');
       return NextResponse.json(
         { 
-          error: 'Service configuration incomplete',
-          message: 'The chat service is not properly configured. Please contact support.'
+          error: 'Service temporarily unavailable',
+          message: 'The chat service is currently undergoing maintenance. Please try again later.'
         },
         { status: 503 }
       );
@@ -85,6 +83,15 @@ export async function POST(request: NextRequest) {
 
     // Initialize Supabase clients
     const adminSupabase = await createServiceRoleClient();
+    if (!adminSupabase) {
+      return NextResponse.json(
+        { 
+          error: 'Database connection failed',
+          message: 'Unable to process your request. Please try again later.'
+        },
+        { status: 503 }
+      );
+    }
 
     // Get or create conversation
     let conversationId = conversation_id;
@@ -155,7 +162,12 @@ export async function POST(request: NextRequest) {
             }
           }
           
-          const embeddingResponse = await getOpenAIClient().embeddings.create({
+          const openaiClient = getOpenAIClient();
+          if (!openaiClient) {
+            console.error('[Chat API] OpenAI client not available for embeddings');
+            return [];
+          }
+          const embeddingResponse = await openaiClient.embeddings.create({
             model: 'text-embedding-3-small',
             input: message,
           });
@@ -1218,7 +1230,18 @@ export async function POST(request: NextRequest) {
     messages.push({ role: 'user', content: message });
 
     // Get AI response
-    const completion = await getOpenAIClient().chat.completions.create({
+    const openaiClient = getOpenAIClient();
+    if (!openaiClient) {
+      return NextResponse.json(
+        { 
+          error: 'AI service unavailable',
+          message: 'The AI service is temporarily unavailable. Please try again later.'
+        },
+        { status: 503 }
+      );
+    }
+    
+    const completion = await openaiClient.chat.completions.create({
       model: 'gpt-4.1',
       messages,
       temperature: 0.7,

@@ -1,30 +1,18 @@
 import { NextRequest, NextResponse } from 'next/server';
 export const runtime = 'nodejs'
 export const dynamic = 'force-dynamic'
-import { createClient, createServiceRoleClient } from '@/lib/supabase-server';
+import { createClient, createServiceRoleClient, validateSupabaseEnv } from '@/lib/supabase-server';
 import { logger } from '@/lib/logger';
 import { unstable_cache } from 'next/cache';
 
 export async function GET(request: NextRequest) {
   try {
-    // Ensure required env is present for service role operations
-    const hasUrl = Boolean(process.env.NEXT_PUBLIC_SUPABASE_URL);
-    const hasServiceKey = Boolean(process.env.SUPABASE_SERVICE_ROLE_KEY);
-    if (!hasUrl || !hasServiceKey) {
-      console.error('GET /api/training misconfigured Supabase env', {
-        hasUrl,
-        hasServiceKey,
-        url: process.env.NEXT_PUBLIC_SUPABASE_URL ? 'present' : 'missing',
-        serviceKey: process.env.SUPABASE_SERVICE_ROLE_KEY ? 'present' : 'missing'
-      });
+    // Validate Supabase configuration
+    if (!validateSupabaseEnv()) {
       return NextResponse.json(
         { 
-          error: 'Service configuration incomplete',
-          message: 'The service is not properly configured. Please contact support.',
-          details: process.env.NODE_ENV === 'development' ? {
-            missingUrl: !hasUrl,
-            missingServiceKey: !hasServiceKey
-          } : undefined
+          error: 'Service temporarily unavailable',
+          message: 'The service is currently undergoing maintenance. Please try again later.'
         },
         { status: 503 }
       );
@@ -36,6 +24,15 @@ export async function GET(request: NextRequest) {
     const offset = (page - 1) * limit;
 
     const adminSupabase = await createServiceRoleClient();
+    if (!adminSupabase) {
+      return NextResponse.json(
+        { 
+          error: 'Database connection failed',
+          message: 'Unable to connect to the database. Please try again later.'
+        },
+        { status: 503 }
+      );
+    }
     
     // Get total count for pagination from scraped_pages
     const { count } = await adminSupabase
@@ -98,7 +95,30 @@ export async function GET(request: NextRequest) {
 
 export async function POST(request: NextRequest) {
   try {
+    // Validate environment configuration early for clearer errors in prod
+    const hasUrl = Boolean(process.env.NEXT_PUBLIC_SUPABASE_URL);
+    const hasAnon = Boolean(process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY);
+    const hasServiceKey = Boolean(process.env.SUPABASE_SERVICE_ROLE_KEY);
+    if (!hasUrl || !hasAnon || !hasServiceKey) {
+      logger.error('POST /api/training misconfigured Supabase env', undefined, {
+        hasUrl,
+        hasAnon,
+        hasServiceKey,
+      });
+      return NextResponse.json(
+        { error: 'Service misconfigured: missing Supabase env' },
+        { status: 503 }
+      );
+    }
+
     const supabase = await createClient();
+    if (!supabase) {
+      return NextResponse.json(
+        { error: 'Service temporarily unavailable' },
+        { status: 503 }
+      );
+    }
+    
     const { data: { user } } = await supabase.auth.getUser();
     
     if (!user) {
@@ -116,6 +136,12 @@ export async function POST(request: NextRequest) {
     }
 
     const adminSupabase = await createServiceRoleClient();
+    if (!adminSupabase) {
+      return NextResponse.json(
+        { error: 'Database connection failed' },
+        { status: 503 }
+      );
+    }
     
     // Create training data entry
     const { data, error } = await adminSupabase
@@ -130,7 +156,13 @@ export async function POST(request: NextRequest) {
       .select()
       .single();
 
-    if (error) throw error;
+    if (error) {
+      logger.error('POST /api/training insert failed', error, {
+        userId: user.id,
+        type,
+      });
+      throw error;
+    }
 
     // TODO: Trigger processing/embedding generation
     
@@ -145,7 +177,7 @@ export async function POST(request: NextRequest) {
       }
     });
   } catch (error) {
-    console.error('Error creating training data:', error);
+    logger.error('POST /api/training unhandled error', error);
     return NextResponse.json(
       { error: 'Failed to create training data' },
       { status: 500 }
