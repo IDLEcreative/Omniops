@@ -1,0 +1,161 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Chat Widget Test - Thompson's E Parts</title>
+    <style>
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, sans-serif;
+            margin: 0;
+            padding: 40px;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+        }
+        .container {
+            max-width: 800px;
+            margin: 0 auto;
+            background: white;
+            border-radius: 12px;
+            padding: 40px;
+            box-shadow: 0 20px 40px rgba(0,0,0,0.1);
+        }
+        h1 {
+            color: #333;
+            margin-bottom: 10px;
+        }
+        .subtitle {
+            color: #666;
+            margin-bottom: 30px;
+        }
+        .test-section {
+            background: #f7f7f7;
+            border-radius: 8px;
+            padding: 20px;
+            margin: 20px 0;
+        }
+        .test-section h2 {
+            color: #444;
+            font-size: 18px;
+            margin-top: 0;
+        }
+        .test-questions {
+            list-style: none;
+            padding: 0;
+        }
+        .test-questions li {
+            background: white;
+            padding: 12px 16px;
+            margin: 8px 0;
+            border-radius: 6px;
+            cursor: pointer;
+            transition: all 0.2s;
+            border: 2px solid transparent;
+        }
+        .test-questions li:hover {
+            border-color: #667eea;
+            transform: translateX(4px);
+        }
+        .status {
+            background: #4CAF50;
+            color: white;
+            padding: 8px 16px;
+            border-radius: 20px;
+            display: inline-block;
+            font-size: 14px;
+            margin-bottom: 20px;
+        }
+        .info-box {
+            background: #e3f2fd;
+            border-left: 4px solid #2196F3;
+            padding: 16px;
+            margin: 20px 0;
+            border-radius: 4px;
+        }
+        .info-box strong {
+            color: #1976D2;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>🤖 Chat Widget Test Environment</h1>
+        <p class="subtitle">Thompson's E Parts Customer Service</p>
+        
+        <span class="status">✓ Widget Active</span>
+        
+        <div class="info-box">
+            <strong>Testing Mode:</strong> This page simulates how the chat widget will appear on your website. 
+            The chat bubble should appear in the bottom-right corner.
+        </div>
+
+        <div class="test-section">
+            <h2>🧪 Sample Questions to Test RAG System</h2>
+            <p>Click any question below to copy it, then paste in the chat:</p>
+            <ul class="test-questions">
+                <li onclick="copyToClipboard('What products do you offer?')">What products do you offer?</li>
+                <li onclick="copyToClipboard('Do you sell hydraulic pumps?')">Do you sell hydraulic pumps?</li>
+                <li onclick="copyToClipboard('What tipper safety equipment is available?')">What tipper safety equipment is available?</li>
+                <li onclick="copyToClipboard('Tell me about crane parts')">Tell me about crane parts</li>
+                <li onclick="copyToClipboard('Do you have Palfinger crane parts?')">Do you have Palfinger crane parts?</li>
+                <li onclick="copyToClipboard('What are your contact details?')">What are your contact details?</li>
+                <li onclick="copyToClipboard('Do you sell wheel safety products?')">Do you sell wheel safety products?</li>
+                <li onclick="copyToClipboard('What brands of rams do you stock?')">What brands of rams do you stock?</li>
+            </ul>
+        </div>
+
+        <div class="test-section">
+            <h2>🔧 Widget Configuration</h2>
+            <p><strong>Domain:</strong> thompsonseparts.co.uk (mapped from localhost)</p>
+            <p><strong>Server:</strong> http://localhost:3001</p>
+            <p><strong>Features:</strong> RAG-enabled, WooCommerce integration ready</p>
+        </div>
+
+        <div class="test-section">
+            <h2>📊 Expected Behavior</h2>
+            <ul>
+                <li>✅ Chat bubble appears in bottom-right corner</li>
+                <li>✅ Clicking bubble opens chat interface</li>
+                <li>✅ Questions about products return specific information from Thompson's E Parts</li>
+                <li>✅ Responses include source URLs when available</li>
+                <li>✅ Generic questions without matches show helpful fallback messages</li>
+            </ul>
+        </div>
+    </div>
+
+    <!-- Embed the chat widget -->
+    <script>
+        // Widget configuration
+        window.ChatWidgetConfig = {
+            serverUrl: 'http://localhost:3001',
+            appearance: {
+                position: 'bottom-right',
+                primaryColor: '#667eea'
+            },
+            behavior: {
+                showOnLoad: false,
+                persistState: true
+            }
+        };
+
+        // Helper function to copy text
+        function copyToClipboard(text) {
+            navigator.clipboard.writeText(text).then(() => {
+                // Visual feedback
+                event.target.style.background = '#4CAF50';
+                event.target.style.color = 'white';
+                event.target.textContent = '✓ Copied: ' + text;
+                
+                setTimeout(() => {
+                    event.target.style.background = 'white';
+                    event.target.style.color = '#333';
+                    event.target.textContent = text;
+                }, 2000);
+            });
+        }
+    </script>
+    
+    <!-- Load the embed script from your local server -->
+    <script src="http://localhost:3001/embed.js"></script>
+</body>
+</html>

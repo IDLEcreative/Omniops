@@ -139,9 +139,13 @@ export async function POST(request: NextRequest) {
     }
     // 2. Website content context (if enabled and not demo)
     else if (config?.features?.websiteScraping?.enabled !== false && domain) {
+      // For localhost testing, use thompsonseparts.co.uk content
+      const searchDomain = domain === 'localhost' ? 'thompsonseparts.co.uk' : domain;
+      console.log(`[Chat API] Searching embeddings for domain: ${searchDomain} (original: ${domain})`);
+      
       embeddingSearchPromise = searchSimilarContent(
         message,
-        domain,
+        searchDomain,
         3, // Get top 3 from embeddings
         0.3  // Lower threshold to get more results
       ).catch(async (searchError) => {
