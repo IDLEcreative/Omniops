@@ -45,14 +45,9 @@ export interface UpdateScrapeJobOptions {
 }
 
 export class ScrapeJobManager {
-  private supabasePromise: ReturnType<typeof createClient>
-
-  constructor() {
-    this.supabasePromise = createClient()
-  }
-
+  // Create Supabase client on-demand within request context
   private async getSupabase() {
-    return await this.supabasePromise
+    return await createClient()
   }
 
   /**

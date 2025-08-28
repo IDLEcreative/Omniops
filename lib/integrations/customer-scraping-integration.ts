@@ -42,14 +42,9 @@ export interface ScrapingTriggerResult {
 
 export class CustomerScrapingIntegration {
   private static instance: CustomerScrapingIntegration
-  private supabasePromise: ReturnType<typeof createClient>
-
-  constructor() {
-    this.supabasePromise = createClient()
-  }
-
+  // Create Supabase client on-demand within request context
   private async getSupabase() {
-    return await this.supabasePromise
+    return await createClient()
   }
 
   static getInstance(): CustomerScrapingIntegration {

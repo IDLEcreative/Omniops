@@ -1,4 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server';
+export const runtime = 'nodejs'
+export const dynamic = 'force-dynamic'
 import { createClient } from '@/lib/supabase-server';
 import { refreshDomainContent, discoverNewPages, refreshPageContent } from '@/lib/content-refresh';
 import { z } from 'zod';

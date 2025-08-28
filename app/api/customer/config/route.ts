@@ -9,6 +9,8 @@
  */
 
 import { NextRequest, NextResponse } from 'next/server'
+export const runtime = 'nodejs'
+export const dynamic = 'force-dynamic'
 import { createClient } from '@/lib/supabase-server'
 import { logger } from '@/lib/logger'
 import { domainValidator, type DomainValidationResult } from '@/lib/utils/domain-validator'

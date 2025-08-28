@@ -1,4 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server';
+export const runtime = 'nodejs'
+export const dynamic = 'force-dynamic'
 import { getDynamicWooCommerceClient } from '@/lib/woocommerce-dynamic';
 import { createServiceRoleClient } from '@/lib/supabase-server';
 

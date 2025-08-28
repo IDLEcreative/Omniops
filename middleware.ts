@@ -3,34 +3,47 @@ import type { NextRequest } from 'next/server';
 import { createServerClient } from '@supabase/ssr';
 
 export async function middleware(request: NextRequest) {
-  let response = NextResponse.next({
-    request: {
-      headers: request.headers,
-    },
+  // Always create a single response instance and attach cookies to it
+  const response = NextResponse.next({
+    request: { headers: request.headers },
   });
 
-  const supabase = createServerClient(
-    process.env.NEXT_PUBLIC_SUPABASE_URL!,
-    process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!,
-    {
-      cookies: {
-        getAll() {
-          return request.cookies.getAll()
-        },
-        setAll(cookiesToSet) {
-          cookiesToSet.forEach(({ name, value }) => request.cookies.set(name, value))
-          response = NextResponse.next({
-            request,
-          })
-          cookiesToSet.forEach(({ name, value, options }) =>
-            response.cookies.set(name, value, options)
-          )
-        },
-      },
-    }
+  // Default to no user; attempt to resolve via Supabase if env is present
+  let user: any = null;
+
+  const hasSupabaseEnv = Boolean(
+    process.env.NEXT_PUBLIC_SUPABASE_URL && process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY
   );
 
-  const { data: { user } } = await supabase.auth.getUser();
+  if (hasSupabaseEnv) {
+    try {
+      const supabase = createServerClient(
+        process.env.NEXT_PUBLIC_SUPABASE_URL!,
+        process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!,
+        {
+          cookies: {
+            getAll() {
+              return request.cookies.getAll();
+            },
+            setAll(cookiesToSet) {
+              // Only set on the response; Next will propagate back to the browser
+              cookiesToSet.forEach(({ name, value, options }) =>
+                response.cookies.set(name, value, options)
+              );
+            },
+          },
+        }
+      );
+
+      const { data, error } = await supabase.auth.getUser();
+      if (!error) {
+        user = data?.user ?? null;
+      }
+    } catch (e) {
+      // Fail open: treat as unauthenticated but continue without crashing middleware
+      console.warn('Middleware Supabase auth check skipped:', (e as Error)?.message);
+    }
+  }
 
   // Protected routes
   const protectedPaths = ['/admin', '/setup'];

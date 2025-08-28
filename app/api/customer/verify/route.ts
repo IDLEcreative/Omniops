@@ -1,4 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server';
+export const runtime = 'nodejs'
+export const dynamic = 'force-dynamic'
 import { createServiceRoleClient } from '@/lib/supabase-server';
 import { CustomerVerification } from '@/lib/customer-verification';
 import { z } from 'zod';
