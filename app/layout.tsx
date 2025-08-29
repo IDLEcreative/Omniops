@@ -17,6 +17,7 @@ const geistMono = Geist_Mono({
 export const metadata: Metadata = {
   title: "Omniops - AI Customer Service Platform",
   description: "Intelligent customer support that scales with your business. Handle queries in 40+ languages with AI-powered assistance.",
+  viewport: "width=device-width, initial-scale=1, maximum-scale=5",
 };
 
 export default function RootLayout({
