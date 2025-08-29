@@ -773,7 +773,7 @@ export async function crawlWebsite(
 ): Promise<string> {
   const jobId = `crawl_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`;
   const startUrl = new URL(url);
-  const maxPages = options?.maxPages || 50;
+  const maxPages = options?.maxPages ?? -1; // Default to unlimited for production
   const crawlEntireSite = options?.maxPages === -1;
   
   console.log(`[CRAWLER] Starting website crawl with job ID: ${jobId}`);
@@ -964,6 +964,29 @@ export async function crawlWebsite(
     }
   });
   
+  // Try to discover URLs from sitemap first
+  let sitemapUrls: string[] = [];
+  try {
+    console.log(`[${jobId}] Checking for sitemap at ${startUrl.origin}/sitemap.xml`);
+    const parser = new sitemapParser.SitemapParser();
+    const sitemapEntries = await parser.parseSitemapFromUrl(`${startUrl.origin}/sitemap.xml`);
+    
+    if (sitemapEntries && sitemapEntries.length > 0) {
+      console.log(`[${jobId}] Found ${sitemapEntries.length} URLs in sitemap!`);
+      sitemapUrls = sitemapEntries.map(entry => entry.loc);
+      
+      // Update job with discovered URLs count
+      await jobManager.updateJob(jobId, { 
+        total: Math.min(sitemapEntries.length, maxPages === -1 ? sitemapEntries.length : maxPages),
+        sitemapDetected: true,
+        sitemapUrlCount: sitemapEntries.length
+      });
+    }
+  } catch (sitemapError) {
+    console.log(`[${jobId}] No sitemap found or error parsing: ${sitemapError.message}`);
+    // Continue with regular crawling
+  }
+  
   // Start crawling in background using child process
   console.log(`[${jobId}] Preparing to spawn crawler worker process...`);
   
@@ -985,7 +1008,8 @@ export async function crawlWebsite(
     maxPages.toString(),
     turboMode.toString(),
     options?.configPreset || 'memoryEfficient', // Better default for large sites
-    isOwnSite ? 'true' : 'false' // Pass own-site flag (detected or explicit)
+    isOwnSite ? 'true' : 'false', // Pass own-site flag (detected or explicit)
+    JSON.stringify(sitemapUrls.slice(0, maxPages === -1 ? undefined : maxPages)) // Pass sitemap URLs if found
   ];
   
   console.log(`[${jobId}] Spawning worker with arguments:`, workerArgs);

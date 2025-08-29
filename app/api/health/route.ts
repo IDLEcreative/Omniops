@@ -2,13 +2,17 @@ import { NextResponse } from 'next/server';
 export const runtime = 'nodejs'
 export const dynamic = 'force-dynamic'
 import { createClient } from '@/lib/supabase-server';
-import { logger } from '@/lib/logger';
+import { errorLogger } from '@/lib/error-logger';
+import { withErrorHandler } from '@/lib/api-error-handler';
 
-export async function GET() {
+async function handler() {
   const startTime = Date.now();
   const checks = {
     api: 'ok',
     database: 'checking',
+    redis: 'checking',
+    memory: 'checking',
+    errors: 'checking',
     timestamp: new Date().toISOString(),
     uptime: process.uptime(),
     environment: process.env.NODE_ENV || 'development',
@@ -18,35 +22,81 @@ export async function GET() {
     // Check database connection
     const dbStart = Date.now();
     const supabase = await createClient();
-    const { error } = await supabase.from('conversations').select('count').limit(1);
+    const { error: dbError } = await supabase.from('conversations').select('count').limit(1);
     const dbLatency = Date.now() - dbStart;
+    checks.database = dbError ? 'error' : 'ok';
     
-    checks.database = error ? 'error' : 'ok';
+    // Check Redis connection
+    let redisLatency = 0;
+    try {
+      const redisStart = Date.now();
+      const redis = await import('@/lib/redis').then(m => m.redis);
+      if (redis) {
+        await redis.ping();
+        checks.redis = 'ok';
+      } else {
+        checks.redis = 'not-configured';
+      }
+      redisLatency = Date.now() - redisStart;
+    } catch (error) {
+      checks.redis = 'error';
+    }
     
-    // Add database latency to checks
+    // Check memory usage
+    const mem = process.memoryUsage();
+    const memoryUsagePercent = (mem.heapUsed / mem.heapTotal) * 100;
+    checks.memory = memoryUsagePercent > 90 ? 'critical' : 
+                    memoryUsagePercent > 70 ? 'warning' : 'ok';
+    
+    // Check recent errors
+    try {
+      const recentErrors = await errorLogger.getRecentErrors(10);
+      const criticalErrors = recentErrors.filter(e => e.severity === 'critical');
+      checks.errors = criticalErrors.length > 0 ? 'critical' : 
+                      recentErrors.length > 5 ? 'warning' : 'ok';
+    } catch {
+      checks.errors = 'unknown';
+    }
+    
+    // Add detailed metrics
     const detailedChecks = {
       ...checks,
-      databaseLatency: `${dbLatency}ms`,
+      latency: {
+        database: `${dbLatency}ms`,
+        redis: `${redisLatency}ms`,
+      },
+      memory: {
+        heapUsed: Math.round(mem.heapUsed / 1024 / 1024),
+        heapTotal: Math.round(mem.heapTotal / 1024 / 1024),
+        percentage: Math.round(memoryUsagePercent),
+      },
     };
 
-    const allHealthy = checks.api === 'ok' && checks.database === 'ok';
+    const allHealthy = checks.api === 'ok' && 
+                      checks.database === 'ok' && 
+                      checks.memory !== 'critical' &&
+                      checks.errors !== 'critical';
+    
+    const isDegraded = !allHealthy && checks.database === 'ok';
     const responseTime = Date.now() - startTime;
     
-    // Log health check
-    logger.debug('Health check performed', {
-      status: allHealthy ? 'healthy' : 'unhealthy',
-      responseTime,
-      checks: detailedChecks,
-    });
+    // Log health check if degraded or unhealthy
+    if (!allHealthy) {
+      console.warn('Health check degraded/unhealthy', {
+        status: allHealthy ? 'healthy' : isDegraded ? 'degraded' : 'unhealthy',
+        responseTime,
+        checks: detailedChecks,
+      });
+    }
     
     return NextResponse.json(
       { 
-        status: allHealthy ? 'healthy' : 'unhealthy',
+        status: allHealthy ? 'healthy' : isDegraded ? 'degraded' : 'unhealthy',
         checks: detailedChecks,
         responseTime: `${responseTime}ms`,
       },
       { 
-        status: allHealthy ? 200 : 503,
+        status: allHealthy || isDegraded ? 200 : 503,
         headers: {
           'Cache-Control': 'no-cache, no-store, must-revalidate',
           'X-Response-Time': `${responseTime}ms`,
@@ -57,7 +107,8 @@ export async function GET() {
     checks.database = 'error';
     const responseTime = Date.now() - startTime;
     
-    logger.error('Health check failed', error, { checks });
+    console.error('Health check failed:', error);
+    await errorLogger.logError(error, { endpoint: '/api/health', checks });
     
     return NextResponse.json(
       { 
@@ -70,3 +121,5 @@ export async function GET() {
     );
   }
 }
+
+export const GET = withErrorHandler(handler);

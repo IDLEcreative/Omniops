@@ -15,36 +15,89 @@ interface State {
   hasError: boolean;
   error: Error | null;
   errorInfo: React.ErrorInfo | null;
+  errorCount: number;
+  lastErrorTime: number;
 }
 
 export class ErrorBoundary extends Component<Props, State> {
   constructor(props: Props) {
     super(props);
-    this.state = { hasError: false, error: null, errorInfo: null };
+    this.state = { 
+      hasError: false, 
+      error: null, 
+      errorInfo: null,
+      errorCount: 0,
+      lastErrorTime: 0
+    };
   }
 
-  static getDerivedStateFromError(error: Error): State {
+  static getDerivedStateFromError(error: Error): Partial<State> {
     return { hasError: true, error, errorInfo: null };
   }
 
   componentDidCatch(error: Error, errorInfo: React.ErrorInfo) {
+    const now = Date.now();
+    const timeSinceLastError = now - this.state.lastErrorTime;
+    const newErrorCount = timeSinceLastError < 5000 ? this.state.errorCount + 1 : 1;
+    
     // Log error to console in development
     if (process.env.NODE_ENV === "development") {
       console.error("Error caught by boundary:", error, errorInfo);
+      console.error("Error count:", newErrorCount);
     }
 
-    // You can also log to an error reporting service here
-    // logErrorToService(error, errorInfo);
+    // Log to external service
+    this.logErrorToService(error, errorInfo, newErrorCount);
 
     this.setState({
       error,
       errorInfo,
+      errorCount: newErrorCount,
+      lastErrorTime: now
     });
+    
+    // If too many errors in short time, suggest reload
+    if (newErrorCount > 3) {
+      console.error("Multiple errors detected in short succession");
+    }
+  }
+  
+  private async logErrorToService(error: Error, errorInfo: React.ErrorInfo, errorCount: number) {
+    try {
+      await fetch('/api/log-error', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          message: error.message,
+          stack: error.stack,
+          componentStack: errorInfo.componentStack,
+          errorCount,
+          timestamp: new Date().toISOString(),
+          userAgent: typeof navigator !== 'undefined' ? navigator.userAgent : 'unknown',
+          url: typeof window !== 'undefined' ? window.location.href : 'unknown',
+          severity: errorCount > 2 ? 'critical' : 'high',
+          category: 'react_component'
+        }),
+      });
+    } catch (loggingError) {
+      console.error('Failed to log error to service:', loggingError);
+    }
   }
 
   handleReset = () => {
-    this.setState({ hasError: false, error: null, errorInfo: null });
-    window.location.reload();
+    this.setState({ 
+      hasError: false, 
+      error: null, 
+      errorInfo: null,
+      errorCount: 0,
+      lastErrorTime: 0
+    });
+    // Only reload if multiple errors occurred
+    if (this.state.errorCount > 2) {
+      window.location.reload();
+    }
   };
 
   render() {
@@ -78,6 +131,17 @@ export class ErrorBoundary extends Component<Props, State> {
                 </AlertDescription>
               </Alert>
 
+              {this.state.errorCount > 2 && (
+                <Alert variant="destructive" className="mb-4">
+                  <AlertTriangle className="h-4 w-4" />
+                  <AlertTitle>Multiple Errors Detected</AlertTitle>
+                  <AlertDescription>
+                    The application has encountered {this.state.errorCount} errors. 
+                    A full page reload is recommended.
+                  </AlertDescription>
+                </Alert>
+              )}
+              
               {isDevelopment && this.state.errorInfo && (
                 <div className="space-y-2">
                   <h3 className="text-sm font-semibold flex items-center gap-2">

@@ -28,7 +28,7 @@ const nextConfig = {
   // Experimental features for better performance
   experimental: {
     // optimizeCss disabled to avoid critters dependency issue
-    scrollRestoration: true, // Better scroll restoration  
+    scrollRestoration: true, // Better scroll restoration
   },
   
   // Webpack configuration with explicit alias resolution

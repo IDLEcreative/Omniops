@@ -721,49 +721,95 @@ export async function POST(request: NextRequest) {
     let stockCheckPromise: Promise<any[]> | null = null;
     
     if (domain && isStockQuery) {
-      console.log(`Real-time stock check: domain ${domain}`);
+      // For demo/testing: map localhost and Vercel deployments to sample content
+      const isDemoEnvironment = 
+        domain === 'localhost' || 
+        domain?.includes('.vercel.app') || 
+        domain?.includes('.vercel.sh') ||
+        domain?.includes('127.0.0.1') ||
+        domain?.includes('ngrok') ||
+        domain?.includes('preview');
+      
+      const stockDomain = isDemoEnvironment ? 'thompsonseparts.co.uk' : domain;
+      console.log(`Real-time stock check: domain ${stockDomain} (original: ${domain}, isDemo: ${isDemoEnvironment})`);
+      
       stockCheckPromise = (async () => {
         try {
           const { data: customerConfig } = await adminSupabase
             .from('customer_configs')
             .select('woocommerce_url')
-            .eq('domain', domain)
+            .eq('domain', stockDomain)
             .single();
           
           if (customerConfig?.woocommerce_url) {
             const { getDynamicWooCommerceClient } = await import('@/lib/woocommerce-dynamic');
-            const wc = await getDynamicWooCommerceClient(domain);
+            const wc = await getDynamicWooCommerceClient(stockDomain);
             
             if (wc) {
-              console.log('WooCommerce: Fetching real-time stock data for domain', domain);
+              console.log('WooCommerce: Fetching real-time stock data for domain', stockDomain);
               
-              // Extract product identifiers from the message
-              // Look for SKUs (usually alphanumeric codes)
-              const skuPattern = /\b[A-Z0-9]{3,}[-_]?[A-Z0-9]*\b/gi;
-              const skuMatches = message.match(skuPattern) || [];
+              // Extract meaningful search terms from the message
+              // Remove common stock-related words and punctuation to get the actual product identifiers
+              const stockWords = /\b(is|are|in|stock|availability|available|check|for|the|of|how|many|do|you|have|got|any)\b/gi;
+              const cleanedMessage = message
+                .replace(stockWords, ' ')
+                .replace(/[?!.,;:]/g, '') // Remove punctuation
+                .replace(/\s+/g, ' ') // Normalize whitespace
+                .trim();
               
-              // Look for product names (quoted text or specific product mentions)
+              // Look for quoted text first (highest priority)
               const quotedPattern = /"([^"]+)"|'([^']+)'/g;
               const quotedMatches = [...message.matchAll(quotedPattern)].map(m => m[1] || m[2]);
               
-              // Also extract general product terms for broader searches
-              const productTerms = message
-                .toLowerCase()
-                .replace(/stock|availability|available|in stock|out of stock|inventory|how many/gi, '')
-                .trim()
-                .split(/\s+/)
-                .filter(term => term.length > 2);
+              // Look for potential SKUs or product codes (alphanumeric with optional dashes/spaces)
+              // This will match: 2EVRA48, PK-EK 291, PK-EK-291, etc.
+              const skuPattern = /\b[A-Z0-9]{2,}(?:[\s\-][A-Z0-9]+)*\b/gi;
+              const potentialSkus = cleanedMessage.match(skuPattern) || [];
+              
+              // Filter to keep only likely product codes
+              const skuMatches = potentialSkus.filter(match => {
+                // Keep if: contains numbers, or has specific patterns like XX-XX
+                return /\d/.test(match) || /[A-Z]{2,}[\-\s][A-Z]{2,}/.test(match);
+              });
+              
+              console.log('Extracted search terms:', { quoted: quotedMatches, skus: skuMatches, cleaned: cleanedMessage });
               
               const stockResults: any[] = [];
               
               // First, try to find products by SKU (most accurate)
               for (const sku of skuMatches) {
                 try {
-                  const products = await wc.getProducts({ 
+                  // Try exact SKU match first
+                  let products = await wc.getProducts({ 
                     sku: sku,
                     per_page: 1,
                     status: 'publish'
                   });
+                  
+                  // If not found, try variations (remove spaces, add dashes, etc.)
+                  if (!products || products.length === 0) {
+                    // Try with spaces replaced by dashes
+                    const skuWithDash = sku.replace(/\s+/g, '-');
+                    if (skuWithDash !== sku) {
+                      console.log(`Trying SKU variation: ${skuWithDash}`);
+                      products = await wc.getProducts({ 
+                        sku: skuWithDash,
+                        per_page: 1,
+                        status: 'publish'
+                      });
+                    }
+                  }
+                  
+                  // If still not found, try general search
+                  if (!products || products.length === 0) {
+                    console.log(`Trying general search for: ${sku}`);
+                    products = await wc.getProducts({
+                      search: sku,
+                      per_page: 3,
+                      status: 'publish'
+                    });
+                  }
+                  
                   if (products && products.length > 0) {
                     console.log(`Found product by SKU ${sku}:`, products[0].name);
                     stockResults.push({
@@ -778,9 +824,11 @@ export async function POST(request: NextRequest) {
                             'On backorder'
                       }`
                     });
+                  } else {
+                    console.log(`Product not found for SKU: ${sku}`);
                   }
                 } catch (err) {
-                  console.log(`SKU ${sku} not found`);
+                  console.log(`Error searching for SKU ${sku}:`, err);
                 }
               }
               
@@ -817,14 +865,16 @@ export async function POST(request: NextRequest) {
               }
               
               // If no specific products found, do a general search with the cleaned message
-              if (stockResults.length === 0 && productTerms.length > 0) {
-                const searchQuery = productTerms.join(' ');
+              if (stockResults.length === 0 && cleanedMessage.length > 0) {
+                // Use the cleaned message for search (without stock-related words)
+                const searchQuery = cleanedMessage;
                 try {
+                  console.log(`Performing general product search for: "${searchQuery}"`);
                   const products = await wc.getProducts({
                     search: searchQuery,
                     per_page: 5,
                     status: 'publish',
-                    orderby: 'popularity',
+                    orderby: 'relevance',  // Changed to relevance for better search results
                     order: 'desc'
                   });
                   for (const product of products) {

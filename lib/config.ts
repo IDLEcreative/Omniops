@@ -36,7 +36,13 @@ export const WidgetConfigSchema = z.object({
       enabled: z.boolean().default(true),
       urls: z.array(z.string()).default([]),
       crawlDepth: z.number().default(3),
-      maxPages: z.number().default(50),
+      maxPages: z.number().default(-1), // Default to unlimited for production
+      tier: z.enum(['starter', 'professional', 'enterprise']).default('professional'),
+      tierLimits: z.object({
+        starter: z.number().default(100),      // 100 pages for starter
+        professional: z.number().default(1000), // 1000 pages for professional
+        enterprise: z.number().default(-1),     // Unlimited for enterprise
+      }).default({}),
     }),
     
     // Custom knowledge base

@@ -1,0 +1,63 @@
+import { initializeProcessErrorHandlers } from './lib/process-error-handler';
+
+export async function register() {
+  // Initialize error handlers when the server starts
+  if (process.env.NEXT_RUNTIME === 'nodejs') {
+    console.log('Initializing server instrumentation...');
+    
+    // Initialize process error handlers
+    initializeProcessErrorHandlers();
+    
+    // Log server startup
+    console.log(`
+    ================================================
+    🚀 Server started successfully
+    📅 ${new Date().toISOString()}
+    🌍 Environment: ${process.env.NODE_ENV}
+    💾 Memory: ${Math.round(process.memoryUsage().heapUsed / 1024 / 1024)}MB
+    ⏱️  Uptime: ${process.uptime()}s
+    ================================================
+    `);
+  }
+}
+
+export async function onRequestError(
+  error: { digest: string } & Error,
+  request: {
+    path: string;
+    method: string;
+    headers: { [key: string]: string };
+  },
+  context: {
+    routerKind: 'Pages Router' | 'App Router';
+    routePath: string;
+    routeType: 'render' | 'route' | 'action' | 'middleware';
+    renderSource: 'react-server-components' | 'react-server-components-payload' | 'server-rendering';
+    revalidateReason: 'on-demand' | 'stale' | undefined;
+    renderType: 'dynamic' | 'dynamic-resume' | undefined;
+  }
+) {
+  // Log request errors
+  console.error(`Request error on ${request.method} ${request.path}:`, {
+    error: error.message,
+    digest: error.digest,
+    stack: error.stack,
+    context,
+  });
+  
+  // Log to error logger
+  const { logError, ErrorSeverity, ErrorCategory } = await import('./lib/error-logger');
+  await logError(
+    error,
+    {
+      path: request.path,
+      method: request.method,
+      routerKind: context.routerKind,
+      routePath: context.routePath,
+      routeType: context.routeType,
+      digest: error.digest,
+    },
+    ErrorSeverity.HIGH,
+    ErrorCategory.API
+  );
+}
