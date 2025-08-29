@@ -7,6 +7,48 @@ interface MessageContentProps {
 
 // Memoized component to prevent unnecessary re-renders
 export const MessageContent = React.memo(({ content, className = '' }: MessageContentProps) => {
+  // Strip markdown formatting from content
+  const stripMarkdown = useMemo(() => (text: string): string => {
+    let cleaned = text;
+    
+    // Remove horizontal rules (---, ***, ___)
+    cleaned = cleaned.replace(/^[-*_]{3,}$/gm, '');
+    
+    // Remove headers (###, ##, #)
+    cleaned = cleaned.replace(/^#{1,6}\s+/gm, '');
+    
+    // Remove bold/italic markers
+    cleaned = cleaned.replace(/(\*\*|__)(.*?)\1/g, '$2');
+    cleaned = cleaned.replace(/(\*|_)(.*?)\1/g, '$2');
+    
+    // Remove code blocks
+    cleaned = cleaned.replace(/```[\s\S]*?```/g, (match) => {
+      const code = match.replace(/```\w*\n?/g, '').trim();
+      return code;
+    });
+    
+    // Remove inline code
+    cleaned = cleaned.replace(/`([^`]+)`/g, '$1');
+    
+    // Remove blockquotes
+    cleaned = cleaned.replace(/^>\s+/gm, '');
+    
+    // Remove list markers (keeping the text)
+    cleaned = cleaned.replace(/^[\s]*[-*+]\s+/gm, '• ');
+    cleaned = cleaned.replace(/^[\s]*\d+\.\s+/gm, '');
+    
+    // Clean up extra newlines (keep max 2)
+    cleaned = cleaned.replace(/\n{3,}/g, '\n\n');
+    
+    // Trim each line
+    cleaned = cleaned.split('\n').map(line => line.trim()).join('\n');
+    
+    // Remove empty lines at start and end
+    cleaned = cleaned.trim();
+    
+    return cleaned;
+  }, []);
+  
   // Memoized function to convert URLs in text to clickable links
   const renderContentWithLinks = useMemo(() => (text: string) => {
     // Regex patterns for different URL formats
@@ -105,8 +147,11 @@ export const MessageContent = React.memo(({ content, className = '' }: MessageCo
     });
   }, []);
 
-  // Memoize the rendered content
-  const renderedContent = useMemo(() => renderContentWithLinks(content), [content, renderContentWithLinks]);
+  // Memoize the rendered content - first strip markdown, then process links
+  const renderedContent = useMemo(() => {
+    const cleanedContent = stripMarkdown(content);
+    return renderContentWithLinks(cleanedContent);
+  }, [content, stripMarkdown, renderContentWithLinks]);
 
   return (
     <div className={`whitespace-pre-wrap ${className}`}>

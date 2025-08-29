@@ -3,12 +3,24 @@
 import { useState, useEffect } from 'react';
 import ChatWidget from '@/components/ChatWidget';
 
+interface Product {
+  id: number;
+  name: string;
+  sku: string;
+  stock_status: string;
+  stock_quantity: number | null;
+  in_stock: boolean;
+  categories: string[];
+}
+
 export default function EmbedPage() {
   const [demoId, setDemoId] = useState<string>('');
   const [demoConfig, setDemoConfig] = useState<any>(null);
   const [initialOpen, setInitialOpen] = useState(false);
   const [forceClose, setForceClose] = useState(false);
   const [showHints, setShowHints] = useState(true);
+  const [realProducts, setRealProducts] = useState<Product[]>([]);
+  const [loadingProducts, setLoadingProducts] = useState(true);
   const [privacySettings, setPrivacySettings] = useState({
     allowOptOut: true,
     showPrivacyNotice: true,
