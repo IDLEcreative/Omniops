@@ -482,7 +482,7 @@ export default function ChatWidget({
       className={`fixed bottom-5 right-5 w-full max-w-[400px] h-[580px] max-h-[calc(100vh-40px)] 
       sm:w-[400px] sm:right-5 right-0 sm:mx-0 mx-5
       ${highContrast ? 'bg-black border-2 border-white' : 'bg-[#141414]'} 
-      rounded-2xl shadow-2xl flex flex-col transition-all duration-200 ${
+      rounded-2xl shadow-2xl flex flex-col overflow-hidden transition-all duration-200 ${
       isOpen ? 'animate-in slide-in-from-bottom-3 fade-in' : 'animate-out slide-out-to-bottom-3 fade-out'
     }`}
       role="dialog"
@@ -519,7 +519,7 @@ export default function ChatWidget({
       {/* Messages */}
       <div 
         ref={messagesContainerRef}
-        className={`flex-1 px-3 py-3 ${highContrast ? 'bg-black' : 'bg-[#0d0d0d]'} overflow-y-auto overflow-x-hidden`} 
+        className={`flex-1 min-h-0 px-3 py-3 ${highContrast ? 'bg-black' : 'bg-[#0d0d0d]'} overflow-y-auto overflow-x-hidden`} 
         role="log" 
         aria-live="polite" 
         aria-label="Chat messages">
@@ -600,7 +600,7 @@ export default function ChatWidget({
             aria-label="Message input"
             rows={1}
             style={{ height: '40px', minHeight: '40px', maxHeight: '120px' }}
-            className={`flex-1 px-4 py-2 resize-none overflow-y-auto ${
+            className={`flex-1 px-4 py-2 resize-none overflow-hidden ${
               highContrast 
                 ? 'bg-black border-2 border-white text-white placeholder:text-gray-300 focus:border-yellow-400 rounded-2xl' 
                 : 'bg-[#262626] border-0 text-white placeholder:text-gray-400 focus:ring-2 focus:ring-white/20 rounded-2xl'
