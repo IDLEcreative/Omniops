@@ -1,11 +1,12 @@
 import { z } from 'zod';
 import { spawn } from 'child_process';
 import { join } from 'path';
+import Redis from 'ioredis';
 import { ContentExtractor, ExtractedContent } from './content-extractor';
 import { EcommerceExtractor, EcommerceExtractedContent } from './ecommerce-extractor';
 import { getMemoryAwareJobManager, MemoryAwareCrawlJobManager } from './redis-enhanced';
 import { getCrawlerConfig, CrawlerConfig, MemoryMonitor, AIOptimizationMonitor, getAIOptimizationConfig } from './crawler-config';
-import { sitemapParser, SitemapEntry } from './sitemap-parser';
+import { SitemapParser, SitemapEntry } from './sitemap-parser';
 import { jobLimiter } from './job-limiter';
 import { OwnSiteDetector } from './own-site-detector';
 import { CustomerConfigLoader } from './customer-config-loader';
@@ -279,10 +280,53 @@ export async function scrapePage(
     aiOptimizationEnabled: config?.aiOptimization?.enabled
   });
 
-  if (!PlaywrightCrawler) {
-    const error = 'PlaywrightCrawler not available - cannot scrape single pages in this environment';
-    console.error(`[SCRAPER] Fatal error: ${error}`);
-    throw new Error(error);
+  // In serverless/edge environments, use Redis queue instead of direct crawling
+  if (!PlaywrightCrawler || process.env.VERCEL || process.env.NETLIFY) {
+    console.log(`[SCRAPER] Serverless environment detected - using Redis queue for scraping`);
+    
+    // Create a job ID
+    const jobId = `crawl_${Date.now()}_${Math.random().toString(36).substring(7)}`;
+    
+    // Queue the job in Redis
+    const redis = new Redis(process.env.REDIS_URL || 'redis://localhost:6379');
+    
+    const jobData = {
+      jobId,
+      url,
+      domain: new URL(url).hostname,
+      maxPages: config?.maxPages || 50,
+      options: {
+        turboMode: config?.turboMode || false,
+        configPreset: config?.configPreset,
+        useNewConfig: config?.useNewConfig
+      },
+      createdAt: new Date().toISOString()
+    };
+    
+    // Add to queue
+    await redis.lpush('scrape:queue', JSON.stringify(jobData));
+    
+    // Store job status
+    await redis.hset(`crawl:${jobId}`, {
+      status: 'queued',
+      url,
+      maxPages: jobData.maxPages,
+      createdAt: jobData.createdAt
+    });
+    
+    // Set expiry for job data (7 days)
+    await redis.expire(`crawl:${jobId}`, 604800);
+    
+    await redis.quit();
+    
+    console.log(`[SCRAPER] Job ${jobId} queued successfully`);
+    
+    return {
+      jobId,
+      status: 'queued',
+      message: 'Scraping job queued. A worker will process it soon.',
+      checkStatusUrl: `/api/scrape/status?jobId=${jobId}`
+    };
   }
   
   // Use new configuration system if requested or by default in production
@@ -968,7 +1012,7 @@ export async function crawlWebsite(
   let sitemapUrls: string[] = [];
   try {
     console.log(`[${jobId}] Checking for sitemap at ${startUrl.origin}/sitemap.xml`);
-    const parser = new sitemapParser.SitemapParser();
+    const parser = new SitemapParser();
     const sitemapEntries = await parser.parseSitemapFromUrl(`${startUrl.origin}/sitemap.xml`);
     
     if (sitemapEntries && sitemapEntries.length > 0) {
