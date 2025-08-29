@@ -145,7 +145,22 @@ export default function ChatWidget({
     // Check if WooCommerce is enabled for this domain
     const checkWooCommerceConfig = async () => {
       const urlParams = new URLSearchParams(window.location.search);
-      const domain = urlParams.get('domain') || window.location.hostname;
+      // For demo/testing: use thompsonseparts.co.uk for localhost and Vercel deployments
+      let domain = urlParams.get('domain') || window.location.hostname;
+      
+      // Check if this is a demo environment (localhost, Vercel, etc.)
+      const isDemoEnvironment = 
+        domain === 'localhost' || 
+        domain === '127.0.0.1' ||
+        domain.includes('.vercel.app') ||
+        domain.includes('.vercel.sh') ||
+        domain.includes('ngrok') ||
+        domain.includes('preview');
+      
+      if (isDemoEnvironment) {
+        console.log(`[ChatWidget WooCommerce] Using thompsonseparts.co.uk for demo/testing (original: ${urlParams.get('domain') || window.location.hostname})`);
+        domain = 'thompsonseparts.co.uk';
+      }
       
       try {
         const response = await fetch(`/api/customer/config?domain=${encodeURIComponent(domain)}`);
@@ -279,7 +294,22 @@ export default function ChatWidget({
 
     try {
       const urlParams = new URLSearchParams(window.location.search);
-      const domain = urlParams.get('domain') || window.location.hostname;
+      // For demo/testing: use thompsonseparts.co.uk for localhost and Vercel deployments
+      let domain = urlParams.get('domain') || window.location.hostname;
+      
+      // Check if this is a demo environment (localhost, Vercel, etc.)
+      const isDemoEnvironment = 
+        domain === 'localhost' || 
+        domain === '127.0.0.1' ||
+        domain.includes('.vercel.app') ||
+        domain.includes('.vercel.sh') ||
+        domain.includes('ngrok') ||
+        domain.includes('preview');
+      
+      if (isDemoEnvironment) {
+        domain = 'thompsonseparts.co.uk';
+        console.log(`[ChatWidget] Using thompsonseparts.co.uk for demo/testing (original: ${urlParams.get('domain') || window.location.hostname})`);
+      }
 
       // Ensure websiteScraping is enabled for RAG capabilities
       const chatConfig = {
@@ -452,7 +482,7 @@ export default function ChatWidget({
       className={`fixed bottom-5 right-5 w-full max-w-[400px] h-[580px] max-h-[calc(100vh-40px)] 
       sm:w-[400px] sm:right-5 right-0 sm:mx-0 mx-5
       ${highContrast ? 'bg-black border-2 border-white' : 'bg-[#141414]'} 
-      rounded-2xl shadow-2xl flex flex-col overflow-hidden transition-all duration-200 ${
+      rounded-2xl shadow-2xl flex flex-col transition-all duration-200 ${
       isOpen ? 'animate-in slide-in-from-bottom-3 fade-in' : 'animate-out slide-out-to-bottom-3 fade-out'
     }`}
       role="dialog"

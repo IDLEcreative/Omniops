@@ -139,9 +139,17 @@ export async function POST(request: NextRequest) {
     }
     // 2. Website content context (if enabled and not demo)
     else if (config?.features?.websiteScraping?.enabled !== false && domain) {
-      // For localhost testing, use thompsonseparts.co.uk content
-      const searchDomain = domain === 'localhost' ? 'thompsonseparts.co.uk' : domain;
-      console.log(`[Chat API] Searching embeddings for domain: ${searchDomain} (original: ${domain})`);
+      // For demo/testing: map localhost and Vercel deployments to sample content
+      const isDemoEnvironment = 
+        domain === 'localhost' || 
+        domain?.includes('.vercel.app') || 
+        domain?.includes('.vercel.sh') ||
+        domain?.includes('127.0.0.1') ||
+        domain?.includes('ngrok') || // Support ngrok tunnels
+        domain?.includes('preview'); // Support preview deployments
+      
+      const searchDomain = isDemoEnvironment ? 'thompsonseparts.co.uk' : domain;
+      console.log(`[Chat API] Searching embeddings for domain: ${searchDomain} (original: ${domain}, isDemo: ${isDemoEnvironment})`);
       
       embeddingSearchPromise = searchSimilarContent(
         message,
