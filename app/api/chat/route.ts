@@ -139,14 +139,10 @@ export async function POST(request: NextRequest) {
     }
     // 2. Website content context (if enabled and not demo)
     else if (config?.features?.websiteScraping?.enabled !== false && domain) {
-      // For demo/testing: map localhost and Vercel deployments to sample content
+      // For demo/testing: map localhost to sample content
       const isDemoEnvironment = 
         domain === 'localhost' || 
-        domain?.includes('.vercel.app') || 
-        domain?.includes('.vercel.sh') ||
-        domain?.includes('127.0.0.1') ||
-        domain?.includes('ngrok') || // Support ngrok tunnels
-        domain?.includes('preview'); // Support preview deployments
+        domain?.includes('127.0.0.1');
       
       const searchDomain = isDemoEnvironment ? 'thompsonseparts.co.uk' : domain;
       console.log(`[Chat API] Searching embeddings for domain: ${searchDomain} (original: ${domain}, isDemo: ${isDemoEnvironment})`);
@@ -306,7 +302,7 @@ export async function POST(request: NextRequest) {
           
           if (customerConfig?.woocommerce_url) {
             // Check if customer is verified for this conversation
-            const verificationStatus = await CustomerVerification.checkVerificationStatus(conversationId);
+            const verificationStatus = await CustomerVerification.checkVerificationStatus(conversationId!);
             
             // Extract potential order number, email, and customer name from message
             const orderNumberMatch = message.match(/#?(\d{4,})/);
@@ -344,7 +340,7 @@ export async function POST(request: NextRequest) {
                 // Try simple verification first if order number is provided
                 if (orderNumber) {
                   const simpleVerification = await SimpleCustomerVerification.verifyCustomer({
-                    conversationId,
+                    conversationId: conversationId!,
                     email: extractedEmail,
                     orderNumber: orderNumber
                   }, domain);
@@ -432,7 +428,7 @@ export async function POST(request: NextRequest) {
                   // Log access if verified
                   if (isVerified && verificationStatus.customerEmail) {
                     await CustomerVerification.logAccess(
-                      conversationId,
+                      conversationId!,
                       verificationStatus.customerEmail,
                       order.customer_id || null,
                       [`order_${orderNumber}`],
@@ -446,7 +442,7 @@ export async function POST(request: NextRequest) {
                     return [{
                       type: 'order',
                       data: order,
-                      summary: `Order #${orderNumber}: ${order.status}, Total: ${order.currency_symbol}${order.total}`
+                      summary: `Order #${orderNumber}: ${order.status}, Total: ${(order as any).currency_symbol || '$'}${order.total}`
                     }];
                   } else {
                     // Limited info for unverified users (only public info)
@@ -504,11 +500,11 @@ export async function POST(request: NextRequest) {
                   
                   if (customers && customers.length > 0) {
                     const customer = customers[0];
-                    console.log('Found customer by email:', customer.email);
+                    console.log('Found customer by email:', customer!.email);
                     
                     // Get orders for this customer
                     const orders = await wc.getOrders({ 
-                      customer: customer.id,
+                      customer: customer!.id,
                       per_page: 10,
                       orderby: 'date',
                       order: 'desc'
@@ -516,9 +512,9 @@ export async function POST(request: NextRequest) {
                     
                     // Log access
                     await CustomerVerification.logAccess(
-                      conversationId,
+                      conversationId!,
                       extractedEmail,
-                      customer.id,
+                      customer!.id,
                       ['customer_orders_by_email'],
                       `Retrieved orders for email: ${extractedEmail}`,
                       'email_verification'
@@ -580,18 +576,18 @@ export async function POST(request: NextRequest) {
                     if (customers.length === 1) {
                       // Single customer found
                       const customer = customers[0];
-                      console.log('Found single customer by name:', customer.email);
+                      console.log('Found single customer by name:', customer!.email);
                       
                       // Additional check: verify this is the right customer
-                      const fullName = `${customer.first_name} ${customer.last_name}`.trim();
+                      const fullName = `${customer!.first_name} ${customer!.last_name}`.trim();
                       if (verificationStatus.customerEmail && 
-                          customer.email.toLowerCase() !== verificationStatus.customerEmail.toLowerCase()) {
+                          customer!.email.toLowerCase() !== verificationStatus.customerEmail.toLowerCase()) {
                         return [{
                           type: 'verification_required',
                           data: {
-                            message: `Found customer "${fullName}" with email ${customer.email}. Please verify this email to access their orders.`,
+                            message: `Found customer "${fullName}" with email ${customer!.email}. Please verify this email to access their orders.`,
                             method: 'email_verification',
-                            email: customer.email
+                            email: customer!.email
                           },
                           summary: 'Email verification required for found customer'
                         }];
@@ -599,7 +595,7 @@ export async function POST(request: NextRequest) {
                       
                       // Get orders for this customer
                       const orders = await wc.getOrders({ 
-                        customer: customer.id,
+                        customer: customer!.id,
                         per_page: 10,
                         orderby: 'date',
                         order: 'desc'
@@ -607,9 +603,9 @@ export async function POST(request: NextRequest) {
                       
                       // Log access
                       await CustomerVerification.logAccess(
-                        conversationId,
-                        customer.email,
-                        customer.id,
+                        conversationId!,
+                        customer!.email,
+                        customer!.id,
                         ['customer_orders_by_name'],
                         `Retrieved orders for customer name: ${extractedName}`,
                         'name_search'
@@ -621,7 +617,7 @@ export async function POST(request: NextRequest) {
                           data: order,
                           summary: `Order #${order.id}: ${order.status}, Date: ${order.date_created}, Total: ${order.currency_symbol || '$'}${order.total}`,
                           customerInfo: {
-                            email: customer.email,
+                            email: customer!.email,
                             name: fullName
                           }
                         }));
@@ -629,7 +625,7 @@ export async function POST(request: NextRequest) {
                         return [{
                           type: 'message',
                           data: null,
-                          summary: `No orders found for ${fullName} (${customer.email})`
+                          summary: `No orders found for ${fullName} (${customer!.email})`
                         }];
                       }
                     } else {
@@ -669,8 +665,13 @@ export async function POST(request: NextRequest) {
               } else if (isVerified && verificationStatus.customerEmail) {
                 // Verified user asking about their orders - fetch by email
                 console.log('Fetching orders for verified customer:', verificationStatus.customerEmail);
+                // First get customer by email
+                const customers = await wc.getCustomers({ email: verificationStatus.customerEmail });
+                if (!customers || customers.length === 0) {
+                  return [];
+                }
                 const customerOrders = await wc.getOrders({ 
-                  email: verificationStatus.customerEmail,
+                  customer: customers[0]!.id,
                   per_page: 5, 
                   orderby: 'date', 
                   order: 'desc' 
@@ -678,8 +679,8 @@ export async function POST(request: NextRequest) {
                 
                 // Log access
                 await CustomerVerification.logAccess(
-                  conversationId,
-                  verificationStatus.customerEmail,
+                  conversationId!,
+                  verificationStatus.customerEmail!,
                   null,
                   ['recent_orders'],
                   'Customer requested order history',
@@ -721,14 +722,10 @@ export async function POST(request: NextRequest) {
     let stockCheckPromise: Promise<any[]> | null = null;
     
     if (domain && isStockQuery) {
-      // For demo/testing: map localhost and Vercel deployments to sample content
+      // For demo/testing: map localhost to sample content
       const isDemoEnvironment = 
         domain === 'localhost' || 
-        domain?.includes('.vercel.app') || 
-        domain?.includes('.vercel.sh') ||
-        domain?.includes('127.0.0.1') ||
-        domain?.includes('ngrok') ||
-        domain?.includes('preview');
+        domain?.includes('127.0.0.1');
       
       const stockDomain = isDemoEnvironment ? 'thompsonseparts.co.uk' : domain;
       console.log(`Real-time stock check: domain ${stockDomain} (original: ${domain}, isDemo: ${isDemoEnvironment})`);
@@ -811,16 +808,16 @@ export async function POST(request: NextRequest) {
                   }
                   
                   if (products && products.length > 0) {
-                    console.log(`Found product by SKU ${sku}:`, products[0].name);
+                    console.log(`Found product by SKU ${sku}:`, products[0]!.name);
                     stockResults.push({
                       type: 'stock',
                       method: 'sku',
-                      data: products[0],
-                      summary: `${products[0].name} (SKU: ${products[0].sku}): ${
-                        products[0].manage_stock 
-                          ? `${products[0].stock_quantity || 0} in stock`
-                          : products[0].stock_status === 'instock' ? 'In stock' : 
-                            products[0].stock_status === 'outofstock' ? 'Out of stock' :
+                      data: products[0]!,
+                      summary: `${products[0]!.name} (SKU: ${products[0]!.sku}): ${
+                        products[0]!.manage_stock 
+                          ? `${products[0]!.stock_quantity || 0} in stock`
+                          : products[0]!.stock_status === 'instock' ? 'In stock' : 
+                            products[0]!.stock_status === 'outofstock' ? 'Out of stock' :
                             'On backorder'
                       }`
                     });
@@ -834,7 +831,7 @@ export async function POST(request: NextRequest) {
               
               // Then, search by quoted product names
               for (const quotedName of quotedMatches) {
-                if (!stockResults.some(r => r.data.name?.toLowerCase().includes(quotedName.toLowerCase()))) {
+                if (!stockResults.some(r => r.data.name?.toLowerCase().includes(quotedName!.toLowerCase()))) {
                   try {
                     const products = await wc.getProducts({
                       search: quotedName,
@@ -874,7 +871,7 @@ export async function POST(request: NextRequest) {
                     search: searchQuery,
                     per_page: 5,
                     status: 'publish',
-                    orderby: 'relevance',  // Changed to relevance for better search results
+                    orderby: 'popularity',  // Use popularity for better search results
                     order: 'desc'
                   });
                   for (const product of products) {

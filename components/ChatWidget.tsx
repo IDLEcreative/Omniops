@@ -148,14 +148,10 @@ export default function ChatWidget({
       // For demo/testing: use thompsonseparts.co.uk for localhost and Vercel deployments
       let domain = urlParams.get('domain') || window.location.hostname;
       
-      // Check if this is a demo environment (localhost, Vercel, etc.)
+      // Check if this is a demo environment (localhost only)
       const isDemoEnvironment = 
         domain === 'localhost' || 
-        domain === '127.0.0.1' ||
-        domain.includes('.vercel.app') ||
-        domain.includes('.vercel.sh') ||
-        domain.includes('ngrok') ||
-        domain.includes('preview');
+        domain === '127.0.0.1';
       
       if (isDemoEnvironment) {
         console.log(`[ChatWidget WooCommerce] Using thompsonseparts.co.uk for demo/testing (original: ${urlParams.get('domain') || window.location.hostname})`);
@@ -297,14 +293,10 @@ export default function ChatWidget({
       // For demo/testing: use thompsonseparts.co.uk for localhost and Vercel deployments
       let domain = urlParams.get('domain') || window.location.hostname;
       
-      // Check if this is a demo environment (localhost, Vercel, etc.)
+      // Check if this is a demo environment (localhost only)
       const isDemoEnvironment = 
         domain === 'localhost' || 
-        domain === '127.0.0.1' ||
-        domain.includes('.vercel.app') ||
-        domain.includes('.vercel.sh') ||
-        domain.includes('ngrok') ||
-        domain.includes('preview');
+        domain === '127.0.0.1';
       
       if (isDemoEnvironment) {
         domain = 'thompsonseparts.co.uk';
