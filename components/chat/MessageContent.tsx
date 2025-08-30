@@ -11,13 +11,17 @@ export const MessageContent = React.memo(({ content, className = '' }: MessageCo
   const formatMarkdown = useMemo(() => (text: string): string => {
     let formatted = text;
     
+    // First normalize line endings
+    formatted = formatted.replace(/\r\n/g, '\n');
+    formatted = formatted.replace(/\r/g, '\n');
+    
     // Remove horizontal rules (---, ***, ___)
     formatted = formatted.replace(/^[-*_]{3,}$/gm, '');
     
-    // Keep headers but remove the # symbols
-    formatted = formatted.replace(/^#{1,6}\s+(.+)$/gm, '$1');
+    // Keep headers but remove the # symbols and add spacing
+    formatted = formatted.replace(/^#{1,6}\s+(.+)$/gm, '\n$1\n');
     
-    // Convert bold markers to just keep the text bold-looking
+    // Convert bold markers to just keep the text
     formatted = formatted.replace(/(\*\*|__)(.*?)\1/g, '$2');
     
     // Keep single asterisk/underscore for lists but clean up emphasis
@@ -26,7 +30,7 @@ export const MessageContent = React.memo(({ content, className = '' }: MessageCo
     // Format code blocks nicely
     formatted = formatted.replace(/```[\s\S]*?```/g, (match) => {
       const code = match.replace(/```\w*\n?/g, '').trim();
-      return code;
+      return '\n' + code + '\n';
     });
     
     // Keep inline code visible but remove backticks
@@ -35,14 +39,16 @@ export const MessageContent = React.memo(({ content, className = '' }: MessageCo
     // Remove blockquotes marker but keep content
     formatted = formatted.replace(/^>\s+/gm, '');
     
-    // Format list markers consistently
-    formatted = formatted.replace(/^[\s]*[-*+]\s+/gm, '• ');
-    formatted = formatted.replace(/^[\s]*(\d+)\.\s+/gm, '$1. ');
+    // Format list markers consistently with proper spacing
+    formatted = formatted.replace(/^[\s]*[-*+]\s+(.+)$/gm, '\n• $1');
+    formatted = formatted.replace(/^[\s]*(\d+)\.\s+(.+)$/gm, '\n$1. $2');
     
-    // Clean up extra newlines (keep max 2)
-    formatted = formatted.replace(/\n{3,}/g, '\n\n');
+    // Clean up multiple newlines but preserve paragraph breaks
+    formatted = formatted.replace(/\n{4,}/g, '\n\n\n');
+    formatted = formatted.replace(/\n{3}/g, '\n\n');
     
-    // Don't trim each line - preserve intentional spacing
+    // Ensure single line break between list items
+    formatted = formatted.replace(/(\n[•\d]+\..+)(\n)([•\d]+\.)/g, '$1\n$3');
     
     // Remove empty lines at start and end only
     formatted = formatted.trim();
