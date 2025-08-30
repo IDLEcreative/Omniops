@@ -1,5 +1,9 @@
 -- Fix RAG search_embeddings function to use correct table and parameters
+-- Also ensure pgvector is enabled and use the widely-supported <-> operator
 -- Run this in Supabase SQL editor
+
+-- Enable pgvector extension (no-op if already enabled)
+CREATE EXTENSION IF NOT EXISTS vector;
 
 -- Drop all conflicting versions of the function
 DROP FUNCTION IF EXISTS public.search_embeddings CASCADE;
@@ -7,7 +11,7 @@ DROP FUNCTION IF EXISTS public.search_embeddings CASCADE;
 -- Create the correct version that searches page_embeddings table
 CREATE OR REPLACE FUNCTION public.search_embeddings(
   query_embedding vector(1536),
-  p_domain_id UUID,
+  p_domain_id UUID DEFAULT NULL,
   match_threshold float DEFAULT 0.7,
   match_count int DEFAULT 5
 )
@@ -25,19 +29,24 @@ BEGIN
     pe.chunk_text as content,
     COALESCE((pe.metadata->>'url')::text, sp.url) as url,
     COALESCE((pe.metadata->>'title')::text, sp.title) as title,
-    1 - (pe.embedding <=> query_embedding) as similarity
+    1 - (pe.embedding <-> query_embedding) as similarity
   FROM page_embeddings pe
   JOIN scraped_pages sp ON pe.page_id = sp.id
   WHERE 
     (p_domain_id IS NULL OR sp.domain_id = p_domain_id)
-    AND 1 - (pe.embedding <=> query_embedding) > match_threshold
-  ORDER BY pe.embedding <=> query_embedding
+    AND 1 - (pe.embedding <-> query_embedding) > match_threshold
+  ORDER BY pe.embedding <-> query_embedding
   LIMIT match_count;
 END;
 $$;
 
 -- Grant necessary permissions
 GRANT EXECUTE ON FUNCTION public.search_embeddings TO anon, authenticated, service_role;
+
+-- Optional: create an IVF_FLAT index for fast search (requires ANALYZE after significant inserts)
+-- Uncomment and run if not already indexed:
+-- CREATE INDEX IF NOT EXISTS page_embeddings_embedding_idx
+--   ON public.page_embeddings USING ivfflat (embedding vector_l2_ops) WITH (lists = 100);
 
 -- Verify the function was created
 SELECT 
