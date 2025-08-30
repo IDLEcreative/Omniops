@@ -98,10 +98,41 @@
 }
 
 @layer utilities {
+  /* Smooth typing animation with hardware acceleration */
+  .animate-typing-bounce {
+    animation: typing-bounce 1.4s ease-in-out infinite;
+    will-change: transform;
+    transform: translate3d(0, 0, 0);
+  }
+  
+  .animate-typing-wave {
+    animation: typing-wave 1.4s ease-in-out infinite;
+    will-change: transform, opacity;
+    transform: translate3d(0, 0, 0);
+  }
+  
+  .animate-typing-pulse {
+    animation: typing-pulse 1.4s ease-in-out infinite;
+    will-change: transform, opacity;
+    transform: translate3d(0, 0, 0);
+  }
+  
   .overflow-wrap-anywhere {
     overflow-wrap: anywhere;
     word-wrap: break-word;
     word-break: break-word;
+  }
+  /* Hide native scrollbars on elements that shouldn't show their own */
+  .no-scrollbar::-webkit-scrollbar {
+    display: none;
+  }
+  .no-scrollbar {
+    -ms-overflow-style: none; /* IE and Edge */
+    scrollbar-width: none; /* Firefox */
+  }
+  /* Prevent nested scroll chaining */
+  .overscroll-contain {
+    overscroll-behavior: contain;
   }
 }
 

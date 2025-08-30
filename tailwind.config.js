@@ -76,10 +76,41 @@ module.exports = {
           from: { height: "var(--radix-accordion-content-height)" },
           to: { height: "0" },
         },
+        "typing-bounce": {
+          "0%, 60%, 100%": {
+            transform: "translateY(0)",
+          },
+          "30%": {
+            transform: "translateY(-10px)",
+          },
+        },
+        "typing-wave": {
+          "0%, 40%, 100%": {
+            transform: "translateY(0) scale(1)",
+            opacity: "0.5",
+          },
+          "20%": {
+            transform: "translateY(-12px) scale(1.2)",
+            opacity: "1",
+          },
+        },
+        "typing-pulse": {
+          "0%, 100%": {
+            opacity: "0.3",
+            transform: "scale(0.8)",
+          },
+          "50%": {
+            opacity: "1",
+            transform: "scale(1.2)",
+          },
+        },
       },
       animation: {
         "accordion-down": "accordion-down 0.2s ease-out",
         "accordion-up": "accordion-up 0.2s ease-out",
+        "typing-bounce": "typing-bounce 1.4s ease-in-out infinite",
+        "typing-wave": "typing-wave 1.4s ease-in-out infinite",
+        "typing-pulse": "typing-pulse 1.4s ease-in-out infinite",
       },
     },
   },

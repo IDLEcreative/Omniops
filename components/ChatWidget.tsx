@@ -420,8 +420,8 @@ export default function ChatWidget({
   // Consent screen if required
   if (privacySettings.requireConsent && !privacySettings.consentGiven && isOpen) {
     return (
-      <div className="fixed bottom-5 right-5 w-full max-w-[400px] h-auto 
-        sm:w-[400px] sm:right-5 right-0 sm:mx-0 mx-5
+      <div className="fixed bottom-5 right-0 w-full max-w-[400px] h-auto 
+        sm:w-[400px] sm:right-5 mx-5 sm:mx-0
         bg-[#141414] rounded-2xl shadow-2xl p-5 animate-in slide-in-from-bottom-3 duration-200">
         <div className="space-y-5">
           <div className="flex items-center gap-3">
@@ -466,7 +466,7 @@ export default function ChatWidget({
       <>
         <button
           onClick={() => setIsOpen(true)}
-          className="fixed bottom-5 right-5 w-14 h-14 bg-gradient-to-br from-[#3a3a3a] to-[#2a2a2a] text-white rounded-full shadow-xl hover:shadow-2xl hover:scale-105 focus:outline-none focus:ring-2 focus:ring-white/50 focus:ring-offset-2 focus:ring-offset-black transition-all duration-200 flex items-center justify-center animate-in fade-in duration-300"
+          className="fixed bottom-5 right-5 w-14 h-14 bg-gradient-to-br from-[#3a3a3a] to-[#2a2a2a] text-white rounded-full shadow-xl hover:shadow-2xl hover:scale-105 focus:outline-none focus:ring-2 focus:ring-white/50 focus:ring-offset-2 focus:ring-offset-black transition-all duration-300 flex items-center justify-center animate-in fade-in"
           aria-label="Open chat support widget"
           role="button"
           tabIndex={0}
@@ -479,8 +479,8 @@ export default function ChatWidget({
 
   return (
     <div 
-      className={`fixed bottom-5 right-5 w-full max-w-[400px] h-[580px] max-h-[calc(100vh-40px)] 
-      sm:w-[400px] sm:right-5 right-0 sm:mx-0 mx-5
+      className={`fixed bottom-5 right-0 w-full max-w-[400px] h-[580px] max-h-[calc(100vh-40px)] 
+      sm:w-[400px] sm:right-5 mx-5 sm:mx-0
       ${highContrast ? 'bg-black border-2 border-white' : 'bg-[#141414]'} 
       rounded-2xl shadow-2xl flex flex-col overflow-hidden transition-all duration-200 ${
       isOpen ? 'animate-in slide-in-from-bottom-3 fade-in' : 'animate-out slide-out-to-bottom-3 fade-out'
@@ -489,7 +489,7 @@ export default function ChatWidget({
       aria-label="Chat support widget"
       aria-modal="true">
       {/* Header */}
-      <div className={`${highContrast ? 'bg-black border-b-2 border-white' : 'bg-[#1f1f1f]'} px-4 py-2.5 flex items-center justify-between rounded-t-2xl`}>
+      <div className={`${highContrast ? 'bg-transparent border-b-2 border-white' : 'bg-transparent border-b border-white/10'} px-4 py-2.5 flex items-center justify-between`}>
         <div className="flex items-center gap-3 flex-1 min-w-0">
           <div className="h-2 w-2 bg-green-500 rounded-full flex-shrink-0" aria-label="Status: Online" />
           <div className="min-w-0 flex-1">
@@ -519,7 +519,7 @@ export default function ChatWidget({
       {/* Messages */}
       <div 
         ref={messagesContainerRef}
-        className={`flex-1 min-h-0 px-3 py-3 ${highContrast ? 'bg-black' : 'bg-[#0d0d0d]'} overflow-y-auto overflow-x-hidden`} 
+        className={`flex-1 min-h-0 px-3 py-3 bg-transparent overflow-y-auto overflow-x-hidden overscroll-contain`} 
         role="log" 
         aria-live="polite" 
         aria-label="Chat messages">
@@ -549,7 +549,7 @@ export default function ChatWidget({
               aria-label={`${message.role === 'user' ? 'You said' : 'Support agent said'}: ${message.content}`}
             >
               <div
-                className={`px-4 py-2.5 break-words overflow-wrap-anywhere ${
+                className={`px-4 py-2.5 break-words overflow-wrap-anywhere overflow-visible no-scrollbar ${
                   fontSize === 'xlarge' ? 'text-lg' : fontSize === 'large' ? 'text-base' : 'text-sm'
                 } ${
                   message.role === 'user'
@@ -574,10 +574,10 @@ export default function ChatWidget({
           <div className="mb-3" role="status" aria-live="polite">
             <span className="sr-only">Support agent is typing</span>
             <div className={`${highContrast ? 'bg-black border-2 border-white rounded-2xl' : 'bg-[#1a1a1a] rounded-2xl rounded-tl-md'} px-4 py-2.5 inline-block shadow-sm`}>
-              <div className="flex gap-1.5 items-center" aria-hidden="true">
-                <div className={`w-2 h-2 ${highContrast ? 'bg-white' : 'bg-gray-400'} rounded-full animate-pulse`} />
-                <div className={`w-2 h-2 ${highContrast ? 'bg-white' : 'bg-gray-400'} rounded-full animate-pulse [animation-delay:200ms]`} />
-                <div className={`w-2 h-2 ${highContrast ? 'bg-white' : 'bg-gray-400'} rounded-full animate-pulse [animation-delay:400ms]`} />
+              <div className="flex gap-1 items-center" aria-hidden="true">
+                <div className={`w-2 h-2 ${highContrast ? 'bg-white' : 'bg-gray-400'} rounded-full animate-typing-bounce`} />
+                <div className={`w-2 h-2 ${highContrast ? 'bg-white' : 'bg-gray-400'} rounded-full animate-typing-bounce [animation-delay:200ms]`} />
+                <div className={`w-2 h-2 ${highContrast ? 'bg-white' : 'bg-gray-400'} rounded-full animate-typing-bounce [animation-delay:400ms]`} />
               </div>
             </div>
           </div>
@@ -586,7 +586,7 @@ export default function ChatWidget({
 
 
       {/* Input */}
-      <div className={`px-4 py-3 ${highContrast ? 'border-t-2 border-white bg-black' : 'bg-[#1a1a1a]'} rounded-b-2xl`}>
+      <div className={`px-4 py-3 ${highContrast ? 'bg-transparent border-t-2 border-white' : 'bg-transparent border-t border-white/10'}`}>
         <div className="flex gap-2 items-end">
           <label htmlFor="chat-input" className="sr-only">Type your message</label>
           <textarea

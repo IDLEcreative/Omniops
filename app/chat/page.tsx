@@ -2,11 +2,9 @@
 
 import { useState, useEffect, useRef } from 'react';
 import { Card } from '@/components/ui/card';
-import { ScrollArea } from '@/components/ui/scroll-area';
 import { Input } from '@/components/ui/input';
 import { Button } from '@/components/ui/button';
 import { Avatar, AvatarFallback } from '@/components/ui/avatar';
-import { Badge } from '@/components/ui/badge';
 import { Send, Bot, User } from 'lucide-react';
 import { Message } from '@/types';
 import { MessageContent } from '@/components/chat/MessageContent';
@@ -108,7 +106,8 @@ export default function ChatPage() {
   };
 
   return (
-    <div className="container mx-auto max-w-4xl h-screen flex flex-col p-4">
+    <div className="container mx-auto max-w-4xl h-dvh flex flex-col overflow-hidden">
+      <div className="flex-1 p-4 flex flex-col">
       <Card className="flex-1 flex flex-col">
         <div className="p-4 border-b">
           <h1 className="text-2xl font-bold">Customer Service Assistant</h1>
@@ -117,7 +116,7 @@ export default function ChatPage() {
           </p>
         </div>
 
-        <ScrollArea className="flex-1 p-4">
+        <div className="flex-1 p-4 overflow-y-auto overscroll-contain">
           <div className="space-y-4">
             {messages.map((message) => (
               <div
@@ -153,19 +152,6 @@ export default function ChatPage() {
                         className="text-sm"
                       />
                     </Card>
-                    {message.metadata?.sources && (
-                      <div className="mt-2 flex flex-wrap gap-1">
-                        {message.metadata.sources.map((source, idx) => (
-                          <Badge
-                            key={idx}
-                            variant="secondary"
-                            className="text-xs"
-                          >
-                            Source {idx + 1}
-                          </Badge>
-                        ))}
-                      </div>
-                    )}
                   </div>
                 </div>
               </div>
@@ -179,10 +165,10 @@ export default function ChatPage() {
                     </AvatarFallback>
                   </Avatar>
                   <Card className="p-3 bg-muted">
-                    <div className="flex gap-1">
-                      <div className="w-2 h-2 bg-current rounded-full animate-bounce" />
-                      <div className="w-2 h-2 bg-current rounded-full animate-bounce delay-100" />
-                      <div className="w-2 h-2 bg-current rounded-full animate-bounce delay-200" />
+                    <div className="flex items-center gap-1">
+                      <div className="w-2 h-2 bg-gray-500 rounded-full animate-typing-bounce" />
+                      <div className="w-2 h-2 bg-gray-500 rounded-full animate-typing-bounce [animation-delay:200ms]" />
+                      <div className="w-2 h-2 bg-gray-500 rounded-full animate-typing-bounce [animation-delay:400ms]" />
                     </div>
                   </Card>
                 </div>
@@ -190,7 +176,7 @@ export default function ChatPage() {
             )}
             <div ref={scrollRef} />
           </div>
-        </ScrollArea>
+        </div>
 
         <div className="p-4 border-t">
           <form
@@ -213,6 +199,7 @@ export default function ChatPage() {
           </form>
         </div>
       </Card>
+      </div>
     </div>
   );
 }
