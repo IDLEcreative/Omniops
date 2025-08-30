@@ -563,13 +563,19 @@ export default function ChatWidget({
         ))}
         
         {loading && (
-          <div className="mb-3" role="status" aria-live="polite">
-            <span className="sr-only">Support agent is typing</span>
-            <div className={`${highContrast ? 'bg-black border-2 border-white rounded-2xl' : 'bg-[#1a1a1a] rounded-2xl rounded-tl-md'} px-4 py-2.5 inline-block shadow-sm`}>
-              <div className="flex gap-1 items-center" aria-hidden="true">
-                <div className={`w-2 h-2 ${highContrast ? 'bg-white' : 'bg-gray-400'} rounded-full animate-typing-bounce`} />
-                <div className={`w-2 h-2 ${highContrast ? 'bg-white' : 'bg-gray-400'} rounded-full animate-typing-bounce [animation-delay:200ms]`} />
-                <div className={`w-2 h-2 ${highContrast ? 'bg-white' : 'bg-gray-400'} rounded-full animate-typing-bounce [animation-delay:400ms]`} />
+          <div className="mb-3 flex justify-start" role="status" aria-live="polite">
+            <div className="max-w-[80%] mr-auto">
+              <span className="sr-only">Support agent is typing</span>
+              <div className={`px-4 py-2.5 inline-block ${
+                highContrast 
+                  ? 'bg-black text-white border-2 border-white rounded-2xl rounded-tl-md'
+                  : 'bg-[#1a1a1a] text-gray-200 rounded-2xl rounded-tl-md shadow-sm'
+              }`}>
+                <div className="flex gap-1 items-center" aria-hidden="true">
+                  <div className={`w-2 h-2 ${highContrast ? 'bg-white' : 'bg-gray-400'} rounded-full animate-typing-bounce`} />
+                  <div className={`w-2 h-2 ${highContrast ? 'bg-white' : 'bg-gray-400'} rounded-full animate-typing-bounce [animation-delay:200ms]`} />
+                  <div className={`w-2 h-2 ${highContrast ? 'bg-white' : 'bg-gray-400'} rounded-full animate-typing-bounce [animation-delay:400ms]`} />
+                </div>
               </div>
             </div>
           </div>
