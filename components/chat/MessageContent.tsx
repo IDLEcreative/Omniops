@@ -7,46 +7,47 @@ interface MessageContentProps {
 
 // Memoized component to prevent unnecessary re-renders
 export const MessageContent = React.memo(({ content, className = '' }: MessageContentProps) => {
-  // Strip markdown formatting from content
-  const stripMarkdown = useMemo(() => (text: string): string => {
-    let cleaned = text;
+  // Format markdown content for better display
+  const formatMarkdown = useMemo(() => (text: string): string => {
+    let formatted = text;
     
     // Remove horizontal rules (---, ***, ___)
-    cleaned = cleaned.replace(/^[-*_]{3,}$/gm, '');
+    formatted = formatted.replace(/^[-*_]{3,}$/gm, '');
     
-    // Remove headers (###, ##, #)
-    cleaned = cleaned.replace(/^#{1,6}\s+/gm, '');
+    // Keep headers but remove the # symbols
+    formatted = formatted.replace(/^#{1,6}\s+(.+)$/gm, '$1');
     
-    // Remove bold/italic markers
-    cleaned = cleaned.replace(/(\*\*|__)(.*?)\1/g, '$2');
-    cleaned = cleaned.replace(/(\*|_)(.*?)\1/g, '$2');
+    // Convert bold markers to just keep the text bold-looking
+    formatted = formatted.replace(/(\*\*|__)(.*?)\1/g, '$2');
     
-    // Remove code blocks
-    cleaned = cleaned.replace(/```[\s\S]*?```/g, (match) => {
+    // Keep single asterisk/underscore for lists but clean up emphasis
+    formatted = formatted.replace(/(?<!\*)(\*|_)(?!\*)([^*_\n]+?)(\*|_)(?!\*)/g, '$2');
+    
+    // Format code blocks nicely
+    formatted = formatted.replace(/```[\s\S]*?```/g, (match) => {
       const code = match.replace(/```\w*\n?/g, '').trim();
       return code;
     });
     
-    // Remove inline code
-    cleaned = cleaned.replace(/`([^`]+)`/g, '$1');
+    // Keep inline code visible but remove backticks
+    formatted = formatted.replace(/`([^`]+)`/g, '$1');
     
-    // Remove blockquotes
-    cleaned = cleaned.replace(/^>\s+/gm, '');
+    // Remove blockquotes marker but keep content
+    formatted = formatted.replace(/^>\s+/gm, '');
     
-    // Remove list markers (keeping the text)
-    cleaned = cleaned.replace(/^[\s]*[-*+]\s+/gm, '• ');
-    cleaned = cleaned.replace(/^[\s]*\d+\.\s+/gm, '');
+    // Format list markers consistently
+    formatted = formatted.replace(/^[\s]*[-*+]\s+/gm, '• ');
+    formatted = formatted.replace(/^[\s]*(\d+)\.\s+/gm, '$1. ');
     
     // Clean up extra newlines (keep max 2)
-    cleaned = cleaned.replace(/\n{3,}/g, '\n\n');
+    formatted = formatted.replace(/\n{3,}/g, '\n\n');
     
-    // Trim each line
-    cleaned = cleaned.split('\n').map(line => line.trim()).join('\n');
+    // Don't trim each line - preserve intentional spacing
     
-    // Remove empty lines at start and end
-    cleaned = cleaned.trim();
+    // Remove empty lines at start and end only
+    formatted = formatted.trim();
     
-    return cleaned;
+    return formatted;
   }, []);
   
   // Memoized function to convert URLs in text to clickable links
@@ -147,16 +148,16 @@ export const MessageContent = React.memo(({ content, className = '' }: MessageCo
     });
   }, []);
 
-  // Memoize the rendered content - first strip markdown, then process links
+  // Memoize the rendered content - first format markdown, then process links
   const renderedContent = useMemo(() => {
-    const cleanedContent = stripMarkdown(content);
-    return renderContentWithLinks(cleanedContent);
-  }, [content, stripMarkdown, renderContentWithLinks]);
+    const formattedContent = formatMarkdown(content);
+    return renderContentWithLinks(formattedContent);
+  }, [content, formatMarkdown, renderContentWithLinks]);
 
   return (
-    <div className={`whitespace-pre-wrap ${className}`}>
+    <span className={`whitespace-pre-wrap ${className}`}>
       {renderedContent}
-    </div>
+    </span>
   );
 }, (prevProps, nextProps) => {
   // Custom comparison function for React.memo
