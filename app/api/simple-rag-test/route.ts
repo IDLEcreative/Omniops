@@ -38,7 +38,7 @@ export async function GET(request: NextRequest) {
     try {
       const { data: relevantChunks, error: rpcError } = await supabase.rpc('search_embeddings', {
         query_embedding: queryEmbedding,
-        similarity_threshold: 0.5,
+        match_threshold: 0.5,
         match_count: 5,
       });
       

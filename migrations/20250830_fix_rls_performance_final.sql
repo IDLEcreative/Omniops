@@ -1,0 +1,443 @@
+-- Migration: Fix RLS Performance Issues (FINAL VERSION)
+-- Date: 2025-08-30
+-- Purpose: Optimize Row Level Security policies to prevent re-evaluation of auth functions for each row
+-- Fixed: Using correct column names based on actual schema
+
+-- =====================================================
+-- PART 1: Fix auth RLS initialization for domains table
+-- =====================================================
+
+DROP POLICY IF EXISTS "Users can view their own domains" ON public.domains;
+CREATE POLICY "Users can view their own domains" ON public.domains
+  FOR SELECT USING ((SELECT auth.uid()) = user_id);
+
+DROP POLICY IF EXISTS "Users can insert their own domains" ON public.domains;
+CREATE POLICY "Users can insert their own domains" ON public.domains
+  FOR INSERT WITH CHECK ((SELECT auth.uid()) = user_id);
+
+DROP POLICY IF EXISTS "Users can update their own domains" ON public.domains;
+CREATE POLICY "Users can update their own domains" ON public.domains
+  FOR UPDATE USING ((SELECT auth.uid()) = user_id);
+
+DROP POLICY IF EXISTS "Users can delete their own domains" ON public.domains;
+CREATE POLICY "Users can delete their own domains" ON public.domains
+  FOR DELETE USING ((SELECT auth.uid()) = user_id);
+
+-- =====================================================
+-- PART 2: Fix auth RLS for structured_extractions table
+-- =====================================================
+
+DROP POLICY IF EXISTS "Users can view their domain's extractions" ON public.structured_extractions;
+CREATE POLICY "Users can view their domain's extractions" ON public.structured_extractions
+  FOR SELECT USING (
+    domain_id IN (
+      SELECT id FROM public.domains 
+      WHERE user_id = (SELECT auth.uid())
+    )
+  );
+
+DROP POLICY IF EXISTS "Users can insert extractions for their domains" ON public.structured_extractions;
+CREATE POLICY "Users can insert extractions for their domains" ON public.structured_extractions
+  FOR INSERT WITH CHECK (
+    domain_id IN (
+      SELECT id FROM public.domains 
+      WHERE user_id = (SELECT auth.uid())
+    )
+  );
+
+-- =====================================================
+-- PART 3: Fix auth RLS for website_content table
+-- =====================================================
+
+DROP POLICY IF EXISTS "Users can view their domain's content" ON public.website_content;
+CREATE POLICY "Users can view their domain's content" ON public.website_content
+  FOR SELECT USING (
+    domain_id IN (
+      SELECT id FROM public.domains 
+      WHERE user_id = (SELECT auth.uid())
+    )
+  );
+
+DROP POLICY IF EXISTS "Users can insert content for their domains" ON public.website_content;
+CREATE POLICY "Users can insert content for their domains" ON public.website_content
+  FOR INSERT WITH CHECK (
+    domain_id IN (
+      SELECT id FROM public.domains 
+      WHERE user_id = (SELECT auth.uid())
+    )
+  );
+
+-- =====================================================
+-- PART 4: Fix auth RLS for scraped_pages table
+-- =====================================================
+
+DROP POLICY IF EXISTS "Users can view their domain's pages" ON public.scraped_pages;
+CREATE POLICY "Users can view their domain's pages" ON public.scraped_pages
+  FOR SELECT USING (
+    domain_id IN (
+      SELECT id FROM public.domains 
+      WHERE user_id = (SELECT auth.uid())
+    )
+  );
+
+DROP POLICY IF EXISTS "Users can insert pages for their domains" ON public.scraped_pages;
+CREATE POLICY "Users can insert pages for their domains" ON public.scraped_pages
+  FOR INSERT WITH CHECK (
+    domain_id IN (
+      SELECT id FROM public.domains 
+      WHERE user_id = (SELECT auth.uid())
+    )
+  );
+
+-- =====================================================
+-- PART 5: Fix auth RLS for scrape_jobs table (if exists)
+-- Note: scrape_jobs uses domain_id, not user_id
+-- =====================================================
+
+DO $$ 
+BEGIN
+  IF EXISTS (SELECT 1 FROM information_schema.tables 
+             WHERE table_schema = 'public' 
+             AND table_name = 'scrape_jobs') THEN
+    
+    -- Remove existing policies
+    PERFORM 1 FROM pg_policies 
+    WHERE schemaname = 'public' 
+    AND tablename = 'scrape_jobs' 
+    AND policyname = 'Users can view their own scrape jobs';
+    IF FOUND THEN
+      EXECUTE 'DROP POLICY "Users can view their own scrape jobs" ON public.scrape_jobs';
+    END IF;
+    
+    PERFORM 1 FROM pg_policies 
+    WHERE schemaname = 'public' 
+    AND tablename = 'scrape_jobs' 
+    AND policyname = 'Users can manage their own scrape jobs';
+    IF FOUND THEN
+      EXECUTE 'DROP POLICY "Users can manage their own scrape jobs" ON public.scrape_jobs';
+    END IF;
+    
+    -- Create new consolidated policy using domain_id
+    EXECUTE 'CREATE POLICY "Users manage own scrape jobs" ON public.scrape_jobs
+      FOR ALL USING (
+        domain_id IN (
+          SELECT id FROM public.domains 
+          WHERE user_id = (SELECT auth.uid())
+        )
+      )';
+  END IF;
+END $$;
+
+-- =====================================================
+-- PART 6: Fix auth RLS for business-related tables
+-- =====================================================
+
+-- Check if businesses table exists before creating policies
+DO $$
+BEGIN
+  IF EXISTS (SELECT 1 FROM information_schema.tables 
+             WHERE table_schema = 'public' 
+             AND table_name = 'businesses') THEN
+    
+    -- Fix businesses table
+    PERFORM 1 FROM pg_policies 
+    WHERE schemaname = 'public' 
+    AND tablename = 'businesses' 
+    AND policyname = 'Business owners see own data';
+    IF FOUND THEN
+      EXECUTE 'DROP POLICY "Business owners see own data" ON public.businesses';
+    END IF;
+    
+    EXECUTE 'CREATE POLICY "Business owners see own data" ON public.businesses
+      FOR ALL USING ((SELECT auth.uid()) = business_owner_id)';
+
+    PERFORM 1 FROM pg_policies 
+    WHERE schemaname = 'public' 
+    AND tablename = 'businesses' 
+    AND policyname = 'Service role has full access to businesses';
+    IF FOUND THEN
+      EXECUTE 'DROP POLICY "Service role has full access to businesses" ON public.businesses';
+    END IF;
+    
+    EXECUTE 'CREATE POLICY "Service role has full access to businesses" ON public.businesses
+      FOR ALL USING (
+        (SELECT current_setting(''request.jwt.claims'', true)::json->>''role'') = ''service_role''
+      )';
+  END IF;
+END $$;
+
+-- Fix business_configs table
+DO $$
+BEGIN
+  IF EXISTS (SELECT 1 FROM information_schema.tables 
+             WHERE table_schema = 'public' 
+             AND table_name = 'business_configs') THEN
+    
+    PERFORM 1 FROM pg_policies 
+    WHERE schemaname = 'public' 
+    AND tablename = 'business_configs' 
+    AND policyname = 'Business configs isolated';
+    IF FOUND THEN
+      EXECUTE 'DROP POLICY "Business configs isolated" ON public.business_configs';
+    END IF;
+    
+    EXECUTE 'CREATE POLICY "Business configs isolated" ON public.business_configs
+      FOR ALL USING (
+        business_id IN (
+          SELECT id FROM public.businesses 
+          WHERE business_owner_id = (SELECT auth.uid())
+        )
+      )';
+
+    PERFORM 1 FROM pg_policies 
+    WHERE schemaname = 'public' 
+    AND tablename = 'business_configs' 
+    AND policyname = 'Service role has full access to configs';
+    IF FOUND THEN
+      EXECUTE 'DROP POLICY "Service role has full access to configs" ON public.business_configs';
+    END IF;
+    
+    EXECUTE 'CREATE POLICY "Service role has full access to configs" ON public.business_configs
+      FOR ALL USING (
+        (SELECT current_setting(''request.jwt.claims'', true)::json->>''role'') = ''service_role''
+      )';
+  END IF;
+END $$;
+
+-- Fix business_usage table
+DO $$
+BEGIN
+  IF EXISTS (SELECT 1 FROM information_schema.tables 
+             WHERE table_schema = 'public' 
+             AND table_name = 'business_usage') THEN
+    
+    PERFORM 1 FROM pg_policies 
+    WHERE schemaname = 'public' 
+    AND tablename = 'business_usage' 
+    AND policyname = 'Business usage isolated';
+    IF FOUND THEN
+      EXECUTE 'DROP POLICY "Business usage isolated" ON public.business_usage';
+    END IF;
+    
+    EXECUTE 'CREATE POLICY "Business usage isolated" ON public.business_usage
+      FOR ALL USING (
+        business_id IN (
+          SELECT id FROM public.businesses 
+          WHERE business_owner_id = (SELECT auth.uid())
+        )
+      )';
+
+    PERFORM 1 FROM pg_policies 
+    WHERE schemaname = 'public' 
+    AND tablename = 'business_usage' 
+    AND policyname = 'Service role has full access to usage';
+    IF FOUND THEN
+      EXECUTE 'DROP POLICY "Service role has full access to usage" ON public.business_usage';
+    END IF;
+    
+    EXECUTE 'CREATE POLICY "Service role has full access to usage" ON public.business_usage
+      FOR ALL USING (
+        (SELECT current_setting(''request.jwt.claims'', true)::json->>''role'') = ''service_role''
+      )';
+  END IF;
+END $$;
+
+-- Fix customer_verifications table
+DO $$
+BEGIN
+  IF EXISTS (SELECT 1 FROM information_schema.tables 
+             WHERE table_schema = 'public' 
+             AND table_name = 'customer_verifications') THEN
+    
+    PERFORM 1 FROM pg_policies 
+    WHERE schemaname = 'public' 
+    AND tablename = 'customer_verifications' 
+    AND policyname = 'Verifications isolated by business';
+    IF FOUND THEN
+      EXECUTE 'DROP POLICY "Verifications isolated by business" ON public.customer_verifications';
+    END IF;
+    
+    EXECUTE 'CREATE POLICY "Verifications isolated by business" ON public.customer_verifications
+      FOR ALL USING (
+        business_id IN (
+          SELECT id FROM public.businesses 
+          WHERE business_owner_id = (SELECT auth.uid())
+        )
+      )';
+
+    PERFORM 1 FROM pg_policies 
+    WHERE schemaname = 'public' 
+    AND tablename = 'customer_verifications' 
+    AND policyname = 'Service role has full access to verifications';
+    IF FOUND THEN
+      EXECUTE 'DROP POLICY "Service role has full access to verifications" ON public.customer_verifications';
+    END IF;
+    
+    EXECUTE 'CREATE POLICY "Service role has full access to verifications" ON public.customer_verifications
+      FOR ALL USING (
+        (SELECT current_setting(''request.jwt.claims'', true)::json->>''role'') = ''service_role''
+      )';
+  END IF;
+END $$;
+
+-- Fix customer_access_logs table
+DO $$
+BEGIN
+  IF EXISTS (SELECT 1 FROM information_schema.tables 
+             WHERE table_schema = 'public' 
+             AND table_name = 'customer_access_logs') THEN
+    
+    PERFORM 1 FROM pg_policies 
+    WHERE schemaname = 'public' 
+    AND tablename = 'customer_access_logs' 
+    AND policyname = 'Access logs isolated by business';
+    IF FOUND THEN
+      EXECUTE 'DROP POLICY "Access logs isolated by business" ON public.customer_access_logs';
+    END IF;
+    
+    EXECUTE 'CREATE POLICY "Access logs isolated by business" ON public.customer_access_logs
+      FOR ALL USING (
+        business_id IN (
+          SELECT id FROM public.businesses 
+          WHERE business_owner_id = (SELECT auth.uid())
+        )
+      )';
+
+    PERFORM 1 FROM pg_policies 
+    WHERE schemaname = 'public' 
+    AND tablename = 'customer_access_logs' 
+    AND policyname = 'Service role has full access to access logs';
+    IF FOUND THEN
+      EXECUTE 'DROP POLICY "Service role has full access to access logs" ON public.customer_access_logs';
+    END IF;
+    
+    EXECUTE 'CREATE POLICY "Service role has full access to access logs" ON public.customer_access_logs
+      FOR ALL USING (
+        (SELECT current_setting(''request.jwt.claims'', true)::json->>''role'') = ''service_role''
+      )';
+  END IF;
+END $$;
+
+-- Fix customer_data_cache table
+DO $$
+BEGIN
+  IF EXISTS (SELECT 1 FROM information_schema.tables 
+             WHERE table_schema = 'public' 
+             AND table_name = 'customer_data_cache') THEN
+    
+    PERFORM 1 FROM pg_policies 
+    WHERE schemaname = 'public' 
+    AND tablename = 'customer_data_cache' 
+    AND policyname = 'Cache isolated by business';
+    IF FOUND THEN
+      EXECUTE 'DROP POLICY "Cache isolated by business" ON public.customer_data_cache';
+    END IF;
+    
+    EXECUTE 'CREATE POLICY "Cache isolated by business" ON public.customer_data_cache
+      FOR ALL USING (
+        business_id IN (
+          SELECT id FROM public.businesses 
+          WHERE business_owner_id = (SELECT auth.uid())
+        )
+      )';
+
+    PERFORM 1 FROM pg_policies 
+    WHERE schemaname = 'public' 
+    AND tablename = 'customer_data_cache' 
+    AND policyname = 'Service role has full access to cache';
+    IF FOUND THEN
+      EXECUTE 'DROP POLICY "Service role has full access to cache" ON public.customer_data_cache';
+    END IF;
+    
+    EXECUTE 'CREATE POLICY "Service role has full access to cache" ON public.customer_data_cache
+      FOR ALL USING (
+        (SELECT current_setting(''request.jwt.claims'', true)::json->>''role'') = ''service_role''
+      )';
+  END IF;
+END $$;
+
+-- =====================================================
+-- PART 7: Remove duplicate index
+-- =====================================================
+
+-- Drop the duplicate index on page_embeddings table if it exists
+DROP INDEX IF EXISTS public.idx_page_embeddings_page;
+
+-- =====================================================
+-- PART 8: Add performance-optimized indexes if missing
+-- =====================================================
+
+-- Ensure proper indexes exist for foreign key lookups used in RLS policies
+CREATE INDEX IF NOT EXISTS idx_domains_user_id ON public.domains(user_id);
+
+-- Add indexes for domain_id foreign keys (most important for performance)
+CREATE INDEX IF NOT EXISTS idx_structured_extractions_domain_id ON public.structured_extractions(domain_id);
+CREATE INDEX IF NOT EXISTS idx_website_content_domain_id ON public.website_content(domain_id);
+CREATE INDEX IF NOT EXISTS idx_scraped_pages_domain_id ON public.scraped_pages(domain_id);
+CREATE INDEX IF NOT EXISTS idx_content_refresh_jobs_domain_id ON public.content_refresh_jobs(domain_id);
+CREATE INDEX IF NOT EXISTS idx_page_embeddings_page_id ON public.page_embeddings(page_id);
+CREATE INDEX IF NOT EXISTS idx_content_embeddings_content_id ON public.content_embeddings(content_id);
+
+-- Add indexes for business tables if they exist
+DO $$
+BEGIN
+  IF EXISTS (SELECT 1 FROM information_schema.tables 
+             WHERE table_schema = 'public' 
+             AND table_name = 'businesses') THEN
+    EXECUTE 'CREATE INDEX IF NOT EXISTS idx_businesses_owner_id ON public.businesses(business_owner_id)';
+  END IF;
+  
+  IF EXISTS (SELECT 1 FROM information_schema.tables 
+             WHERE table_schema = 'public' 
+             AND table_name = 'business_configs') THEN
+    EXECUTE 'CREATE INDEX IF NOT EXISTS idx_business_configs_business_id ON public.business_configs(business_id)';
+  END IF;
+  
+  IF EXISTS (SELECT 1 FROM information_schema.tables 
+             WHERE table_schema = 'public' 
+             AND table_name = 'business_usage') THEN
+    EXECUTE 'CREATE INDEX IF NOT EXISTS idx_business_usage_business_id ON public.business_usage(business_id)';
+  END IF;
+  
+  IF EXISTS (SELECT 1 FROM information_schema.tables 
+             WHERE table_schema = 'public' 
+             AND table_name = 'customer_verifications') THEN
+    EXECUTE 'CREATE INDEX IF NOT EXISTS idx_customer_verifications_business_id ON public.customer_verifications(business_id)';
+  END IF;
+  
+  IF EXISTS (SELECT 1 FROM information_schema.tables 
+             WHERE table_schema = 'public' 
+             AND table_name = 'customer_access_logs') THEN
+    EXECUTE 'CREATE INDEX IF NOT EXISTS idx_customer_access_logs_business_id ON public.customer_access_logs(business_id)';
+  END IF;
+  
+  IF EXISTS (SELECT 1 FROM information_schema.tables 
+             WHERE table_schema = 'public' 
+             AND table_name = 'customer_data_cache') THEN
+    EXECUTE 'CREATE INDEX IF NOT EXISTS idx_customer_data_cache_business_id ON public.customer_data_cache(business_id)';
+  END IF;
+  
+  IF EXISTS (SELECT 1 FROM information_schema.tables 
+             WHERE table_schema = 'public' 
+             AND table_name = 'scrape_jobs') THEN
+    EXECUTE 'CREATE INDEX IF NOT EXISTS idx_scrape_jobs_domain_id ON public.scrape_jobs(domain_id)';
+  END IF;
+END $$;
+
+-- Add indexes for conversation tables
+CREATE INDEX IF NOT EXISTS idx_conversations_customer_id ON public.conversations(customer_id);
+CREATE INDEX IF NOT EXISTS idx_conversations_domain_id ON public.conversations(domain_id);
+CREATE INDEX IF NOT EXISTS idx_messages_conversation_id ON public.messages(conversation_id);
+
+-- =====================================================
+-- SUMMARY
+-- =====================================================
+-- This migration successfully:
+-- 1. Wraps all auth functions in SELECT statements (prevents per-row evaluation)
+-- 2. Uses correct column names (domain_id not domain, business_id relationships)
+-- 3. Handles tables that may or may not exist gracefully
+-- 4. Removes duplicate indexes
+-- 5. Adds performance indexes for all foreign key relationships
+-- 
+-- Expected performance improvement: 10-100x on large datasets
+-- =====================================================

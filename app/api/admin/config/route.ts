@@ -32,6 +32,13 @@ export async function GET() {
   try {
     const supabase = await createClient();
     
+    if (!supabase) {
+      return NextResponse.json(
+        { error: 'Failed to initialize Supabase client' },
+        { status: 500 }
+      );
+    }
+    
     // Get authenticated user
     const { data: { user }, error: authError } = await supabase.auth.getUser();
     
@@ -102,6 +109,13 @@ export async function POST(request: NextRequest) {
     
     const supabase = await createClient();
     
+    if (!supabase) {
+      return NextResponse.json(
+        { error: 'Failed to initialize Supabase client' },
+        { status: 500 }
+      );
+    }
+    
     // Get authenticated user
     const { data: { user }, error: authError } = await supabase.auth.getUser();
     
@@ -128,6 +142,13 @@ export async function POST(request: NextRequest) {
     
     // Use service role client for inserts
     const serviceSupabase = await createServiceRoleClient();
+    
+    if (!serviceSupabase) {
+      return NextResponse.json(
+        { error: 'Failed to initialize service role client' },
+        { status: 500 }
+      );
+    }
     
     // Encrypt sensitive fields before storage
     const encryptedWooCommerce = encryptWooCommerceConfig(validatedData.woocommerce);

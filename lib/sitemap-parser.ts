@@ -52,6 +52,15 @@ export class SitemapParser {
         responseType: 'text',
       });
 
+      const parsed = this.xmlParser.parse(response.data);
+      
+      // Check if it's a sitemap index and handle it automatically
+      if (parsed.sitemapindex?.sitemap) {
+        console.log('Detected sitemap index, parsing all child sitemaps...');
+        return this.parseSitemapIndex(url);
+      }
+      
+      // Otherwise parse as regular sitemap
       return this.parseSitemapXml(response.data);
     } catch (error) {
       console.error(`Failed to fetch sitemap from ${url}:`, error);
@@ -66,9 +75,9 @@ export class SitemapParser {
     try {
       const parsed = this.xmlParser.parse(xmlContent);
       
-      // Check if it's a sitemap index
+      // This method should only handle regular sitemaps
       if (parsed.sitemapindex?.sitemap) {
-        throw new Error('This is a sitemap index. Use parseSitemapIndex() instead.');
+        throw new Error('This is a sitemap index. Use parseSitemapFromUrl() or parseSitemapIndex() instead.');
       }
 
       // Extract URL entries

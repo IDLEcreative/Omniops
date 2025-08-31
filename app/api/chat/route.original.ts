@@ -58,7 +58,7 @@ export async function POST(request: NextRequest) {
     
     if (!conversationId) {
       // Create new conversation
-      const { data: newConversation, error: convError } = await adminSupabase
+      const { data: newConversation, error: convError } = await adminSupabase!
         .from('conversations')
         .insert({
           session_id,
@@ -71,7 +71,7 @@ export async function POST(request: NextRequest) {
     }
 
     // Start saving user message immediately after we have conversation ID
-    const saveUserMessagePromise = adminSupabase
+    const saveUserMessagePromise = adminSupabase!
       .from('messages')
       .insert({
         conversation_id: conversationId,
@@ -85,7 +85,7 @@ export async function POST(request: NextRequest) {
     let wooCommerceSearchPromise: Promise<any> | null = null;
     // Start fetching conversation history immediately
     const historyPromise: Promise<any> = (async () => {
-      return await adminSupabase
+      return await adminSupabase!
         .from('messages')
         .select('role, content')
         .eq('conversation_id', conversationId!)
@@ -115,7 +115,7 @@ export async function POST(request: NextRequest) {
           const embedding = embeddingResponse.data[0]?.embedding;
 
           if (embedding) {
-            const { data: relevantChunks } = await adminSupabase.rpc('search_embeddings', {
+            const { data: relevantChunks } = await adminSupabase!.rpc('search_embeddings', {
               query_embedding: embedding,
               similarity_threshold: 0.7,
               match_count: 5,
@@ -215,7 +215,7 @@ export async function POST(request: NextRequest) {
       // Check if WooCommerce is enabled for this domain
       wooCommerceSearchPromise = (async () => {
         try {
-          const { data: customerConfig } = await adminSupabase
+          const { data: customerConfig } = await adminSupabase!
             .from('customer_configs')
             .select('woocommerce_enabled')
             .eq('domain', domain)
@@ -406,7 +406,7 @@ export async function POST(request: NextRequest) {
     const aiResponse = completion.choices[0]?.message?.content || 'I apologize, but I could not generate a response.';
 
     // Save assistant message
-    await adminSupabase
+    await adminSupabase!
       .from('messages')
       .insert({
         conversation_id: conversationId,

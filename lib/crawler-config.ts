@@ -15,14 +15,14 @@ export const AIOptimizationConfigSchema = z.object({
 // Crawler configuration schema
 export const CrawlerConfigSchema = z.object({
   // Concurrency settings
-  maxConcurrency: z.number().min(1).max(20).default(3), // Conservative default to avoid rate limiting
+  maxConcurrency: z.number().min(1).max(20).default(5), // Optimized default for better performance
   
   // Timeout settings (all in milliseconds)
   timeouts: z.object({
-    request: z.number().min(5000).max(120000).default(30000), // 30s default
-    navigation: z.number().min(5000).max(120000).default(30000), // 30s default
-    resourceLoad: z.number().min(1000).max(30000).default(10000), // 10s default
-    scriptExecution: z.number().min(1000).max(30000).default(10000), // 10s default
+    request: z.number().min(5000).max(120000).default(20000), // 20s default (reduced from 30s)
+    navigation: z.number().min(5000).max(120000).default(20000), // 20s default (reduced from 30s)
+    resourceLoad: z.number().min(1000).max(30000).default(5000), // 5s default (reduced from 10s)
+    scriptExecution: z.number().min(1000).max(30000).default(5000), // 5s default (reduced from 10s)
   }).default({}),
   
   // Rate limiting
@@ -214,20 +214,26 @@ export const cachingConfigurations = {
 
 // Default configurations for different use cases
 export const crawlerPresets = {
-  // Fast crawling for well-structured sites
+  // Fast crawling for well-structured sites with optimized settings
   fast: {
-    maxConcurrency: 10,
+    maxConcurrency: 12, // Increased from 10
     timeouts: {
-      request: 15000,
-      navigation: 15000,
-      resourceLoad: 5000,
-      scriptExecution: 5000,
+      request: 10000, // Reduced from 15000
+      navigation: 10000, // Reduced from 15000
+      resourceLoad: 3000, // Reduced from 5000
+      scriptExecution: 3000, // Reduced from 5000
     },
     browser: {
       viewport: { width: 1920, height: 1080 },
       headless: true,
       userAgent: 'Mozilla/5.0 (compatible; Googlebot/2.1; +http://www.google.com/bot.html)',
-      blockResources: ['image', 'media', 'font'],
+      blockResources: ['image', 'media', 'font', 'other'], // Added 'other' for more blocking
+    },
+    rateLimit: {
+      requestsPerMinute: 120, // Increased for fast crawling
+      delayBetweenRequests: 100, // Reduced delay
+      adaptiveDelay: true,
+      respectRobotsTxt: false,
     },
   },
   
@@ -248,14 +254,20 @@ export const crawlerPresets = {
     },
   },
   
-  // Memory-efficient for very large crawls
+  // Memory-efficient for very large crawls with progressive concurrency
   memoryEfficient: {
-    maxConcurrency: 3,
+    maxConcurrency: 5, // Increased from 3 - will adapt based on memory
     memory: {
-      maxResultsInMemory: 500,
-      batchSize: 50,
+      maxResultsInMemory: 1000, // Increased from 500
+      batchSize: 100, // Increased from 50
       enableStreaming: true,
-      gcThreshold: 0.7,
+      gcThreshold: 0.6, // More aggressive GC
+    },
+    timeouts: {
+      request: 15000,
+      navigation: 15000,
+      resourceLoad: 5000,
+      scriptExecution: 5000,
     },
     browser: {
       viewport: { width: 1920, height: 1080 },

@@ -69,6 +69,19 @@ export async function createClient() {
             }
           },
         },
+        db: {
+          schema: 'public',
+        },
+        global: {
+          headers: {
+            'x-connection-pooling': 'session',
+            'x-pool-timeout': '60',
+          },
+        },
+        auth: {
+          persistSession: true,
+          autoRefreshToken: true,
+        },
       }
     )
   } catch (error) {
@@ -102,6 +115,19 @@ export async function createServiceRoleClient() {
             return []
           },
           setAll() {},
+        },
+        db: {
+          schema: 'public',
+        },
+        global: {
+          headers: {
+            'x-connection-pooling': 'transaction',
+            'x-pool-timeout': '60',
+          },
+        },
+        auth: {
+          persistSession: false,
+          autoRefreshToken: false,
         },
       }
     )

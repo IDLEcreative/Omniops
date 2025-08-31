@@ -108,11 +108,11 @@ export async function POST() {
 CREATE EXTENSION IF NOT EXISTS vector;
 
 -- Create the search function
-CREATE OR REPLACE FUNCTION search_embeddings(
+CREATE OR REPLACE FUNCTION public.search_embeddings(
   query_embedding vector(1536),
-  similarity_threshold float DEFAULT 0.7,
-  match_count int DEFAULT 5,
-  p_domain_id uuid DEFAULT NULL
+  p_domain_id uuid DEFAULT NULL,
+  match_threshold float DEFAULT 0.7,
+  match_count int DEFAULT 5
 )
 RETURNS TABLE (
   content text,
@@ -120,28 +120,18 @@ RETURNS TABLE (
   title text,
   similarity float
 )
-LANGUAGE plpgsql
-AS $$
-BEGIN
-  RETURN QUERY
+LANGUAGE sql STABLE AS $$
   SELECT 
     pe.chunk_text AS content,
-    COALESCE((pe.metadata->>'url')::text, '') AS url,
-    COALESCE((pe.metadata->>'title')::text, 'Thompson eParts') AS title,
-    1 - (pe.embedding <=> query_embedding) AS similarity
+    COALESCE((pe.metadata->>'url')::text, sp.url) AS url,
+    COALESCE((pe.metadata->>'title')::text, sp.title) AS title,
+    1 - (pe.embedding <-> query_embedding) AS similarity
   FROM page_embeddings pe
-  WHERE 
-    1 - (pe.embedding <=> query_embedding) > similarity_threshold
-    AND (
-      p_domain_id IS NULL 
-      OR pe.page_id IN (
-        SELECT id FROM scraped_pages 
-        WHERE domain = (SELECT domain FROM customer_configs WHERE id = p_domain_id)
-      )
-    )
-  ORDER BY pe.embedding <=> query_embedding
+  JOIN scraped_pages sp ON sp.id = pe.page_id
+  WHERE (p_domain_id IS NULL OR sp.domain_id = p_domain_id)
+    AND 1 - (pe.embedding <-> query_embedding) > match_threshold
+  ORDER BY pe.embedding <-> query_embedding
   LIMIT match_count;
-END;
 $$;
 
 -- Verify it was created

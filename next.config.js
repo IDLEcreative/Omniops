@@ -32,12 +32,32 @@ const nextConfig = {
   },
   
   // Webpack configuration with explicit alias resolution
-  webpack: (config) => {
+  webpack: (config, { dev, isServer }) => {
     // Explicitly set up @ alias for module resolution
     config.resolve.alias = {
       ...config.resolve.alias,
       '@': path.resolve(__dirname),
     };
+    
+    // Memory optimizations for development
+    if (dev) {
+      config.watchOptions = {
+        ...config.watchOptions,
+        ignored: ['**/node_modules/**', '**/.git/**', '**/.next/**'],
+      };
+      
+      // Reduce memory usage in development
+      config.optimization = {
+        ...config.optimization,
+        removeAvailableModules: false,
+        removeEmptyChunks: false,
+        splitChunks: false,
+      };
+      
+      // Limit parallel builds to reduce memory
+      config.parallelism = 2;
+    }
+    
     return config;
   },
   
