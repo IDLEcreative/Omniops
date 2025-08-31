@@ -1,0 +1,306 @@
+/**
+ * Optimized Query Cache for Multi-User Chat System
+ * Focuses on caching shared resources, not personalized data
+ */
+
+import { createHash } from 'crypto';
+import { SupabaseClient } from '@supabase/supabase-js';
+
+interface SmartCacheOptions {
+  ttlSeconds?: number;
+  cacheLevel?: 'none' | 'memory' | 'database' | 'both';
+  scope?: 'user' | 'domain' | 'global';
+}
+
+export class SmartQueryCache {
+  private static memoryCache = new Map<string, any>();
+  
+  /**
+   * Determine if a query should be cached based on its type
+   */
+  static shouldCache(queryType: string, queryContent: string): SmartCacheOptions {
+    // Patterns that benefit from caching
+    const cacheablePatterns = {
+      // High cache value - common across users
+      'embedding_search': {
+        patterns: [/price|cost|shipping|delivery|return|warranty|hours|location|contact/i],
+        options: { cacheLevel: 'both', scope: 'domain', ttlSeconds: 3600 }
+      },
+      
+      // Medium cache value - semi-common queries  
+      'product_search': {
+        patterns: [/spare parts|ford|toyota|honda|nissan|bmw|mercedes/i],
+        options: { cacheLevel: 'both', scope: 'domain', ttlSeconds: 1800 }
+      },
+      
+      // Low cache value - personalized
+      'order_status': {
+        patterns: [/order #|my order|tracking|where is my/i],
+        options: { cacheLevel: 'none', scope: 'user', ttlSeconds: 0 }
+      },
+      
+      // No cache - real-time data
+      'inventory': {
+        patterns: [/in stock|availability|how many left/i],
+        options: { cacheLevel: 'none', scope: 'user', ttlSeconds: 0 }
+      }
+    };
+    
+    // Check each pattern
+    for (const [type, config] of Object.entries(cacheablePatterns)) {
+      if (config.patterns.some(p => p.test(queryContent))) {
+        return config.options;
+      }
+    }
+    
+    // Default: cache at domain level for 30 minutes
+    return { 
+      cacheLevel: 'memory', 
+      scope: 'domain', 
+      ttlSeconds: 1800 
+    };
+  }
+  
+  /**
+   * Generate cache key with scope awareness
+   */
+  static generateScopedKey(
+    params: Record<string, any>,
+    scope: 'user' | 'domain' | 'global',
+    conversationId?: string,
+    domainId?: string
+  ): string {
+    const keyBase = {
+      ...params,
+      _scope: scope,
+      _domain: scope !== 'user' ? domainId : undefined,
+      _conversation: scope === 'user' ? conversationId : undefined
+    };
+    
+    // Remove null/undefined values
+    Object.keys(keyBase).forEach(key => {
+      if (keyBase[key] === undefined || keyBase[key] === null) {
+        delete keyBase[key];
+      }
+    });
+    
+    return createHash('sha256')
+      .update(JSON.stringify(keyBase))
+      .digest('hex');
+  }
+  
+  /**
+   * Intelligent cache execution
+   */
+  static async execute<T>(
+    params: {
+      queryType: string;
+      queryContent: string;
+      domainId?: string;
+      conversationId?: string;
+      supabase?: SupabaseClient;
+      forceOptions?: SmartCacheOptions;
+    },
+    queryFn: () => Promise<T>
+  ): Promise<{ data: T; cacheHit: boolean; cacheType?: string }> {
+    const {
+      queryType,
+      queryContent,
+      domainId,
+      conversationId,
+      supabase,
+      forceOptions
+    } = params;
+    
+    // Determine caching strategy
+    const cacheOptions = forceOptions || this.shouldCache(queryType, queryContent);
+    
+    // Don't cache if caching is disabled
+    if (cacheOptions.cacheLevel === 'none') {
+      const data = await queryFn();
+      return { data, cacheHit: false };
+    }
+    
+    // Generate appropriate cache key
+    const cacheKey = this.generateScopedKey(
+      { type: queryType, content: queryContent },
+      cacheOptions.scope!,
+      conversationId,
+      domainId
+    );
+    
+    // Try memory cache first
+    if (cacheOptions.cacheLevel === 'memory' || cacheOptions.cacheLevel === 'both') {
+      const cached = this.getFromMemory(cacheKey);
+      if (cached !== null) {
+        return { data: cached, cacheHit: true, cacheType: 'memory' };
+      }
+    }
+    
+    // Try database cache
+    if (cacheOptions.cacheLevel === 'database' || cacheOptions.cacheLevel === 'both') {
+      if (supabase && domainId) {
+        const cached = await this.getFromDb(supabase, domainId, cacheKey);
+        if (cached !== null) {
+          // Populate memory cache from DB
+          if (cacheOptions.cacheLevel === 'both') {
+            this.setInMemory(cacheKey, cached, cacheOptions.ttlSeconds);
+          }
+          return { data: cached as T, cacheHit: true, cacheType: 'database' };
+        }
+      }
+    }
+    
+    // Cache miss - execute query
+    const data = await queryFn();
+    
+    // Store in appropriate caches
+    if (cacheOptions.cacheLevel === 'memory' || cacheOptions.cacheLevel === 'both') {
+      this.setInMemory(cacheKey, data, cacheOptions.ttlSeconds);
+    }
+    
+    if ((cacheOptions.cacheLevel === 'database' || cacheOptions.cacheLevel === 'both') 
+        && supabase && domainId) {
+      await this.setInDb(
+        supabase,
+        domainId,
+        cacheKey,
+        queryContent,
+        data,
+        cacheOptions.ttlSeconds
+      );
+    }
+    
+    return { data, cacheHit: false };
+  }
+  
+  /**
+   * Get cache statistics by scope
+   */
+  static getStatsByScope() {
+    const stats = {
+      global: { count: 0, size: 0 },
+      domain: { count: 0, size: 0 },
+      user: { count: 0, size: 0 },
+      total: { count: 0, size: 0 }
+    };
+    
+    for (const [key, value] of this.memoryCache) {
+      const size = JSON.stringify(value).length;
+      stats.total.count++;
+      stats.total.size += size;
+      
+      // Rough scope detection based on key pattern
+      if (key.includes('_conversation')) {
+        stats.user.count++;
+        stats.user.size += size;
+      } else if (key.includes('_domain')) {
+        stats.domain.count++;
+        stats.domain.size += size;
+      } else {
+        stats.global.count++;
+        stats.global.size += size;
+      }
+    }
+    
+    return stats;
+  }
+  
+  /**
+   * Clear caches by scope
+   */
+  static clearByScope(scope: 'user' | 'domain' | 'global', identifier?: string) {
+    const keysToDelete: string[] = [];
+    
+    for (const [key] of this.memoryCache) {
+      if (scope === 'user' && identifier && key.includes(identifier)) {
+        keysToDelete.push(key);
+      } else if (scope === 'domain' && identifier && key.includes(identifier)) {
+        keysToDelete.push(key);
+      } else if (scope === 'global' && !key.includes('_domain') && !key.includes('_conversation')) {
+        keysToDelete.push(key);
+      }
+    }
+    
+    keysToDelete.forEach(key => this.memoryCache.delete(key));
+    return keysToDelete.length;
+  }
+  
+  // Keep existing helper methods
+  private static getFromMemory<T>(key: string): T | null {
+    const entry = this.memoryCache.get(key);
+    if (!entry) return null;
+    
+    if (entry.expiresAt && Date.now() > entry.expiresAt) {
+      this.memoryCache.delete(key);
+      return null;
+    }
+    
+    return entry.data as T;
+  }
+  
+  private static setInMemory<T>(key: string, data: T, ttlSeconds?: number): void {
+    const ttl = ttlSeconds || 3600;
+    this.memoryCache.set(key, {
+      data,
+      expiresAt: Date.now() + (ttl * 1000)
+    });
+    
+    // Prevent memory leak
+    if (this.memoryCache.size > 1000) {
+      const firstKey = this.memoryCache.keys().next().value;
+      this.memoryCache.delete(firstKey);
+    }
+  }
+  
+  private static async getFromDb<T>(
+    supabase: SupabaseClient,
+    domainId: string,
+    queryHash: string
+  ): Promise<T | null> {
+    const { data, error } = await supabase
+      .from('query_cache')
+      .select('results, hit_count')
+      .eq('domain_id', domainId)
+      .eq('query_hash', queryHash)
+      .gt('expires_at', new Date().toISOString())
+      .single();
+    
+    if (error || !data) return null;
+    
+    // Increment hit count asynchronously
+    supabase
+      .from('query_cache')
+      .update({ hit_count: data.hit_count + 1 })
+      .eq('domain_id', domainId)
+      .eq('query_hash', queryHash)
+      .then(() => {});
+    
+    return data.results as T;
+  }
+  
+  private static async setInDb<T>(
+    supabase: SupabaseClient,
+    domainId: string,
+    queryHash: string,
+    queryText: string | null,
+    data: T,
+    ttlSeconds?: number
+  ): Promise<void> {
+    const ttl = ttlSeconds || 3600;
+    const expiresAt = new Date(Date.now() + (ttl * 1000)).toISOString();
+    
+    await supabase
+      .from('query_cache')
+      .upsert({
+        domain_id: domainId,
+        query_hash: queryHash,
+        query_text: queryText,
+        results: data,
+        expires_at: expiresAt,
+        created_at: new Date().toISOString()
+      }, {
+        onConflict: 'domain_id,query_hash'
+      });
+  }
+}
