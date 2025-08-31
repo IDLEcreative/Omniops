@@ -458,7 +458,7 @@ export default function ChatWidget({
       <>
         <button
           onClick={() => setIsOpen(true)}
-          className="fixed bottom-4 right-4 sm:bottom-5 sm:right-5 w-12 h-12 sm:w-14 sm:h-14 bg-gradient-to-br from-[#3a3a3a] to-[#2a2a2a] text-white rounded-full shadow-xl hover:shadow-2xl hover:scale-105 focus:outline-none focus:ring-2 focus:ring-white/50 focus:ring-offset-2 focus:ring-offset-black transition-all duration-300 flex items-center justify-center animate-in fade-in"
+          className="fixed bottom-4 right-4 sm:bottom-5 sm:right-5 w-12 h-12 sm:w-14 sm:h-14 bg-gradient-to-br from-[#3a3a3a] to-[#2a2a2a] text-white rounded-full shadow-xl hover:shadow-2xl hover:scale-105 focus:outline-none focus:ring-2 focus:ring-white/50 focus:ring-offset-2 focus:ring-offset-black transition-all duration-300 flex items-center justify-center animate-in fade-in z-50"
           aria-label="Open chat support widget"
           role="button"
           tabIndex={0}
@@ -474,7 +474,7 @@ export default function ChatWidget({
       className={`fixed bottom-0 right-0 w-full h-full 
       sm:bottom-5 sm:w-[400px] sm:h-[580px] sm:max-h-[calc(100vh-40px)] sm:right-5 sm:mx-0
       ${highContrast ? 'bg-black border-2 border-white' : 'bg-[#141414]'} 
-      sm:rounded-2xl shadow-2xl flex flex-col overflow-hidden transition-all duration-200 ${
+      sm:rounded-2xl shadow-2xl flex flex-col overflow-hidden transition-all duration-200 z-50 ${
       isOpen ? 'animate-in slide-in-from-bottom-3 fade-in' : 'animate-out slide-out-to-bottom-3 fade-out'
     }`}
       role="dialog"
