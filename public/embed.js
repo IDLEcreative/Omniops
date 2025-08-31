@@ -106,6 +106,8 @@
     const iframe = document.createElement('iframe');
     iframe.id = 'chat-widget-iframe';
     iframe.title = 'Customer Support Chat';
+    // Prevent iframe from showing its own scrollbars
+    iframe.setAttribute('scrolling', 'no');
     
     // Check for demo mode
     const currentScript = document.currentScript || document.querySelector('script[src*="embed.js"]');
@@ -135,20 +137,27 @@
     }
     
     iframe.src = `${config.serverUrl}/embed?${urlParams.toString()}`;
+    
+    // Detect mobile device
+    const isMobile = /iPhone|iPad|iPod|Android/i.test(navigator.userAgent) || window.innerWidth <= 768;
+    
     iframe.style.cssText = `
       position: fixed;
-      ${config.appearance.position?.includes('bottom') ? 'bottom: 20px' : 'top: 20px'};
-      ${config.appearance.position?.includes('right') ? 'right: 20px' : 'left: 20px'};
+      ${isMobile ? 'bottom: 0' : config.appearance.position?.includes('bottom') ? 'bottom: 20px' : 'top: 20px'};
+      ${isMobile ? 'right: 0' : config.appearance.position?.includes('right') ? 'right: 20px' : 'left: 20px'};
+      ${isMobile ? 'left: 0' : ''};
       border: none;
-      width: ${config.appearance.width || 400}px;
-      height: ${config.appearance.height || 600}px;
-      max-width: calc(100vw - 40px);
-      max-height: calc(100vh - 40px);
+      width: ${isMobile ? '100vw' : (config.appearance.width || 400) + 'px'};
+      height: ${isMobile ? '100vh' : (config.appearance.height || 600) + 'px'};
+      max-width: ${isMobile ? '100vw' : 'calc(100vw - 40px)'};
+      max-height: ${isMobile ? '100vh' : 'calc(100vh - 40px)'};
       z-index: 9999;
-      border-radius: 12px;
-      box-shadow: 0 10px 40px rgba(0, 0, 0, 0.15);
+      border-radius: ${isMobile ? '0' : '12px'};
+      box-shadow: ${isMobile ? 'none' : '0 10px 40px rgba(0, 0, 0, 0.15)'};
       background: white;
     `;
+    // Extra guard to avoid scrollbars on some browsers
+    iframe.style.overflow = 'hidden';
     
     // Hide initially to prevent flash
     iframe.style.display = 'none';

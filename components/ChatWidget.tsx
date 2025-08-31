@@ -412,9 +412,9 @@ export default function ChatWidget({
   // Consent screen if required
   if (privacySettings.requireConsent && !privacySettings.consentGiven && isOpen) {
     return (
-      <div className="fixed bottom-5 right-0 w-full max-w-[400px] h-auto 
-        sm:w-[400px] sm:right-5 mx-5 sm:mx-0
-        bg-[#141414] rounded-2xl shadow-2xl p-5 animate-in slide-in-from-bottom-3 duration-200">
+      <div className="fixed bottom-0 right-0 w-full h-auto 
+        sm:bottom-5 sm:w-[400px] sm:right-5 sm:mx-0
+        bg-[#141414] sm:rounded-2xl shadow-2xl p-5 animate-in slide-in-from-bottom-3 duration-200">
         <div className="space-y-5">
           <div className="flex items-center gap-3">
             <div className="h-10 w-10 rounded-full bg-gradient-to-br from-[#3a3a3a] to-[#2a2a2a] flex items-center justify-center">
@@ -458,12 +458,12 @@ export default function ChatWidget({
       <>
         <button
           onClick={() => setIsOpen(true)}
-          className="fixed bottom-5 right-5 w-14 h-14 bg-gradient-to-br from-[#3a3a3a] to-[#2a2a2a] text-white rounded-full shadow-xl hover:shadow-2xl hover:scale-105 focus:outline-none focus:ring-2 focus:ring-white/50 focus:ring-offset-2 focus:ring-offset-black transition-all duration-300 flex items-center justify-center animate-in fade-in"
+          className="fixed bottom-4 right-4 sm:bottom-5 sm:right-5 w-12 h-12 sm:w-14 sm:h-14 bg-gradient-to-br from-[#3a3a3a] to-[#2a2a2a] text-white rounded-full shadow-xl hover:shadow-2xl hover:scale-105 focus:outline-none focus:ring-2 focus:ring-white/50 focus:ring-offset-2 focus:ring-offset-black transition-all duration-300 flex items-center justify-center animate-in fade-in"
           aria-label="Open chat support widget"
           role="button"
           tabIndex={0}
         >
-          <MessageCircle className="h-6 w-6" aria-hidden="true" />
+          <MessageCircle className="h-5 w-5 sm:h-6 sm:w-6" aria-hidden="true" />
         </button>
       </>
     );
@@ -471,17 +471,17 @@ export default function ChatWidget({
 
   return (
     <div 
-      className={`fixed bottom-5 right-0 w-full max-w-[400px] h-[580px] max-h-[calc(100vh-40px)] 
-      sm:w-[400px] sm:right-5 mx-5 sm:mx-0
+      className={`fixed bottom-0 right-0 w-full h-full 
+      sm:bottom-5 sm:w-[400px] sm:h-[580px] sm:max-h-[calc(100vh-40px)] sm:right-5 sm:mx-0
       ${highContrast ? 'bg-black border-2 border-white' : 'bg-[#141414]'} 
-      rounded-2xl shadow-2xl flex flex-col overflow-hidden transition-all duration-200 ${
+      sm:rounded-2xl shadow-2xl flex flex-col overflow-hidden transition-all duration-200 ${
       isOpen ? 'animate-in slide-in-from-bottom-3 fade-in' : 'animate-out slide-out-to-bottom-3 fade-out'
     }`}
       role="dialog"
       aria-label="Chat support widget"
       aria-modal="true">
       {/* Header */}
-      <div className={`${highContrast ? 'bg-transparent border-b-2 border-white' : 'bg-transparent border-b border-white/10'} px-4 py-2.5 flex items-center justify-between`}>
+      <div className={`${highContrast ? 'bg-transparent border-b-2 border-white' : 'bg-transparent border-b border-white/10'} px-3 sm:px-4 py-2.5 flex items-center justify-between`}>
         <div className="flex items-center gap-3 flex-1 min-w-0">
           <div className="h-2 w-2 bg-green-500 rounded-full flex-shrink-0" aria-label="Status: Online" />
           <div className="min-w-0 flex-1">
@@ -511,7 +511,7 @@ export default function ChatWidget({
       {/* Messages */}
       <div 
         ref={messagesContainerRef}
-        className={`flex-1 min-h-0 px-3 py-3 bg-transparent overflow-y-auto overflow-x-hidden overscroll-contain`} 
+        className={`flex-1 min-h-0 px-2 sm:px-3 py-3 bg-transparent overflow-y-auto overflow-x-hidden overscroll-contain`} 
         role="log" 
         aria-live="polite" 
         aria-label="Chat messages">
@@ -584,7 +584,7 @@ export default function ChatWidget({
 
 
       {/* Input */}
-      <div className={`px-4 py-3 ${highContrast ? 'bg-transparent border-t-2 border-white' : 'bg-transparent border-t border-white/10'}`}>
+      <div className={`px-3 sm:px-4 py-3 ${highContrast ? 'bg-transparent border-t-2 border-white' : 'bg-transparent border-t border-white/10'}`}>
         <div className="flex gap-2 items-end">
           <label htmlFor="chat-input" className="sr-only">Type your message</label>
           <textarea
