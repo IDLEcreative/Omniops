@@ -10,6 +10,7 @@ import { searchSimilarContent } from '@/lib/embeddings';
 import { CustomerVerification } from '@/lib/customer-verification';
 import { SimpleCustomerVerification } from '@/lib/customer-verification-simple';
 import { QueryCache } from '@/lib/query-cache';
+import { WooCommerceAIInstructions } from '@/lib/woocommerce-ai-instructions';
 
 // Lazy load OpenAI client to avoid build-time errors
 let openai: OpenAI | null = null;
@@ -217,7 +218,19 @@ export async function POST(request: NextRequest) {
     }
 
     // 3. Customer verification (cached per conversation)
-    const isCustomerQuery = /order|tracking|delivery|account|email|invoice|receipt|refund|return|my purchase|my order|where is|when will|status|cancel|change.*address|update.*address|modify/i.test(message);
+    // More specific pattern to avoid false positives
+    // Pattern focuses on: personal references (my), past actions (ordered/bought), specific order numbers
+    const personalOrderPattern = /\b(my\s+(order|delivery|purchase|invoice|receipt|refund|return|package|stuff|account)|i\s+(ordered|bought|purchased)|order\s*#?\d{3,}|where('s|\s+is)\s+my|when\s+will\s+my|track\s+my|cancel\s+my|find\s+my|check\s+my|show\s+(me\s+)?my)\b/i;
+    
+    // Pattern for checking existing orders (not future/general)
+    const existingOrderPattern = /\b(recent\s+(orders?|purchases?)|order\s+(status|history)|purchase\s+history|delivery\s+(status|question)|hasn't\s+arrived|is\s+late|went\s+through)\b/i;
+    
+    // Exclusion pattern for general/future queries
+    const generalQueryPattern = /\b(how\s+(to|do|does|can)\s+(i\s+)?(order|ordering|place|return)|order\s+process|ordering\s+work|want\s+to\s+(order|buy|purchase)|what\s+(brands?|products?|payment)|business\s+hours?|shipping\s+(cost|rates?)|return\s+policy|delivery\s+options?|can\s+i\s+order)\b/i;
+    
+    // Final decision: trigger verification only for personal/existing orders, NOT for general queries
+    const isCustomerQuery = !generalQueryPattern.test(message) && 
+                           (personalOrderPattern.test(message) || existingOrderPattern.test(message));
     
     if (isCustomerQuery && conversationId) {
       const verificationCacheKey = `verification_${conversationId}`;
@@ -274,25 +287,36 @@ export async function POST(request: NextRequest) {
       ...contextPromises
     ]);
 
-    // Build context for OpenAI
-    let systemContext = `You are a helpful customer service assistant.
+    // Build context for OpenAI with enhanced WooCommerce support
+    let systemContext = '';
     
-    Important instructions:
-    - When you reference specific products, pages, or information, include relevant links
-    - Format links as markdown: [link text](url) or just include the URL directly
-    - If you mention a product that has a URL in the context, include that URL
-    - Make links descriptive and natural in your responses`;
+    // Use enhanced instructions if this is a customer query
+    if (verificationResult && typeof verificationResult === 'object') {
+      const result = verificationResult as any;
+      systemContext = WooCommerceAIInstructions.buildCompleteContext(
+        result.level || 'none',
+        result.context || '',
+        result.prompt || '',
+        message
+      );
+    } else {
+      // Default context for non-customer queries
+      systemContext = `You are a helpful customer service assistant.
+      
+      Important instructions:
+      - When you reference specific products, pages, or information, include relevant links
+      - Format links as markdown: [link text](url) or just include the URL directly
+      - If you mention a product that has a URL in the context, include that URL
+      - Make links descriptive and natural in your responses`;
+    }
     
+    // Add website information if available
     if (embeddingResults && embeddingResults.length > 0) {
       systemContext += `\n\nRelevant website information:\n${
         embeddingResults.map((r: any) => 
           `- ${r.title} (${r.url}): ${r.content.substring(0, 500)}...`
         ).join('\n')
       }`;
-    }
-    
-    if (verificationResult?.context) {
-      systemContext += `\n\n${verificationResult.context}`;
     }
 
     // Generate response using OpenAI
@@ -337,7 +361,7 @@ export async function POST(request: NextRequest) {
 
     return NextResponse.json<ChatResponse>({
       message: assistantMessage,
-      conversation_id: conversationId,
+      conversation_id: conversationId!,
       sources: embeddingResults?.map((r: any) => ({
         url: r.url,
         title: r.title,
