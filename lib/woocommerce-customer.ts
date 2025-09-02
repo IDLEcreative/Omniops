@@ -188,6 +188,64 @@ export class WooCommerceCustomer {
   }
 
   /**
+   * Get customer orders by email (finds customer first, then gets orders)
+   */
+  async getCustomerOrdersByEmail(
+    email: string,
+    limit: number = 10,
+    conversationId?: string
+  ): Promise<OrderSummary[]> {
+    try {
+      // First, find the customer by email
+      const customer = await this.searchCustomerByEmail(email, conversationId);
+      
+      if (!customer) {
+        // Try searching orders directly by billing email
+        // This handles guest checkouts where no customer account exists
+        try {
+          const orders = await this.wc.getOrders({
+            per_page: limit,
+            orderby: 'date',
+            order: 'desc',
+            search: email  // Search by email in order fields
+          });
+          
+          // Filter orders to only those matching the email
+          const filteredOrders = orders.filter(order => 
+            order.billing?.email?.toLowerCase() === email.toLowerCase()
+          );
+          
+          const orderSummaries: OrderSummary[] = filteredOrders.map(order => ({
+            id: order.id,
+            number: order.number,
+            status: order.status,
+            date_created: order.date_created,
+            total: order.total,
+            currency: order.currency,
+            line_items_count: order.line_items?.length || 0,
+            customer_note: order.customer_note
+          }));
+          
+          return orderSummaries;
+        } catch (searchError) {
+          console.error('[WooCommerceCustomer] Error searching orders by email:', searchError);
+          return [];
+        }
+      }
+      // Then get their orders
+      return await this.getCustomerOrders(
+        customer.id,
+        limit,
+        conversationId,
+        email
+      );
+    } catch (error) {
+      console.error('Error getting customer orders by email:', error);
+      return [];
+    }
+  }
+
+  /**
    * Get specific order details
    */
   async getOrderDetails(
@@ -376,15 +434,37 @@ export class WooCommerceCustomer {
 
       // Search for customer
       const customer = await this.searchCustomerByEmail(email, conversationId);
+      
+      // Even if no customer record exists, try to find orders by email
+      const orders = customer 
+        ? await this.getCustomerOrders(customer.id, 3, conversationId, email)
+        : await this.getCustomerOrdersByEmail(email, 3, conversationId);
+      
+      // Get recent purchases only if we have a customer ID
+      const purchases = customer 
+        ? await this.getRecentPurchases(customer.id, 5, conversationId, email)
+        : [];
+
+      // If we found orders but no customer, create a minimal customer object
+      if (!customer && orders.length > 0) {
+        const context = {
+          customer: {
+            email: email,
+            first_name: 'Guest',
+            last_name: 'Customer',
+            date_created: '',
+            orders_count: orders.length,
+            total_spent: orders.reduce((sum, order) => sum + parseFloat(order.total), 0).toFixed(2)
+          },
+          recentOrders: orders,
+          recentPurchases: purchases
+        };
+        return this.formatCustomerContext(context);
+      }
+
       if (!customer) {
         return '';
       }
-
-      // Get recent orders
-      const orders = await this.getCustomerOrders(customer.id, 3, conversationId, email);
-      
-      // Get recent purchases
-      const purchases = await this.getRecentPurchases(customer.id, 5, conversationId, email);
 
       const context = {
         customer: DataMasker.maskCustomerData(customer),

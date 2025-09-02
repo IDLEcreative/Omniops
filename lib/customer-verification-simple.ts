@@ -27,6 +27,7 @@ export class SimpleCustomerVerification {
   ): Promise<VerificationLevel> {
     const { name, email, orderNumber, postalCode } = request;
     
+    
     // Count how many pieces of info provided
     const infoProvided = [name, email, orderNumber, postalCode].filter(Boolean).length;
     
@@ -39,9 +40,16 @@ export class SimpleCustomerVerification {
     }
 
     // Try to match with WooCommerce data
-    const wcCustomer = domain 
-      ? await WooCommerceCustomer.forDomain(domain)
-      : WooCommerceCustomer.fromEnvironment();
+    // Try domain-specific client first, fall back to environment
+    let wcCustomer = null;
+    if (domain) {
+      wcCustomer = await WooCommerceCustomer.forDomain(domain);
+    }
+    
+    // Fall back to environment variables if domain client not available
+    if (!wcCustomer) {
+      wcCustomer = WooCommerceCustomer.fromEnvironment();
+    }
     
     if (!wcCustomer) {
       return {
@@ -64,6 +72,15 @@ export class SimpleCustomerVerification {
             allowedData: ['orders', 'account', 'personal_info', 'order_history']
           };
         }
+      } else {
+        // No customer found, but we have an email - still allow order lookup
+        // This handles guest checkouts or cases where customer records don't exist
+        await this.logVerification(request.conversationId, email, 'email_provided');
+        return {
+          level: 'full',
+          customerEmail: email,
+          allowedData: ['orders', 'order_history', 'order_status']
+        };
       }
     }
 
@@ -74,7 +91,8 @@ export class SimpleCustomerVerification {
         orderNumber,
         name,
         postalCode,
-        request.conversationId
+        request.conversationId,
+        email
       );
       
       if (orderVerification.level !== 'none') {
@@ -105,7 +123,8 @@ export class SimpleCustomerVerification {
     orderNumber: string,
     name?: string,
     postalCode?: string,
-    conversationId?: string
+    conversationId?: string,
+    email?: string
   ): Promise<VerificationLevel> {
     try {
       // Search for the order
@@ -121,6 +140,13 @@ export class SimpleCustomerVerification {
 
       const order = orders[0];
       let verificationScore = 0;
+      
+      // Check email match (strongest verification)
+      if (email && order.billing?.email) {
+        if (order.billing.email.toLowerCase() === email.toLowerCase()) {
+          verificationScore += 3; // Email match is strong verification
+        }
+      }
       
       // Check name match
       if (name) {
@@ -242,9 +268,16 @@ export class SimpleCustomerVerification {
     }
 
     // Get customer data based on verification level
-    const wcCustomer = domain 
-      ? await WooCommerceCustomer.forDomain(domain)
-      : WooCommerceCustomer.fromEnvironment();
+    // Try domain-specific client first, fall back to environment
+    let wcCustomer = null;
+    if (domain) {
+      wcCustomer = await WooCommerceCustomer.forDomain(domain);
+    }
+    
+    // Fall back to environment variables if domain client not available
+    if (!wcCustomer) {
+      wcCustomer = WooCommerceCustomer.fromEnvironment();
+    }
     
     if (!wcCustomer || !level.customerEmail) {
       return `\nCustomer Status: ${level.level} verification.`;
@@ -252,12 +285,19 @@ export class SimpleCustomerVerification {
 
     // For basic verification, only show limited data
     if (level.level === 'basic') {
-      const orders = await wcCustomer.getCustomerOrders(
-        level.customerId!,
-        1,  // Only most recent order
-        conversationId,
-        level.customerEmail
-      );
+      // If we have an email but no customer ID, try to find orders by email
+      const orders = level.customerId 
+        ? await wcCustomer.getCustomerOrders(
+            level.customerId,
+            1,  // Only most recent order
+            conversationId,
+            level.customerEmail
+          )
+        : await wcCustomer.getCustomerOrdersByEmail(
+            level.customerEmail,
+            1,  // Only most recent order
+            conversationId
+          );
       
       if (orders.length > 0) {
         const order = orders[0];

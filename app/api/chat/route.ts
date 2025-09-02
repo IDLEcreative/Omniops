@@ -99,6 +99,7 @@ export async function POST(request: NextRequest) {
     let conversationId = conversation_id;
     
     if (!conversationId) {
+      // No conversation ID provided, create a new one
       const { data: newConversation, error: convError } = await adminSupabase
         .from('conversations')
         .insert({ session_id })
@@ -107,6 +108,27 @@ export async function POST(request: NextRequest) {
       
       if (convError) throw convError;
       conversationId = newConversation.id;
+    } else {
+      // Conversation ID provided, ensure it exists
+      const { data: existingConv } = await adminSupabase
+        .from('conversations')
+        .select('id')
+        .eq('id', conversationId)
+        .single();
+      
+      if (!existingConv) {
+        // Conversation doesn't exist, create it with the provided ID
+        const { error: createError } = await adminSupabase
+          .from('conversations')
+          .insert({ 
+            id: conversationId,
+            session_id 
+          });
+        
+        if (createError) {
+          console.error('[Chat] Failed to create conversation:', createError);
+        }
+      }
     }
 
     // Start saving user message immediately
@@ -116,7 +138,8 @@ export async function POST(request: NextRequest) {
         conversation_id: conversationId,
         role: 'user',
         content: message,
-      });
+      })
+      .select();
 
     // Prepare parallel context gathering with caching
     const contextPromises: Promise<unknown>[] = [];
@@ -149,26 +172,23 @@ export async function POST(request: NextRequest) {
       }
     }
 
-    // 1. Cached conversation history
-    const historyPromise = QueryCache.execute(
-      {
-        key: `history_${conversationId}`,
-        domainId: domainId || undefined,
-        ttlSeconds: 300, // 5 minutes
-        useMemoryCache: true,
-        useDbCache: false,
-        supabase: adminSupabase
-      },
-      async () => {
-        const { data } = await adminSupabase
-          .from('messages')
-          .select('role, content')
-          .eq('conversation_id', conversationId!)
-          .order('created_at', { ascending: true })
-          .limit(10);
-        return data || [];
+    // 1. Conversation history - NO CACHING as it changes with every message
+    const historyPromise = (async () => {
+      const { data, error } = await adminSupabase
+        .from('messages')
+        .select('role, content')
+        .eq('conversation_id', conversationId!)
+        .order('created_at', { ascending: true })
+        .limit(10);
+      
+      if (error) {
+        console.error('[Chat] Failed to fetch history:', error);
+        return [];
       }
-    );
+      
+      console.log('[Chat] Fetched history for', conversationId, ':', data?.length || 0, 'messages');
+      return data || [];
+    })();
 
     // 2. Check for contact information requests FIRST
     const contactPattern = /\b(contact|phone|call|telephone|email|mail|reach|support|help|customer\s+service|get\s+in\s+touch|speak|talk\s+to\s+someone|talk\s+to|need\s+to\s+speak|want\s+to\s+talk)\b/i;
@@ -326,15 +346,28 @@ export async function POST(request: NextRequest) {
     // Pattern for checking existing orders (not future/general)
     const existingOrderPattern = /\b(recent\s+(orders?|purchases?)|order\s+(status|history)|purchase\s+history|delivery\s+(status|question)|hasn't\s+arrived|is\s+late|went\s+through)\b/i;
     
+    // Check if message contains an email address
+    const hasEmailInMessage = /\b[A-Za-z0-9._%+-]+@[A-Za-z0-9.-]+\.[A-Z|a-z]{2,}\b/.test(message);
+    
+    // Check if message is or contains a potential order number (5-6 digits, possibly with #)
+    const hasPotentialOrderNumber = /^#?\d{5,6}$/.test(message.trim()) || /\border\s*#?\d{5,6}\b/i.test(message);
+    
     // Exclusion pattern for general/future queries
     const generalQueryPattern = /\b(how\s+(to|do|does|can)\s+(i\s+)?(order|ordering|place|return)|order\s+process|ordering\s+work|want\s+to\s+(order|buy|purchase)|what\s+(brands?|products?|payment)|business\s+hours?|shipping\s+(cost|rates?)|return\s+policy|delivery\s+options?|can\s+i\s+order)\b/i;
     
-    // Final decision: trigger verification only for personal/existing orders, NOT for general queries
-    const isCustomerQuery = !generalQueryPattern.test(message) && 
-                           (personalOrderPattern.test(message) || existingOrderPattern.test(message));
+    // For follow-up detection, we need to wait for history
+    // Initial check without history
+    const isCustomerQueryInitial = hasEmailInMessage || hasPotentialOrderNumber ||
+                           (!generalQueryPattern.test(message) && 
+                            (personalOrderPattern.test(message) || existingOrderPattern.test(message)));
+    
+    // We'll refine this after getting history data
+    let isCustomerQuery = isCustomerQueryInitial;
     
     if (isCustomerQuery && conversationId) {
-      const verificationCacheKey = `verification_${conversationId}`;
+      // Include message hash in cache key to detect new verification info
+      const messageHash = Buffer.from(message).toString('base64').substring(0, 20);
+      const verificationCacheKey = `verification_${conversationId}_${messageHash}`;
       
       const customerVerificationPromise = QueryCache.execute(
         {
@@ -347,15 +380,61 @@ export async function POST(request: NextRequest) {
           try {
             const { SimpleCustomerVerification } = await import('@/lib/customer-verification-simple');
             
+            // Check current message for verification info
             const emailMatch = message.match(/\b[A-Za-z0-9._%+-]+@[A-Za-z0-9.-]+\.[A-Z|a-z]{2,}\b/);
             const orderMatch = message.match(/#?\d{4,}/);
             const nameMatch = message.match(/(?:my name is|i'm|i am)\s+([A-Za-z]+(?:\s+[A-Za-z]+)?)/i);
             
+            // Also check conversation history for previously provided info
+            let historicalEmail: string | undefined;
+            let historicalOrder: string | undefined;
+            let historicalName: string | undefined;
+            
+            // Get conversation history to check for previous verification
+            const history = await historyPromise;
+            if (history && Array.isArray(history)) {
+              // Search through previous user messages for verification info
+              for (const msg of history) {
+                if (msg.role === 'user') {
+                  // Check for email in previous messages
+                  if (!historicalEmail) {
+                    const histEmailMatch = msg.content.match(/\b[A-Za-z0-9._%+-]+@[A-Za-z0-9.-]+\.[A-Z|a-z]{2,}\b/);
+                    if (histEmailMatch) historicalEmail = histEmailMatch[0];
+                  }
+                  // Check for order number in previous messages
+                  if (!historicalOrder) {
+                    const histOrderMatch = msg.content.match(/#?\d{4,}/);
+                    if (histOrderMatch) historicalOrder = histOrderMatch[0]?.replace('#', '');
+                  }
+                  // Check for name in previous messages
+                  if (!historicalName) {
+                    const histNameMatch = msg.content.match(/(?:my name is|i'm|i am)\s+([A-Za-z]+(?:\s+[A-Za-z]+)?)/i);
+                    if (histNameMatch) historicalName = histNameMatch[1];
+                  }
+                }
+              }
+            }
+            
+            // Use current message info first, fall back to historical
+            const finalEmail = emailMatch?.[0] || historicalEmail;
+            const finalOrder = orderMatch?.[0]?.replace('#', '') || historicalOrder;
+            const finalName = nameMatch?.[1] || historicalName;
+            
+            // Log what we found for debugging
+            console.log('[Customer Verification] Found:', {
+              currentEmail: emailMatch?.[0],
+              historicalEmail,
+              finalEmail,
+              currentOrder: orderMatch?.[0],
+              historicalOrder,
+              finalOrder
+            });
+            
             const verificationLevel = await SimpleCustomerVerification.verifyCustomer({
               conversationId,
-              email: emailMatch?.[0],
-              orderNumber: orderMatch?.[0]?.replace('#', ''),
-              name: nameMatch?.[1],
+              email: finalEmail,
+              orderNumber: finalOrder,
+              name: finalName,
             }, domain);
             
             const context = await SimpleCustomerVerification.getCustomerContext(
@@ -369,7 +448,9 @@ export async function POST(request: NextRequest) {
             return {
               context,
               prompt,
-              level: verificationLevel.level
+              level: verificationLevel.level,
+              verifiedEmail: finalEmail,
+              verifiedOrder: finalOrder
             };
           } catch (error) {
             console.error('Customer verification failed:', error);
@@ -382,11 +463,100 @@ export async function POST(request: NextRequest) {
     }
 
     // Wait for all context gathering
-    const [historyData, embeddingResults, verificationResult] = await Promise.all([
+    const [historyData, embeddingResults, ...contextResults] = await Promise.all([
       historyPromise,
       embeddingSearchPromise,
       ...contextPromises
     ]);
+
+    console.log('[Chat] Processing message:', {
+      message,
+      isCustomerQuery,
+      hasHistory: !!(historyData && historyData.length > 0),
+      historyLength: historyData?.length || 0,
+      conversationId
+    });
+
+    // Check if this is a follow-up question about orders (now that we have history)
+    // Run this check even if initial customer query detection didn't trigger
+    if (historyData && historyData.length > 0 && conversationId) {
+      const recentMessages = historyData.slice(-3); // Check last 3 messages
+      const hasRecentOrderDiscussion = recentMessages.some((msg: any) => 
+        msg.content && (msg.content.includes('Order #') || msg.content.includes('on-hold') || msg.content.includes('order'))
+      );
+      
+      // Short questions after order discussion are likely follow-ups
+      const isShortQuestion = message.length < 50 && message.includes('?');
+      // Common follow-up patterns - be more liberal with matching
+      const followUpPattern = /\b(why|what|when|how|on\s*hold|status|delivered|cancelled|refunded|shipped|explain|means?)\b/i;
+      const isFollowUpAboutOrder = hasRecentOrderDiscussion && (isShortQuestion || followUpPattern.test(message));
+      
+      console.log('[Chat] Follow-up check:', {
+        message,
+        isCustomerQuery,
+        hasRecentOrderDiscussion,
+        isShortQuestion,
+        matchesPattern: followUpPattern.test(message),
+        isFollowUpAboutOrder
+      });
+      
+      // If it's a follow-up and we haven't already processed customer verification
+      if (isFollowUpAboutOrder && !isCustomerQuery) {
+        console.log('[Chat] Detected follow-up question about order:', message);
+        try {
+          const { SimpleCustomerVerification } = await import('@/lib/customer-verification-simple');
+          
+          // Check history for previously provided verification info
+          let historicalEmail: string | undefined;
+          let historicalOrder: string | undefined;
+          
+          for (const msg of historyData) {
+            if (msg.role === 'user') {
+              if (!historicalEmail) {
+                const histEmailMatch = msg.content.match(/\b[A-Za-z0-9._%+-]+@[A-Za-z0-9.-]+\.[A-Z|a-z]{2,}\b/);
+                if (histEmailMatch) historicalEmail = histEmailMatch[0];
+              }
+              if (!historicalOrder) {
+                const histOrderMatch = msg.content.match(/#?\d{4,}/);
+                if (histOrderMatch) historicalOrder = histOrderMatch[0]?.replace('#', '');
+              }
+            }
+          }
+          
+          if (historicalEmail || historicalOrder) {
+            const verificationLevel = await SimpleCustomerVerification.verifyCustomer({
+              conversationId,
+              email: historicalEmail,
+              orderNumber: historicalOrder,
+            }, domain);
+            
+            const context = await SimpleCustomerVerification.getCustomerContext(
+              verificationLevel,
+              conversationId,
+              domain
+            );
+            
+            const prompt = SimpleCustomerVerification.getVerificationPrompt(verificationLevel);
+            
+            // Add this as the verification result
+            contextResults.push({
+              context,
+              prompt,
+              level: verificationLevel.level,
+              verifiedEmail: historicalEmail,
+              verifiedOrder: historicalOrder,
+              isFollowUp: true
+            });
+            isCustomerQuery = true; // Mark as customer query for context building
+          }
+        } catch (error) {
+          console.error('[Chat] Follow-up verification failed:', error);
+        }
+      }
+    }
+
+    // Find the verification result (it's the last item in contextResults if customer verification was triggered)
+    const verificationResult = isCustomerQuery ? contextResults[contextResults.length - 1] : null;
 
     // Build context for OpenAI with enhanced WooCommerce support
     let systemContext = '';
@@ -394,12 +564,30 @@ export async function POST(request: NextRequest) {
     // Use enhanced instructions if this is a customer query
     if (verificationResult && typeof verificationResult === 'object') {
       const result = verificationResult as any;
+      
+      // Add conversation context hint if we're discussing orders
+      let contextualMessage = message;
+      if (historyData && historyData.length > 0) {
+        // Check if the last assistant message mentioned an order
+        const lastAssistantMsg = [...historyData].reverse().find((m: any) => m.role === 'assistant');
+        if (lastAssistantMsg && lastAssistantMsg.content.includes('Order #')) {
+          // Add context that we're discussing the previously mentioned order
+          contextualMessage = `[Context: User is following up about the order just discussed] ${message}`;
+        }
+      }
+      
       systemContext = WooCommerceAIInstructions.buildCompleteContext(
         result.level || 'none',
         result.context || '',
         result.prompt || '',
-        message
+        contextualMessage
       );
+      
+      // Add explicit instruction about conversation context
+      systemContext += `\n\nIMPORTANT: Pay attention to the conversation history. If the user asks follow-up questions about orders or information you just provided, respond in that context. For example:
+      - If you just showed an order and they ask "on hold?" they're asking about the order status, not products.
+      - If they say "why" after seeing an order status, explain the status.
+      - Use the conversation history to understand ambiguous questions.`;
     } else {
       // Default context for non-customer queries
       systemContext = `You are a helpful customer service assistant.
@@ -408,7 +596,8 @@ export async function POST(request: NextRequest) {
       - When you reference specific products, pages, or information, include relevant links
       - Format links as markdown: [link text](url) or just include the URL directly
       - If you mention a product that has a URL in the context, include that URL
-      - Make links descriptive and natural in your responses`;
+      - Make links descriptive and natural in your responses
+      - Pay attention to conversation history for context`;
     }
     
     // Add contact information if this is a contact request
@@ -446,16 +635,27 @@ export async function POST(request: NextRequest) {
       throw new Error('OpenAI client not available');
     }
 
+    // Log what we're sending to OpenAI
+    const openAIMessages = [
+      { role: 'system', content: systemContext },
+      ...historyData.map((msg: any) => ({
+        role: msg.role as 'user' | 'assistant',
+        content: msg.content
+      })),
+      { role: 'user', content: message }
+    ];
+    
+    console.log('[Chat] Sending to OpenAI:', {
+      messageCount: openAIMessages.length,
+      systemPromptLength: systemContext.length,
+      historyMessages: historyData.length,
+      currentMessage: message,
+      lastAssistantMessage: historyData.filter((m: any) => m.role === 'assistant').slice(-1)[0]?.content?.substring(0, 100)
+    });
+
     const completion = await openaiClient.chat.completions.create({
       model: 'gpt-4-turbo-preview',
-      messages: [
-        { role: 'system', content: systemContext },
-        ...historyData.map((msg: any) => ({
-          role: msg.role as 'user' | 'assistant',
-          content: msg.content
-        })),
-        { role: 'user', content: message }
-      ],
+      messages: openAIMessages,
       temperature: 0.7,
       max_tokens: 500,
     });
@@ -464,16 +664,23 @@ export async function POST(request: NextRequest) {
       'I apologize, but I was unable to generate a response. Please try again.';
 
     // Save assistant response
-    await adminSupabase
+    const { error: assistantSaveError } = await adminSupabase
       .from('messages')
       .insert({
         conversation_id: conversationId,
         role: 'assistant',
         content: assistantMessage,
       });
+    
+    if (assistantSaveError) {
+      console.error('[Chat] Failed to save assistant message:', JSON.stringify(assistantSaveError, null, 2));
+    }
 
     // Wait for user message to be saved
-    await saveUserMessagePromise;
+    const userSaveResult = await saveUserMessagePromise;
+    if (userSaveResult?.error) {
+      console.error('[Chat] Failed to save user message:', JSON.stringify(userSaveResult.error, null, 2));
+    }
 
     // Log cache statistics periodically
     if (Math.random() < 0.1) { // 10% of requests

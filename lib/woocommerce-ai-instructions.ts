@@ -10,10 +10,18 @@ export class WooCommerceAIInstructions {
   static getEnhancedSystemPrompt(verificationLevel: string, hasCustomerData: boolean): string {
     const basePrompt = `You are a helpful customer service assistant with FULL ACCESS to order management and WooCommerce systems.`;
     
-    if (verificationLevel === 'full' && hasCustomerData) {
+    if (verificationLevel === 'full') {
       return `${basePrompt}
 
 IMPORTANT: You have verified this customer and have their full order history.
+
+CRITICAL INSTRUCTION: When a customer provides ONLY their email address, they are asking to see their orders.
+YOU MUST:
+1. Thank them for providing their email
+2. Look for "Recent Orders:" in the context below
+3. List ALL orders found in the format: "Order #[number] - [date] - [status] - [total]"
+4. If no orders found, say "I couldn't find any orders for this email"
+
 When asked about orders, deliveries, or account details:
 - Use the customer information provided in the context below
 - Reference specific order numbers and statuses from their recent orders
@@ -104,8 +112,22 @@ ${order.customer_note ? `- Note: ${order.customer_note}` : ''}
   /**
    * Get action prompts for specific queries
    */
-  static getActionPrompt(query: string): string {
+  static getActionPrompt(query: string, verificationLevel?: string): string {
     const lowerQuery = query.toLowerCase();
+    
+    // If already verified with email in the message, still show orders
+    if ((verificationLevel === 'full' || verificationLevel === 'basic') && lowerQuery.includes('@')) {
+      return `Customer provided email and is verified.
+      YOU MUST display their orders:
+      1. Check the "Recent Orders:" section in the context below
+      2. List ALL orders with format: "Order #[number] - [date] - [status] - [total]"
+      3. If no orders found, say "I couldn't find any orders for this email"`;
+    }
+    
+    // If already verified without email, no prompt needed
+    if (verificationLevel === 'full' || verificationLevel === 'basic') {
+      return ''; // No action prompt needed - customer is verified
+    }
     
     // Check for general/non-order queries FIRST - these should NOT trigger verification
     if (lowerQuery.includes('business hours') || lowerQuery.includes('are you open')) {
@@ -128,16 +150,31 @@ ${order.customer_note ? `- Note: ${order.customer_note}` : ''}
       return 'This is asking about the ordering PROCESS. Explain how to place orders without asking for verification.';
     }
     
-    // Now check for ACTUAL order queries that DO need verification
-    if ((lowerQuery.includes('recent') || lowerQuery.includes('show') || lowerQuery.includes('list')) && 
-        (lowerQuery.includes('order') || lowerQuery.includes('purchase'))) {
-      return `MUST ASK FOR VERIFICATION: The customer wants to see their orders.
-      YOU MUST SAY: "I'd be happy to help you with your recent orders. To look these up for you, I'll need your email address or order number please."`;
+    // Check if BOTH order number and email are provided
+    const hasEmail = lowerQuery.includes('@');
+    const hasOrderNumber = lowerQuery.includes('#') || /\b\d{4,}\b/.test(query);
+    
+    if (hasEmail && hasOrderNumber) {
+      return `Customer provided both email and order number. Verification should be complete.
+      Use the customer context provided to give specific information about their order.`;
     }
     
-    if (lowerQuery.includes('my') && (lowerQuery.includes('delivery') || lowerQuery.includes('package') || lowerQuery.includes('order'))) {
-      return `MUST ASK FOR VERIFICATION: The customer is asking about THEIR specific order/delivery.
-      YOU MUST SAY: "I can help you track your [delivery/order/package]. Please provide your order number or email address so I can look it up."`;
+    // Check if email is already provided - if so, skip asking for verification
+    if (hasEmail) {
+      // Don't ask for verification if email is already provided
+      // Jump straight to the email handling below
+    } else {
+      // Now check for ACTUAL order queries that DO need verification
+      if ((lowerQuery.includes('recent') || lowerQuery.includes('show') || lowerQuery.includes('list')) && 
+          (lowerQuery.includes('order') || lowerQuery.includes('purchase'))) {
+        return `MUST ASK FOR VERIFICATION: The customer wants to see their orders.
+        YOU MUST SAY: "I'd be happy to help you with your recent orders. To look these up for you, I'll need your email address or order number please."`;
+      }
+      
+      if (lowerQuery.includes('my') && (lowerQuery.includes('delivery') || lowerQuery.includes('package') || lowerQuery.includes('order'))) {
+        return `MUST ASK FOR VERIFICATION: The customer is asking about THEIR specific order/delivery.
+        YOU MUST SAY: "I can help you track your [delivery/order/package]. Please provide your order number or email address so I can look it up."`;
+      }
     }
     
     if (lowerQuery.includes('track') || lowerQuery.includes('where') || lowerQuery.includes('status')) {
@@ -150,15 +187,19 @@ ${order.customer_note ? `- Note: ${order.customer_note}` : ''}
       YOU MUST SAY: "I can help you with cancellation. Which order would you like to cancel? Please provide the order number or email address."`;
     }
     
-    if (lowerQuery.includes('#') || /\b\d{4,}\b/.test(query)) {
+    if (hasOrderNumber && !hasEmail) {
       return `MUST ASK FOR EMAIL: The customer provided an order number.
       YOU MUST SAY: "I'll check order #[number] for you. For security purposes, please provide the email address associated with this order."`;
     }
     
-    if (lowerQuery.includes('@')) {
+    if (hasEmail) {
       return `Customer provided email address.
-      Say: "Thank you for providing your email. Let me look up your orders for [email]."
-      Then attempt to retrieve their order history.`;
+      MANDATORY RESPONSE:
+      1. Say: "Thank you for providing your email. Let me look up your orders for [email]."
+      2. IMPORTANT: Check the Customer Information section below for order data
+      3. If "Recent Orders:" section exists, YOU MUST list ALL orders shown
+      4. Format: "You have [X] order(s):" then list each order with number, date, status, and total
+      5. If no orders found, say "I couldn't find any orders associated with this email."`;
     }
     
     return '';
@@ -178,7 +219,7 @@ ${order.customer_note ? `- Note: ${order.customer_note}` : ''}
       customerContext.includes('Recent Orders:')
     );
     
-    const actionPrompt = this.getActionPrompt(userQuery);
+    const actionPrompt = this.getActionPrompt(userQuery, verificationLevel);
     
     let fullContext = systemPrompt;
     
