@@ -23,3 +23,4 @@ __mocks__/
 docs/wireframes/
 /supabase/
 .claude/
+# Trigger Vercel deployment
