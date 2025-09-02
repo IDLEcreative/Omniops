@@ -322,11 +322,9 @@ export default function ChatWidget({
           message: userMessage,
           conversation_id: conversationId || undefined, // Only send if not empty
           session_id: sessionId,
-          domain,
+          domain: storeDomain || domain, // Use storeDomain if available for WooCommerce
           demoId: demoId || undefined,
           config: chatConfig,
-          woocommerceEnabled: woocommerceEnabled,
-          storeDomain: storeDomain || domain,
         }),
       });
 
