@@ -122,17 +122,30 @@ export async function POST(request: NextRequest) {
     const contextPromises: Promise<unknown>[] = [];
     let embeddingSearchPromise: Promise<any> | null = null;
     
-    // Get domain ID for caching
+    // Get domain ID for caching - check domains table first for scraping data
     let domainId: string | null = null;
+    let customerConfigId: string | null = null;
     if (domain) {
+      // First check domains table (for scraped content)
       const { data: domainData } = await adminSupabase
-        .from('customer_configs')
+        .from('domains')
         .select('id')
         .eq('domain', domain.replace('www.', ''))
         .single();
       
       if (domainData) {
         domainId = domainData.id;
+      }
+      
+      // Also get customer_configs ID if needed for other purposes
+      const { data: configData } = await adminSupabase
+        .from('customer_configs')
+        .select('id')
+        .eq('domain', domain.replace('www.', ''))
+        .single();
+      
+      if (configData) {
+        customerConfigId = configData.id;
       }
     }
 
@@ -157,7 +170,95 @@ export async function POST(request: NextRequest) {
       }
     );
 
-    // 2. Cached website content search (if enabled)
+    // 2. Check for contact information requests FIRST
+    const contactPattern = /\b(contact|phone|call|telephone|email|mail|reach|support|help|customer\s+service|get\s+in\s+touch|speak|talk\s+to\s+someone|talk\s+to|need\s+to\s+speak|want\s+to\s+talk)\b/i;
+    const isContactRequest = contactPattern.test(message);
+    
+    let contactInfo: any = null;
+    if (isContactRequest && domainId) {
+      // Try to get contact info from structured_extractions
+      const contactPromise = QueryCache.execute(
+        {
+          key: `contact_info_${domainId}`,
+          domainId,
+          ttlSeconds: 3600, // 1 hour cache
+          useMemoryCache: true,
+          useDbCache: true,
+          supabase: adminSupabase
+        },
+        async () => {
+          try {
+            // First try structured_extractions table for contact info
+            const { data: extractions } = await adminSupabase
+              .from('structured_extractions')
+              .select('data')
+              .eq('domain_id', domainId)
+              .eq('extract_type', 'contact')
+              .single();
+            
+            if (extractions?.data) {
+              return extractions.data;
+            }
+            
+            // Fallback: Search for contact info in scraped content
+            const { data: pages } = await adminSupabase
+              .from('scraped_pages')
+              .select('content, url')
+              .eq('domain_id', domainId)
+              .or('url.ilike.%contact%,url.ilike.%about%,url.ilike.%help%,url.ilike.%support%')
+              .limit(5);
+            
+            if (pages && pages.length > 0) {
+              // Extract contact details from content
+              const contactDetails: any = {
+                phones: [],
+                emails: [],
+                addresses: [],
+                urls: []
+              };
+              
+              pages.forEach(page => {
+                // Extract phone numbers
+                const phoneRegex = /(?:\+?44\s?|0)(?:\d{4,5}\s?\d{6}|\d{3}\s?\d{3}\s?\d{4}|\d{2}\s?\d{4}\s?\d{4})/g;
+                const phones = page.content.match(phoneRegex);
+                if (phones) {
+                  contactDetails.phones.push(...phones.map((p: string) => p.trim()));
+                }
+                
+                // Extract emails
+                const emailRegex = /[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}/g;
+                const emails = page.content.match(emailRegex);
+                if (emails) {
+                  contactDetails.emails.push(...emails);
+                }
+                
+                // Add URL where contact info was found
+                if (page.url && (phones || emails)) {
+                  contactDetails.urls.push(page.url);
+                }
+              });
+              
+              // Deduplicate
+              contactDetails.phones = [...new Set(contactDetails.phones)];
+              contactDetails.emails = [...new Set(contactDetails.emails)];
+              contactDetails.urls = [...new Set(contactDetails.urls)];
+              
+              return contactDetails;
+            }
+            
+            return null;
+          } catch (error) {
+            console.error('Error fetching contact info:', error);
+            return null;
+          }
+        }
+      );
+      
+      contextPromises.push(contactPromise);
+      contactInfo = await contactPromise;
+    }
+    
+    // 3. Cached website content search (if enabled)
     if (config?.features?.websiteScraping?.enabled !== false && domain && domainId) {
       const searchDomain = domain === 'localhost' || domain?.includes('127.0.0.1')
         ? 'thompsonseparts.co.uk' 
@@ -217,7 +318,7 @@ export async function POST(request: NextRequest) {
       contextPromises.push(embeddingSearchPromise);
     }
 
-    // 3. Customer verification (cached per conversation)
+    // 4. Customer verification (cached per conversation)
     // More specific pattern to avoid false positives
     // Pattern focuses on: personal references (my), past actions (ordered/bought), specific order numbers
     const personalOrderPattern = /\b(my\s+(order|delivery|purchase|invoice|receipt|refund|return|package|stuff|account)|i\s+(ordered|bought|purchased)|order\s*#?\d{3,}|where('s|\s+is)\s+my|when\s+will\s+my|track\s+my|cancel\s+my|find\s+my|check\s+my|show\s+(me\s+)?my)\b/i;
@@ -308,6 +409,26 @@ export async function POST(request: NextRequest) {
       - Format links as markdown: [link text](url) or just include the URL directly
       - If you mention a product that has a URL in the context, include that URL
       - Make links descriptive and natural in your responses`;
+    }
+    
+    // Add contact information if this is a contact request
+    if (isContactRequest && contactInfo) {
+      systemContext += `\n\nIMPORTANT - The customer is asking for contact information. Please provide these details immediately:\n`;
+      
+      if (contactInfo.phones && contactInfo.phones.length > 0) {
+        systemContext += `Phone numbers: ${contactInfo.phones.join(', ')}\n`;
+      }
+      if (contactInfo.emails && contactInfo.emails.length > 0) {
+        systemContext += `Email addresses: ${contactInfo.emails.join(', ')}\n`;
+      }
+      if (contactInfo.addresses && contactInfo.addresses.length > 0) {
+        systemContext += `Addresses: ${contactInfo.addresses.join('; ')}\n`;
+      }
+      if (contactInfo.urls && contactInfo.urls.length > 0) {
+        systemContext += `For more information, visit: ${contactInfo.urls.join(', ')}\n`;
+      }
+      
+      systemContext += `\nProvide these contact details directly in your response, formatted clearly and professionally.`;
     }
     
     // Add website information if available
