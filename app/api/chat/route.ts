@@ -339,11 +339,18 @@ export async function POST(request: NextRequest) {
             }
             
             // Try optimized search first
+            // Increase match_count for product queries to get more results
+            const isProductQuery = message.toLowerCase().includes('pump') || 
+                                 message.toLowerCase().includes('product') ||
+                                 message.toLowerCase().includes('part') ||
+                                 message.toLowerCase().includes('cifa') ||
+                                 message.toLowerCase().includes('show me');
+            
             const { data: results, error } = await adminSupabase.rpc('search_content_optimized', {
               query_text: message,
               query_embedding: null, // Will be generated in function if needed
               p_domain_id: domainId,
-              match_count: 5,
+              match_count: isProductQuery ? 10 : 5,  // Get more results for product queries
               use_hybrid: true
             });
             
@@ -629,30 +636,33 @@ export async function POST(request: NextRequest) {
       - Use the conversation history to understand ambiguous questions.`;
     } else {
       // Default context for non-customer queries
-      systemContext = `You are an experienced customer service representative who genuinely wants to help customers find exactly what they need.
+      systemContext = `You are a helpful customer service assistant.
       
-      CRITICAL POLICIES:
+      CRITICAL:
       - Never recommend or link to external shops, competitors, manufacturer websites, community blogs/forums, or third‑party documentation.
       - Only reference and link to our own website/domain. All links in responses MUST be same‑domain.
       - If a link is needed but an in‑house page is not available, direct the customer to contact us instead (do not link externally).
-      
-      CONVERSATIONAL APPROACH:
-      - Act like a knowledgeable shop assistant who asks intelligent follow-up questions
-      - When customers are vague about what they need, help them by asking about their specific situation, project, or requirements
-      - Guide them naturally through questions until you understand their exact need
-      - Don't just list products - understand what they're trying to achieve
       
       If a customer asks about products that aren't available or that you don't have information about, suggest they:
       - Contact customer service directly for assistance
       - Check back later as inventory is regularly updated
       - Consider similar products from our current selection
       - Inquire about special ordering options
+      - Ask about product availability timelines
       
-      COMMUNICATION STYLE:
-      - Be conversational but professional
-      - Ask thoughtful follow-up questions when requests are unclear
+      Formatting Requirements:
+      - Use proper markdown formatting for lists
+      - Put each product recommendation on separate lines with clear spacing
+      - Include a blank line between different products
+      - Keep responses concise and scannable (2–4 short sentences or up to 4 brief bullets)
+      
+      Important instructions:
+      - When you reference specific products, pages, or information, include links ONLY to our own domain
+      - Format links as markdown: [link text](url) or just include the URL directly
+      - If you mention a product that has a URL in the context, include that URL
+      - Make links descriptive and natural in your responses
       - Pay attention to conversation history for context
-      - Keep responses focused but helpful`;
+      - If the request is ambiguous or non-specific, ask one short clarifying question (just one)`;
       
       // Add product recommendation guidelines only for product-related queries
       const productGuidelines = ProductRecommendationContext.buildProductContext(message);
@@ -691,14 +701,19 @@ export async function POST(request: NextRequest) {
             let score = 0;
             nameTokens.forEach(t => { if (tokens.has(t)) score += 1; });
             if (score === 0 && name && msg.includes(name)) score += 2; // direct phrase match bonus
-            // Domain-specific nudges
-            if (/filler|fillers/.test(msg) && /filler/.test(name)) score += 1;
-            if (/stopper|stoppers/.test(msg) && /stopper/.test(name)) score += 1;
             return { cat: c, score };
           }).filter(x => x.score > 0);
 
           scored.sort((a, b) => b.score - a.score);
           const top = scored.slice(0, 2);
+          
+          // Debug logging
+          if (scored.length > 0) {
+            console.log('[Chat] Category matching results:', 
+              scored.slice(0, 5).map(s => ({ name: s.cat.name, score: s.score }))
+            );
+          }
+          
           matchedCategories = top.map(({ cat }) => ({
             name: cat.name,
             url: `https://${browseDomain}/product-category/${cat.slug}/`
@@ -731,17 +746,40 @@ export async function POST(request: NextRequest) {
     
     // Add website information if available
     if (embeddingResults && embeddingResults.length > 0) {
-      systemContext += `\n\nRelevant website information:\n${
-        embeddingResults.map((r: any) => 
-          `- ${r.title} (${r.url}): ${r.content.substring(0, 500)}...`
-        ).join('\n')
-      }`;
+      // Check if we have specific product pages
+      const productPages = embeddingResults.filter((r: any) => 
+        r.url && (r.url.includes('/product/') || r.content.toLowerCase().includes('price') || r.content.toLowerCase().includes('pump'))
+      );
+      
+      if (productPages.length > 0) {
+        systemContext += `\n\nIMPORTANT: Found specific product pages that match the query. You MUST include these products in your response:\n${
+          productPages.map((r: any, index: number) => 
+            `\nProduct ${index + 1}:\n- Title: ${r.title}\n- URL: ${r.url}\n- Details: ${r.content.substring(0, 300)}...`
+          ).join('\n')
+        }`;
+        
+        systemContext += `\n\nWhen responding about these products:
+        1. List each product with its name and key details
+        2. Include the product URL on its own line
+        3. Add a blank line between products for readability
+        4. Focus on the products found above rather than asking for clarification`;
+      } else {
+        systemContext += `\n\nRelevant website information:\n${
+          embeddingResults.map((r: any) => 
+            `- ${r.title} (${r.url}): ${r.content.substring(0, 300)}...`
+          ).join('\n')
+        }`;
+      }
     }
 
     // Add relevant product categories to help the model include shop links
     if (matchedCategories.length > 0) {
       systemContext += `\n\nRelevant product categories (same‑domain links):\n${matchedCategories.map(c => `- ${c.name}: ${c.url}`).join('\n')}`;
-      systemContext += `\n\nIf recommending products from these categories, include one "Browse all [Category]" link.`;
+      systemContext += `\n\nWhen recommending products:
+      1. List each product on separate lines with clear spacing
+      2. Include the product link on its own line
+      3. Add a blank line between different products
+      4. At the end, include "Browse all ${matchedCategories[0]?.name || 'products'}: ${matchedCategories[0]?.url || ''}" as the category link`;
     }
 
     // Generate response using OpenAI
@@ -765,15 +803,61 @@ export async function POST(request: NextRequest) {
       systemPromptLength: systemContext.length,
       historyMessages: historyData.length,
       currentMessage: message,
+      hasCategoryContext: matchedCategories.length > 0,
+      categories: matchedCategories.map(c => c.name),
       lastAssistantMessage: historyData.filter((m: any) => m.role === 'assistant').slice(-1)[0]?.content?.substring(0, 100)
     });
 
-    const completion = await openaiClient.chat.completions.create({
-      model: 'gpt-4-turbo-preview',
-      messages: openAIMessages,
-      temperature: 0.7,
-      max_tokens: 500,
-    });
+    // Configure model based on environment or preference
+    const useGPT5 = process.env.USE_GPT5_MINI === 'true';
+    const modelConfig = useGPT5 
+      ? {
+          model: 'gpt-5-mini',
+          messages: openAIMessages,
+          max_completion_tokens: 2500,  // Increased to accommodate reasoning + output
+          reasoning_effort: 'low',       // Low reasoning for better quality answers
+          // GPT-5 doesn't support custom temperature
+        }
+      : {
+          model: 'gpt-4.1',
+          messages: openAIMessages,
+          temperature: 0.7,
+          max_tokens: 500,
+        };
+
+    let completion;
+    try {
+      completion = await openaiClient.chat.completions.create(modelConfig as any);
+      
+      console.log('[Chat] Model response received:', {
+        model: completion.model,
+        hasChoices: !!completion.choices,
+        choicesLength: completion.choices?.length,
+        hasContent: !!completion.choices?.[0]?.message?.content,
+        usage: completion.usage
+      });
+    } catch (openAIError: any) {
+      console.error('[Chat] OpenAI API error:', openAIError.message);
+      if (openAIError.status) {
+        console.error('[Chat] Error status:', openAIError.status);
+      }
+      if (openAIError.error) {
+        console.error('[Chat] Error details:', openAIError.error);
+      }
+      
+      // Fallback to GPT-4.1 if GPT-5-mini fails
+      if (useGPT5) {
+        console.log('[Chat] Falling back to GPT-4.1...');
+        completion = await openaiClient.chat.completions.create({
+          model: 'gpt-4.1',
+          messages: openAIMessages,
+          temperature: 0.7,
+          max_tokens: 500,
+        });
+      } else {
+        throw openAIError;
+      }
+    }
 
     let assistantMessage = completion.choices[0]?.message?.content || 
       'I apologize, but I was unable to generate a response. Please try again.';
