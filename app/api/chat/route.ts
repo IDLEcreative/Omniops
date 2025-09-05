@@ -10,8 +10,10 @@ import { searchSimilarContent } from '@/lib/embeddings';
 import { CustomerVerification } from '@/lib/customer-verification';
 import { SimpleCustomerVerification } from '@/lib/customer-verification-simple';
 import { QueryCache } from '@/lib/query-cache';
-import { WooCommerceAIInstructions } from '@/lib/woocommerce-ai-instructions';
+import { CustomerServiceAgent } from '@/lib/agents/customer-service-agent';
+import { WooCommerceAgent } from '@/lib/agents/woocommerce-agent';
 import { ProductRecommendationContext } from '@/lib/product-recommendation-context';
+import { sanitizeOutboundLinks } from '@/lib/link-sanitizer';
 
 // Lazy load OpenAI client to avoid build-time errors
 let openai: OpenAI | null = null;
@@ -32,6 +34,8 @@ function getOpenAIClient(): OpenAI | null {
   }
   return openai;
 }
+
+// sanitizer imported from lib/link-sanitizer
 
 // Request validation
 const ChatRequestSchema = z.object({
@@ -577,7 +581,12 @@ export async function POST(request: NextRequest) {
         }
       }
       
-      systemContext = WooCommerceAIInstructions.buildCompleteContext(
+      // Decide which provider agent to use (modular routing)
+      const ProviderAgent = (config?.features?.woocommerce?.enabled)
+        ? WooCommerceAgent
+        : CustomerServiceAgent;
+
+      systemContext = ProviderAgent.buildCompleteContext(
         result.level || 'none',
         result.context || '',
         result.prompt || '',
@@ -593,15 +602,23 @@ export async function POST(request: NextRequest) {
       // Default context for non-customer queries
       systemContext = `You are a helpful customer service assistant.
       
-      CRITICAL: Never recommend external shops, stores, competitors, or third-party retailers. If a customer asks about products that aren't available or that you don't have information about, suggest they:
+      CRITICAL:
+      - Never recommend or link to external shops, competitors, manufacturer websites, community blogs/forums, or third‑party documentation.
+      - Only reference and link to our own website/domain. All links in responses MUST be same‑domain.
+      - If a link is needed but an in‑house page is not available, direct the customer to contact us instead (do not link externally).
+      
+      If a customer asks about products that aren't available or that you don't have information about, suggest they:
       - Contact customer service directly for assistance
       - Check back later as inventory is regularly updated
       - Consider similar products from our current selection
       - Inquire about special ordering options
       - Ask about product availability timelines
       
+      Brevity:
+      - Keep responses concise and scannable (2–4 short sentences or up to 4 brief bullets)
+      
       Important instructions:
-      - When you reference specific products, pages, or information, include relevant links
+      - When you reference specific products, pages, or information, include links ONLY to our own domain
       - Format links as markdown: [link text](url) or just include the URL directly
       - If you mention a product that has a URL in the context, include that URL
       - Make links descriptive and natural in your responses
@@ -674,8 +691,14 @@ export async function POST(request: NextRequest) {
       max_tokens: 500,
     });
 
-    const assistantMessage = completion.choices[0]?.message?.content || 
+    let assistantMessage = completion.choices[0]?.message?.content || 
       'I apologize, but I was unable to generate a response. Please try again.';
+
+    // Enforce in-house linking policy by stripping any external links from the AI output
+    const allowedDomain = (domain && !/localhost|127\.0\.0\.1|vercel/i.test(domain))
+      ? domain
+      : 'thompsonseparts.co.uk';
+    assistantMessage = sanitizeOutboundLinks(assistantMessage, allowedDomain);
 
     // Save assistant response
     const { error: assistantSaveError } = await adminSupabase

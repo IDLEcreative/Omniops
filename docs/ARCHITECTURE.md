@@ -20,7 +20,9 @@ graph TB
     
     subgraph "Business Logic Layer"
         API --> RL[Rate Limiter]
-        API --> WC[WooCommerce Service]
+        API --> AG[Agent Router]
+        AG --> CSA[Customer Service Agent]
+        CSA --> WAG[WooCommerce Agent]
         API --> AI[AI Service]
         API --> SC[Scraping Service]
     end
@@ -36,6 +38,20 @@ graph TB
         WC --> WCAPI[WooCommerce API]
     end
 ```
+
+## Agent Architecture
+
+- Customer communicates with the generic Customer Service Agent (CSA).
+- CSA builds the base system context for general support and products.
+- When a message is an order/delivery/account query and a provider is enabled, CSA delegates to a provider-specific agent.
+- Current provider agent: WooCommerce Agent. Future agents (e.g., Shopify) can be added without changing CSA.
+
+Implementation details:
+- Provider decision happens in `app/api/chat/route.ts:585`.
+- CSA and provider agents expose the same interface (`lib/agents/ecommerce-agent.ts:1`).
+- WooCommerce-specific instructions live in `lib/agents/woocommerce-agent.ts:1`.
+- Generic instructions live in `lib/agents/customer-service-agent.ts:1`.
+- A legacy shim keeps `lib/woocommerce-ai-instructions.ts:1` working for existing code/tests.
 
 ## Component Architecture
 

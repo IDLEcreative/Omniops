@@ -1,42 +1,27 @@
-# Repository Guidelines
+# Agent Layer
 
-## Project Structure & Module Organization
-- `app/`: Next.js App Router (e.g., `page.tsx`, `layout.tsx`, `api/**/route.ts`).
-- `components/`: Reusable UI. Prefer PascalCase (e.g., `ChatWidget.tsx`); group by domain.
-- `lib/`: Shared utilities and services (Supabase, OpenAI, scraping helpers).
-- `hooks/`: React hooks.
-- `__tests__/`, `__mocks__/`: Unit/integration tests and Jest mocks.
-- `browser-automation/`: Playwright/Crawlee scripts for scraping/diagnostics.
-- `scripts/`: Maintenance scripts (run with `tsx`).
-- `public/`, `docs/`, `supabase/`: Static assets, docs, and DB migrations.
+This project uses a modular Agent architecture to keep the main Customer Service Agent lean and provider-agnostic while enabling specialized e-commerce logic via provider agents.
 
-## Build, Test, and Development Commands
-- `npm run dev`: Start local dev server at `http://localhost:3000`.
-- `npm run build` / `npm start`: Production build and start.
-- `npm run lint`: ESLint (Next.js + TypeScript rules).
-- `npm test`: All Jest tests. `npm run test:unit`, `npm run test:integration`, `npm run test:coverage` for variants.
-- `npx playwright test`: Run Playwright tests (ensure server running).
-- `npm run check:all`: Dependency check, lint, and type-check.
+## Components
 
-## Coding Style & Naming Conventions
-- TypeScript strict; 2‑space indent; format with Prettier; lint with ESLint (`eslint.config.mjs`).
-- Components: PascalCase files; routes: kebab‑case under `app/`.
-- Tests: `*.test.ts(x)`/`*.spec.ts(x)`; place under `__tests__/` when possible.
-- Imports: use alias `@/` (see `tsconfig.json` paths).
+- `lib/agents/ecommerce-agent.ts`: Interface that defines a common contract for all agents. Methods include `getEnhancedSystemPrompt`, `getActionPrompt`, `formatOrdersForAI`, and `buildCompleteContext`.
+- `lib/agents/customer-service-agent.ts`: Generic Customer Service Agent. This is the primary agent the user interacts with; it handles all general support and product guidance.
+- `lib/agents/woocommerce-agent.ts`: WooCommerce-specific agent. Reuses generic behavior but tailors the system prompt for WooCommerce and order handling.
+- `lib/woocommerce-ai-instructions.ts`: Legacy compatibility shim that re-exports the WooCommerce agent as `WooCommerceAIInstructions`.
 
-## Testing Guidelines
-- Frameworks: Jest (+ jsdom, Testing Library) and Playwright for E2E.
-- Coverage: Jest global thresholds ~70% lines/funcs/branches; integration config targets 60–70%.
-- Naming: `__tests__/integration/**/*.test.ts(x)` for integration; unit tests alongside code or under `__tests__`.
-- Run examples: `npm test`, `npm run test:integration`, `npx playwright test` (with `npm run dev`).
+## Routing
 
-## Commit & Pull Request Guidelines
-- Commits: Follow Conventional Commits where possible (`feat:`, `fix:`, `docs:`, `chore:`, `test:`). Example: `feat(chat): add message streaming`.
-- PRs: Include purpose, linked issues, test plan/steps, and screenshots for UI. Note any env or migration changes.
-- Pre-submit: `npm run check:all` and ensure tests pass locally.
+Provider routing happens in the chat API when a message is identified as an order/delivery/account query (i.e., a “customer” query).
 
-## Security & Configuration Tips
-- Copy envs from `.env.local.example` → `.env.local` (do not commit secrets). See also `.env.example`.
-- Configure Supabase keys and OpenAI credentials before running integration/E2E tests.
-- Be cautious with scraping scripts; respect robots.txt and site policies.
+- Decision: `app/api/chat/route.ts:585`
+- If `config.features.woocommerce.enabled === true`, the system uses `WooCommerceAgent`.
+- Otherwise, it uses the generic `CustomerServiceAgent`.
+
+This makes it easy to add more providers (e.g., Shopify) later without changing the main agent or bloating its logic.
+
+## Rationale
+
+- Keep the user-facing agent (CSA) small and focused on customer service tone, constraints, and general product support.
+- Encapsulate provider-specific policies and heuristics in dedicated agents.
+- Maintain backwards compatibility for existing tools/tests using the old `WooCommerceAIInstructions` entry point.
 

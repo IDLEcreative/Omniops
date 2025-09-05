@@ -10,6 +10,10 @@ The `/lib` directory contains the foundational modules that power our customer s
 
 ```
 lib/
+├── agents/                     # Modular agent layer
+│   ├── ecommerce-agent.ts     # Interface for provider agents
+│   ├── customer-service-agent.ts  # Generic main agent (user-facing)
+│   └── woocommerce-agent.ts   # WooCommerce-specific specialization
 ├── __mocks__/                    # Mock implementations for testing
 │   ├── supabase/               # Supabase mocks
 │   ├── woocommerce-full.ts     # WooCommerce API mocks
@@ -79,6 +83,12 @@ lib/
 - **`woocommerce-cache.ts`** - Caching layer for WooCommerce data
 - **`woocommerce-cart-tracker.ts`** - Abandoned cart tracking functionality
 - **`woocommerce-chat-functions.ts`** - Chat integration with WooCommerce
+
+### 🤝 Agents (Modular Prompt Layer)
+- **`agents/ecommerce-agent.ts`** - TypeScript interface defining a common contract for agent capabilities (prompt/context builders)
+- **`agents/customer-service-agent.ts`** - Generic Customer Service Agent used for all user interactions; handles general queries and product guidance
+- **`agents/woocommerce-agent.ts`** - WooCommerce specialization used when WooCommerce is enabled and the user asks about orders/delivery/account
+- Backwards compatibility shim: `lib/woocommerce-ai-instructions.ts` re-exports the WooCommerce agent as `WooCommerceAIInstructions`
 
 ### 🔐 Security & Authentication
 - **`auth/`** - Authentication utilities (see detailed README in subdirectory)

@@ -31,7 +31,6 @@ import {
   ArrowUpRight,
   Building2,
   UserCheck,
-  DollarSign,
   Languages,
   Lock,
   Smartphone,
@@ -125,7 +124,7 @@ const stats = [
 const pricingPlans = [
   {
     name: "Starter",
-    price: "$29",
+    price: "£29",
     description: "Perfect for small businesses",
     features: [
       "Up to 1,000 conversations/month",
@@ -138,7 +137,7 @@ const pricingPlans = [
   },
   {
     name: "Professional",
-    price: "$99",
+    price: "£99",
     description: "For growing companies",
     features: [
       "Up to 10,000 conversations/month",
