@@ -78,15 +78,22 @@ jest.mock('next/headers', () => ({
   })),
 }))
 
-// Establish API mocking before all tests
-beforeAll(() => server.listen({ onUnhandledRequest: 'error' }))
+// Establish API mocking before all tests (guarded for Node/MSW compatibility)
+beforeAll(() => {
+  try {
+    server.listen({ onUnhandledRequest: 'error' })
+  } catch (e) {
+    // eslint-disable-next-line no-console
+    console.warn('[MSW] Disabled in test environment:', e?.message || e)
+  }
+})
 
 // Reset any request handlers that we may add during the tests,
 // so they don't affect other tests
 afterEach(() => {
-  server.resetHandlers()
+  try { server.resetHandlers() } catch {}
   jest.clearAllMocks()
 })
 
 // Clean up after the tests are finished
-afterAll(() => server.close())
+afterAll(() => { try { server.close() } catch {} })

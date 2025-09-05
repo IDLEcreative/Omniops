@@ -1,12 +1,14 @@
 // Test script to debug embedding search
+require('dotenv').config({ path: '.env.local' });
 const { searchSimilarContent } = require('./lib/embeddings');
 
 async function testEmbeddingSearch() {
-  console.log('Testing embedding search for thompsonseparts.co.uk...\n');
+  const query = process.argv[2] || 'dc66-10p';
+  console.log(`Testing embedding/keyword search for thompsonseparts.co.uk with query: "${query}"\n`);
   
   try {
     const results = await searchSimilarContent(
-      'What products do you sell?',
+      query,
       'thompsonseparts.co.uk',
       5,
       0.3

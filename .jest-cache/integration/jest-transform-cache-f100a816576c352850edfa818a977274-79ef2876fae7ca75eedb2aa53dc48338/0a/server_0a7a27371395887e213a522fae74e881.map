@@ -1,0 +1,1 @@
+{"version":3,"sources":["/Users/jamesguy/Omniops/__tests__/mocks/server.ts"],"sourcesContent":["import { setupServer } from 'msw/node'\nimport { handlers } from './handlers'\n\nexport const server = setupServer(...handlers)"],"names":["server","setupServer","handlers"],"mappings":";;;;+BAGaA;;;eAAAA;;;sBAHe;0BACH;AAElB,MAAMA,SAASC,IAAAA,iBAAW,KAAIC,kBAAQ"}

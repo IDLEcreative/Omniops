@@ -4,21 +4,21 @@
       "headless": true,
       "headed": true,
       "version": "140.0.7339.16",
-      "launchTime": 120,
+      "launchTime": 1636,
       "error": null
     },
     "firefox": {
       "headless": true,
       "headed": true,
       "version": "141.0",
-      "launchTime": 736,
+      "launchTime": 2639,
       "error": null
     },
     "webkit": {
       "headless": true,
       "headed": true,
       "version": "26.0",
-      "launchTime": 233,
+      "launchTime": 2735,
       "error": null
     }
   },
@@ -73,7 +73,7 @@
     },
     "advanced": {
       "javascript": true,
-      "pageEvaluation": 1756326498719,
+      "pageEvaluation": 1757071878459,
       "multipleSelectors": true,
       "formInteraction": true
     },
@@ -84,15 +84,15 @@
     }
   },
   "performance": {
-    "standardTime": 187,
-    "optimizedTime": 183,
-    "improvement": 4,
-    "improvementPercent": "2.14"
+    "standardTime": 208,
+    "optimizedTime": 194,
+    "improvement": 14,
+    "improvementPercent": "6.73"
   },
   "errors": [],
   "summary": {
-    "totalTime": 4474,
-    "timestamp": "2025-08-27T20:28:19.321Z",
+    "totalTime": 10660,
+    "timestamp": "2025-09-05T11:31:19.108Z",
     "browsersWorking": 3,
     "scrapingTests": 4,
     "errors": 0

@@ -1,0 +1,20 @@
+2ac7ace7980fb0000e7bb3edcbfe60f9
+/**
+ * Global Setup for Integration Tests
+ * Runs once before all tests
+ */ "use strict";
+module.exports = async ()=>{
+    console.log('🔧 Setting up integration test environment...');
+    // Set test environment variables
+    process.env.NODE_ENV = 'test';
+    process.env.CI = 'true';
+    // Disable real network calls
+    process.env.DISABLE_REAL_REQUESTS = 'true';
+    // Set memory limits for testing
+    if (global.gc) {
+        global.gc();
+    }
+    console.log('✅ Global setup complete');
+};
+
+//# sourceMappingURL=data:application/json;base64,eyJ2ZXJzaW9uIjozLCJzb3VyY2VzIjpbIi9Vc2Vycy9qYW1lc2d1eS9PbW5pb3BzL19fdGVzdHNfXy91dGlscy9nbG9iYWwtc2V0dXAuanMiXSwic291cmNlc0NvbnRlbnQiOlsiLyoqXG4gKiBHbG9iYWwgU2V0dXAgZm9yIEludGVncmF0aW9uIFRlc3RzXG4gKiBSdW5zIG9uY2UgYmVmb3JlIGFsbCB0ZXN0c1xuICovXG5cbm1vZHVsZS5leHBvcnRzID0gYXN5bmMgKCkgPT4ge1xuICBjb25zb2xlLmxvZygn8J+UpyBTZXR0aW5nIHVwIGludGVncmF0aW9uIHRlc3QgZW52aXJvbm1lbnQuLi4nKVxuICBcbiAgLy8gU2V0IHRlc3QgZW52aXJvbm1lbnQgdmFyaWFibGVzXG4gIHByb2Nlc3MuZW52Lk5PREVfRU5WID0gJ3Rlc3QnXG4gIHByb2Nlc3MuZW52LkNJID0gJ3RydWUnXG4gIFxuICAvLyBEaXNhYmxlIHJlYWwgbmV0d29yayBjYWxsc1xuICBwcm9jZXNzLmVudi5ESVNBQkxFX1JFQUxfUkVRVUVTVFMgPSAndHJ1ZSdcbiAgXG4gIC8vIFNldCBtZW1vcnkgbGltaXRzIGZvciB0ZXN0aW5nXG4gIGlmIChnbG9iYWwuZ2MpIHtcbiAgICBnbG9iYWwuZ2MoKVxuICB9XG4gIFxuICBjb25zb2xlLmxvZygn4pyFIEdsb2JhbCBzZXR1cCBjb21wbGV0ZScpXG59Il0sIm5hbWVzIjpbIm1vZHVsZSIsImV4cG9ydHMiLCJjb25zb2xlIiwibG9nIiwicHJvY2VzcyIsImVudiIsIk5PREVfRU5WIiwiQ0kiLCJESVNBQkxFX1JFQUxfUkVRVUVTVFMiLCJnbG9iYWwiLCJnYyJdLCJtYXBwaW5ncyI6IkFBQUE7OztDQUdDO0FBRURBLE9BQU9DLE9BQU8sR0FBRztJQUNmQyxRQUFRQyxHQUFHLENBQUM7SUFFWixpQ0FBaUM7SUFDakNDLFFBQVFDLEdBQUcsQ0FBQ0MsUUFBUSxHQUFHO0lBQ3ZCRixRQUFRQyxHQUFHLENBQUNFLEVBQUUsR0FBRztJQUVqQiw2QkFBNkI7SUFDN0JILFFBQVFDLEdBQUcsQ0FBQ0cscUJBQXFCLEdBQUc7SUFFcEMsZ0NBQWdDO0lBQ2hDLElBQUlDLE9BQU9DLEVBQUUsRUFBRTtRQUNiRCxPQUFPQyxFQUFFO0lBQ1g7SUFFQVIsUUFBUUMsR0FBRyxDQUFDO0FBQ2QifQ==

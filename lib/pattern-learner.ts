@@ -40,7 +40,8 @@ export class PatternLearner {
       throw new Error('Supabase credentials not found. Please set NEXT_PUBLIC_SUPABASE_URL and SUPABASE_SERVICE_ROLE_KEY environment variables.');
     }
     
-    return createClient(url, key);
+    const client = createClient(url, key);
+    return client;
   }
   
   private static get supabase() {
@@ -101,6 +102,11 @@ export class PatternLearner {
       }
     }
 
+    // Skip saving if no patterns were learned
+    if (patterns.length === 0) {
+      return;
+    }
+
     // Save or update patterns for this domain
     await this.saveDomainPatterns(domain, {
       domain,
@@ -146,8 +152,9 @@ export class PatternLearner {
     patterns: DomainPatterns
   ): Promise<void> {
     // Check if patterns exist for this domain
-    const { data: existing } = await this.supabase
-      .from('domain_patterns')
+    const supa = this.supabase as any;
+    const qb1 = supa.from('domain_patterns');
+    const { data: existing } = await qb1
       .select('*')
       .eq('domain', domain)
       .single();
@@ -159,8 +166,8 @@ export class PatternLearner {
         patterns.patterns
       );
 
-      await this.supabase
-        .from('domain_patterns')
+      const qb2 = supa.from('domain_patterns');
+      await qb2
         .update({
           patterns: mergedPatterns,
           platform: patterns.platform || existing.platform,
@@ -172,9 +179,8 @@ export class PatternLearner {
         .eq('domain', domain);
     } else {
       // Insert new patterns
-      await this.supabase
-        .from('domain_patterns')
-        .insert(patterns);
+      const qb3 = supa.from('domain_patterns');
+      await qb3.insert(patterns);
     }
   }
 

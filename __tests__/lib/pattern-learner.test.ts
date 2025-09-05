@@ -1,20 +1,11 @@
 import { describe, it, expect, jest, beforeEach, afterEach } from '@jest/globals'
 import { PatternLearner, ExtractedPattern, DomainPatterns } from '@/lib/pattern-learner'
 import { NormalizedProduct } from '@/lib/product-normalizer'
-
-// Mock Supabase client
-const mockSupabaseClient = {
-  from: jest.fn().mockReturnThis(),
-  select: jest.fn().mockReturnThis(),
-  insert: jest.fn().mockReturnThis(),
-  update: jest.fn().mockReturnThis(),
-  eq: jest.fn().mockReturnThis(),
-  single: jest.fn(),
-}
-
-jest.mock('@supabase/supabase-js', () => ({
-  createClient: jest.fn(() => mockSupabaseClient)
-}))
+// Use centralized Supabase mock from __mocks__
+// eslint-disable-next-line @typescript-eslint/no-var-requires
+const supabaseMockModule = require('@supabase/supabase-js')
+const mockSupabaseClient = supabaseMockModule._mockSupabaseClient as any
+const { MockQueryBuilder } = supabaseMockModule
 
 // Mock environment variables
 const originalEnv = process.env
@@ -30,12 +21,8 @@ describe('PatternLearner', () => {
       SUPABASE_SERVICE_ROLE_KEY: 'test-service-key'
     }
 
-    // Reset mock implementations
-    mockSupabaseClient.from.mockReturnValue(mockSupabaseClient)
-    mockSupabaseClient.select.mockReturnValue(mockSupabaseClient)
-    mockSupabaseClient.insert.mockReturnValue(mockSupabaseClient)
-    mockSupabaseClient.update.mockReturnValue(mockSupabaseClient)
-    mockSupabaseClient.eq.mockReturnValue(mockSupabaseClient)
+    // Reset mock implementations (from returns a new builder each time)
+    mockSupabaseClient.from.mockImplementation(() => new MockQueryBuilder())
   })
 
   afterEach(() => {
@@ -84,14 +71,19 @@ describe('PatternLearner', () => {
         extractionMethod: 'dom'
       }
 
-      // Mock database responses
-      mockSupabaseClient.single.mockResolvedValueOnce({ data: null, error: null })
-      mockSupabaseClient.insert.mockResolvedValue({ data: {}, error: null })
+      // Mock database responses using query builders
+      const qbExisting = new MockQueryBuilder()
+      qbExisting.single.mockResolvedValue({ data: null, error: null })
+      const qbInsert = new MockQueryBuilder()
+      qbInsert.insert = jest.fn().mockResolvedValue({ data: {}, error: null })
+      mockSupabaseClient.from
+        .mockReturnValueOnce(qbExisting) // for existing
+        .mockReturnValueOnce(qbInsert)   // for insert
 
       await PatternLearner.learnFromExtraction('https://example.com/product/123', products, extractionData)
 
       expect(mockSupabaseClient.from).toHaveBeenCalledWith('domain_patterns')
-      expect(mockSupabaseClient.insert).toHaveBeenCalledWith(
+      expect(qbInsert.insert).toHaveBeenCalledWith(
         expect.objectContaining({
           domain: 'example.com',
           platform: 'woocommerce',
@@ -125,7 +117,9 @@ describe('PatternLearner', () => {
       ]
 
       // Mock database error
-      mockSupabaseClient.single.mockRejectedValue(new Error('Database error'))
+      const qbErr = new MockQueryBuilder()
+      qbErr.single.mockRejectedValue(new Error('Database error'))
+      mockSupabaseClient.from.mockReturnValue(qbErr)
 
       // Should not throw error
       await expect(PatternLearner.learnFromExtraction('https://example.com/product', products, {}))
@@ -135,7 +129,7 @@ describe('PatternLearner', () => {
     it('should skip learning when no products provided', async () => {
       await PatternLearner.learnFromExtraction('https://example.com/product', [], {})
 
-      expect(mockSupabaseClient.insert).not.toHaveBeenCalled()
+      expect(mockSupabaseClient.from).not.toHaveBeenCalled()
     })
   })
 
@@ -163,17 +157,21 @@ describe('PatternLearner', () => {
         totalExtractions: 20
       }
 
-      mockSupabaseClient.single.mockResolvedValue({ data: mockPatterns, error: null })
+      const qbGet = new MockQueryBuilder()
+      qbGet.single.mockResolvedValue({ data: mockPatterns, error: null })
+      mockSupabaseClient.from.mockReturnValue(qbGet)
 
       const result = await PatternLearner.getPatterns('https://example.com/some-page')
 
       expect(mockSupabaseClient.from).toHaveBeenCalledWith('domain_patterns')
-      expect(mockSupabaseClient.eq).toHaveBeenCalledWith('domain', 'example.com')
+      expect(qbGet.eq).toHaveBeenCalledWith('domain', 'example.com')
       expect(result).toEqual(mockPatterns)
     })
 
     it('should return null when no patterns found', async () => {
-      mockSupabaseClient.single.mockResolvedValue({ data: null, error: { message: 'Not found' } })
+      const qbNone = new MockQueryBuilder()
+      qbNone.single.mockResolvedValue({ data: null, error: { message: 'Not found' } })
+      mockSupabaseClient.from.mockReturnValue(qbNone)
 
       const result = await PatternLearner.getPatterns('https://newsite.com/product')
 
@@ -181,7 +179,9 @@ describe('PatternLearner', () => {
     })
 
     it('should handle database errors gracefully', async () => {
-      mockSupabaseClient.single.mockRejectedValue(new Error('Database connection failed'))
+      const qbDbErr = new MockQueryBuilder()
+      qbDbErr.single.mockRejectedValue(new Error('Database connection failed'))
+      mockSupabaseClient.from.mockReturnValue(qbDbErr)
 
       const result = await PatternLearner.getPatterns('https://example.com/product')
 
@@ -218,7 +218,9 @@ describe('PatternLearner', () => {
         totalExtractions: 10
       }
 
-      mockSupabaseClient.single.mockResolvedValue({ data: mockPatterns, error: null })
+      const qbApply = new MockQueryBuilder()
+      qbApply.single.mockResolvedValue({ data: mockPatterns, error: null })
+      mockSupabaseClient.from.mockReturnValue(qbApply)
 
       // Mock Cheerio-like object
       const mockCheerio = jest.fn()
@@ -258,7 +260,9 @@ describe('PatternLearner', () => {
         totalExtractions: 5
       }
 
-      mockSupabaseClient.single.mockResolvedValue({ data: mockPatterns, error: null })
+      const qbLow = new MockQueryBuilder()
+      qbLow.single.mockResolvedValue({ data: mockPatterns, error: null })
+      mockSupabaseClient.from.mockReturnValue(qbLow)
 
       const mockCheerio = jest.fn()
       mockCheerio.mockReturnValue({ length: 0 })
@@ -269,7 +273,9 @@ describe('PatternLearner', () => {
     })
 
     it('should return null when no patterns exist', async () => {
-      mockSupabaseClient.single.mockResolvedValue({ data: null, error: null })
+      const qbNone = new MockQueryBuilder()
+      qbNone.single.mockResolvedValue({ data: null, error: null })
+      mockSupabaseClient.from.mockReturnValue(qbNone)
 
       const mockCheerio = jest.fn()
       const result = await PatternLearner.applyPatterns('https://newdomain.com/product', mockCheerio)
@@ -293,7 +299,9 @@ describe('PatternLearner', () => {
         totalExtractions: 10
       }
 
-      mockSupabaseClient.single.mockResolvedValue({ data: mockPatterns, error: null })
+      const qbNone2 = new MockQueryBuilder()
+      qbNone2.single.mockResolvedValue({ data: mockPatterns, error: null })
+      mockSupabaseClient.from.mockReturnValue(qbNone2)
 
       // Mock Cheerio to throw an error
       const mockCheerio = jest.fn()
@@ -324,12 +332,17 @@ describe('PatternLearner', () => {
         totalExtractions: 10
       }
 
-      mockSupabaseClient.single.mockResolvedValue({ data: existingPatterns, error: null })
-      mockSupabaseClient.update.mockResolvedValue({ data: {}, error: null })
+      const qbGet = new MockQueryBuilder()
+      qbGet.single.mockResolvedValue({ data: existingPatterns, error: null })
+      const qbUpdate = new MockQueryBuilder() as any
+      qbUpdate.update = jest.fn().mockReturnThis()
+      mockSupabaseClient.from
+        .mockReturnValueOnce(qbGet)
+        .mockReturnValueOnce(qbUpdate)
 
       await PatternLearner.updatePatternSuccess('https://example.com/product', true, ['name:.product-title'])
 
-      expect(mockSupabaseClient.update).toHaveBeenCalledWith(
+      expect(qbUpdate.update).toHaveBeenCalledWith(
         expect.objectContaining({
           successRate: expect.any(Number),
           totalExtractions: 11,
@@ -339,12 +352,15 @@ describe('PatternLearner', () => {
     })
 
     it('should handle missing patterns gracefully', async () => {
-      mockSupabaseClient.single.mockResolvedValue({ data: null, error: null })
+      const qbMissing = new MockQueryBuilder()
+      qbMissing.single.mockResolvedValue({ data: null, error: null })
+      mockSupabaseClient.from.mockReturnValue(qbMissing)
 
       await expect(PatternLearner.updatePatternSuccess('https://newdomain.com/product', false))
         .resolves.toBeUndefined()
 
-      expect(mockSupabaseClient.update).not.toHaveBeenCalled()
+      // Only the select builder was used; no second from for update
+      expect(mockSupabaseClient.from).toHaveBeenCalledTimes(1)
     })
   })
 
@@ -366,8 +382,13 @@ describe('PatternLearner', () => {
         totalExtractions: 5
       }
 
-      mockSupabaseClient.single.mockResolvedValue({ data: existingPatterns, error: null })
-      mockSupabaseClient.update.mockResolvedValue({ data: {}, error: null })
+      const qbExisting = new MockQueryBuilder()
+      qbExisting.single.mockResolvedValue({ data: existingPatterns, error: null })
+      const qbUpdate2 = new MockQueryBuilder() as any
+      qbUpdate2.update = jest.fn().mockReturnThis()
+      mockSupabaseClient.from
+        .mockReturnValueOnce(qbExisting)
+        .mockReturnValueOnce(qbUpdate2)
 
       const products: NormalizedProduct[] = [
         {
@@ -382,7 +403,7 @@ describe('PatternLearner', () => {
         selectors: { price: '.new-price-selector' }
       })
 
-      expect(mockSupabaseClient.update).toHaveBeenCalledWith(
+      expect(qbUpdate2.update).toHaveBeenCalledWith(
         expect.objectContaining({
           patterns: expect.arrayContaining([
             expect.objectContaining({
@@ -415,8 +436,13 @@ describe('PatternLearner', () => {
         totalExtractions: 5
       }
 
-      mockSupabaseClient.single.mockResolvedValue({ data: existingPatterns, error: null })
-      mockSupabaseClient.update.mockResolvedValue({ data: {}, error: null })
+      const qbExisting2 = new MockQueryBuilder()
+      qbExisting2.single.mockResolvedValue({ data: existingPatterns, error: null })
+      const qbUpdate3 = new MockQueryBuilder() as any
+      qbUpdate3.update = jest.fn().mockReturnThis()
+      mockSupabaseClient.from
+        .mockReturnValueOnce(qbExisting2)
+        .mockReturnValueOnce(qbUpdate3)
 
       const products: NormalizedProduct[] = [
         {
@@ -430,7 +456,7 @@ describe('PatternLearner', () => {
       })
 
       // Should update existing pattern confidence
-      expect(mockSupabaseClient.update).toHaveBeenCalled()
+      expect(qbUpdate3.update).toHaveBeenCalled()
     })
   })
 
@@ -459,12 +485,14 @@ describe('PatternLearner', () => {
         }
       ]
 
-      mockSupabaseClient.single.mockImplementation(() => ({ data: platformPatterns, error: null }))
+      const qbRec = new MockQueryBuilder()
+      qbRec.then = (resolve: any) => Promise.resolve({ data: platformPatterns, error: null }).then(resolve)
+      mockSupabaseClient.from.mockReturnValue(qbRec)
 
       const recommendations = await PatternLearner.getRecommendations('https://newshop.com/product', 'woocommerce')
 
       expect(mockSupabaseClient.from).toHaveBeenCalledWith('domain_patterns')
-      expect(mockSupabaseClient.eq).toHaveBeenCalledWith('platform', 'woocommerce')
+      expect(qbRec.eq).toHaveBeenCalledWith('platform', 'woocommerce')
       expect(recommendations).toEqual(
         expect.arrayContaining([
           expect.objectContaining({
@@ -483,7 +511,9 @@ describe('PatternLearner', () => {
     })
 
     it('should return empty array when no platform patterns found', async () => {
-      mockSupabaseClient.single.mockImplementation(() => ({ data: [], error: null }))
+      const qbRecEmpty = new MockQueryBuilder()
+      qbRecEmpty.then = (resolve: any) => Promise.resolve({ data: [], error: null }).then(resolve)
+      mockSupabaseClient.from.mockReturnValue(qbRecEmpty)
 
       const recommendations = await PatternLearner.getRecommendations('https://example.com/product', 'unknown-platform')
 
@@ -501,13 +531,15 @@ describe('PatternLearner', () => {
       ]
 
       for (const url of testCases) {
-        mockSupabaseClient.single.mockResolvedValue({ data: null, error: null })
-        
+        const qb = new MockQueryBuilder()
+        qb.single.mockResolvedValue({ data: null, error: null })
+        mockSupabaseClient.from.mockReturnValue(qb)
+
         await PatternLearner.getPatterns(url)
-        
+
         const expectedDomain = new URL(url).hostname
-        expect(mockSupabaseClient.eq).toHaveBeenCalledWith('domain', expectedDomain)
-        
+        expect(qb.eq).toHaveBeenCalledWith('domain', expectedDomain)
+
         jest.clearAllMocks()
       }
     })
@@ -536,7 +568,9 @@ describe('PatternLearner', () => {
         totalExtractions: 10
       }
 
-      mockSupabaseClient.single.mockResolvedValue({ data: mockPatterns, error: null })
+      const qbErr2 = new MockQueryBuilder()
+      qbErr2.single.mockResolvedValue({ data: mockPatterns, error: null })
+      mockSupabaseClient.from.mockReturnValue(qbErr2)
 
       // Mock element not found
       const mockCheerio = jest.fn()
@@ -561,15 +595,20 @@ describe('PatternLearner', () => {
         }
       ]
 
-      mockSupabaseClient.single.mockResolvedValue({ data: null, error: null })
-      mockSupabaseClient.insert.mockResolvedValue({ data: {}, error: null })
+      const qbExistNone = new MockQueryBuilder()
+      qbExistNone.single.mockResolvedValue({ data: null, error: null })
+      const qbIns2 = new MockQueryBuilder()
+      qbIns2.insert = jest.fn().mockResolvedValue({ data: {}, error: null })
+      mockSupabaseClient.from
+        .mockReturnValueOnce(qbExistNone)
+        .mockReturnValueOnce(qbIns2)
 
       await PatternLearner.learnFromExtraction('https://shop.example.com/product/complete', products, {
         platform: 'magento',
         extractionMethod: 'json-ld'
       })
 
-      expect(mockSupabaseClient.insert).toHaveBeenCalledWith(
+      expect(qbIns2.insert).toHaveBeenCalledWith(
         expect.objectContaining({
           domain: 'shop.example.com',
           platform: 'magento',

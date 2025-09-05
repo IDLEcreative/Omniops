@@ -34,50 +34,7 @@ global.Response = class Response {
   }
 } as any
 
-global.Headers = class Headers {
-  private map: Map<string, string>
-
-  constructor(init?: HeadersInit) {
-    this.map = new Map()
-    if (init) {
-      if (init instanceof Headers) {
-        init.forEach((value, key) => {
-          this.map.set(key.toLowerCase(), value)
-        })
-      } else if (Array.isArray(init)) {
-        init.forEach(([key, value]) => {
-          this.map.set(key.toLowerCase(), String(value))
-        })
-      } else if (typeof init === 'object') {
-        Object.entries(init).forEach(([key, value]) => {
-          this.map.set(key.toLowerCase(), String(value))
-        })
-      }
-    }
-  }
-
-  get(name: string) {
-    return this.map.get(name.toLowerCase()) || null
-  }
-
-  set(name: string, value: string) {
-    this.map.set(name.toLowerCase(), String(value))
-  }
-
-  has(name: string) {
-    return this.map.has(name.toLowerCase())
-  }
-
-  delete(name: string) {
-    return this.map.delete(name.toLowerCase())
-  }
-
-  forEach(callback: (value: string, key: string, parent: Headers) => void) {
-    this.map.forEach((value, key) => {
-      callback(value, key, this)
-    })
-  }
-} as any
+// Use native Headers from undici/Node where available
 
 // Mock the static json method on Response
 Response.json = function(data: any, init?: ResponseInit) {

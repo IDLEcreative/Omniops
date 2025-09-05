@@ -141,3 +141,8 @@ module.exports = {
     SupabaseClient: jest.fn().mockImplementation(() => mockSupabaseClient),
   }
 };
+
+// Expose testing hooks
+module.exports._mockSupabaseClient = mockSupabaseClient;
+module.exports.MockQueryBuilder = MockQueryBuilder;
+globalThis.__SUPABASE_MOCK__ = mockSupabaseClient;
