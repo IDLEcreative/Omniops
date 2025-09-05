@@ -12,6 +12,7 @@ import { SimpleCustomerVerification } from '@/lib/customer-verification-simple';
 import { QueryCache } from '@/lib/query-cache';
 import { CustomerServiceAgent } from '@/lib/agents/customer-service-agent';
 import { WooCommerceAgent } from '@/lib/agents/woocommerce-agent';
+import { selectProviderAgent } from '@/lib/agents/router';
 import { ProductRecommendationContext } from '@/lib/product-recommendation-context';
 import { sanitizeOutboundLinks } from '@/lib/link-sanitizer';
 
@@ -582,18 +583,8 @@ export async function POST(request: NextRequest) {
       }
       
       // Decide which provider agent to use (modular routing)
-      // If request config doesn't specify WooCommerce, fall back to env detection
-      const woocommerceEnvConfigured = Boolean(
-        process.env.WOOCOMMERCE_URL &&
-        process.env.WOOCOMMERCE_CONSUMER_KEY &&
-        process.env.WOOCOMMERCE_CONSUMER_SECRET
-      );
-      const woocommerceEnabled =
-        typeof config?.features?.woocommerce?.enabled === 'boolean'
-          ? config!.features!.woocommerce!.enabled
-          : woocommerceEnvConfigured;
-
-      const ProviderAgent = woocommerceEnabled ? WooCommerceAgent : CustomerServiceAgent;
+      const provider = selectProviderAgent(config as any, process.env);
+      const ProviderAgent = provider === 'woocommerce' ? WooCommerceAgent : CustomerServiceAgent;
 
       systemContext = ProviderAgent.buildCompleteContext(
         result.level || 'none',
