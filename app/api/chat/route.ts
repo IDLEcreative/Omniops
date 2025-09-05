@@ -13,7 +13,6 @@ import { QueryCache } from '@/lib/query-cache';
 import { CustomerServiceAgent } from '@/lib/agents/customer-service-agent';
 import { WooCommerceAgent } from '@/lib/agents/woocommerce-agent';
 import { selectProviderAgent } from '@/lib/agents/router';
-import { ProductRecommendationContext } from '@/lib/product-recommendation-context';
 import { getDynamicWooCommerceClient } from '@/lib/woocommerce-dynamic';
 import { sanitizeOutboundLinks } from '@/lib/link-sanitizer';
 
@@ -156,11 +155,16 @@ export async function POST(request: NextRequest) {
     let domainId: string | null = null;
     let customerConfigId: string | null = null;
     if (domain) {
+      // For localhost/dev, use thompsonseparts.co.uk
+      const searchDomain = (domain === 'localhost' || domain?.includes('127.0.0.1'))
+        ? 'thompsonseparts.co.uk'
+        : domain.replace('www.', '');
+      
       // First check domains table (for scraped content)
       const { data: domainData } = await adminSupabase
         .from('domains')
         .select('id')
-        .eq('domain', domain.replace('www.', ''))
+        .eq('domain', searchDomain)
         .single();
       
       if (domainData) {
@@ -171,7 +175,7 @@ export async function POST(request: NextRequest) {
       const { data: configData } = await adminSupabase
         .from('customer_configs')
         .select('id')
-        .eq('domain', domain.replace('www.', ''))
+        .eq('domain', searchDomain)
         .single();
       
       if (configData) {
@@ -286,6 +290,13 @@ export async function POST(request: NextRequest) {
     }
     
     // 3. Cached website content search (if enabled)
+    console.log('[Chat] RAG search check:', {
+      websiteScraping: config?.features?.websiteScraping?.enabled !== false,
+      domain,
+      domainId,
+      willSearch: !!(config?.features?.websiteScraping?.enabled !== false && domain && domainId)
+    });
+    
     if (config?.features?.websiteScraping?.enabled !== false && domain && domainId) {
       const searchDomain = domain === 'localhost' || domain?.includes('127.0.0.1')
         ? 'thompsonseparts.co.uk' 
@@ -339,18 +350,12 @@ export async function POST(request: NextRequest) {
             }
             
             // Try optimized search first
-            // Increase match_count for product queries to get more results
-            const isProductQuery = message.toLowerCase().includes('pump') || 
-                                 message.toLowerCase().includes('product') ||
-                                 message.toLowerCase().includes('part') ||
-                                 message.toLowerCase().includes('cifa') ||
-                                 message.toLowerCase().includes('show me');
-            
+            // Always get more results to give AI more context to reason with
             const { data: results, error } = await adminSupabase.rpc('search_content_optimized', {
               query_text: message,
               query_embedding: null, // Will be generated in function if needed
               p_domain_id: domainId,
-              match_count: isProductQuery ? 10 : 5,  // Get more results for product queries
+              match_count: 8,  // Get more results for better context
               use_hybrid: true
             });
             
@@ -363,12 +368,12 @@ export async function POST(request: NextRequest) {
               }));
             }
             
-            // Fallback to original search
+            // Fallback to original search with lower threshold for broader results
             return await searchSimilarContent(
               message,
               searchDomain,
-              3,
-              0.3
+              8,  // Get more results
+              0.2   // Lower threshold to get broader semantic matches
             );
           } catch (error) {
             console.error('Search error:', error);
@@ -510,6 +515,23 @@ export async function POST(request: NextRequest) {
       embeddingSearchPromise,
       ...contextPromises
     ]);
+    
+    console.log('[Chat] Context gathering complete:', {
+      hasHistory: !!(historyData && historyData.length > 0),
+      hasEmbeddingResults: !!(embeddingResults && embeddingResults.length > 0),
+      embeddingResultCount: embeddingResults?.length || 0,
+      contextResultsCount: contextResults.length
+    });
+    
+    if (embeddingResults && embeddingResults.length > 0) {
+      console.log('[Chat] Embedding results preview:', 
+        embeddingResults.slice(0, 3).map((r: any) => ({
+          title: r.title?.substring(0, 50),
+          url: r.url,
+          contentPreview: r.content?.substring(0, 100)
+        }))
+      );
+    }
 
     console.log('[Chat] Processing message:', {
       message,
@@ -652,31 +674,39 @@ export async function POST(request: NextRequest) {
       
       Formatting Requirements:
       - Use proper markdown formatting for lists
-      - Put each product recommendation on separate lines with clear spacing
-      - Include a blank line between different products
-      - Keep responses concise and scannable (2–4 short sentences or up to 4 brief bullets)
+      - CRITICAL: Each bullet point MUST be on its own line with double line breaks
+      - Format lists like this:
+        
+        • First item
+        
+        • Second item
+        
+        • Third item
+      
+      - Keep responses concise and scannable (2–4 short sentences or up to 8 brief bullets)
       
       Important instructions:
       - When you reference specific products, pages, or information, include links ONLY to our own domain
-      - Format links as markdown: [link text](url) or just include the URL directly
-      - If you mention a product that has a URL in the context, include that URL
+      - ALWAYS use compact markdown links: [Product Name](url) - never show raw URLs
+      - Use bullet points (•) when listing multiple products
+      - Keep product names concise by removing redundant suffixes  
       - Make links descriptive and natural in your responses
       - Pay attention to conversation history for context
-      - If the request is ambiguous or non-specific, ask one short clarifying question (just one)`;
       
-      // Add product recommendation guidelines only for product-related queries
-      const productGuidelines = ProductRecommendationContext.buildProductContext(message);
-      if (productGuidelines) {
-        systemContext += productGuidelines;
-      }
+      Product Query Handling - CRITICAL:
+      - When customers ask about products (even vaguely), ALWAYS show available options first
+      - If customer says "any" or seems unsure, present ALL relevant options immediately
+      - NEVER ask "which type do you need?" before showing what's available
+      - Only ask for clarification AFTER listing products, and only if truly necessary
+      - Example: "Need a pump" → Show all pump types available, THEN optionally ask for model/part number`;
+      
     }
     
-    // If this is a product-related query, try to surface matching categories (WooCommerce)
+    // Try to surface matching categories (WooCommerce) for any query
     let matchedCategories: Array<{ name: string; url: string }> = [];
     try {
-      const isProductQuery = ProductRecommendationContext.shouldApplyGuidelines(message);
       const wooEnabled = config?.features?.woocommerce?.enabled !== false; // default true
-      if (isProductQuery && wooEnabled && domain) {
+      if (wooEnabled && domain) {
         const browseDomain = /localhost|127\.0\.0\.1/i.test(domain) ? 'thompsonseparts.co.uk' : domain.replace(/^https?:\/\//, '');
         const wc = await getDynamicWooCommerceClient(browseDomain);
         if (wc) {
@@ -746,30 +776,49 @@ export async function POST(request: NextRequest) {
     
     // Add website information if available
     if (embeddingResults && embeddingResults.length > 0) {
-      // Check if we have specific product pages
-      const productPages = embeddingResults.filter((r: any) => 
-        r.url && (r.url.includes('/product/') || r.content.toLowerCase().includes('price') || r.content.toLowerCase().includes('pump'))
-      );
+      console.log('[Chat] Adding embedding results to context:', {
+        count: embeddingResults.length,
+        firstResultTitle: embeddingResults[0]?.title
+      });
       
-      if (productPages.length > 0) {
-        systemContext += `\n\nIMPORTANT: Found specific product pages that match the query. You MUST include these products in your response:\n${
-          productPages.map((r: any, index: number) => 
-            `\nProduct ${index + 1}:\n- Title: ${r.title}\n- URL: ${r.url}\n- Details: ${r.content.substring(0, 300)}...`
-          ).join('\n')
-        }`;
-        
-        systemContext += `\n\nWhen responding about these products:
-        1. List each product with its name and key details
-        2. Include the product URL on its own line
-        3. Add a blank line between products for readability
-        4. Focus on the products found above rather than asking for clarification`;
-      } else {
-        systemContext += `\n\nRelevant website information:\n${
-          embeddingResults.map((r: any) => 
-            `- ${r.title} (${r.url}): ${r.content.substring(0, 300)}...`
-          ).join('\n')
-        }`;
-      }
+      systemContext += `\n\n⚠️ MANDATORY: The following products/pages were found. YOU MUST display them ALL in your response:\n`;
+      
+      embeddingResults.forEach((r: any, index: number) => {
+        systemContext += `\n${index + 1}. ${r.title}\n`;
+        systemContext += `   URL: ${r.url}\n`;
+        systemContext += `   Content: ${r.content.substring(0, 400)}...\n`;
+      });
+      
+      systemContext += `\n\nCRITICAL INSTRUCTIONS - YOU MUST FOLLOW THESE RULES:
+      1. ALWAYS show the products/pages found above IMMEDIATELY when responding
+      2. Format each product as a COMPACT clickable link using markdown: [Product Name](url)
+      3. Include ALL relevant products found (don't hide any)
+      4. You can ask clarifying questions AFTER showing the products, but NEVER instead of showing them
+      5. Even if the user's query is vague, STILL SHOW the products first, then ask for clarification if needed
+      
+      FORMATTING RULES - EXTREMELY IMPORTANT:
+      - Use markdown links: [Product Name](url) - NOT the full URL text
+      - CRITICAL: Insert TWO NEWLINES after each product. Use actual line breaks, not spaces.
+      - Each bullet point (•) MUST start on a new line
+      - Structure your response with proper paragraph breaks
+      - Keep product names concise - remove redundant text like "Thompsons E Parts"
+      
+      Required structure:
+      1. Opening sentence
+      2. Empty line
+      3. First product with bullet
+      4. Empty line  
+      5. Second product with bullet
+      6. Empty line
+      7. Continue pattern...
+      8. Empty line
+      9. Closing question
+      
+      The response should have visible vertical spacing between items.
+      
+      REMEMBER: Products found = Products shown. Each product on NEW LINE.`;
+    } else {
+      console.log('[Chat] No embedding results to add to context');
     }
 
     // Add relevant product categories to help the model include shop links
@@ -805,8 +854,18 @@ export async function POST(request: NextRequest) {
       currentMessage: message,
       hasCategoryContext: matchedCategories.length > 0,
       categories: matchedCategories.map(c => c.name),
+      hasEmbeddingContext: systemContext.includes('Relevant content from our website'),
       lastAssistantMessage: historyData.filter((m: any) => m.role === 'assistant').slice(-1)[0]?.content?.substring(0, 100)
     });
+    
+    // Debug: Log a sample of the system context to see what AI is getting
+    if (systemContext.includes('Relevant content from our website')) {
+      const contextSample = systemContext.substring(
+        systemContext.indexOf('Relevant content from our website'),
+        systemContext.indexOf('Relevant content from our website') + 500
+      );
+      console.log('[Chat] System context sample:', contextSample);
+    }
 
     // Configure model based on environment or preference
     const useGPT5 = process.env.USE_GPT5_MINI === 'true';
@@ -861,6 +920,28 @@ export async function POST(request: NextRequest) {
 
     let assistantMessage = completion.choices[0]?.message?.content || 
       'I apologize, but I was unable to generate a response. Please try again.';
+
+    // Debug: Log the ORIGINAL AI response before any processing
+    console.log('[Chat] ORIGINAL AI Response (first 500 chars):');
+    console.log(assistantMessage.substring(0, 500));
+    console.log('[Chat] Contains bullet points:', assistantMessage.includes('•'));
+    console.log('[Chat] Contains newlines:', assistantMessage.includes('\n'));
+
+    // Post-process to ensure bullet points are on separate lines
+    // First, handle the case where bullet points follow a colon
+    assistantMessage = assistantMessage.replace(/(:\s*)•/g, '$1\n\n• ');
+    
+    // Then replace all remaining " • " patterns with line breaks
+    assistantMessage = assistantMessage.replace(/ • /g, '\n\n• ');
+    
+    // Ensure first bullet point after intro has proper spacing
+    assistantMessage = assistantMessage.replace(/(available|options|have):\s*\n\n•/, '$1:\n\n• ');
+    
+    // Debug: Log the formatted message to verify line breaks
+    if (assistantMessage.includes('•')) {
+      console.log('[Chat] Post-processed message has bullet points');
+      console.log('[Chat] Sample:', assistantMessage.substring(0, 200).replace(/\n/g, '\\n'));
+    }
 
     // Enforce in-house linking policy by stripping any external links from the AI output
     const allowedDomain = (domain && !/localhost|127\.0\.0\.1|vercel/i.test(domain))

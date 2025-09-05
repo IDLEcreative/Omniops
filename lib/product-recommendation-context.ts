@@ -10,21 +10,28 @@ export class ProductRecommendationContext {
   static getProductGuidelines(): string {
     return `
 PRODUCT RECOMMENDATION GUIDELINES:
-When customers ask about specific products or parts:
-1. **Keep It Concise**: Use 1 line per option, max 3 options, plus one category link. Avoid long descriptions.
-2. **In‑House Only**: Only link to our own website/domain. Do NOT include links to manufacturers, community blogs, forums, PDFs, or any external sites.
-3. **Structure Your Response**:
-   - Start with the best/most popular recommendation
-   - Follow with 1-2 alternative options
-   - End with a category link like "Browse our full [Pumps section](url)" or "View all [Mixer Parts](url)"
-4. **Use This Format**:
-   "For your [specific need], I recommend:
-   
-   **Option 1:** [Product Name] - [Brief description and link]
-   **Option 2:** [Alternative Product] - [Brief description and link]  
-   **Option 3:** [Third option if available] - [Brief description and link]
-   
-   You can also browse our complete [Category Name](url) section to see all available options."`;
+When customers ask about products or parts:
+1. Keep It Concise: 1 line per option, max 3 options, and 1 category link.
+2. In‑House Only: Only link to our domain. Never link to external sites.
+3. Always Include Category: If the request maps to a product category (e.g. "Body Fillers & Stoppers"), include a clear "Browse the category" link so the customer can shop themselves.
+4. Ask One Clarifying Question: If the request is non‑specific or could mean multiple items, ask a single follow‑up question to narrow choice (e.g. size, brand, material, colour/finish, kit vs single, usage).
+5. Structure:
+   - Start with the best/most popular option
+   - Add 1–2 viable alternatives
+   - End with: "Browse all [Category Name](url)"
+6. Suggested Format:
+   For your [need], I recommend:
+
+   • [Option 1] – short reason [link]
+   • [Option 2] – short reason [link]
+   • [Option 3] – short reason [link]
+
+   Browse all [Category Name](url)
+
+7. Clarifying Question Examples (ask one if needed):
+   - "Are you after [subcategory A] or [subcategory B]?"
+   - "Any brand preference or size (e.g. 250ml, 1L)?"
+   - "Is this for [use case], and do you need [finish/spec]?"`;
   }
 
   /**
@@ -39,7 +46,7 @@ When customers ask about specific products or parts:
       'buy', 'purchase', 'order', 'get', 'need', 'want',
       'looking for', 'search for', 'find',
       'recommend', 'suggestion', 'suggest', 'advice',
-      'pump', 'mixer', 'engine', 'filter', 'seal',
+      'pump', 'mixer', 'engine', 'filter', 'seal', 'filler', 'fillers', 'stopper', 'stoppers', 'body filler',
       'compatible', 'fits', 'works with',
       'best', 'good', 'suitable', 'right'
     ];

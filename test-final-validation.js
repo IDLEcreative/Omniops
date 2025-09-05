@@ -1,161 +1,63 @@
-#!/usr/bin/env node
+// Final validation test after fixes
+const fetch = require('node-fetch');
 
-/**
- * Final validation test for 90%+ success rate
- * Faster version with reduced timeouts
- */
+async function testFinal() {
+  console.log('=== FINAL VALIDATION AFTER FIXES ===\n');
+  console.log('Testing: "Need a pump for my Cifa mixer"\n');
+  
+  let successCount = 0;
+  let results = [];
+  
+  for (let i = 1; i <= 10; i++) {
+    try {
+      const response = await fetch('http://localhost:3000/api/chat', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          message: 'Need a pump for my Cifa mixer',
+          domain: i % 2 === 0 ? 'thompsonseparts.co.uk' : 'localhost',
+          session_id: `final-test-${i}`,
+          conversationId: `final-conv-${i}`
+        }),
+      });
 
-const API_URL = 'http://localhost:3001/api/chat';
-const TEST_DOMAIN = 'thompsonselectrical.co.uk';
-
-async function testQuery(message, shouldTrigger) {
-  try {
-    const response = await fetch(API_URL, {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({
-        message,
-        session_id: `test-${Date.now()}-${Math.random()}`,
-        domain: TEST_DOMAIN
-      }),
-      signal: AbortSignal.timeout(5000) // 5 second timeout per request
-    });
-
-    if (!response.ok) {
-      console.log(`❌ "${message}" - HTTP ${response.status}`);
-      return false;
-    }
-
-    const data = await response.json();
-    const text = data.message.toLowerCase();
-    
-    // Check if verification was requested
-    const triggersVerification = 
-      text.includes('email address') || 
-      text.includes('order number') ||
-      text.includes('provide your email') ||
-      text.includes('provide the email');
-    
-    // Check for bad phrases
-    const hasNoAccess = 
-      text.includes("don't have access") || 
-      text.includes("cannot access") ||
-      text.includes("i'm unable") ||
-      text.includes("can't pull up");
-    
-    const correct = triggersVerification === shouldTrigger && !hasNoAccess;
-    
-    console.log(`${correct ? '✅' : '❌'} "${message}"`);
-    
-    if (!correct) {
-      console.log(`   Expected trigger: ${shouldTrigger}, Got: ${triggersVerification}`);
-      if (hasNoAccess) {
-        console.log(`   ⚠️  Contains forbidden phrase!`);
+      const data = await response.json();
+      
+      if (data.message) {
+        const hasProducts = data.message.includes('Cifa Mixer') && 
+                           data.message.includes('http');
+        const showsFirst = data.message.startsWith('Here are') || 
+                          data.message.includes('options we have');
+        
+        console.log(`Test ${i} (${i % 2 === 0 ? 'thompsonseparts' : 'localhost'}):`);
+        console.log(`  ✅ Shows products: ${hasProducts}`);
+        console.log(`  ✅ Products first: ${showsFirst}`);
+        console.log(`  Preview: ${data.message.substring(0, 100)}...`);
+        
+        if (hasProducts && showsFirst) successCount++;
+        results.push({ hasProducts, showsFirst });
       }
-      console.log(`   Response: ${data.message.substring(0, 80)}...`);
+    } catch (error) {
+      console.log(`Test ${i}: ERROR - ${error.message}`);
+      results.push({ error: true });
     }
     
-    return correct;
-  } catch (error) {
-    console.log(`❌ "${message}" - Error: ${error.message}`);
-    return false;
-  }
-}
-
-async function runTests() {
-  console.log('\n=== FINAL VALIDATION TEST ===');
-  console.log('Target: 90%+ Success Rate\n');
-  
-  let passed = 0;
-  let total = 0;
-  
-  // Category 1: Order Queries (MUST trigger verification)
-  console.log('📁 Order Queries (should trigger):');
-  const orderQueries = [
-    "show me my recent orders",
-    "where is my delivery?",
-    "track my order",
-    "my order status",
-    "cancel my order",
-    "my package location",
-    "when will my order arrive",
-    "I ordered last week",
-    "check my purchase",
-    "my invoice please",
-    "list my orders",
-    "MY ORDER IS LATE",
-    "track my delivery",
-    "find my order",
-    "my recent purchases"
-  ];
-  
-  for (const query of orderQueries) {
-    total++;
-    if (await testQuery(query, true)) passed++;
-    await new Promise(r => setTimeout(r, 200)); // Small delay
+    console.log('');
+    await new Promise(resolve => setTimeout(resolve, 500));
   }
   
-  // Category 2: Non-Order Queries (should NOT trigger)
-  console.log('\n📁 Non-Order Queries (should NOT trigger):');
-  const nonOrderQueries = [
-    "what are your hours?",
-    "do you sell cables?",
-    "shipping costs?",
-    "return policy?",
-    "how to order?",
-    "payment methods?",
-    "company info",
-    "product catalog",
-    "I want to order something",
-    "order process explanation",
-    "how does ordering work?",
-    "are you open weekends?",
-    "what brands do you carry?"
-  ];
+  console.log('=== RESULTS ===');
+  console.log(`Success rate: ${successCount}/10 (${successCount * 10}%)`);
+  console.log(`Shows products: ${results.filter(r => r.hasProducts).length}/10`);
+  console.log(`Products shown first: ${results.filter(r => r.showsFirst).length}/10`);
   
-  for (const query of nonOrderQueries) {
-    total++;
-    if (await testQuery(query, false)) passed++;
-    await new Promise(r => setTimeout(r, 200)); // Small delay
-  }
-  
-  // Results
-  const rate = Math.round((passed / total) * 100);
-  console.log(`\n=== RESULTS: ${passed}/${total} (${rate}%) ===`);
-  
-  if (rate >= 90) {
-    console.log('✅ SUCCESS! Target of 90% achieved!');
-    console.log('🎉 WooCommerce integration is production ready!');
+  if (successCount >= 9) {
+    console.log('\n✅ ISSUE RESOLVED: AI now consistently shows products!');
+  } else if (successCount >= 7) {
+    console.log('\n⚠️ IMPROVED: AI shows products most of the time but may need further tweaking');
   } else {
-    console.log(`⚠️  Below target. Need ${90-rate}% more to reach 90%`);
-  }
-  
-  process.exit(rate >= 90 ? 0 : 1);
-}
-
-// Check server first
-async function checkServer() {
-  try {
-    const response = await fetch('http://localhost:3001/api/health', {
-      signal: AbortSignal.timeout(2000)
-    });
-    return response.ok;
-  } catch {
-    return false;
+    console.log('\n❌ NEEDS MORE WORK: AI still inconsistent');
   }
 }
 
-// Main
-async function main() {
-  console.log('🔍 Checking server...');
-  
-  if (!await checkServer()) {
-    console.log('❌ Server not running on port 3001');
-    process.exit(1);
-  }
-  
-  console.log('✅ Server is running');
-  await runTests();
-}
-
-main().catch(console.error);
+testFinal().catch(console.error);

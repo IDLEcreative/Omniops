@@ -3,7 +3,7 @@
  * Follows pagination links to scrape complete product catalogs
  */
 
-import { EcommerceExtractor, EcommerceExtractedContent } from './ecommerce-extractor';
+import type { EcommerceExtractedContent } from '@/lib/ecommerce-extractor';
 import { NormalizedProduct } from './product-normalizer';
 
 export interface PaginationOptions {
@@ -26,7 +26,8 @@ export interface CatalogResult {
 export class PaginationCrawler {
   private visitedUrls = new Set<string>();
   private allProducts: NormalizedProduct[] = [];
-  private productSkus = new Set<string>(); // For deduplication
+  private productSkus = new Set<string>(); // For deduplication by SKU
+  private productNames = new Set<string>(); // For deduplication by name+price
   
   constructor(private options: PaginationOptions = {}) {
     this.options = {
@@ -41,6 +42,8 @@ export class PaginationCrawler {
    * Crawl a category/listing page with automatic pagination
    */
   async crawlCatalog(startUrl: string, page: any): Promise<CatalogResult> {
+    // Validate URL early
+    try { new URL(startUrl); } catch { return this.buildResult(startUrl, 1, undefined, 0); }
     const startTime = Date.now();
     let currentUrl = startUrl;
     let pageNum = 1;
@@ -80,6 +83,8 @@ export class PaginationCrawler {
         
         // Extract HTML and parse with our e-commerce extractor
         const html = await page.content();
+        // Dynamic import to work seamlessly with Jest module mocking
+        const { EcommerceExtractor } = await import('@/lib/ecommerce-extractor');
         const extracted = await EcommerceExtractor.extractEcommerce(html, currentUrl);
         
         // Store platform info
@@ -132,9 +137,12 @@ export class PaginationCrawler {
           // Try to find pagination manually if not detected
           const nextPageUrl = await this.findNextPageUrl(page, currentUrl);
           if (nextPageUrl) {
+            // If load more returns same URL, allow revisiting
+            if (nextPageUrl === currentUrl) {
+              this.visitedUrls.delete(currentUrl);
+            }
             currentUrl = nextPageUrl;
             pageNum++;
-            
             if (this.options.delayBetweenPages) {
               await this.delay(this.options.delayBetweenPages);
             }
@@ -154,9 +162,13 @@ export class PaginationCrawler {
     console.log(`📊 Total products collected: ${this.allProducts.length}`);
     console.log(`📄 Pages scraped: ${pageNum}`);
     
+    return this.buildResult(startUrl, totalPages, platform, totalProductCount);
+  }
+  
+  private buildResult(startUrl: string, totalPages: number, platform?: string, totalProductCount?: number): CatalogResult {
     return {
       products: this.allProducts,
-      totalPages: totalPages,
+      totalPages,
       totalProducts: totalProductCount || this.allProducts.length,
       platform,
       baseUrl: startUrl,
@@ -244,19 +256,16 @@ export class PaginationCrawler {
     const newProducts: NormalizedProduct[] = [];
     
     for (const product of products) {
-      // Check by SKU first
+      const nameKey = `${product.name || ''}_${product.price?.amount ?? ''}`;
       if (product.sku) {
-        if (!this.productSkus.has(product.sku)) {
-          this.productSkus.add(product.sku);
-          newProducts.push(product);
-        }
+        if (this.productSkus.has(product.sku) || this.productNames.has(nameKey)) continue;
+        this.productSkus.add(product.sku);
+        this.productNames.add(nameKey);
+        newProducts.push(product);
       } else {
-        // Fallback to name-based deduplication
-        const productKey = `${product.name}_${product.price?.amount}`;
-        if (!this.productSkus.has(productKey)) {
-          this.productSkus.add(productKey);
-          newProducts.push(product);
-        }
+        if (this.productNames.has(nameKey)) continue;
+        this.productNames.add(nameKey);
+        newProducts.push(product);
       }
     }
     

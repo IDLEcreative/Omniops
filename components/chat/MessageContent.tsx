@@ -7,50 +7,18 @@ interface MessageContentProps {
 
 // Memoized component to prevent unnecessary re-renders
 export const MessageContent = React.memo(({ content, className = '' }: MessageContentProps) => {
-  // Format markdown content for better display
+  // Format markdown content for better display - simplified to preserve formatting
   const formatMarkdown = useMemo(() => (text: string): string => {
+    // DON'T modify the text much - preserve the original formatting
+    // The AI is already providing proper formatting with line breaks
+    
     let formatted = text;
     
-    // First normalize line endings
+    // Just normalize line endings
     formatted = formatted.replace(/\r\n/g, '\n');
     formatted = formatted.replace(/\r/g, '\n');
     
-    // Remove horizontal rules (---, ***, ___)
-    formatted = formatted.replace(/^[-*_]{3,}$/gm, '');
-    
-    // Keep headers but remove the # symbols and add spacing
-    formatted = formatted.replace(/^#{1,6}\s+(.+)$/gm, '\n$1\n');
-    
-    // Convert bold markers to just keep the text
-    formatted = formatted.replace(/(\*\*|__)(.*?)\1/g, '$2');
-    
-    // Keep single asterisk/underscore for lists but clean up emphasis
-    formatted = formatted.replace(/(?<!\*)(\*|_)(?!\*)([^*_\n]+?)(\*|_)(?!\*)/g, '$2');
-    
-    // Format code blocks nicely
-    formatted = formatted.replace(/```[\s\S]*?```/g, (match) => {
-      const code = match.replace(/```\w*\n?/g, '').trim();
-      return '\n' + code + '\n';
-    });
-    
-    // Keep inline code visible but remove backticks
-    formatted = formatted.replace(/`([^`]+)`/g, '$1');
-    
-    // Remove blockquotes marker but keep content
-    formatted = formatted.replace(/^>\s+/gm, '');
-    
-    // Format list markers consistently with proper spacing
-    formatted = formatted.replace(/^[\s]*[-*+]\s+(.+)$/gm, '\n• $1');
-    formatted = formatted.replace(/^[\s]*(\d+)\.\s+(.+)$/gm, '\n$1. $2');
-    
-    // Clean up multiple newlines but preserve paragraph breaks
-    formatted = formatted.replace(/\n{4,}/g, '\n\n\n');
-    formatted = formatted.replace(/\n{3}/g, '\n\n');
-    
-    // Ensure single line break between list items
-    formatted = formatted.replace(/(\n[•\d]+\..+)(\n)([•\d]+\.)/g, '$1\n$3');
-    
-    // Remove empty lines at start and end only
+    // Trim only
     formatted = formatted.trim();
     
     return formatted;
@@ -154,6 +122,12 @@ export const MessageContent = React.memo(({ content, className = '' }: MessageCo
 
   // Memoize the rendered content - first format markdown, then process links
   const renderedContent = useMemo(() => {
+    // Debug: Check if content has line breaks
+    if (content.includes('•')) {
+      console.log('[MessageContent] Raw content preview:', content.substring(0, 500));
+      console.log('[MessageContent] Has newlines after bullets:', content.includes('•\n'));
+    }
+    
     const formattedContent = formatMarkdown(content);
     return renderContentWithLinks(formattedContent);
   }, [content, formatMarkdown, renderContentWithLinks]);

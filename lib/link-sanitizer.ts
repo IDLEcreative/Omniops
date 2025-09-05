@@ -27,6 +27,10 @@ export function sanitizeOutboundLinks(message: string, allowedDomain: string | n
     }
   });
 
-  return message.replace(/\s{2,}/g, ' ').trim();
+  // Preserve newlines while cleaning up excessive spaces
+  return message
+    .replace(/[^\S\n]{2,}/g, ' ')  // Replace multiple spaces (but not newlines) with single space
+    .replace(/\n{3,}/g, '\n\n')     // Limit consecutive newlines to maximum 2
+    .trim();
 }
 

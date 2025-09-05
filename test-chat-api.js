@@ -2,9 +2,11 @@
 const fetch = require('node-fetch');
 
 async function testChatAPI() {
+  console.log('\n🚀 Testing Chat API with GPT-5-mini model...\n');
   const queries = [
-    "Is 2EVRA48 in stock?",
-    "Check availability of PK-EK 291"
+    "What are your business hours?",
+    "Tell me about your return policy",
+    "Is 2EVRA48 in stock?"
   ];
   
   for (const query of queries) {

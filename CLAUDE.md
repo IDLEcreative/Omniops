@@ -6,6 +6,8 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 This is an AI-powered customer service chat widget built with Next.js 15, React 19, TypeScript, and Supabase. The application provides an embeddable chat widget that can be integrated into any website, with features including web scraping, WooCommerce integration, and privacy-compliant data handling.
 
+This is a Gerenal purpose customer service agent, please do not bake any companies specific information into the code, this could effect another company using the system
+
 
 ### FILE LENGTH
 - **STRICT RULE**: All files must be under 300 LOC
