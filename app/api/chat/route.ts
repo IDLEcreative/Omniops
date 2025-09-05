@@ -11,6 +11,7 @@ import { CustomerVerification } from '@/lib/customer-verification';
 import { SimpleCustomerVerification } from '@/lib/customer-verification-simple';
 import { QueryCache } from '@/lib/query-cache';
 import { WooCommerceAIInstructions } from '@/lib/woocommerce-ai-instructions';
+import { ProductRecommendationContext } from '@/lib/product-recommendation-context';
 
 // Lazy load OpenAI client to avoid build-time errors
 let openai: OpenAI | null = null;
@@ -605,6 +606,12 @@ export async function POST(request: NextRequest) {
       - If you mention a product that has a URL in the context, include that URL
       - Make links descriptive and natural in your responses
       - Pay attention to conversation history for context`;
+      
+      // Add product recommendation guidelines only for product-related queries
+      const productGuidelines = ProductRecommendationContext.buildProductContext(message);
+      if (productGuidelines) {
+        systemContext += productGuidelines;
+      }
     }
     
     // Add contact information if this is a contact request
