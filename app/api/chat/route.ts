@@ -14,6 +14,7 @@ import { CustomerServiceAgent } from '@/lib/agents/customer-service-agent';
 import { WooCommerceAgent } from '@/lib/agents/woocommerce-agent';
 import { selectProviderAgent } from '@/lib/agents/router';
 import { ProductRecommendationContext } from '@/lib/product-recommendation-context';
+import { getDynamicWooCommerceClient } from '@/lib/woocommerce-dynamic';
 import { sanitizeOutboundLinks } from '@/lib/link-sanitizer';
 
 // Lazy load OpenAI client to avoid build-time errors
@@ -309,6 +310,34 @@ export async function POST(request: NextRequest) {
         },
         async () => {
           try {
+            // Detect SKU/part codes (e.g., DC66-10P) and prefer precise lookup
+            const extractPartCodes = (text: string): string[] => {
+              const codes = new Set<string>();
+              const regex = /\b(?=[A-Za-z0-9\-\/]*[A-Za-z])(?=[A-Za-z0-9\-\/]*\d)[A-Za-z0-9]+(?:[\-\/][A-Za-z0-9]+)+\b/g;
+              const lower = text.toLowerCase();
+              let m: RegExpExecArray | null;
+              while ((m = regex.exec(lower)) !== null) {
+                const token = m[0];
+                if (token.length >= 4 && token.length <= 32) {
+                  codes.add(token);
+                }
+              }
+              return Array.from(codes);
+            };
+            const isPartQuery = extractPartCodes(message).length > 0;
+            if (isPartQuery) {
+              // Use library search which has WooCommerce SKU fallback
+              const precise = await searchSimilarContent(
+                message,
+                searchDomain,
+                5,
+                0.3
+              );
+              if (precise && precise.length > 0) {
+                return precise;
+              }
+            }
+            
             // Try optimized search first
             const { data: results, error } = await adminSupabase.rpc('search_content_optimized', {
               query_text: message,
@@ -600,35 +629,84 @@ export async function POST(request: NextRequest) {
       - Use the conversation history to understand ambiguous questions.`;
     } else {
       // Default context for non-customer queries
-      systemContext = `You are a helpful customer service assistant.
+      systemContext = `You are an experienced customer service representative who genuinely wants to help customers find exactly what they need.
       
-      CRITICAL:
+      CRITICAL POLICIES:
       - Never recommend or link to external shops, competitors, manufacturer websites, community blogs/forums, or third‑party documentation.
       - Only reference and link to our own website/domain. All links in responses MUST be same‑domain.
       - If a link is needed but an in‑house page is not available, direct the customer to contact us instead (do not link externally).
+      
+      CONVERSATIONAL APPROACH:
+      - Act like a knowledgeable shop assistant who asks intelligent follow-up questions
+      - When customers are vague about what they need, help them by asking about their specific situation, project, or requirements
+      - Guide them naturally through questions until you understand their exact need
+      - Don't just list products - understand what they're trying to achieve
       
       If a customer asks about products that aren't available or that you don't have information about, suggest they:
       - Contact customer service directly for assistance
       - Check back later as inventory is regularly updated
       - Consider similar products from our current selection
       - Inquire about special ordering options
-      - Ask about product availability timelines
       
-      Brevity:
-      - Keep responses concise and scannable (2–4 short sentences or up to 4 brief bullets)
-      
-      Important instructions:
-      - When you reference specific products, pages, or information, include links ONLY to our own domain
-      - Format links as markdown: [link text](url) or just include the URL directly
-      - If you mention a product that has a URL in the context, include that URL
-      - Make links descriptive and natural in your responses
-      - Pay attention to conversation history for context`;
+      COMMUNICATION STYLE:
+      - Be conversational but professional
+      - Ask thoughtful follow-up questions when requests are unclear
+      - Pay attention to conversation history for context
+      - Keep responses focused but helpful`;
       
       // Add product recommendation guidelines only for product-related queries
       const productGuidelines = ProductRecommendationContext.buildProductContext(message);
       if (productGuidelines) {
         systemContext += productGuidelines;
       }
+    }
+    
+    // If this is a product-related query, try to surface matching categories (WooCommerce)
+    let matchedCategories: Array<{ name: string; url: string }> = [];
+    try {
+      const isProductQuery = ProductRecommendationContext.shouldApplyGuidelines(message);
+      const wooEnabled = config?.features?.woocommerce?.enabled !== false; // default true
+      if (isProductQuery && wooEnabled && domain) {
+        const browseDomain = /localhost|127\.0\.0\.1/i.test(domain) ? 'thompsonseparts.co.uk' : domain.replace(/^https?:\/\//, '');
+        const wc = await getDynamicWooCommerceClient(browseDomain);
+        if (wc) {
+          // Cache categories per domain to avoid repeated API calls
+          const categories = await QueryCache.execute(
+            {
+              key: `woo_categories_${domainId || browseDomain}`,
+              domainId: domainId || undefined,
+              ttlSeconds: 3600,
+              useMemoryCache: true,
+              useDbCache: true,
+              supabase: adminSupabase
+            },
+            async () => await wc.getProductCategories({ per_page: 100 })
+          );
+          // Simple relevance scoring based on token overlap
+          const msg = message.toLowerCase();
+          const tokens = new Set<string>(msg.split(/[^a-z0-9]+/i).filter(Boolean) as string[]);
+          const scored = categories.map((c: any) => {
+            const name = (c.name || '').toLowerCase();
+            const nameTokens = new Set<string>(name.split(/[^a-z0-9]+/i).filter(Boolean) as string[]);
+            let score = 0;
+            nameTokens.forEach(t => { if (tokens.has(t)) score += 1; });
+            if (score === 0 && name && msg.includes(name)) score += 2; // direct phrase match bonus
+            // Domain-specific nudges
+            if (/filler|fillers/.test(msg) && /filler/.test(name)) score += 1;
+            if (/stopper|stoppers/.test(msg) && /stopper/.test(name)) score += 1;
+            return { cat: c, score };
+          }).filter(x => x.score > 0);
+
+          scored.sort((a, b) => b.score - a.score);
+          const top = scored.slice(0, 2);
+          matchedCategories = top.map(({ cat }) => ({
+            name: cat.name,
+            url: `https://${browseDomain}/product-category/${cat.slug}/`
+          }));
+        }
+      }
+    } catch (e) {
+      console.warn('[Chat] Category detection failed (non-fatal):', e);
     }
     
     // Add contact information if this is a contact request
@@ -658,6 +736,12 @@ export async function POST(request: NextRequest) {
           `- ${r.title} (${r.url}): ${r.content.substring(0, 500)}...`
         ).join('\n')
       }`;
+    }
+
+    // Add relevant product categories to help the model include shop links
+    if (matchedCategories.length > 0) {
+      systemContext += `\n\nRelevant product categories (same‑domain links):\n${matchedCategories.map(c => `- ${c.name}: ${c.url}`).join('\n')}`;
+      systemContext += `\n\nIf recommending products from these categories, include one "Browse all [Category]" link.`;
     }
 
     // Generate response using OpenAI
