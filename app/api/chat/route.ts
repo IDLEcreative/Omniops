@@ -582,9 +582,18 @@ export async function POST(request: NextRequest) {
       }
       
       // Decide which provider agent to use (modular routing)
-      const ProviderAgent = (config?.features?.woocommerce?.enabled)
-        ? WooCommerceAgent
-        : CustomerServiceAgent;
+      // If request config doesn't specify WooCommerce, fall back to env detection
+      const woocommerceEnvConfigured = Boolean(
+        process.env.WOOCOMMERCE_URL &&
+        process.env.WOOCOMMERCE_CONSUMER_KEY &&
+        process.env.WOOCOMMERCE_CONSUMER_SECRET
+      );
+      const woocommerceEnabled =
+        typeof config?.features?.woocommerce?.enabled === 'boolean'
+          ? config!.features!.woocommerce!.enabled
+          : woocommerceEnvConfigured;
+
+      const ProviderAgent = woocommerceEnabled ? WooCommerceAgent : CustomerServiceAgent;
 
       systemContext = ProviderAgent.buildCompleteContext(
         result.level || 'none',
