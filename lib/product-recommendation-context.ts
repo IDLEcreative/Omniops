@@ -11,8 +11,8 @@ export class ProductRecommendationContext {
     return `
 PRODUCT RECOMMENDATION GUIDELINES:
 When customers ask about specific products or parts:
-1. **Provide Multiple Options**: Always offer 2-3 product recommendations when possible, not just one
-2. **Include Category Links**: Direct customers to relevant product categories or sections for broader browsing
+1. **Keep It Concise**: Use 1 line per option, max 3 options, plus one category link. Avoid long descriptions.
+2. **In‑House Only**: Only link to our own website/domain. Do NOT include links to manufacturers, community blogs, forums, PDFs, or any external sites.
 3. **Structure Your Response**:
    - Start with the best/most popular recommendation
    - Follow with 1-2 alternative options

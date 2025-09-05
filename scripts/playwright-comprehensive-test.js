@@ -6,7 +6,7 @@
 const { chromium, firefox, webkit } = require('playwright');
 const fs = require('fs/promises');
 const path = require('path');
-const { scrapingConfig } = require('./playwright.config.js');
+const { scrapingConfig } = require(path.resolve(__dirname, '../playwright.config.js'));
 
 class PlaywrightTester {
   constructor() {

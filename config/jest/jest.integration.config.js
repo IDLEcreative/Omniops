@@ -1,12 +1,16 @@
+const path = require('path')
 const nextJest = require('next/jest')
 
 const createJestConfig = nextJest({
   // Provide the path to your Next.js app to load next.config.js and .env files
-  dir: './',
+  dir: path.resolve(__dirname, '../..'),
 })
 
 // Custom Jest configuration for integration tests
 const customJestConfig = {
+  // Ensure root is the project root (not this config folder)
+  rootDir: path.resolve(__dirname, '../..'),
+
   // Use the integration test environment
   displayName: 'Integration Tests',
   
@@ -15,7 +19,7 @@ const customJestConfig = {
   
   // Setup files
   setupFilesAfterEnv: [
-    '<rootDir>/jest.setup.js',
+    '<rootDir>/test-utils/jest.setup.js',
     '<rootDir>/__tests__/utils/integration-setup.js'
   ],
   
@@ -25,18 +29,25 @@ const customJestConfig = {
   ],
   
   // Module name mapping
-  moduleNameMapping: {
+  moduleNameMapper: {
+    '^msw/node$': '<rootDir>/node_modules/msw/lib/node/index.js',
+    '^@mswjs/interceptors/ClientRequest$': '<rootDir>/node_modules/@mswjs/interceptors/lib/node/interceptors/ClientRequest/index.js',
     '^@/(.*)$': '<rootDir>/$1',
     '^@/components/(.*)$': '<rootDir>/components/$1',
     '^@/lib/(.*)$': '<rootDir>/lib/$1',
     '^@/hooks/(.*)$': '<rootDir>/hooks/$1',
     '^@/utils/(.*)$': '<rootDir>/__tests__/utils/$1',
+    '\\.(css|less|scss|sass)$': 'identity-obj-proxy',
   },
   
   // Transform configuration
   transform: {
     '^.+\\.(js|jsx|ts|tsx)$': ['babel-jest', { presets: ['next/babel'] }],
   },
+  // Transform ESM packages in node_modules used by tests
+  transformIgnorePatterns: [
+    '/node_modules/(?!(msw|@mswjs/interceptors|cheerio)/)',
+  ],
   
   // Files to ignore
   testPathIgnorePatterns: [
@@ -122,11 +133,8 @@ const customJestConfig = {
   // Snapshot serializers (if needed)
   snapshotSerializers: [],
   
-  // Watch plugins (for development)
-  watchPlugins: [
-    'jest-watch-typeahead/filename',
-    'jest-watch-typeahead/testname',
-  ],
+  // Watch plugins disabled for CI/e2e stability
+  watchPlugins: [],
   
   // Performance hints
   maxWorkers: '50%', // Use 50% of available cores for stability
@@ -138,14 +146,10 @@ const customJestConfig = {
   preset: undefined,
   
   // Handle static assets
-  moduleNameMapping: {
-    ...require('next/jest')().moduleNameMapping,
-    '^@/(.*)$': '<rootDir>/$1',
-    '\\.(css|less|scss|sass)$': 'identity-obj-proxy',
-  },
+  // Keep a single, correct moduleNameMapper above
   
-  // Environment variables for testing
-  setupFiles: ['<rootDir>/jest.env.js'],
+  // Environment variables for testing are handled in setupFilesAfterEnv
+  setupFiles: [],
 }
 
 // Create the Jest config
