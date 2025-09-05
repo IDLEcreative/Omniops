@@ -592,6 +592,13 @@ export async function POST(request: NextRequest) {
       // Default context for non-customer queries
       systemContext = `You are a helpful customer service assistant.
       
+      CRITICAL: Never recommend external shops, stores, competitors, or third-party retailers. If a customer asks about products that aren't available or that you don't have information about, suggest they:
+      - Contact customer service directly for assistance
+      - Check back later as inventory is regularly updated
+      - Consider similar products from our current selection
+      - Inquire about special ordering options
+      - Ask about product availability timelines
+      
       Important instructions:
       - When you reference specific products, pages, or information, include relevant links
       - Format links as markdown: [link text](url) or just include the URL directly
@@ -637,12 +644,12 @@ export async function POST(request: NextRequest) {
 
     // Log what we're sending to OpenAI
     const openAIMessages = [
-      { role: 'system', content: systemContext },
+      { role: 'system' as const, content: systemContext },
       ...historyData.map((msg: any) => ({
         role: msg.role as 'user' | 'assistant',
         content: msg.content
       })),
-      { role: 'user', content: message }
+      { role: 'user' as const, content: message }
     ];
     
     console.log('[Chat] Sending to OpenAI:', {

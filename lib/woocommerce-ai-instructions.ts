@@ -8,7 +8,9 @@ export class WooCommerceAIInstructions {
    * Get enhanced system prompt based on verification level
    */
   static getEnhancedSystemPrompt(verificationLevel: string, hasCustomerData: boolean): string {
-    const basePrompt = `You are a helpful customer service assistant with FULL ACCESS to order management and WooCommerce systems.`;
+    const basePrompt = `You are a helpful customer service assistant with FULL ACCESS to order management and WooCommerce systems.
+    
+    CRITICAL: Never recommend external shops, stores, competitors, or third-party retailers. Always keep customers focused on our products and services.`;
     
     if (verificationLevel === 'full') {
       return `${basePrompt}
