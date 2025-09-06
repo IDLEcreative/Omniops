@@ -184,6 +184,9 @@ export async function generateEmbeddings(params: {
     }));
     
     // Use bulk insert function for 86% performance improvement
+    if (!supabase) {
+      throw new Error('Database connection unavailable');
+    }
     const { data, error } = await supabase.rpc('bulk_insert_embeddings', {
       embeddings: embeddingRecords
     });
@@ -247,6 +250,11 @@ export async function searchSimilarContent(
   similarity: number;
 }>> {
   const supabase = await createServiceRoleClient();
+  
+  if (!supabase) {
+    console.error('Failed to create Supabase client');
+    return [];
+  }
 
   // Helper: simple keyword extraction that preserves SKU-like tokens (e.g., DC66-10P)
   function extractKeywords(text: string, max = 5): string[] {
@@ -292,11 +300,13 @@ export async function searchSimilarContent(
             orParts.push(`title.ilike.${like}`);
             orParts.push(`url.ilike.${like}`);
           }
+          if (!supabase) return [];
           let q = supabase
             .from('scraped_pages')
             .select('url, title, content')
             .limit(limit);
-          if (domainId) q = q.eq('domain_id', domainId);
+          // Filter by domain if provided
+          q = q.eq('domain', domain);
           if (orParts.length > 0) {
             // @ts-ignore - Supabase's .or accepts a string expression
             q = (q as any).or(orParts.join(','));
@@ -353,6 +363,7 @@ export async function searchSimilarContent(
       // Build OR filter for content ILIKE keywords
       const orFilter = keywords.map(k => `content.ilike.%${k}%`).join(',');
 
+      if (!supabase) return [];
       let q = supabase
         .from('scraped_pages')
         .select('url, title, content')
@@ -456,10 +467,12 @@ export async function searchSimilarContent(
             if (!resp || resp.length === 0) {
               // Fallback to text search by the longest code
               const longest = codes.sort((a, b) => b.length - a.length)[0];
-              url = `${base}?search=${encodeURIComponent(longest)}&status=publish&${per}&${auth}`;
-              try {
-                resp = (await axios.get(url, { timeout: 5000 })).data || [];
-              } catch {}
+              if (longest) {
+                url = `${base}?search=${encodeURIComponent(longest)}&status=publish&${per}&${auth}`;
+                try {
+                  resp = (await axios.get(url, { timeout: 5000 })).data || [];
+                } catch {}
+              }
             }
             if (resp && resp.length > 0) {
               return resp.slice(0, limit).map((p: any) => ({

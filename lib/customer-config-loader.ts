@@ -8,6 +8,9 @@ export class CustomerConfigLoader {
       
       // If customerId provided, load for specific customer
       if (customerId) {
+        if (!supabase) {
+          throw new Error('Database connection unavailable');
+        }
         const { data, error } = await supabase
           .from('customer_configs')
           .select('owned_domains')
@@ -24,6 +27,9 @@ export class CustomerConfigLoader {
       }
       
       // Otherwise, try to load for authenticated user
+      if (!supabase) {
+        return;
+      }
       const { data: { user }, error: authError } = await supabase.auth.getUser();
       
       if (!authError && user) {
@@ -35,6 +41,9 @@ export class CustomerConfigLoader {
           .single();
           
         if (!customerError && customer) {
+          if (!supabase) {
+            return;
+          }
           const { data, error } = await supabase
             .from('customer_configs')
             .select('owned_domains')

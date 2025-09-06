@@ -7,55 +7,55 @@ import { NextRequest } from 'next/server';
 export function mockSupabaseClient(overrides?: any): any {
   const defaultClient = {
     auth: {
-      signInWithPassword: jest.fn().mockResolvedValue({ 
+      signInWithPassword: jest.fn<any>().mockResolvedValue({ 
         data: { 
           user: { id: 'test-user-id', email: 'test@example.com' }, 
           session: { access_token: 'test-token', refresh_token: 'refresh-token' } 
         }, 
         error: null 
       }),
-      signUp: jest.fn().mockResolvedValue({ 
+      signUp: jest.fn<any>().mockResolvedValue({ 
         data: { 
           user: { id: 'new-user-id', email: 'new@example.com' }, 
           session: null 
         }, 
         error: null 
       }),
-      signOut: jest.fn().mockResolvedValue({ error: null }),
-      getSession: jest.fn().mockResolvedValue({ 
+      signOut: jest.fn<any>().mockResolvedValue({ error: null }),
+      getSession: jest.fn<any>().mockResolvedValue({ 
         data: { 
           session: { access_token: 'test-token', refresh_token: 'refresh-token' } 
         }, 
         error: null 
       }),
-      getUser: jest.fn().mockResolvedValue({ 
+      getUser: jest.fn<any>().mockResolvedValue({ 
         data: { 
           user: { id: 'test-user-id', email: 'test@example.com' } 
         }, 
         error: null 
       }),
-      onAuthStateChange: jest.fn().mockReturnValue({
+      onAuthStateChange: jest.fn<any>().mockReturnValue({
         data: { subscription: { unsubscribe: jest.fn() } },
       }),
     },
-    from: jest.fn<any, any>(() => ({
+    from: jest.fn<any>(() => ({
       select: jest.fn().mockReturnThis(),
       insert: jest.fn().mockReturnThis(),
       update: jest.fn().mockReturnThis(),
       upsert: jest.fn().mockReturnThis(),
       delete: jest.fn().mockReturnThis(),
       eq: jest.fn().mockReturnThis(),
-      single: jest.fn().mockResolvedValue({ data: null, error: null }),
-      then: jest.fn().mockResolvedValue({ data: [], error: null }),
+      single: jest.fn<any>().mockResolvedValue({ data: null, error: null }),
+      then: jest.fn<any>().mockResolvedValue({ data: [], error: null }),
     })),
-    rpc: jest.fn().mockResolvedValue({ data: [], error: null }),
+    rpc: jest.fn<any>().mockResolvedValue({ data: [], error: null }),
     storage: {
-      from: jest.fn().mockReturnValue({
-        upload: jest.fn().mockResolvedValue({ 
+      from: jest.fn<any>().mockReturnValue({
+        upload: jest.fn<any>().mockResolvedValue({ 
           data: { path: 'test/path' }, 
           error: null 
         }),
-        getPublicUrl: jest.fn().mockReturnValue({ 
+        getPublicUrl: jest.fn<any>().mockReturnValue({ 
           data: { publicUrl: 'https://example.com/file' } 
         }),
       }),
@@ -70,10 +70,11 @@ export function mockSupabaseClient(overrides?: any): any {
  */
 export function mockWooCommerceClient(overrides?: any) {
   const defaultClient = {
-    get: jest.fn().mockImplementation((endpoint: string, params?: any) => {
+    get: jest.fn<any>().mockImplementation((endpoint: string, params?: any) => {
       // Provide sensible default responses based on endpoint
       if (endpoint.startsWith('products/')) {
-        const id = parseInt(endpoint.split('/')[1]);
+        const idString = endpoint.split('/')[1];
+        const id = idString ? parseInt(idString) : 1;
         return Promise.resolve({
           data: {
             id,
@@ -131,9 +132,9 @@ export function mockWooCommerceClient(overrides?: any) {
       
       return Promise.resolve({ data: [] });
     }),
-    post: jest.fn().mockResolvedValue({ data: {} }),
-    put: jest.fn().mockResolvedValue({ data: {} }),
-    delete: jest.fn().mockResolvedValue({ data: { deleted: true } }),
+    post: jest.fn<any>().mockResolvedValue({ data: {} }),
+    put: jest.fn<any>().mockResolvedValue({ data: {} }),
+    delete: jest.fn<any>().mockResolvedValue({ data: { deleted: true } }),
   };
 
   return { ...defaultClient, ...overrides };

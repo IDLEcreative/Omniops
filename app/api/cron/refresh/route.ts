@@ -19,6 +19,13 @@ export async function GET(request: NextRequest) {
   
   const supabase = await createServiceRoleClient();
   
+  if (!supabase) {
+    return NextResponse.json(
+      { error: 'Database connection unavailable' },
+      { status: 503 }
+    );
+  }
+  
   try {
     // Get all domains that need refresh
     const hoursThreshold = 24; // Refresh content older than 24 hours
@@ -84,6 +91,13 @@ export async function POST(request: NextRequest) {
     const { domainIds, forceRefresh = false } = body;
     
     const supabase = await createServiceRoleClient();
+    
+    if (!supabase) {
+      return NextResponse.json(
+        { error: 'Database connection unavailable' },
+        { status: 503 }
+      );
+    }
     
     // Get domains to refresh
     let query = supabase.from('domains').select('id, domain');

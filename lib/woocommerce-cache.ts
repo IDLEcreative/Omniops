@@ -52,7 +52,7 @@ export class WooCommerceDashboardCache {
         cachedAt: new Date().toISOString(),
       };
       
-      await this.redis.setex(key, this.TTL.DASHBOARD, JSON.stringify(cacheData));
+      await this.redis.set(key, JSON.stringify(cacheData), this.TTL.DASHBOARD);
       console.log(`[Cache SET] Dashboard for tenant ${tenantId} (TTL: ${this.TTL.DASHBOARD}s)`);
       
       // Also cache individual components with their own TTLs
@@ -73,7 +73,7 @@ export class WooCommerceDashboardCache {
     if (data.abandonedCarts) {
       const key = `wc:${tenantId}:abandoned_carts`;
       promises.push(
-        this.redis.setex(key, this.TTL.ABANDONED_CARTS, JSON.stringify(data.abandonedCarts))
+        this.redis.set(key, JSON.stringify(data.abandonedCarts), this.TTL.ABANDONED_CARTS)
       );
     }
     
@@ -81,7 +81,7 @@ export class WooCommerceDashboardCache {
     if (data.lowStock) {
       const key = `wc:${tenantId}:low_stock`;
       promises.push(
-        this.redis.setex(key, this.TTL.LOW_STOCK, JSON.stringify(data.lowStock))
+        this.redis.set(key, JSON.stringify(data.lowStock), this.TTL.LOW_STOCK)
       );
     }
     
@@ -89,7 +89,7 @@ export class WooCommerceDashboardCache {
     if (data.revenueHistory) {
       const key = `wc:${tenantId}:revenue_history`;
       promises.push(
-        this.redis.setex(key, this.TTL.HISTORICAL, JSON.stringify(data.revenueHistory))
+        this.redis.set(key, JSON.stringify(data.revenueHistory), this.TTL.HISTORICAL)
       );
     }
     
@@ -119,7 +119,10 @@ export class WooCommerceDashboardCache {
       const keys = await this.redis.keys(pattern);
       
       if (keys.length > 0) {
-        await this.redis.del(...keys);
+        // ResilientRedisClient.del() takes a single key, so delete them one by one
+        for (const key of keys) {
+          await this.redis.del(key);
+        }
         console.log(`[Cache INVALIDATE] Cleared ${keys.length} cache keys for tenant ${tenantId}`);
       }
     } catch (error) {
@@ -175,13 +178,12 @@ export class WooCommerceDashboardCache {
         keys: [] as any[],
       };
       
+      // Note: ResilientRedisClient doesn't have ttl() or memory() methods
+      // We'll just return the key names for now
       for (const key of keys) {
-        const ttl = await this.redis.ttl(key);
-        const memory = await this.redis.memory('USAGE', key);
         stats.keys.push({
           key: key.replace(`wc:${tenantId}:`, ''),
-          ttl,
-          memory,
+          // ttl and memory info not available with ResilientRedisClient
         });
       }
       

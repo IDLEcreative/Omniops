@@ -271,8 +271,8 @@ export class ProductNormalizer {
       let match;
       while ((match = specPattern.exec(content)) !== null) {
         const [, name, value] = match;
-        const trimmedName = name.trim();
-        const trimmedValue = value.trim();
+        const trimmedName = name?.trim();
+        const trimmedValue = value?.trim();
         if (trimmedName && trimmedValue && trimmedName.length < 50) {
           specs.push({
             name: trimmedName,

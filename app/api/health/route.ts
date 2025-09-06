@@ -20,19 +20,26 @@ async function handler() {
 
   try {
     // Check database connection
+    let dbLatency = 0;
     const dbStart = Date.now();
     const supabase = await createClient();
-    const { error: dbError } = await supabase.from('conversations').select('count').limit(1);
-    const dbLatency = Date.now() - dbStart;
-    checks.database = dbError ? 'error' : 'ok';
+    
+    if (!supabase) {
+      checks.database = 'unavailable';
+    } else {
+      const { error: dbError } = await supabase.from('conversations').select('count').limit(1);
+      dbLatency = Date.now() - dbStart;
+      checks.database = dbError ? 'error' : 'ok';
+    }
     
     // Check Redis connection
     let redisLatency = 0;
     try {
       const redisStart = Date.now();
-      const redis = await import('@/lib/redis').then(m => m.redis);
-      if (redis) {
-        await redis.ping();
+      const { getRedisClient } = await import('@/lib/redis');
+      const redis = getRedisClient();
+      if (redis && 'ping' in redis) {
+        await (redis as any).ping();
         checks.redis = 'ok';
       } else {
         checks.redis = 'not-configured';

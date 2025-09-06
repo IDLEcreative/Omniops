@@ -19,6 +19,14 @@ export async function POST(request: NextRequest) {
 
     // Get WooCommerce configuration for this domain
     const supabase = await createServiceRoleClient();
+    
+    if (!supabase) {
+      return NextResponse.json(
+        { error: 'Database connection unavailable' },
+        { status: 503 }
+      );
+    }
+    
     const { data: config, error: configError } = await supabase
       .from('customer_configs')
       .select('woocommerce_url, woocommerce_consumer_key, woocommerce_consumer_secret')

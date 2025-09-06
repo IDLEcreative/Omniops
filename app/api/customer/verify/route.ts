@@ -117,6 +117,14 @@ export async function PUT(request: NextRequest) {
 
     // Update conversation with verification status
     const supabase = await createServiceRoleClient();
+    
+    if (!supabase) {
+      return NextResponse.json(
+        { error: 'Database connection unavailable' },
+        { status: 503 }
+      );
+    }
+    
     await supabase
       .from('messages')
       .update({ 

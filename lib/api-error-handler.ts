@@ -86,11 +86,13 @@ export function withErrorHandler(
         message = 'Validation Error: ' + error.errors.map(e => `${e.path.join('.')}: ${e.message}`).join(', ');
         category = ErrorCategory.VALIDATION;
         severity = ErrorSeverity.LOW;
-      } else if (error instanceof ApiError) {
-        statusCode = error.statusCode || 500;
-        message = error.message;
-        category = error.category || ErrorCategory.SYSTEM;
-        severity = error.severity || ErrorSeverity.MEDIUM;
+      } else if (error && typeof error === 'object' && 'statusCode' in error) {
+        // Check if error has ApiError-like properties
+        const apiError = error as ApiError;
+        statusCode = apiError.statusCode || 500;
+        message = apiError.message || 'An error occurred';
+        category = apiError.category || ErrorCategory.SYSTEM;
+        severity = apiError.severity || ErrorSeverity.MEDIUM;
       } else if (error instanceof Error) {
         message = error.message;
         

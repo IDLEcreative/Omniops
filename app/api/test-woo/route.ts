@@ -11,6 +11,14 @@ export async function GET(request: NextRequest) {
   
   // First check if config exists
   const supabase = await createServiceRoleClient();
+  
+  if (!supabase) {
+    return NextResponse.json(
+      { error: 'Database connection unavailable' },
+      { status: 503 }
+    );
+  }
+  
   const { data: checkConfig, error: checkError } = await supabase
     .from('customer_configs')
     .select('*')

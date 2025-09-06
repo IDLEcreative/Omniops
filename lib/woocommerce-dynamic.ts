@@ -22,6 +22,10 @@ interface Product {
 export async function getDynamicWooCommerceClient(domain: string): Promise<WooCommerceAPI | null> {
   const supabase = await createServiceRoleClient();
   
+  if (!supabase) {
+    return null;
+  }
+  
   // Fetch configuration for this domain
   const { data: config, error } = await supabase
     .from('customer_configs')

@@ -7,7 +7,8 @@
     "prebuild": "ls -la lib/supabase/ && echo 'Supabase files found'",
     "build": "next build",
     "start": "next start",
-    "lint": "next lint",
+    "lint": "eslint . --max-warnings 50",
+    "lint:fix": "eslint . --fix",
     "test": "jest",
     "test:unit": "jest --testMatch='**/__tests__/**/*.test.ts' --testPathIgnorePatterns='**/__tests__/integration/**'",
     "test:integration": "jest --config=config/jest/jest.integration.config.js",
@@ -72,11 +73,9 @@
     "playwright": "^1.55.0",
     "react": "^19.0.0",
     "react-dom": "^19.0.0",
-    "redis": "^5.8.2",
     "tailwind-merge": "^2.5.0",
     "turndown": "^7.1.2",
     "uuid": "^9.0.1",
-    "winston": "^3.11.0",
     "zod": "^3.22.4"
   },
   "devDependencies": {

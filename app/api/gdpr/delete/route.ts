@@ -32,6 +32,13 @@ export async function POST(request: NextRequest) {
 
     const supabase = await createServiceRoleClient();
 
+    if (!supabase) {
+      return NextResponse.json(
+        { error: 'Database connection unavailable' },
+        { status: 503 }
+      );
+    }
+
     // Get conversations to delete
     let query = supabase
       .from('conversations')

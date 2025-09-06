@@ -207,6 +207,9 @@ export class CustomerScrapingIntegration {
     try {
       // Find all customer configs using this domain
       const supabase = await this.getSupabase()
+      if (!supabase) {
+        throw new Error('Database connection unavailable')
+      }
       const { data: customerConfigs, error } = await supabase
         .from('customer_configs')
         .select('id, customer_id, domain')
@@ -270,6 +273,9 @@ export class CustomerScrapingIntegration {
     try {
       // Get customer configuration
       const supabase = await this.getSupabase()
+      if (!supabase) {
+        throw new Error('Failed to create Supabase client')
+      }
       const { data: customerConfig, error } = await supabase
         .from('customer_configs')
         .select('id, domain, customer_id')
@@ -465,7 +471,7 @@ export class CustomerScrapingIntegration {
     try {
       // Find pending/running jobs for this domain and customer
       const supabase = await this.getSupabase()
-      const { data: pendingJobs, error } = await supabase
+      const { data: pendingJobs, error } = await supabase!
         .from('scrape_jobs')
         .select('id')
         .eq('domain', domain)
@@ -512,7 +518,7 @@ export class CustomerScrapingIntegration {
   }> {
     try {
       const supabase = await this.getSupabase()
-      const { data: jobs, error } = await supabase
+      const { data: jobs, error } = await supabase!
         .from('scrape_jobs')
         .select('status, created_at, completed_at')
         .eq('customer_config_id', customerConfigId)

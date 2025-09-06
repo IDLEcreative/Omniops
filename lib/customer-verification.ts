@@ -32,6 +32,10 @@ export class CustomerVerification {
   static async createVerification(request: VerificationRequest): Promise<VerificationResult> {
     const supabase = await createServiceRoleClient();
     
+    if (!supabase) {
+      throw new Error('Database connection unavailable');
+    }
+    
     try {
       // Check for existing recent verifications (rate limiting)
       const { data: recentVerifications } = await supabase
@@ -102,6 +106,13 @@ export class CustomerVerification {
   ): Promise<VerifyCodeResult> {
     const supabase = await createServiceRoleClient();
     
+    if (!supabase) {
+      return {
+        verified: false,
+        message: 'Database connection unavailable'
+      };
+    }
+    
     try {
       // Call Supabase function to verify code
       const { data, error } = await supabase.rpc('verify_customer_code', {
@@ -149,6 +160,10 @@ export class CustomerVerification {
     verifiedAt?: Date;
   }> {
     const supabase = await createServiceRoleClient();
+    
+    if (!supabase) {
+      return { isVerified: false };
+    }
     
     try {
       const { data } = await supabase
@@ -221,6 +236,11 @@ export class CustomerVerification {
   ): Promise<void> {
     const supabase = await createServiceRoleClient();
     
+    if (!supabase) {
+      console.error('Database connection unavailable for logging access');
+      return;
+    }
+    
     try {
       await supabase.rpc('log_customer_access', {
         p_conversation_id: conversationId,
@@ -247,6 +267,11 @@ export class CustomerVerification {
   ): Promise<void> {
     const supabase = await createServiceRoleClient();
     
+    if (!supabase) {
+      console.error('Database connection unavailable for caching data');
+      return;
+    }
+    
     try {
       await supabase
         .from('customer_data_cache')
@@ -271,6 +296,10 @@ export class CustomerVerification {
     dataType?: string
   ): Promise<any | null> {
     const supabase = await createServiceRoleClient();
+    
+    if (!supabase) {
+      return null;
+    }
     
     try {
       let query = supabase
@@ -304,6 +333,11 @@ export class CustomerVerification {
    */
   static async cleanExpiredData(): Promise<void> {
     const supabase = await createServiceRoleClient();
+    
+    if (!supabase) {
+      console.error('Database connection unavailable for cleaning expired data');
+      return;
+    }
     
     try {
       await supabase.rpc('clean_expired_customer_data');

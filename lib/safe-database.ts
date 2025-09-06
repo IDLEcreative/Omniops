@@ -122,6 +122,10 @@ export async function safeSearchEmbeddings(
     async () => {
       const supabase = await createClient();
       
+      if (!supabase) {
+        throw new Error('Database connection unavailable');
+      }
+      
       // Try the new function signature first
       let result = await supabase.rpc('search_embeddings', {
         p_domain_id: domainId,
@@ -133,7 +137,7 @@ export async function safeSearchEmbeddings(
       // If the new signature fails, try the old one
       if (result.error?.message?.includes('search_embeddings')) {
         console.log('Trying alternative search_embeddings signature...');
-        result = await supabase.rpc('search_embeddings', {
+        result = await supabase!.rpc('search_embeddings', {
           customer_id: domainId,
           query_embedding: queryEmbedding,
           match_threshold: matchThreshold,

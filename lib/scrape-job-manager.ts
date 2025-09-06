@@ -81,6 +81,9 @@ export class ScrapeJobManager {
 
       // Get domain and customer config IDs if they exist
       const supabaseClient = await this.getSupabase()
+      if (!supabaseClient) {
+        throw new Error('Database connection unavailable')
+      }
       const [domainResult, configResult] = await Promise.all([
         supabaseClient
           .from('domains')
@@ -99,6 +102,9 @@ export class ScrapeJobManager {
 
       // Create the job
       const supabase = await this.getSupabase()
+      if (!supabase) {
+        throw new Error('Database connection unavailable')
+      }
       const { data, error } = await supabase
         .from('scrape_jobs')
         .insert({
@@ -154,6 +160,9 @@ export class ScrapeJobManager {
       }
 
       const supabase = await this.getSupabase()
+      if (!supabase) {
+        throw new Error('Database connection unavailable')
+      }
       const { data, error } = await supabase
         .from('scrape_jobs')
         .update(updateData)
@@ -186,6 +195,9 @@ export class ScrapeJobManager {
   async getJob(jobId: string): Promise<ScrapeJob | null> {
     try {
       const supabase = await this.getSupabase()
+      if (!supabase) {
+        throw new Error('Database connection unavailable')
+      }
       const { data, error } = await supabase
         .from('scrape_jobs')
         .select('*')
@@ -211,6 +223,9 @@ export class ScrapeJobManager {
   async findPendingJob(domain: string, jobType?: string): Promise<ScrapeJob | null> {
     try {
       const supabase = await this.getSupabase()
+      if (!supabase) {
+        throw new Error('Database connection unavailable')
+      }
       let query = supabase
         .from('scrape_jobs')
         .select('*')
@@ -261,6 +276,9 @@ export class ScrapeJobManager {
       } = options
 
       const supabase = await this.getSupabase()
+      if (!supabase) {
+        throw new Error('Database connection unavailable')
+      }
       let query = supabase
         .from('scrape_jobs')
         .select('*', { count: 'exact' })
@@ -305,6 +323,9 @@ export class ScrapeJobManager {
   async getNextJob(): Promise<ScrapeJob | null> {
     try {
       const supabase = await this.getSupabase()
+      if (!supabase) {
+        throw new Error('Database connection unavailable')
+      }
       const { data, error } = await supabase
         .from('scrape_jobs')
         .select('*')
@@ -333,6 +354,9 @@ export class ScrapeJobManager {
   async claimJob(jobId: string): Promise<ScrapeJob | null> {
     try {
       const supabase = await this.getSupabase()
+      if (!supabase) {
+        throw new Error('Database connection unavailable')
+      }
       const { data, error } = await supabase
         .from('scrape_jobs')
         .update({
@@ -377,6 +401,9 @@ export class ScrapeJobManager {
       }
 
       const supabase = await this.getSupabase()
+      if (!supabase) {
+        throw new Error('Database connection unavailable')
+      }
       const { data, error } = await supabase
         .from('scrape_jobs')
         .update({
@@ -424,6 +451,9 @@ export class ScrapeJobManager {
       }
 
       const supabase = await this.getSupabase()
+      if (!supabase) {
+        throw new Error('Database connection unavailable')
+      }
       const { data, error } = await supabase
         .from('scrape_jobs')
         .update(updateData)
@@ -462,6 +492,9 @@ export class ScrapeJobManager {
   }> {
     try {
       const supabase = await this.getSupabase()
+      if (!supabase) {
+        throw new Error('Database connection unavailable')
+      }
       let query = supabase
         .from('scrape_jobs')
         .select('status')
@@ -507,6 +540,9 @@ export class ScrapeJobManager {
       cutoffDate.setDate(cutoffDate.getDate() - olderThanDays)
 
       const supabase = await this.getSupabase()
+      if (!supabase) {
+        throw new Error('Database connection unavailable')
+      }
       const { data, error } = await supabase
         .from('scrape_jobs')
         .delete()

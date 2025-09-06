@@ -20,6 +20,9 @@ export async function refreshPageContent(
   
   try {
     // Check if page exists and when it was last scraped
+    if (!supabase) {
+      throw new Error('Database connection unavailable');
+    }
     const { data: existingPage } = await supabase
       .from('website_content')
       .select('id, scraped_at, content_hash')
@@ -99,6 +102,9 @@ export async function refreshDomainContent(
   
   try {
     // Get domain details
+    if (!supabase) {
+      throw new Error('Database connection unavailable');
+    }
     const { data: domain } = await supabase
       .from('domains')
       .select('domain, settings')
@@ -199,6 +205,9 @@ export async function discoverNewPages(
     console.log(`Sitemap discovery for ${baseUrl} - needs implementation`);
     
     // Get existing URLs for this domain
+    if (!supabase) {
+      throw new Error('Database connection unavailable');
+    }
     const { data: existingPages } = await supabase
       .from('website_content')
       .select('url')

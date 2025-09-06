@@ -38,6 +38,14 @@ export async function POST(request: NextRequest) {
     
     // Verify the conversation exists and is valid
     const supabase = await createServiceRoleClient();
+    
+    if (!supabase) {
+      return NextResponse.json(
+        { error: 'Database connection unavailable' },
+        { status: 503 }
+      );
+    }
+    
     const { data: conversation, error: convError } = await supabase
       .from('conversations')
       .select('id, verified_customer_email, verification_status')
@@ -181,6 +189,13 @@ export async function GET(request: NextRequest) {
   
   try {
     const supabase = await createServiceRoleClient();
+    
+    if (!supabase) {
+      return NextResponse.json(
+        { error: 'Database connection unavailable' },
+        { status: 503 }
+      );
+    }
     
     // Get modification history for this order in this conversation
     const { data: modifications, error } = await supabase

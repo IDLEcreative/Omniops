@@ -7,9 +7,9 @@ import { createHash } from 'crypto';
 import { SupabaseClient } from '@supabase/supabase-js';
 
 interface SmartCacheOptions {
-  ttlSeconds?: number;
-  cacheLevel?: 'none' | 'memory' | 'database' | 'both';
-  scope?: 'user' | 'domain' | 'global';
+  ttlSeconds: number;
+  cacheLevel: 'none' | 'memory' | 'database' | 'both';
+  scope: 'user' | 'domain' | 'global';
 }
 
 export class SmartQueryCache {
@@ -24,25 +24,25 @@ export class SmartQueryCache {
       // High cache value - common across users
       'embedding_search': {
         patterns: [/price|cost|shipping|delivery|return|warranty|hours|location|contact/i],
-        options: { cacheLevel: 'both', scope: 'domain', ttlSeconds: 3600 }
+        options: { cacheLevel: 'both' as const, scope: 'domain' as const, ttlSeconds: 3600 }
       },
       
       // Medium cache value - semi-common queries  
       'product_search': {
         patterns: [/spare parts|ford|toyota|honda|nissan|bmw|mercedes/i],
-        options: { cacheLevel: 'both', scope: 'domain', ttlSeconds: 1800 }
+        options: { cacheLevel: 'both' as const, scope: 'domain' as const, ttlSeconds: 1800 }
       },
       
       // Low cache value - personalized
       'order_status': {
         patterns: [/order #|my order|tracking|where is my/i],
-        options: { cacheLevel: 'none', scope: 'user', ttlSeconds: 0 }
+        options: { cacheLevel: 'none' as const, scope: 'user' as const, ttlSeconds: 0 }
       },
       
       // No cache - real-time data
       'inventory': {
         patterns: [/in stock|availability|how many left/i],
-        options: { cacheLevel: 'none', scope: 'user', ttlSeconds: 0 }
+        options: { cacheLevel: 'none' as const, scope: 'user' as const, ttlSeconds: 0 }
       }
     };
     
@@ -55,8 +55,8 @@ export class SmartQueryCache {
     
     // Default: cache at domain level for 30 minutes
     return { 
-      cacheLevel: 'memory', 
-      scope: 'domain', 
+      cacheLevel: 'memory' as const, 
+      scope: 'domain' as const, 
       ttlSeconds: 1800 
     };
   }
@@ -79,8 +79,8 @@ export class SmartQueryCache {
     
     // Remove null/undefined values
     Object.keys(keyBase).forEach(key => {
-      if (keyBase[key] === undefined || keyBase[key] === null) {
-        delete keyBase[key];
+      if ((keyBase as any)[key] === undefined || (keyBase as any)[key] === null) {
+        delete (keyBase as any)[key];
       }
     });
     
@@ -124,7 +124,7 @@ export class SmartQueryCache {
     // Generate appropriate cache key
     const cacheKey = this.generateScopedKey(
       { type: queryType, content: queryContent },
-      cacheOptions.scope!,
+      cacheOptions.scope,
       conversationId,
       domainId
     );
@@ -133,7 +133,7 @@ export class SmartQueryCache {
     if (cacheOptions.cacheLevel === 'memory' || cacheOptions.cacheLevel === 'both') {
       const cached = this.getFromMemory(cacheKey);
       if (cached !== null) {
-        return { data: cached, cacheHit: true, cacheType: 'memory' };
+        return { data: cached as T, cacheHit: true, cacheType: 'memory' };
       }
     }
     
@@ -249,7 +249,9 @@ export class SmartQueryCache {
     // Prevent memory leak
     if (this.memoryCache.size > 1000) {
       const firstKey = this.memoryCache.keys().next().value;
-      this.memoryCache.delete(firstKey);
+      if (firstKey !== undefined) {
+        this.memoryCache.delete(firstKey);
+      }
     }
   }
   

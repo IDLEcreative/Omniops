@@ -13,6 +13,10 @@ export class MultiTenantCustomerVerification {
   static async getBusinessId(domain?: string, apiKey?: string): Promise<string | null> {
     const supabase = await createServiceRoleClient();
     
+    if (!supabase) {
+      return null;
+    }
+    
     // Method 1: From domain (embedded widget)
     if (domain) {
       const { data } = await supabase
@@ -53,6 +57,10 @@ export class MultiTenantCustomerVerification {
     }
   ) {
     const supabase = await createServiceRoleClient();
+    
+    if (!supabase) {
+      throw new Error('Database connection unavailable');
+    }
     
     // All queries are scoped to this business
     const { data: config } = await supabase
@@ -105,6 +113,11 @@ export class MultiTenantCustomerVerification {
   ) {
     const supabase = await createServiceRoleClient();
     
+    if (!supabase) {
+      console.error('Database connection unavailable for logging access');
+      return;
+    }
+    
     await supabase
       .from('customer_access_logs')
       .insert({
@@ -125,6 +138,11 @@ export class MultiTenantCustomerVerification {
    */
   static async trackUsage(businessId: string, usageType: string) {
     const supabase = await createServiceRoleClient();
+    
+    if (!supabase) {
+      console.error('Database connection unavailable for tracking usage');
+      return;
+    }
     
     // Increment daily usage
     await supabase.rpc('track_api_usage', {
@@ -154,6 +172,10 @@ export class MultiTenantCustomerVerification {
   ) {
     const supabase = await createServiceRoleClient();
     
+    if (!supabase) {
+      return null;
+    }
+    
     const { data } = await supabase
       .from('customer_data_cache')
       .select('cached_data')
@@ -176,6 +198,11 @@ export class MultiTenantCustomerVerification {
     data: any
   ) {
     const supabase = await createServiceRoleClient();
+    
+    if (!supabase) {
+      console.error('Database connection unavailable for caching data');
+      return;
+    }
     
     await supabase
       .from('customer_data_cache')

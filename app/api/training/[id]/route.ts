@@ -9,6 +9,14 @@ export async function DELETE(
 ) {
   try {
     const supabase = await createClient();
+    
+    if (!supabase) {
+      return NextResponse.json(
+        { error: 'Database connection unavailable' },
+        { status: 503 }
+      );
+    }
+    
     const { data: { user } } = await supabase.auth.getUser();
     
     if (!user) {
@@ -16,6 +24,14 @@ export async function DELETE(
     }
 
     const adminSupabase = await createServiceRoleClient();
+    
+    if (!adminSupabase) {
+      return NextResponse.json(
+        { error: 'Database connection unavailable' },
+        { status: 503 }
+      );
+    }
+    
     const resolvedParams = await params;
     
     // Delete associated embeddings first

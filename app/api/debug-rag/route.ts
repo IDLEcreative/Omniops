@@ -12,6 +12,10 @@ export async function GET() {
   
   const supabase = createClient(supabaseUrl, supabaseServiceRoleKey);
   
+  const openai = new OpenAI({
+    apiKey: process.env.OPENAI_API_KEY,
+  });
+  
   const debug: any = {};
   
   try {

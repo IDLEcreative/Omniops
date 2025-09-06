@@ -162,8 +162,9 @@ async function gracefulShutdown(reason: string, exitCode: number) {
     // Close Redis connections
     console.log('Closing Redis connections...');
     try {
-      const { redis } = await import('./redis');
-      if (redis) {
+      const { getRedisClient } = await import('./redis');
+      const redis = await getRedisClient();
+      if (redis && 'quit' in redis && typeof redis.quit === 'function') {
         await redis.quit();
       }
     } catch (error) {

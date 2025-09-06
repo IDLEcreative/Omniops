@@ -294,7 +294,7 @@ export async function scrapePage(
       jobId,
       url,
       domain: new URL(url).hostname,
-      maxPages: config?.maxPages || 50,
+      maxPages: (config as any)?.maxPages || 50,
       options: {
         turboMode: config?.turboMode || false,
         configPreset: config?.configPreset,
@@ -322,11 +322,14 @@ export async function scrapePage(
     console.log(`[SCRAPER] Job ${jobId} queued successfully`);
     
     return {
+      url,
+      title: '',
+      content: '',
       jobId,
-      status: 'queued',
+      status: 'queued' as const,
       message: 'Scraping job queued. A worker will process it soon.',
       checkStatusUrl: `/api/scrape/status?jobId=${jobId}`
-    };
+    } as any;
   }
   
   // Use new configuration system if requested or by default in production
@@ -1027,7 +1030,7 @@ export async function crawlWebsite(
       });
     }
   } catch (sitemapError) {
-    console.log(`[${jobId}] No sitemap found or error parsing: ${sitemapError.message}`);
+    console.log(`[${jobId}] No sitemap found or error parsing: ${sitemapError instanceof Error ? sitemapError.message : String(sitemapError)}`);
     // Continue with regular crawling
   }
   

@@ -23,8 +23,14 @@ export async function GET(request: NextRequest) {
     if (testType === 'all' || testType === 'schema') {
       const supabase = await createServiceRoleClient();
       
-      try {
-        // Check if tables exist
+      if (!supabase) {
+        results.tests.schema = {
+          success: false,
+          error: 'Database connection unavailable'
+        };
+      } else {
+        try {
+          // Check if tables exist
         const tables = ['conversations', 'messages', 'customer_verifications', 'customer_access_logs', 'customer_data_cache'];
         const tableCheck: any = {};
         const tableErrors: any = {};
@@ -52,6 +58,7 @@ export async function GET(request: NextRequest) {
           success: false,
           error: error.message
         };
+      }
       }
     }
 
@@ -91,10 +98,12 @@ export async function GET(request: NextRequest) {
           
           // Clean up test data
           const supabase = await createServiceRoleClient();
-          await supabase
+          if (supabase) {
+            await supabase
             .from('customer_verifications')
             .delete()
             .eq('conversation_id', testConversationId);
+          }
         } else {
           results.tests.verification = {
             success: false,
@@ -209,24 +218,31 @@ export async function GET(request: NextRequest) {
         
         // Check if logged
         const supabase = await createServiceRoleClient();
-        const { data } = await supabase
-          .from('customer_access_logs')
-          .select('*')
-          .eq('conversation_id', testConversationId)
-          .single();
-        
-        results.tests.logging = {
-          success: !!data,
-          logged: !!data,
-          message: 'Access logging test complete'
-        };
-        
-        // Clean up
-        if (data) {
-          await supabase
+        if (!supabase) {
+          results.tests.logging = {
+            success: false,
+            error: 'Database connection unavailable'
+          };
+        } else {
+          const { data } = await supabase
+            .from('customer_access_logs')
+            .select('*')
+            .eq('conversation_id', testConversationId)
+            .single();
+          
+          results.tests.logging = {
+            success: !!data,
+            logged: !!data,
+            message: 'Access logging test complete'
+          };
+          
+          // Clean up
+          if (data) {
+            await supabase
             .from('customer_access_logs')
             .delete()
             .eq('id', data.id);
+          }
         }
       } catch (error: any) {
         results.tests.logging = {
@@ -267,10 +283,12 @@ export async function GET(request: NextRequest) {
         
         // Clean up
         const supabase = await createServiceRoleClient();
-        await supabase
-          .from('customer_data_cache')
-          .delete()
-          .eq('conversation_id', testConversationId);
+        if (supabase) {
+          await supabase
+            .from('customer_data_cache')
+            .delete()
+            .eq('conversation_id', testConversationId);
+        }
       } catch (error: any) {
         results.tests.caching = {
           success: false,

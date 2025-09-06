@@ -91,12 +91,10 @@ export async function POST(request: NextRequest) {
 
     // Initialize Supabase clients
     const adminSupabase = await createServiceRoleClient();
+    
     if (!adminSupabase) {
       return NextResponse.json(
-        { 
-          error: 'Database connection failed',
-          message: 'Unable to process your request. Please try again later.'
-        },
+        { error: 'Database connection unavailable' },
         { status: 503 }
       );
     }
@@ -698,7 +696,14 @@ export async function POST(request: NextRequest) {
       - If customer says "any" or seems unsure, present ALL relevant options immediately
       - NEVER ask "which type do you need?" before showing what's available
       - Only ask for clarification AFTER listing products, and only if truly necessary
-      - Example: "Need a pump" → Show all pump types available, THEN optionally ask for model/part number`;
+      - Example: "Need a pump" → Show all pump types available, THEN optionally ask for model/part number
+      
+      Product Information Accuracy - MANDATORY:
+      - NEVER make assumptions about product relationships or what's included
+      - Only state facts that are explicitly in the product information provided
+      - If asked "does X include Y", only answer if you have clear information
+      - When uncertain, say "I don't have specific details about what's included with this product"
+      - Suggest contacting customer service for detailed specifications when information is unclear`;
       
     }
     
@@ -786,7 +791,7 @@ export async function POST(request: NextRequest) {
       embeddingResults.forEach((r: any, index: number) => {
         systemContext += `\n${index + 1}. ${r.title}\n`;
         systemContext += `   URL: ${r.url}\n`;
-        systemContext += `   Content: ${r.content.substring(0, 400)}...\n`;
+        systemContext += `   Content: ${r.content.substring(0, 600)}...\n`;
       });
       
       systemContext += `\n\nCRITICAL INSTRUCTIONS - YOU MUST FOLLOW THESE RULES:
@@ -795,6 +800,15 @@ export async function POST(request: NextRequest) {
       3. Include ALL relevant products found (don't hide any)
       4. You can ask clarifying questions AFTER showing the products, but NEVER instead of showing them
       5. Even if the user's query is vague, STILL SHOW the products first, then ask for clarification if needed
+      
+      PRODUCT INFORMATION ACCURACY:
+      - NEVER make assumptions about what a product includes or doesn't include
+      - If asked about product components or what's included:
+        * Only state what you can see in the product content/description
+        * If the information isn't clear, say "I don't have specific details about what's included with this product"
+        * Suggest contacting customer service for detailed product specifications
+      - Do NOT guess or infer product relationships unless explicitly stated
+      - Treat each product as a separate item unless the description clearly states otherwise
       
       FORMATTING RULES - EXTREMELY IMPORTANT:
       - Use markdown links: [Product Name](url) - NOT the full URL text

@@ -12,6 +12,13 @@ export async function GET(
     const domain = resolvedParams.domain;
     const supabase = await createServiceRoleClient();
     
+    if (!supabase) {
+      return NextResponse.json(
+        { error: 'Database connection unavailable' },
+        { status: 503 }
+      );
+    }
+    
     // Get configuration
     const { data: config, error: configError } = await supabase
       .from('customer_configs')

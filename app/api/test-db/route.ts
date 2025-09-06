@@ -7,6 +7,13 @@ export async function GET(request: NextRequest) {
   try {
     const supabase = await createServiceRoleClient();
     
+    if (!supabase) {
+      return NextResponse.json(
+        { error: 'Database connection unavailable' },
+        { status: 503 }
+      );
+    }
+    
     // Test 1: Try direct table query
     const tableTests: any = {};
     const tables = ['conversations', 'messages', 'customer_verifications', 'customer_access_logs', 'customer_data_cache'];

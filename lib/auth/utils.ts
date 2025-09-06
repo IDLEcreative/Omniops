@@ -3,6 +3,9 @@ import { redirect } from 'next/navigation'
 
 export async function getUser() {
   const supabase = await createClient()
+  if (!supabase) {
+    return null
+  }
   const { data: { user }, error } = await supabase.auth.getUser()
   
   if (error || !user) {
@@ -24,6 +27,10 @@ export async function requireAuth() {
 
 export async function signOut() {
   const supabase = await createClient()
+  if (!supabase) {
+    redirect('/login')
+    return
+  }
   await supabase.auth.signOut()
   redirect('/login')
 }

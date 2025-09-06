@@ -5,6 +5,13 @@ export async function GET(request: NextRequest) {
   try {
     const supabase = await createServiceRoleClient();
     
+    if (!supabase) {
+      return NextResponse.json(
+        { error: 'Database connection unavailable' },
+        { status: 503 }
+      );
+    }
+    
     // Test all multi-tenant tables
     const tables = [
       'businesses',

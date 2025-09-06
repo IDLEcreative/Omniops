@@ -152,6 +152,9 @@ export class DomainValidator {
 
       // Check if domain exists in customer_configs
       const supabase = await this.getSupabase()
+      if (!supabase) {
+        throw new Error('Failed to create Supabase client')
+      }
       const { data: customerConfig, error: configError } = await supabase
         .from('customer_configs')
         .select('id, domain')
@@ -164,6 +167,9 @@ export class DomainValidator {
 
       // Check if domain exists in domains table
       const supabase2 = await this.getSupabase()
+      if (!supabase2) {
+        throw new Error('Failed to create Supabase client')
+      }
       const { data: domainRecord, error: domainError } = await supabase2
         .from('domains')
         .select('id, domain')
@@ -176,6 +182,9 @@ export class DomainValidator {
 
       // Check for recent scrape jobs
       const supabase3 = await this.getSupabase()
+      if (!supabase3) {
+        throw new Error('Failed to create Supabase client')
+      }
       const { data: lastScrapeJob, error: jobError } = await supabase3
         .from('scrape_jobs')
         .select('id, status, created_at')
@@ -329,6 +338,9 @@ export class DomainValidator {
       }
 
       const supabase = await this.getSupabase()
+      if (!supabase) {
+        throw new Error('Failed to create Supabase client')
+      }
       const { data: domains, error } = await supabase
         .from('customer_configs')
         .select('domain')

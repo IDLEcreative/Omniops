@@ -10,9 +10,60 @@ const compat = new FlatCompat({
 });
 
 const eslintConfig = [
-  ...compat.extends("next/core-web-vitals", "next/typescript"),
+  // Global ignores - these patterns will be ignored in all configurations
   {
-    ignores: [".next/**", "node_modules/**", "dist/**", "build/**", "coverage/**"],
+    ignores: [
+      // Build outputs
+      ".next/**/*",
+      ".vercel/**/*",
+      "dist/**/*",
+      "build/**/*",
+      "out/**/*",
+      
+      // Dependencies
+      "node_modules/**/*",
+      
+      // Test coverage
+      "coverage/**/*",
+      
+      // Config files
+      "*.config.js",
+      "*.config.ts",
+      "*.config.mjs",
+      "jest.setup.js",
+      
+      // Test and utility files in root
+      "test-*.js",
+      "test-*.ts",
+      "verify-*.js",
+      "verify-*.ts", 
+      "check-*.js",
+      "check-*.ts",
+      "apply-*.js",
+      "diagnose-*.js",
+      "investigate*.js",
+      "execute-*.js",
+      "setup-*.js",
+      
+      // Directories
+      "public/**/*",
+      "docker/**/*",
+      "supabase/**/*",
+      "omniops-scraper/**/*",
+      ".git/**/*",
+      
+      // Generated/temporary files
+      "*.tmp",
+      "*.temp",
+      "*.log",
+      ".env*",
+      ".DS_Store"
+    ]
+  },
+  // Next.js configurations
+  ...compat.extends("next/core-web-vitals", "next/typescript"),
+  // Custom rules
+  {
     rules: {
       "@typescript-eslint/no-explicit-any": "warn",
       "@typescript-eslint/no-unused-vars": "warn",

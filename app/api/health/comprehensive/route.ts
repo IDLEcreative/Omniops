@@ -103,7 +103,19 @@ export async function GET(request: NextRequest) {
   const responseTime = Date.now() - startTime;
 
   // Build response
-  const response = {
+  const response: {
+    status: 'healthy' | 'degraded' | 'unhealthy';
+    timestamp: string;
+    responseTime: string;
+    checks: HealthCheckResult[];
+    summary: {
+      total: number;
+      healthy: number;
+      degraded: number;
+      unhealthy: number;
+    };
+    metrics?: any;
+  } = {
     status: overallStatus,
     timestamp: new Date().toISOString(),
     responseTime: `${responseTime}ms`,
@@ -118,7 +130,7 @@ export async function GET(request: NextRequest) {
 
   // Add detailed metrics if verbose
   if (verbose) {
-    response['metrics'] = await getDetailedMetrics();
+    response.metrics = await getDetailedMetrics();
   }
 
   // Log health check
@@ -150,6 +162,15 @@ async function checkDatabase(): Promise<HealthCheckResult> {
   
   try {
     const supabase = await createClient();
+    
+    if (!supabase) {
+      return {
+        service: 'database',
+        status: 'unhealthy',
+        latency: Date.now() - startTime,
+        error: 'Database connection unavailable',
+      };
+    }
     
     // Perform a simple query
     const { data, error } = await supabase
@@ -370,10 +391,15 @@ async function checkWorkers(): Promise<HealthCheckResult> {
  * Check System Resources
  */
 function checkSystemResources(): HealthCheckResult {
+  const cpus = os.cpus();
+  const cpuCount = cpus?.length || 1;
+  const loadAvg = os.loadavg();
+  const cpuUsage = loadAvg?.[0] ? (loadAvg[0] / cpuCount * 100) : 0;
+  
   const metrics: SystemMetrics = {
     cpu: {
-      usage: os.loadavg()[0] / os.cpus().length * 100,
-      cores: os.cpus().length,
+      usage: cpuUsage,
+      cores: cpuCount,
     },
     memory: {
       used: (os.totalmem() - os.freemem()),

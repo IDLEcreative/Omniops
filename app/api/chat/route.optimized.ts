@@ -268,11 +268,10 @@ export async function POST(request: NextRequest) {
     }
 
     // Wait for all context gathering
-    const [historyData, embeddingResults, verificationResult] = await Promise.all([
-      historyPromise,
-      embeddingSearchPromise,
-      ...contextPromises
-    ]);
+    const contextResults = await Promise.all(contextPromises);
+    const historyData = await historyPromise;
+    const embeddingResults = contextResults.find(r => Array.isArray(r)) || [];
+    const verificationResult = contextResults.find(r => r && typeof r === 'object' && 'level' in r) as { context: string; prompt: string; level: string } | null;
 
     // Build context for OpenAI
     let systemContext = `You are a helpful customer service assistant.`;
@@ -331,7 +330,7 @@ export async function POST(request: NextRequest) {
 
     return NextResponse.json<ChatResponse>({
       message: assistantMessage,
-      conversation_id: conversationId,
+      conversation_id: conversationId!,  // conversationId is guaranteed to be defined at this point
       sources: embeddingResults?.map((r: any) => ({
         url: r.url,
         title: r.title,

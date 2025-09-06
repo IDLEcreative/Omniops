@@ -23,6 +23,14 @@ export async function POST(request: NextRequest) {
       );
     }
     const supabase = await createClient();
+    
+    if (!supabase) {
+      return NextResponse.json(
+        { error: 'Database connection unavailable' },
+        { status: 503 }
+      );
+    }
+    
     const { data: { user } } = await supabase.auth.getUser();
     
     if (!user) {
@@ -39,6 +47,13 @@ export async function POST(request: NextRequest) {
     }
 
     const adminSupabase = await createServiceRoleClient();
+    
+    if (!adminSupabase) {
+      return NextResponse.json(
+        { error: 'Database connection unavailable' },
+        { status: 503 }
+      );
+    }
     
     // Create training data entry
     const { data: trainingData, error: insertError } = await adminSupabase

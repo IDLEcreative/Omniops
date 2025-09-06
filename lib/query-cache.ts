@@ -66,7 +66,9 @@ export class QueryCache {
     // Prevent memory leak - limit cache size
     if (this.memoryCache.size > 1000) {
       const firstKey = this.memoryCache.keys().next().value;
-      this.memoryCache.delete(firstKey);
+      if (firstKey !== undefined) {
+        this.memoryCache.delete(firstKey);
+      }
     }
   }
   

@@ -171,7 +171,7 @@ export class RedisClientWithFallback {
       await this.client.ping();
       this.isRedisAvailable = true;
     } catch (error) {
-      logger.warn('[Redis] Failed to connect, using in-memory fallback:', error);
+      logger.warn('[Redis] Failed to connect, using in-memory fallback:', error as Error);
       this.initializeFallback();
     }
   }
@@ -192,7 +192,7 @@ export class RedisClientWithFallback {
       try {
         return await this.client.get(key);
       } catch (error) {
-        logger.warn('[Redis] Get operation failed, using fallback:', error);
+        logger.warn('[Redis] Get operation failed, using fallback:', error as Error);
       }
     }
     return this.fallback ? await this.fallback.get(key) : null;
@@ -203,7 +203,7 @@ export class RedisClientWithFallback {
       try {
         return await this.client.set(key, value);
       } catch (error) {
-        logger.warn('[Redis] Set operation failed, using fallback:', error);
+        logger.warn('[Redis] Set operation failed, using fallback:', error as Error);
       }
     }
     return this.fallback ? await this.fallback.set(key, value) : null;
@@ -214,7 +214,7 @@ export class RedisClientWithFallback {
       try {
         return await this.client.setex(key, seconds, value);
       } catch (error) {
-        logger.warn('[Redis] Setex operation failed, using fallback:', error);
+        logger.warn('[Redis] Setex operation failed, using fallback:', error as Error);
       }
     }
     return this.fallback ? await this.fallback.setex(key, seconds, value) : null;
@@ -225,7 +225,7 @@ export class RedisClientWithFallback {
       try {
         return await this.client.del(...keys);
       } catch (error) {
-        logger.warn('[Redis] Del operation failed, using fallback:', error);
+        logger.warn('[Redis] Del operation failed, using fallback:', error as Error);
       }
     }
     return this.fallback ? await this.fallback.del(...keys) : 0;
@@ -236,7 +236,7 @@ export class RedisClientWithFallback {
       try {
         return await this.client.exists(key);
       } catch (error) {
-        logger.warn('[Redis] Exists operation failed, using fallback:', error);
+        logger.warn('[Redis] Exists operation failed, using fallback:', error as Error);
       }
     }
     return this.fallback ? await this.fallback.exists(key) : 0;
@@ -247,7 +247,7 @@ export class RedisClientWithFallback {
       try {
         return await this.client.incr(key);
       } catch (error) {
-        logger.warn('[Redis] Incr operation failed, using fallback:', error);
+        logger.warn('[Redis] Incr operation failed, using fallback:', error as Error);
       }
     }
     return this.fallback ? await this.fallback.incr(key) : 0;
@@ -258,7 +258,7 @@ export class RedisClientWithFallback {
       try {
         return await this.client.expire(key, seconds);
       } catch (error) {
-        logger.warn('[Redis] Expire operation failed, using fallback:', error);
+        logger.warn('[Redis] Expire operation failed, using fallback:', error as Error);
       }
     }
     return this.fallback ? await this.fallback.expire(key, seconds) : 0;
@@ -269,7 +269,7 @@ export class RedisClientWithFallback {
       try {
         return await this.client.rpush(key, ...values);
       } catch (error) {
-        logger.warn('[Redis] Rpush operation failed, using fallback:', error);
+        logger.warn('[Redis] Rpush operation failed, using fallback:', error as Error);
       }
     }
     return this.fallback ? await this.fallback.rpush(key, ...values) : 0;
@@ -280,7 +280,7 @@ export class RedisClientWithFallback {
       try {
         return await this.client.lrange(key, start, stop);
       } catch (error) {
-        logger.warn('[Redis] Lrange operation failed, using fallback:', error);
+        logger.warn('[Redis] Lrange operation failed, using fallback:', error as Error);
       }
     }
     return this.fallback ? await this.fallback.lrange(key, start, stop) : [];

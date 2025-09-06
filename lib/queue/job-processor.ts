@@ -1,6 +1,6 @@
 import { Worker, Job, WorkerOptions } from 'bullmq';
 import { getRedisClient } from '../redis-unified';
-import { JobData, JobType, JobPriority } from './queue-manager';
+import { JobData, JobType, JobPriority, FullCrawlJobData, SinglePageJobData, RefreshJobData } from './queue-manager';
 import { scrapePage, crawlWebsite, checkCrawlStatus } from '../scraper-api';
 import { ScrapedPage } from '../scraper-api';
 
@@ -256,13 +256,13 @@ export class JobProcessor {
     try {
       await this.updateProgress(job, {
         percentage: 5,
-        message: `Starting full crawl of ${jobData.url}`,
-        currentUrl: jobData.url,
+        message: `Starting full crawl of ${(jobData as FullCrawlJobData).url}`,
+        currentUrl: (jobData as FullCrawlJobData).url,
       });
 
       // Start the crawl using the existing scraper-api
-      const crawlResult = await crawlWebsite(jobData.url, {
-        ...jobData.config,
+      const crawlResult = await crawlWebsite((jobData as FullCrawlJobData).url, {
+        ...(jobData as any).config,
         onProgress: async (progress: any) => {
           // Update progress based on crawl progress
           const percentage = Math.min(95, Math.max(10, progress.percentage || 0));
@@ -306,16 +306,16 @@ export class JobProcessor {
       await this.updateProgress(job, {
         percentage: 100,
         message: 'Full crawl completed successfully',
-        pagesProcessed: crawlResult.completed || 0,
-        totalPages: crawlResult.total || 0,
+        pagesProcessed: (crawlResult as any).completed || 0,
+        totalPages: (crawlResult as any).total || 0,
       });
 
       return {
         success: true,
         data: crawlResult,
         duration: Date.now() - startTime,
-        pagesProcessed: crawlResult.completed || 0,
-        totalPages: crawlResult.total || 0,
+        pagesProcessed: (crawlResult as any).completed || 0,
+        totalPages: (crawlResult as any).total || 0,
       };
     } catch (error) {
       const errorMessage = error instanceof Error ? error.message : 'Unknown error';
@@ -403,7 +403,7 @@ export class JobProcessor {
   private async processJob(job: Job<JobData>): Promise<JobResult> {
     const { data: jobData } = job;
     
-    console.log(`Processing job ${job.id} of type ${jobData.type} for URL: ${jobData.url}`);
+    console.log(`Processing job ${job.id} of type ${jobData.type} for URL: ${(jobData as any).url || 'N/A'}`);
 
     // Add job metadata
     const startTime = Date.now();

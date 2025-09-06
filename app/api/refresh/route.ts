@@ -25,6 +25,13 @@ export async function POST(request: NextRequest) {
     
     const supabase = await createClient();
     
+    if (!supabase) {
+      return NextResponse.json(
+        { error: 'Database connection unavailable' },
+        { status: 503 }
+      );
+    }
+    
     // Check if domain exists and user has access
     const { data: domain, error: domainError } = await supabase
       .from('domains')
@@ -186,6 +193,13 @@ export async function GET(request: NextRequest) {
   }
   
   const supabase = await createClient();
+  
+  if (!supabase) {
+    return NextResponse.json(
+      { error: 'Database connection unavailable' },
+      { status: 503 }
+    );
+  }
   
   try {
     if (jobId) {

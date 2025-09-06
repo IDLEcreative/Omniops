@@ -120,6 +120,13 @@ export async function POST(request: NextRequest) {
     const supabase = await createServiceRoleClient();
     const userSupabase = await createClient();
     
+    if (!supabase || !userSupabase) {
+      return NextResponse.json(
+        { error: 'Database connection unavailable' },
+        { status: 503 }
+      );
+    }
+    
     // Get the authenticated user's customer ID
     let customerId: string | undefined;
     try {

@@ -94,7 +94,7 @@ export class OrderModificationService {
       const addressText = addressMatch[1];
       
       // Try to parse US-style address
-      const usAddressMatch = addressText.match(/(\d+\s+[^,]+),?\s*([^,]+),?\s*([A-Z]{2})\s+(\d{5}(?:-\d{4})?)/i);
+      const usAddressMatch = addressText?.match(/(\d+\s+[^,]+),?\s*([^,]+),?\s*([A-Z]{2})\s+(\d{5}(?:-\d{4})?)/i);
       if (usAddressMatch) {
         newAddress.street = usAddressMatch[1];
         newAddress.city = usAddressMatch[2];
@@ -107,7 +107,7 @@ export class OrderModificationService {
     let reason = '';
     const reasonMatch = message.match(/(?:because|reason:|due to)\s*(.+?)(?:\.|$)/i);
     if (reasonMatch) {
-      reason = reasonMatch[1].trim();
+      reason = reasonMatch[1]?.trim() || '';
     }
     
     return {
@@ -463,6 +463,11 @@ export class OrderModificationService {
   ): Promise<void> {
     try {
       const supabase = await createServiceRoleClient();
+      
+      if (!supabase) {
+        console.error('Database connection unavailable for logging modification');
+        return;
+      }
       
       await supabase.from('order_modifications_log').insert({
         domain: this.domain,
