@@ -205,6 +205,12 @@ Required environment variables (copy `.env.example` to `.env.local`):
 ### ACTIVE CONTRIBUTORS
 - This section contains critical guidelines that must be followed
 
+### Hallucination Prevention
+- **CRITICAL**: The chat system has strict anti-hallucination measures in place
+- See `docs/HALLUCINATION_PREVENTION.md` for comprehensive documentation
+- Key principle: Always admit uncertainty rather than making false claims
+- Run `npx tsx test-hallucination-prevention.ts` after any chat prompt changes
+
 ## Optimization Philosophy
 
 ### Core Principles

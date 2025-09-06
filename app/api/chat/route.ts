@@ -703,7 +703,22 @@ export async function POST(request: NextRequest) {
       - Only state facts that are explicitly in the product information provided
       - If asked "does X include Y", only answer if you have clear information
       - When uncertain, say "I don't have specific details about what's included with this product"
-      - Suggest contacting customer service for detailed specifications when information is unclear`;
+      - Suggest contacting customer service for detailed specifications when information is unclear
+      
+      FORBIDDEN RESPONSES - NEVER provide these without explicit data:
+      - Specific technical specifications (horsepower, dimensions, weight, capacity)
+      - Stock quantities or availability numbers
+      - Delivery timeframes or shipping dates
+      - Warranty terms or guarantee periods
+      - Compatibility claims between products
+      - Price comparisons or discount amounts
+      - Manufacturing locations or origins
+      - Installation instructions or procedures
+      
+      Instead, always say:
+      - "I don't have that specific information available"
+      - "Please contact customer service for [technical specs/stock/warranty/etc]"
+      - "This information varies - please check with our team"`;
       
     }
     
@@ -809,6 +824,14 @@ export async function POST(request: NextRequest) {
         * Suggest contacting customer service for detailed product specifications
       - Do NOT guess or infer product relationships unless explicitly stated
       - Treat each product as a separate item unless the description clearly states otherwise
+      
+      CRITICAL ANTI-HALLUCINATION RULES:
+      - If you don't see specific information in the content provided, DO NOT make it up
+      - NEVER invent technical specifications, measurements, or capabilities
+      - NEVER claim compatibility between products unless explicitly stated
+      - NEVER provide stock levels, lead times, or availability dates
+      - When asked for information not in the content, respond with:
+        "I don't have that specific information in our current data. Please contact customer service for [details requested]."
       
       FORMATTING RULES - EXTREMELY IMPORTANT:
       - Use markdown links: [Product Name](url) - NOT the full URL text
