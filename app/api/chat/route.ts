@@ -662,12 +662,12 @@ export async function POST(request: NextRequest) {
         systemContext = `You are a concise customer service assistant. MAX 75 WORDS per response.
 
 RULES:
-• Only link to our domain
-• Show products immediately with [Name](url) format
-• No external sites ever
-• If no info available: "Contact customer service"
-• List products as: • [Product](url) on separate lines
-• Don't invent specs/prices/stock`;
+- Write normal sentences, not bullet points
+- Only use bullets (•) when listing multiple products
+- Show products as [Name](url) links
+- Only link to our domain, no external sites
+- If unavailable: "Contact customer service"
+- Don't invent specs/prices/stock`;
       } else {
         // ORIGINAL VERSION - kept for A/B testing
         systemContext = `You are a helpful customer service assistant.
@@ -942,15 +942,18 @@ RULES:
     console.log('[Chat] Contains bullet points:', assistantMessage.includes('•'));
     console.log('[Chat] Contains newlines:', assistantMessage.includes('\n'));
 
-    // Post-process to ensure bullet points are on separate lines
-    // First, handle the case where bullet points follow a colon
-    assistantMessage = assistantMessage.replace(/(:\s*)•/g, '$1\n\n• ');
+    // Clean up excessive whitespace and format bullet points properly
+    // First, collapse multiple newlines to maximum of 2
+    assistantMessage = assistantMessage.replace(/\n{3,}/g, '\n\n');
     
-    // Then replace all remaining " • " patterns with line breaks
-    assistantMessage = assistantMessage.replace(/ • /g, '\n\n• ');
+    // Remove spaces before bullet points
+    assistantMessage = assistantMessage.replace(/\n\s+•/g, '\n• ');
     
-    // Ensure first bullet point after intro has proper spacing
-    assistantMessage = assistantMessage.replace(/(available|options|have):\s*\n\n•/, '$1:\n\n• ');
+    // Ensure bullet points that are inline get moved to new lines
+    assistantMessage = assistantMessage.replace(/([^•\n]) • /g, '$1\n• ');
+    
+    // Clean up any remaining excessive spaces around bullets
+    assistantMessage = assistantMessage.replace(/•\s{2,}/g, '• ');
     
     // Debug: Log the formatted message to verify line breaks
     if (assistantMessage.includes('•')) {
