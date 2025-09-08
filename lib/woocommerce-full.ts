@@ -93,7 +93,10 @@ export const ProductSchema = BaseSchema.extend({
   name: z.string(),
   slug: z.string(),
   permalink: z.string(),
-  type: z.enum(['simple', 'grouped', 'external', 'variable']),
+  type: z.enum([
+    'simple', 'grouped', 'external', 'variable',
+    'variation', 'bundle', 'subscription', 'booking', 'composite'
+  ]).or(z.string()), // Fallback for unknown product types
   status: z.enum(['draft', 'pending', 'private', 'publish']),
   featured: z.boolean(),
   catalog_visibility: z.enum(['visible', 'catalog', 'search', 'hidden']),

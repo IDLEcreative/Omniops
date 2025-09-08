@@ -215,7 +215,7 @@ export interface ProductListParams extends ListParams {
   parent_exclude?: number[];
   slug?: string;
   status?: 'any' | 'draft' | 'pending' | 'private' | 'publish';
-  type?: 'simple' | 'grouped' | 'external' | 'variable';
+  type?: 'simple' | 'grouped' | 'external' | 'variable' | 'variation' | 'bundle' | 'subscription' | 'booking' | 'composite' | string;
   sku?: string;
   featured?: boolean;
   category?: string;

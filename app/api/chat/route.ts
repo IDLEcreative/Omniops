@@ -10,10 +10,7 @@ import { searchSimilarContent } from '@/lib/embeddings';
 import { CustomerVerification } from '@/lib/customer-verification';
 import { SimpleCustomerVerification } from '@/lib/customer-verification-simple';
 import { QueryCache } from '@/lib/query-cache';
-import { CustomerServiceAgent } from '@/lib/agents/customer-service-agent';
-import { WooCommerceAgent } from '@/lib/agents/woocommerce-agent';
-import { selectProviderAgent } from '@/lib/agents/router';
-import { getDynamicWooCommerceClient } from '@/lib/woocommerce-dynamic';
+import { resolveProvider } from '@/lib/providers/router';
 import { sanitizeOutboundLinks } from '@/lib/link-sanitizer';
 
 // Lazy load OpenAI client to avoid build-time errors
@@ -620,7 +617,7 @@ export async function POST(request: NextRequest) {
     // Find the verification result (it's the last item in contextResults if customer verification was triggered)
     const verificationResult = isCustomerQuery ? contextResults[contextResults.length - 1] : null;
 
-    // Build context for OpenAI with enhanced WooCommerce support
+    // Build context for OpenAI with provider-specific support
     let systemContext = '';
     
     // Use enhanced instructions if this is a customer query
@@ -638,11 +635,10 @@ export async function POST(request: NextRequest) {
         }
       }
       
-      // Decide which provider agent to use (modular routing)
-      const provider = selectProviderAgent(config as any, process.env);
-      const ProviderAgent = provider === 'woocommerce' ? WooCommerceAgent : CustomerServiceAgent;
+      // Decide which provider to use (modular routing)
+      const provider = resolveProvider(config as any, process.env);
 
-      systemContext = ProviderAgent.buildCompleteContext(
+      systemContext = provider.agent.buildCompleteContext(
         result.level || 'none',
         result.context || '',
         result.prompt || '',
@@ -656,7 +652,25 @@ export async function POST(request: NextRequest) {
       - Use the conversation history to understand ambiguous questions.`;
     } else {
       // Default context for non-customer queries
-      systemContext = `You are a helpful customer service assistant.
+      // Check if we should use simplified prompt (A/B testing)
+      const useSimplifiedPrompt = process.env.USE_SIMPLIFIED_PROMPT === 'true';
+      
+      console.log('[Chat] Using prompt version:', useSimplifiedPrompt ? 'SIMPLIFIED' : 'ORIGINAL');
+      
+      if (useSimplifiedPrompt) {
+        // SIMPLIFIED VERSION - 91% shorter, focuses on essentials
+        systemContext = `You are a concise customer service assistant. MAX 75 WORDS per response.
+
+RULES:
+• Only link to our domain
+• Show products immediately with [Name](url) format
+• No external sites ever
+• If no info available: "Contact customer service"
+• List products as: • [Product](url) on separate lines
+• Don't invent specs/prices/stock`;
+      } else {
+        // ORIGINAL VERSION - kept for A/B testing
+        systemContext = `You are a helpful customer service assistant.
       
       CRITICAL:
       - Never recommend or link to external shops, competitors, manufacturer websites, community blogs/forums, or third‑party documentation.
@@ -719,59 +733,23 @@ export async function POST(request: NextRequest) {
       - "I don't have that specific information available"
       - "Please contact customer service for [technical specs/stock/warranty/etc]"
       - "This information varies - please check with our team"`;
+      }
       
     }
     
-    // Try to surface matching categories (WooCommerce) for any query
+    // Provider-specific context enrichments (e.g., WooCommerce category links)
     let matchedCategories: Array<{ name: string; url: string }> = [];
     try {
-      const wooEnabled = config?.features?.woocommerce?.enabled !== false; // default true
-      if (wooEnabled && domain) {
-        const browseDomain = /localhost|127\.0\.0\.1/i.test(domain) ? 'thompsonseparts.co.uk' : domain.replace(/^https?:\/\//, '');
-        const wc = await getDynamicWooCommerceClient(browseDomain);
-        if (wc) {
-          // Cache categories per domain to avoid repeated API calls
-          const categories = await QueryCache.execute(
-            {
-              key: `woo_categories_${domainId || browseDomain}`,
-              domainId: domainId || undefined,
-              ttlSeconds: 3600,
-              useMemoryCache: true,
-              useDbCache: true,
-              supabase: adminSupabase
-            },
-            async () => await wc.getProductCategories({ per_page: 100 })
-          );
-          // Simple relevance scoring based on token overlap
-          const msg = message.toLowerCase();
-          const tokens = new Set<string>(msg.split(/[^a-z0-9]+/i).filter(Boolean) as string[]);
-          const scored = categories.map((c: any) => {
-            const name = (c.name || '').toLowerCase();
-            const nameTokens = new Set<string>(name.split(/[^a-z0-9]+/i).filter(Boolean) as string[]);
-            let score = 0;
-            nameTokens.forEach(t => { if (tokens.has(t)) score += 1; });
-            if (score === 0 && name && msg.includes(name)) score += 2; // direct phrase match bonus
-            return { cat: c, score };
-          }).filter(x => x.score > 0);
-
-          scored.sort((a, b) => b.score - a.score);
-          const top = scored.slice(0, 2);
-          
-          // Debug logging
-          if (scored.length > 0) {
-            console.log('[Chat] Category matching results:', 
-              scored.slice(0, 5).map(s => ({ name: s.cat.name, score: s.score }))
-            );
-          }
-          
-          matchedCategories = top.map(({ cat }) => ({
-            name: cat.name,
-            url: `https://${browseDomain}/product-category/${cat.slug}/`
-          }));
-        }
-      }
+      const provider = resolveProvider(config as any, process.env);
+      const enrichments = await provider.getContextEnrichments({
+        message,
+        domain,
+        domainId,
+        supabase: adminSupabase
+      });
+      matchedCategories = enrichments.matchedCategories || [];
     } catch (e) {
-      console.warn('[Chat] Category detection failed (non-fatal):', e);
+      console.warn('[Chat] Provider enrichment failed (non-fatal):', e);
     }
     
     // Add contact information if this is a contact request
