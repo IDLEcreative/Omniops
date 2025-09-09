@@ -70,9 +70,19 @@ export class WooCommerceCartTracker {
       // Transform orders into abandoned cart format
       const abandonedCarts: AbandonedCart[] = orders
         .filter(order => {
+          // Check if order has an abandoned-like status
+          if (!includeStatuses.includes(order.status)) {
+            return false;
+          }
+          
           const orderDate = new Date(order.date_created);
           const orderValue = parseFloat(order.total);
-          return orderDate < cutoffTime && orderValue >= minValue;
+          
+          // If hoursOld is 0, include all orders regardless of age
+          // Otherwise, only include orders older than the specified hours
+          const meetsAgeRequirement = hoursOld === 0 || orderDate < cutoffTime;
+          
+          return meetsAgeRequirement && orderValue >= minValue;
         })
         .map(order => this.transformOrderToCart(order));
 

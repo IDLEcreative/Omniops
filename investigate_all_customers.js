@@ -103,10 +103,10 @@ async function investigateAllCustomers() {
     console.log('   No content found in website_content table');
   }
 
-  // 5. Check content_embeddings table (alternative embeddings storage)
-  console.log('\n5. CHECKING content_embeddings TABLE:');
+  // 5. Check page_embeddings table (alternative embeddings storage)
+  console.log('\n5. CHECKING page_embeddings TABLE:');
   const { data: contentEmbeddings } = await supabase
-    .from('content_embeddings')
+    .from('page_embeddings')
     .select('customer_id')
     .limit(100);
   
@@ -120,14 +120,14 @@ async function investigateAllCustomers() {
     // Count embeddings per customer
     for (const customerId of uniqueContentCustomers) {
       const { data: count } = await supabase
-        .from('content_embeddings')
+        .from('page_embeddings')
         .select('id', { count: 'exact', head: true })
         .eq('customer_id', customerId);
       
       console.log(`      "${customerId}": ${count ? count.length : 0} embeddings`);
     }
   } else {
-    console.log('   No embeddings found in content_embeddings table');
+    console.log('   No embeddings found in page_embeddings table');
   }
 
   console.log('\n=== END OF INVESTIGATION ===');

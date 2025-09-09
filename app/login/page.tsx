@@ -38,7 +38,7 @@ function LoginForm() {
         setError(error.message)
         setLoading(false)
       } else {
-        const redirectTo = searchParams.get('redirectTo') || '/admin'
+        const redirectTo = searchParams.get('redirectTo') || '/dashboard'
         router.push(redirectTo)
         router.refresh()
       }
@@ -80,7 +80,7 @@ function LoginForm() {
         <CardHeader>
           <CardTitle>Login</CardTitle>
           <CardDescription>
-            Enter your credentials to access the admin panel
+            Enter your credentials to access your dashboard
           </CardDescription>
         </CardHeader>
         <form onSubmit={handleSubmit}>

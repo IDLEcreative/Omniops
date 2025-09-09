@@ -93,7 +93,7 @@ The application follows a service-oriented architecture with clear separation of
 Main tables:
 - `customer_configs`: Customer settings and encrypted credentials
 - `scraped_pages` / `website_content`: Indexed website content
-- `page_embeddings` / `content_embeddings`: Vector embeddings for semantic search
+- `page_embeddings`: Vector embeddings for semantic search
 - `conversations` & `messages`: Chat history
 - `structured_extractions`: FAQs, products, contact info
 - `content_refresh_jobs`: Automated content update tracking
@@ -108,20 +108,37 @@ Required environment variables (copy `.env.example` to `.env.local`):
 
 ### Docker Setup
 - **Docker Desktop**: Version 28.3.2 installed and configured
-- **Docker Commands**:
-  ```bash
-  # Start Docker Desktop (macOS)
-  open -a "Docker"
-  
-  # Verify Docker is running
-  docker info
-  
-  # Common Docker commands for this project
-  docker-compose up -d     # Start Redis and other services
-  docker-compose down      # Stop all services
-  docker-compose ps        # Check service status
-  docker-compose logs -f   # View service logs
-  ```
+- **Full Docker Documentation**: See [DOCKER_README.md](DOCKER_README.md) for complete setup guide
+
+#### Quick Docker Commands
+```bash
+# Start Docker Desktop (macOS)
+open -a "Docker"
+
+# Build and run the entire application stack
+docker-compose up -d                    # Production mode
+docker-compose -f docker-compose.dev.yml up -d  # Development with hot reload
+
+# Container management
+docker-compose down                     # Stop all services
+docker-compose ps                       # Check service status
+docker-compose logs -f app              # View application logs
+docker-compose logs -f redis            # View Redis logs
+
+# Rebuild after code changes
+docker-compose up -d --build            # Rebuild and restart
+
+# Access running container
+docker exec -it omniops-app sh         # Shell into app container
+```
+
+#### Docker Files Structure
+- `Dockerfile` - Production multi-stage build
+- `Dockerfile.dev` - Development with hot reload
+- `docker-compose.yml` - Production orchestration
+- `docker-compose.dev.yml` - Development orchestration
+- `.dockerignore` - Build exclusions
+- `.env.docker.example` - Environment template
 
 ## Development Workflow
 

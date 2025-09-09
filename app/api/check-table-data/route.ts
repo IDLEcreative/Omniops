@@ -32,9 +32,9 @@ export async function GET() {
       .select('*', { count: 'exact', head: false })
       .limit(1);
 
-    // Check content_embeddings table
+    // Check page_embeddings table (content_embeddings was renamed)
     const { data: contentEmbeddings, count: contentEmbCount } = await supabase
-      .from('content_embeddings')
+      .from('page_embeddings')
       .select('*', { count: 'exact', head: false })
       .limit(1);
 
@@ -62,7 +62,7 @@ export async function GET() {
         query_text: `
           SELECT column_name, data_type 
           FROM information_schema.columns 
-          WHERE table_name IN ('page_embeddings', 'content_embeddings')
+          WHERE table_name = 'page_embeddings'
           AND table_schema = 'public'
           ORDER BY table_name, ordinal_position
         `
@@ -77,8 +77,7 @@ export async function GET() {
         customer_configs: configCount || 0,
         scraped_pages: scrapedCount || 0,
         website_content: websiteCount || 0,
-        page_embeddings: pageEmbCount || 0,
-        content_embeddings: contentEmbCount || 0
+        page_embeddings: pageEmbCount || 0
       },
       samples: {
         customer_configs: sampleConfigs || [],

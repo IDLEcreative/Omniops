@@ -46,8 +46,8 @@ export const UI_CONSTANTS = {
 export const API_ROUTES = {
   chat: '/api/chat',
   scrape: '/api/scrape',
-  config: '/api/admin/config',
-  testConnection: '/api/admin/test-connection',
+  config: '/api/dashboard/config',
+  testConnection: '/api/dashboard/test-connection',
   products: '/api/woocommerce/products',
   orders: '/api/woocommerce/orders',
   support: '/api/support',

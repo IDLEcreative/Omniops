@@ -2,7 +2,8 @@
 
 import { useState } from "react";
 import Link from "next/link";
-import { usePathname } from "next/navigation";
+import { usePathname, useRouter } from "next/navigation";
+import { useAuth } from "@/components/auth/auth-provider";
 import { 
   LayoutDashboard, 
   MessageSquare, 
@@ -137,6 +138,34 @@ export default function DashboardLayout({
   const [sidebarOpen, setSidebarOpen] = useState(false);
   const [collapsed, setCollapsed] = useState(false);
   const pathname = usePathname();
+  const router = useRouter();
+  const { user, signOut, loading } = useAuth();
+  
+  const handleLogout = async () => {
+    try {
+      await signOut();
+      router.push('/login');
+    } catch (error) {
+      console.error('Logout error:', error);
+      // Still redirect even if logout fails
+      router.push('/login');
+    }
+  };
+  
+  // Get user initials for avatar
+  const getUserInitials = () => {
+    if (!user?.email) return '?';
+    const email = user.email;
+    // Try to get initials from full name if available
+    if (user.user_metadata?.full_name) {
+      const names = user.user_metadata.full_name.split(' ');
+      return names.map(n => n[0]).join('').toUpperCase().slice(0, 2);
+    }
+    // Otherwise use first two characters of email
+    return email.slice(0, 2).toUpperCase();
+  };
+  
+  const displayName = user?.user_metadata?.full_name || user?.email?.split('@')[0] || 'User';
 
   return (
     <TooltipProvider>
@@ -331,40 +360,70 @@ export default function DashboardLayout({
               <ThemeToggle />
 
               {/* User menu */}
-              <DropdownMenu>
-                <DropdownMenuTrigger asChild>
-                  <Button variant="ghost" className="relative h-9 w-9 rounded-full">
-                    <Avatar className="h-8 w-8">
-                      <AvatarImage src="/avatars/01.png" alt="@johndoe" />
-                      <AvatarFallback>JD</AvatarFallback>
-                    </Avatar>
-                  </Button>
-                </DropdownMenuTrigger>
-                <DropdownMenuContent className="w-56" align="end" forceMount>
-                  <DropdownMenuLabel className="font-normal">
-                    <div className="flex flex-col space-y-1">
-                      <p className="text-sm font-medium leading-none">John Doe</p>
-                      <p className="text-xs leading-none text-muted-foreground">
-                        john.doe@example.com
-                      </p>
-                    </div>
-                  </DropdownMenuLabel>
+              {loading ? (
+                <div className="flex items-center gap-2 text-sm text-muted-foreground">
+                  <div className="h-8 w-8 rounded-full bg-muted animate-pulse" />
+                </div>
+              ) : user ? (
+                <div className="flex items-center gap-2">
+                  {/* Show email/name next to avatar on larger screens */}
+                  <div className="hidden md:flex flex-col items-end mr-2">
+                    <p className="text-sm font-medium">{displayName}</p>
+                    <p className="text-xs text-muted-foreground">Logged in</p>
+                  </div>
+                  <DropdownMenu>
+                    <DropdownMenuTrigger asChild>
+                      <Button variant="ghost" className="relative h-9 w-9 rounded-full ring-2 ring-primary/20">
+                        <Avatar className="h-8 w-8">
+                          <AvatarImage src={user?.user_metadata?.avatar_url} alt={user?.email} />
+                          <AvatarFallback className="bg-primary/10 text-primary font-semibold">
+                            {getUserInitials()}
+                          </AvatarFallback>
+                        </Avatar>
+                        {/* Online indicator */}
+                        <span className="absolute bottom-0 right-0 h-2 w-2 rounded-full bg-green-500 ring-2 ring-background" />
+                      </Button>
+                    </DropdownMenuTrigger>
+                    <DropdownMenuContent className="w-56" align="end" forceMount>
+                      <DropdownMenuLabel className="font-normal">
+                        <div className="flex flex-col space-y-1">
+                          <p className="text-sm font-medium leading-none">
+                            {displayName}
+                          </p>
+                          <p className="text-xs leading-none text-muted-foreground">
+                            {user?.email}
+                          </p>
+                        </div>
+                      </DropdownMenuLabel>
                   <DropdownMenuSeparator />
-                  <DropdownMenuItem>
-                    <User className="mr-2 h-4 w-4" />
-                    <span>Profile</span>
+                  <DropdownMenuItem asChild>
+                    <Link href="/dashboard/settings">
+                      <User className="mr-2 h-4 w-4" />
+                      <span>Profile</span>
+                    </Link>
                   </DropdownMenuItem>
-                  <DropdownMenuItem>
-                    <Settings className="mr-2 h-4 w-4" />
-                    <span>Settings</span>
+                  <DropdownMenuItem asChild>
+                    <Link href="/dashboard/settings">
+                      <Settings className="mr-2 h-4 w-4" />
+                      <span>Settings</span>
+                    </Link>
                   </DropdownMenuItem>
                   <DropdownMenuSeparator />
-                  <DropdownMenuItem className="text-red-600">
-                    <LogOut className="mr-2 h-4 w-4" />
-                    <span>Log out</span>
-                  </DropdownMenuItem>
-                </DropdownMenuContent>
-              </DropdownMenu>
+                      <DropdownMenuItem 
+                        className="text-red-600 cursor-pointer"
+                        onClick={handleLogout}
+                      >
+                        <LogOut className="mr-2 h-4 w-4" />
+                        <span>Log out</span>
+                      </DropdownMenuItem>
+                    </DropdownMenuContent>
+                  </DropdownMenu>
+                </div>
+              ) : (
+                <Button variant="ghost" asChild>
+                  <Link href="/login">Sign in</Link>
+                </Button>
+              )}
             </div>
           </header>
 

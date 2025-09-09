@@ -7,7 +7,8 @@ import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Alert, AlertDescription } from "@/components/ui/alert";
 import { 
-  ArrowLeft, 
+  ArrowLeft,
+  ArrowRight, 
   Loader2, 
   ShoppingCart, 
   TrendingUp,
@@ -88,6 +89,8 @@ export default function WooCommerceAnalyticsPage() {
         setData(result);
         setIsCached(result.cached || false);
         setCachedAt(result.cachedAt || null);
+      } else if (result.needsConfiguration) {
+        setError('WooCommerce is not configured. Please add your WooCommerce credentials in Settings → Integrations.');
       } else {
         setError(result.error || 'Failed to load dashboard');
       }
@@ -194,13 +197,41 @@ export default function WooCommerceAnalyticsPage() {
   }
 
   if (error) {
+    const needsConfiguration = error.includes('not configured');
     return (
       <div className="flex-1 p-6 max-w-7xl mx-auto">
+        <div className="flex items-center gap-2 mb-4">
+          <Button 
+            variant="ghost" 
+            size="sm"
+            onClick={() => router.push('/dashboard/integrations')}
+          >
+            <ArrowLeft className="h-4 w-4 mr-2" />
+            Back to Integrations
+          </Button>
+        </div>
+        
         <Alert className="mb-4 border-destructive">
           <AlertTriangle className="h-4 w-4" />
-          <AlertDescription>{error}</AlertDescription>
+          <AlertDescription className="text-sm">{error}</AlertDescription>
         </Alert>
-        <Button onClick={() => loadDashboard()}>Try Again</Button>
+        
+        <div className="flex gap-2">
+          {needsConfiguration ? (
+            <Button 
+              onClick={() => router.push('/dashboard/settings?tab=integrations')}
+              className="gap-2"
+            >
+              Configure WooCommerce
+              <ArrowRight className="h-4 w-4" />
+            </Button>
+          ) : (
+            <Button onClick={() => loadDashboard()}>
+              <RefreshCw className="h-4 w-4 mr-2" />
+              Try Again
+            </Button>
+          )}
+        </div>
       </div>
     );
   }

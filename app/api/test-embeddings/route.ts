@@ -44,7 +44,7 @@ export async function GET(request: Request) {
   // 3. Check embeddings count
   for (const d of domains || []) {
     const { count } = await supabase
-      .from('content_embeddings')
+      .from('page_embeddings')
       .select('*', { count: 'exact', head: true })
       .eq('domain_id', d.id);
       

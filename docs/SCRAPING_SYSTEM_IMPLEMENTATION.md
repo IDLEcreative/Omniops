@@ -38,8 +38,7 @@ This document details the complete implementation of the web scraping system for
 - domains                   # Websites being scraped
 - scraped_pages            # Raw page content
 - website_content          # Structured content
-- page_embeddings          # Vector embeddings for pages
-- content_embeddings       # Vector embeddings for content chunks
+- page_embeddings          # Vector embeddings for semantic search
 - structured_extractions   # Flexible JSONB for products/FAQs/etc
 - ai_optimized_content     # AI-processed content
 - content_hashes           # Deduplication tracking
@@ -438,7 +437,6 @@ const { data: savedPage } = await supabase
 - `content_hashes` - Deduplication tracking
 - `page_content_references` - Link analysis
 - `content_refresh_jobs` - Automatic updates
-- `content_embeddings` - Alternative embedding strategy
 
 ### Why Tables Are Empty
 These tables represent planned features in the architecture but are not yet implemented. They remain in the schema for future development without requiring migrations.

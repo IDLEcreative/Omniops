@@ -42,9 +42,9 @@ training_data
 ├── metadata (JSONB)
 └── timestamps
 
-content_embeddings
+page_embeddings
 ├── id (UUID)
-├── content_id (UUID)
+├── page_id (UUID)
 ├── chunk_text (TEXT)
 ├── embedding (vector)
 └── metadata (JSONB)

@@ -36,9 +36,9 @@ export async function DELETE(
     
     // Delete associated embeddings first
     const { error: embeddingError } = await adminSupabase
-      .from('content_embeddings')
+      .from('page_embeddings')
       .delete()
-      .eq('content_id', resolvedParams.id);
+      .eq('page_id', resolvedParams.id);
 
     if (embeddingError) {
       console.error('Error deleting embeddings:', embeddingError);

@@ -6,7 +6,7 @@ This document details the fixes applied to restore the Retrieval-Augmented Gener
 ## Issues Identified and Resolved
 
 ### 1. Database Function Mismatch
-**Problem**: The `search_embeddings` RPC function was searching for a non-existent `content_embeddings` table (deleted in migration 001) instead of the existing `page_embeddings` table.
+**Problem**: The `search_embeddings` RPC function was searching for a non-existent `content_embeddings` table (removed to simplify schema) instead of the existing `page_embeddings` table.
 
 **Root Cause**: Database migration inconsistency where the function wasn't updated after table restructuring.
 

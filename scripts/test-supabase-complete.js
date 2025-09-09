@@ -108,7 +108,6 @@ async function testSupabaseConnection() {
             { table_name: 'conversations' },
             { table_name: 'messages' },
             { table_name: 'website_content' },
-            { table_name: 'content_embeddings' },
             { table_name: 'structured_extractions' },
             { table_name: 'content_refresh_jobs' }
           ],

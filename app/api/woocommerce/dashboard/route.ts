@@ -2,16 +2,46 @@ import { NextRequest, NextResponse } from 'next/server';
 import { WooCommerceAPI } from '@/lib/woocommerce-api';
 import { WooCommerceCartTracker } from '@/lib/woocommerce-cart-tracker';
 import { getDashboardCache } from '@/lib/woocommerce-cache';
+import { createClient } from '@/lib/supabase-server';
+import { customerConfigLoader } from '@/lib/customer-config-loader';
 
 export async function GET(request: NextRequest) {
   try {
-    const wc = new WooCommerceAPI();
-    const cartTracker = new WooCommerceCartTracker();
+    // First, try to get the customer config from the database
+    const supabase = await createClient();
+    if (!supabase) {
+      return NextResponse.json({ 
+        error: 'Database connection failed',
+        success: false 
+      }, { status: 500 });
+    }
+    
+    // Get the domain from the request or use a default
+    const domain = request.headers.get('host')?.split(':')[0] || 'localhost';
+    
+    // Load customer config which includes WooCommerce credentials
+    const config = await customerConfigLoader.getConfig(domain);
+    
+    if (!config?.woocommerce_url || !config?.woocommerce_consumer_key || !config?.woocommerce_consumer_secret) {
+      return NextResponse.json({ 
+        error: 'WooCommerce is not configured. Please add your WooCommerce credentials in Settings → Integrations.',
+        success: false,
+        needsConfiguration: true
+      }, { status: 400 });
+    }
+    
+    // Initialize WooCommerce API with saved credentials
+    const wc = new WooCommerceAPI({
+      url: config.woocommerce_url,
+      consumerKey: config.woocommerce_consumer_key,
+      consumerSecret: config.woocommerce_consumer_secret
+    });
+    
+    const cartTracker = new WooCommerceCartTracker(wc);
     const cache = getDashboardCache();
     
-    // Get tenant ID (in a real app, this would come from auth/session)
-    // For now, use the store URL as tenant ID
-    const tenantId = process.env.WOOCOMMERCE_URL?.replace(/https?:\/\//, '').replace(/\//g, '') || 'default';
+    // Get tenant ID from the configured store URL
+    const tenantId = config.woocommerce_url?.replace(/https?:\/\//, '').replace(/\//g, '') || domain;
     
     // Check if we want to force refresh (bypass cache)
     const forceRefresh = request.nextUrl.searchParams.get('refresh') === 'true';

@@ -96,11 +96,11 @@ export async function GET(request: NextRequest) {
     }
     
     const { data: contentEmbeddingsCount, error: contentCountError } = await supabase
-      .from('content_embeddings')
+      .from('page_embeddings')
       .select('*', { count: 'exact', head: true });
     
     if (contentCountError) {
-      console.error('Error counting content embeddings:', contentCountError);
+      console.error('Error counting page embeddings:', contentCountError);
     }
     
     return NextResponse.json({
@@ -108,7 +108,6 @@ export async function GET(request: NextRequest) {
       available_domains: uniqueDomains,
       embeddings_info: {
         page_embeddings_count: pageEmbeddingsCount,
-        content_embeddings_count: contentEmbeddingsCount,
         sample_embedding_structure: sampleEmbedding ? Object.keys(sampleEmbedding[0] || {}) : null
       },
       search_test: {

@@ -1,0 +1,1 @@
+{"error":"Invalid request format","details":[{"validation":"uuid","code":"invalid_string","message":"Invalid uuid","path":["conversation_id"]}]}

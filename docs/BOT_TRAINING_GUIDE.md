@@ -202,12 +202,12 @@ CREATE TABLE training_data (
 );
 ```
 
-### content_embeddings table
+### page_embeddings table
 Stores vector embeddings for semantic search:
 ```sql
-CREATE TABLE content_embeddings (
+CREATE TABLE page_embeddings (
   id UUID PRIMARY KEY,
-  content_id UUID,
+  page_id UUID,
   chunk_text TEXT,
   embedding vector(1536),
   metadata JSONB

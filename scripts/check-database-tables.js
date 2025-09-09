@@ -56,8 +56,7 @@ async function checkTables() {
       'training_embeddings', 
       'scraped_pages',
       'website_content',
-      'page_embeddings',
-      'content_embeddings'
+      'page_embeddings'
     ];
 
     console.log('\nChecking for RAG/training tables:');

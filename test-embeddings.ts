@@ -46,13 +46,13 @@ async function testEmbeddingsSearch() {
   console.log('\n3. Checking embeddings:');
   for (const domain of domains || []) {
     const { data: embeddings, error: embError } = await supabase
-      .from('content_embeddings')
+      .from('page_embeddings')
       .select('id')
       .eq('domain_id', domain.id)
       .limit(1);
       
     const { count: embedCount } = await supabase
-      .from('content_embeddings')
+      .from('page_embeddings')
       .select('*', { count: 'exact', head: true })
       .eq('domain_id', domain.id);
       

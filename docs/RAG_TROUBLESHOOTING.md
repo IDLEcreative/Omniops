@@ -234,7 +234,6 @@ const EMBEDDING_MODEL = 'text-embedding-3-small';  // Or ada-002
 ```bash
 # 1. Clear and rebuild embeddings
 DELETE FROM page_embeddings;
-DELETE FROM content_embeddings;
 
 # 2. Re-scrape content
 # Use admin panel at /admin/scraping

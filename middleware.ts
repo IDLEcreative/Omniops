@@ -88,7 +88,7 @@ export async function middleware(request: NextRequest) {
   }
 
   // Protected routes
-  const protectedPaths = ['/admin', '/setup'];
+  const protectedPaths = ['/dashboard', '/setup'];
   const isProtectedPath = protectedPaths.some(path => request.nextUrl.pathname.startsWith(path));
   
   if (isProtectedPath && !user) {
@@ -100,7 +100,7 @@ export async function middleware(request: NextRequest) {
   const isAuthPath = authPaths.some(path => request.nextUrl.pathname.startsWith(path));
   
   if (isAuthPath && user) {
-    return NextResponse.redirect(new URL('/admin', request.url));
+    return NextResponse.redirect(new URL('/dashboard', request.url));
   }
   
   // Security headers for non-API routes

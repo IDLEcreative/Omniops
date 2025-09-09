@@ -1,0 +1,86 @@
+version: '3.8'
+
+services:
+  # Redis Service - Required for job queue
+  redis:
+    image: redis:7-alpine
+    container_name: omniops-redis
+    ports:
+      - "6379:6379"
+    volumes:
+      - redis-data:/data
+      - ./docker/redis.conf:/usr/local/etc/redis/redis.conf
+    command: redis-server /usr/local/etc/redis/redis.conf
+    restart: unless-stopped
+    networks:
+      - omniops-network
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  # Next.js Application
+  app:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: omniops-app
+    ports:
+      - "3000:3000"
+    environment:
+      - NODE_ENV=production
+      - REDIS_URL=redis://redis:6379
+      # Supabase configuration
+      - NEXT_PUBLIC_SUPABASE_URL=${NEXT_PUBLIC_SUPABASE_URL}
+      - NEXT_PUBLIC_SUPABASE_ANON_KEY=${NEXT_PUBLIC_SUPABASE_ANON_KEY}
+      - SUPABASE_SERVICE_ROLE_KEY=${SUPABASE_SERVICE_ROLE_KEY}
+      # OpenAI configuration
+      - OPENAI_API_KEY=${OPENAI_API_KEY}
+      # Optional WooCommerce configuration
+      - WOOCOMMERCE_URL=${WOOCOMMERCE_URL:-}
+      - WOOCOMMERCE_CONSUMER_KEY=${WOOCOMMERCE_CONSUMER_KEY:-}
+      - WOOCOMMERCE_CONSUMER_SECRET=${WOOCOMMERCE_CONSUMER_SECRET:-}
+    depends_on:
+      redis:
+        condition: service_healthy
+    restart: unless-stopped
+    networks:
+      - omniops-network
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:3000/api/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 40s
+    volumes:
+      # Mount for live configuration updates if needed
+      - ./public:/app/public:ro
+
+  # Scraper Worker Service (optional - uncomment if needed)
+  # scraper-worker:
+  #   build:
+  #     context: .
+  #     dockerfile: docker/Dockerfile.worker
+  #   container_name: omniops-scraper-worker
+  #   environment:
+  #     - NODE_ENV=production
+  #     - REDIS_URL=redis://redis:6379
+  #     - NEXT_PUBLIC_SUPABASE_URL=${NEXT_PUBLIC_SUPABASE_URL}
+  #     - NEXT_PUBLIC_SUPABASE_ANON_KEY=${NEXT_PUBLIC_SUPABASE_ANON_KEY}
+  #     - SUPABASE_SERVICE_ROLE_KEY=${SUPABASE_SERVICE_ROLE_KEY}
+  #     - OPENAI_API_KEY=${OPENAI_API_KEY}
+  #   depends_on:
+  #     redis:
+  #       condition: service_healthy
+  #   restart: unless-stopped
+  #   networks:
+  #     - omniops-network
+
+volumes:
+  redis-data:
+    driver: local
+
+networks:
+  omniops-network:
+    driver: bridge

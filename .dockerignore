@@ -53,7 +53,6 @@ docker-compose.yml
 tsconfig.tsbuildinfo
 storage
 scraped-data
-scripts
 browser-automation
 wordpress-plugin
 

@@ -18,8 +18,6 @@ Provider routing happens in the chat API when a message is identified as an orde
 - If not specified, it falls back to environment detection: if `WOOCOMMERCE_URL`, `WOOCOMMERCE_CONSUMER_KEY`, and `WOOCOMMERCE_CONSUMER_SECRET` are set, it uses `WooCommerceAgent`.
 - Otherwise, it uses the generic `CustomerServiceAgent`.
 
-This makes it easy to add more providers (e.g., Shopify) later without changing the main agent or bloating its logic.
-
 ## Rationale
 
 - Keep the user-facing agent (CSA) small and focused on customer service tone, constraints, and general product support.

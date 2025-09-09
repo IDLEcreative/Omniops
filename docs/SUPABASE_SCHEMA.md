@@ -47,11 +47,10 @@
 | `page_content_references` | Internal/external link mapping and analysis |
 | `domain_patterns` | Learned extraction patterns for different platforms |
 
-### AI & Embeddings Tables (4)
+### AI & Embeddings Tables (3)
 | Table Name | Purpose |
 |------------|---------|
-| `page_embeddings` | Vector embeddings for scraped pages |
-| `content_embeddings` | Vector embeddings for semantic search |
+| `page_embeddings` | Vector embeddings for scraped pages and semantic search |
 | `ai_optimized_content` | AI-enhanced content with quality scores |
 | `training_data` | Custom training data for domain-specific AI |
 
@@ -203,16 +202,6 @@ metadata            JSONB DEFAULT '{}'::jsonb
 created_at          TIMESTAMPTZ DEFAULT NOW()
 ```
 
-#### `content_embeddings`
-```sql
-id                  UUID PRIMARY KEY DEFAULT uuid_generate_v4()
-content_id          UUID REFERENCES website_content(id) ON DELETE CASCADE
-chunk_text          TEXT NOT NULL
-embedding           vector(1536)  -- OpenAI embeddings dimension
-chunk_index         INTEGER
-metadata            JSONB DEFAULT '{}'::jsonb
-created_at          TIMESTAMPTZ DEFAULT NOW()
-```
 
 #### `ai_optimized_content`
 ```sql
@@ -310,14 +299,13 @@ scraped_pages
     └── page_embeddings (via page_id)
 
 website_content
-    ├── content_embeddings (via content_id)
     └── ai_optimized_content (via source_content_id)
 
 conversations
     └── messages (via conversation_id)
 ```
 
-**Total**: 16 foreign key relationships with CASCADE deletion
+**Total**: 15 foreign key relationships with CASCADE deletion
 
 ## Indexes
 
@@ -331,7 +319,6 @@ conversations
 
 #### Vector Search Indexes (IVFFlat)
 - `idx_page_embeddings_vector` - Semantic search on page embeddings
-- `idx_content_embeddings_vector` - Semantic search on content
 
 #### Time-based Indexes
 - `idx_scraped_pages_last_scraped` - Recent scraping activity

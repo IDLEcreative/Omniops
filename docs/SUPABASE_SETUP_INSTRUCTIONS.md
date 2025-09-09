@@ -63,7 +63,7 @@ supabase db push < scripts/create-customer-tables.sql
 - `customer_verifications` (with business_id)
 - `customer_access_logs` (with business_id)
 - `customer_data_cache` (with business_id)
-- `content_embeddings` (with business_id)
+- `page_embeddings` (with business_id)
 
 ### Single Tenant Schema (`create-customer-tables.sql`)
 **Use this if:**

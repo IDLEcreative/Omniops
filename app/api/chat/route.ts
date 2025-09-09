@@ -10,7 +10,10 @@ import { searchSimilarContent } from '@/lib/embeddings';
 import { CustomerVerification } from '@/lib/customer-verification';
 import { SimpleCustomerVerification } from '@/lib/customer-verification-simple';
 import { QueryCache } from '@/lib/query-cache';
-import { resolveProvider } from '@/lib/providers/router';
+import { CustomerServiceAgent } from '@/lib/agents/customer-service-agent';
+import { WooCommerceAgent } from '@/lib/agents/woocommerce-agent';
+import { selectProviderAgent } from '@/lib/agents/router';
+import { getDynamicWooCommerceClient, searchProductsDynamic } from '@/lib/woocommerce-dynamic';
 import { sanitizeOutboundLinks } from '@/lib/link-sanitizer';
 
 // Lazy load OpenAI client to avoid build-time errors
@@ -528,6 +531,60 @@ export async function POST(request: NextRequest) {
       );
     }
 
+    // Brand-aware guardrail: if user asks for a specific brand (e.g., Teng)
+    // and we don't actually have matching brand products, avoid surfacing unrelated items
+    try {
+      const msgLower = (message || '').toLowerCase();
+      // Simple brand detection (extendable)
+      const brandMatch = msgLower.match(/\b(teng(?:\s+tools)?)\b/);
+      if (brandMatch) {
+        const requestedBrand = 'teng';
+        const hasBrandInTitles = Array.isArray(embeddingResults)
+          ? embeddingResults.some((r: any) => (r?.title || '').toLowerCase().includes(requestedBrand))
+          : false;
+
+        // Normalize domain for WooCommerce client usage
+        const browseDomain = /localhost|127\.0\.0\.1/i.test(domain || '')
+          ? 'thompsonseparts.co.uk'
+          : (domain || '').replace(/^https?:\/\//, '').replace('www.', '');
+
+        // If no brand titles found from RAG results, try WooCommerce direct brand search
+        if (!hasBrandInTitles && browseDomain) {
+          const wcBrandProducts = await searchProductsDynamic(browseDomain, 'teng', 6);
+          if (Array.isArray(wcBrandProducts) && wcBrandProducts.length > 0) {
+            // Map WooCommerce products into the same structure used below
+            const mapped = wcBrandProducts.map((p: any) => ({
+              title: p.name || 'Product',
+              url: p.permalink || '',
+              content: `${p.name || ''}\nPrice: ${p.price || p.regular_price || ''}\n${String(p.short_description || p.description || '').replace(/<[^>]+>/g, ' ').trim()}`.trim(),
+              similarity: 0.9
+            }));
+            // Replace embeddingResults so downstream logic shows these explicitly
+            // eslint-disable-next-line @typescript-eslint/ban-ts-comment
+            // @ts-ignore - treat as any for downstream usage
+            (embeddingResults as any) = mapped;
+            console.log('[Chat] Brand-aware Woo results used for Teng:', mapped.length);
+          } else {
+            // No brand products in WooCommerce either → provide relevant alternatives
+            // Prefer torque wrench items explicitly instead of unrelated pages
+            try {
+              const alt = await searchSimilarContent('torque wrench', browseDomain, 6, 0.2);
+              if (alt && alt.length > 0) {
+                // eslint-disable-next-line @typescript-eslint/ban-ts-comment
+                // @ts-ignore
+                (embeddingResults as any) = alt;
+                console.log('[Chat] Brand not found; using torque wrench alternatives:', alt.length);
+              }
+            } catch (e) {
+              console.warn('[Chat] Alternative search failed:', e);
+            }
+          }
+        }
+      }
+    } catch (brandErr) {
+      console.warn('[Chat] Brand-aware guardrail failed (non-fatal):', brandErr);
+    }
+
     console.log('[Chat] Processing message:', {
       message,
       isCustomerQuery,
@@ -617,7 +674,7 @@ export async function POST(request: NextRequest) {
     // Find the verification result (it's the last item in contextResults if customer verification was triggered)
     const verificationResult = isCustomerQuery ? contextResults[contextResults.length - 1] : null;
 
-    // Build context for OpenAI with provider-specific support
+    // Build context for OpenAI with enhanced WooCommerce support
     let systemContext = '';
     
     // Use enhanced instructions if this is a customer query
@@ -635,10 +692,11 @@ export async function POST(request: NextRequest) {
         }
       }
       
-      // Decide which provider to use (modular routing)
-      const provider = resolveProvider(config as any, process.env);
+      // Decide which provider agent to use (modular routing)
+      const provider = selectProviderAgent(config as any, process.env);
+      const ProviderAgent = provider === 'woocommerce' ? WooCommerceAgent : CustomerServiceAgent;
 
-      systemContext = provider.agent.buildCompleteContext(
+      systemContext = ProviderAgent.buildCompleteContext(
         result.level || 'none',
         result.context || '',
         result.prompt || '',
@@ -737,19 +795,56 @@ RULES:
       
     }
     
-    // Provider-specific context enrichments (e.g., WooCommerce category links)
+    // Try to surface matching categories (WooCommerce) for any query
     let matchedCategories: Array<{ name: string; url: string }> = [];
     try {
-      const provider = resolveProvider(config as any, process.env);
-      const enrichments = await provider.getContextEnrichments({
-        message,
-        domain,
-        domainId,
-        supabase: adminSupabase
-      });
-      matchedCategories = enrichments.matchedCategories || [];
+      const wooEnabled = config?.features?.woocommerce?.enabled !== false; // default true
+      if (wooEnabled && domain) {
+        const browseDomain = /localhost|127\.0\.0\.1/i.test(domain) ? 'thompsonseparts.co.uk' : domain.replace(/^https?:\/\//, '');
+        const wc = await getDynamicWooCommerceClient(browseDomain);
+        if (wc) {
+          // Cache categories per domain to avoid repeated API calls
+          const categories = await QueryCache.execute(
+            {
+              key: `woo_categories_${domainId || browseDomain}`,
+              domainId: domainId || undefined,
+              ttlSeconds: 3600,
+              useMemoryCache: true,
+              useDbCache: true,
+              supabase: adminSupabase
+            },
+            async () => await wc.getProductCategories({ per_page: 100 })
+          );
+          // Simple relevance scoring based on token overlap
+          const msg = message.toLowerCase();
+          const tokens = new Set<string>(msg.split(/[^a-z0-9]+/i).filter(Boolean) as string[]);
+          const scored = categories.map((c: any) => {
+            const name = (c.name || '').toLowerCase();
+            const nameTokens = new Set<string>(name.split(/[^a-z0-9]+/i).filter(Boolean) as string[]);
+            let score = 0;
+            nameTokens.forEach(t => { if (tokens.has(t)) score += 1; });
+            if (score === 0 && name && msg.includes(name)) score += 2; // direct phrase match bonus
+            return { cat: c, score };
+          }).filter(x => x.score > 0);
+
+          scored.sort((a, b) => b.score - a.score);
+          const top = scored.slice(0, 2);
+          
+          // Debug logging
+          if (scored.length > 0) {
+            console.log('[Chat] Category matching results:', 
+              scored.slice(0, 5).map(s => ({ name: s.cat.name, score: s.score }))
+            );
+          }
+          
+          matchedCategories = top.map(({ cat }) => ({
+            name: cat.name,
+            url: `https://${browseDomain}/product-category/${cat.slug}/`
+          }));
+        }
+      }
     } catch (e) {
-      console.warn('[Chat] Provider enrichment failed (non-fatal):', e);
+      console.warn('[Chat] Category detection failed (non-fatal):', e);
     }
     
     // Add contact information if this is a contact request

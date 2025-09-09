@@ -45,9 +45,9 @@ export async function refreshPageContent(
     // Delete old embeddings
     if (existingPage) {
       await supabase
-        .from('content_embeddings')
+        .from('page_embeddings')
         .delete()
-        .eq('content_id', existingPage.id);
+        .eq('page_id', existingPage.id);
     }
 
     // Update or insert content

@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Button } from "@/components/ui/button";
@@ -43,11 +43,15 @@ import {
   Webhook,
   Archive,
   Trash2,
+  ShoppingCart,
+  AlertTriangle,
 } from "lucide-react";
 import { Alert, AlertDescription } from "@/components/ui/alert";
 
 export default function SettingsPage() {
   const [isDirty, setIsDirty] = useState(false);
+  const [loading, setLoading] = useState(false);
+  const [saveStatus, setSaveStatus] = useState<'idle' | 'saving' | 'success' | 'error'>('idle');
   const [settings, setSettings] = useState({
     // General Settings
     companyName: "Omniops Customer Service",
@@ -78,6 +82,9 @@ export default function SettingsPage() {
     openaiApiKey: "sk-..." + "*".repeat(20),
     supabaseUrl: "https://your-project.supabase.co",
     redisUrl: "redis://localhost:6379",
+    woocommerceUrl: "",
+    woocommerceConsumerKey: "",
+    woocommerceConsumerSecret: "",
     
     // Advanced
     debugMode: false,
@@ -91,17 +98,80 @@ export default function SettingsPage() {
     setIsDirty(true);
   };
 
-  const handleSave = () => {
-    // Save settings logic would go here
-    console.log("Saving settings:", settings);
-    setIsDirty(false);
-    // Show success message
+  const handleSave = async () => {
+    setLoading(true);
+    setSaveStatus('saving');
+    
+    try {
+      // Prepare configuration in the format the API expects
+      const configData = {
+        domain: window.location.hostname,
+        owned_domains: [],
+        woocommerce: {
+          enabled: !!(settings.woocommerceUrl && settings.woocommerceConsumerKey && settings.woocommerceConsumerSecret),
+          url: settings.woocommerceUrl,
+          consumer_key: settings.woocommerceConsumerKey,
+          consumer_secret: settings.woocommerceConsumerSecret,
+        },
+        shopify: {
+          enabled: false,
+          domain: '',
+          access_token: '',
+        },
+      };
+      
+      const response = await fetch('/api/dashboard/config', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify(configData),
+      });
+      
+      if (!response.ok) {
+        throw new Error('Failed to save settings');
+      }
+      
+      setIsDirty(false);
+      setSaveStatus('success');
+      setTimeout(() => setSaveStatus('idle'), 3000);
+    } catch (error) {
+      console.error('Error saving settings:', error);
+      setSaveStatus('error');
+      setTimeout(() => setSaveStatus('idle'), 3000);
+    } finally {
+      setLoading(false);
+    }
   };
 
   const handleReset = () => {
     // Reset to defaults logic would go here
     setIsDirty(false);
   };
+
+  // Load existing settings on mount
+  useEffect(() => {
+    const loadSettings = async () => {
+      try {
+        const response = await fetch('/api/dashboard/config');
+        if (response.ok) {
+          const data = await response.json();
+          if (data.config && data.config.woocommerce) {
+            setSettings(prev => ({
+              ...prev,
+              woocommerceUrl: data.config.woocommerce.url || '',
+              woocommerceConsumerKey: data.config.woocommerce.consumer_key || '',
+              woocommerceConsumerSecret: data.config.woocommerce.consumer_secret || '',
+            }));
+          }
+        }
+      } catch (error) {
+        console.error('Failed to load settings:', error);
+      }
+    };
+    
+    loadSettings();
+  }, []);
 
   return (
     <div className="p-8 space-y-8">
@@ -119,13 +189,22 @@ export default function SettingsPage() {
               Unsaved changes
             </Badge>
           )}
-          <Button variant="outline" onClick={handleReset}>
+          <Button variant="outline" onClick={handleReset} disabled={loading}>
             <RotateCcw className="h-4 w-4 mr-2" />
             Reset
           </Button>
-          <Button onClick={handleSave}>
-            <Save className="h-4 w-4 mr-2" />
-            Save Changes
+          <Button onClick={handleSave} disabled={loading || !isDirty}>
+            {loading ? (
+              <>
+                <div className="h-4 w-4 mr-2 animate-spin rounded-full border-2 border-current border-t-transparent" />
+                Saving...
+              </>
+            ) : (
+              <>
+                <Save className="h-4 w-4 mr-2" />
+                Save Changes
+              </>
+            )}
           </Button>
         </div>
       </div>
@@ -605,6 +684,116 @@ export default function SettingsPage() {
                     placeholder="redis://localhost:6379"
                   />
                 </div>
+              </CardContent>
+            </Card>
+
+            <Card>
+              <CardHeader>
+                <CardTitle className="flex items-center">
+                  <ShoppingCart className="h-5 w-5 mr-2" />
+                  WooCommerce Integration
+                </CardTitle>
+                <CardDescription>
+                  Connect your WooCommerce store for enhanced e-commerce support
+                </CardDescription>
+              </CardHeader>
+              <CardContent className="space-y-4">
+                <div className="space-y-2">
+                  <Label htmlFor="woocommerceUrl">Store URL</Label>
+                  <Input
+                    id="woocommerceUrl"
+                    value={settings.woocommerceUrl}
+                    onChange={(e) => handleSettingChange('woocommerceUrl', e.target.value)}
+                    placeholder="https://your-store.com"
+                  />
+                  <p className="text-xs text-muted-foreground">
+                    The full URL of your WooCommerce store
+                  </p>
+                </div>
+                
+                <div className="space-y-2">
+                  <Label htmlFor="woocommerceConsumerKey">Consumer Key</Label>
+                  <Input
+                    id="woocommerceConsumerKey"
+                    type="password"
+                    value={settings.woocommerceConsumerKey}
+                    onChange={(e) => handleSettingChange('woocommerceConsumerKey', e.target.value)}
+                    placeholder="ck_..."
+                  />
+                  <p className="text-xs text-muted-foreground">
+                    Found in WooCommerce → Settings → Advanced → REST API
+                  </p>
+                </div>
+                
+                <div className="space-y-2">
+                  <Label htmlFor="woocommerceConsumerSecret">Consumer Secret</Label>
+                  <Input
+                    id="woocommerceConsumerSecret"
+                    type="password"
+                    value={settings.woocommerceConsumerSecret}
+                    onChange={(e) => handleSettingChange('woocommerceConsumerSecret', e.target.value)}
+                    placeholder="cs_..."
+                  />
+                  <p className="text-xs text-muted-foreground">
+                    Keep this secret safe - it provides full API access
+                  </p>
+                </div>
+
+                <Alert>
+                  <AlertTriangle className="h-4 w-4" />
+                  <AlertDescription className="text-xs">
+                    Ensure your WooCommerce REST API is enabled and using HTTPS for secure communication
+                  </AlertDescription>
+                </Alert>
+              </CardContent>
+            </Card>
+
+            <Card>
+              <CardHeader>
+                <CardTitle className="flex items-center">
+                  <Code className="h-5 w-5 mr-2" />
+                  WooCommerce Integration
+                </CardTitle>
+                <CardDescription>
+                  Connect your WooCommerce store for product and order data
+                </CardDescription>
+              </CardHeader>
+              <CardContent className="space-y-4">
+                <div className="space-y-2">
+                  <Label htmlFor="wooUrl">Store URL</Label>
+                  <Input
+                    id="wooUrl"
+                    value={settings.woocommerceUrl}
+                    onChange={(e) => handleSettingChange('woocommerceUrl', e.target.value)}
+                    placeholder="https://your-store.com"
+                  />
+                </div>
+                
+                <div className="space-y-2">
+                  <Label htmlFor="wooKey">Consumer Key</Label>
+                  <Input
+                    id="wooKey"
+                    type="password"
+                    value={settings.woocommerceConsumerKey}
+                    onChange={(e) => handleSettingChange('woocommerceConsumerKey', e.target.value)}
+                    placeholder="ck_..."
+                  />
+                </div>
+                
+                <div className="space-y-2">
+                  <Label htmlFor="wooSecret">Consumer Secret</Label>
+                  <Input
+                    id="wooSecret"
+                    type="password"
+                    value={settings.woocommerceConsumerSecret}
+                    onChange={(e) => handleSettingChange('woocommerceConsumerSecret', e.target.value)}
+                    placeholder="cs_..."
+                  />
+                </div>
+
+                <Button variant="outline" className="w-full">
+                  Test Connection
+                </Button>
               </CardContent>
             </Card>
 

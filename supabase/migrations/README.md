@@ -95,16 +95,6 @@ website_content (
   updated_at TIMESTAMPTZ
 )
 
--- Enhanced embedding storage
-content_embeddings (
-  id UUID PRIMARY KEY,
-  content_id UUID REFERENCES website_content(id),
-  chunk_text TEXT,
-  embedding vector(1536),
-  chunk_index INTEGER,
-  metadata JSONB,
-  created_at TIMESTAMPTZ
-)
 ```
 
 #### AI Content Optimization

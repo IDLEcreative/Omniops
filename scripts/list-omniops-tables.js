@@ -39,7 +39,6 @@ async function listTables() {
         'conversations',
         'messages',
         'website_content',
-        'content_embeddings',
         'structured_extractions',
         'content_refresh_jobs',
         'scraping_jobs',
@@ -81,12 +80,7 @@ async function listTables() {
       .from('page_embeddings')
       .select('*', { count: 'exact', head: true });
     
-    const { count: contentEmbeddings } = await supabase
-      .from('content_embeddings')
-      .select('*', { count: 'exact', head: true });
-    
     console.log(`  • Page embeddings: ${pageEmbeddings || 0}`);
-    console.log(`  • Content embeddings: ${contentEmbeddings || 0}`);
 
   } catch (error) {
     console.error('❌ Error:', error.message);

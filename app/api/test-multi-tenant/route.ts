@@ -22,7 +22,7 @@ export async function GET(request: NextRequest) {
       'customer_verifications',
       'customer_access_logs',
       'customer_data_cache',
-      'content_embeddings'
+      'page_embeddings'
     ];
     
     const tableTests: any = {};

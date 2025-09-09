@@ -34,7 +34,7 @@ export async function GET() {
           'scraped_pages',
           'website_content',
           'page_embeddings',
-          'content_embeddings',
+          'page_embeddings',
           'training_documents',
           'training_embeddings',
           'structured_extractions',

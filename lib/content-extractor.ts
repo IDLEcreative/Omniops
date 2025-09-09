@@ -2,26 +2,28 @@ import { Readability } from '@mozilla/readability';
 import { JSDOM } from 'jsdom';
 import * as cheerio from 'cheerio';
 import { createHash } from 'crypto';
+import { extractBusinessInfo, selectiveStripBoilerplate, smartHtmlToText, BusinessInfo } from './business-content-extractor';
 
 // We'll skip Turndown for now to avoid import issues - can use HTML directly
 // or convert to text without markdown formatting
 
 // Helper function to convert HTML to plain text
+// Now uses smart extraction that preserves business info
 function htmlToText(html: string): string {
+  return smartHtmlToText(html);
+}
+
+// Strip boilerplate/navigation from a DOM document (mutates the document)
+// Now uses selective stripping that preserves business-critical information
+function stripBoilerplate(document: Document): void {
+  const html = document.documentElement.outerHTML;
   const $ = cheerio.load(html);
   
-  // Remove script and style elements
-  $('script, style, noscript').remove();
+  // Apply selective stripping
+  selectiveStripBoilerplate($);
   
-  // Preserve some structure
-  $('p, div, section, article').append('\n\n');
-  $('br').replaceWith('\n');
-  
-  // Get text content
-  return $.text()
-    .replace(/\n{3,}/g, '\n\n')  // Replace multiple newlines
-    .replace(/[ \t]+/g, ' ')  // Replace multiple spaces/tabs
-    .trim();
+  // Update the document with the cleaned HTML
+  document.documentElement.innerHTML = $.html();
 }
 
 export interface ExtractedContent {
@@ -39,6 +41,7 @@ export interface ExtractedContent {
   contentHash: string;
   wordCount: number;
   readingTime: number; // in minutes
+  businessInfo?: BusinessInfo; // Preserved business-critical information
 }
 
 export class ContentExtractor {
@@ -46,12 +49,16 @@ export class ContentExtractor {
    * Extract content using Mozilla's Readability for better accuracy
    */
   static extractWithReadability(html: string, url: string): ExtractedContent {
+    // First, extract business information before any stripping
+    const businessInfo = extractBusinessInfo(html);
+    
     // Create virtual DOM
     const dom = new JSDOM(html, { url });
     const document = dom.window.document;
     
-    // Clone document for Readability (it modifies the DOM)
+    // Clone document for Readability (it modifies the DOM) and strip boilerplate
     const documentClone = document.cloneNode(true) as Document;
+    stripBoilerplate(documentClone);
     
     // Extract metadata before Readability modifies DOM
     const metadata = this.extractMetadata(document);
@@ -68,7 +75,7 @@ export class ContentExtractor {
     let excerpt = '';
     
     if (article && article.content) {
-      // Convert HTML to text
+      // Convert HTML to text (includes secondary boilerplate removal)
       content = htmlToText(article.content);
       textContent = article.textContent || '';
       title = article.title || metadata.title || '';
@@ -107,6 +114,7 @@ export class ContentExtractor {
       contentHash,
       wordCount,
       readingTime,
+      businessInfo, // Include preserved business information
     };
   }
   

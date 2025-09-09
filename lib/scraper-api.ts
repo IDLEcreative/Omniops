@@ -816,6 +816,7 @@ export async function crawlWebsite(
     useNewConfig?: boolean; // Use new configuration system
     newConfigPreset?: keyof typeof ConfigPresets; // Preset for new config system
     aiOptimization?: AIOptimizationConfig; // AI optimization configuration
+    forceRescrape?: boolean; // Force re-scrape even if recently scraped
   }
 ): Promise<string> {
   const jobId = `crawl_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`;
@@ -1056,7 +1057,8 @@ export async function crawlWebsite(
     turboMode.toString(),
     options?.configPreset || 'memoryEfficient', // Better default for large sites
     isOwnSite ? 'true' : 'false', // Pass own-site flag (detected or explicit)
-    JSON.stringify(sitemapUrls.slice(0, maxPages === -1 ? undefined : maxPages)) // Pass sitemap URLs if found
+    JSON.stringify(sitemapUrls.slice(0, maxPages === -1 ? undefined : maxPages)), // Pass sitemap URLs if found
+    (options?.forceRescrape ? 'true' : 'false')
   ];
   
   console.log(`[${jobId}] Spawning worker with arguments:`, workerArgs);
