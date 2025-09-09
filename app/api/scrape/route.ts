@@ -2,7 +2,8 @@ import { NextRequest, NextResponse } from 'next/server';
 export const runtime = 'nodejs'
 export const dynamic = 'force-dynamic'
 import { createServiceRoleClient, createClient } from '@/lib/supabase-server';
-import { scrapePage, crawlWebsite, checkCrawlStatus, getHealthStatus } from '@/lib/scraper-api';
+import { scrapePage, checkCrawlStatus, getHealthStatus } from '@/lib/scraper-api';
+import { crawlWebsiteWithCleanup } from '@/lib/scraper-with-cleanup';
 import OpenAI from 'openai';
 import { z } from 'zod';
 import crypto from 'crypto';
@@ -196,7 +197,7 @@ export async function POST(request: NextRequest) {
       });
     } else {
       // Full website crawl (turbo mode integrated into main crawler)
-      const jobId = await crawlWebsite(url, {
+      const jobId = await crawlWebsiteWithCleanup(url, {
         maxPages: max_pages,
         excludePaths: ['/wp-admin', '/admin', '/login', '/cart', '/checkout'],
         turboMode: turbo,

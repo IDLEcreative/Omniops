@@ -1,4 +1,5 @@
-import { crawlWebsite, checkCrawlStatus, streamCrawlResults } from '../scraper-api';
+import { checkCrawlStatus, streamCrawlResults } from '../scraper-api';
+import { crawlWebsiteWithCleanup } from '../scraper-with-cleanup';
 import { getOptimalConfig } from '../scraper-config-own-site';
 
 // Example: Scraping your own website with maximum speed
@@ -20,7 +21,7 @@ async function scrapeOwnWebsite() {
   
   // Option 1: Single high-performance job
   console.log('Option 1: Single job with high concurrency');
-  const singleJobId = await crawlWebsite(url, {
+  const singleJobId = await crawlWebsiteWithCleanup(url, {
     maxPages: estimatedPages,
     ownSite: true, // Enable own-site optimizations
     turboMode: true, // Enable turbo mode
@@ -37,7 +38,7 @@ async function scrapeOwnWebsite() {
   
   // Start multiple jobs, each handling a portion of the site
   for (let i = 0; i < parallel.totalJobs; i++) {
-    const jobId = await crawlWebsite(url, {
+    const jobId = await crawlWebsiteWithCleanup(url, {
       maxPages: parallel.pagesPerJob,
       ownSite: true,
       turboMode: true,
@@ -130,7 +131,7 @@ async function advancedOwnSiteScraping() {
   const url = 'https://www.your-company.com';
   
   // Use case 1: Scrape only product pages for e-commerce
-  const productJobId = await crawlWebsite(url, {
+  const productJobId = await crawlWebsiteWithCleanup(url, {
     maxPages: -1, // No limit
     ownSite: true,
     includePaths: ['/products/*', '/category/*/products/*'],
@@ -156,7 +157,7 @@ async function advancedOwnSiteScraping() {
   });
   
   // Use case 2: Documentation site with code examples
-  const docsJobId = await crawlWebsite(url + '/docs', {
+  const docsJobId = await crawlWebsiteWithCleanup(url + '/docs', {
     maxPages: -1,
     ownSite: true,
     config: {
@@ -185,7 +186,7 @@ async function advancedOwnSiteScraping() {
   });
   
   // Use case 3: News/blog site with frequent updates
-  const newsJobId = await crawlWebsite(url + '/news', {
+  const newsJobId = await crawlWebsiteWithCleanup(url + '/news', {
     maxPages: 1000, // Last 1000 articles
     ownSite: true,
     config: {

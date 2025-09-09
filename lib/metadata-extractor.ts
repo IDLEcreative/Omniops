@@ -70,6 +70,9 @@ export class MetadataExtractor {
     totalChunks: number,
     htmlContent?: string
   ): Promise<EnhancedEmbeddingMetadata> {
+    // Determine content type first
+    const contentType = this.classifyContent(chunk, url, title);
+    
     return {
       // Core fields
       url,
@@ -78,7 +81,7 @@ export class MetadataExtractor {
       total_chunks: totalChunks,
       
       // Content classification
-      content_type: this.classifyContent(chunk, url, title),
+      content_type: contentType,
       content_category: this.extractCategory(url, title, chunk),
       
       // Contextual information
@@ -98,7 +101,13 @@ export class MetadataExtractor {
       readability_score: this.calculateReadability(chunk),
       
       // Domain-specific
-      ...this.extractEcommerceData(chunk, fullContent, htmlContent)
+      ...this.extractEcommerceData(chunk, fullContent, htmlContent),
+      
+      // Contact information
+      contact_info: this.extractContactInfo(chunk),
+      
+      // Q&A pairs (for FAQ content)
+      qa_pairs: contentType === 'faq' ? this.extractQAPairs(fullContent) : undefined
     };
   }
 
@@ -369,6 +378,103 @@ export class MetadataExtractor {
     
     // Clamp between 0 and 100
     return Math.max(0, Math.min(100, score));
+  }
+
+  /**
+   * Extract contact information from text
+   */
+  private static extractContactInfo(text: string): { 
+    email?: string; 
+    phone?: string; 
+    address?: string 
+  } | undefined {
+    const result: { email?: string; phone?: string; address?: string } = {};
+    
+    // Extract email addresses
+    const emailPattern = /[\w._%+-]+@[\w.-]+\.[A-Z|a-z]{2,}/gi;
+    const emails = text.match(emailPattern);
+    if (emails && emails.length > 0) {
+      result.email = emails[0].toLowerCase();
+    }
+    
+    // Extract phone numbers (various formats)
+    const phonePatterns = [
+      /(?:\+?1[-.\s]?)?\(?\d{3}\)?[-.\s]?\d{3}[-.\s]?\d{4}/g, // US format
+      /\+?[0-9]{1,4}[-.\s]?\(?\d{1,4}\)?[-.\s]?\d{1,4}[-.\s]?\d{1,9}/g, // International
+      /\b\d{3}[-.]?\d{3}[-.]?\d{4}\b/g // Simple format
+    ];
+    
+    for (const pattern of phonePatterns) {
+      const phones = text.match(pattern);
+      if (phones && phones.length > 0) {
+        // Clean up the phone number
+        const cleaned = phones[0].replace(/[^\d+]/g, '');
+        if (cleaned.length >= 10) {
+          result.phone = phones[0];
+          break;
+        }
+      }
+    }
+    
+    // Extract address (simple pattern - can be enhanced)
+    const addressPattern = /\d+\s+[\w\s]+(?:street|st|avenue|ave|road|rd|lane|ln|drive|dr|court|ct|boulevard|blvd)/gi;
+    const addresses = text.match(addressPattern);
+    if (addresses && addresses.length > 0) {
+      result.address = addresses[0];
+    }
+    
+    return Object.keys(result).length > 0 ? result : undefined;
+  }
+
+  /**
+   * Extract Q&A pairs from text
+   */
+  private static extractQAPairs(text: string): Array<{
+    question: string;
+    answer: string;
+  }> {
+    const pairs: Array<{ question: string; answer: string }> = [];
+    
+    // Pattern 1: Q: ... A: ... format
+    const qaPattern1 = /Q:\s*(.+?)\s*A:\s*(.+?)(?=Q:|$)/gis;
+    let match;
+    while ((match = qaPattern1.exec(text)) !== null) {
+      if (match[1] && match[2]) {
+        pairs.push({
+          question: match[1].trim().replace(/\n+/g, ' '),
+          answer: match[2].trim().replace(/\n+/g, ' ')
+        });
+      }
+    }
+    
+    // Pattern 2: Question? Answer format (FAQ style)
+    if (pairs.length === 0) {
+      const qaPattern2 = /([^.!?\n]+\?)\s*([^?]+?)(?=\n[^.!?\n]+\?|$)/gis;
+      while ((match = qaPattern2.exec(text)) !== null) {
+        if (match[1] && match[2]) {
+          pairs.push({
+            question: match[1].trim(),
+            answer: match[2].trim()
+          });
+        }
+      }
+    }
+    
+    // Pattern 3: Numbered FAQ format
+    if (pairs.length === 0) {
+      const qaPattern3 = /\d+\.\s*([^.!?\n]+\?)\s*([^?]+?)(?=\d+\.|$)/gis;
+      while ((match = qaPattern3.exec(text)) !== null) {
+        if (match[1] && match[2]) {
+          pairs.push({
+            question: match[1].trim(),
+            answer: match[2].trim()
+          });
+        }
+      }
+    }
+    
+    // Limit to reasonable number of Q&A pairs
+    return pairs.slice(0, 10);
   }
 
   /**

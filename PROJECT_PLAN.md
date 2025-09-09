@@ -123,6 +123,34 @@ An AI-powered customer service chat system that integrates with WordPress/WooCom
   - API Examples (Complete request/response)
   - Deployment Checklist
 
+#### 3.5 Intelligent Site Type Detection & Domain-Specific Extraction
+- [ ] **Phase 1: Automatic Site Type Detection (Week 1)**
+  - [ ] Content pattern analyzer for industry detection
+  - [ ] Domain name and meta tag analysis
+  - [ ] Schema.org structured data extraction
+  - [ ] E-commerce platform detection (WooCommerce, Shopify, etc.)
+  - [ ] Confidence scoring system (0-100%)
+  - [ ] Store detection results in customer_configs
+- [ ] **Phase 2: Domain-Specific Extractors (Week 2)**
+  - [ ] Automotive parts extractor (OEM numbers, compatibility, specs)
+  - [ ] Fashion/apparel extractor (sizes, colors, materials)
+  - [ ] Electronics extractor (technical specs, power ratings)
+  - [ ] Food/restaurant extractor (nutrition, ingredients, allergens)
+  - [ ] Services extractor (pricing tiers, packages, availability)
+  - [ ] Generic fallback extractor for unknown types
+- [ ] **Phase 3: Continuous Learning & Refinement (Week 3)**
+  - [ ] Detection refinement with each scrape
+  - [ ] Pattern learning from customer feedback
+  - [ ] Manual override capability in admin panel
+  - [ ] Multi-signal hybrid detection approach
+  - [ ] Industry-specific search relevance tuning
+- [ ] **Expected Benefits**:
+  - 60-80% improvement in search relevance
+  - Automatic optimization per customer domain
+  - No manual configuration required
+  - Industry-specific metadata extraction
+  - Better entity recognition and product matching
+
 ### Phase 4: Scale & Optimize (Month 2)
 
 #### 4.1 Performance Optimization

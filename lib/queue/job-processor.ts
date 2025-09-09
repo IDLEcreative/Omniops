@@ -1,7 +1,8 @@
 import { Worker, Job, WorkerOptions } from 'bullmq';
 import { getRedisClient } from '../redis-unified';
 import { JobData, JobType, JobPriority, FullCrawlJobData, SinglePageJobData, RefreshJobData } from './queue-manager';
-import { scrapePage, crawlWebsite, checkCrawlStatus } from '../scraper-api';
+import { scrapePage, checkCrawlStatus } from '../scraper-api';
+import { crawlWebsiteWithCleanup } from '../scraper-with-cleanup';
 import { ScrapedPage } from '../scraper-api';
 
 /**
@@ -261,7 +262,7 @@ export class JobProcessor {
       });
 
       // Start the crawl using the existing scraper-api
-      const crawlResult = await crawlWebsite((jobData as FullCrawlJobData).url, {
+      const crawlResult = await crawlWebsiteWithCleanup((jobData as FullCrawlJobData).url, {
         ...(jobData as any).config,
         onProgress: async (progress: any) => {
           // Update progress based on crawl progress
@@ -360,7 +361,7 @@ export class JobProcessor {
       let result;
       if (refreshData.config?.fullRefresh && refreshData.urls?.[0]) {
         // Full refresh - crawl the website
-        result = await crawlWebsite(refreshData.urls[0], config);
+        result = await crawlWebsiteWithCleanup(refreshData.urls[0], config);
       } else if (refreshData.urls?.[0]) {
         // Single page refresh
         result = await scrapePage(refreshData.urls[0], config);

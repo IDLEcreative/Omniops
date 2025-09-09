@@ -7,6 +7,7 @@ import OpenAI from 'openai';
 import { z } from 'zod';
 import { checkDomainRateLimit } from '@/lib/rate-limit';
 import { searchSimilarContent } from '@/lib/embeddings';
+import { smartSearch, extractQueryKeywords, isPriceQuery, extractPriceRange } from '@/lib/search-wrapper';
 import { CustomerVerification } from '@/lib/customer-verification';
 import { SimpleCustomerVerification } from '@/lib/customer-verification-simple';
 import { QueryCache } from '@/lib/query-cache';
@@ -335,12 +336,17 @@ export async function POST(request: NextRequest) {
             };
             const isPartQuery = extractPartCodes(message).length > 0;
             if (isPartQuery) {
-              // Use library search which has WooCommerce SKU fallback
-              const precise = await searchSimilarContent(
+              // Use smart search for part queries - will use enhanced metadata if available
+              const priceRange = extractPriceRange(message);
+              const precise = await smartSearch(
                 message,
                 searchDomain,
                 5,
-                0.3
+                0.3,
+                {
+                  contentTypes: ['product'],
+                  priceRange: priceRange || undefined
+                }
               );
               if (precise && precise.length > 0) {
                 return precise;
@@ -366,12 +372,19 @@ export async function POST(request: NextRequest) {
               }));
             }
             
-            // Fallback to original search with lower threshold for broader results
-            return await searchSimilarContent(
+            // Fallback to smart search with lower threshold for broader results
+            const queryKeywords = extractQueryKeywords(message);
+            const priceRange = extractPriceRange(message);
+            return await smartSearch(
               message,
               searchDomain,
               8,  // Get more results
-              0.2   // Lower threshold to get broader semantic matches
+              0.2,   // Lower threshold to get broader semantic matches
+              {
+                mustHaveKeywords: queryKeywords.length > 0 ? queryKeywords.slice(0, 3) : undefined,
+                priceRange: priceRange || undefined,
+                boostRecent: true
+              }
             );
           } catch (error) {
             console.error('Search error:', error);
