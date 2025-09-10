@@ -96,7 +96,38 @@ Main tables:
 - `page_embeddings`: Vector embeddings for semantic search
 - `conversations` & `messages`: Chat history
 - `structured_extractions`: FAQs, products, contact info
-- `content_refresh_jobs`: Automated content update tracking
+- `scrape_jobs`: Background job queue for scraping tasks
+- `query_cache`: Performance optimization cache
+
+### Database Operations via Supabase Management API
+
+When MCP tools are unavailable or Supabase CLI has migration conflicts, use the Management API directly:
+
+```javascript
+// Direct SQL execution via Supabase Management API
+const SUPABASE_ACCESS_TOKEN = 'sbp_...'; // Your access token
+const PROJECT_REF = 'birugqyuqhiahxvxeyqg'; // Project reference
+
+const response = await fetch(
+  `https://api.supabase.com/v1/projects/${PROJECT_REF}/database/query`,
+  {
+    method: 'POST',
+    headers: {
+      'Authorization': `Bearer ${SUPABASE_ACCESS_TOKEN}`,
+      'Content-Type': 'application/json',
+    },
+    body: JSON.stringify({ query: sqlStatement })
+  }
+);
+```
+
+**Use cases:**
+- Executing DDL statements (CREATE/DROP/ALTER TABLE)
+- Running migrations when CLI has conflicts
+- Bulk data operations
+- Direct database maintenance
+
+**Note:** The Management API is equivalent to running SQL in the Supabase Dashboard and bypasses migration tracking.
 
 ## Environment Setup
 
