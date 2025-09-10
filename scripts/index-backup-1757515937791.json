@@ -1,0 +1,151 @@
+{
+  "timestamp": "2025-09-10T14:52:17.790Z",
+  "indexes": [
+    {
+      "schemaname": "public",
+      "tablename": "conversations",
+      "indexname": "idx_conversations_customer_id",
+      "indexdef": "CREATE INDEX idx_conversations_customer_id ON public.conversations USING btree (customer_id)"
+    },
+    {
+      "schemaname": "public",
+      "tablename": "conversations",
+      "indexname": "idx_conversations_domain_id",
+      "indexdef": "CREATE INDEX idx_conversations_domain_id ON public.conversations USING btree (domain_id)"
+    },
+    {
+      "schemaname": "public",
+      "tablename": "customer_configs",
+      "indexname": "idx_customer_configs_customer_id",
+      "indexdef": "CREATE INDEX idx_customer_configs_customer_id ON public.customer_configs USING btree (customer_id)"
+    },
+    {
+      "schemaname": "public",
+      "tablename": "domains",
+      "indexname": "idx_domains_user_id",
+      "indexdef": "CREATE INDEX idx_domains_user_id ON public.domains USING btree (user_id)"
+    },
+    {
+      "schemaname": "public",
+      "tablename": "page_embeddings",
+      "indexname": "idx_page_embeddings_entities_gin",
+      "indexdef": "CREATE INDEX idx_page_embeddings_entities_gin ON public.page_embeddings USING gin (((metadata -> 'entities'::text)))"
+    },
+    {
+      "schemaname": "public",
+      "tablename": "page_embeddings",
+      "indexname": "idx_page_embeddings_hnsw",
+      "indexdef": "CREATE INDEX idx_page_embeddings_hnsw ON public.page_embeddings USING hnsw (embedding vector_cosine_ops)"
+    },
+    {
+      "schemaname": "public",
+      "tablename": "page_embeddings",
+      "indexname": "idx_page_embeddings_keywords_gin",
+      "indexdef": "CREATE INDEX idx_page_embeddings_keywords_gin ON public.page_embeddings USING gin (((metadata -> 'keywords'::text)))"
+    },
+    {
+      "schemaname": "public",
+      "tablename": "page_embeddings",
+      "indexname": "idx_page_embeddings_price_range",
+      "indexdef": "CREATE INDEX idx_page_embeddings_price_range ON public.page_embeddings USING btree ((((metadata -> 'price_range'::text) ->> 'min'::text)), (((metadata -> 'price_range'::text) ->> 'max'::text))) WHERE ((metadata -> 'price_range'::text) IS NOT NULL)"
+    },
+    {
+      "schemaname": "public",
+      "tablename": "page_embeddings",
+      "indexname": "idx_page_embeddings_vector_hnsw",
+      "indexdef": "CREATE INDEX idx_page_embeddings_vector_hnsw ON public.page_embeddings USING hnsw (embedding vector_l2_ops) WITH (m='16', ef_construction='64')"
+    },
+    {
+      "schemaname": "public",
+      "tablename": "scrape_jobs",
+      "indexname": "idx_scrape_jobs_customer_config_id",
+      "indexdef": "CREATE INDEX idx_scrape_jobs_customer_config_id ON public.scrape_jobs USING btree (customer_config_id)"
+    },
+    {
+      "schemaname": "public",
+      "tablename": "scrape_jobs",
+      "indexname": "idx_scrape_jobs_domain_id",
+      "indexdef": "CREATE INDEX idx_scrape_jobs_domain_id ON public.scrape_jobs USING btree (domain_id)"
+    },
+    {
+      "schemaname": "public",
+      "tablename": "scrape_jobs",
+      "indexname": "idx_scrape_jobs_priority_status",
+      "indexdef": "CREATE INDEX idx_scrape_jobs_priority_status ON public.scrape_jobs USING btree (priority, status)"
+    },
+    {
+      "schemaname": "public",
+      "tablename": "scrape_jobs",
+      "indexname": "idx_scrape_jobs_queue_job",
+      "indexdef": "CREATE INDEX idx_scrape_jobs_queue_job ON public.scrape_jobs USING btree (queue_job_id)"
+    },
+    {
+      "schemaname": "public",
+      "tablename": "scrape_jobs",
+      "indexname": "idx_scrape_jobs_status",
+      "indexdef": "CREATE INDEX idx_scrape_jobs_status ON public.scrape_jobs USING btree (status)"
+    },
+    {
+      "schemaname": "public",
+      "tablename": "scraped_pages",
+      "indexname": "idx_scraped_pages_content_gin",
+      "indexdef": "CREATE INDEX idx_scraped_pages_content_gin ON public.scraped_pages USING gin (to_tsvector('english'::regconfig, content))"
+    },
+    {
+      "schemaname": "public",
+      "tablename": "scraped_pages",
+      "indexname": "idx_scraped_pages_domain_scraped",
+      "indexdef": "CREATE INDEX idx_scraped_pages_domain_scraped ON public.scraped_pages USING btree (domain_id, scraped_at DESC)"
+    },
+    {
+      "schemaname": "public",
+      "tablename": "scraped_pages",
+      "indexname": "idx_scraped_pages_title_gin",
+      "indexdef": "CREATE INDEX idx_scraped_pages_title_gin ON public.scraped_pages USING gin (to_tsvector('english'::regconfig, title))"
+    },
+    {
+      "schemaname": "public",
+      "tablename": "scraped_pages",
+      "indexname": "idx_scraped_pages_url_completed",
+      "indexdef": "CREATE INDEX idx_scraped_pages_url_completed ON public.scraped_pages USING btree (url) WHERE (status = 'completed'::text)"
+    },
+    {
+      "schemaname": "public",
+      "tablename": "structured_extractions",
+      "indexname": "idx_structured_extractions_domain",
+      "indexdef": "CREATE INDEX idx_structured_extractions_domain ON public.structured_extractions USING btree (domain_id)"
+    },
+    {
+      "schemaname": "public",
+      "tablename": "structured_extractions",
+      "indexname": "idx_structured_extractions_url",
+      "indexdef": "CREATE INDEX idx_structured_extractions_url ON public.structured_extractions USING btree (url)"
+    },
+    {
+      "schemaname": "public",
+      "tablename": "website_content",
+      "indexname": "idx_website_content_domain",
+      "indexdef": "CREATE INDEX idx_website_content_domain ON public.website_content USING btree (domain_id)"
+    },
+    {
+      "schemaname": "public",
+      "tablename": "website_content",
+      "indexname": "idx_website_content_hash",
+      "indexdef": "CREATE INDEX idx_website_content_hash ON public.website_content USING btree (domain_id, content_hash)"
+    },
+    {
+      "schemaname": "public",
+      "tablename": "website_content",
+      "indexname": "idx_website_content_type",
+      "indexdef": "CREATE INDEX idx_website_content_type ON public.website_content USING btree (content_type)"
+    },
+    {
+      "schemaname": "public",
+      "tablename": "website_content",
+      "indexname": "idx_website_content_url",
+      "indexdef": "CREATE INDEX idx_website_content_url ON public.website_content USING btree (url)"
+    }
+  ],
+  "dropScript": "-- Dropping unused indexes from scrape_jobs\nDROP INDEX IF EXISTS public.idx_scrape_jobs_status;\nDROP INDEX IF EXISTS public.idx_scrape_jobs_domain_id;\nDROP INDEX IF EXISTS public.idx_scrape_jobs_customer_config_id;\nDROP INDEX IF EXISTS public.idx_scrape_jobs_priority_status;\nDROP INDEX IF EXISTS public.idx_scrape_jobs_queue_job;\n\n-- Dropping unused indexes from customer_configs\nDROP INDEX IF EXISTS public.idx_customer_configs_customer_id;\n\n-- Dropping unused indexes from domains\nDROP INDEX IF EXISTS public.idx_domains_user_id;\n\n-- Dropping unused indexes from website_content\nDROP INDEX IF EXISTS public.idx_website_content_domain;\nDROP INDEX IF EXISTS public.idx_website_content_url;\nDROP INDEX IF EXISTS public.idx_website_content_type;\nDROP INDEX IF EXISTS public.idx_website_content_hash;\n\n-- Dropping unused indexes from page_embeddings\nDROP INDEX IF EXISTS public.idx_page_embeddings_keywords_gin;\nDROP INDEX IF EXISTS public.idx_page_embeddings_vector_hnsw;\nDROP INDEX IF EXISTS public.idx_page_embeddings_entities_gin;\nDROP INDEX IF EXISTS public.idx_page_embeddings_price_range;\nDROP INDEX IF EXISTS public.idx_page_embeddings_hnsw;\n\n-- Dropping unused indexes from scraped_pages\nDROP INDEX IF EXISTS public.idx_scraped_pages_content_gin;\nDROP INDEX IF EXISTS public.idx_scraped_pages_title_gin;\nDROP INDEX IF EXISTS public.idx_scraped_pages_domain_scraped;\nDROP INDEX IF EXISTS public.idx_scraped_pages_url_completed;\n\n-- Dropping unused indexes from structured_extractions\nDROP INDEX IF EXISTS public.idx_structured_extractions_domain;\nDROP INDEX IF EXISTS public.idx_structured_extractions_url;\n\n-- Dropping unused indexes from conversations\nDROP INDEX IF EXISTS public.idx_conversations_domain_id;\nDROP INDEX IF EXISTS public.idx_conversations_customer_id;\n",
+  "recreateScript": "-- Script to recreate indexes if needed\n\n-- Indexes for conversations\nCREATE INDEX idx_conversations_customer_id ON public.conversations USING btree (customer_id);\nCREATE INDEX idx_conversations_domain_id ON public.conversations USING btree (domain_id);\n\n-- Indexes for customer_configs\nCREATE INDEX idx_customer_configs_customer_id ON public.customer_configs USING btree (customer_id);\n\n-- Indexes for domains\nCREATE INDEX idx_domains_user_id ON public.domains USING btree (user_id);\n\n-- Indexes for page_embeddings\nCREATE INDEX idx_page_embeddings_entities_gin ON public.page_embeddings USING gin (((metadata -> 'entities'::text)));\nCREATE INDEX idx_page_embeddings_hnsw ON public.page_embeddings USING hnsw (embedding vector_cosine_ops);\nCREATE INDEX idx_page_embeddings_keywords_gin ON public.page_embeddings USING gin (((metadata -> 'keywords'::text)));\nCREATE INDEX idx_page_embeddings_price_range ON public.page_embeddings USING btree ((((metadata -> 'price_range'::text) ->> 'min'::text)), (((metadata -> 'price_range'::text) ->> 'max'::text))) WHERE ((metadata -> 'price_range'::text) IS NOT NULL);\nCREATE INDEX idx_page_embeddings_vector_hnsw ON public.page_embeddings USING hnsw (embedding vector_l2_ops) WITH (m='16', ef_construction='64');\n\n-- Indexes for scrape_jobs\nCREATE INDEX idx_scrape_jobs_customer_config_id ON public.scrape_jobs USING btree (customer_config_id);\nCREATE INDEX idx_scrape_jobs_domain_id ON public.scrape_jobs USING btree (domain_id);\nCREATE INDEX idx_scrape_jobs_priority_status ON public.scrape_jobs USING btree (priority, status);\nCREATE INDEX idx_scrape_jobs_queue_job ON public.scrape_jobs USING btree (queue_job_id);\nCREATE INDEX idx_scrape_jobs_status ON public.scrape_jobs USING btree (status);\n\n-- Indexes for scraped_pages\nCREATE INDEX idx_scraped_pages_content_gin ON public.scraped_pages USING gin (to_tsvector('english'::regconfig, content));\nCREATE INDEX idx_scraped_pages_domain_scraped ON public.scraped_pages USING btree (domain_id, scraped_at DESC);\nCREATE INDEX idx_scraped_pages_title_gin ON public.scraped_pages USING gin (to_tsvector('english'::regconfig, title));\nCREATE INDEX idx_scraped_pages_url_completed ON public.scraped_pages USING btree (url) WHERE (status = 'completed'::text);\n\n-- Indexes for structured_extractions\nCREATE INDEX idx_structured_extractions_domain ON public.structured_extractions USING btree (domain_id);\nCREATE INDEX idx_structured_extractions_url ON public.structured_extractions USING btree (url);\n\n-- Indexes for website_content\nCREATE INDEX idx_website_content_domain ON public.website_content USING btree (domain_id);\nCREATE INDEX idx_website_content_hash ON public.website_content USING btree (domain_id, content_hash);\nCREATE INDEX idx_website_content_type ON public.website_content USING btree (content_type);\nCREATE INDEX idx_website_content_url ON public.website_content USING btree (url);"
+}

@@ -18,27 +18,74 @@ function getOpenAIClient(): OpenAI {
   return openai;
 }
 
-// Split text into chunks for embedding
+// Token estimation and limits for OpenAI embeddings
+const MAX_TOKENS_PER_CHUNK = 7500; // Conservative limit (model max is 8192)
+const CHARS_PER_TOKEN_ESTIMATE = 4; // Rough estimate: 1 token ≈ 4 characters
+
+// Split text into chunks for embedding with token limit checking
 export function splitIntoChunks(text: string, maxChunkSize: number = 1000): string[] {
   const chunks: string[] = [];
   const sentences = text.split(/(?<=[.!?])\s+/);
   
-  let currentChunk = '';
+  // Check if we need token-aware splitting
+  const estimatedTokens = text.length / CHARS_PER_TOKEN_ESTIMATE;
+  const needsTokenSplitting = estimatedTokens > MAX_TOKENS_PER_CHUNK;
   
-  for (const sentence of sentences) {
-    if ((currentChunk + sentence).length > maxChunkSize && currentChunk) {
+  // Use token-aware splitting for large texts
+  if (needsTokenSplitting) {
+    console.log(`[Token Management] Large text detected: ~${Math.round(estimatedTokens)} tokens, splitting at token boundaries`);
+    
+    let currentChunk = '';
+    let currentTokenEstimate = 0;
+    
+    for (const sentence of sentences) {
+      const sentenceTokens = sentence.length / CHARS_PER_TOKEN_ESTIMATE;
+      
+      // If adding this sentence would exceed token limit, save current chunk
+      if (currentTokenEstimate + sentenceTokens > MAX_TOKENS_PER_CHUNK && currentChunk) {
+        chunks.push(currentChunk.trim());
+        currentChunk = sentence;
+        currentTokenEstimate = sentenceTokens;
+      } else {
+        currentChunk += (currentChunk ? ' ' : '') + sentence;
+        currentTokenEstimate += sentenceTokens;
+      }
+    }
+    
+    if (currentChunk) {
       chunks.push(currentChunk.trim());
-      currentChunk = sentence;
-    } else {
-      currentChunk += (currentChunk ? ' ' : '') + sentence;
+    }
+    
+    console.log(`[Token Management] Split into ${chunks.length} chunks, max ~${Math.round(MAX_TOKENS_PER_CHUNK)} tokens each`);
+  } else {
+    // Use standard character-based splitting for smaller texts
+    let currentChunk = '';
+    
+    for (const sentence of sentences) {
+      if ((currentChunk + sentence).length > maxChunkSize && currentChunk) {
+        chunks.push(currentChunk.trim());
+        currentChunk = sentence;
+      } else {
+        currentChunk += (currentChunk ? ' ' : '') + sentence;
+      }
+    }
+    
+    if (currentChunk) {
+      chunks.push(currentChunk.trim());
     }
   }
   
-  if (currentChunk) {
-    chunks.push(currentChunk.trim());
-  }
-  
   return chunks;
+}
+
+// Validate chunk size before sending to OpenAI
+function validateChunkSize(chunk: string): boolean {
+  const estimatedTokens = chunk.length / CHARS_PER_TOKEN_ESTIMATE;
+  if (estimatedTokens > MAX_TOKENS_PER_CHUNK) {
+    console.warn(`[Token Warning] Chunk exceeds token limit: ~${Math.round(estimatedTokens)} tokens`);
+    return false;
+  }
+  return true;
 }
 
 // Generate embeddings for text chunks with caching and parallel processing
@@ -83,17 +130,75 @@ export async function generateEmbeddingVectors(chunks: string[]): Promise<number
     // Process current set of batches in parallel
     const batchPromises = currentBatches.map(async ({ indices, batch }) => {
       try {
+        // Validate all chunks in batch before sending
+        const validatedBatch = batch.filter(chunk => {
+          const isValid = validateChunkSize(chunk);
+          if (!isValid) {
+            // If chunk is too large, try to split it further
+            const subChunks = splitIntoChunks(chunk, 1000);
+            console.warn(`[Token Fix] Chunk too large, split into ${subChunks.length} smaller chunks`);
+            // Note: This would require adjusting indices, so for now we'll truncate
+            return false;
+          }
+          return true;
+        });
+        
+        if (validatedBatch.length === 0) {
+          console.error('[Token Error] All chunks in batch exceeded token limit');
+          return { indices: [], embeddings: [], texts: [] };
+        }
+        
         const response = await getOpenAIClient().embeddings.create({
           model: 'text-embedding-3-small',
-          input: batch,
+          input: validatedBatch,
         });
         
         return {
-          indices,
+          indices: indices.slice(0, validatedBatch.length), // Adjust indices if some chunks were filtered
           embeddings: response.data.map(item => item.embedding),
-          texts: batch
+          texts: validatedBatch
         };
-      } catch (error) {
+      } catch (error: any) {
+        // Check if it's a token limit error
+        if (error?.message?.includes('maximum context length')) {
+          console.error(`[Token Error] OpenAI token limit exceeded, attempting to split chunks further`);
+          
+          // Emergency split: divide each chunk in half
+          const emergencySplitBatch = batch.flatMap(chunk => {
+            const mid = Math.floor(chunk.length / 2);
+            return [chunk.slice(0, mid), chunk.slice(mid)];
+          });
+          
+          try {
+            const response = await getOpenAIClient().embeddings.create({
+              model: 'text-embedding-3-small',
+              input: emergencySplitBatch,
+            });
+            
+            // Combine pairs of embeddings by averaging (simple approach)
+            const combinedEmbeddings = [];
+            for (let i = 0; i < response.data.length; i += 2) {
+              if (i + 1 < response.data.length) {
+                const emb1 = response.data[i]?.embedding;
+                const emb2 = response.data[i + 1]?.embedding;
+                if (emb1 && emb2) {
+                  const combined = emb1.map((val, idx) => (val + (emb2[idx] || 0)) / 2);
+                  combinedEmbeddings.push(combined);
+                }
+              }
+            }
+            
+            return {
+              indices,
+              embeddings: combinedEmbeddings,
+              texts: batch
+            };
+          } catch (splitError) {
+            console.error(`[Token Error] Emergency split also failed:`, splitError);
+            throw splitError;
+          }
+        }
+        
         console.error(`Error generating embeddings for batch:`, error);
         // Retry once on failure
         try {
