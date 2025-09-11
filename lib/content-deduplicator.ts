@@ -521,19 +521,97 @@ class LZString {
   private static baseReverseDic: { [key: string]: number };
 }
 
+// LRU Cache implementation for memory management
+class LRUCache<K, V> {
+  private cache: Map<K, V> = new Map();
+  private maxSize: number;
+  private accessOrder: Map<K, number> = new Map();
+  private accessCounter: number = 0;
+
+  constructor(maxSize: number) {
+    this.maxSize = maxSize;
+  }
+
+  get(key: K): V | undefined {
+    const value = this.cache.get(key);
+    if (value !== undefined) {
+      // Update access order
+      this.accessOrder.set(key, this.accessCounter++);
+    }
+    return value;
+  }
+
+  set(key: K, value: V): void {
+    // Check if we need to evict
+    if (!this.cache.has(key) && this.cache.size >= this.maxSize) {
+      this.evictLeastRecentlyUsed();
+    }
+    
+    this.cache.set(key, value);
+    this.accessOrder.set(key, this.accessCounter++);
+  }
+
+  has(key: K): boolean {
+    return this.cache.has(key);
+  }
+
+  delete(key: K): boolean {
+    this.accessOrder.delete(key);
+    return this.cache.delete(key);
+  }
+
+  clear(): void {
+    this.cache.clear();
+    this.accessOrder.clear();
+    this.accessCounter = 0;
+  }
+
+  get size(): number {
+    return this.cache.size;
+  }
+
+  entries(): IterableIterator<[K, V]> {
+    return this.cache.entries();
+  }
+
+  private evictLeastRecentlyUsed(): void {
+    let oldestKey: K | undefined;
+    let oldestAccess = Infinity;
+    
+    for (const [key, accessTime] of this.accessOrder.entries()) {
+      if (accessTime < oldestAccess) {
+        oldestAccess = accessTime;
+        oldestKey = key;
+      }
+    }
+    
+    if (oldestKey !== undefined) {
+      this.cache.delete(oldestKey);
+      this.accessOrder.delete(oldestKey);
+    }
+  }
+}
+
 // Main ContentDeduplicator class
 export class ContentDeduplicator {
   private storage: DeduplicatedStorage;
   private redis: Redis | null = null;
   private supabase: any;
-  private minHashCache: Map<string, MinHash> = new Map();
+  private minHashCache: LRUCache<string, MinHash>;
   private templatePatterns: Map<string, Pattern> = new Map();
+  private processedPages: number = 0;
+  private readonly CLEANUP_INTERVAL = 500; // Cleanup every 500 pages
+  private readonly MAX_MINHASH_CACHE = 1000; // Max MinHash entries
+  private readonly MAX_COMMON_ELEMENTS = 2000; // Max common elements
   
   constructor(
     supabaseUrl?: string,
     supabaseKey?: string,
     redisUrl?: string
   ) {
+    // Initialize with LRU cache for MinHash
+    this.minHashCache = new LRUCache<string, MinHash>(this.MAX_MINHASH_CACHE);
+    
     this.storage = {
       commonElements: new Map(),
       uniqueContent: new Map(),
@@ -630,7 +708,7 @@ export class ContentDeduplicator {
     return compressed; // Not compressed
   }
 
-  // Find similar content using MinHash
+  // Find similar content using MinHash with memory management
   private async findSimilarContent(content: string, threshold: number = 0.8): Promise<SimilarityResult[]> {
     const contentHash = this.generateHash(content);
     let minHash = this.minHashCache.get(contentHash);
@@ -654,6 +732,12 @@ export class ContentDeduplicator {
         
         results.push({ hash, similarity, type });
       }
+    }
+    
+    // Perform automatic cleanup if needed
+    this.processedPages++;
+    if (this.processedPages % this.CLEANUP_INTERVAL === 0) {
+      await this.performMemoryCleanup();
     }
     
     return results.sort((a, b) => b.similarity - a.similarity);
@@ -1112,6 +1196,61 @@ export class ContentDeduplicator {
     }
   }
 
+  // Perform memory cleanup to prevent memory leaks
+  private async performMemoryCleanup(): Promise<void> {
+    console.log(`[ContentDeduplicator] Performing memory cleanup at ${this.processedPages} pages processed`);
+    
+    // Clean up commonElements Map if it's too large
+    if (this.storage.commonElements.size > this.MAX_COMMON_ELEMENTS) {
+      const elementsToKeep = new Map<string, ContentHash>();
+      const sortedElements = Array.from(this.storage.commonElements.entries())
+        .sort((a, b) => b[1].frequency - a[1].frequency)
+        .slice(0, Math.floor(this.MAX_COMMON_ELEMENTS * 0.8)); // Keep 80% of max
+      
+      for (const [hash, content] of sortedElements) {
+        elementsToKeep.set(hash, content);
+      }
+      
+      this.storage.commonElements = elementsToKeep;
+      console.log(`[ContentDeduplicator] Trimmed commonElements from ${this.storage.commonElements.size} to ${elementsToKeep.size}`);
+    }
+    
+    // Clean up uniqueContent Map (remove rarely accessed items)
+    if (this.storage.uniqueContent.size > 1000) {
+      const keysToDelete: string[] = [];
+      let count = 0;
+      for (const key of this.storage.uniqueContent.keys()) {
+        if (count++ > 800) { // Keep only 800 most recent
+          keysToDelete.push(key);
+        }
+      }
+      
+      for (const key of keysToDelete) {
+        this.storage.uniqueContent.delete(key);
+      }
+      console.log(`[ContentDeduplicator] Cleaned ${keysToDelete.length} items from uniqueContent`);
+    }
+    
+    // Clean up references for pages that are no longer in commonElements
+    const validHashes = new Set(this.storage.commonElements.keys());
+    for (const [url, hashes] of this.storage.references.entries()) {
+      const validRefs = hashes.filter(h => validHashes.has(h));
+      if (validRefs.length !== hashes.length) {
+        this.storage.references.set(url, validRefs);
+      }
+      // Remove empty reference entries
+      if (validRefs.length === 0) {
+        this.storage.references.delete(url);
+      }
+    }
+    
+    // Force garbage collection hint (Node.js will decide when to actually run it)
+    if (global.gc) {
+      global.gc();
+      console.log('[ContentDeduplicator] Requested garbage collection');
+    }
+  }
+
   // Clear cache and storage
   async clearCache(): Promise<void> {
     this.storage.commonElements.clear();
@@ -1119,6 +1258,7 @@ export class ContentDeduplicator {
     this.storage.references.clear();
     this.minHashCache.clear();
     this.templatePatterns.clear();
+    this.processedPages = 0;
     
     if (this.redis) {
       await this.redis.flushall();
@@ -1132,13 +1272,17 @@ export class ContentDeduplicator {
     references: number;
     patterns: number;
     cacheSize: number;
+    processedPages: number;
+    memoryUsage: NodeJS.MemoryUsage;
   } {
     return {
       commonElements: this.storage.commonElements.size,
       uniqueContent: this.storage.uniqueContent.size,
       references: this.storage.references.size,
       patterns: this.templatePatterns.size,
-      cacheSize: this.minHashCache.size
+      cacheSize: this.minHashCache.size,
+      processedPages: this.processedPages,
+      memoryUsage: process.memoryUsage()
     };
   }
 
