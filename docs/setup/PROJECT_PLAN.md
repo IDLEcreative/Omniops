@@ -151,6 +151,37 @@ An AI-powered customer service chat system that integrates with WordPress/WooCom
   - Industry-specific metadata extraction
   - Better entity recognition and product matching
 
+#### 3.6 Metadata Vectorization for Enhanced Search (Critical - 80% Search Improvement)
+- [ ] **Phase 1: Content Enrichment (Week 1)**
+  - [ ] Implement metadata-enriched content generation
+  - [ ] Include product SKU, price, availability in embeddings
+  - [ ] Update scraper-worker.js to use enriched content
+  - [ ] Test with Thompson's eParts catalog
+  - [ ] Deploy quick win solution (30-40% improvement)
+- [ ] **Phase 2: Dual Embedding Strategy (Week 2-3)**
+  - [ ] Add metadata_embedding column to database
+  - [ ] Generate separate embeddings for structured data
+  - [ ] Implement weighted similarity scoring
+  - [ ] Create migration script for existing data
+  - [ ] Build hybrid search function (50-60% improvement)
+- [ ] **Phase 3: Intelligent Query Routing (Week 4)**
+  - [ ] Develop query intent classifier
+  - [ ] Implement SQL pre-filtering on metadata
+  - [ ] Create product-specific search endpoint
+  - [ ] Add price range and availability filters
+  - [ ] Achieve 70-80% search relevance improvement
+- [ ] **Expected Benefits**:
+  - Natural language product queries ("cheapest hydraulic pump in stock")
+  - Precise SKU and part number matching
+  - Price-based filtering and sorting
+  - Availability-aware search results
+  - Reduced "no results found" responses by 90%
+- [ ] **Documentation**: See `/docs/METADATA_VECTORIZATION_PLAN.md`
+  - Complete implementation guide (400+ lines)
+  - Database migration scripts
+  - Performance benchmarks
+  - Testing strategies
+
 ### Phase 4: Scale & Optimize (Month 2)
 
 #### 4.1 Performance Optimization
@@ -206,6 +237,9 @@ An AI-powered customer service chat system that integrates with WordPress/WooCom
 - **Scraping efficiency: 93% cost reduction**
 - **Incremental scrape time: < 15 minutes (vs 7 hours full)**
 - **Change detection accuracy: > 99%**
+- **Search relevance score: > 80% (from 40%)**
+- **Product query accuracy: > 90%**
+- **Metadata embedding coverage: 100%**
 
 ### Business KPIs
 - Customer satisfaction score > 4.5/5
@@ -285,6 +319,12 @@ An AI-powered customer service chat system that integrates with WordPress/WooCom
    - Add scheduling UI to training dashboard
    - Expected completion: 4 weeks
    - ROI: 93% reduction in scraping costs
+6. **Critical Enhancement**: Metadata Vectorization (NEW)
+   - Week 1: Quick win content enrichment
+   - Week 2-3: Dual embedding implementation
+   - Week 4: Intelligent query routing
+   - Expected completion: 4 weeks
+   - ROI: 80% improvement in search relevance for e-commerce
 
 ## 📝 Notes
 
@@ -294,6 +334,7 @@ An AI-powered customer service chat system that integrates with WordPress/WooCom
 - Documentation: `/docs/`
 
 ## 🔄 Last Updated
-- Date: August 25, 2025
-- Version: 1.0.0
+- Date: September 11, 2025
+- Version: 1.1.0
 - Status: Development → Beta (in progress)
+- Latest Addition: Metadata Vectorization Plan (Phase 3.6)
