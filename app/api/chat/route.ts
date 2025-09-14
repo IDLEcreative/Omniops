@@ -8,6 +8,7 @@ import { z } from 'zod';
 import { checkDomainRateLimit } from '@/lib/rate-limit';
 import { searchSimilarContent } from '@/lib/embeddings';
 import { smartSearch, extractQueryKeywords, isPriceQuery, extractPriceRange } from '@/lib/search-wrapper';
+import { getEnhancedChatContext, formatChunksForPrompt } from '@/lib/chat-context-enhancer';
 import { CustomerVerification } from '@/lib/customer-verification';
 import { SimpleCustomerVerification } from '@/lib/customer-verification-simple';
 import { QueryCache } from '@/lib/query-cache';
@@ -320,75 +321,53 @@ export async function POST(request: NextRequest) {
         },
         async () => {
           try {
-            // Detect SKU/part codes (e.g., DC66-10P) and prefer precise lookup
-            const extractPartCodes = (text: string): string[] => {
-              const codes = new Set<string>();
-              const regex = /\b(?=[A-Za-z0-9\-\/]*[A-Za-z])(?=[A-Za-z0-9\-\/]*\d)[A-Za-z0-9]+(?:[\-\/][A-Za-z0-9]+)+\b/g;
-              const lower = text.toLowerCase();
-              let m: RegExpExecArray | null;
-              while ((m = regex.exec(lower)) !== null) {
-                const token = m[0];
-                if (token.length >= 4 && token.length <= 32) {
-                  codes.add(token);
-                }
-              }
-              return Array.from(codes);
-            };
-            const isPartQuery = extractPartCodes(message).length > 0;
-            if (isPartQuery) {
-              // Use smart search for part queries - will use enhanced metadata if available
-              const priceRange = extractPriceRange(message);
-              const precise = await smartSearch(
-                message,
-                searchDomain,
-                5,
-                0.3,
-                {
-                  contentTypes: ['product'],
-                  priceRange: priceRange || undefined
-                }
-              );
-              if (precise && precise.length > 0) {
-                return precise;
-              }
-            }
-            
-            // Try optimized search first
-            // Always get more results to give AI more context to reason with
-            const { data: results, error } = await adminSupabase.rpc('search_content_optimized', {
-              query_text: message,
-              query_embedding: null, // Will be generated in function if needed
-              p_domain_id: domainId,
-              match_count: 8,  // Get more results for better context
-              use_hybrid: true
-            });
-            
-            if (!error && results && results.length > 0) {
-              return results.map((r: any) => ({
-                content: r.content,
-                url: r.url || '',
-                title: r.title || 'Untitled',
-                similarity: r.similarity || 0.7
-              }));
-            }
-            
-            // Fallback to smart search with lower threshold for broader results
-            const queryKeywords = extractQueryKeywords(message);
-            const priceRange = extractPriceRange(message);
-            return await smartSearch(
+            // Use our enhanced context retrieval that gets 10-15 chunks
+            const enhancedContext = await getEnhancedChatContext(
               message,
               searchDomain,
-              8,  // Get more results
-              0.2,   // Lower threshold to get broader semantic matches
+              domainId,
               {
-                mustHaveKeywords: queryKeywords.length > 0 ? queryKeywords.slice(0, 3) : undefined,
-                priceRange: priceRange || undefined,
-                boostRecent: true
+                enableSmartSearch: true,
+                minChunks: 10,  // Increased from 3-5
+                maxChunks: 15   // Maximum context window
               }
             );
+            
+            console.log('[Chat] Enhanced context retrieved:', {
+              totalChunks: enhancedContext.totalChunks,
+              avgSimilarity: enhancedContext.averageSimilarity,
+              hasHighConfidence: enhancedContext.hasHighConfidence,
+              contextSummary: enhancedContext.contextSummary
+            });
+            
+            // Return chunks in the expected format
+            return enhancedContext.chunks.map(chunk => ({
+              content: chunk.content,
+              url: chunk.url,
+              title: chunk.title,
+              similarity: chunk.similarity
+            }));
           } catch (error) {
-            console.error('Search error:', error);
-            return [];
+            console.error('Enhanced context search error:', error);
+            // Fallback to original search method
+            try {
+              const queryKeywords = extractQueryKeywords(message);
+              const priceRange = extractPriceRange(message);
+              return await smartSearch(
+                message,
+                searchDomain,
+                10,  // Still get more results than before
+                0.2,
+                {
+                  mustHaveKeywords: queryKeywords.length > 0 ? queryKeywords.slice(0, 3) : undefined,
+                  priceRange: priceRange || undefined,
+                  boostRecent: true
+                }
+              );
+            } catch (fallbackError) {
+              console.error('Fallback search also failed:', fallbackError);
+              return [];
+            }
           }
         }
       );
@@ -880,27 +859,63 @@ RULES:
       systemContext += `\nProvide these contact details directly in your response, formatted clearly and professionally.`;
     }
     
-    // Add website information if available
+    // Add website information if available - now handling MORE chunks efficiently
     if (embeddingResults && embeddingResults.length > 0) {
-      console.log('[Chat] Adding embedding results to context:', {
+      console.log('[Chat] Adding enhanced embedding results to context:', {
         count: embeddingResults.length,
-        firstResultTitle: embeddingResults[0]?.title
+        firstResultTitle: embeddingResults[0]?.title,
+        avgSimilarity: embeddingResults.reduce((sum: number, r: any) => sum + (r.similarity || 0), 0) / embeddingResults.length
       });
       
-      systemContext += `\n\n⚠️ MANDATORY: The following products/pages were found. YOU MUST display them ALL in your response:\n`;
+      // Group chunks by similarity tier for better AI processing
+      const highRelevance = embeddingResults.filter((r: any) => r.similarity > 0.85);
+      const mediumRelevance = embeddingResults.filter((r: any) => r.similarity > 0.7 && r.similarity <= 0.85);
+      const contextualRelevance = embeddingResults.filter((r: any) => r.similarity <= 0.7);
       
-      embeddingResults.forEach((r: any, index: number) => {
-        systemContext += `\n${index + 1}. ${r.title}\n`;
-        systemContext += `   URL: ${r.url}\n`;
-        systemContext += `   Content: ${r.content.substring(0, 600)}...\n`;
-      });
+      systemContext += `\n\n⚠️ COMPREHENSIVE CONTEXT: Found ${embeddingResults.length} relevant sources (${highRelevance.length} highly relevant, ${mediumRelevance.length} moderately relevant):\n`;
       
-      systemContext += `\n\nCRITICAL INSTRUCTIONS - YOU MUST FOLLOW THESE RULES:
-      1. ALWAYS show the products/pages found above IMMEDIATELY when responding
-      2. Format each product as a COMPACT clickable link using markdown: [Product Name](url)
-      3. Include ALL relevant products found (don't hide any)
-      4. You can ask clarifying questions AFTER showing the products, but NEVER instead of showing them
-      5. Even if the user's query is vague, STILL SHOW the products first, then ask for clarification if needed
+      // Present high relevance items prominently
+      if (highRelevance.length > 0) {
+        systemContext += `\n🎯 HIGHLY RELEVANT (Must prioritize these):\n`;
+        highRelevance.forEach((r: any, index: number) => {
+          systemContext += `\n${index + 1}. ${r.title} [${(r.similarity * 100).toFixed(0)}% match]\n`;
+          systemContext += `   URL: ${r.url}\n`;
+          systemContext += `   Content: ${r.content.substring(0, 500)}...\n`;
+        });
+      }
+      
+      // Add medium relevance for additional context
+      if (mediumRelevance.length > 0) {
+        systemContext += `\n📋 ADDITIONAL CONTEXT:\n`;
+        mediumRelevance.forEach((r: any, index: number) => {
+          systemContext += `\n${highRelevance.length + index + 1}. ${r.title}\n`;
+          systemContext += `   URL: ${r.url}\n`;
+          systemContext += `   Summary: ${r.content.substring(0, 300)}...\n`;
+        });
+      }
+      
+      // Include lower relevance items briefly for comprehensive coverage
+      if (contextualRelevance.length > 0) {
+        systemContext += `\n📚 RELATED INFORMATION (for completeness):\n`;
+        contextualRelevance.forEach((r: any) => {
+          systemContext += `• ${r.title}: ${r.content.substring(0, 150)}... (${r.url})\n`;
+        });
+      }
+      
+      systemContext += `\n\nCRITICAL INSTRUCTIONS - ENHANCED CONTEXT UTILIZATION:
+      
+      WITH ${embeddingResults.length} CHUNKS OF CONTEXT, YOU CAN NOW:
+      1. Make intelligent connections between related products and information
+      2. Provide comprehensive answers using ALL available context
+      3. Cross-reference between different chunks to find complete information
+      4. Identify patterns and relationships across multiple sources
+      
+      MANDATORY RULES:
+      1. ALWAYS show relevant products/pages IMMEDIATELY when responding
+      2. Format each product as a COMPACT clickable link: [Product Name](url)
+      3. Include ALL relevant items (we've provided ${embeddingResults.length} chunks for a reason)
+      4. Use the FULL context to provide complete, accurate answers
+      5. When multiple chunks mention related information, synthesize them intelligently
       
       PRODUCT INFORMATION ACCURACY:
       - NEVER make assumptions about what a product includes or doesn't include

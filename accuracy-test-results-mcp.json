@@ -1,0 +1,450 @@
+{
+  "testRun": {
+    "timestamp": "2025-09-14T22:00:41.512Z",
+    "totalQueries": 11,
+    "passedQueries": 0,
+    "failedQueries": 11,
+    "overallAccuracy": 0,
+    "averageChunksRetrieved": 0,
+    "averageResponseTime": 0.8799240000000246,
+    "contextWindowEffectiveness": 0
+  },
+  "comparison": {
+    "oldSystem": {
+      "averageChunks": 4,
+      "estimatedAccuracy": 0.85
+    },
+    "newSystem": {
+      "averageChunks": 0,
+      "measuredAccuracy": 0,
+      "improvement": -100
+    }
+  },
+  "categoryResults": {
+    "product": {
+      "queries": 4,
+      "passed": 0,
+      "accuracy": 0,
+      "averageChunks": 0,
+      "averageSimilarity": 0
+    },
+    "technical": {
+      "queries": 3,
+      "passed": 0,
+      "accuracy": 0,
+      "averageChunks": 0,
+      "averageSimilarity": 0
+    },
+    "comparison": {
+      "queries": 2,
+      "passed": 0,
+      "accuracy": 0,
+      "averageChunks": 0,
+      "averageSimilarity": 0
+    },
+    "complex": {
+      "queries": 2,
+      "passed": 0,
+      "accuracy": 0,
+      "averageChunks": 0,
+      "averageSimilarity": 0
+    }
+  },
+  "detailedResults": [
+    {
+      "queryId": "P001",
+      "query": "I need an alternator pulley for a Freelander",
+      "type": "product",
+      "chunksRetrieved": 0,
+      "averageSimilarity": 0,
+      "maxSimilarity": 0,
+      "minSimilarity": 0,
+      "highConfidenceChunks": 0,
+      "mediumConfidenceChunks": 0,
+      "lowConfidenceChunks": 0,
+      "contextWindowUsed": 0,
+      "responseTime": 0.4036670000000129,
+      "foundExpectedTerms": [],
+      "missingExpectedTerms": [
+        "alternator",
+        "pulley",
+        "freelander",
+        "land rover"
+      ],
+      "accuracy": 0,
+      "passed": false,
+      "positionDistribution": [
+        0,
+        0,
+        0,
+        0
+      ],
+      "metadataEnhanced": false,
+      "searchSources": [
+        "embedding",
+        "enhanced_search"
+      ]
+    },
+    {
+      "queryId": "P002",
+      "query": "DC66-10P hydraulic tank for forest loader",
+      "type": "product",
+      "chunksRetrieved": 0,
+      "averageSimilarity": 0,
+      "maxSimilarity": 0,
+      "minSimilarity": 0,
+      "highConfidenceChunks": 0,
+      "mediumConfidenceChunks": 0,
+      "lowConfidenceChunks": 0,
+      "contextWindowUsed": 0,
+      "responseTime": 0.8104999999999905,
+      "foundExpectedTerms": [],
+      "missingExpectedTerms": [
+        "DC66-10P",
+        "hydraulic",
+        "tank",
+        "forest",
+        "loader"
+      ],
+      "accuracy": 0,
+      "passed": false,
+      "positionDistribution": [
+        0,
+        0,
+        0,
+        0
+      ],
+      "metadataEnhanced": false,
+      "searchSources": [
+        "embedding",
+        "enhanced_search"
+      ]
+    },
+    {
+      "queryId": "P003",
+      "query": "What torque wrenches do you have in stock?",
+      "type": "product",
+      "chunksRetrieved": 0,
+      "averageSimilarity": 0,
+      "maxSimilarity": 0,
+      "minSimilarity": 0,
+      "highConfidenceChunks": 0,
+      "mediumConfidenceChunks": 0,
+      "lowConfidenceChunks": 0,
+      "contextWindowUsed": 0,
+      "responseTime": 0.3949160000000802,
+      "foundExpectedTerms": [],
+      "missingExpectedTerms": [
+        "torque",
+        "wrench",
+        "stock",
+        "available"
+      ],
+      "accuracy": 0,
+      "passed": false,
+      "positionDistribution": [
+        0,
+        0,
+        0,
+        0
+      ],
+      "metadataEnhanced": false,
+      "searchSources": [
+        "embedding",
+        "enhanced_search"
+      ]
+    },
+    {
+      "queryId": "P004",
+      "query": "hydraulic tank for tough conditions",
+      "type": "product",
+      "chunksRetrieved": 0,
+      "averageSimilarity": 0,
+      "maxSimilarity": 0,
+      "minSimilarity": 0,
+      "highConfidenceChunks": 0,
+      "mediumConfidenceChunks": 0,
+      "lowConfidenceChunks": 0,
+      "contextWindowUsed": 0,
+      "responseTime": 0.7712080000000014,
+      "foundExpectedTerms": [],
+      "missingExpectedTerms": [
+        "hydraulic",
+        "tank",
+        "tough",
+        "conditions",
+        "durable"
+      ],
+      "accuracy": 0,
+      "passed": false,
+      "positionDistribution": [
+        0,
+        0,
+        0,
+        0
+      ],
+      "metadataEnhanced": false,
+      "searchSources": [
+        "embedding",
+        "enhanced_search"
+      ]
+    },
+    {
+      "queryId": "T001",
+      "query": "What are the specifications for DC66-10P tank capacity?",
+      "type": "technical",
+      "chunksRetrieved": 0,
+      "averageSimilarity": 0,
+      "maxSimilarity": 0,
+      "minSimilarity": 0,
+      "highConfidenceChunks": 0,
+      "mediumConfidenceChunks": 0,
+      "lowConfidenceChunks": 0,
+      "contextWindowUsed": 0,
+      "responseTime": 0.46795799999995324,
+      "foundExpectedTerms": [],
+      "missingExpectedTerms": [
+        "DC66-10P",
+        "specifications",
+        "tank",
+        "capacity",
+        "size"
+      ],
+      "accuracy": 0,
+      "passed": false,
+      "positionDistribution": [
+        0,
+        0,
+        0,
+        0
+      ],
+      "metadataEnhanced": false,
+      "searchSources": [
+        "embedding",
+        "enhanced_search"
+      ]
+    },
+    {
+      "queryId": "T002",
+      "query": "torque wrench accuracy and measurement range",
+      "type": "technical",
+      "chunksRetrieved": 0,
+      "averageSimilarity": 0,
+      "maxSimilarity": 0,
+      "minSimilarity": 0,
+      "highConfidenceChunks": 0,
+      "mediumConfidenceChunks": 0,
+      "lowConfidenceChunks": 0,
+      "contextWindowUsed": 0,
+      "responseTime": 0.48820900000009715,
+      "foundExpectedTerms": [],
+      "missingExpectedTerms": [
+        "torque",
+        "wrench",
+        "accuracy",
+        "measurement",
+        "range"
+      ],
+      "accuracy": 0,
+      "passed": false,
+      "positionDistribution": [
+        0,
+        0,
+        0,
+        0
+      ],
+      "metadataEnhanced": false,
+      "searchSources": [
+        "embedding",
+        "enhanced_search"
+      ]
+    },
+    {
+      "queryId": "T003",
+      "query": "What materials are used in hydraulic tank construction?",
+      "type": "technical",
+      "chunksRetrieved": 0,
+      "averageSimilarity": 0,
+      "maxSimilarity": 0,
+      "minSimilarity": 0,
+      "highConfidenceChunks": 0,
+      "mediumConfidenceChunks": 0,
+      "lowConfidenceChunks": 0,
+      "contextWindowUsed": 0,
+      "responseTime": 1.3910410000000866,
+      "foundExpectedTerms": [],
+      "missingExpectedTerms": [
+        "materials",
+        "hydraulic",
+        "tank",
+        "construction",
+        "steel"
+      ],
+      "accuracy": 0,
+      "passed": false,
+      "positionDistribution": [
+        0,
+        0,
+        0,
+        0
+      ],
+      "metadataEnhanced": false,
+      "searchSources": [
+        "embedding",
+        "enhanced_search"
+      ]
+    },
+    {
+      "queryId": "C001",
+      "query": "Compare different brake pad types and their applications",
+      "type": "comparison",
+      "chunksRetrieved": 0,
+      "averageSimilarity": 0,
+      "maxSimilarity": 0,
+      "minSimilarity": 0,
+      "highConfidenceChunks": 0,
+      "mediumConfidenceChunks": 0,
+      "lowConfidenceChunks": 0,
+      "contextWindowUsed": 0,
+      "responseTime": 0.9836659999998574,
+      "foundExpectedTerms": [],
+      "missingExpectedTerms": [
+        "brake",
+        "pad",
+        "types",
+        "applications",
+        "compare"
+      ],
+      "accuracy": 0,
+      "passed": false,
+      "positionDistribution": [
+        0,
+        0,
+        0,
+        0
+      ],
+      "metadataEnhanced": false,
+      "searchSources": [
+        "embedding",
+        "enhanced_search"
+      ]
+    },
+    {
+      "queryId": "C002",
+      "query": "What is the difference between hydraulic tank models?",
+      "type": "comparison",
+      "chunksRetrieved": 0,
+      "averageSimilarity": 0,
+      "maxSimilarity": 0,
+      "minSimilarity": 0,
+      "highConfidenceChunks": 0,
+      "mediumConfidenceChunks": 0,
+      "lowConfidenceChunks": 0,
+      "contextWindowUsed": 0,
+      "responseTime": 1.2684580000000096,
+      "foundExpectedTerms": [],
+      "missingExpectedTerms": [
+        "difference",
+        "hydraulic",
+        "tank",
+        "models"
+      ],
+      "accuracy": 0,
+      "passed": false,
+      "positionDistribution": [
+        0,
+        0,
+        0,
+        0
+      ],
+      "metadataEnhanced": false,
+      "searchSources": [
+        "embedding",
+        "enhanced_search"
+      ]
+    },
+    {
+      "queryId": "X001",
+      "query": "I need a hydraulic tank for a forest loader that works in tough conditions, what options do you have and what are the specifications?",
+      "type": "complex",
+      "chunksRetrieved": 0,
+      "averageSimilarity": 0,
+      "maxSimilarity": 0,
+      "minSimilarity": 0,
+      "highConfidenceChunks": 0,
+      "mediumConfidenceChunks": 0,
+      "lowConfidenceChunks": 0,
+      "contextWindowUsed": 0,
+      "responseTime": 1.2549999999998818,
+      "foundExpectedTerms": [],
+      "missingExpectedTerms": [
+        "hydraulic",
+        "tank",
+        "forest",
+        "loader",
+        "tough",
+        "conditions",
+        "specifications"
+      ],
+      "accuracy": 0,
+      "passed": false,
+      "positionDistribution": [
+        0,
+        0,
+        0,
+        0
+      ],
+      "metadataEnhanced": false,
+      "searchSources": [
+        "embedding",
+        "enhanced_search"
+      ]
+    },
+    {
+      "queryId": "X002",
+      "query": "What alternator pulleys are compatible with Land Rover Freelander, and how do I install them?",
+      "type": "complex",
+      "chunksRetrieved": 0,
+      "averageSimilarity": 0,
+      "maxSimilarity": 0,
+      "minSimilarity": 0,
+      "highConfidenceChunks": 0,
+      "mediumConfidenceChunks": 0,
+      "lowConfidenceChunks": 0,
+      "contextWindowUsed": 0,
+      "responseTime": 1.4445410000002994,
+      "foundExpectedTerms": [],
+      "missingExpectedTerms": [
+        "alternator",
+        "pulley",
+        "compatible",
+        "land rover",
+        "freelander",
+        "install"
+      ],
+      "accuracy": 0,
+      "passed": false,
+      "positionDistribution": [
+        0,
+        0,
+        0,
+        0
+      ],
+      "metadataEnhanced": false,
+      "searchSources": [
+        "embedding",
+        "enhanced_search"
+      ]
+    }
+  ],
+  "recommendations": [
+    "Overall accuracy 0.0% is below target 90%. Consider adjusting similarity thresholds or improving metadata.",
+    "Average chunks retrieved (0.0) is below target 10. Consider lowering similarity thresholds or expanding search scope."
+  ],
+  "systemHealth": {
+    "searchFunctionStatus": "Enhanced search functions active",
+    "enhancedMetadataAvailable": false,
+    "vectorIndexPerformance": "Good",
+    "cacheHitRate": 0.75
+  }
+}
