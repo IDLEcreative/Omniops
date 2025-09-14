@@ -24,7 +24,8 @@ async function askQuestion(question: string): Promise<{response: string, confide
       body: JSON.stringify({
         message: question,
         domain: 'thompsonseparts.co.uk',
-        conversationId: 'test-' + Date.now()
+        conversationId: 'test-' + Date.now(),
+        session_id: 'test-session-' + Date.now()
       })
     });
     
@@ -34,17 +35,21 @@ async function askQuestion(question: string): Promise<{response: string, confide
     
     const data = await response.json();
     
+    // Handle the actual response structure
+    const responseText = data.message || data.response || '';
+    
     // Analyze response quality
     const hasSpecificInfo = 
-      data.response.includes('£') ||  // Has price
-      data.response.includes('SKU') || // Has product code
-      data.response.includes('available') || // Has availability
-      data.response.includes('specification'); // Has specs
+      responseText.includes('£') ||  // Has price
+      responseText.includes('SKU') || // Has product code
+      responseText.includes('available') || // Has availability
+      responseText.includes('specification') || // Has specs
+      responseText.includes('product/'); // Has product links
     
     const confidence = hasSpecificInfo ? 0.9 : 0.5;
     
     return {
-      response: data.response,
+      response: responseText,
       confidence
     };
   } catch (error) {
