@@ -53,6 +53,12 @@ npx tsc --noEmit        # Run TypeScript type checking
 # Database Migration
 npm run migrate:encrypt-credentials  # Migrate credentials to encrypted format
 
+# Database Cleanup
+npx tsx test-database-cleanup.ts stats              # View scraping statistics
+npx tsx test-database-cleanup.ts clean              # Clean all scraped data
+npx tsx test-database-cleanup.ts clean --domain=X   # Clean specific domain
+npx tsx test-database-cleanup.ts clean --dry-run    # Preview cleanup
+
 # Dependencies
 npm run check:deps       # Check for dependency issues
 npm run check:all        # Run all checks (deps + lint + typecheck)
@@ -247,6 +253,19 @@ docker exec -it omniops-app sh         # Shell into app container
 1. Scraping config: `lib/crawler-config.ts`
 2. Content extraction: `lib/content-extractor.ts`
 3. Job monitoring: Check Redis or use job status endpoint
+
+### Database Cleanup & Maintenance
+When you need to clean scraped data for fresh re-scraping:
+
+1. **Check Current Data**: `npx tsx test-database-cleanup.ts stats`
+2. **Clean Specific Domain**: `npx tsx test-database-cleanup.ts clean --domain=example.com`
+3. **Clean Everything**: `npx tsx test-database-cleanup.ts clean`
+
+The cleanup system uses CASCADE foreign keys for safe deletion:
+- Removes: scraped pages, embeddings, extractions, cache
+- Preserves: customer configs, credentials, user accounts
+- See `lib/database-cleaner.ts` for implementation
+- Full docs: `docs/DATABASE_CLEANUP.md`
 
 ## Critical Development Guidelines
 

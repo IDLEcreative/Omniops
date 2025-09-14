@@ -39,6 +39,7 @@ A modern, AI-powered customer service chat widget that can be embedded on any we
 - Node.js 18+
 - Redis server
 - AI API key (OpenAI or Anthropic)
+- Supabase account (for database and vector storage)
 
 ### Basic Setup
 
@@ -522,7 +523,48 @@ npm run docker:logs    # View container logs
 # Background Services
 npm run queue:start    # Start job processor
 npm run worker:start   # Start worker service
+
+# Database Maintenance
+npx tsx test-database-cleanup.ts stats  # View scraping statistics
+npx tsx test-database-cleanup.ts clean  # Clean all scraped data
 ```
+
+## 🧹 Database Cleanup
+
+### Quick Cleanup Commands
+
+Clean all scraped data and embeddings when you need a fresh start:
+
+```bash
+# Check current data statistics
+npx tsx test-database-cleanup.ts stats
+
+# Preview what will be deleted (dry run)
+npx tsx test-database-cleanup.ts clean --dry-run
+
+# Clean all data (with 3-second safety countdown)
+npx tsx test-database-cleanup.ts clean
+
+# Clean specific domain only
+npx tsx test-database-cleanup.ts clean --domain=example.com
+```
+
+### What Gets Cleaned
+
+- ✅ All scraped pages and HTML content
+- ✅ Vector embeddings for semantic search
+- ✅ Structured extractions (FAQs, products, etc.)
+- ✅ Scrape job queue and cache
+- ✅ Optionally: Chat conversations for the domain
+
+### What's Preserved
+
+- ✅ Customer configurations and settings
+- ✅ WooCommerce credentials (encrypted)
+- ✅ User accounts and authentication
+- ✅ Domain configurations
+
+For detailed cleanup documentation, see [Database Cleanup Guide](./docs/DATABASE_CLEANUP.md).
 
 ## 🐳 Docker Deployment
 

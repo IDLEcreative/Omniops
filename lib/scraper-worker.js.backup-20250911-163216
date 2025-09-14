@@ -18,9 +18,6 @@ const crypto = require('crypto');
 const { EmbeddingDeduplicator } = require('./embedding-deduplicator');
 const { MetadataExtractor } = require('./metadata-extractor'); // JavaScript version
 const { DatabaseOptimizer } = require('./database-optimizer');
-const { EcommerceExtractor } = require('./ecommerce-extractor');
-const { ContentEnricher } = require('./content-enricher');
-const { sanitizeForLogging } = require('./log-sanitizer');
 
 // Initialize the global deduplicator
 const deduplicator = new EmbeddingDeduplicator();
@@ -562,224 +559,6 @@ function extractMetadata(document) {
     }
   });
   
-  // Extract e-commerce specific data  
-  const extractProductData = () => {
-    const productData = {};
-    
-    // Helper function to get meta tags - defined inside extractProductData
-    const getMetaInner = (name) => {
-      const element = document.querySelector(
-        `meta[name="${name}"], meta[property="${name}"], meta[property="og:${name}"], meta[property="article:${name}"]`
-      );
-      return element ? element.getAttribute('content') : null;
-    };
-    
-    // Try to extract price
-    const priceSelectors = [
-      '.price', '.product-price', '.woocommerce-Price-amount', 
-      '[itemprop="price"]', '.regular-price', '.sale-price',
-      'span.amount', '.price-box', '.product-price-value'
-    ];
-    
-    for (const selector of priceSelectors) {
-      const priceElement = document.querySelector(selector);
-      if (priceElement) {
-        productData.price = priceElement.textContent?.trim();
-        break;
-      }
-    }
-    
-    // Try to extract availability/stock
-    const stockSelectors = [
-      '.stock', '.in-stock', '.out-of-stock', '.availability',
-      '[itemprop="availability"]', '.stock-status', '.product-stock'
-    ];
-    
-    for (const selector of stockSelectors) {
-      const stockElement = document.querySelector(selector);
-      if (stockElement) {
-        productData.availability = stockElement.textContent?.trim();
-        productData.inStock = !stockElement.textContent?.toLowerCase().includes('out of stock');
-        break;
-      }
-    }
-    
-    // Try to extract SKU
-    const skuSelectors = [
-      '.sku', '[itemprop="sku"]', '.product-sku', '.sku-number'
-    ];
-    
-    for (const selector of skuSelectors) {
-      const skuElement = document.querySelector(selector);
-      if (skuElement) {
-        productData.sku = skuElement.textContent?.trim();
-        break;
-      }
-    }
-    
-    // Extract BRAND from multiple sources
-    const extractBrand = () => {
-      // Try direct brand selectors
-      const brandSelectors = [
-        '[itemprop="brand"]',
-        '[itemprop="manufacturer"]', 
-        '.product-brand',
-        '.brand',
-        '.manufacturer',
-        '.product-manufacturer',
-        '.brand-name',
-        '.product-vendor',
-        'span.brand',
-        'div.brand'
-      ];
-      
-      for (const selector of brandSelectors) {
-        const brandElement = document.querySelector(selector);
-        if (brandElement) {
-          const brandText = brandElement.textContent?.trim();
-          if (brandText && brandText.length > 1 && brandText.length < 100) {
-            return brandText;
-          }
-        }
-      }
-      
-      // Try to extract from product title (common pattern: "Brand - Product Name")
-      const titleElement = document.querySelector('h1, .product-title, .product-name');
-      if (titleElement) {
-        const titleText = titleElement.textContent?.trim();
-        if (titleText) {
-          // Check for dash pattern
-          const dashMatch = titleText.match(/^([A-Z][A-Za-z0-9\s&-]+?)\s*[-–—]\s*/);
-          if (dashMatch && dashMatch[1].length < 50) {
-            return dashMatch[1].trim();
-          }
-          
-          // Check for known brand patterns in title
-          const brandPatterns = [
-            /^(Bosch|Makita|DeWalt|Stanley|Black\s*&?\s*Decker|Ryobi|Milwaukee|Festool|Hilti|Metabo)/i,
-            /^(Thompson|Draper|Faithfull|Silverline|Sealey|Clarke|Wolf|Einhell)/i
-          ];
-          
-          for (const pattern of brandPatterns) {
-            const match = titleText.match(pattern);
-            if (match) {
-              return match[1].trim();
-            }
-          }
-        }
-      }
-      
-      // Try metadata attributes
-      const metaBrand = getMetaInner('brand') || getMetaInner('manufacturer') || getMetaInner('product:brand');
-      if (metaBrand) {
-        return metaBrand;
-      }
-      
-      return null;
-    };
-    
-    // Extract CATEGORY from multiple sources
-    const extractCategory = () => {
-      // Try breadcrumbs first (most reliable for categories)
-      const breadcrumbSelectors = [
-        '.breadcrumb',
-        '.breadcrumbs',
-        'nav[aria-label*="breadcrumb"]',
-        '.woocommerce-breadcrumb',
-        '.site-breadcrumbs',
-        'ol[itemtype*="BreadcrumbList"]',
-        '.navigation-breadcrumbs'
-      ];
-      
-      for (const selector of breadcrumbSelectors) {
-        const breadcrumbElement = document.querySelector(selector);
-        if (breadcrumbElement) {
-          // Get all breadcrumb items
-          const items = breadcrumbElement.querySelectorAll('a, span:not(.separator):not(.divider)');
-          const categories = [];
-          
-          items.forEach((item, index) => {
-            const text = item.textContent?.trim();
-            // Skip home/shop links and the product name (usually last)
-            if (text && 
-                !text.toLowerCase().match(/^(home|shop|products?)$/i) && 
-                index < items.length - 1) {
-              categories.push(text);
-            }
-          });
-          
-          if (categories.length > 0) {
-            // Return as hierarchical path
-            return categories.join(' > ');
-          }
-        }
-      }
-      
-      // Try direct category selectors
-      const categorySelectors = [
-        '[itemprop="category"]',
-        '.product-category',
-        '.category',
-        '.product-type',
-        '.product_cat',
-        'span.posted_in a',
-        '.product-categories a'
-      ];
-      
-      for (const selector of categorySelectors) {
-        const categoryElements = document.querySelectorAll(selector);
-        if (categoryElements.length > 0) {
-          const categories = [];
-          categoryElements.forEach(el => {
-            const text = el.textContent?.trim();
-            if (text && text.length > 1) {
-              categories.push(text);
-            }
-          });
-          
-          if (categories.length > 0) {
-            return categories.join(', ');
-          }
-        }
-      }
-      
-      // Try to get from meta tags
-      const metaCategory = getMetaInner('category') || getMetaInner('product:category') || getMetaInner('article:section');
-      if (metaCategory) {
-        return metaCategory;
-      }
-      
-      return null;
-    };
-    
-    // Extract brand and category
-    productData.brand = extractBrand();
-    productData.category = extractCategory();
-    
-    // Add timestamp for when this was last checked (use different name to avoid conflict)
-    productData.extractedAt = new Date().toISOString();
-    
-    return productData;
-  };
-  
-  const productData = extractProductData();
-  
-  // Remove product-related fields from structuredData to avoid duplication
-  const { price, sku, productID, brand, manufacturer, category, availability, offers, ...cleanStructuredData } = structuredData;
-  
-  // Don't spread raw productData to avoid legacy field names
-  const { 
-    price: prodPrice, 
-    sku: prodSku, 
-    inStock, 
-    categories, 
-    availability: prodAvailability, 
-    brand: prodBrand,
-    category: prodCategory,
-    extractedAt, 
-    ...otherProductData 
-  } = productData;
-  
   return {
     title: getMeta('title') || document.title,
     description: getMeta('description'),
@@ -790,17 +569,7 @@ function extractMetadata(document) {
     type: getMeta('type'),
     image: getMeta('image'),
     site_name: getMeta('site_name'),
-    ...cleanStructuredData, // Spread non-product structured data
-    // ONLY use consolidated field names with priority: extracted > structured > metadata
-    productSku: prodSku || sku || productID,
-    productPrice: prodPrice || price || offers?.price,
-    productInStock: inStock !== undefined ? inStock : 
-                    (availability === 'InStock' || 
-                     offers?.availability === 'https://schema.org/InStock'),
-    productBrand: prodBrand || brand?.name || brand || manufacturer,
-    productCategory: prodCategory || categories || category,
-    // Add timestamp
-    lastChecked: new Date().toISOString()
+    ...structuredData,
   };
 }
 
@@ -966,12 +735,6 @@ async function splitIntoChunks(text, maxChunkSize = 1000, pageUrl = '', htmlCont
   
   // Filter out boilerplate chunks
   const nonBoilerplateChunks = allChunks.filter(chunk => !isDuplicateChunk(chunk, pageUrl));
-  
-  // Skip deduplication entirely when force rescraping
-  if (FORCE_RESCRAPE) {
-    console.log(`[Worker ${jobId}] Force rescrape enabled - skipping deduplication for ${pageUrl}`);
-    return nonBoilerplateChunks;
-  }
   
   // Now use the global deduplicator to filter out already-seen chunks
   const { unique, duplicates } = await deduplicator.filterDuplicates(nonBoilerplateChunks, pageUrl);
@@ -1193,46 +956,11 @@ async function runCrawl() {
           // Extract business info first
           const businessInfo = extractBusinessInfo(html);
           
-          // Try e-commerce extraction for product data
-          let ecommerceData = null;
-          try {
-            console.log(`[Worker ${jobId}] Attempting e-commerce extraction for ${pageUrl}`);
-            const ecommerceExtracted = await EcommerceExtractor.extractEcommerce(html, pageUrl);
-            if (ecommerceExtracted?.products?.length > 0) {
-              ecommerceData = ecommerceExtracted;
-              console.log(`[Worker ${jobId}] Extracted ${ecommerceData.products.length} products from ${pageUrl}`);
-              // Always log first product for verification (not just force rescrape)
-              const firstProduct = ecommerceData.products[0];
-              console.log(`[Worker ${jobId}] Product:`, sanitizeForLogging({
-                name: firstProduct.name,
-                sku: firstProduct.sku,
-                price: firstProduct.price?.formatted || firstProduct.price?.raw || firstProduct.price,
-                availability: firstProduct.availability?.inStock
-              }));
-            } else {
-              console.log(`[Worker ${jobId}] No products extracted from ${pageUrl}`);
-            }
-          } catch (ecomError) {
-            console.log(`[Worker ${jobId}] E-commerce extraction failed:`, ecomError.message);
-            console.error(`[Worker ${jobId}] E-commerce extraction error details:`, ecomError);
-          }
-          
-          // ALWAYS extract content with Readability for the base structure
+          // Extract content with selective stripping
           const extracted = extractWithReadability(html, pageUrl);
           
           // Add business info to extracted data
           extracted.businessInfo = businessInfo;
-          
-          // Add e-commerce data if available
-          if (ecommerceData) {
-            extracted.ecommerceData = {
-              platform: ecommerceData.platform,
-              pageType: ecommerceData.pageType,
-              products: ecommerceData.products,
-              pagination: ecommerceData.pagination,
-              breadcrumbs: ecommerceData.breadcrumbs
-            };
-          }
           
           // Prepare page data
           const pageData = {
@@ -1244,9 +972,7 @@ async function runCrawl() {
               wordCount: extracted.wordCount,
               images: extracted.images,
               links: extracted.links
-            },
-            businessInfo: extracted.businessInfo,
-            ecommerceData: extracted.ecommerceData
+            }
           };
           
           // Save to database immediately
@@ -1268,31 +994,14 @@ async function runCrawl() {
               }
             }
             
-            // Prepare database record with consolidated metadata
-            // The metadata already contains productSku, productPrice, etc. from extractMeta()
-            // We should prioritize ecommerceData if available as it's more detailed
+            // Prepare database record
             const dbRecord = {
               url: pageData.url,
               title: pageData.title,
               content: pageData.content,
               metadata: {
                 ...(pageData.metadata || {}),
-                businessInfo: pageData.businessInfo || {},
-                ecommerceData: pageData.ecommerceData || null,
-                extractedAt: new Date().toISOString(),
-                // Override with ecommerceData if available (more detailed/accurate)
-                ...(pageData.ecommerceData?.products?.[0] && {
-                  productName: pageData.ecommerceData.products[0].name,
-                  productSku: pageData.ecommerceData.products[0].sku || pageData.metadata?.productSku,
-                  productPrice: pageData.ecommerceData.products[0].price?.formatted || 
-                               pageData.ecommerceData.products[0].price?.raw || 
-                               pageData.ecommerceData.products[0].price ||
-                               pageData.metadata?.productPrice,
-                  productInStock: pageData.ecommerceData.products[0].availability?.inStock ?? 
-                                 pageData.metadata?.productInStock,
-                  productBrand: pageData.ecommerceData.products[0].brand || pageData.metadata?.productBrand,
-                  productCategory: pageData.ecommerceData.products[0].category || pageData.metadata?.productCategory
-                })
+                businessInfo: pageData.businessInfo || {}
               },
               status: 'completed',
               scraped_at: new Date().toISOString(),
@@ -1318,21 +1027,6 @@ async function runCrawl() {
             } else {
               console.log(`[Worker ${jobId}] Saved page to database: ${pageUrl}`);
               
-              // Always log enhanced metadata for visibility (with sanitization)
-              if (dbRecord.metadata?.productSku || dbRecord.metadata?.productPrice) {
-                const metadataToLog = {
-                  productSku: dbRecord.metadata?.productSku,
-                  productPrice: dbRecord.metadata?.productPrice,
-                  productInStock: dbRecord.metadata?.productInStock,
-                  productBrand: dbRecord.metadata?.productBrand,
-                  productCategory: dbRecord.metadata?.productCategory,
-                  lastChecked: dbRecord.metadata?.extractedAt,
-                  mode: FORCE_RESCRAPE ? 'force-rescrape' : 'normal'
-                };
-                console.log(`[Worker ${jobId}] Enhanced metadata extracted for ${pageUrl}:`, 
-                  sanitizeForLogging(metadataToLog));
-              }
-              
               // Generate embeddings for the content
               if (pageData.content && pageData.content.length > 0) {
                 // Check if embeddings already exist
@@ -1344,30 +1038,15 @@ async function runCrawl() {
                 
                 // Generate embeddings if they don't exist OR if force rescrape is enabled
                 if (!existingEmbeddings || existingEmbeddings.length === 0 || FORCE_RESCRAPE) {
-                  // Enrich content with metadata for better embeddings
-                  let enrichedContent = pageData.content;
-                  if (pageData.metadata) {
-                    enrichedContent = ContentEnricher.enrichContent(
-                      pageData.content, 
-                      pageData.metadata, 
-                      pageUrl, 
-                      pageData.title || ''
-                    );
-                    console.log(`[Worker ${jobId}] Content enriched with metadata for ${pageUrl}`);
-                  }
-                  
                   // Split into chunks with semantic understanding or fallback to simple
                   // PERFORMANCE: Larger chunks = fewer embeddings = faster processing
-                  const chunks = await splitIntoChunks(enrichedContent, 3000, pageUrl, html);
+                  const chunks = await splitIntoChunks(pageData.content, 3000, pageUrl, html);
                   
                   if (chunks.length > 0) {
                     console.log(`[Worker ${jobId}] Generating ${chunks.length} embeddings for ${pageUrl}`);
                     const embeddings = await generateEmbeddings(chunks);
                     
                     // Delete any old embeddings first (already optimized by index)
-                    if (FORCE_RESCRAPE && existingEmbeddings?.length > 0) {
-                      console.log(`[Worker ${jobId}] Force rescrape - deleting ${existingEmbeddings.length} old embeddings for ${pageUrl}`);
-                    }
                     const deleteStart = Date.now();
                     await supabase
                       .from('page_embeddings')

@@ -225,6 +225,26 @@ export class EcommerceExtractor extends ContentExtractor {
     
     breadcrumbs = this.extractBreadcrumbs($);
     
+    // Create consolidated metadata for backward compatibility and easier access
+    const firstProduct = products?.[0];
+    const consolidatedMetadata = firstProduct ? {
+      productSku: firstProduct.sku,
+      productName: firstProduct.name,
+      productPrice: firstProduct.price?.formatted || 
+                    (typeof firstProduct.price === 'object' ? JSON.stringify(firstProduct.price) : firstProduct.price),
+      productInStock: firstProduct.availability?.inStock,
+      productBrand: firstProduct.brand,
+      productCategory: firstProduct.categories?.[0],
+      platform,
+      pageType,
+      // Include business info in consolidated format
+      businessInfo: baseContent.metadata.businessInfo || this.extractBusinessInfo($)
+    } : {
+      platform,
+      pageType,
+      businessInfo: baseContent.metadata.businessInfo || this.extractBusinessInfo($)
+    };
+    
     return {
       ...baseContent,
       platform,
@@ -232,6 +252,20 @@ export class EcommerceExtractor extends ContentExtractor {
       products,
       pagination,
       breadcrumbs,
+      // Merge consolidated metadata into the existing metadata
+      metadata: {
+        ...baseContent.metadata,
+        ...consolidatedMetadata,
+        // Keep ecommerceData as a separate structured object for advanced use cases
+        ecommerceData: {
+          platform,
+          pageType,
+          products,
+          pagination,
+          breadcrumbs,
+          totalProducts
+        }
+      }
     };
   }
 
@@ -747,6 +781,90 @@ export class EcommerceExtractor extends ContentExtractor {
     return specs;
   }
   
+  /**
+   * Extract business information
+   */
+  private static extractBusinessInfo($: cheerio.CheerioAPI): any {
+    return {
+      contactInfo: {
+        phones: this.extractPhoneNumbers($),
+        emails: this.extractEmails($),
+        addresses: this.extractAddresses($)
+      },
+      businessHours: this.extractBusinessHours($)
+    };
+  }
+
+  /**
+   * Extract phone numbers from page
+   */
+  private static extractPhoneNumbers($: cheerio.CheerioAPI): string[] {
+    const phones: string[] = [];
+    const phoneRegex = /(?:\+?[\d\s\-\(\)]{10,})/g;
+    
+    // Check common phone selectors
+    $('.phone, .telephone, .contact-phone, [href^="tel:"]').each((_, el) => {
+      const text = $(el).text().trim();
+      const matches = text.match(phoneRegex);
+      if (matches) phones.push(...matches);
+    });
+    
+    return [...new Set(phones)]; // Remove duplicates
+  }
+
+  /**
+   * Extract email addresses from page
+   */
+  private static extractEmails($: cheerio.CheerioAPI): string[] {
+    const emails: string[] = [];
+    const emailRegex = /[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}/g;
+    
+    // Check common email selectors
+    $('.email, .contact-email, [href^="mailto:"]').each((_, el) => {
+      const text = $(el).text().trim();
+      const href = $(el).attr('href');
+      
+      if (href?.startsWith('mailto:')) {
+        emails.push(href.replace('mailto:', ''));
+      }
+      
+      const matches = text.match(emailRegex);
+      if (matches) emails.push(...matches);
+    });
+    
+    return [...new Set(emails)]; // Remove duplicates
+  }
+
+  /**
+   * Extract addresses from page
+   */
+  private static extractAddresses($: cheerio.CheerioAPI): string[] {
+    const addresses: string[] = [];
+    
+    // Check common address selectors
+    $('.address, .contact-address, [itemtype*="PostalAddress"]').each((_, el) => {
+      const text = $(el).text().trim();
+      if (text) addresses.push(text);
+    });
+    
+    return addresses;
+  }
+
+  /**
+   * Extract business hours from page
+   */
+  private static extractBusinessHours($: cheerio.CheerioAPI): string[] {
+    const hours: string[] = [];
+    
+    // Check common business hours selectors
+    $('.hours, .business-hours, .opening-hours, [itemtype*="OpeningHoursSpecification"]').each((_, el) => {
+      const text = $(el).text().trim();
+      if (text) hours.push(text);
+    });
+    
+    return hours;
+  }
+
   /**
    * Extract total product count from listing page
    */

@@ -1,0 +1,161 @@
+/**
+ * Example: How to integrate learning into the scraping process
+ * This shows WHEN learning happens in the data pipeline
+ */
+
+// === OPTION 1: Learn During Batch Scraping ===
+async function scrapeWithLearning(domain, urls) {
+  const { LearningService } = require('./learning-service');
+  const scraperWorker = require('./scraper-worker');
+  
+  console.log(`Starting scrape for ${domain} with ${urls.length} URLs`);
+  
+  // Step 1: Scrape all pages
+  const scrapedProducts = await scraperWorker.scrapePages(urls);
+  
+  // Step 2: Learn from products IMMEDIATELY after scraping
+  // This happens BEFORE users start querying
+  const productPages = scrapedProducts.filter(p => p.type === 'product');
+  if (productPages.length > 0) {
+    console.log(`[Learning] Found ${productPages.length} products to learn from`);
+    
+    const learner = new LearningService(domain, supabase);
+    const startTime = Date.now();
+    
+    // Learn patterns from all products at once
+    await learner.learnFromNewProducts(productPages);
+    
+    console.log(`[Learning] Completed in ${Date.now() - startTime}ms`);
+  }
+  
+  // Step 3: Generate embeddings (already has learned patterns available)
+  await generateEmbeddings(scrapedProducts, domain);
+  
+  console.log(`Scraping and learning complete for ${domain}`);
+}
+
+// === OPTION 2: Learn Incrementally as Products are Found ===
+async function incrementalLearning(domain, url, pageData) {
+  const { LearningService } = require('./learning-service');
+  
+  // If this is a product page, learn from it immediately
+  if (pageData.type === 'product') {
+    const learner = new LearningService(domain, supabase);
+    
+    // Quick incremental update (fast, ~50ms)
+    await learner.learnFromSingleProduct(pageData);
+    
+    console.log(`[Learning] Updated knowledge from: ${url}`);
+  }
+  
+  // Continue with normal processing
+  await saveToDatabase(pageData);
+  await generateEmbedding(pageData);
+}
+
+// === OPTION 3: Scheduled Background Learning ===
+async function setupScheduledLearning() {
+  const cron = require('node-cron');
+  const { LearningService } = require('./learning-service');
+  
+  // Run learning every night at 2 AM for each domain
+  cron.schedule('0 2 * * *', async () => {
+    console.log('[Learning] Starting nightly learning job');
+    
+    // Get all active domains
+    const { data: domains } = await supabase
+      .from('customer_configs')
+      .select('domain')
+      .eq('is_active', true);
+    
+    // Learn from each domain's products
+    for (const { domain } of domains) {
+      await LearningService.schedulePeriodicLearning(domain, supabase);
+    }
+    
+    console.log('[Learning] Nightly learning complete');
+  });
+}
+
+// === TIMELINE: When Learning Happens ===
+
+/**
+ * TIMELINE OF LEARNING:
+ * 
+ * 1. INITIAL SETUP (Day 0)
+ *    Customer adds their domain → No knowledge yet
+ * 
+ * 2. FIRST SCRAPE (Day 0, Hour 1)
+ *    ↓ Scraper runs for first time
+ *    ↓ Finds 500 products
+ *    → LEARNING HAPPENS HERE (Option 1)
+ *    ↓ Builds initial synonyms, brands, categories
+ *    ↓ Saves to query_enhancement_config table
+ *    ✓ Knowledge ready BEFORE first user query
+ * 
+ * 3. INCREMENTAL UPDATES (Ongoing)
+ *    ↓ New products added to catalog
+ *    → LEARNING HAPPENS HERE (Option 2)
+ *    ↓ Updates knowledge incrementally
+ *    ✓ Always up-to-date
+ * 
+ * 4. PERIODIC REFRESH (Nightly)
+ *    ↓ Scheduled job runs at 2 AM
+ *    → LEARNING HAPPENS HERE (Option 3)
+ *    ↓ Re-analyzes recent products
+ *    ↓ Refines synonym mappings
+ *    ✓ Improves accuracy over time
+ * 
+ * 5. USER QUERY (Anytime)
+ *    ↓ User searches for product
+ *    ↓ QueryEnhancer loads EXISTING knowledge (fast, cached)
+ *    ✓ No learning delay during query
+ */
+
+// === PERFORMANCE COMPARISON ===
+
+/**
+ * OLD WAY (Learning on First Query):
+ * - User searches "laptop"
+ * - System realizes no knowledge exists
+ * - Queries 100 products from database (500ms)
+ * - Analyzes and learns patterns (2000ms)
+ * - Finally processes user query
+ * - TOTAL DELAY: 2.5 seconds on first query ❌
+ * 
+ * NEW WAY (Learning During Ingestion):
+ * - Scraper ingests products
+ * - Learning happens in background
+ * - Knowledge saved to database
+ * - User searches "laptop"
+ * - System loads cached knowledge (50ms)
+ * - Processes query immediately
+ * - TOTAL DELAY: 50ms ✓
+ */
+
+// === INTEGRATION POINTS ===
+
+/**
+ * WHERE TO ADD LEARNING CALLS:
+ * 
+ * 1. lib/scraper-worker.js
+ *    - After line 1373 (when crawl completes)
+ *    - Add: await learner.learnFromNewProducts(products)
+ * 
+ * 2. app/api/scrape/route.ts
+ *    - After successful scrape job
+ *    - Trigger learning for that domain
+ * 
+ * 3. app/api/products/import/route.ts (if exists)
+ *    - After bulk product import
+ *    - Learn from imported products
+ * 
+ * 4. Background worker/cron job
+ *    - Periodic re-learning for accuracy
+ */
+
+module.exports = {
+  scrapeWithLearning,
+  incrementalLearning,
+  setupScheduledLearning
+};

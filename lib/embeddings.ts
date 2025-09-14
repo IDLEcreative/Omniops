@@ -262,9 +262,33 @@ export async function generateEmbeddings(params: {
   content: string;
   url: string;
   title: string;
+  metadata?: any; // Added metadata parameter for enrichment
 }): Promise<void> {
   const supabase = await createClient();
-  const chunks = splitIntoChunks(params.content);
+  
+  // Import ContentEnricher dynamically to avoid build issues
+  let enrichedContent = params.content;
+  try {
+    const { ContentEnricher } = await import('./content-enricher.js');
+    
+    // Check if content needs enrichment
+    if (ContentEnricher.needsEnrichment(params.content) && params.metadata) {
+      enrichedContent = ContentEnricher.enrichContent(
+        params.content,
+        params.metadata,
+        params.url,
+        params.title
+      );
+      
+      // Log enrichment quality for monitoring
+      const quality = ContentEnricher.calculateEnrichmentQuality(enrichedContent);
+      console.log(`[Embeddings] Content enriched with score ${quality.enrichmentScore}/100 for ${params.url}`);
+    }
+  } catch (e) {
+    console.log('[Embeddings] ContentEnricher not available, using raw content');
+  }
+  
+  const chunks = splitIntoChunks(enrichedContent);
   
   if (chunks.length === 0) {
     console.warn('No chunks to embed for', params.url);
@@ -314,9 +338,68 @@ export async function generateEmbeddings(params: {
 }
 
 // Generate a single embedding for a query with caching
-export async function generateQueryEmbedding(query: string): Promise<number[]> {
+export async function generateQueryEmbedding(
+  query: string, 
+  enrichWithIntent: boolean = true,
+  domain?: string
+): Promise<number[]> {
+  // Enrich query with intent markers for better matching
+  let processedQuery = query;
+  if (enrichWithIntent) {
+    try {
+      // Use dynamic QueryEnhancer with domain context
+      const { QueryEnhancer } = await import('./query-enhancer.js');
+      
+      // Get Supabase client if we have a domain
+      let supabase = null;
+      if (domain) {
+        const { createClient } = await import('@supabase/supabase-js');
+        supabase = createClient(
+          process.env.NEXT_PUBLIC_SUPABASE_URL!,
+          process.env.SUPABASE_SERVICE_ROLE_KEY!
+        );
+      }
+      
+      const enhanced = await QueryEnhancer.enhanceQuery(query, domain, supabase);
+      
+      if (enhanced.confidence > 0.6 && enhanced.expanded !== query) {
+        processedQuery = enhanced.expanded;
+        console.log(`[Query Enhancement] Enhanced with ${enhanced.confidence.toFixed(2)} confidence`);
+        console.log(`[Query Enhancement] Original: "${query}"`);
+        console.log(`[Query Enhancement] Enhanced: "${processedQuery.substring(0, 100)}..."`);
+        
+        if (enhanced.suggestedTerms && enhanced.suggestedTerms.length > 0) {
+          console.log(`[Query Enhancement] Suggested terms: ${enhanced.suggestedTerms.join(', ')}`);
+        }
+      }
+    } catch (e) {
+      // Fallback to simple pattern-based enrichment
+      console.log('[Query Enhancement] Using simple pattern enrichment');
+      
+      // Generic patterns that work across all domains
+      const skuPattern = /\b[A-Z0-9]+[-\/][A-Z0-9]+\b/gi;
+      const pricePattern = /\b(cheap|cheapest|expensive|under|below|above|over)\s*\$?\d*\b/gi;
+      const stockPattern = /\b(in stock|available|out of stock|unavailable)\b/gi;
+      
+      if (skuPattern.test(query)) {
+        // Add SKU context for part number searches
+        processedQuery = `SKU Part Number ${query}`;
+      } else if (pricePattern.test(query)) {
+        // Add price context for price-based queries
+        processedQuery = `Price ${query}`;
+      } else if (stockPattern.test(query)) {
+        // Add availability context
+        processedQuery = `Availability Stock ${query}`;
+      }
+    }
+    
+    if (processedQuery !== query) {
+      console.log(`[Query Enhancement] Query enhanced for better matching`);
+    }
+  }
+  
   // Check cache first
-  const cached = embeddingCache.get(query);
+  const cached = embeddingCache.get(processedQuery);
   if (cached) {
     console.log('[Performance] Query embedding from cache');
     return cached;
@@ -325,7 +408,7 @@ export async function generateQueryEmbedding(query: string): Promise<number[]> {
   try {
     const response = await getOpenAIClient().embeddings.create({
       model: 'text-embedding-3-small',
-      input: query,
+      input: processedQuery,
     });
     
     const embedding = response.data[0]?.embedding;
@@ -334,7 +417,7 @@ export async function generateQueryEmbedding(query: string): Promise<number[]> {
     }
     
     // Cache the query embedding
-    embeddingCache.set(query, embedding);
+    embeddingCache.set(processedQuery, embedding);
     return embedding;
   } catch (error) {
     console.error('Error generating query embedding:', error);

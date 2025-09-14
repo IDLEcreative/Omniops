@@ -1,0 +1,185 @@
+// Enhanced scraper-worker.js modifications for true force rescrape with metadata updates
+// This file shows the key modifications needed to scraper-worker.js
+
+// MODIFICATION 1: Skip deduplication when force rescraping (around line 739)
+async function createContentChunks(text, html, pageUrl, maxChunkSize = 2000) {
+  // ... existing code ...
+  
+  // Filter out boilerplate chunks
+  const nonBoilerplateChunks = allChunks.filter(chunk => !isDuplicateChunk(chunk, pageUrl));
+  
+  // ENHANCED: Skip deduplication entirely when force rescraping
+  if (FORCE_RESCRAPE) {
+    console.log(`[Worker ${jobId}] Force rescrape enabled - skipping deduplication for ${pageUrl}`);
+    return nonBoilerplateChunks;
+  }
+  
+  // Now use the global deduplicator to filter out already-seen chunks
+  const { unique, duplicates } = await deduplicator.filterDuplicates(nonBoilerplateChunks, pageUrl);
+  
+  if (duplicates.length > 0) {
+    console.log(`[Worker ${jobId}] Global deduplicator filtered ${duplicates.length} duplicate chunks for ${pageUrl}`);
+  }
+
+  return unique;
+}
+
+// MODIFICATION 2: Enhanced metadata extraction for e-commerce (replace existing extractMetadata function)
+function extractMetadata(document) {
+  const getMeta = (name) => {
+    const element = document.querySelector(
+      `meta[name="${name}"], meta[property="${name}"], meta[property="og:${name}"], meta[property="article:${name}"]`
+    );
+    return element ? element.getAttribute('content') : null;
+  };
+  
+  // Extract JSON-LD structured data
+  let structuredData = {};
+  const jsonLdScripts = document.querySelectorAll('script[type="application/ld+json"]');
+  jsonLdScripts.forEach(script => {
+    try {
+      const data = JSON.parse(script.textContent || '{}');
+      structuredData = { ...structuredData, ...data };
+    } catch (e) {
+      // Ignore parsing errors
+    }
+  });
+  
+  // ENHANCED: Extract e-commerce specific data
+  const extractProductData = () => {
+    const productData = {};
+    
+    // Try to extract price
+    const priceSelectors = [
+      '.price', '.product-price', '.woocommerce-Price-amount', 
+      '[itemprop="price"]', '.regular-price', '.sale-price',
+      'span.amount', '.price-box', '.product-price-value'
+    ];
+    
+    for (const selector of priceSelectors) {
+      const priceElement = document.querySelector(selector);
+      if (priceElement) {
+        productData.price = priceElement.textContent?.trim();
+        break;
+      }
+    }
+    
+    // Try to extract availability/stock
+    const stockSelectors = [
+      '.stock', '.in-stock', '.out-of-stock', '.availability',
+      '[itemprop="availability"]', '.stock-status', '.product-stock'
+    ];
+    
+    for (const selector of stockSelectors) {
+      const stockElement = document.querySelector(selector);
+      if (stockElement) {
+        productData.availability = stockElement.textContent?.trim();
+        productData.inStock = !stockElement.textContent?.toLowerCase().includes('out of stock');
+        break;
+      }
+    }
+    
+    // Try to extract SKU
+    const skuSelectors = [
+      '.sku', '[itemprop="sku"]', '.product-sku', '.sku-number'
+    ];
+    
+    for (const selector of skuSelectors) {
+      const skuElement = document.querySelector(selector);
+      if (skuElement) {
+        productData.sku = skuElement.textContent?.trim();
+        break;
+      }
+    }
+    
+    // Try to extract product categories
+    const categorySelectors = [
+      '.product-category', '.posted_in', '.product-categories',
+      '[itemprop="category"]', '.breadcrumb'
+    ];
+    
+    for (const selector of categorySelectors) {
+      const categoryElement = document.querySelector(selector);
+      if (categoryElement) {
+        productData.categories = categoryElement.textContent?.trim();
+        break;
+      }
+    }
+    
+    // Extract product description
+    const descSelectors = [
+      '.product-description', '.product-short-description',
+      '[itemprop="description"]', '.summary'
+    ];
+    
+    for (const selector of descSelectors) {
+      const descElement = document.querySelector(selector);
+      if (descElement) {
+        productData.description = descElement.textContent?.trim().substring(0, 500);
+        break;
+      }
+    }
+    
+    // Add timestamp for when this was last checked
+    productData.lastChecked = new Date().toISOString();
+    
+    return productData;
+  };
+  
+  // ENHANCED: Combine all metadata
+  return {
+    title: getMeta('title') || document.title,
+    description: getMeta('description'),
+    author: getMeta('author') || getMeta('article:author'),
+    publishedDate: getMeta('published_time') || getMeta('datePublished'),
+    modifiedDate: getMeta('modified_time') || getMeta('dateModified'),
+    keywords: getMeta('keywords'),
+    type: getMeta('type'),
+    image: getMeta('image'),
+    site_name: getMeta('site_name'),
+    ...structuredData,
+    ...extractProductData(), // Add e-commerce data
+  };
+}
+
+// MODIFICATION 3: Force regeneration of embeddings when force rescraping (around line 1040)
+if (!existingEmbeddings || existingEmbeddings.length === 0 || FORCE_RESCRAPE) {
+  if (FORCE_RESCRAPE && existingEmbeddings?.length > 0) {
+    console.log(`[Worker ${jobId}] Force rescrape - deleting old embeddings for ${pageUrl}`);
+    // Delete old embeddings before creating new ones
+    await supabase
+      .from('page_embeddings')
+      .delete()
+      .eq('page_id', pageData.id);
+  }
+  
+  // Generate embeddings for the content chunks
+  const contentChunks = await createContentChunks(
+    pageData.content,
+    htmlContent,
+    pageUrl
+  );
+  
+  // ... rest of embedding generation code
+}
+
+// MODIFICATION 4: Update the upsert to ensure metadata is always updated (around line 1018)
+const { data: pageData, error: pageError } = await supabase
+  .from('scraped_pages')
+  .upsert(dbRecord, {
+    onConflict: 'url',
+    ignoreDuplicates: false,  // IMPORTANT: This ensures updates happen
+    updateOnConflict: true    // Explicitly update on conflict
+  })
+  .select()
+  .single();
+
+// MODIFICATION 5: Log what metadata was extracted for debugging
+if (FORCE_RESCRAPE) {
+  console.log(`[Worker ${jobId}] Force rescrape metadata for ${pageUrl}:`, {
+    price: dbRecord.metadata?.price,
+    availability: dbRecord.metadata?.availability,
+    sku: dbRecord.metadata?.sku,
+    lastChecked: dbRecord.metadata?.lastChecked
+  });
+}
