@@ -5,11 +5,12 @@
  * Tests and measures the impact of database optimizations on real query performance
  */
 
-const { createClient } = require('@supabase/supabase-js');
-const https = require('https');
-const fs = require('fs');
-const path = require('path');
-require('dotenv').config({ path: '.env.local' });
+import { createClient  } from '@supabase/supabase-js';
+import https from 'node:https';
+import fs from 'node:fs';
+import path from 'node:path';
+import dotenv from 'dotenv';
+dotenv.config({ path: '.env.local' });
 
 // Configuration
 const SUPABASE_URL = process.env.NEXT_PUBLIC_SUPABASE_URL;
@@ -243,7 +244,7 @@ async function benchmarkQueryCache() {
   
   // Memory cache test
   const memWriteStart = performance.now();
-  const { QueryCache } = require('../lib/query-cache.ts');
+  import { QueryCache  } from '../lib/query-cache.ts';
   QueryCache.setInMemory(cacheKey, testData, 60);
   const memWriteTime = performance.now() - memWriteStart;
   
@@ -517,4 +518,4 @@ if (require.main === module) {
   main().catch(console.error);
 }
 
-module.exports = { main, metrics };
+export { main, metrics };;

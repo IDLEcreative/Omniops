@@ -6,6 +6,7 @@ import { ScrapeJobData, ScrapeJobResult, getQueueManager } from '../queue/scrape
 import { logger } from '../logger';
 import { getResilientRedisClient } from '../redis-enhanced';
 import { EventEmitter } from 'events';
+import * as os from 'os';
 
 /**
  * Standalone worker service for processing scraping jobs
@@ -33,7 +34,7 @@ export class ScraperWorkerService extends EventEmitter {
   ) {
     super();
     
-    this.workerCount = workerOptions.workerCount || Math.max(1, Math.floor(require('os').cpus().length / 2));
+    this.workerCount = workerOptions.workerCount || Math.max(1, Math.floor(os.cpus().length / 2));
     this.maxMemoryUsage = workerOptions.memoryThreshold || 0.85;
     
     // Bind methods to preserve 'this' context
@@ -366,7 +367,7 @@ export class ScraperWorkerService extends EventEmitter {
    */
   private getMemoryUsage(): { used: number; total: number; percentUsed: number } {
     const memoryUsage = process.memoryUsage();
-    const totalMemory = require('os').totalmem();
+    const totalMemory = os.totalmem();
     
     return {
       used: memoryUsage.heapUsed,
@@ -541,7 +542,7 @@ export class ScraperWorkerService extends EventEmitter {
 async function startWorkerService(): Promise<void> {
   const workerService = new ScraperWorkerService({
     concurrency: parseInt(process.env.WORKER_CONCURRENCY || '2'),
-    workerCount: parseInt(process.env.WORKER_COUNT || String(Math.max(1, Math.floor(require('os').cpus().length / 2)))),
+    workerCount: parseInt(process.env.WORKER_COUNT || String(Math.max(1, Math.floor(os.cpus().length / 2)))),
     queueName: process.env.QUEUE_NAME || 'scrape-queue',
     enableHealthMonitoring: process.env.ENABLE_HEALTH_MONITORING !== 'false',
     memoryThreshold: parseFloat(process.env.MEMORY_THRESHOLD || '0.85'),

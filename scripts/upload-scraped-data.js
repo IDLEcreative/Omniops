@@ -6,13 +6,19 @@
  */
 
 // Load environment variables
-require('dotenv').config({ path: require('path').join(__dirname, '..', '.env') });
+import dotenv from 'dotenv';
+import path from 'node:path';
+import { fileURLToPath } from 'node:url';
+import { dirname } from 'node:path';
+import { createClient } from '@supabase/supabase-js';
+import OpenAI from 'openai';
+import { promises as fs } from 'node:fs';
 
-const { createClient } = require('@supabase/supabase-js');
-const OpenAI = require('openai');
-const fs = require('fs').promises;
-const path = require('path');
-const crypto = require('crypto');
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = dirname(__filename);
+dotenv.config({ path: path.join(__dirname, '..', '.env') });
+import path from 'node:path';
+import crypto from 'node:crypto';
 
 // Initialize clients
 const supabase = createClient(
@@ -231,4 +237,4 @@ if (require.main === module) {
   main().catch(console.error);
 }
 
-module.exports = { processPage, generateEmbeddings };
+export { processPage, generateEmbeddings };;

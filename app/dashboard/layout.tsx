@@ -159,7 +159,7 @@ export default function DashboardLayout({
     // Try to get initials from full name if available
     if (user.user_metadata?.full_name) {
       const names = user.user_metadata.full_name.split(' ');
-      return names.map(n => n[0]).join('').toUpperCase().slice(0, 2);
+      return names.map((n: string) => n[0]).join('').toUpperCase().slice(0, 2);
     }
     // Otherwise use first two characters of email
     return email.slice(0, 2).toUpperCase();

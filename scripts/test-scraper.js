@@ -5,7 +5,7 @@
  * This tests the scraper functionality directly
  */
 
-const { scrapePage } = require('./lib/scraper-api');
+import { scrapePage  } from './lib/scraper-api';
 
 async function testScraper() {
   const url = 'https://www.thompsonseparts.co.uk/';

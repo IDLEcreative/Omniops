@@ -1,6 +1,7 @@
 // Test database connection and WooCommerce configuration
-require('dotenv').config({ path: '.env' });
-const { createClient } = require('@supabase/supabase-js');
+import dotenv from 'dotenv';
+dotenv.config({ path: '.env' });
+import { createClient  } from '@supabase/supabase-js';
 
 async function testConnection() {
   console.log('🔧 Testing database connection...');

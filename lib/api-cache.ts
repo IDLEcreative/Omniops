@@ -145,9 +145,9 @@ export const CACHE_CONFIGS = {
  * Add performance timing headers
  */
 export function addPerformanceHeaders(
-  response: NextResponse,
+  response: Response,
   startTime: number
-): NextResponse {
+): Response {
   const endTime = performance.now();
   const duration = (endTime - startTime).toFixed(2);
   
@@ -161,7 +161,7 @@ export function addPerformanceHeaders(
  * Middleware to add caching headers to GET requests
  */
 export function withCaching(
-  handler: Function,
+  handler: (request: Request, ...args: any[]) => Promise<Response>,
   cacheOptions: CacheOptions = CACHE_CONFIGS.DYNAMIC
 ) {
   return async (request: Request, ...args: any[]) => {
@@ -170,14 +170,14 @@ export function withCaching(
     // Only cache GET requests
     if (request.method !== 'GET') {
       const response = await handler(request, ...args);
-      return addPerformanceHeaders(response, startTime);
+      return addPerformanceHeaders(response as Response, startTime);
     }
 
     try {
       const response = await handler(request, ...args);
       
       // If handler returns data directly, wrap it
-      if (!(response instanceof NextResponse)) {
+      if (!(response instanceof Response)) {
         return cachedJsonResponse(response, request, cacheOptions);
       }
 

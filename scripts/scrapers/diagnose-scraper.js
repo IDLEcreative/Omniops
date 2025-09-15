@@ -5,9 +5,9 @@
  * Helps diagnose and fix scraper initialization issues
  */
 
-const fs = require('fs');
-const path = require('path');
-const { spawn } = require('child_process');
+import fs from 'node:fs';
+import path from 'node:path';
+import { spawn  } from 'node:child_process';
 
 console.log('========================================');
 console.log('     SCRAPER DIAGNOSTICS TOOL v1.0     ');
@@ -114,7 +114,7 @@ const checkRedis = () => {
 // Check required npm packages
 console.log('\n5. Checking required npm packages...');
 const checkPackages = () => {
-  const packageJson = require('./package.json');
+  import packageJson from './package.json';
   const requiredPackages = [
     '@crawlee/playwright',
     'playwright',

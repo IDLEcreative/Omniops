@@ -114,4 +114,5 @@ MockedWooCommerceRestApi.prototype = WooCommerceRestApi.prototype;
 // Support both CommonJS and ES module imports
 MockedWooCommerceRestApi.default = MockedWooCommerceRestApi;
 
-module.exports = MockedWooCommerceRestApi;
+export default MockedWooCommerceRestApi;
+export { MockedWooCommerceRestApi as WooCommerceRestApi };

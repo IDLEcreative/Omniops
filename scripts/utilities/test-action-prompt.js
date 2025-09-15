@@ -1,5 +1,5 @@
 // Test action prompt generation
-const { WooCommerceAIInstructions } = require('./lib/woocommerce-ai-instructions');
+import { WooCommerceAIInstructions  } from './lib/woocommerce-ai-instructions';
 
 // Test different messages
 const testMessages = [

@@ -1,5 +1,6 @@
-const { Client } = require('pg');
-require('dotenv').config({ path: '.env.local' });
+import { Client  } from 'pg';
+import dotenv from 'dotenv';
+dotenv.config({ path: '.env.local' });
 
 // Parse Supabase connection string
 const SUPABASE_URL = process.env.NEXT_PUBLIC_SUPABASE_URL;

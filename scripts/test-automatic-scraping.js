@@ -4,9 +4,15 @@
  * Test script to demonstrate automatic scraping when customer adds domain
  */
 
-const { createClient } = require('@supabase/supabase-js');
-const { config } = require('dotenv');
-const { join } = require('path');
+import { createClient  } from '@supabase/supabase-js';
+import { config  } from 'dotenv';
+import { join  } from 'node:path';
+
+import { fileURLToPath } from 'node:url';
+import { dirname } from 'node:path';
+
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = dirname(__filename);
 
 // Load environment variables
 config({ path: join(__dirname, '.env.local') });

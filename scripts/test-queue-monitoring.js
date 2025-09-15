@@ -4,8 +4,8 @@
  * Test script for queue and monitoring systems
  */
 
-const { Queue, Worker, QueueEvents } = require('bullmq');
-const Redis = require('ioredis');
+import { Queue, Worker, QueueEvents  } from 'bullmq';
+import Redis from 'ioredis';
 
 async function testQueueSystem() {
   console.log('====================================');
@@ -140,7 +140,7 @@ async function testQueueSystem() {
   // Test 4: API Endpoints
   console.log('\n4. Testing API endpoints...');
   try {
-    const http = require('http');
+    import http from 'node:http';
     
     // Test health endpoint
     const healthData = await new Promise((resolve, reject) => {

@@ -7,7 +7,7 @@
  * Usage: node scripts/test-chat-quick.js
  */
 
-const { v4: uuidv4 } = require('uuid');
+import { v4: uuidv4  } from 'uuid';
 
 // Test configuration
 const TEST_CONFIG = {
@@ -186,4 +186,4 @@ if (require.main === module) {
   runTests().catch(console.error);
 }
 
-module.exports = { runTests, testQuery };
+export { runTests, testQuery };;

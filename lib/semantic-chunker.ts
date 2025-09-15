@@ -75,51 +75,68 @@ export class SemanticChunker {
       const headingRegex = /<h([1-6])[^>]*>(.*?)<\/h\1>/gi;
       let match;
       while ((match = headingRegex.exec(htmlContent)) !== null) {
-        structure.headings.push({
-          level: parseInt(match[1]),
-          text: this.stripHtml(match[2]),
-          position: match.index
-        });
-      }
-
-      // Find paragraphs
-      const paraRegex = /<p[^>]*>(.*?)<\/p>/gis;
-      while ((match = paraRegex.exec(htmlContent)) !== null) {
-        const content = this.stripHtml(match[1]);
-        if (content.trim()) {
-          structure.paragraphs.push({
-            content,
+        const level = match[1];
+        const text = match[2];
+        if (level && text) {
+          structure.headings.push({
+            level: parseInt(level),
+            text: this.stripHtml(text),
             position: match.index
           });
         }
       }
 
+      // Find paragraphs
+      const paraRegex = /<p[^>]*>([\s\S]*?)<\/p>/gi;
+      while ((match = paraRegex.exec(htmlContent)) !== null) {
+        const matchText = match[1];
+        if (matchText) {
+          const content = this.stripHtml(matchText);
+          if (content.trim()) {
+            structure.paragraphs.push({
+              content,
+              position: match.index
+            });
+          }
+        }
+      }
+
       // Find lists
-      const listRegex = /<(ul|ol)[^>]*>.*?<\/\1>/gis;
+      const listRegex = /<(ul|ol)[^>]*>[\s\S]*?<\/\1>/gi;
       while ((match = listRegex.exec(htmlContent)) !== null) {
-        structure.lists.push({
-          content: this.stripHtml(match[0]),
-          position: match.index,
-          type: match[1] as 'ul' | 'ol'
-        });
+        const fullMatch = match[0];
+        const listType = match[1];
+        if (fullMatch && listType) {
+          structure.lists.push({
+            content: this.stripHtml(fullMatch),
+            position: match.index,
+            type: listType as 'ul' | 'ol'
+          });
+        }
       }
 
       // Find tables
-      const tableRegex = /<table[^>]*>.*?<\/table>/gis;
+      const tableRegex = /<table[^>]*>[\s\S]*?<\/table>/gi;
       while ((match = tableRegex.exec(htmlContent)) !== null) {
-        structure.tables.push({
-          content: this.stripHtml(match[0]),
-          position: match.index
-        });
+        const fullMatch = match[0];
+        if (fullMatch) {
+          structure.tables.push({
+            content: this.stripHtml(fullMatch),
+            position: match.index
+          });
+        }
       }
 
       // Find code blocks
-      const codeRegex = /<(code|pre)[^>]*>.*?<\/\1>/gis;
+      const codeRegex = /<(code|pre)[^>]*>[\s\S]*?<\/\1>/gi;
       while ((match = codeRegex.exec(htmlContent)) !== null) {
-        structure.codeBlocks.push({
-          content: this.stripHtml(match[0]),
-          position: match.index
-        });
+        const fullMatch = match[0];
+        if (fullMatch) {
+          structure.codeBlocks.push({
+            content: this.stripHtml(fullMatch),
+            position: match.index
+          });
+        }
       }
     } else {
       // Improved text-based parsing
@@ -131,6 +148,7 @@ export class SemanticChunker {
       
       for (let i = 0; i < lines.length; i++) {
         const line = lines[i];
+        if (!line) continue;
         const trimmed = line.trim();
         position += line.length + 1;
         
@@ -155,13 +173,16 @@ export class SemanticChunker {
             isInList = false;
           }
           
-          const level = trimmed.match(/^#+/)[0].length;
-          const text = trimmed.replace(/^#+\s*/, '');
-          structure.headings.push({
-            level,
-            text,
-            position: position - line.length
-          });
+          const levelMatch = trimmed.match(/^#+/);
+          if (levelMatch && levelMatch[0]) {
+            const level = levelMatch[0].length;
+            const text = trimmed.replace(/^#+\s*/, '');
+            structure.headings.push({
+              level,
+              text,
+              position: position - line.length
+            });
+          }
         }
         // Detect Q&A format - treat Q: as a heading-like boundary
         else if (trimmed.startsWith('Q:')) {
@@ -209,10 +230,16 @@ export class SemanticChunker {
         // Detect code blocks
         else if (trimmed.startsWith('```')) {
           // Find end of code block
-          let codeContent = [];
+          const codeContent = [];
           let j = i + 1;
-          while (j < lines.length && !lines[j].trim().startsWith('```')) {
-            codeContent.push(lines[j]);
+          while (j < lines.length) {
+            const codeLine = lines[j];
+            if (codeLine && codeLine.trim().startsWith('```')) {
+              break;
+            }
+            if (codeLine !== undefined) {
+              codeContent.push(codeLine);
+            }
             j++;
           }
           if (j < lines.length) {
@@ -329,6 +356,9 @@ export class SemanticChunker {
           };
         }
         
+        if (!currentBlock.elements) {
+          currentBlock.elements = [];
+        }
         currentBlock.elements.push(element);
         const elementContent = this.getElementContent(element);
         if (elementContent) {
@@ -339,8 +369,9 @@ export class SemanticChunker {
           currentBlock.content += elementContent;
           
           // Update type based on dominant element type
-          if (element.type === 'list' && currentBlock.elements.filter(e => e.type === 'list').length > 
-              currentBlock.elements.filter(e => e.type === 'paragraph').length) {
+          const elements = currentBlock.elements || [];
+          if (element.type === 'list' && elements.filter(e => e.type === 'list').length > 
+              elements.filter(e => e.type === 'paragraph').length) {
             currentBlock.type = 'list';
           } else if (element.type === 'code' && currentBlock.type !== 'section') {
             currentBlock.type = 'code';
@@ -379,7 +410,7 @@ export class SemanticChunker {
     }
 
     // First pass: merge very small blocks (< 200 chars)
-    let firstPass = this.mergeVerySmallBlocks(sizedBlocks);
+    const firstPass = this.mergeVerySmallBlocks(sizedBlocks);
     
     // Second pass: merge small adjacent blocks with same parent
     const mergedBlocks = this.mergeSmallBlocks(firstPass);
@@ -396,13 +427,17 @@ export class SemanticChunker {
     
     while (i < blocks.length) {
       const current = blocks[i];
+      if (!current) {
+        i++;
+        continue;
+      }
       
       // If block is very small and not the last one
       if (current.content.length < 200 && i < blocks.length - 1) {
         const next = blocks[i + 1];
         
         // Merge with next if combined size is reasonable
-        if (current.content.length + next.content.length <= this.IDEAL_CHUNK_SIZE) {
+        if (next && current.content.length + next.content.length <= this.IDEAL_CHUNK_SIZE) {
           merged.push({
             ...current,
             content: current.content + '\n\n' + next.content,
@@ -419,7 +454,7 @@ export class SemanticChunker {
         const prev = merged[merged.length - 1];
         
         // Merge with previous if combined size is reasonable
-        if (prev.content.length + current.content.length <= this.IDEAL_CHUNK_SIZE) {
+        if (prev && prev.content.length + current.content.length <= this.IDEAL_CHUNK_SIZE) {
           prev.content = prev.content + '\n\n' + current.content;
           prev.elements = [...(prev.elements || []), ...(current.elements || [])];
           if (prev.type !== current.type) {
@@ -530,8 +565,10 @@ export class SemanticChunker {
 
     for (let i = 0; i < blocks.length; i++) {
       const block = blocks[i];
-      const prevBlock = blocks[i - 1];
-      const nextBlock = blocks[i + 1];
+      if (!block) continue;
+      
+      const prevBlock = i > 0 ? blocks[i - 1] : undefined;
+      const nextBlock = i < blocks.length - 1 ? blocks[i + 1] : undefined;
 
       let chunkContent = block.content;
       let overlapPrevious = '';

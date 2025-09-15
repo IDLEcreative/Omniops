@@ -7,7 +7,7 @@
  * It handles graceful shutdown, memory monitoring, and health checks.
  */
 
-const { getRedisClient, getJobManager, QUEUE_NAMESPACES } = require('../lib/redis-unified');
+import { getRedisClient, getJobManager, QUEUE_NAMESPACES  } from '../lib/redis-unified';
 
 // Worker type from environment
 const WORKER_TYPE = process.env.WORKER_TYPE || 'scraping';
@@ -65,7 +65,7 @@ async function updateHealthStatus() {
  * Start scraping worker
  */
 async function startScrapingWorker() {
-  const { createJobProcessor } = require('../lib/queue/job-processor');
+  const { createJobProcessor } = await import('../lib/queue/job-processor.js');
   
   const processor = createJobProcessor(
     'scraper-queue',
@@ -95,7 +95,7 @@ async function startScrapingWorker() {
  * Start embeddings worker
  */
 async function startEmbeddingsWorker() {
-  const { Worker } = require('bullmq');
+  const { Worker } = await import('bullmq');
   const redis = getRedisClient();
   
   const worker = new Worker(
@@ -106,7 +106,7 @@ async function startEmbeddingsWorker() {
       
       try {
         // Import embedding generation logic
-        const { generateEmbeddings } = require('../lib/embeddings');
+        const { generateEmbeddings } = await import('../lib/embeddings.js');
         const embeddings = await generateEmbeddings(content, { url, customerId });
         
         workerHealth.jobsProcessed++;
@@ -132,7 +132,7 @@ async function startEmbeddingsWorker() {
  * Start WooCommerce sync worker
  */
 async function startWooCommerceWorker() {
-  const { Worker } = require('bullmq');
+  const { Worker } = await import('bullmq');
   const redis = getRedisClient();
   
   const worker = new Worker(
@@ -143,7 +143,7 @@ async function startWooCommerceWorker() {
       
       try {
         // Import WooCommerce sync logic
-        const { syncProducts, syncOrders } = require('../lib/woocommerce-sync');
+        const { syncProducts, syncOrders } = await import('../lib/woocommerce-sync.js');
         
         let result;
         switch (action) {
@@ -180,7 +180,7 @@ async function startWooCommerceWorker() {
  * Start maintenance worker
  */
 async function startMaintenanceWorker() {
-  const { Worker } = require('bullmq');
+  const { Worker } = await import('bullmq');
   const redis = getRedisClient();
   
   const worker = new Worker(

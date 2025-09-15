@@ -126,7 +126,7 @@ const simulateResponseCharacteristics = (prompt: string, query: string) => {
   
   // Simulate response length and structure
   let estimatedLength = 0;
-  let responseStructure: string[] = [];
+  const responseStructure: string[] = [];
   
   if (isVerbose) {
     // Verbose prompt likely produces longer responses

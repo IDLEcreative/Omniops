@@ -162,7 +162,7 @@ describe('Rate Limiting', () => {
       const domain = 'example.com'
 
       // Default limit is 100 requests per minute
-      let result = checkDomainRateLimit(domain)
+      const result = checkDomainRateLimit(domain)
       expect(result.allowed).toBe(true)
       expect(result.remaining).toBe(99)
       expect(result.resetTime).toBe(currentTime + 60000)

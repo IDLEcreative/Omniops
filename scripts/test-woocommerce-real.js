@@ -1,7 +1,8 @@
 // Load environment variables
-require('dotenv').config({ path: '.env.local' });
+import dotenv from 'dotenv';
+dotenv.config({ path: '.env.local' });
 
-const { createClient } = require('@supabase/supabase-js');
+import { createClient  } from '@supabase/supabase-js';
 
 // Set up encryption key if not already set
 if (!process.env.ENCRYPTION_KEY) {
@@ -9,7 +10,7 @@ if (!process.env.ENCRYPTION_KEY) {
 }
 
 // Encryption functions
-const crypto = require('crypto');
+import crypto from 'node:crypto';
 
 function encrypt(text) {
   if (!text) return '';

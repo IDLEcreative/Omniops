@@ -48,9 +48,17 @@ diagnose-*.js
 investigate-*.js
 execute-*.js
 setup-*.js
+clean-*.ts
+edge-case-*.ts
 
 # Scripts directory - already handled properly
 scripts/
+
+# Compiled JavaScript files in lib directory (TypeScript sources exist)
+lib/*.js
+
+# Browser automation scripts (not part of main app)
+browser-automation/
 
 # Public directory
 public/

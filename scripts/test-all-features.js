@@ -7,8 +7,14 @@
  * Usage: node test-all-features.js
  */
 
-const fs = require('fs');
-const path = require('path');
+import fs from 'node:fs';
+import path from 'node:path';
+
+import { fileURLToPath } from 'node:url';
+import { dirname } from 'node:path';
+
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = dirname(__filename);
 
 // Terminal colors for better output
 const colors = {
@@ -122,9 +128,9 @@ async function testQueueSystem() {
   
   try {
     // Import queue modules
-    const { QueueManager, JobPriority } = require('./lib/queue/queue-manager');
-    const { JobProcessor } = require('./lib/queue/job-processor');
-    const { JobUtils, QueueMonitor, QueueMaintenance } = require('./lib/queue/queue-utils');
+    import { QueueManager, JobPriority  } from './lib/queue/queue-manager';
+    import { JobProcessor  } from './lib/queue/job-processor';
+    import { JobUtils, QueueMonitor, QueueMaintenance  } from './lib/queue/queue-utils';
     
     logTest('Queue modules import', 'pass');
     
@@ -257,7 +263,7 @@ async function testWorkerSystem() {
   
   try {
     // Import worker modules
-    const { ScraperWorkerService } = require('./lib/workers/scraper-worker-service');
+    import { ScraperWorkerService  } from './lib/workers/scraper-worker-service';
     logTest('Worker modules import', 'pass');
     
     // Initialize worker service
@@ -314,7 +320,7 @@ async function testWorkerSystem() {
     });
     
     // Create test jobs for workers to process
-    const { JobUtils } = require('./lib/queue/queue-utils');
+    import { JobUtils  } from './lib/queue/queue-utils';
     
     for (let i = 0; i < 5; i++) {
       await JobUtils.createSinglePageJob(`https://example.com/worker-test-${i}`, {
@@ -547,7 +553,7 @@ async function testIntegrationFeatures() {
   logSubSection('Testing Embedding Generation');
   
   try {
-    const { generateEmbeddings } = require('./lib/embeddings');
+    import { generateEmbeddings  } from './lib/embeddings';
     
     const testText = 'This is a test product description for embedding generation.';
     const embeddings = await generateEmbeddings(testText);
@@ -568,7 +574,7 @@ async function testPerformance() {
   logSubSection('Testing Queue Throughput');
   
   try {
-    const { JobUtils } = require('./lib/queue/queue-utils');
+    import { JobUtils  } from './lib/queue/queue-utils';
     
     const startTime = Date.now();
     const jobCount = 100;
@@ -598,7 +604,7 @@ async function testPerformance() {
   logSubSection('Testing Worker Concurrency');
   
   try {
-    const { ScraperWorkerService } = require('./lib/workers/scraper-worker-service');
+    import { ScraperWorkerService  } from './lib/workers/scraper-worker-service';
     
     const workerService = new ScraperWorkerService({
       concurrency: 4,
@@ -771,4 +777,4 @@ if (require.main === module) {
   });
 }
 
-module.exports = { main, testStats };
+export { main, testStats };;

@@ -1,4 +1,4 @@
-const fetch = require('node-fetch');
+import fetch from 'node-fetch';
 
 const API_BASE = 'http://localhost:3001';
 const DOMAIN = 'thompsonseparts.co.uk';

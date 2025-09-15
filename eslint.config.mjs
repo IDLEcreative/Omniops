@@ -30,7 +30,12 @@ const eslintConfig = [
       "*.config.js",
       "*.config.ts",
       "*.config.mjs",
+      "**/*.config.js",
+      "config/**/*",
       "jest.setup.js",
+      
+      // Next.js generated files
+      "next-env.d.ts",
       
       // Test and utility files in root
       "test-*.js",
@@ -44,6 +49,15 @@ const eslintConfig = [
       "investigate*.js",
       "execute-*.js",
       "setup-*.js",
+      "clean-*.ts",
+      "edge-case-*.ts",
+      "performance-*.ts",
+      
+      // Compiled JavaScript files in lib directory (TypeScript sources exist)
+      "lib/*.js",
+      
+      // Browser automation scripts (not part of main app)
+      "browser-automation/**/*",
       
       // Directories
       "public/**/*",
@@ -51,6 +65,9 @@ const eslintConfig = [
       "supabase/**/*",
       "omniops-scraper/**/*",
       ".git/**/*",
+      
+      // Scripts directory 
+      "scripts/**/*",
       
       // Generated/temporary files
       "*.tmp",

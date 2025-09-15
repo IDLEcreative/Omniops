@@ -15,6 +15,14 @@ export async function POST(request: NextRequest) {
   try {
     const supabase = await createClient();
     
+    // Check if supabase client was created successfully
+    if (!supabase) {
+      return NextResponse.json(
+        { error: 'Database connection failed' },
+        { status: 500 }
+      );
+    }
+    
     // Check if user is authenticated
     const { data: { user }, error: authError } = await supabase.auth.getUser();
     if (authError || !user) {
@@ -62,6 +70,14 @@ export async function POST(request: NextRequest) {
 export async function GET(request: NextRequest) {
   try {
     const supabase = await createClient();
+    
+    // Check if supabase client was created successfully
+    if (!supabase) {
+      return NextResponse.json(
+        { error: 'Database connection failed' },
+        { status: 500 }
+      );
+    }
     
     // Check if user is authenticated
     const { data: { user }, error: authError } = await supabase.auth.getUser();

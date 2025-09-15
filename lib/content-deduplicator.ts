@@ -342,7 +342,7 @@ class LZString {
 
   private static _decompress(length: number, resetValue: number, getNextValue: (index: number) => number): string {
     const dictionary: string[] = [];
-    let next: number;
+    let next: number = 0;
     let enlargeIn = 4;
     let dictSize = 4;
     let numBits = 3;

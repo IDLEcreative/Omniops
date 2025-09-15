@@ -586,7 +586,7 @@ export class MockFactory {
       }),
 
       // Connection management
-      on: jest.fn((event: string, handler: Function) => {
+      on: jest.fn((event: string, handler: (...args: any[]) => void) => {
         // Mock event handlers
       }),
       

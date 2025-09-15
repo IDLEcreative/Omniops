@@ -84,19 +84,27 @@ export async function GET(request: NextRequest) {
     }
 
     // Get additional detailed statistics
-    let query = supabase
-      .from('page_embeddings')
-      .select('metadata');
+    let embeddings: any[] | null = null;
+    let embeddingsError: any = null;
 
     if (domainId) {
       // Join with scraped_pages to filter by domain
-      query = supabase
+      const result = await supabase
         .from('page_embeddings')
         .select('metadata, scraped_pages!inner(domain_id)')
         .eq('scraped_pages.domain_id', domainId);
+      
+      embeddings = result.data;
+      embeddingsError = result.error;
+    } else {
+      // Get all embeddings without domain filter
+      const result = await supabase
+        .from('page_embeddings')
+        .select('metadata');
+      
+      embeddings = result.data;
+      embeddingsError = result.error;
     }
-
-    const { data: embeddings, error: embeddingsError } = await query;
 
     if (embeddingsError) {
       console.error('Error fetching embeddings:', embeddingsError);
@@ -112,7 +120,7 @@ export async function GET(request: NextRequest) {
     const brandSet = new Set<string>();
     const productSet = new Set<string>();
     const prices: number[] = [];
-    let currencies = new Set<string>();
+    const currencies = new Set<string>();
 
     embeddings?.forEach(embedding => {
       const metadata = embedding.metadata;

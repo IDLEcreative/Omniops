@@ -1,7 +1,13 @@
 #!/usr/bin/env node
-const https = require('https');
-const fs = require('fs');
-const path = require('path');
+import https from 'node:https';
+import fs from 'node:fs';
+import path from 'node:path';
+
+import { fileURLToPath } from 'node:url';
+import { dirname } from 'node:path';
+
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = dirname(__filename);
 
 // YOUR project credentials
 const SUPABASE_URL = 'birugqyuqhiahxvxeyqg.supabase.co';

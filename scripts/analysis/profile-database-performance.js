@@ -11,9 +11,10 @@
  * 5. Index effectiveness and query execution plans
  */
 
-const { createClient } = require('@supabase/supabase-js');
-const crypto = require('crypto');
-require('dotenv').config({ path: '.env.local' });
+import { createClient  } from '@supabase/supabase-js';
+import crypto from 'node:crypto';
+import dotenv from 'dotenv';
+dotenv.config({ path: '.env.local' });
 
 const supabase = createClient(
   process.env.NEXT_PUBLIC_SUPABASE_URL,

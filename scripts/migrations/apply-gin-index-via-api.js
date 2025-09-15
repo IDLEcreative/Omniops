@@ -5,7 +5,8 @@
  * Based on instructions from CLAUDE.md
  */
 
-require('dotenv').config({ path: '.env.local' });
+import dotenv from 'dotenv';
+dotenv.config({ path: '.env.local' });
 
 // Configuration from CLAUDE.md
 const SUPABASE_ACCESS_TOKEN = 'sbp_f30783ba26b0a6ae2bba917988553bd1d5f76d97';

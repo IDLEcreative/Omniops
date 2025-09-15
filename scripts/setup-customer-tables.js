@@ -1,6 +1,12 @@
-const { createClient } = require('@supabase/supabase-js');
-const fs = require('fs');
-const path = require('path');
+import { createClient  } from '@supabase/supabase-js';
+import fs from 'node:fs';
+import path from 'node:path';
+
+import { fileURLToPath } from 'node:url';
+import { dirname } from 'node:path';
+
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = dirname(__filename);
 
 // Your app's Supabase credentials
 const supabaseUrl = 'https://birugqyuqhiahxvxeyqg.supabase.co';

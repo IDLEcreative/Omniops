@@ -5,9 +5,15 @@
  * Prepares the migration SQL for manual application in Supabase dashboard
  */
 
-const fs = require('fs');
-const path = require('path');
-const chalk = require('chalk');
+import fs from 'node:fs';
+import path from 'node:path';
+import chalk from 'chalk';
+
+import { fileURLToPath } from 'node:url';
+import { dirname } from 'node:path';
+
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = dirname(__filename);
 
 function logSuccess(message) {
   console.log(chalk.green('✅ ' + message));

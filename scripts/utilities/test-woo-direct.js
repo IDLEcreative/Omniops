@@ -1,11 +1,14 @@
 // Test direct WooCommerce API connection
-require('dotenv').config({ path: '.env.local' });
+import dotenv from 'dotenv';
+import WooCommerceRestApi from "@woocommerce/woocommerce-rest-api";
+
+dotenv.config({ path: '.env.local' });
 
 async function testDirectAPI() {
   console.log('=== Testing Direct WooCommerce API ===\n');
   
   // First check if we have dynamic WooCommerce configs stored
-  const { getDynamicWooCommerceClient } = require('./lib/woocommerce-dynamic');
+  const { getDynamicWooCommerceClient } = await import('./lib/woocommerce-dynamic.js');
   
   console.log('1. Checking for thompsonseparts.co.uk configuration:');
   try {
@@ -52,7 +55,6 @@ async function testDirectAPI() {
       console.log('   ✗ No configuration found - trying environment variables');
       
       // Try environment variables
-      const WooCommerceRestApi = require("@woocommerce/woocommerce-rest-api").default;
       
       const WooCommerce = new WooCommerceRestApi({
         url: process.env.WOOCOMMERCE_URL,
@@ -76,7 +78,7 @@ async function testDirectAPI() {
   
   // Also check using the WooCommerceCustomer class
   console.log('\n4. Testing WooCommerceCustomer class:');
-  const { WooCommerceCustomer } = require('./lib/woocommerce-customer');
+  import { WooCommerceCustomer  } from './lib/woocommerce-customer';
   
   try {
     // Try for the specific domain

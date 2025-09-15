@@ -209,7 +209,7 @@ export class EcommerceExtractor extends ContentExtractor {
     // Extract e-commerce specific data
     let products: NormalizedProduct[] = [];
     let pagination;
-    let breadcrumbs;
+    let breadcrumbs: any = null;
     let totalProducts;
     
     if (pageType === 'product') {

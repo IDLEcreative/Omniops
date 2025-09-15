@@ -4,8 +4,9 @@
  * Test script to verify the OpenAI token limit and Redis connection fixes
  */
 
-const { createClient } = require('@supabase/supabase-js');
-require('dotenv').config({ path: '.env.local' });
+import { createClient  } from '@supabase/supabase-js';
+import dotenv from 'dotenv';
+dotenv.config({ path: '.env.local' });
 
 const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL;
 const supabaseKey = process.env.SUPABASE_SERVICE_ROLE_KEY;
@@ -25,7 +26,7 @@ async function testScraping() {
     // Test 1: Start a small batch scrape
     console.log('\n📝 Test 1: Starting small batch scrape (5 pages)...');
     
-    const { spawn } = require('child_process');
+    import { spawn  } from 'node:child_process';
     const scraperProcess = spawn('npm', ['run', 'scraper:crawl', '--', 
       '--limit', '5', 
       '--url', 'https://www.thompsonseparts.co.uk'

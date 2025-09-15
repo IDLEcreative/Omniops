@@ -1,6 +1,6 @@
 #!/usr/bin/env node
 
-const https = require('https');
+import https from 'node:https';
 
 const PROJECT_REF = 'birugqyuqhiahxvxeyqg';
 const ACCESS_TOKEN = 'sbp_3d1fa3086b18fbca507ee9b65042aa264395e1b8';

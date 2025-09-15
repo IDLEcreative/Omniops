@@ -59,8 +59,16 @@ export async function smartSearch(
         const detectedTypes = detectContentTypes(query);
         const contentTypes = options?.contentTypes || detectedTypes;
         
-        // Apply query enhancement to search
-        const searchConfig = QueryEnhancer.applyToSearch(enhancedQuery);
+        // Apply query enhancement to search - create config from enhanced query
+        const searchConfig = {
+          searchTerms: [
+            enhancedQuery.normalized,
+            ...enhancedQuery.expanded_terms.slice(0, 5),
+            ...Array.from(enhancedQuery.synonyms.values()).flat().slice(0, 5)
+          ],
+          boostFields: {},
+          filters: {}
+        };
         
         // Combine extracted keywords with enhanced terms
         const queryKeywords = [
@@ -79,7 +87,7 @@ export async function smartSearch(
           contentTypes: contentTypes.length > 0 ? contentTypes : undefined,
           boostRecent: options?.boostRecent || (enhancedQuery.intent === 'transactional'),
           mustHaveKeywords: queryKeywords.length > 0 ? queryKeywords : options?.mustHaveKeywords,
-          priceRange: options?.priceRange || extractPriceRange(query)
+          priceRange: options?.priceRange || extractPriceRange(query) || undefined
         });
         
         if (results && results.length > 0) {
@@ -202,7 +210,7 @@ export function isPriceQuery(query: string): boolean {
 export function extractPriceRange(query: string): { min: number; max: number } | null {
   // Look for explicit price ranges
   const rangeMatch = query.match(/(?:between\s+)?[\$£€]?\s*(\d+(?:\.\d{2})?)\s*(?:to|-)\s*[\$£€]?\s*(\d+(?:\.\d{2})?)/i);
-  if (rangeMatch) {
+  if (rangeMatch && rangeMatch[1] && rangeMatch[2]) {
     return {
       min: parseFloat(rangeMatch[1]),
       max: parseFloat(rangeMatch[2])
@@ -211,7 +219,7 @@ export function extractPriceRange(query: string): { min: number; max: number } |
   
   // Look for "under X" pattern
   const underMatch = query.match(/under\s+[\$£€]?\s*(\d+(?:\.\d{2})?)/i);
-  if (underMatch) {
+  if (underMatch && underMatch[1]) {
     return {
       min: 0,
       max: parseFloat(underMatch[1])
@@ -220,7 +228,7 @@ export function extractPriceRange(query: string): { min: number; max: number } |
   
   // Look for "over X" pattern
   const overMatch = query.match(/over\s+[\$£€]?\s*(\d+(?:\.\d{2})?)/i);
-  if (overMatch) {
+  if (overMatch && overMatch[1]) {
     return {
       min: parseFloat(overMatch[1]),
       max: 999999

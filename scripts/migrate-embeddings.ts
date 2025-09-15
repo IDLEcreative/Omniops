@@ -65,7 +65,7 @@ async function migrateEmbeddings(domainFilter?: string): Promise<MigrationStats>
 
   try {
     // Get total count of embeddings to process
-    let countQuery = supabase
+    const countQuery = supabase
       .from('page_embeddings')
       .select('id', { count: 'exact', head: true });
 

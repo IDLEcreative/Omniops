@@ -73,7 +73,7 @@ async function runVerification() {
           model: 'text-embedding-3-small',
           input: testQuery,
         });
-        const queryEmbedding = embeddingResponse.data[0].embedding;
+        const queryEmbedding = embeddingResponse.data[0]?.embedding || [];
         
         // Test the enhanced function
         console.log('🔄 Calling match_page_embeddings_extended...');
@@ -114,14 +114,14 @@ async function runVerification() {
             
             // Show similarity distribution
             const similarities = chunks?.map((c: any) => c.similarity) || [];
-            const avgSim = similarities.reduce((a, b) => a + b, 0) / (similarities.length || 1);
-            const highConf = similarities.filter(s => s > 0.85).length;
+            const avgSim = similarities.reduce((a: number, b: number) => a + b, 0) / (similarities.length || 1);
+            const highConf = similarities.filter((s: number) => s > 0.85).length;
             
             console.log(`\n📊 Quality Metrics:`);
             console.log(`   Average similarity: ${(avgSim * 100).toFixed(1)}%`);
             console.log(`   High confidence chunks (>85%): ${highConf}`);
-            console.log(`   Medium confidence (70-85%): ${similarities.filter(s => s > 0.7 && s <= 0.85).length}`);
-            console.log(`   Low confidence (<70%): ${similarities.filter(s => s <= 0.7).length}`);
+            console.log(`   Medium confidence (70-85%): ${similarities.filter((s: number) => s > 0.7 && s <= 0.85).length}`);
+            console.log(`   Low confidence (<70%): ${similarities.filter((s: number) => s <= 0.7).length}`);
             
             // Project accuracy
             const projectedAccuracy = 80 + (chunkCount * 1.5);

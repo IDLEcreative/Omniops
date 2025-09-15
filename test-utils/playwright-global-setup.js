@@ -3,9 +3,9 @@
  * Initializes the test environment and prepares browsers
  */
 
-const { chromium, firefox, webkit } = require('playwright');
-const fs = require('fs/promises');
-const path = require('path');
+import { chromium, firefox, webkit } from 'playwright';
+import fs from 'fs/promises';
+import path from 'path';
 
 async function globalSetup() {
   console.log('🚀 Playwright Global Setup Starting...');
@@ -86,4 +86,4 @@ async function globalSetup() {
   );
 }
 
-module.exports = globalSetup;
+export default globalSetup;

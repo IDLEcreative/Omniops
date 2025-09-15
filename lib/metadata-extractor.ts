@@ -48,6 +48,19 @@ export interface EnhancedEmbeddingMetadata {
     value: number;
     count: number;
   };
+  
+  // Contact information
+  contact_info?: {
+    email?: string;
+    phone?: string;
+    address?: string;
+  };
+  
+  // Q&A pairs for FAQ content
+  qa_pairs?: Array<{
+    question: string;
+    answer: string;
+  }>;
 }
 
 export class MetadataExtractor {
@@ -158,9 +171,9 @@ export class MetadataExtractor {
     ];
     
     // Count signals
-    let productScore = productSignals.filter(pattern => pattern.test(lowerChunk)).length;
-    let faqScore = faqSignals.filter(pattern => pattern.test(lowerChunk)).length;
-    let docScore = docSignals.filter(pattern => pattern.test(lowerChunk)).length;
+    const productScore = productSignals.filter(pattern => pattern.test(lowerChunk)).length;
+    const faqScore = faqSignals.filter(pattern => pattern.test(lowerChunk)).length;
+    const docScore = docSignals.filter(pattern => pattern.test(lowerChunk)).length;
     
     // Return highest scoring type
     if (productScore >= 2) return 'product';
@@ -247,7 +260,9 @@ export class MetadataExtractor {
     const models = [];
     let match;
     while ((match = modelPattern.exec(text)) !== null) {
-      models.push(match[1].toUpperCase());
+      if (match[1]) {
+        models.push(match[1].toUpperCase());
+      }
     }
     if (models.length > 0) {
       entities.models = [...new Set(models)];
@@ -492,8 +507,10 @@ export class MetadataExtractor {
     const prices: number[] = [];
     let priceMatch;
     while ((priceMatch = pricePattern.exec(chunk)) !== null) {
-      const price = parseFloat(priceMatch[1].replace(',', ''));
-      if (!isNaN(price)) prices.push(price);
+      if (priceMatch[1]) {
+        const price = parseFloat(priceMatch[1].replace(',', ''));
+        if (!isNaN(price)) prices.push(price);
+      }
     }
     
     if (prices.length > 0) {
@@ -518,7 +535,7 @@ export class MetadataExtractor {
     // Extract ratings (simple pattern)
     const ratingPattern = /([\d.]+)\s*(?:out of\s*5|\s*stars?)/i;
     const ratingMatch = chunk.match(ratingPattern);
-    if (ratingMatch) {
+    if (ratingMatch && ratingMatch[1]) {
       const value = parseFloat(ratingMatch[1]);
       if (!isNaN(value) && value <= 5) {
         // Look for review count
@@ -526,7 +543,7 @@ export class MetadataExtractor {
         const countMatch = chunk.match(countPattern);
         result.ratings = {
           value,
-          count: countMatch ? parseInt(countMatch[1]) : 0
+          count: countMatch && countMatch[1] ? parseInt(countMatch[1]) : 0
         };
       }
     }

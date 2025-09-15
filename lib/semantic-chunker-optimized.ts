@@ -149,15 +149,15 @@ export class SemanticChunkerOptimized {
     let match;
     
     while ((match = blockRegex.exec(html)) !== null) {
-      const tag = match[1].toLowerCase();
+      const tag = match[1]?.toLowerCase();
       const content = this.stripHtmlFast(match[0]);
       
-      if (content.trim()) {
+      if (content.trim() && tag) {
         blocks.push({
           type: this.mapTagToType(tag),
           content,
           position: match.index,
-          level: tag.startsWith('h') ? parseInt(tag[1]) : undefined
+          level: tag?.startsWith('h') ? parseInt(tag[1] || '1') : undefined
         });
       }
     }
@@ -316,18 +316,27 @@ export class SemanticChunkerOptimized {
     const totalChunks = chunks.length;
 
     for (let i = 0; i < chunks.length; i++) {
-      chunks[i].total_chunks = totalChunks;
+      const currentChunk = chunks[i];
+      if (currentChunk) {
+        currentChunk.total_chunks = totalChunks;
 
-      if (i > 0) {
-        const prevContent = chunks[i - 1].content;
-        const overlapSize = Math.min(50, prevContent.length / 4);
-        chunks[i].overlap_with_previous = prevContent.slice(-overlapSize);
-      }
+        if (i > 0) {
+          const prevChunk = chunks[i - 1];
+          if (prevChunk) {
+            const prevContent = prevChunk.content;
+            const overlapSize = Math.min(50, prevContent.length / 4);
+            currentChunk.overlap_with_previous = prevContent.slice(-overlapSize);
+          }
+        }
 
-      if (i < chunks.length - 1) {
-        const nextContent = chunks[i + 1].content;
-        const overlapSize = Math.min(50, nextContent.length / 4);
-        chunks[i].overlap_with_next = nextContent.slice(0, overlapSize);
+        if (i < chunks.length - 1) {
+          const nextChunk = chunks[i + 1];
+          if (nextChunk) {
+            const nextContent = nextChunk.content;
+            const overlapSize = Math.min(50, nextContent.length / 4);
+            currentChunk.overlap_with_next = nextContent.slice(0, overlapSize);
+          }
+        }
       }
     }
 

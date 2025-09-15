@@ -432,7 +432,7 @@ export default function HelpPage() {
                     </CardHeader>
                     <CardContent>
                       <div className="bg-muted p-4 rounded-lg font-mono text-sm">
-                        <div className="text-green-600">// Add this script tag to your website</div>
+                        <div className="text-green-600">{`// Add this script tag to your website`}</div>
                         <div>&lt;script src="https://widget.omniops.ai/embed.js"&gt;&lt;/script&gt;</div>
                         <div>&lt;script&gt;</div>
                         <div className="ml-4">OmniopsWidget.init(&#123;</div>

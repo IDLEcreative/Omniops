@@ -31,6 +31,12 @@ export class SynonymAutoLearner {
   public async learnFromScrapedContent(domainId: string, domain: string): Promise<void> {
     console.log(`[SynonymLearner] Starting automatic synonym learning for ${domain}`);
     
+    // Check if supabase client is initialized
+    if (!this.supabase) {
+      console.error('[SynonymLearner] Supabase client not initialized');
+      return;
+    }
+    
     try {
       // Get sample of scraped content
       const { data: pages, error } = await this.supabase
@@ -94,7 +100,9 @@ export class SynonymAutoLearner {
       
       // Extract bracketed variations (these are often synonyms)
       let match;
+      patterns.bracketed.lastIndex = 0; // Reset regex state
       while ((match = patterns.bracketed.exec(content)) !== null) {
+        if (!match[1] || !match[2]) continue; // Skip if capture groups are undefined
         const mainTerm = match[1].toLowerCase();
         const variation = match[2].toLowerCase();
         
@@ -115,7 +123,9 @@ export class SynonymAutoLearner {
       }
       
       // Extract slash alternatives
+      patterns.slashed.lastIndex = 0; // Reset regex state
       while ((match = patterns.slashed.exec(content)) !== null) {
+        if (!match[1] || !match[2]) continue; // Skip if capture groups are undefined
         const term1 = match[1].toLowerCase();
         const term2 = match[2].toLowerCase();
         
@@ -180,6 +190,12 @@ export class SynonymAutoLearner {
    * Store learned synonyms in database
    */
   private async storeSynonyms(domainId: string, synonymGroups: Array<{term: string, synonyms: string[]}>): Promise<void> {
+    // Check if supabase client is initialized
+    if (!this.supabase) {
+      console.error('[SynonymLearner] Cannot store synonyms: Supabase client not initialized');
+      return;
+    }
+    
     for (const group of synonymGroups) {
       try {
         await this.supabase

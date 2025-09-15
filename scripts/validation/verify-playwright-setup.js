@@ -5,11 +5,11 @@
  * Verifies all Playwright dependencies and configurations for web scraping
  */
 
-const { chromium, firefox, webkit } = require('playwright');
-const fs = require('fs/promises');
-const path = require('path');
-const { spawn } = require('child_process');
-const { scrapingConfig } = require('./playwright.config.js');
+import { chromium, firefox, webkit  } from 'playwright';
+import fs from 'fs/promises';
+import path from 'node:path';
+import { spawn  } from 'node:child_process';
+import { scrapingConfig  } from './playwright.config.js';
 
 class PlaywrightSetupVerifier {
   constructor() {
@@ -156,7 +156,7 @@ class PlaywrightSetupVerifier {
     
     // Check if config file exists and is valid
     try {
-      const config = require('./playwright.config.js');
+      import config from './playwright.config.js';
       console.log('  ✅ playwright.config.js found and valid');
       
       this.results.configuration.configFile = true;
@@ -178,7 +178,7 @@ class PlaywrightSetupVerifier {
     
     // Check browser context pool
     try {
-      const BrowserContextPool = require('./lib/browser-context-pool.ts');
+      import BrowserContextPool from './lib/browser-context-pool.ts';
       console.log('  ✅ Browser context pool available');
       this.results.configuration.contextPool = true;
     } catch (error) {
@@ -412,4 +412,4 @@ if (require.main === module) {
     });
 }
 
-module.exports = { PlaywrightSetupVerifier };
+export { PlaywrightSetupVerifier };;

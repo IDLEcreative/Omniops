@@ -194,14 +194,14 @@ export async function searchEnhancedContent(
     
     // Apply additional filters if specified
     if (mustHaveKeywords && mustHaveKeywords.length > 0) {
-      results = results.filter(r => {
+      results = results.filter((r: any) => {
         const keywords = r.metadata?.keywords || [];
         return mustHaveKeywords.some(k => keywords.includes(k.toLowerCase()));
       });
     }
     
     if (priceRange) {
-      results = results.filter(r => {
+      results = results.filter((r: any) => {
         const price = r.metadata?.price_range;
         if (!price) return false;
         return price.min >= priceRange.min && price.max <= priceRange.max;
@@ -210,7 +210,7 @@ export async function searchEnhancedContent(
     
     // Sort by similarity and return top results
     return results
-      .sort((a, b) => b.similarity - a.similarity)
+      .sort((a: any, b: any) => b.similarity - a.similarity)
       .slice(0, limit);
     
   } catch (error) {

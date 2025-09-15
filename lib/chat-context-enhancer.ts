@@ -83,8 +83,8 @@ export async function getEnhancedChatContext(
         minChunks - allChunks.length,  // Get remaining chunks needed
         0.2,  // Lower threshold for broader matches
         {
-          boostRecent: true,
-          excludeUrls: allChunks.map(c => c.url)  // Avoid duplicates
+          boostRecent: true
+          // Note: Duplicate removal handled by deduplicateChunks function
         }
       );
       

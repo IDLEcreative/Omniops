@@ -1,4 +1,4 @@
-const { chromium, firefox, webkit } = require('playwright');
+import { chromium, firefox, webkit  } from 'playwright';
 
 async function testPlaywrightBrowsers() {
   console.log('🚀 Testing Playwright Browser Dependencies\n');

@@ -7,8 +7,14 @@
  * to validate the enhanced scraping system works as expected.
  */
 
-const fs = require('fs');
-const path = require('path');
+import fs from 'node:fs';
+import path from 'node:path';
+
+import { fileURLToPath } from 'node:url';
+import { dirname } from 'node:path';
+
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = dirname(__filename);
 
 console.log('🧪 Direct Scraper Functionality Test');
 console.log('====================================');

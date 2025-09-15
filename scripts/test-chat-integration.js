@@ -3,7 +3,7 @@
 // Test script for chat integration with Supabase
 // This tests the complete flow with proper UUID session IDs
 
-const crypto = require('crypto');
+import crypto from 'node:crypto';
 
 // Generate a proper UUID v4
 function generateUUID() {

@@ -5,8 +5,8 @@
  * This identifies and removes embeddings with identical or near-identical content
  */
 
-const { createClient } = require('@supabase/supabase-js');
-const crypto = require('crypto');
+import { createClient  } from '@supabase/supabase-js';
+import crypto from 'node:crypto';
 
 // Initialize Supabase client
 const supabase = createClient(

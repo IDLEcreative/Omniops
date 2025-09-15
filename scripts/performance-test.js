@@ -5,9 +5,9 @@
  * Measures and reports on various performance metrics after optimizations
  */
 
-const https = require('https');
-const http = require('http');
-const { performance } = require('perf_hooks');
+import https from 'node:https';
+import http from 'node:http';
+import { performance  } from 'perf_hooks';
 
 // Configuration
 const BASE_URL = process.env.BASE_URL || 'http://localhost:3000';
@@ -261,7 +261,7 @@ async function runPerformanceTests() {
   }
   
   // Save results to file
-  const fs = require('fs');
+  import fs from 'node:fs';
   const timestamp = new Date().toISOString().replace(/[:.]/g, '-');
   const filename = `performance-results-${timestamp}.json`;
   

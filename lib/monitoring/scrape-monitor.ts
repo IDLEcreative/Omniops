@@ -2,6 +2,7 @@ import { EventEmitter } from 'events';
 import { getQueueManager, ScrapeQueueManager } from '../queue/scrape-queue';
 import { getResilientRedisClient } from '../redis-enhanced';
 import { logger } from '../logger';
+import * as os from 'os';
 
 /**
  * Comprehensive health monitoring system for scraper workers and queue system
@@ -363,7 +364,7 @@ export class ScrapeMonitor extends EventEmitter {
   private async checkMemoryHealth(): Promise<ComponentHealth> {
     try {
       const memUsage = process.memoryUsage();
-      const totalMemory = require('os').totalmem();
+      const totalMemory = os.totalmem();
       const percentUsed = memUsage.heapUsed / totalMemory;
 
       const isCritical = percentUsed > this.config.alertThresholds.memory.critical;
@@ -436,7 +437,7 @@ export class ScrapeMonitor extends EventEmitter {
       const queueMetrics = queueMetricsData.queue;
       const workerMetrics: any[] = []; // Worker metrics not available from ScrapeQueueManager
 
-      const totalMemory = require('os').totalmem();
+      const totalMemory = os.totalmem();
       const activeWorkers = workerMetrics.filter((w: any) => w.isRunning);
       
       return {

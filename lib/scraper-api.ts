@@ -1,6 +1,7 @@
 import { z } from 'zod';
 import { spawn } from 'child_process';
 import { join } from 'path';
+import * as fs from 'fs';
 import Redis from 'ioredis';
 import { ContentExtractor, ExtractedContent } from './content-extractor';
 import { EcommerceExtractor, EcommerceExtractedContent } from './ecommerce-extractor';
@@ -190,11 +191,11 @@ class DeduplicationService {
 // Only import Playwright for single page scraping
 let PlaywrightCrawler: any;
 if (typeof window === 'undefined' && !process.env.NEXT_RUNTIME) {
-  try {
-    PlaywrightCrawler = require('crawlee').PlaywrightCrawler;
-  } catch (e) {
+  import('crawlee').then(module => {
+    PlaywrightCrawler = module.PlaywrightCrawler;
+  }).catch(e => {
     console.log('PlaywrightCrawler not available in this environment');
-  }
+  });
 }
 
 // Schema for scraped page data
@@ -1043,7 +1044,6 @@ export async function crawlWebsite(
   console.log(`[${jobId}] Worker script path: ${crawlerPath}`);
   
   // Check if worker file exists
-  const fs = require('fs');
   if (!fs.existsSync(crawlerPath)) {
     console.error(`[${jobId}] ERROR: Worker script not found at ${crawlerPath}`);
     throw new Error(`Worker script not found at ${crawlerPath}`);

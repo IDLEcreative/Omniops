@@ -12,13 +12,13 @@ import { generateQueryEmbedding } from '@/lib/embeddings';
 
 // Dynamic imports for Node.js modules
 const getQueryClassifier = async () => {
-  const module = await import('@/lib/query-classifier.js');
-  return module.QueryClassifier;
+  const imported = await import('@/lib/query-classifier.js');
+  return imported.QueryClassifier;
 };
 
 const getContentEnricher = async () => {
-  const module = await import('@/lib/content-enricher.js');
-  return module.ContentEnricher;
+  const imported = await import('@/lib/content-enricher.js');
+  return imported.ContentEnricher;
 };
 
 // Request schema
@@ -63,42 +63,45 @@ export async function POST(req: NextRequest) {
     const QueryClassifier = await getQueryClassifier();
     
     // Classify the query for intelligent routing
-    const classification = QueryClassifier.classifyQuery(query);
+    const classification = await QueryClassifier.classifyQuery(query);
     
     console.log('[Product Search] Query classification:', {
       query,
-      type: classification.type,
-      routing: classification.routing.primary,
-      confidence: classification.confidence
+      type: classification?.type,
+      route: classification?.route,
+      confidence: classification?.confidence
     });
     
     // Prepare response structure
     const response = {
       query,
       classification: {
-        type: classification.type,
-        confidence: classification.confidence,
+        type: classification?.type,
+        confidence: classification?.confidence,
         intent: {
-          hasSKU: classification.sku.detected,
-          hasPrice: classification.priceIntent.detected,
-          hasAvailability: classification.availabilityIntent.detected,
-          hasBrand: classification.brand.detected
+          hasSKU: !!classification?.sku,
+          hasPrice: !!classification?.priceIntent,
+          hasAvailability: !!classification?.availabilityIntent,
+          hasBrand: !!classification?.brand
         }
       },
       results: [] as any[],
       metadata: {
         totalResults: 0,
         searchTime: 0,
-        searchStrategy: classification.routing.primary,
-        weights: classification.routing.weights
+        searchStrategy: classification?.route || 'hybrid_search',
+        weights: { text: 0.5, metadata: 0.5 }
       }
     };
     
     const startTime = Date.now();
     
     // Route based on classification
-    switch (classification.routing.primary) {
+    const route: string = classification?.route || 'hybrid_search';
+    
+    switch (route) {
       case 'sql_direct':
+      case 'sql_filtered':
         // Direct SQL search for SKU lookups
         response.results = await performSQLDirectSearch(
           supabase,
@@ -108,7 +111,7 @@ export async function POST(req: NextRequest) {
         );
         break;
         
-      case 'sql_filtered_vector':
+      case 'hybrid_search':
         // SQL pre-filter then vector search
         response.results = await performFilteredVectorSearch(
           supabase,
@@ -120,7 +123,7 @@ export async function POST(req: NextRequest) {
         );
         break;
         
-      case 'vector_dual':
+      case 'semantic_search':
         // Dual embedding vector search
         response.results = await performDualVectorSearch(
           supabase,
@@ -131,7 +134,7 @@ export async function POST(req: NextRequest) {
         );
         break;
         
-      case 'vector_text':
+      case 'knowledge_base':
         // Text-focused vector search (for support queries)
         response.results = await performTextVectorSearch(
           supabase,
@@ -158,10 +161,10 @@ export async function POST(req: NextRequest) {
     // Log performance metrics
     console.log('[Product Search] Performance:', {
       query: query.substring(0, 50),
-      strategy: classification.routing.primary,
+      strategy: classification?.route || 'hybrid_search',
       resultsFound: response.results.length,
       searchTime: `${response.metadata.searchTime}ms`,
-      improvement: calculateImprovement(classification.type, response.metadata.searchTime)
+      improvement: calculateImprovement(classification?.type || 'general_search', response.metadata.searchTime)
     });
     
     return NextResponse.json(response);
@@ -193,7 +196,8 @@ async function performSQLDirectSearch(
   domain: string | undefined,
   limit: number
 ): Promise<any[]> {
-  const { skus } = classification.sku;
+  const sku = classification.sku;
+  const skus = sku ? [sku] : [];
   
   if (!skus || skus.length === 0) {
     return [];
@@ -254,21 +258,21 @@ async function performFilteredVectorSearch(
     .select('page_id');
   
   // Apply price filters
-  if (classification.priceIntent.priceRange?.max || filters.maxPrice) {
-    sqlQuery = sqlQuery.lte('price', classification.priceIntent.priceRange?.max || filters.maxPrice);
+  if (filters.maxPrice) {
+    sqlQuery = sqlQuery.lte('price', filters.maxPrice);
   }
-  if (classification.priceIntent.priceRange?.min || filters.minPrice) {
-    sqlQuery = sqlQuery.gte('price', classification.priceIntent.priceRange?.min || filters.minPrice);
+  if (filters.minPrice) {
+    sqlQuery = sqlQuery.gte('price', filters.minPrice);
   }
   
   // Apply stock filter
-  if (classification.availabilityIntent.wantsInStock || filters.inStock) {
+  if (classification.availabilityIntent || filters.inStock) {
     sqlQuery = sqlQuery.eq('in_stock', true);
   }
   
   // Apply brand filter
-  if (classification.brand.primary || filters.brand) {
-    sqlQuery = sqlQuery.ilike('brand', `%${classification.brand.primary || filters.brand}%`);
+  if (classification.brand || filters.brand) {
+    sqlQuery = sqlQuery.ilike('brand', `%${classification.brand || filters.brand}%`);
   }
   
   // Apply domain filter
@@ -304,8 +308,8 @@ async function performFilteredVectorSearch(
     {
       query_text_embedding: queryEmbeddings.textEmbedding,
       query_metadata_embedding: queryEmbeddings.metadataEmbedding,
-      text_weight: classification.routing.weights.text,
-      metadata_weight: classification.routing.weights.metadata,
+      text_weight: 0.3,
+      metadata_weight: 0.7,
       match_threshold: 0.5,
       match_count: limit
     }

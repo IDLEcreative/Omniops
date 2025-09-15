@@ -1,5 +1,5 @@
 // Direct test of WooCommerce API
-const WooCommerceRestApi = require("@woocommerce/woocommerce-rest-api").default;
+import WooCommerceRestApi from "@woocommerce/woocommerce-rest-api";
 
 const WooCommerce = new WooCommerceRestApi({
   url: 'https://www.thompsonseparts.co.uk',

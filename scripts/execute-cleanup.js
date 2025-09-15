@@ -1,4 +1,4 @@
-const fetch = require('node-fetch');
+import fetch from 'node-fetch';
 
 // Supabase Management API configuration
 const SUPABASE_ACCESS_TOKEN = 'sbp_f30783ba26b0a6ae2bba917988553bd1d5f76d97';
@@ -101,7 +101,7 @@ DROP TABLE IF EXISTS public.customers CASCADE;
 
 // Also verify the final state
 async function verifyFinalState() {
-  const { createClient } = require('@supabase/supabase-js');
+  import { createClient  } from '@supabase/supabase-js';
   
   const supabaseUrl = 'https://birugqyuqhiahxvxeyqg.supabase.co';
   const supabaseKey = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImJpcnVncXl1cWhpYWh4dnhleXFnIiwicm9sZSI6InNlcnZpY2Vfcm9sZSIsImlhdCI6MTc1NTc4NzE2NCwiZXhwIjoyMDcxMzYzMTY0fQ.5bw0QlkRgv_PA7iHrpWixvC31d7WZ5VYSR2JZnhsw8s';

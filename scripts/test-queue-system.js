@@ -11,9 +11,9 @@
  * - Queue management operations
  */
 
-const { QueueManager, JobPriority } = require('./lib/queue/queue-manager.ts');
-const { JobProcessor } = require('./lib/queue/job-processor.ts');
-const { JobUtils, QueueMonitor, QueueMaintenance, CronPatterns } = require('./lib/queue/queue-utils.ts');
+import { QueueManager, JobPriority  } from './lib/queue/queue-manager.ts';
+import { JobProcessor  } from './lib/queue/job-processor.ts';
+import { JobUtils, QueueMonitor, QueueMaintenance, CronPatterns  } from './lib/queue/queue-utils.ts';
 
 async function testQueueSystem() {
   console.log('🚀 Starting Queue Management System Test...\n');
@@ -321,7 +321,4 @@ if (require.main === module) {
     });
 }
 
-module.exports = {
-  testQueueSystem,
-  showAPIExamples,
-};
+export { testQueueSystem, showAPIExamples };;

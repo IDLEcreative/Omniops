@@ -41,8 +41,8 @@ describe('Supabase Database Integration', () => {
       },
     }
 
-    const { createClient: supabaseCreateClient } = require('@supabase/supabase-js')
-    supabaseCreateClient.mockReturnValue(mockSupabaseClient)
+    const supabaseModule = await import('@supabase/supabase-js')
+    ;(supabaseModule.createClient as jest.Mock).mockReturnValue(mockSupabaseClient)
   })
 
   describe('Database Operations', () => {

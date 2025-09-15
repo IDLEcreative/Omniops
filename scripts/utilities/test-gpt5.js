@@ -1,5 +1,6 @@
-const OpenAI = require('openai');
-require('dotenv').config({ path: '.env.local' });
+import OpenAI from 'openai';
+import dotenv from 'dotenv';
+dotenv.config({ path: '.env.local' });
 
 async function testGPT5Mini() {
   console.log('\n🔍 Testing GPT-5-mini directly with OpenAI API...\n');

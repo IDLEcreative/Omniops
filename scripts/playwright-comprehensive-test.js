@@ -3,10 +3,15 @@
  * Tests all browser configurations and scraping capabilities
  */
 
-const { chromium, firefox, webkit } = require('playwright');
-const fs = require('fs/promises');
-const path = require('path');
-const { scrapingConfig } = require(path.resolve(__dirname, '../playwright.config.js'));
+import { chromium, firefox, webkit  } from 'playwright';
+import fs from 'fs/promises';
+import path from 'node:path';
+
+import { fileURLToPath } from 'node:url';
+import { dirname } from 'node:path';
+
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = dirname(__filename);
 
 class PlaywrightTester {
   constructor() {
@@ -22,6 +27,10 @@ class PlaywrightTester {
   async runAllTests() {
     console.log('🚀 Starting Comprehensive Playwright Tests');
     console.log('='.repeat(50));
+    
+    // Load config
+    const { scrapingConfig } = await import(path.resolve(__dirname, '../playwright.config.js'));
+    this.scrapingConfig = scrapingConfig;
     
     try {
       await this.testBrowserLaunching();
@@ -451,7 +460,7 @@ ${this.results.performance.improvementPercent ?
 }
 
 // Run the comprehensive test if called directly
-if (require.main === module) {
+if (import.meta.url === `file://${process.argv[1]}`) {
   const tester = new PlaywrightTester();
   tester.runAllTests()
     .then((results) => {
@@ -465,4 +474,4 @@ if (require.main === module) {
     });
 }
 
-module.exports = { PlaywrightTester };
+export { PlaywrightTester };;

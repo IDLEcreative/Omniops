@@ -1,6 +1,7 @@
-const fetch = require('node-fetch');
-const OpenAI = require('openai');
-require('dotenv').config({ path: '.env.local' });
+import fetch from 'node-fetch';
+import OpenAI from 'openai';
+import dotenv from 'dotenv';
+dotenv.config({ path: '.env.local' });
 
 async function testGPT5Comparison() {
   console.log('\n🔬 GPT-5 vs GPT-5-mini Comparison (Both at Minimal Reasoning)\n');

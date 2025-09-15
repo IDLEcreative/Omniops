@@ -3,8 +3,8 @@
  * Cleans up after test runs and generates reports
  */
 
-const fs = require('fs/promises');
-const path = require('path');
+import fs from 'fs/promises';
+import path from 'path';
 
 async function globalTeardown() {
   console.log('🧹 Playwright Global Teardown Starting...');
@@ -72,4 +72,4 @@ async function globalTeardown() {
   }
 }
 
-module.exports = globalTeardown;
+export default globalTeardown;

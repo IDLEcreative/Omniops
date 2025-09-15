@@ -1,7 +1,8 @@
 #!/usr/bin/env node
-require('dotenv').config({ path: '.env.local' });
-const { createClient } = require('@supabase/supabase-js');
-const { DatabaseOptimizer } = require('./lib/database-optimizer');
+import dotenv from 'dotenv';
+dotenv.config({ path: '.env.local' });
+import { createClient  } from '@supabase/supabase-js';
+import { DatabaseOptimizer  } from './lib/database-optimizer';
 
 // Initialize Supabase client
 const supabase = createClient(

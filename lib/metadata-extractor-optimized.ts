@@ -285,7 +285,9 @@ export class OptimizedMetadataExtractor {
     this.PATTERNS.model.lastIndex = 0; // Reset regex
     let count = 0;
     while ((match = this.PATTERNS.model.exec(text)) !== null && count < 5) {
-      models.push(match[1].toUpperCase());
+      if (match[1]) {
+        models.push(match[1].toUpperCase());
+      }
       count++;
     }
     if (models.length > 0) {
@@ -432,10 +434,12 @@ export class OptimizedMetadataExtractor {
     let priceMatch;
     let priceCount = 0;
     while ((priceMatch = this.PATTERNS.price.exec(chunk)) !== null && priceCount < 10) {
-      const price = parseFloat(priceMatch[1].replace(',', ''));
+      if (priceMatch[1]) {
+        const price = parseFloat(priceMatch[1].replace(',', ''));
       if (!isNaN(price) && price > 0 && price < 1000000) {
-        prices.push(price);
-        priceCount++;
+          prices.push(price);
+          priceCount++;
+        }
       }
     }
     
@@ -460,13 +464,13 @@ export class OptimizedMetadataExtractor {
     
     // Extract rating
     const ratingMatch = chunk.match(this.PATTERNS.rating);
-    if (ratingMatch) {
+    if (ratingMatch && ratingMatch[1]) {
       const value = parseFloat(ratingMatch[1]);
       if (!isNaN(value) && value <= 5) {
         const countMatch = chunk.match(this.PATTERNS.reviewCount);
         result.ratings = {
           value,
-          count: countMatch ? parseInt(countMatch[1]) : 0
+          count: countMatch && countMatch[1] ? parseInt(countMatch[1]) : 0
         };
       }
     }

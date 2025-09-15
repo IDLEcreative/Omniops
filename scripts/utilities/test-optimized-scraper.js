@@ -4,8 +4,9 @@
  * Test the optimized scraper performance
  */
 
-require('dotenv').config({ path: '.env.local' });
-const { crawlWebsite } = require('./lib/scraper-api');
+import dotenv from 'dotenv';
+dotenv.config({ path: '.env.local' });
+import { crawlWebsite  } from './lib/scraper-api';
 
 async function testOptimizedScraper() {
   console.log('🚀 Testing Optimized Scraper Performance\n');

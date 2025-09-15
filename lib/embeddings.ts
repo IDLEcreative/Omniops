@@ -304,7 +304,7 @@ export async function generateEmbeddings(params: {
       page_id: params.contentId,  // Changed from content_id to page_id
       chunk_text: chunk,
       // Format embedding for pgvector: convert array to string format
-      embedding: `[${embeddings[index].join(',')}]`,
+      embedding: embeddings[index] ? `[${embeddings[index].join(',')}]` : null,
       metadata: {
         chunk_index: index,
         total_chunks: chunks.length,
@@ -349,7 +349,8 @@ export async function generateQueryEmbedding(
   if (enrichWithIntent) {
     try {
       // Use dynamic QueryEnhancer with domain context
-      const { QueryEnhancer } = await import('./query-enhancer.js');
+      const QueryEnhancerModule = await import('./query-enhancer.js');
+      const GenericQueryEnhancer = QueryEnhancerModule.QueryEnhancer;
       
       // Get Supabase client if we have a domain
       let supabase = null;
@@ -361,7 +362,8 @@ export async function generateQueryEmbedding(
         );
       }
       
-      const enhanced = await QueryEnhancer.enhanceQuery(query, domain, supabase);
+      const enhancer = new (GenericQueryEnhancer as any)();
+      const enhanced = await enhancer.enhanceQuery(query, domain, supabase);
       
       if (enhanced.confidence > 0.6 && enhanced.expanded !== query) {
         processedQuery = enhanced.expanded;
@@ -497,7 +499,7 @@ export async function searchSimilarContent(
           // Filter by domain if provided
           q = q.eq('domain', domain);
           if (orParts.length > 0) {
-            // @ts-ignore - Supabase's .or accepts a string expression
+            // Supabase's .or accepts a string expression
             q = (q as any).or(orParts.join(','));
           }
           const { data, error } = await q;
@@ -560,7 +562,7 @@ export async function searchSimilarContent(
         .limit(limit);
 
       // Apply keyword filter
-      // @ts-ignore: Supabase .or signature accepts a string expression
+      // Supabase .or signature accepts a string expression
       q = (q as any).or(orFilter);
 
       const { data, error } = await q;
@@ -689,10 +691,10 @@ export async function searchSimilarContent(
           .select('url, title, content')
           .limit(limit);
         if (domainId) q = q.eq('domain_id', domainId);
-        // @ts-ignore prioritize product URLs
+        // Prioritize product URLs
         q = (q as any).or('url.ilike.%/product/%');
         if (orParts.length > 0) {
-          // @ts-ignore combine with part code filters
+          // Combine with part code filters
           q = (q as any).or(orParts.join(','));
         }
         const { data, error: pageErr } = await q as any;

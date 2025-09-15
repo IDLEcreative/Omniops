@@ -8,12 +8,12 @@ import OpenAI from 'openai';
 import { createServiceRoleClient } from './supabase-server';
 
 // Dynamic import to avoid build issues
-let ContentEnricher: any;
+let ContentEnricher: typeof import('./content-enricher').ContentEnricher | null = null;
 
 async function getContentEnricher() {
   if (!ContentEnricher) {
-    const module = await import('./content-enricher.js');
-    ContentEnricher = module.ContentEnricher;
+    const imported = await import('./content-enricher.js');
+    ContentEnricher = imported.ContentEnricher;
   }
   return ContentEnricher;
 }
@@ -51,12 +51,12 @@ export class DualEmbeddings {
     const Enricher = await getContentEnricher();
     
     // Generate text embedding (with light enrichment for context)
-    const enrichedText = Enricher.needsEnrichment(text) && metadata
-      ? Enricher.enrichContent(text, metadata, url, title)
+    const enrichedText = Enricher?.needsEnrichment?.(text) && metadata
+      ? Enricher?.enrichContent?.(text, metadata, url, title) || text
       : text;
     
     // Generate metadata-only content for specialized embedding
-    const metadataContent = metadata 
+    const metadataContent = metadata && Enricher?.createMetadataOnlyContent
       ? Enricher.createMetadataOnlyContent(metadata)
       : '';
     
@@ -215,7 +215,7 @@ export class DualEmbeddings {
       const skuPattern = /\b[A-Z0-9]{2,}[-\/][A-Z0-9]+\b/i;
       const standaloneSkuPattern = /\b[A-Z]{1,3}\d{6,}\b/;
       
-      let skuMatch = query.match(skuPattern) || query.match(standaloneSkuPattern);
+      const skuMatch = query.match(skuPattern) || query.match(standaloneSkuPattern);
       if (skuMatch) {
         parts.push(`SKU: ${skuMatch[0]}`);
         parts.push(`Part Number: ${skuMatch[0]}`);
@@ -313,7 +313,7 @@ export class DualEmbeddings {
     const hasStructuredData = metadataContent.length > 20;
     
     let score = 0;
-    if (metadata?.ecommerceData?.products?.length > 0) score += 40;
+    if (metadata?.ecommerceData?.products?.length && metadata.ecommerceData.products.length > 0) score += 40;
     if (metadata?.productSku || metadata?.ecommerceData?.products?.[0]?.sku) score += 30;
     if (metadata?.productPrice || metadata?.ecommerceData?.products?.[0]?.price) score += 20;
     if (metadata?.productInStock !== undefined) score += 10;
@@ -361,17 +361,17 @@ export class DualEmbeddings {
     const records = chunks.map((chunk, index) => ({
       page_id: pageId,
       chunk_text: chunk,
-      embedding: embeddings[index].textEmbedding,
-      metadata_embedding: embeddings[index].metadataEmbedding,
+      embedding: embeddings[index]?.textEmbedding || new Array(1536).fill(0),
+      metadata_embedding: embeddings[index]?.metadataEmbedding || new Array(1536).fill(0),
       embedding_type: 'dual',
       embedding_version: 2,
       metadata: {
-        ...metadata,
+        ...(metadata || {}),
         chunk_index: index,
         total_chunks: chunks.length,
-        has_metadata_embedding: embeddings[index].quality.hasStructuredData,
-        metadata_score: embeddings[index].quality.metadataScore,
-        recommended_weights: embeddings[index].quality.recommendedWeights
+        has_metadata_embedding: embeddings[index]?.quality?.hasStructuredData || false,
+        metadata_score: embeddings[index]?.quality?.metadataScore || 0,
+        recommended_weights: embeddings[index]?.quality?.recommendedWeights || { text: 0.6, metadata: 0.4 }
       }
     }));
     

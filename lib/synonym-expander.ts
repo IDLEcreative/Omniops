@@ -136,8 +136,11 @@ export class SynonymExpander {
     
     for (const term of multiWordTerms) {
       if (lowerQuery.includes(term)) {
-        const synonyms = this.synonymMap[term].slice(0, maxExpansions);
-        synonyms.forEach(syn => expanded.add(syn));
+        const termSynonyms = this.synonymMap[term];
+        if (termSynonyms) {
+          const synonyms = termSynonyms.slice(0, maxExpansions);
+          synonyms.forEach(syn => expanded.add(syn));
+        }
       }
     }
     

@@ -5,8 +5,8 @@
  * Verifies your Personal Access Token works with Supabase API
  */
 
-const https = require('https');
-const chalk = require('chalk');
+import https from 'node:https';
+import chalk from 'chalk';
 
 const token = 'sbp_f30783ba26b0a6ae2bba917988553bd1d5f76d97';
 

@@ -1,10 +1,11 @@
 // Test specific WooCommerce searches
-require('dotenv').config({ path: '.env.local' });
+import dotenv from 'dotenv';
+dotenv.config({ path: '.env.local' });
 
 async function testSpecificSearches() {
   console.log('=== Testing Specific WooCommerce Searches ===\n');
   
-  const { WooCommerceCustomer } = require('./lib/woocommerce-customer');
+  import { WooCommerceCustomer  } from './lib/woocommerce-customer';
   const customer = await WooCommerceCustomer.forDomain('thompsonseparts.co.uk');
   
   if (!customer) {

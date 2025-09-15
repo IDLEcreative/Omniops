@@ -1,4 +1,4 @@
-const { createClient } = require('@supabase/supabase-js');
+import { createClient  } from '@supabase/supabase-js';
 
 // Your actual Supabase credentials
 const SUPABASE_URL = 'https://birugqyuqhiahxvxeyqg.supabase.co';

@@ -5,9 +5,10 @@
  * Tests all major Supabase features and MCP-equivalent operations
  */
 
-require('dotenv').config({ path: '.env.local' });
-const { createClient } = require('@supabase/supabase-js');
-const chalk = require('chalk');
+import dotenv from 'dotenv';
+dotenv.config({ path: '.env.local' });
+import { createClient  } from '@supabase/supabase-js';
+import chalk from 'chalk';
 
 const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL;
 const supabaseServiceKey = process.env.SUPABASE_SERVICE_ROLE_KEY;

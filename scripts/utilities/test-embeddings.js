@@ -1,6 +1,7 @@
 // Test script to debug embedding search
-require('dotenv').config({ path: '.env.local' });
-const { searchSimilarContent } = require('./lib/embeddings');
+import dotenv from 'dotenv';
+dotenv.config({ path: '.env.local' });
+import { searchSimilarContent  } from './lib/embeddings';
 
 async function testEmbeddingSearch() {
   const query = process.argv[2] || 'dc66-10p';

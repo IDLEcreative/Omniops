@@ -1,7 +1,7 @@
 #!/usr/bin/env node
 
 // Direct connection to Supabase to verify data
-const { createClient } = require('@supabase/supabase-js');
+import { createClient  } from '@supabase/supabase-js';
 
 // Use the correct project from .env
 const supabaseUrl = 'https://birugqyuqhiahxvxeyqg.supabase.co';

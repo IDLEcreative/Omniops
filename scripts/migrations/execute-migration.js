@@ -1,5 +1,5 @@
-const { createClient } = require('@supabase/supabase-js');
-const fs = require('fs');
+import { createClient  } from '@supabase/supabase-js';
+import fs from 'node:fs';
 
 // Get environment variables
 const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL || 'https://birugqyuqhiahxvxeyqg.supabase.co';

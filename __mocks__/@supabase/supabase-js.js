@@ -130,19 +130,19 @@ const mockSupabaseClient = {
   }
 };
 
-const createClient = jest.fn().mockImplementation(() => mockSupabaseClient);
+export const createClient = jest.fn().mockImplementation(() => mockSupabaseClient);
 
-// Support both CommonJS and ES module imports
-module.exports = {
-  createClient,
-  SupabaseClient: jest.fn().mockImplementation(() => mockSupabaseClient),
-  default: {
-    createClient,
-    SupabaseClient: jest.fn().mockImplementation(() => mockSupabaseClient),
-  }
-};
+export const SupabaseClient = jest.fn().mockImplementation(() => mockSupabaseClient);
 
 // Expose testing hooks
-module.exports._mockSupabaseClient = mockSupabaseClient;
-module.exports.MockQueryBuilder = MockQueryBuilder;
+export const _mockSupabaseClient = mockSupabaseClient;
+export { MockQueryBuilder };
 globalThis.__SUPABASE_MOCK__ = mockSupabaseClient;
+
+// Default export
+export default {
+  createClient,
+  SupabaseClient,
+  _mockSupabaseClient,
+  MockQueryBuilder
+};

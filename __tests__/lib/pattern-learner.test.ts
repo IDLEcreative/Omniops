@@ -2,10 +2,9 @@ import { describe, it, expect, jest, beforeEach, afterEach } from '@jest/globals
 import { PatternLearner, ExtractedPattern, DomainPatterns } from '@/lib/pattern-learner'
 import { NormalizedProduct } from '@/lib/product-normalizer'
 // Use centralized Supabase mock from __mocks__
-// eslint-disable-next-line @typescript-eslint/no-var-requires
-const supabaseMockModule = require('@supabase/supabase-js')
-const mockSupabaseClient = supabaseMockModule._mockSupabaseClient as any
-const { MockQueryBuilder } = supabaseMockModule
+import supabaseMockModule from '@supabase/supabase-js'
+const mockSupabaseClient = (supabaseMockModule as any)._mockSupabaseClient
+const { MockQueryBuilder } = supabaseMockModule as any
 
 // Mock environment variables
 const originalEnv = process.env

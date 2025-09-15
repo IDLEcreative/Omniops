@@ -1,5 +1,6 @@
-const OpenAI = require('openai');
-require('dotenv').config({ path: '.env.local' });
+import OpenAI from 'openai';
+import dotenv from 'dotenv';
+dotenv.config({ path: '.env.local' });
 
 async function testOptimalReasoning() {
   console.log('\n🔬 Testing Optimal Reasoning Level for Customer Service\n');

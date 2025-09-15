@@ -5,7 +5,7 @@
  * Tests and documents all available MCP capabilities
  */
 
-const chalk = require('chalk');
+import chalk from 'chalk';
 
 console.log(chalk.bold.cyan('\n🚀 SUPABASE MCP VERIFICATION REPORT\n'));
 console.log(chalk.yellow('=' .repeat(60)));
@@ -231,7 +231,7 @@ console.log(chalk.magenta('\n📝 Alternative Approach:'));
 console.log('For immediate database access, you can use the Supabase');
 console.log('JavaScript client with the service role key (which you have):');
 console.log(chalk.gray(`
-const { createClient } = require('@supabase/supabase-js');
+import { createClient  } from '@supabase/supabase-js';
 const supabase = createClient(
   process.env.NEXT_PUBLIC_SUPABASE_URL,
   process.env.SUPABASE_SERVICE_ROLE_KEY

@@ -1,8 +1,9 @@
 #!/usr/bin/env node
 
-const https = require('https');
-const { createClient } = require('@supabase/supabase-js');
-require('dotenv').config({ path: '.env.local' });
+import https from 'node:https';
+import { createClient  } from '@supabase/supabase-js';
+import dotenv from 'dotenv';
+dotenv.config({ path: '.env.local' });
 
 const PROJECT_REF = 'birugqyuqhiahxvxeyqg';
 const ACCESS_TOKEN = 'sbp_3d1fa3086b18fbca507ee9b65042aa264395e1b8';

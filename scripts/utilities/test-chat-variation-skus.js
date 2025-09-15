@@ -2,7 +2,8 @@
 // Usage: node test-chat-variation-skus.js [domain] [maxSamples]
 // Requires: dev server running on http://localhost:3000 and .env.local configured
 
-require('dotenv').config({ path: '.env.local' });
+import dotenv from 'dotenv';
+dotenv.config({ path: '.env.local' });
 
 const DOMAIN = process.argv[2] || 'thompsonseparts.co.uk';
 const MAX_SAMPLES = parseInt(process.argv[3] || '8', 10);
@@ -13,7 +14,7 @@ async function getWooConfig(domain) {
   const serviceKey = process.env.SUPABASE_SERVICE_ROLE_KEY;
   if (supabaseUrl && serviceKey) {
     try {
-      const { createClient } = require('@supabase/supabase-js');
+      import { createClient  } from '@supabase/supabase-js';
       const s = createClient(supabaseUrl, serviceKey);
       const { data } = await s
         .from('customer_configs')

@@ -1,2 +1,3 @@
-require('dotenv').config({ path: '.env.local' });
-require('./test-rag.js');
+import dotenv from 'dotenv';
+dotenv.config({ path: '.env.local' });
+import './test-rag.js';

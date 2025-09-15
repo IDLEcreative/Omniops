@@ -6,7 +6,8 @@ async function testRealDomain() {
   console.log('━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━');
   
   const apiUrl = 'http://localhost:3000/api/chat';
-  const sessionId = require('crypto').randomUUID();
+  const { randomUUID } = await import('node:crypto');
+  const sessionId = randomUUID();
   
   try {
     const response = await fetch(apiUrl, {

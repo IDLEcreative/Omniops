@@ -39,7 +39,7 @@ async function testChunkRetrieval(query: string, domainId: string): Promise<Test
       model: 'text-embedding-3-small',
       input: query,
     });
-    const queryEmbedding = embeddingResponse.data[0].embedding;
+    const queryEmbedding = embeddingResponse.data[0]?.embedding || [];
     
     // Test the enhanced function with corrected JOIN
     const { data, error } = await supabase.rpc('match_page_embeddings_extended', {

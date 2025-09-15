@@ -1,8 +1,9 @@
 // Debug what the chat route is doing
-require('dotenv').config({ path: '.env.local' });
+import dotenv from 'dotenv';
+dotenv.config({ path: '.env.local' });
 
 async function debugChatRoute() {
-  const { SimpleCustomerVerification } = require('./lib/customer-verification-simple');
+  import { SimpleCustomerVerification  } from './lib/customer-verification-simple';
   
   const conversationId = 'debug-' + Date.now();
   const domain = 'thompsonseparts.co.uk';
@@ -55,7 +56,7 @@ async function debugChatRoute() {
   console.log(prompt || 'No prompt');
   
   // Now test what AI instructions would be added
-  const { WooCommerceAIInstructions } = require('./lib/woocommerce-ai-instructions');
+  import { WooCommerceAIInstructions  } from './lib/woocommerce-ai-instructions';
   
   const systemPrompt = WooCommerceAIInstructions.getEnhancedSystemPrompt(
     verificationLevel.level,

@@ -1,12 +1,13 @@
 // Test WooCommerce API directly
-const fetch = require('node-fetch');
-require('dotenv').config({ path: '.env.local' });
+import fetch from 'node-fetch';
+import dotenv from 'dotenv';
+dotenv.config({ path: '.env.local' });
 
 async function testWooCommerceAPI() {
   console.log('Testing WooCommerce API for product searches...\n');
   
   // Get the WooCommerce credentials for thompsonseparts.co.uk
-  const { createClient } = require('@supabase/supabase-js');
+  import { createClient  } from '@supabase/supabase-js';
   const supabaseUrl = 'https://birugqyuqhiahxvxeyqg.supabase.co';
   const supabaseKey = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImJpcnVncXl1cWhpYWh4dnhleXFnIiwicm9sZSI6InNlcnZpY2Vfcm9sZSIsImlhdCI6MTc1NTc4NzE2NCwiZXhwIjoyMDcxMzYzMTY0fQ.5bw0QlkRgv_PA7iHrpWixvC31d7WZ5VYSR2JZnhsw8s';
   

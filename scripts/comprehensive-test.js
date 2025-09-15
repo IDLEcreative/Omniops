@@ -5,8 +5,8 @@
  * Tests all aspects of the chat system with Supabase
  */
 
-const crypto = require('crypto');
-const { createClient } = require('@supabase/supabase-js');
+import crypto from 'node:crypto';
+import { createClient  } from '@supabase/supabase-js';
 
 // Test configuration
 const API_URL = 'http://localhost:3000/api/chat';

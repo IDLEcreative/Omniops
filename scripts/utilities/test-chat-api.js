@@ -1,5 +1,5 @@
 // Test the chat API directly
-const fetch = require('node-fetch');
+import fetch from 'node-fetch';
 
 async function testChatAPI() {
   console.log('\n🚀 Testing Chat API with GPT-5-mini model...\n');

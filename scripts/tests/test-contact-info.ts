@@ -125,7 +125,7 @@ async function runTests() {
   
   // Run tests
   let successCount = 0;
-  let totalTests = contactQueries.length;
+  const totalTests = contactQueries.length;
   
   for (const query of contactQueries) {
     const success = await testContactQuery(query, sessionId);

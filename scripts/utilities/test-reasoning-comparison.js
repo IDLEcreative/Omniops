@@ -1,5 +1,6 @@
-const fetch = require('node-fetch');
-require('dotenv').config({ path: '.env.local' });
+import fetch from 'node-fetch';
+import dotenv from 'dotenv';
+dotenv.config({ path: '.env.local' });
 
 async function testReasoningComparison() {
   console.log('\n🔬 GPT-5-mini Reasoning Effort Comparison Test\n');
@@ -49,7 +50,7 @@ async function testReasoningComparison() {
       
       try {
         // Make direct OpenAI API call to test different configurations
-        const OpenAI = require('openai');
+        import OpenAI from 'openai';
         const openai = new OpenAI({ apiKey: process.env.OPENAI_API_KEY });
         
         const systemPrompt = `You are a helpful customer service assistant for a spare parts store.

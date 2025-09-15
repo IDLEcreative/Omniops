@@ -1,12 +1,13 @@
 // Test chatbot with real WooCommerce API
-require('dotenv').config({ path: '.env.local' });
+import dotenv from 'dotenv';
+dotenv.config({ path: '.env.local' });
 
 async function simulateChatbot() {
   console.log('=== Simulating Chatbot Order Lookup ===\n');
   
   // Simulate what happens in the chat route
-  const { SimpleCustomerVerification } = require('./lib/customer-verification-simple');
-  const { WooCommerceCustomer } = require('./lib/woocommerce-customer');
+  import { SimpleCustomerVerification  } from './lib/customer-verification-simple';
+  import { WooCommerceCustomer  } from './lib/woocommerce-customer';
   
   const conversationId = 'test-conversation-' + Date.now();
   const domain = 'thompsonseparts.co.uk';

@@ -1,5 +1,5 @@
 // Final validation test after fixes
-const fetch = require('node-fetch');
+import fetch from 'node-fetch';
 
 async function testFinal() {
   console.log('=== FINAL VALIDATION AFTER FIXES ===\n');

@@ -1,4 +1,4 @@
-const fetch = require('node-fetch');
+import fetch from 'node-fetch';
 
 async function checkCredentials() {
   console.log('🔍 Checking WooCommerce Credentials Format');

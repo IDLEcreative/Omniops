@@ -7,8 +7,8 @@
  * the automatic scraping integration working seamlessly.
  */
 
-const https = require('https')
-const http = require('http')
+import https from 'node:https';
+import http from 'node:http';
 
 // Test configuration
 const API_BASE_URL = process.env.API_BASE_URL || 'http://localhost:3000'
@@ -506,10 +506,4 @@ if (require.main === module) {
   })
 }
 
-module.exports = {
-  runCustomerFlow,
-  testDomainValidation,
-  createCustomerConfig,
-  checkScrapeJobStatus,
-  monitorScrapeProgress
-}
+export { runCustomerFlow, testDomainValidation, createCustomerConfig, checkScrapeJobStatus, monitorScrapeProgress };

@@ -1,5 +1,5 @@
-const { createClient } = require('@supabase/supabase-js');
-const OpenAI = require('openai');
+import { createClient  } from '@supabase/supabase-js';
+import OpenAI from 'openai';
 
 // Get environment variables
 const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL;

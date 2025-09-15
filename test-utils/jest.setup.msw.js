@@ -1,33 +1,32 @@
 // Polyfill for TextEncoder/TextDecoder in Node environment
+import { TextEncoder as NodeTextEncoder, TextDecoder as NodeTextDecoder } from 'util';
+import { randomUUID as nodeRandomUUID } from 'crypto';
+import { TransformStream as NodeTransformStream, ReadableStream as NodeReadableStream, WritableStream as NodeWritableStream } from 'stream/web';
+
 if (typeof TextEncoder === 'undefined') {
-  const { TextEncoder, TextDecoder } = require('util');
-  global.TextEncoder = TextEncoder;
-  global.TextDecoder = TextDecoder;
+  global.TextEncoder = NodeTextEncoder;
+  global.TextDecoder = NodeTextDecoder;
 }
 
 // Polyfill for crypto.randomUUID
 if (typeof crypto === 'undefined' || !crypto.randomUUID) {
-  const { randomUUID } = require('crypto');
   global.crypto = global.crypto || {};
-  global.crypto.randomUUID = randomUUID;
+  global.crypto.randomUUID = nodeRandomUUID;
 }
 
 // Polyfill for TransformStream
 if (typeof TransformStream === 'undefined') {
-  const { TransformStream } = require('stream/web');
-  global.TransformStream = TransformStream;
+  global.TransformStream = NodeTransformStream;
 }
 
 // Polyfill for ReadableStream if not available
 if (typeof ReadableStream === 'undefined') {
-  const { ReadableStream } = require('stream/web');
-  global.ReadableStream = ReadableStream;
+  global.ReadableStream = NodeReadableStream;
 }
 
 // Polyfill for WritableStream if not available
 if (typeof WritableStream === 'undefined') {
-  const { WritableStream } = require('stream/web');
-  global.WritableStream = WritableStream;
+  global.WritableStream = NodeWritableStream;
 }
 
 // Polyfill for BroadcastChannel
@@ -330,19 +329,15 @@ if (typeof Headers === 'undefined') {
 
 // Polyfill for fetch if not available
 if (typeof fetch === 'undefined') {
-  try {
-    global.fetch = require('node-fetch');
-  } catch (e) {
-    // If node-fetch is not available, create a basic mock
-    global.fetch = jest.fn(() =>
-      Promise.resolve({
-        json: () => Promise.resolve({}),
-        text: () => Promise.resolve(''),
-        ok: true,
-        status: 200,
-      })
-    );
-  }
+  // Create a basic mock for fetch
+  global.fetch = jest.fn(() =>
+    Promise.resolve({
+      json: () => Promise.resolve({}),
+      text: () => Promise.resolve(''),
+      ok: true,
+      status: 200,
+    })
+  );
 }
 
 // Polyfill for FormData if not available

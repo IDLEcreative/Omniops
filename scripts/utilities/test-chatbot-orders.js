@@ -1,11 +1,12 @@
 // Test the chatbot's ability to retrieve orders with mock data fallback
-require('dotenv').config({ path: '.env.local' });
+import dotenv from 'dotenv';
+dotenv.config({ path: '.env.local' });
 
 async function testChatbotOrderLookup() {
   console.log('=== Testing Chatbot Order Lookup ===\n');
   
   // Test the WooCommerce customer module directly
-  const { WooCommerceCustomer } = require('./lib/woocommerce-customer');
+  import { WooCommerceCustomer  } from './lib/woocommerce-customer';
   
   const customer = WooCommerceCustomer.fromEnvironment();
   

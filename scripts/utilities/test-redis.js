@@ -5,7 +5,13 @@
  * Tests both local and Vercel Redis connections
  */
 
-const Redis = require('ioredis');
+import Redis from 'ioredis';
+
+import { fileURLToPath } from 'node:url';
+import { dirname } from 'node:path';
+
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = dirname(__filename);
 
 async function testRedisConnection(url, label) {
   console.log(`\n🔍 Testing ${label}...`);
@@ -93,8 +99,9 @@ async function main() {
     console.log('=================================');
     
     // Try to test the fallback if the module exists
-    const path = require('path');
-    const moduleExists = require('fs').existsSync(path.join(__dirname, 'lib', 'redis-unified.ts'));
+    import path from 'node:path';
+    import { existsSync } from 'node:fs';
+    const moduleExists = existsSync(path.join(__dirname, 'lib', 'redis-unified.ts'));
     
     if (moduleExists) {
       console.log('✅ Redis fallback module exists in the project');

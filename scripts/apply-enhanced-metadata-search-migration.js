@@ -5,11 +5,18 @@
  * Applies the enhanced metadata search functions and indexes to Supabase
  */
 
-require('dotenv').config({ path: '.env.local' });
-const { createClient } = require('@supabase/supabase-js');
-const chalk = require('chalk');
-const fs = require('fs');
-const path = require('path');
+import dotenv from 'dotenv';
+
+import { fileURLToPath } from 'node:url';
+import { dirname } from 'node:path';
+
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = dirname(__filename);
+dotenv.config({ path: '.env.local' });
+import { createClient  } from '@supabase/supabase-js';
+import chalk from 'chalk';
+import fs from 'node:fs';
+import path from 'node:path';
 
 const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL;
 const supabaseServiceKey = process.env.SUPABASE_SERVICE_ROLE_KEY;

@@ -5,7 +5,7 @@
  * Helps identify what type of Supabase tokens you have
  */
 
-const chalk = require('chalk');
+import chalk from 'chalk';
 
 console.log(chalk.bold.cyan('\n🔍 SUPABASE TOKEN TYPE IDENTIFIER\n'));
 console.log(chalk.yellow('='.repeat(60)));

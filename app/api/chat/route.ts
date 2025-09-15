@@ -290,14 +290,19 @@ export async function POST(request: NextRequest) {
     }
     
     // 3. Cached website content search (if enabled)
+    // CRITICAL: Detect greetings and skip product search for them
+    const greetingPattern = /^(hi|hey|hello|heya|hiya|howdy|greetings|good\s+(morning|afternoon|evening)|yo|sup|what'?s\s+up)[\s!?]*$/i;
+    const isGreeting = greetingPattern.test(message.trim());
+    
     console.log('[Chat] RAG search check:', {
       websiteScraping: config?.features?.websiteScraping?.enabled !== false,
       domain,
       domainId,
-      willSearch: !!(config?.features?.websiteScraping?.enabled !== false && domain && domainId)
+      isGreeting,
+      willSearch: !!(config?.features?.websiteScraping?.enabled !== false && domain && domainId && !isGreeting)
     });
     
-    if (config?.features?.websiteScraping?.enabled !== false && domain && domainId) {
+    if (config?.features?.websiteScraping?.enabled !== false && domain && domainId && !isGreeting) {
       const searchDomain = domain === 'localhost' || domain?.includes('127.0.0.1')
         ? 'thompsonseparts.co.uk' 
         : domain;
@@ -669,6 +674,10 @@ export async function POST(request: NextRequest) {
     // Build context for OpenAI with enhanced WooCommerce support
     let systemContext = '';
     
+    // Add specific context for angry/frustrated customers
+    const isAngryCustomer = /unacceptable|ridiculous|losing money|losing thousands|downtime|crane.*down|equipment.*down|costing me/i.test(message);
+    const mentionsFinancialImpact = /losing money|losing thousands|costing|financial|revenue|business impact/i.test(message);
+    
     // Use enhanced instructions if this is a customer query
     if (verificationResult && typeof verificationResult === 'object') {
       const result = verificationResult as any;
@@ -708,19 +717,40 @@ export async function POST(request: NextRequest) {
       console.log('[Chat] Using prompt version:', useSimplifiedPrompt ? 'SIMPLIFIED' : 'ORIGINAL');
       
       if (useSimplifiedPrompt) {
-        // SIMPLIFIED VERSION - 91% shorter, focuses on essentials
-        systemContext = `You are a concise customer service assistant. MAX 75 WORDS per response.
+        // SIMPLIFIED VERSION - More conversational and human
+        systemContext = `You are a warm, helpful customer service representative. Act like a real person, not a robot.
 
-RULES:
-- Write normal sentences, not bullet points
-- Only use bullets (•) when listing multiple products
-- Show products as [Name](url) links
-- Only link to our domain, no external sites
-- If unavailable: "Contact customer service"
-- Don't invent specs/prices/stock`;
+CONVERSATION STYLE:
+- Be empathetic and understanding, especially with frustrated customers
+- Start responses conversationally ("I understand how frustrating that must be...")
+- For complaints/issues: FIRST acknowledge feelings, THEN offer help
+- CRITICAL: If customer mentions losing money/downtime, acknowledge the business impact
+- Say things like "I understand this downtime is costing you" or "I realize the financial impact"
+- For greetings: Warm response, ask how you can help
+- Keep responses concise but natural (MAX 100 words)
+
+PRODUCT HANDLING:
+- Only show products when customer asks for them or clearly needs them
+- Use bullets (•) for product lists
+- Format: [Product Name](url)
+- If customer is upset, DON'T immediately show products
+
+HONESTY:
+- Never invent specifications, prices, or technical details
+- Say "I don't have that specific information" when unsure
+- Suggest contacting customer service for details you don't have`;
       } else {
-        // ORIGINAL VERSION - kept for A/B testing
-        systemContext = `You are a helpful customer service assistant.
+        // ORIGINAL VERSION - Updated to be more conversational
+        systemContext = `You are a warm, professional customer service representative. Be helpful and human.
+      
+      CONVERSATION PRINCIPLES:
+      - Act like a real person helping a customer, not a search engine
+      - Show empathy FIRST when customers are frustrated or having issues
+      - For complaints: "I understand how frustrating that must be..." BEFORE offering solutions
+      - For angry customers mentioning lost money/time: ALWAYS acknowledge the business impact
+      - Examples: "I completely understand the impact this is having on your business" or "I realize this downtime is costing you"
+      - For greetings: Warm welcome, then ask how you can help
+      - Build rapport - use conversational language like "I'd be happy to help" or "Let me check that for you"
       
       CRITICAL:
       - Never recommend or link to external shops, competitors, manufacturer websites, community blogs/forums, or third‑party documentation.
@@ -755,12 +785,12 @@ RULES:
       - Make links descriptive and natural in your responses
       - Pay attention to conversation history for context
       
-      Product Query Handling - CRITICAL:
-      - When customers ask about products (even vaguely), ALWAYS show available options first
-      - If customer says "any" or seems unsure, present ALL relevant options immediately
-      - NEVER ask "which type do you need?" before showing what's available
-      - Only ask for clarification AFTER listing products, and only if truly necessary
-      - Example: "Need a pump" → Show all pump types available, THEN optionally ask for model/part number
+      Product Query Handling:
+      - When customers SPECIFICALLY ask about products, show relevant options
+      - Balance being helpful with being conversational
+      - If customer seems frustrated or upset, acknowledge that FIRST before products
+      - For vague requests, it's OK to ask clarifying questions conversationally
+      - Example: "I'd be happy to help you find a pump. What type of equipment is it for?"
       
       Product Information Accuracy - MANDATORY:
       - NEVER make assumptions about product relationships or what's included
@@ -787,11 +817,11 @@ RULES:
       
     }
     
-    // Try to surface matching categories (WooCommerce) for any query
+    // Try to surface matching categories (WooCommerce) for any query - but NOT for greetings
     let matchedCategories: Array<{ name: string; url: string }> = [];
     try {
       const wooEnabled = config?.features?.woocommerce?.enabled !== false; // default true
-      if (wooEnabled && domain) {
+      if (wooEnabled && domain && !isGreeting) {
         const browseDomain = /localhost|127\.0\.0\.1/i.test(domain) ? 'thompsonseparts.co.uk' : domain.replace(/^https?:\/\//, '');
         const wc = await getDynamicWooCommerceClient(browseDomain);
         if (wc) {
@@ -860,7 +890,8 @@ RULES:
     }
     
     // Add website information if available - now handling MORE chunks efficiently
-    if (embeddingResults && embeddingResults.length > 0) {
+    // CRITICAL: Don't add product context for greetings
+    if (embeddingResults && embeddingResults.length > 0 && !isGreeting) {
       console.log('[Chat] Adding enhanced embedding results to context:', {
         count: embeddingResults.length,
         firstResultTitle: embeddingResults[0]?.title,
@@ -902,20 +933,20 @@ RULES:
         });
       }
       
-      systemContext += `\n\nCRITICAL INSTRUCTIONS - ENHANCED CONTEXT UTILIZATION:
+      systemContext += `\n\nCONTEXT UTILIZATION - BE CONVERSATIONAL:
       
-      WITH ${embeddingResults.length} CHUNKS OF CONTEXT, YOU CAN NOW:
-      1. Make intelligent connections between related products and information
-      2. Provide comprehensive answers using ALL available context
-      3. Cross-reference between different chunks to find complete information
-      4. Identify patterns and relationships across multiple sources
+      WITH ${embeddingResults.length} CHUNKS OF CONTEXT AVAILABLE:
+      1. Use this information to be helpful, but remain conversational
+      2. Don't dump all products at once - be selective based on what's most relevant
+      3. For frustrated customers, use context to understand their issue, not to push products
+      4. Synthesize information naturally into your response
       
-      MANDATORY RULES:
-      1. ALWAYS show relevant products/pages IMMEDIATELY when responding
-      2. Format each product as a COMPACT clickable link: [Product Name](url)
-      3. Include ALL relevant items (we've provided ${embeddingResults.length} chunks for a reason)
-      4. Use the FULL context to provide complete, accurate answers
-      5. When multiple chunks mention related information, synthesize them intelligently
+      BALANCED APPROACH:
+      1. If customer asks for products specifically, then show relevant options
+      2. If customer has a problem/complaint, focus on solving that first
+      3. Format products nicely when shown: [Product Name](url)
+      4. Keep responses natural - you're a person, not a product catalog
+      5. Use context to be informed, but prioritize the human connection
       
       PRODUCT INFORMATION ACCURACY:
       - NEVER make assumptions about what a product includes or doesn't include
@@ -959,6 +990,29 @@ RULES:
       console.log('[Chat] No embedding results to add to context');
     }
 
+    // Add specific instructions for greetings
+    if (isGreeting) {
+      systemContext += `\n\nIMPORTANT: The user just greeted you with "${message}". 
+      Respond with a warm, friendly greeting and ask how you can help them today.
+      DO NOT list any products or categories unless they specifically ask for them.
+      Keep it conversational and welcoming.`;
+    }
+    
+    // Add specific instructions for angry customers
+    if (isAngryCustomer) {
+      systemContext += `\n\n⚠️ CRITICAL - ANGRY CUSTOMER DETECTED:
+      The customer is extremely frustrated. You MUST:
+      1. Start with genuine empathy: "I completely understand how frustrating this must be"
+      2. ${mentionsFinancialImpact ? 'ACKNOWLEDGE THE FINANCIAL IMPACT: "I realize this downtime is costing you money" or "I understand the financial impact this is having on your business"' : 'Acknowledge their frustration sincerely'}
+      3. Take ownership: "Let me help you resolve this immediately"
+      4. Offer concrete next steps
+      
+      DO NOT:
+      - Ask for details before showing empathy
+      - Use generic apologies
+      - Deflect blame to shipping companies or suppliers`;
+    }
+    
     // Add relevant product categories to help the model include shop links
     if (matchedCategories.length > 0) {
       systemContext += `\n\nRelevant product categories (same‑domain links):\n${matchedCategories.map(c => `- ${c.name}: ${c.url}`).join('\n')}`;

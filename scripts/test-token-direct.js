@@ -5,7 +5,7 @@
  * Tests the personal access token directly against Supabase Management API
  */
 
-const https = require('https');
+import https from 'node:https';
 
 const token = process.env.SUPABASE_ACCESS_TOKEN;
 

@@ -1,8 +1,8 @@
 #!/usr/bin/env node
 
-const https = require('https');
-const fs = require('fs').promises;
-const path = require('path');
+import https from 'node:https';
+import { promises as fs } from 'node:fs';
+import path from 'node:path';
 
 const PROJECT_REF = 'birugqyuqhiahxvxeyqg';
 const ACCESS_TOKEN = 'sbp_3d1fa3086b18fbca507ee9b65042aa264395e1b8';

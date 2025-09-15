@@ -4,7 +4,7 @@
  * Test the scraper API endpoint for Thompson's Parts website
  */
 
-const fetch = require('node-fetch');
+import fetch from 'node-fetch';
 
 async function testScraperAPI() {
   const url = 'https://www.thompsonseparts.co.uk/';
@@ -104,7 +104,7 @@ async function testScraperAPI() {
 // Check if fetch is available
 if (typeof fetch === 'undefined') {
   console.log('Installing node-fetch...');
-  const { execSync } = require('child_process');
+  import { execSync  } from 'node:child_process';
   try {
     execSync('npm install node-fetch@2', { stdio: 'inherit' });
     console.log('node-fetch installed successfully\n');

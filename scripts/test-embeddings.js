@@ -7,7 +7,8 @@ async function testEmbeddingsSearch() {
   console.log('━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━');
   
   const apiUrl = 'http://localhost:3000/api/chat';
-  const sessionId = require('crypto').randomUUID();
+  const { randomUUID } = await import('node:crypto');
+  const sessionId = randomUUID();
   
   // Test with a domain that might have content
   const testCases = [
@@ -28,7 +29,7 @@ async function testEmbeddingsSearch() {
       name: 'Without domain (should skip embeddings)',
       payload: {
         message: 'Tell me about your products',
-        session_id: require('crypto').randomUUID(),
+        session_id: randomUUID(),
       }
     }
   ];

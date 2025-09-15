@@ -6,7 +6,7 @@
  * Used by Docker health checks to verify worker status
  */
 
-const { getRedisClient } = require('../lib/redis-unified');
+import { getRedisClient  } from '../lib/redis-unified';
 
 async function checkWorkerHealth() {
   const workerType = process.env.WORKER_TYPE || 'scraping';

@@ -1,7 +1,8 @@
 // Test WooCommerce connection using the official package
-require('dotenv').config({ path: '.env.local' });
+import dotenv from 'dotenv';
+dotenv.config({ path: '.env.local' });
 
-const WooCommerceRestApi = require("@woocommerce/woocommerce-rest-api").default;
+import WooCommerceRestApi from "@woocommerce/woocommerce-rest-api";
 
 console.log('=== Testing with WooCommerce Package ===\n');
 console.log('URL:', process.env.WOOCOMMERCE_URL);
