@@ -42,7 +42,7 @@ function getOpenAIClient(): OpenAI | null {
 
 // Request validation
 const ChatRequestSchema = z.object({
-  message: z.string().min(1).max(1000),
+  message: z.string().min(1).max(5000),
   conversation_id: z.string().uuid().optional(),
   session_id: z.string().min(1),
   domain: z.string().optional(),
@@ -155,10 +155,13 @@ export async function POST(request: NextRequest) {
     let domainId: string | null = null;
     let customerConfigId: string | null = null;
     if (domain) {
-      // For localhost/dev, use thompsonseparts.co.uk
-      const searchDomain = (domain === 'localhost' || domain?.includes('127.0.0.1'))
-        ? 'thompsonseparts.co.uk'
-        : domain.replace('www.', '');
+      // Map various domain formats to the canonical domain in database
+      let searchDomain = domain.replace('www.', '');
+      
+      // For localhost testing, use the production domain
+      if (domain === 'localhost' || domain?.includes('127.0.0.1')) {
+        searchDomain = 'thompsonseparts.co.uk';
+      }
       
       // First check domains table (for scraped content)
       const { data: domainData } = await adminSupabase
@@ -303,9 +306,11 @@ export async function POST(request: NextRequest) {
     });
     
     if (config?.features?.websiteScraping?.enabled !== false && domain && domainId && !isGreeting) {
-      const searchDomain = domain === 'localhost' || domain?.includes('127.0.0.1')
-        ? 'thompsonseparts.co.uk' 
-        : domain;
+      // Map domains consistently
+      let searchDomain = domain.replace('www.', '');
+      if (domain === 'localhost' || domain?.includes('127.0.0.1')) {
+        searchDomain = 'thompsonseparts.co.uk';
+      }
       
       // Generate cache key from message + domain
       const searchCacheKey = QueryCache.generateKey({
@@ -911,7 +916,10 @@ HONESTY:
         highRelevance.forEach((r: any, index: number) => {
           systemContext += `\n${index + 1}. ${r.title} [${(r.similarity * 100).toFixed(0)}% match]\n`;
           systemContext += `   URL: ${r.url}\n`;
-          systemContext += `   Content: ${r.content.substring(0, 500)}...\n`;
+          // For product pages, include MORE content to capture all specs
+          const contentLength = r.url.includes('/product/') ? 2000 : 500;
+          const truncatedContent = r.content.substring(0, contentLength);
+          systemContext += `   Content: ${truncatedContent}...\n`;
         });
       }
       
@@ -921,29 +929,41 @@ HONESTY:
         mediumRelevance.forEach((r: any, index: number) => {
           systemContext += `\n${highRelevance.length + index + 1}. ${r.title}\n`;
           systemContext += `   URL: ${r.url}\n`;
-          systemContext += `   Summary: ${r.content.substring(0, 300)}...\n`;
+          // For product pages, include MORE content to capture all specs
+          const contentLength = r.url.includes('/product/') ? 1500 : 300;
+          systemContext += `   Summary: ${r.content.substring(0, contentLength)}...\n`;
         });
       }
       
-      // Include lower relevance items briefly for comprehensive coverage
+      // Include lower relevance items - but give FULL content for product pages
       if (contextualRelevance.length > 0) {
         systemContext += `\n📚 RELATED INFORMATION (for completeness):\n`;
-        contextualRelevance.forEach((r: any) => {
-          systemContext += `• ${r.title}: ${r.content.substring(0, 150)}... (${r.url})\n`;
+        contextualRelevance.forEach((r: any, index: number) => {
+          // For product pages, include FULL content even if similarity is lower
+          if (r.url.includes('/product/')) {
+            systemContext += `\n${index + 1}. ${r.title} [${(r.similarity * 100).toFixed(0)}% match]\n`;
+            systemContext += `   URL: ${r.url}\n`;
+            const truncatedContent = r.content.substring(0, 2000); // Same as high relevance
+            systemContext += `   Content: ${truncatedContent}...\n`;
+          } else {
+            // Non-product pages can be brief
+            systemContext += `• ${r.title}: ${r.content.substring(0, 150)}... (${r.url})\n`;
+          }
         });
       }
       
-      systemContext += `\n\nCONTEXT UTILIZATION - BE CONVERSATIONAL:
+      systemContext += `\n\nIMPORTANT INSTRUCTIONS FOR USING WEBSITE CONTENT:
       
       WITH ${embeddingResults.length} CHUNKS OF CONTEXT AVAILABLE:
-      1. Use this information to be helpful, but remain conversational
-      2. Don't dump all products at once - be selective based on what's most relevant
-      3. For frustrated customers, use context to understand their issue, not to push products
-      4. Synthesize information naturally into your response
+      1. ALL sections above (HIGHLY RELEVANT, MODERATELY RELEVANT, and RELATED INFORMATION) contain real data from our website
+      2. For product inquiries, extract and provide ALL specifications, pricing, and details from the Content sections
+      3. Even items marked as "RELATED INFORMATION" contain valid product data - USE IT when answering about those products
+      4. When a customer asks about a specific product (by name/SKU), check ALL sections for that product's information
       
-      BALANCED APPROACH:
-      1. If customer asks for products specifically, then show relevant options
-      2. If customer has a problem/complaint, focus on solving that first
+      PRODUCT INFORMATION EXTRACTION:
+      1. Look for SKU, prices (£), specifications (cm3/rev, bar, ISO, etc.), and descriptions in the Content
+      2. Present the information you find - don't say "I don't have that information" if it's in the content above
+      3. The content may be formatted as raw text - extract the key details and present them clearly
       3. Format products nicely when shown: [Product Name](url)
       4. Keep responses natural - you're a person, not a product catalog
       5. Use context to be informed, but prioritize the human connection
@@ -1046,7 +1066,7 @@ HONESTY:
       currentMessage: message,
       hasCategoryContext: matchedCategories.length > 0,
       categories: matchedCategories.map(c => c.name),
-      hasEmbeddingContext: systemContext.includes('Relevant content from our website'),
+      hasEmbeddingContext: systemContext.includes('COMPREHENSIVE CONTEXT') || systemContext.includes('Relevant content from our website'),
       lastAssistantMessage: historyData.filter((m: any) => m.role === 'assistant').slice(-1)[0]?.content?.substring(0, 100)
     });
     

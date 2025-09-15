@@ -63,9 +63,9 @@ export async function searchWithEnhancedContext(
     // First, generate embedding for the query
     const queryEmbedding = await generateQueryEmbedding(query);
     
-    // Get domain_id for filtering
+    // Get domain_id for filtering from domains table
     const { data: domainData } = await supabase
-      .from('customer_configs')
+      .from('domains')
       .select('id')
       .eq('domain', domain.replace('www.', ''))
       .single();
@@ -80,7 +80,7 @@ export async function searchWithEnhancedContext(
       };
     }
 
-    // Retrieve MORE chunks than traditional approach
+    // Use the correct function name match_page_embeddings_extended
     const { data: embeddings, error } = await supabase.rpc(
       'match_page_embeddings_extended',
       {
@@ -93,20 +93,12 @@ export async function searchWithEnhancedContext(
 
     if (error) {
       console.error('[Enhanced Embeddings] Search error:', error);
-      // Fall back to standard function if extended doesn't exist
-      const { data: fallbackData } = await supabase.rpc(
-        'match_page_embeddings',
-        {
-          query_embedding: queryEmbedding,
-          p_domain_id: domainData.id,
-          match_threshold: similarityThreshold,
-          match_count: maxChunks
-        }
-      );
-      
-      if (fallbackData) {
-        return processChunks(fallbackData, minChunks, prioritizeFirst, groupByPage);
-      }
+      return {
+        chunks: [],
+        groupedContext: new Map(),
+        totalRetrieved: 0,
+        averageSimilarity: 0
+      };
     }
 
     if (!embeddings || embeddings.length === 0) {
@@ -324,13 +316,110 @@ export async function searchSimilarContentEnhanced(
     groupByPage: true
   });
   
-  // Return in the expected format
-  return result.chunks.map(chunk => ({
+  // Convert to the expected format
+  const mapped = result.chunks.map(chunk => ({
     content: chunk.content || '',
     url: chunk.url || '',
     title: chunk.title || '',
     similarity: chunk.similarity || 0
   }));
+  
+  // ENHANCEMENT: For product pages, retrieve ALL chunks and combine them intelligently
+  const productUrls = mapped
+    .filter(r => r.url.includes('/product/'))
+    .map(r => r.url);
+  
+  if (productUrls.length > 0) {
+    console.log(`[Enhanced Embeddings] Found ${productUrls.length} product URLs, fetching ALL chunks for complete product info...`);
+    
+    // Create Supabase client for additional queries
+    const { createClient } = await import('@supabase/supabase-js');
+    const supabase = createClient(
+      process.env.NEXT_PUBLIC_SUPABASE_URL!,
+      process.env.SUPABASE_SERVICE_ROLE_KEY!
+    );
+    
+    // For each product URL, get ALL its chunks
+    for (const productUrl of productUrls) {
+      try {
+        // First, get the page_id for this URL
+        const { data: pageData } = await supabase
+          .from('scraped_pages')
+          .select('id')
+          .eq('url', productUrl)
+          .single();
+        
+        if (pageData?.id) {
+          // Get ALL chunks for this page
+          const { data: allChunks } = await supabase
+            .from('page_embeddings')
+            .select('chunk_text, metadata')
+            .eq('page_id', pageData.id);
+          
+          if (allChunks && allChunks.length > 0) {
+            console.log(`[Enhanced Embeddings] Found ${allChunks.length} chunks for ${productUrl}`);
+            
+            // Intelligently combine chunks - prioritize chunks with product details
+            let combinedContent = '';
+            let productDescChunk = '';
+            let specsChunk = '';
+            let priceChunk = '';
+            
+            // Categorize chunks by content type
+            allChunks.forEach((chunk) => {
+              const text = chunk.chunk_text;
+              
+              // Check what type of content this chunk contains
+              if (text.includes('SKU:') && text.includes('Product Description')) {
+                // This chunk has the complete product info
+                productDescChunk = text + '\n';
+                console.log(`[Enhanced Embeddings] Found COMPLETE product chunk with SKU and description`);
+              } else if (text.includes('Product Description') || text.includes('SKU:') || text.includes('EBA')) {
+                productDescChunk += text + '\n';
+              } else if (text.includes('cm3/rev') || text.includes('bar') || text.includes('ISO')) {
+                specsChunk += text + '\n';
+              } else if (text.includes('£') && (text.includes('VAT') || text.includes('Inc') || text.includes('Excl'))) {
+                priceChunk += text + '\n';
+              }
+            });
+            
+            // Combine in order of importance
+            if (productDescChunk) combinedContent += productDescChunk;
+            if (specsChunk && !productDescChunk.includes(specsChunk)) {
+              combinedContent += '\n' + specsChunk;
+            }
+            if (priceChunk && !combinedContent.includes(priceChunk)) {
+              combinedContent += '\n' + priceChunk;
+            }
+            
+            // Find and update the existing result with combined content
+            const existingIndex = mapped.findIndex(r => r.url === productUrl);
+            if (existingIndex >= 0) {
+              mapped[existingIndex].content = combinedContent;
+              console.log(`[Enhanced Embeddings] Enhanced product content for ${productUrl}`);
+              console.log(`[Enhanced Embeddings] Combined content length: ${combinedContent.length} chars`);
+              
+              // Log verification
+              if (combinedContent.includes('EBA13041B')) {
+                console.log(`[Enhanced Embeddings] ✓ SKU found in combined chunks`);
+              }
+              if (combinedContent.includes('130 cm3/rev')) {
+                console.log(`[Enhanced Embeddings] ✓ Flow rate spec found in combined chunks`);
+              }
+              if (combinedContent.includes('420 bar')) {
+                console.log(`[Enhanced Embeddings] ✓ Pressure spec found in combined chunks`);
+              }
+            }
+          }
+        }
+      } catch (error) {
+        console.error(`[Enhanced Embeddings] Error enhancing product ${productUrl}:`, error);
+        // Continue with other products if one fails
+      }
+    }
+  }
+  
+  return mapped;
 }
 
 /**

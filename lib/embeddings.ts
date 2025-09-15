@@ -496,8 +496,12 @@ export async function searchSimilarContent(
             .from('scraped_pages')
             .select('url, title, content')
             .limit(limit);
-          // Filter by domain if provided
-          q = q.eq('domain', domain);
+          // Filter by domain_id if available, otherwise use URL pattern
+          if (domainId) {
+            q = q.eq('domain_id', domainId);
+          } else {
+            q = q.like('url', `%${domain.replace('www.', '')}%`);
+          }
           if (orParts.length > 0) {
             // Supabase's .or accepts a string expression
             q = (q as any).or(orParts.join(','));
@@ -558,8 +562,14 @@ export async function searchSimilarContent(
       let q = supabase
         .from('scraped_pages')
         .select('url, title, content')
-        .like('url', `%${domain.replace('www.', '')}%`)
         .limit(limit);
+      
+      // Filter by domain_id if available, otherwise use URL pattern
+      if (domainId) {
+        q = q.eq('domain_id', domainId);
+      } else {
+        q = q.like('url', `%${domain.replace('www.', '')}%`);
+      }
 
       // Apply keyword filter
       // Supabase .or signature accepts a string expression
@@ -588,10 +598,14 @@ export async function searchSimilarContent(
     // First, look up the domain_id for this domain
     let domainId: string | null = null;
     if (domain) {
+      // Map domains to canonical form in database
+      let searchDomain = domain.replace('www.', '');
+      
+      
       const { data: domainData, error: domainError } = await supabase
         .from('domains')
         .select('id')
-        .eq('domain', domain.replace('www.', ''))
+        .eq('domain', searchDomain)
         .single();
 
       if (!domainError && domainData) {
@@ -749,6 +763,121 @@ export async function searchSimilarContent(
       title: result.title || result.metadata?.title || 'Untitled',
       similarity: result.similarity || 0,
     }));
+
+    // ENHANCEMENT: For product pages, retrieve ALL chunks and combine them intelligently
+    const productUrls = mapped
+      .filter(r => r.url.includes('/product/'))
+      .map(r => r.url);
+    
+    if (productUrls.length > 0) {
+      console.log(`[RAG] Found ${productUrls.length} product URLs, fetching ALL chunks for complete product info...`);
+      console.log(`[RAG] Product URLs to enhance:`, productUrls.slice(0, 3));
+      
+      // For each product URL, get ALL its chunks
+      for (const productUrl of productUrls) {
+        try {
+          console.log(`[RAG] Processing product URL: ${productUrl}`);
+          // First, get the page_id for this URL
+          const { data: pageData, error: pageError } = await supabase
+            .from('scraped_pages')
+            .select('id')
+            .eq('url', productUrl)
+            .single();
+          
+          if (pageError) {
+            console.log(`[RAG] Error fetching page_id for ${productUrl}:`, pageError);
+            continue;
+          }
+          
+          if (pageData?.id) {
+            // Get ALL chunks for this page
+            const { data: allChunks } = await supabase
+              .from('page_embeddings')
+              .select('chunk_text, metadata')
+              .eq('page_id', pageData.id);
+            
+            if (allChunks && allChunks.length > 0) {
+              console.log(`[RAG] Found ${allChunks.length} chunks for ${productUrl}`);
+              
+              // Intelligently combine chunks - prioritize chunks with product details
+              let combinedContent = '';
+              let productDescChunk = '';
+              let specsChunk = '';
+              let priceChunk = '';
+              let navigationChunks = '';
+              
+              // Categorize chunks by content type
+              allChunks.forEach((chunk, idx) => {
+                const text = chunk.chunk_text;
+                
+                // Log the first few chunks to see what we're getting
+                if (idx < 3) {
+                  console.log(`[RAG] Chunk ${idx} preview (50 chars):`, text.substring(0, 50));
+                }
+                
+                // Check what type of content this chunk contains
+                // Look for complete product information chunks first
+                if (text.includes('SKU:') && text.includes('Product Description')) {
+                  // This chunk has the complete product info
+                  productDescChunk = text + '\n';
+                  console.log(`[RAG] Found COMPLETE product chunk ${idx} with SKU and description`);
+                } else if (text.includes('Product Description') || text.includes('SKU:') || text.includes('EBA')) {
+                  productDescChunk += text + '\n';
+                  console.log(`[RAG] Found product description chunk ${idx}`);
+                } else if (text.includes('cm3/rev') || text.includes('bar') || text.includes('ISO')) {
+                  specsChunk += text + '\n';
+                  console.log(`[RAG] Found specs chunk ${idx}`);
+                } else if (text.includes('£') && (text.includes('VAT') || text.includes('Inc') || text.includes('Excl'))) {
+                  priceChunk += text + '\n';
+                  console.log(`[RAG] Found price chunk ${idx}`);
+                } else {
+                  // Navigation or other content - keep but prioritize less
+                  navigationChunks += text.substring(0, 200) + '...\n';
+                }
+              });
+              
+              // Combine in order of importance
+              if (productDescChunk) combinedContent += productDescChunk;
+              if (specsChunk && !productDescChunk.includes(specsChunk)) {
+                combinedContent += '\n' + specsChunk;
+              }
+              if (priceChunk && !combinedContent.includes(priceChunk)) {
+                combinedContent += '\n' + priceChunk;
+              }
+              
+              // Only add navigation if we have space and it's not redundant
+              if (combinedContent.length < 2000 && navigationChunks) {
+                combinedContent += '\n[Additional context: ' + navigationChunks.substring(0, 300) + ']';
+              }
+              
+              // Find and update the existing result with combined content
+              const existingIndex = mapped.findIndex(r => r.url === productUrl);
+              if (existingIndex >= 0) {
+                mapped[existingIndex].content = combinedContent;
+                console.log(`[RAG] Enhanced product content for ${productUrl} with ${allChunks.length} combined chunks`);
+                console.log(`[RAG] Combined content length: ${combinedContent.length} chars`);
+                
+                // Log a sample to verify we got the right content
+                if (combinedContent.includes('SKU:')) {
+                  console.log(`[RAG] ✓ SKU found in combined chunks`);
+                }
+                if (combinedContent.includes('130 cm3/rev')) {
+                  console.log(`[RAG] ✓ Flow rate spec found in combined chunks`);
+                }
+                if (combinedContent.includes('420 bar')) {
+                  console.log(`[RAG] ✓ Pressure spec found in combined chunks`);
+                }
+                if (combinedContent.includes('£1,100')) {
+                  console.log(`[RAG] ✓ Price found in combined chunks`);
+                }
+              }
+            }
+          }
+        } catch (error) {
+          console.warn(`[RAG] Failed to fetch all chunks for ${productUrl}:`, error);
+        }
+      }
+    }
 
     // If RPC returned nothing, try a lightweight fallback
     if (mapped.length === 0) {
