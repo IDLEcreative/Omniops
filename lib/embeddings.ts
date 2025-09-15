@@ -303,7 +303,8 @@ export async function generateEmbeddings(params: {
     const embeddingRecords = chunks.map((chunk, index) => ({
       page_id: params.contentId,  // Changed from content_id to page_id
       chunk_text: chunk,
-      embedding: embeddings[index],
+      // Format embedding for pgvector: convert array to string format
+      embedding: `[${embeddings[index].join(',')}]`,
       metadata: {
         chunk_index: index,
         total_chunks: chunks.length,
