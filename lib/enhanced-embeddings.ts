@@ -67,7 +67,7 @@ export async function searchWithEnhancedContext(
     const { data: domainData } = await supabase
       .from('domains')
       .select('id')
-      .eq('domain', domain.replace('www.', ''))
+      .eq('domain', domain?.replace('www.', '') || '')
       .single();
     
     if (!domainData) {
@@ -368,7 +368,7 @@ export async function searchSimilarContentEnhanced(
   const { data: domainData } = await supabase
     .from('domains')
     .select('id')
-    .eq('domain', domain.replace('www.', ''))
+    .eq('domain', domain?.replace('www.', '') || '')
     .single();
   
   if (domainData?.id) {

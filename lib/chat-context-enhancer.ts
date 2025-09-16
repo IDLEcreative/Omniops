@@ -136,6 +136,173 @@ export async function getEnhancedChatContext(
       priceLabel: 'price'
     };
     
+    // First check scraped_pages metadata for product information
+    const { data: productPages, error: productPagesError } = await supabase
+      .from('scraped_pages')
+      .select('url, title, content, metadata')
+      .eq('domain_id', domainId)
+      .or(`title.ilike.%${searchQuery}%,content.ilike.%${searchQuery}%`)
+      .limit(10);
+    
+    if (!productPagesError && productPages && productPages.length > 0) {
+      console.log(`[Context Enhancer] Checking ${productPages.length} scraped pages for product data...`);
+      
+      for (const page of productPages) {
+        // Check if metadata contains ecommerce data with products
+        if (page.metadata?.ecommerceData?.products && Array.isArray(page.metadata.ecommerceData.products)) {
+          for (const product of page.metadata.ecommerceData.products) {
+            // Check if product matches search query
+            const productName = product.name || '';
+            const productSku = product.sku || '';
+            const matchesQuery = productName.toLowerCase().includes(searchQuery.toLowerCase()) ||
+                                productSku.toLowerCase().includes(searchQuery.toLowerCase());
+            
+            if (matchesQuery) {
+              // Format product as content chunk with price
+              let productContent = `Product: ${product.name}`;
+              
+              if (product.price) {
+                if (typeof product.price === 'object' && product.price.formatted) {
+                  productContent += `\nPrice: ${product.price.formatted}`;
+                } else if (typeof product.price === 'object' && product.price.value) {
+                  productContent += `\nPrice: £${product.price.value}`;
+                } else if (typeof product.price === 'string') {
+                  productContent += `\nPrice: ${product.price}`;
+                } else if (typeof product.price === 'number') {
+                  productContent += `\nPrice: £${product.price}`;
+                }
+              }
+              
+              if (product.sku) {
+                productContent += `\nSKU: ${product.sku}`;
+              }
+              
+              if (product.availability?.inStock !== undefined) {
+                productContent += `\nAvailability: ${product.availability.inStock ? 'In Stock' : 'Out of Stock'}`;
+              }
+              
+              if (product.description) {
+                productContent += `\n${product.description}`;
+              }
+              
+              allChunks.push({
+                content: productContent,
+                url: page.url || '',
+                title: product.name || page.title || '',
+                similarity: 0.95, // High score for direct product matches
+                source: 'product' as const,
+                metadata: product
+              });
+              
+              console.log(`[Context Enhancer] Found product with price: ${product.name} - ${product.price?.formatted || product.price}`);
+            }
+          }
+        }
+      }
+    }
+    
+    // Check structured_extractions table for product data
+    const { data: structuredProducts, error: structuredError } = await supabase
+      .from('structured_extractions')
+      .select('url, extracted_data, confidence_score')
+      .eq('domain_id', domainId)
+      .eq('extract_type', 'product')
+      .limit(20);
+    
+    if (!structuredError && structuredProducts && structuredProducts.length > 0) {
+      console.log(`[Context Enhancer] Checking ${structuredProducts.length} structured product extractions...`);
+      
+      for (const extraction of structuredProducts) {
+        const product = extraction.extracted_data as any;
+        if (product) {
+          // Check if product matches search query
+          const productName = product.name || '';
+          const productSku = product.sku || '';
+          const matchesQuery = productName.toLowerCase().includes(searchQuery.toLowerCase()) ||
+                              productSku.toLowerCase().includes(searchQuery.toLowerCase());
+          
+          if (matchesQuery) {
+            // Format product as content chunk
+            let productContent = `Product: ${product.name}`;
+            
+            if (product.price) {
+              if (product.price.formatted) {
+                productContent += `\nPrice: ${product.price.formatted}`;
+              } else if (product.price.value) {
+                productContent += `\nPrice: £${product.price.value}`;
+              }
+            }
+            
+            if (product.sku) {
+              productContent += `\nSKU: ${product.sku}`;
+            }
+            
+            allChunks.push({
+              content: productContent,
+              url: extraction.url || '',
+              title: product.name || '',
+              similarity: extraction.confidence_score || 0.9,
+              source: 'product' as const,
+              metadata: product
+            });
+            
+            console.log(`[Context Enhancer] Found structured product: ${product.name} - ${product.price?.formatted}`);
+          }
+        }
+      }
+    }
+    
+    // Check website_content table for product data (alternative content storage)
+    const { data: websiteContent, error: websiteContentError } = await supabase
+      .from('website_content')
+      .select('url, title, content, metadata')
+      .eq('domain_id', domainId)
+      .or(`url.ilike.%/product/%,title.ilike.%${searchQuery}%,content.ilike.%${searchQuery}%`)
+      .limit(10);
+    
+    if (!websiteContentError && websiteContent && websiteContent.length > 0) {
+      console.log(`[Context Enhancer] Checking ${websiteContent.length} website_content entries...`);
+      
+      for (const page of websiteContent) {
+        // Check if metadata contains product data (similar to scraped_pages)
+        if (page.metadata?.ecommerceData?.products) {
+          for (const product of page.metadata.ecommerceData.products) {
+            const matchesQuery = product.name?.toLowerCase().includes(searchQuery.toLowerCase()) ||
+                                product.sku?.toLowerCase().includes(searchQuery.toLowerCase());
+            
+            if (matchesQuery) {
+              let productContent = `Product: ${product.name}`;
+              
+              if (product.price) {
+                if (typeof product.price === 'object' && product.price.formatted) {
+                  productContent += `\nPrice: ${product.price.formatted}`;
+                } else if (typeof product.price === 'object' && product.price.value) {
+                  productContent += `\nPrice: £${product.price.value}`;
+                } else {
+                  productContent += `\nPrice: ${product.price}`;
+                }
+              }
+              
+              if (product.sku) {
+                productContent += `\nSKU: ${product.sku}`;
+              }
+              
+              allChunks.push({
+                content: productContent,
+                url: page.url || '',
+                title: product.name || page.title || '',
+                similarity: 0.9,
+                source: 'product' as const,
+                metadata: product
+              });
+              
+              console.log(`[Context Enhancer] Found product in website_content: ${product.name}`);
+            }
+          }
+        }
+      }
+    }
+    
     // Check entity catalog for direct matches (works for any business type)
     const { data: entities, error: entityError } = await supabase
       .from('entity_catalog')

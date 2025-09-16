@@ -48,6 +48,12 @@ export class CustomerServiceAgent implements ECommerceAgent {
     - Customers can't choose from options they don't know exist - show them what's available
     - Only ask for clarification AFTER showing products, if truly necessary
     
+    Price Information Handling:
+    - If price data is available in context, display it prominently
+    - If no price shown, say "Please check the product page for current pricing"
+    - For price range questions without specific prices, say "Prices vary by item - please check individual products"
+    - NEVER make up or estimate prices
+    
     Context-Aware Response Strategy:
     - When provided with product context, ALWAYS present specific products found
     - Look for confidence indicators in the context (HIGH/MEDIUM/LOW confidence)

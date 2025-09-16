@@ -18,6 +18,7 @@ import { selectProviderAgent } from '@/lib/agents/router';
 import { getDynamicWooCommerceClient, searchProductsDynamic } from '@/lib/woocommerce-dynamic';
 import { sanitizeOutboundLinks } from '@/lib/link-sanitizer';
 import { ResponsePostProcessor } from '@/lib/response-post-processor';
+import { SimpleResponseProcessor } from '@/lib/response-post-processor-simple';
 
 // Lazy load OpenAI client to avoid build-time errors
 let openai: OpenAI | null = null;
@@ -52,6 +53,13 @@ const ChatRequestSchema = z.object({
     features: z.object({
       woocommerce: z.object({ enabled: z.boolean() }).optional(),
       websiteScraping: z.object({ enabled: z.boolean() }).optional(),
+    }).optional(),
+    ai: z.object({
+      trustAIPresentation: z.boolean().optional(),
+      postProcessing: z.object({
+        enabled: z.boolean().optional(),
+        forceProducts: z.boolean().optional(),
+      }).optional(),
     }).optional(),
   }).optional(),
 });
@@ -572,12 +580,46 @@ export async function POST(request: NextRequest) {
           const wcBrandProducts = await searchProductsDynamic(browseDomain, 'teng', 6);
           if (Array.isArray(wcBrandProducts) && wcBrandProducts.length > 0) {
             // Map WooCommerce products into the same structure used below
-            const mapped = wcBrandProducts.map((p: any) => ({
-              title: p.name || 'Product',
-              url: p.permalink || '',
-              content: `${p.name || ''}\nPrice: ${p.price || p.regular_price || ''}\n${String(p.short_description || p.description || '').replace(/<[^>]+>/g, ' ').trim()}`.trim(),
-              similarity: 0.9
-            }));
+            const mapped = wcBrandProducts.map((p: any) => {
+              // Build comprehensive product content with price prominently displayed
+              let productContent = `${p.name || 'Product'}`;
+              
+              // Add price information prominently
+              if (p.price || p.regular_price || p.sale_price) {
+                const displayPrice = p.price || p.sale_price || p.regular_price;
+                productContent += `\nPrice: £${displayPrice}`;
+                
+                // Show sale information if applicable
+                if (p.sale_price && p.regular_price && p.sale_price !== p.regular_price) {
+                  productContent += ` (Was £${p.regular_price})`;
+                }
+              } else {
+                productContent += `\nPrice: Contact for pricing`;
+              }
+              
+              // Add SKU if available
+              if (p.sku) {
+                productContent += `\nSKU: ${p.sku}`;
+              }
+              
+              // Add stock status
+              if (p.in_stock !== undefined) {
+                productContent += `\nAvailability: ${p.in_stock ? 'In Stock' : 'Out of Stock'}`;
+              }
+              
+              // Add description
+              const description = String(p.short_description || p.description || '').replace(/<[^>]+>/g, ' ').trim();
+              if (description) {
+                productContent += `\n${description}`;
+              }
+              
+              return {
+                title: p.name || 'Product',
+                url: p.permalink || '',
+                content: productContent,
+                similarity: 0.9
+              };
+            });
             // Replace embeddingResults so downstream logic shows these explicitly
             // eslint-disable-next-line @typescript-eslint/ban-ts-comment
             // @ts-ignore - treat as any for downstream usage
@@ -920,158 +962,54 @@ HONESTY:
         avgSimilarity: embeddingResults.reduce((sum: number, r: any) => sum + (r.similarity || 0), 0) / embeddingResults.length
       });
       
-      // Group chunks by similarity tier for better AI processing (adjusted thresholds)
-      const highRelevance = embeddingResults.filter((r: any) => r.similarity > 0.75);
-      const mediumRelevance = embeddingResults.filter((r: any) => r.similarity > 0.55 && r.similarity <= 0.75);
-      const contextualRelevance = embeddingResults.filter((r: any) => r.similarity <= 0.55);
+      // Check if any results lack price information
+      const resultsWithoutPrices = embeddingResults.filter((r: any) => 
+        r.url?.includes('/product/') && 
+        !r.content?.toLowerCase().includes('price:') &&
+        !r.content?.includes('£')
+      );
       
-      systemContext += `\n\n⚠️ COMPREHENSIVE CONTEXT: Found ${embeddingResults.length} relevant sources (${highRelevance.length} highly relevant, ${mediumRelevance.length} moderately relevant):\n`;
-      
-      // Present high relevance items prominently
-      if (highRelevance.length > 0) {
-        systemContext += `\n🎯 HIGHLY RELEVANT (Must prioritize these):\n`;
-        highRelevance.forEach((r: any, index: number) => {
-          systemContext += `\n${index + 1}. ${r.title} [${(r.similarity * 100).toFixed(0)}% match]\n`;
-          systemContext += `   URL: ${r.url}\n`;
-          
-          // Content-type-aware truncation based on URL patterns
-          let contentLength = 1000; // Default
-          const urlLower = r.url.toLowerCase();
-          const titleLower = (r.title || '').toLowerCase();
-          
-          if (urlLower.includes('/product/') || titleLower.includes('product')) {
-            contentLength = 2000; // Products need full specs
-          } else if (urlLower.includes('/support/') || urlLower.includes('/help/') || 
-                     titleLower.includes('support') || titleLower.includes('help')) {
-            contentLength = 1200; // Support/Help articles
-          } else if (urlLower.includes('/policy/') || urlLower.includes('/terms/') || 
-                     urlLower.includes('/privacy/') || titleLower.includes('policy')) {
-            contentLength = 800; // Policy pages
-          } else if (urlLower.includes('/blog/') || urlLower.includes('/news/') || 
-                     titleLower.includes('blog') || titleLower.includes('article')) {
-            contentLength = 1000; // Blog posts
-          } else if (urlLower.includes('/faq/') || titleLower.includes('faq') || 
-                     titleLower.includes('frequently asked')) {
-            contentLength = 10000; // FAQ - no truncation (full content)
-          } else if (urlLower.includes('/contact/') || titleLower.includes('contact')) {
-            contentLength = 10000; // Contact info - no truncation
+      // If we have product pages without prices, try to get prices from WooCommerce
+      if (resultsWithoutPrices.length > 0 && domain) {
+        console.log(`[Chat] Found ${resultsWithoutPrices.length} products without prices, checking WooCommerce...`);
+        
+        const browseDomain = /localhost|127\.0\.0\.1/i.test(domain)
+          ? 'thompsonseparts.co.uk'
+          : domain.replace(/^https?:\/\//, '').replace('www.', '');
+        
+        try {
+          // Extract product names from URLs or titles
+          for (const result of resultsWithoutPrices) {
+            const productName = result.title?.replace(' - Thompsons E Parts', '').trim();
+            if (productName) {
+              // Try to get price from WooCommerce
+              const wcProducts = await searchProductsDynamic(browseDomain, productName, 1);
+              if (wcProducts && wcProducts.length > 0) {
+                const product = wcProducts[0];
+                if (product?.price) {
+                  // Enhance the content with price information
+                  result.content = `${result.content}\nPrice: £${product.price}`;
+                  if (product.sku) {
+                    result.content += `\nSKU: ${product.sku}`;
+                  }
+                  // Check for in_stock property (may not exist on type)
+                  if ('in_stock' in product && product.in_stock !== undefined) {
+                    result.content += `\nAvailability: ${product.in_stock ? 'In Stock' : 'Out of Stock'}`;
+                  }
+                  console.log(`[Chat] Added price £${product.price} to ${productName}`);
+                }
+              }
+            }
           }
-          
-          const truncatedContent = contentLength >= 10000 ? r.content : r.content.substring(0, contentLength);
-          systemContext += `   Content: ${truncatedContent}${contentLength < r.content.length ? '...' : ''}\n`;
-        });
+        } catch (priceError) {
+          console.warn('[Chat] Failed to fetch prices from WooCommerce:', priceError);
+        }
       }
       
-      // Add medium relevance for additional context
-      if (mediumRelevance.length > 0) {
-        systemContext += `\n📋 ADDITIONAL CONTEXT:\n`;
-        mediumRelevance.forEach((r: any, index: number) => {
-          systemContext += `\n${highRelevance.length + index + 1}. ${r.title}\n`;
-          systemContext += `   URL: ${r.url}\n`;
-          
-          // Content-type-aware truncation for medium relevance items
-          let contentLength = 600; // Default for medium relevance
-          const urlLower = r.url.toLowerCase();
-          const titleLower = (r.title || '').toLowerCase();
-          
-          if (urlLower.includes('/product/') || titleLower.includes('product')) {
-            contentLength = 1500; // Products still get good coverage
-          } else if (urlLower.includes('/support/') || urlLower.includes('/help/')) {
-            contentLength = 800; // Support articles
-          } else if (urlLower.includes('/faq/') || titleLower.includes('faq')) {
-            contentLength = 2000; // FAQs get more space
-          } else if (urlLower.includes('/contact/') || titleLower.includes('contact')) {
-            contentLength = 2000; // Contact info gets full space
-          }
-          
-          const truncatedContent = r.content.substring(0, contentLength);
-          systemContext += `   Summary: ${truncatedContent}${contentLength < r.content.length ? '...' : ''}\n`;
-        });
-      }
-      
-      // Include lower relevance items - but give FULL content for product pages
-      if (contextualRelevance.length > 0) {
-        systemContext += `\n📚 RELATED INFORMATION (for completeness):\n`;
-        contextualRelevance.forEach((r: any, index: number) => {
-          // For product pages, include FULL content even if similarity is lower
-          if (r.url.includes('/product/')) {
-            systemContext += `\n${index + 1}. ${r.title} [${(r.similarity * 100).toFixed(0)}% match]\n`;
-            systemContext += `   URL: ${r.url}\n`;
-            const truncatedContent = r.content.substring(0, 2000); // Same as high relevance
-            systemContext += `   Content: ${truncatedContent}...\n`;
-          } else {
-            // Non-product pages can be brief
-            systemContext += `• ${r.title}: ${r.content.substring(0, 150)}... (${r.url})\n`;
-          }
-        });
-      }
-      
-      systemContext += `\n\nIMPORTANT INSTRUCTIONS FOR USING WEBSITE CONTENT:
-      
-      CRITICAL FOR VAGUE QUERIES LIKE "its for agriculture":
-      - If ANY products are listed above that match the category, SHOW THEM
-      - Don't just link to categories if you have actual products in the context
-      - Present the TOP 3-5 products from above, THEN mention the category
-      - MANDATORY EXAMPLE RESPONSE for "its for agriculture":
-        "Based on your agricultural needs, here are some suitable tipper options:
-         • [Agri Flip front to rear sheeting system](url) - Perfect for agricultural dumper trailers
-         • [Any other agricultural product from context](url)
-         You can also browse our full [Agriculture category](url) for more options."
-      - Use this pattern for ALL vague category queries
-      
-      WITH ${embeddingResults.length} CHUNKS OF CONTEXT AVAILABLE:
-      1. ALL sections above (HIGHLY RELEVANT, MODERATELY RELEVANT, and RELATED INFORMATION) contain real data from our website
-      2. For product inquiries, extract and provide ALL specifications, pricing, and details from the Content sections
-      3. Even items marked as "RELATED INFORMATION" contain valid product data - USE IT when answering about those products
-      4. When a customer asks about a specific product (by name/SKU), check ALL sections for that product's information
-      
-      PRODUCT INFORMATION EXTRACTION:
-      1. Look for SKU, prices (£), specifications (cm3/rev, bar, ISO, etc.), and descriptions in the Content
-      2. Present the information you find - don't say "I don't have that information" if it's in the content above
-      3. The content may be formatted as raw text - extract the key details and present them clearly
-      3. Format products nicely when shown: [Product Name](url)
-      4. Keep responses natural - you're a person, not a product catalog
-      5. Use context to be informed, but prioritize the human connection
-      
-      PRODUCT INFORMATION ACCURACY:
-      - For SPECIFICATIONS: Never make assumptions about what a product includes
-      - For PRODUCT SELECTION: ALWAYS present products found in context, even for vague queries
-      - Balance between accuracy and helpfulness:
-        * For vague queries ("its for agriculture") → Show ALL agricultural products found
-        * For specific specs questions → Only state what's in the description
-        * For browsing queries → Present options liberally
-      - PRIORITY: Showing products > Being cautious
-      - Only suggest contacting customer service AFTER showing available products
-      
-      CRITICAL ANTI-HALLUCINATION RULES:
-      - If you don't see specific information in the content provided, DO NOT make it up
-      - NEVER invent technical specifications, measurements, or capabilities
-      - NEVER claim compatibility between products unless explicitly stated
-      - NEVER provide stock levels, lead times, or availability dates
-      - When asked for information not in the content, respond with:
-        "I don't have that specific information in our current data. Please contact customer service for [details requested]."
-      
-      FORMATTING RULES - EXTREMELY IMPORTANT:
-      - Use markdown links: [Product Name](url) - NOT the full URL text
-      - CRITICAL: Insert TWO NEWLINES after each product. Use actual line breaks, not spaces.
-      - Each bullet point (•) MUST start on a new line
-      - Structure your response with proper paragraph breaks
-      - Keep product names concise - remove redundant text like "Thompsons E Parts"
-      
-      Required structure:
-      1. Opening sentence
-      2. Empty line
-      3. First product with bullet
-      4. Empty line  
-      5. Second product with bullet
-      6. Empty line
-      7. Continue pattern...
-      8. Empty line
-      9. Closing question
-      
-      The response should have visible vertical spacing between items.
-      
-      REMEMBER: Products found = Products shown. Each product on NEW LINE.`;
+      // Use the formatChunksForPrompt function which properly formats with confidence levels
+      // Pass the user message to filter out irrelevant products
+      const formattedChunks = formatChunksForPrompt(embeddingResults, true, message);
+      systemContext += `\n\n${formattedChunks}`;
     } else {
       console.log('[Chat] No embedding results to add to context');
     }
@@ -1205,14 +1143,24 @@ HONESTY:
     console.log('[Chat] Contains bullet points:', assistantMessage.includes('•'));
     console.log('[Chat] Contains newlines:', assistantMessage.includes('\n'));
 
-    // Apply post-processing to ensure products are presented for vague queries
-    if (embeddingResults && embeddingResults.length > 0) {
+    // Check config for post-processing preference
+    const trustAI = config?.ai?.trustAIPresentation !== false; // Default true
+    const postProcessingEnabled = config?.ai?.postProcessing?.enabled === true; // Default false
+    
+    if (trustAI || !postProcessingEnabled) {
+      // Trust AI's judgment - pass through unchanged
+      const result = SimpleResponseProcessor.process(assistantMessage);
+      console.log('[Chat] Using simplified processor - trusting AI presentation');
+      assistantMessage = result.processed;
+    } else if (embeddingResults && embeddingResults.length > 0) {
+      // Legacy post-processing (only if explicitly enabled)
+      console.log('[Chat] Using legacy post-processor (not recommended)');
       const postProcessResult = ResponsePostProcessor.processResponse(
         assistantMessage,
         message,
         embeddingResults as any[],
         {
-          forceProductPresentation: true,
+          forceProductPresentation: config?.ai?.postProcessing?.forceProducts || false,
           maxProductsToAppend: 3,
           appendStrategy: 'natural'
         }
@@ -1222,14 +1170,6 @@ HONESTY:
         console.log('[Chat] Post-processor appended', postProcessResult.appendedProducts, 'products to response');
         assistantMessage = postProcessResult.processed;
       }
-      
-      // Also run analysis for debugging
-      const analysis = ResponsePostProcessor.analyzeResponse(
-        assistantMessage, 
-        message,
-        embeddingResults as any[]
-      );
-      console.log('[Chat] Post-processing analysis:', analysis);
     }
 
     // Clean up excessive whitespace and format bullet points properly
