@@ -175,3 +175,214 @@ export interface QueryInspectorOptions {
   autoReport?: boolean;
   reportInterval?: number; // milliseconds
 }
+
+// Log Analyzer Types
+export interface LogEntry {
+  id: string;
+  timestamp: Date;
+  level: LogLevel;
+  message: string;
+  source?: string;
+  metadata?: Record<string, unknown>;
+  raw?: string;
+  format?: LogFormat;
+  patterns?: string[];
+  severity?: LogSeverity;
+  category?: LogCategory;
+}
+
+export type LogLevel = 'error' | 'warn' | 'info' | 'debug' | 'trace' | 'fatal' | 'unknown';
+export type LogFormat = 'json' | 'apache' | 'nginx' | 'syslog' | 'plain' | 'combined' | 'custom';
+export type LogSeverity = 'critical' | 'high' | 'medium' | 'low' | 'info';
+export type LogCategory = 'security' | 'performance' | 'error' | 'access' | 'system' | 'database' | 'network' | 'other';
+
+export interface LogPattern {
+  id: string;
+  name: string;
+  pattern: RegExp;
+  severity: LogSeverity;
+  category: LogCategory;
+  description: string;
+  enabled: boolean;
+  count?: number;
+  lastMatch?: Date;
+  examples?: string[];
+}
+
+export interface ErrorGroup {
+  id: string;
+  signature: string;
+  count: number;
+  firstSeen: Date;
+  lastSeen: Date;
+  level: LogLevel;
+  message: string;
+  category: LogCategory;
+  entries: LogEntry[];
+  similarity?: number;
+  resolved?: boolean;
+}
+
+export interface TimelineBucket {
+  timestamp: Date;
+  count: number;
+  errorCount: number;
+  warnCount: number;
+  infoCount: number;
+  debugCount: number;
+  levels: Record<LogLevel, number>;
+  categories: Record<LogCategory, number>;
+  patterns: Record<string, number>;
+}
+
+export interface LogStatistics {
+  totalEntries: number;
+  entriesByLevel: Record<LogLevel, number>;
+  entriesByCategory: Record<LogCategory, number>;
+  entriesBySource: Record<string, number>;
+  errorRate: number;
+  timespan: {
+    start: Date;
+    end: Date;
+    duration: number;
+  };
+  patterns: {
+    matched: number;
+    total: number;
+    byPattern: Record<string, number>;
+  };
+  trends: {
+    errorsPerHour: number;
+    warningsPerHour: number;
+    peakHour: Date;
+    quietHour: Date;
+  };
+}
+
+export interface SecurityEvent {
+  id: string;
+  type: SecurityEventType;
+  severity: LogSeverity;
+  timestamp: Date;
+  source: string;
+  details: Record<string, unknown>;
+  logEntry: LogEntry;
+  riskScore: number; // 0-100
+  indicators: string[];
+}
+
+export type SecurityEventType = 
+  | 'sql_injection'
+  | 'xss_attempt'
+  | 'path_traversal'
+  | 'brute_force'
+  | 'unusual_traffic'
+  | 'malformed_request'
+  | 'privilege_escalation'
+  | 'data_exfiltration'
+  | 'suspicious_user_agent'
+  | 'rate_limit_exceeded'
+  | 'authentication_failure'
+  | 'unauthorized_access';
+
+export interface PerformanceIssue {
+  id: string;
+  type: PerformanceIssueType;
+  severity: LogSeverity;
+  timestamp: Date;
+  duration?: number;
+  threshold?: number;
+  details: Record<string, unknown>;
+  logEntry: LogEntry;
+  impact: string;
+  suggestions: string[];
+}
+
+export type PerformanceIssueType = 
+  | 'slow_request'
+  | 'high_memory'
+  | 'high_cpu'
+  | 'timeout'
+  | 'connection_pool_exhausted'
+  | 'database_slow'
+  | 'cache_miss'
+  | 'large_payload'
+  | 'queue_backlog';
+
+export interface LogAnalyzerOptions {
+  maxEntries?: number;
+  enablePatternMatching?: boolean;
+  enableErrorGrouping?: boolean;
+  enableSecurityDetection?: boolean;
+  enablePerformanceAnalysis?: boolean;
+  customPatterns?: LogPattern[];
+  errorGroupingSimilarity?: number; // 0-1
+  timelineBucketSize?: number; // minutes
+  memoryThreshold?: number; // MB
+  slowRequestThreshold?: number; // milliseconds
+  realTimeAlerts?: boolean;
+  retentionPeriod?: number; // days
+}
+
+export interface LogAnalysisReport {
+  summary: {
+    totalEntries: number;
+    timespan: { start: Date; end: Date };
+    errorRate: number;
+    criticalIssues: number;
+    securityEvents: number;
+    performanceIssues: number;
+  };
+  statistics: LogStatistics;
+  errorGroups: ErrorGroup[];
+  securityEvents: SecurityEvent[];
+  performanceIssues: PerformanceIssue[];
+  timeline: TimelineBucket[];
+  patterns: {
+    matched: LogPattern[];
+    recommendations: string[];
+  };
+  recommendations: {
+    immediate: string[];
+    shortTerm: string[];
+    longTerm: string[];
+  };
+  exportData?: {
+    json?: string;
+    csv?: string;
+    html?: string;
+  };
+  generatedAt: Date;
+}
+
+export interface LogStreamOptions {
+  encoding?: BufferEncoding;
+  highWaterMark?: number;
+  objectMode?: boolean;
+  parseLines?: boolean;
+  skipEmpty?: boolean;
+}
+
+export interface AlertCondition {
+  id: string;
+  name: string;
+  pattern?: RegExp;
+  level?: LogLevel;
+  category?: LogCategory;
+  threshold?: number;
+  timeWindow?: number; // minutes
+  enabled: boolean;
+  action: AlertAction;
+}
+
+export type AlertAction = 'log' | 'email' | 'webhook' | 'slack' | 'custom';
+
+export interface Alert {
+  id: string;
+  condition: AlertCondition;
+  timestamp: Date;
+  count: number;
+  entries: LogEntry[];
+  severity: LogSeverity;
+  message: string;
+}
