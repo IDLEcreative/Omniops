@@ -106,3 +106,72 @@ export interface ProfilerOptions {
   enableCallStack?: boolean;
   maxCallStackDepth?: number;
 }
+
+// Query Inspector Types
+export interface QueryExecution {
+  id: string;
+  query: string;
+  normalizedQuery: string;
+  startTime: number;
+  endTime: number;
+  duration: number;
+  rowCount?: number;
+  affectedRows?: number;
+  error?: Error;
+  stackTrace: string[];
+  timestamp: number;
+  params?: unknown[];
+  method?: string;
+  table?: string;
+}
+
+export interface QueryPattern {
+  normalizedQuery: string;
+  count: number;
+  totalTime: number;
+  avgTime: number;
+  minTime: number;
+  maxTime: number;
+  errorCount: number;
+  lastSeen: number;
+  tables: Set<string>;
+  methods: Set<string>;
+}
+
+export interface NPlusOneDetection {
+  pattern: string;
+  occurrences: number;
+  totalTime: number;
+  queries: QueryExecution[];
+  confidence: number; // 0-1, how confident we are it's N+1
+}
+
+export interface SlowQuery {
+  execution: QueryExecution;
+  reason: 'duration' | 'rows' | 'frequency';
+  severity: 'warning' | 'critical';
+}
+
+export interface QueryInspectorStats {
+  totalQueries: number;
+  totalTime: number;
+  avgTime: number;
+  slowQueries: SlowQuery[];
+  nPlusOneIssues: NPlusOneDetection[];
+  errorRate: number;
+  patterns: QueryPattern[];
+  topTables: Array<{ table: string; count: number; time: number }>;
+  recommendations: string[];
+}
+
+export interface QueryInspectorOptions {
+  slowQueryThreshold?: number; // milliseconds
+  maxHistorySize?: number;
+  trackStackTrace?: boolean;
+  enableNPlusOneDetection?: boolean;
+  enablePatternAnalysis?: boolean;
+  nPlusOneThreshold?: number; // minimum occurrences to flag as N+1
+  nPlusOneTimeWindow?: number; // milliseconds to look for patterns
+  autoReport?: boolean;
+  reportInterval?: number; // milliseconds
+}
