@@ -3,6 +3,7 @@ import { createClient, createServiceRoleClient } from '@/lib/supabase-server';
 import { getDynamicWooCommerceClient } from '@/lib/woocommerce-dynamic';
 import axios from 'axios';
 import { embeddingCache, contentDeduplicator } from '@/lib/embedding-cache';
+import { getSearchCacheManager } from '@/lib/search-cache';
 
 // Lazy load OpenAI client to avoid build-time errors
 let openai: OpenAI | null = null;
@@ -440,6 +441,20 @@ export async function searchSimilarContent(
   title: string;
   similarity: number;
 }>> {
+  // Check cache first for performance
+  const cacheManager = getSearchCacheManager();
+  const cachedResult = await cacheManager.getCachedResult(query, domain);
+  
+  if (cachedResult && cachedResult.chunks) {
+    console.log('[Cache] HIT - Returning cached search results');
+    await cacheManager.trackCacheAccess(true);
+    return cachedResult.chunks;
+  }
+  
+  console.log('[Cache] MISS - Performing new search');
+  await cacheManager.trackCacheAccess(false);
+  const searchStartTime = Date.now();
+  
   const supabase = await createServiceRoleClient();
   
   if (!supabase) {
@@ -1139,8 +1154,29 @@ export async function searchSimilarContent(
     
     if (combined.length === 0) {
       // Final fallback if everything failed
-      return await fallbackKeywordSearch(domainId);
+      const fallbackResults = await fallbackKeywordSearch(domainId);
+      // Cache even fallback results
+      await cacheManager.cacheResult(query, { 
+        response: '', 
+        chunks: fallbackResults 
+      }, domain);
+      console.log(`[Cache] Cached fallback results (${Date.now() - searchStartTime}ms)`);
+      return fallbackResults;
     }
+    
+    // Cache successful results before returning
+    await cacheManager.cacheResult(query, { 
+      response: '', 
+      chunks: combined,
+      metadata: {
+        sourcesUsed: [...new Set(combined.map((r: any) => r.source))],
+        chunksRetrieved: combined.length,
+        searchMethod: 'hybrid'
+      }
+    }, domain);
+    
+    const searchDuration = Date.now() - searchStartTime;
+    console.log(`[Cache] Cached search results (${searchDuration}ms)`);
     
     return combined;
   } catch (error) {
