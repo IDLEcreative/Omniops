@@ -31,7 +31,7 @@ export const SCRAPING_SETTINGS = {
 // Embedding settings
 export const EMBEDDING_SETTINGS = {
   dimensions: 1536,
-  similarityThreshold: 0.7,
+  similarityThreshold: 0.45,  // Lowered from 0.7 for better recall
   maxResults: 5,
 } as const;
 

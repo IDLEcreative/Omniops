@@ -248,8 +248,20 @@ export class MetadataExtractor {
   private static extractEntities(text: string): EnhancedEmbeddingMetadata['entities'] {
     const entities: EnhancedEmbeddingMetadata['entities'] = {};
     
-    // SKU patterns (e.g., DC66-10P, ABC-123, SKU12345)
-    const skuPattern = /\b(?:[A-Z]{2,}[\-\/]?[\d]{2,}[\w\-]*|SKU[\s]?[\d]+)\b/gi;
+    // SKU patterns (e.g., DC66-10P, DC66-10P-24-V2, ABC-123, RLY-DC66-10P-V2, SKU12345)
+    // This comprehensive regex captures:
+    // - Simple alphanumeric: ABC123, DC66
+    // - Hyphenated patterns: DC66-10P, DC66-10P-24
+    // - Slash variants: DC66/10P
+    // - Version suffixes: DC66-10P-V1, DC66-10P-24-V2
+    // - Prefixed SKUs: RLY-DC66-10P-V2
+    // - SKU labeled: SKU 12345, SKU12345
+    // Pattern breakdown:
+    // - SKU[\s]?[\d]+ - matches "SKU 12345" or "SKU12345"
+    // - [A-Z]{2,}[\d]+ - matches letter-number combos like "DC66", "ABC123"
+    // - (?:[-\/][A-Z0-9]+)* - matches hyphen/slash segments like "-10P", "/10P", "-24"
+    // - (?:-V\d+)? - optional version suffix like "-V1", "-V2"
+    const skuPattern = /\b(?:SKU[\s]?[\d]+|(?:[A-Z]{2,}[-])?[A-Z]{2,}[\d]+(?:[-\/][A-Z0-9]+)*(?:-V\d+)?)\b/gi;
     const skus = text.match(skuPattern);
     if (skus) {
       entities.skus = [...new Set(skus.map(s => s.toUpperCase()))];

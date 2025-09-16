@@ -151,10 +151,10 @@ export const ProductSchema = BaseSchema.extend({
   attributes: z.array(z.object({
     id: z.number(),
     name: z.string(),
-    position: z.number(),
-    visible: z.boolean(),
-    variation: z.boolean(),
-    options: z.array(z.string()),
+    position: z.number().optional(),
+    visible: z.boolean().optional(),
+    variation: z.boolean().optional(),
+    options: z.array(z.string()).optional(),
   })),
   default_attributes: z.array(z.object({
     id: z.number(),

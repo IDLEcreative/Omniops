@@ -79,7 +79,7 @@ npm run check:all        # Run all checks (deps + lint + typecheck)
 
 The application follows a service-oriented architecture with clear separation of concerns:
 
-1. **API Layer** (`app/api/`): All endpoints for chat, scraping, admin, privacy, and integrations
+1. **API Layer** (`app/api/`): All endpoints for chat, scraping, privacy, and integrations
 2. **Business Logic** (`lib/`): Core services including embeddings, rate limiting, encryption, and scraping
 3. **Data Layer**: Supabase client/server instances with Row Level Security
 4. **External Integrations**: OpenAI, WooCommerce
@@ -218,11 +218,6 @@ docker exec -it omniops-app sh         # Shell into app container
 - Entry: `app/api/scrape/route.ts`
 - Core: `lib/crawler-config.ts`, `lib/content-extractor.ts`
 - Jobs: Redis-backed via `lib/redis.ts`
-
-### Admin Panel
-- Entry: `app/admin/page.tsx`
-- Config: `app/api/admin/config/route.ts`
-- Scraping Management: `app/admin/scraping/page.tsx`
 
 ### WooCommerce Integration
 - Dynamic API: `lib/woocommerce-dynamic.ts`
@@ -450,5 +445,4 @@ const [a, b] = await Promise.all([fetchA(), fetchB()]);
 - Always check `lib/config.ts` for feature flags and configuration schemas
 - Rate limiting is enforced per domain - see `lib/rate-limit.ts`
 - All customer WooCommerce credentials must be encrypted before storage
-- Use the Admin panel at `/admin` for testing configurations
 - Redis must be running for web scraping features to work

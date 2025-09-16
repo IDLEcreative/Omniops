@@ -38,8 +38,8 @@ export async function getEnhancedChatContext(
 ): Promise<EnhancedContext> {
   const {
     enableSmartSearch = true,
-    minChunks = 10,  // Increased from 3-5
-    maxChunks = 15   // Maximum chunks to retrieve
+    minChunks = 20,  // Increased from 10 to 20 for better recall
+    maxChunks = 25   // Maximum chunks to retrieve (increased from 15)
   } = options;
 
   console.log(`[Context Enhancer] Getting enhanced context for: "${message.substring(0, 50)}..."`);
@@ -55,13 +55,13 @@ export async function getEnhancedChatContext(
   const allChunks: ContextChunk[] = [];
   
   try {
-    // 1. Try enhanced embedding search first (gets 10-15 chunks)
+    // 1. Try enhanced embedding search first (gets 20-25 chunks)
     // Use expanded query for better matching
     const embeddingResults = await searchSimilarContentEnhanced(
       hasExpansion ? expandedQuery : message,
       domain,
       minChunks,
-      0.65  // Lower threshold to get more context
+      0.15  // Much lower threshold - was 0.45, now 0.15 for maximum recall
     );
     
     if (embeddingResults && embeddingResults.length > 0) {
@@ -188,10 +188,10 @@ export function formatChunksForPrompt(chunks: ContextChunk[]): string {
     return 'No relevant information found.';
   }
   
-  // Group chunks by similarity tier
-  const highConfidence = chunks.filter(c => c.similarity > 0.85);
-  const mediumConfidence = chunks.filter(c => c.similarity > 0.7 && c.similarity <= 0.85);
-  const lowConfidence = chunks.filter(c => c.similarity <= 0.7);
+  // Group chunks by similarity tier (adjusted thresholds for better recall)
+  const highConfidence = chunks.filter(c => c.similarity > 0.75);
+  const mediumConfidence = chunks.filter(c => c.similarity > 0.55 && c.similarity <= 0.75);
+  const lowConfidence = chunks.filter(c => c.similarity <= 0.55);
   
   let formatted = '';
   
@@ -252,9 +252,9 @@ export function analyzeQueryIntent(query: string): {
   const needsGeneralContext = !needsProductContext && !needsTechnicalContext;
   
   // Suggest more chunks for complex queries
-  let suggestedChunks = 8;  // Base amount
-  if (needsTechnicalContext) suggestedChunks = 12;  // More for technical
-  if (queryLower.includes('compare') || queryLower.includes('difference')) suggestedChunks = 15;  // Maximum for comparisons
+  let suggestedChunks = 15;  // Base amount (increased from 8)
+  if (needsTechnicalContext) suggestedChunks = 20;  // More for technical (increased from 12)
+  if (queryLower.includes('compare') || queryLower.includes('difference')) suggestedChunks = 25;  // Maximum for comparisons (increased from 15)
   
   return {
     needsProductContext,

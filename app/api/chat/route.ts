@@ -338,8 +338,8 @@ export async function POST(request: NextRequest) {
               domainId,
               {
                 enableSmartSearch: true,
-                minChunks: 10,  // Increased from 3-5
-                maxChunks: 15   // Maximum context window
+                minChunks: 20,  // Increased from 10 to 20 for better recall
+                maxChunks: 25   // Maximum context window (increased from 15)
               }
             );
             
@@ -520,7 +520,17 @@ export async function POST(request: NextRequest) {
       hasHistory: !!(historyData && historyData.length > 0),
       hasEmbeddingResults: !!(embeddingResults && embeddingResults.length > 0),
       embeddingResultCount: embeddingResults?.length || 0,
-      contextResultsCount: contextResults.length
+      contextResultsCount: contextResults.length,
+      // Track improvement metrics
+      improvementMetrics: {
+        chunksRetrieved: embeddingResults?.length || 0,
+        avgSimilarity: embeddingResults?.length > 0 
+          ? (embeddingResults.reduce((sum: number, r: any) => sum + (r.similarity || 0), 0) / embeddingResults.length).toFixed(3)
+          : 0,
+        lowSimilarityChunks: embeddingResults?.filter((r: any) => r.similarity < 0.55).length || 0,
+        highSimilarityChunks: embeddingResults?.filter((r: any) => r.similarity > 0.75).length || 0,
+        productChunks: embeddingResults?.filter((r: any) => r.url?.includes('/product/')).length || 0
+      }
     });
     
     if (embeddingResults && embeddingResults.length > 0) {
@@ -903,10 +913,10 @@ HONESTY:
         avgSimilarity: embeddingResults.reduce((sum: number, r: any) => sum + (r.similarity || 0), 0) / embeddingResults.length
       });
       
-      // Group chunks by similarity tier for better AI processing
-      const highRelevance = embeddingResults.filter((r: any) => r.similarity > 0.85);
-      const mediumRelevance = embeddingResults.filter((r: any) => r.similarity > 0.7 && r.similarity <= 0.85);
-      const contextualRelevance = embeddingResults.filter((r: any) => r.similarity <= 0.7);
+      // Group chunks by similarity tier for better AI processing (adjusted thresholds)
+      const highRelevance = embeddingResults.filter((r: any) => r.similarity > 0.75);
+      const mediumRelevance = embeddingResults.filter((r: any) => r.similarity > 0.55 && r.similarity <= 0.75);
+      const contextualRelevance = embeddingResults.filter((r: any) => r.similarity <= 0.55);
       
       systemContext += `\n\n⚠️ COMPREHENSIVE CONTEXT: Found ${embeddingResults.length} relevant sources (${highRelevance.length} highly relevant, ${mediumRelevance.length} moderately relevant):\n`;
       
@@ -916,10 +926,32 @@ HONESTY:
         highRelevance.forEach((r: any, index: number) => {
           systemContext += `\n${index + 1}. ${r.title} [${(r.similarity * 100).toFixed(0)}% match]\n`;
           systemContext += `   URL: ${r.url}\n`;
-          // For product pages, include MORE content to capture all specs
-          const contentLength = r.url.includes('/product/') ? 2000 : 500;
-          const truncatedContent = r.content.substring(0, contentLength);
-          systemContext += `   Content: ${truncatedContent}...\n`;
+          
+          // Content-type-aware truncation based on URL patterns
+          let contentLength = 1000; // Default
+          const urlLower = r.url.toLowerCase();
+          const titleLower = (r.title || '').toLowerCase();
+          
+          if (urlLower.includes('/product/') || titleLower.includes('product')) {
+            contentLength = 2000; // Products need full specs
+          } else if (urlLower.includes('/support/') || urlLower.includes('/help/') || 
+                     titleLower.includes('support') || titleLower.includes('help')) {
+            contentLength = 1200; // Support/Help articles
+          } else if (urlLower.includes('/policy/') || urlLower.includes('/terms/') || 
+                     urlLower.includes('/privacy/') || titleLower.includes('policy')) {
+            contentLength = 800; // Policy pages
+          } else if (urlLower.includes('/blog/') || urlLower.includes('/news/') || 
+                     titleLower.includes('blog') || titleLower.includes('article')) {
+            contentLength = 1000; // Blog posts
+          } else if (urlLower.includes('/faq/') || titleLower.includes('faq') || 
+                     titleLower.includes('frequently asked')) {
+            contentLength = 10000; // FAQ - no truncation (full content)
+          } else if (urlLower.includes('/contact/') || titleLower.includes('contact')) {
+            contentLength = 10000; // Contact info - no truncation
+          }
+          
+          const truncatedContent = contentLength >= 10000 ? r.content : r.content.substring(0, contentLength);
+          systemContext += `   Content: ${truncatedContent}${contentLength < r.content.length ? '...' : ''}\n`;
         });
       }
       
@@ -929,9 +961,24 @@ HONESTY:
         mediumRelevance.forEach((r: any, index: number) => {
           systemContext += `\n${highRelevance.length + index + 1}. ${r.title}\n`;
           systemContext += `   URL: ${r.url}\n`;
-          // For product pages, include MORE content to capture all specs
-          const contentLength = r.url.includes('/product/') ? 1500 : 300;
-          systemContext += `   Summary: ${r.content.substring(0, contentLength)}...\n`;
+          
+          // Content-type-aware truncation for medium relevance items
+          let contentLength = 600; // Default for medium relevance
+          const urlLower = r.url.toLowerCase();
+          const titleLower = (r.title || '').toLowerCase();
+          
+          if (urlLower.includes('/product/') || titleLower.includes('product')) {
+            contentLength = 1500; // Products still get good coverage
+          } else if (urlLower.includes('/support/') || urlLower.includes('/help/')) {
+            contentLength = 800; // Support articles
+          } else if (urlLower.includes('/faq/') || titleLower.includes('faq')) {
+            contentLength = 2000; // FAQs get more space
+          } else if (urlLower.includes('/contact/') || titleLower.includes('contact')) {
+            contentLength = 2000; // Contact info gets full space
+          }
+          
+          const truncatedContent = r.content.substring(0, contentLength);
+          systemContext += `   Summary: ${truncatedContent}${contentLength < r.content.length ? '...' : ''}\n`;
         });
       }
       
