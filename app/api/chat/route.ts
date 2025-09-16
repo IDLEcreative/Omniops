@@ -17,6 +17,7 @@ import { WooCommerceAgent } from '@/lib/agents/woocommerce-agent';
 import { selectProviderAgent } from '@/lib/agents/router';
 import { getDynamicWooCommerceClient, searchProductsDynamic } from '@/lib/woocommerce-dynamic';
 import { sanitizeOutboundLinks } from '@/lib/link-sanitizer';
+import { ResponsePostProcessor } from '@/lib/response-post-processor';
 
 // Lazy load OpenAI client to avoid build-time errors
 let openai: OpenAI | null = null;
@@ -813,12 +814,12 @@ HONESTY:
       - For vague requests, it's OK to ask clarifying questions conversationally
       - Example: "I'd be happy to help you find a pump. What type of equipment is it for?"
       
-      Product Information Accuracy - MANDATORY:
-      - NEVER make assumptions about product relationships or what's included
-      - Only state facts that are explicitly in the product information provided
-      - If asked "does X include Y", only answer if you have clear information
-      - When uncertain, say "I don't have specific details about what's included with this product"
-      - Suggest contacting customer service for detailed specifications when information is unclear
+      Product Information Presentation - MANDATORY:
+      - ALWAYS show products found in context, even for vague queries
+      - Present products FIRST, then add caveats about specifications if needed
+      - For vague queries like "its for [category]" → Show relevant products immediately
+      - Only be conservative about technical SPECIFICATIONS, not product SELECTION
+      - Contact customer service is a LAST resort, after showing available options
       
       FORBIDDEN RESPONSES - NEVER provide these without explicit data:
       - Specific technical specifications (horsepower, dimensions, weight, capacity)
@@ -1007,6 +1008,17 @@ HONESTY:
       
       systemContext += `\n\nIMPORTANT INSTRUCTIONS FOR USING WEBSITE CONTENT:
       
+      CRITICAL FOR VAGUE QUERIES LIKE "its for agriculture":
+      - If ANY products are listed above that match the category, SHOW THEM
+      - Don't just link to categories if you have actual products in the context
+      - Present the TOP 3-5 products from above, THEN mention the category
+      - MANDATORY EXAMPLE RESPONSE for "its for agriculture":
+        "Based on your agricultural needs, here are some suitable tipper options:
+         • [Agri Flip front to rear sheeting system](url) - Perfect for agricultural dumper trailers
+         • [Any other agricultural product from context](url)
+         You can also browse our full [Agriculture category](url) for more options."
+      - Use this pattern for ALL vague category queries
+      
       WITH ${embeddingResults.length} CHUNKS OF CONTEXT AVAILABLE:
       1. ALL sections above (HIGHLY RELEVANT, MODERATELY RELEVANT, and RELATED INFORMATION) contain real data from our website
       2. For product inquiries, extract and provide ALL specifications, pricing, and details from the Content sections
@@ -1022,13 +1034,14 @@ HONESTY:
       5. Use context to be informed, but prioritize the human connection
       
       PRODUCT INFORMATION ACCURACY:
-      - NEVER make assumptions about what a product includes or doesn't include
-      - If asked about product components or what's included:
-        * Only state what you can see in the product content/description
-        * If the information isn't clear, say "I don't have specific details about what's included with this product"
-        * Suggest contacting customer service for detailed product specifications
-      - Do NOT guess or infer product relationships unless explicitly stated
-      - Treat each product as a separate item unless the description clearly states otherwise
+      - For SPECIFICATIONS: Never make assumptions about what a product includes
+      - For PRODUCT SELECTION: ALWAYS present products found in context, even for vague queries
+      - Balance between accuracy and helpfulness:
+        * For vague queries ("its for agriculture") → Show ALL agricultural products found
+        * For specific specs questions → Only state what's in the description
+        * For browsing queries → Present options liberally
+      - PRIORITY: Showing products > Being cautious
+      - Only suggest contacting customer service AFTER showing available products
       
       CRITICAL ANTI-HALLUCINATION RULES:
       - If you don't see specific information in the content provided, DO NOT make it up
@@ -1191,6 +1204,33 @@ HONESTY:
     console.log(assistantMessage.substring(0, 500));
     console.log('[Chat] Contains bullet points:', assistantMessage.includes('•'));
     console.log('[Chat] Contains newlines:', assistantMessage.includes('\n'));
+
+    // Apply post-processing to ensure products are presented for vague queries
+    if (embeddingResults && embeddingResults.length > 0) {
+      const postProcessResult = ResponsePostProcessor.processResponse(
+        assistantMessage,
+        message,
+        embeddingResults as any[],
+        {
+          forceProductPresentation: true,
+          maxProductsToAppend: 3,
+          appendStrategy: 'natural'
+        }
+      );
+      
+      if (postProcessResult.wasModified) {
+        console.log('[Chat] Post-processor appended', postProcessResult.appendedProducts, 'products to response');
+        assistantMessage = postProcessResult.processed;
+      }
+      
+      // Also run analysis for debugging
+      const analysis = ResponsePostProcessor.analyzeResponse(
+        assistantMessage, 
+        message,
+        embeddingResults as any[]
+      );
+      console.log('[Chat] Post-processing analysis:', analysis);
+    }
 
     // Clean up excessive whitespace and format bullet points properly
     // First, collapse multiple newlines to maximum of 2
