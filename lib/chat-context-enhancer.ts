@@ -7,13 +7,16 @@ import { searchSimilarContentEnhanced } from './enhanced-embeddings';
 import { smartSearch } from './search-wrapper';
 import { synonymExpander } from './synonym-expander-dynamic';
 import { QueryReformulator } from './query-reformulator';
+import { queryInterpreter } from './ai-query-interpreter';
+import { createClient } from '@supabase/supabase-js';
 
 interface ContextChunk {
   content: string;
   url: string;
   title: string;
   similarity: number;
-  source?: 'embedding' | 'smart' | 'fallback';
+  source?: 'embedding' | 'smart' | 'fallback' | 'hybrid' | 'product';
+  metadata?: any;
 }
 
 interface EnhancedContext {
@@ -49,18 +52,33 @@ export async function getEnhancedChatContext(
 
   console.log(`[Context Enhancer] Getting enhanced context for: "${message.substring(0, 50)}..."`);
   
-  // Step 1: Reformulate query based on conversation context
-  const reformulated = QueryReformulator.reformulate(message, conversationHistory);
-  const searchQuery = reformulated.reformulated;
+  // Step 1: Let AI interpret what the user ACTUALLY wants to search for
+  // This handles typos, context, and intent understanding
+  const interpreted = await queryInterpreter.interpretQuery(message, conversationHistory);
   
-  if (reformulated.strategy !== 'direct') {
-    console.log(`[Context Enhancer] Query reformulated using ${reformulated.strategy} strategy`);
-    console.log(`  Original: "${message}"`);
-    console.log(`  Reformulated: "${searchQuery}"`);
-    console.log(`  Confidence: ${(reformulated.confidence * 100).toFixed(0)}%`);
+  // If AI says no search needed (greeting, etc), return empty
+  if (!queryInterpreter.needsProductSearch(interpreted.intent)) {
+    console.log(`[Context Enhancer] AI determined no product search needed for intent: ${interpreted.intent}`);
+    return {
+      chunks: [],
+      totalChunks: 0,
+      averageSimilarity: 0,
+      hasHighConfidence: false
+    };
   }
   
-  // Step 2: Apply domain-specific synonym expansion to the reformulated query
+  // Use the AI's corrected/interpreted search terms
+  const searchQuery = interpreted.searchTerms.join(' ') || message;
+  
+  if (searchQuery !== message) {
+    console.log(`[Context Enhancer] AI interpreted query:`);
+    console.log(`  Original: "${message}"`);
+    console.log(`  Search for: "${searchQuery}"`);
+    console.log(`  Intent: ${interpreted.intent}`);
+    console.log(`  Confidence: ${(interpreted.confidence * 100).toFixed(0)}%`);
+  }
+  
+  // Step 2: Apply domain-specific synonym expansion to the AI-interpreted query
   const expandedQuery = await synonymExpander.expandQuery(searchQuery, domainId, 3);
   const hasExpansion = expandedQuery !== searchQuery.toLowerCase().split(/\s+/).join(' ');
   
@@ -70,18 +88,88 @@ export async function getEnhancedChatContext(
   
   const allChunks: ContextChunk[] = [];
   
+  // Initialize Supabase client for hybrid search
+  const supabase = createClient(
+    process.env.NEXT_PUBLIC_SUPABASE_URL!,
+    process.env.SUPABASE_SERVICE_ROLE_KEY!
+  );
+  
   try {
-    // 1. Try enhanced embedding search first (gets 20-25 chunks)
-    // Use expanded query for better matching
-    const embeddingResults = await searchSimilarContentEnhanced(
-      hasExpansion ? expandedQuery : message,
-      domain,
-      minChunks,
-      0.15  // Much lower threshold - was 0.45, now 0.15 for maximum recall
+    // NEW: Try hybrid search first (combines fulltext, fuzzy, metadata, and vector)
+    console.log(`[Context Enhancer] Trying hybrid search for maximum accuracy...`);
+    
+    const { data: hybridResults, error: hybridError } = await supabase.rpc(
+      'hybrid_product_search',
+      {
+        p_query: hasExpansion ? expandedQuery : searchQuery,
+        p_domain_id: domainId,
+        p_limit: maxChunks,
+        p_enable_fuzzy: true,
+        p_vector_embedding: null // Will be added when we have embedding
+      }
     );
     
-    if (embeddingResults && embeddingResults.length > 0) {
-      console.log(`[Context Enhancer] Found ${embeddingResults.length} embedding chunks`);
+    if (!hybridError && hybridResults && hybridResults.length > 0) {
+      console.log(`[Context Enhancer] Hybrid search found ${hybridResults.length} results`);
+      
+      // Add hybrid results with high priority
+      allChunks.push(...hybridResults.map((r: any) => ({
+        content: r.content || '',
+        url: r.url || '',
+        title: r.title || '',
+        similarity: r.score || 0.8, // Use score from hybrid search
+        source: 'hybrid' as const,
+        metadata: r.metadata
+      })));
+    }
+    
+    // Check product catalog for direct matches
+    const { data: products, error: productError } = await supabase
+      .from('product_catalog')
+      .select('*')
+      .or(`name.ilike.%${searchQuery}%,sku.ilike.%${searchQuery}%,category.ilike.%${searchQuery}%`)
+      .limit(5);
+    
+    if (!productError && products && products.length > 0) {
+      console.log(`[Context Enhancer] Found ${products.length} direct product matches`);
+      
+      // Format products as context chunks
+      for (const product of products) {
+        const productContent = `
+Product: ${product.name}
+SKU: ${product.sku || 'N/A'}
+Price: ${product.price ? `$${product.price}` : 'Contact for pricing'}
+Category: ${product.category || 'General'}
+In Stock: ${product.in_stock ? 'Yes' : 'No'}
+Description: ${product.description || 'No description available'}
+${product.specifications ? `Specifications: ${JSON.stringify(product.specifications)}` : ''}
+        `.trim();
+        
+        allChunks.push({
+          content: productContent,
+          url: '', // Products don't have URLs yet
+          title: product.name,
+          similarity: 0.95, // High score for direct matches
+          source: 'product' as const,
+          metadata: product
+        });
+      }
+    }
+    
+    // Fallback to original embedding search if hybrid didn't find enough
+    if (allChunks.length < minChunks) {
+      console.log(`[Context Enhancer] Need more chunks, adding embedding search...`);
+      
+      // 1. Try enhanced embedding search (gets 20-25 chunks)
+      const embeddingResults = await searchSimilarContentEnhanced(
+        hasExpansion ? expandedQuery : searchQuery,
+        domain,
+        minChunks - allChunks.length,
+        0.15  // Much lower threshold for maximum recall
+      );
+      
+      if (embeddingResults && embeddingResults.length > 0) {
+        console.log(`[Context Enhancer] Found ${embeddingResults.length} additional embedding chunks`);
       allChunks.push(...embeddingResults.map(r => ({
         ...r,
         source: 'embedding' as const
@@ -92,9 +180,9 @@ export async function getEnhancedChatContext(
     if (enableSmartSearch && allChunks.length < minChunks) {
       console.log(`[Context Enhancer] Need more chunks, trying smart search...`);
       
-      // Use expanded query for smart search as well
+      // Use expanded query for smart search as well, or AI-interpreted query
       const smartResults = await smartSearch(
-        hasExpansion ? expandedQuery : message,
+        hasExpansion ? expandedQuery : searchQuery,  // Use AI-corrected query, not original message
         domain,
         minChunks - allChunks.length,  // Get remaining chunks needed
         0.2,  // Lower threshold for broader matches
@@ -143,7 +231,7 @@ export async function getEnhancedChatContext(
       hasHighConfidence,
       contextSummary,
       reformulatedQuery: searchQuery,
-      queryStrategy: reformulated.strategy
+      queryStrategy: interpreted.intent
     };
     
   } catch (error) {
@@ -201,9 +289,47 @@ function generateContextSummary(chunks: ContextChunk[]): string {
 /**
  * Format chunks for inclusion in chat prompt
  */
-export function formatChunksForPrompt(chunks: ContextChunk[], includeConfidenceGuide: boolean = true): string {
+export function formatChunksForPrompt(chunks: ContextChunk[], includeConfidenceGuide: boolean = true, userQuery?: string): string {
   if (chunks.length === 0) {
     return 'No relevant information found.';
+  }
+  
+  // If we have a user query, check if chunks are actually relevant
+  if (userQuery) {
+    const queryLower = userQuery.toLowerCase();
+    
+    // Extract meaningful words from the query (3+ characters, not common words)
+    const stopWords = ['the', 'and', 'for', 'you', 'sell', 'have', 'show', 'what', 'which', 'any', 'some'];
+    const queryWords = queryLower
+      .split(/\s+/)
+      .filter(word => word.length >= 3 && !stopWords.includes(word));
+    
+    if (queryWords.length > 0) {
+      // Check if chunks actually relate to the query terms
+      const relevantChunks = chunks.filter(chunk => {
+        const contentLower = (chunk.title + ' ' + chunk.content).toLowerCase();
+        
+        // Count how many query words appear in the content
+        const matchCount = queryWords.filter(word => {
+          // Handle potential typos by checking if content contains the word or similar
+          return contentLower.includes(word) || 
+                 // Check for partial matches (for typos)
+                 queryWords.some(qw => {
+                   const similarity = Math.min(word.length, qw.length) >= 4 && 
+                                     contentLower.includes(qw.substring(0, 4));
+                   return similarity;
+                 });
+        }).length;
+        
+        // If at least some query words match, or similarity is very high, keep it
+        return matchCount > 0 || chunk.similarity > 0.85;
+      });
+      
+      // If we found relevant chunks and they're significantly fewer, use them
+      if (relevantChunks.length > 0 && relevantChunks.length < chunks.length * 0.9) {
+        chunks = relevantChunks;
+      }
+    }
   }
   
   // Group chunks by similarity tier (adjusted thresholds for better recall)
@@ -218,7 +344,8 @@ export function formatChunksForPrompt(chunks: ContextChunk[], includeConfidenceG
     formatted += '## CONFIDENCE GUIDE FOR RESPONSES:\n';
     formatted += '- HIGH confidence (>75%): Present these products/info directly and confidently\n';
     formatted += '- MEDIUM confidence (55-75%): Present with "These might be suitable" or "Based on what you described"\n';
-    formatted += '- LOW confidence (<55%): Only use as supporting context, ask clarifying questions\n\n';
+    formatted += '- LOW confidence (<55%): Still present with "Here are some options that might work"\n';
+    formatted += '⚠️ IMPORTANT: Even for vague queries, if products are found, PRESENT THEM!\n\n';
   }
   
   if (highConfidence.length > 0) {
@@ -242,11 +369,20 @@ export function formatChunksForPrompt(chunks: ContextChunk[], includeConfidenceG
     ).join('');
   }
   
-  // Add summary
+  // Add summary and instructions
   formatted += '\n\n## SUMMARY:\n';
   formatted += `- Found ${highConfidence.length} highly relevant products\n`;
   formatted += `- Found ${mediumConfidence.length} possibly relevant products\n`;
   formatted += `- Total context items: ${chunks.length}\n`;
+  
+  // Special instructions for vague queries
+  if (chunks.length > 0) {
+    formatted += '\n## RESPONSE INSTRUCTIONS:\n';
+    formatted += '1. If user query is vague (like "its for X"), show the TOP 3-5 products above\n';
+    formatted += '2. Present products FIRST, then mention category for more options\n';
+    formatted += '3. Never say "I don\'t see specific products" if products are listed above\n';
+    formatted += '4. For continuation queries, use the reformulated query context\n';
+  }
   
   return formatted;
 }
