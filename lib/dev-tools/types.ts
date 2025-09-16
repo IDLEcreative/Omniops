@@ -386,3 +386,174 @@ export interface Alert {
   severity: LogSeverity;
   message: string;
 }
+
+// Execution Tracer Types
+export interface TraceEntry {
+  id: string;
+  type: 'entry' | 'exit' | 'error' | 'async_start' | 'async_end';
+  functionName: string;
+  className?: string;
+  fileName?: string;
+  lineNumber?: number;
+  columnNumber?: number;
+  timestamp: number;
+  duration?: number;
+  depth: number;
+  callId: string;
+  parentCallId?: string;
+  args?: unknown[];
+  result?: unknown;
+  error?: Error;
+  stackTrace?: string[];
+  isAsync: boolean;
+  asyncId?: string;
+  memoryUsage?: {
+    heapUsed: number;
+    heapTotal: number;
+    external: number;
+  };
+}
+
+export interface CallStats {
+  count: number;
+  totalTime: number;
+  avgTime: number;
+  minTime: number;
+  maxTime: number;
+  errorCount: number;
+  lastCalled: number;
+  recursiveCount: number;
+  asyncCount: number;
+}
+
+export interface CallGraph {
+  nodes: CallGraphNode[];
+  edges: CallGraphEdge[];
+  stats: Record<string, CallStats>;
+}
+
+export interface CallGraphNode {
+  id: string;
+  functionName: string;
+  className?: string;
+  fileName?: string;
+  calls: number;
+  selfTime: number;
+  totalTime: number;
+  errors: number;
+  isAsync: boolean;
+}
+
+export interface CallGraphEdge {
+  from: string;
+  to: string;
+  calls: number;
+  totalTime: number;
+}
+
+export interface SequenceDiagram {
+  participants: string[];
+  interactions: SequenceInteraction[];
+  mermaidCode: string;
+}
+
+export interface SequenceInteraction {
+  from: string;
+  to: string;
+  message: string;
+  type: 'call' | 'return' | 'error';
+  timestamp: number;
+  duration?: number;
+  isAsync: boolean;
+}
+
+export interface ChromeTraceEvent {
+  name: string;
+  cat: string;
+  ph: 'B' | 'E' | 'X' | 'i' | 'I'; // Begin, End, Complete, Instant, Counter
+  ts: number; // timestamp in microseconds
+  dur?: number; // duration in microseconds
+  pid: number; // process id
+  tid: number; // thread id
+  args?: Record<string, unknown>;
+  stack?: string[];
+}
+
+export interface ChromeTraceFormat {
+  traceEvents: ChromeTraceEvent[];
+  displayTimeUnit: 'ms' | 'ns';
+  systemTraceEvents?: string;
+  otherData?: Record<string, unknown>;
+}
+
+export interface ExecutionTimeline {
+  startTime: number;
+  endTime: number;
+  duration: number;
+  totalCalls: number;
+  maxDepth: number;
+  entries: TraceEntry[];
+  summary: {
+    functionCalls: number;
+    asyncCalls: number;
+    errors: number;
+    uniqueFunctions: number;
+    deepestCall: number;
+  };
+}
+
+export interface TracerOptions {
+  maxDepth?: number;
+  maxHistory?: number;
+  trackArgs?: boolean;
+  trackReturnValues?: boolean;
+  trackMemory?: boolean;
+  trackStackTrace?: boolean;
+  excludePatterns?: RegExp[];
+  includePatterns?: RegExp[];
+  asyncTracking?: boolean;
+  memoryBounded?: boolean;
+  memoryLimit?: number; // bytes
+  enableSourceMap?: boolean;
+  sampleRate?: number; // 0-1, for performance
+}
+
+export interface AutoInstrumentTracerOptions {
+  includePrivate?: boolean;
+  includeGetters?: boolean;
+  includeSetters?: boolean;
+  excludeConstructor?: boolean;
+  excludePatterns?: RegExp[];
+  maxDepth?: number;
+  trackArgs?: boolean;
+  trackReturnValues?: boolean;
+}
+
+export interface TraceReport {
+  summary: {
+    totalCalls: number;
+    totalTime: number;
+    maxDepth: number;
+    errorRate: number;
+    asyncCallsPercent: number;
+    topFunctions: Array<{ name: string; calls: number; time: number }>;
+    slowestFunctions: Array<{ name: string; avgTime: number; maxTime: number }>;
+    mostCalledFunctions: Array<{ name: string; calls: number; totalTime: number }>;
+  };
+  callGraph: CallGraph;
+  timeline: ExecutionTimeline;
+  sequenceDiagram: SequenceDiagram;
+  performance: {
+    memoryLeaks: Array<{ function: string; growthRate: number }>;
+    bottlenecks: Array<{ function: string; impact: number; reason: string }>;
+    recursionIssues: Array<{ function: string; maxDepth: number; calls: number }>;
+  };
+  recommendations: string[];
+  exportFormats: {
+    chrome?: ChromeTraceFormat;
+    mermaid?: string;
+    json?: string;
+    csv?: string;
+  };
+  generatedAt: number;
+}

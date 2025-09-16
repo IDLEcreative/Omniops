@@ -27,6 +27,15 @@ export {
   createLogMonitor
 } from './log-analyzer';
 
+// Execution Tracer exports
+export {
+  ExecutionTracer,
+  executionTracer,
+  traceFunction,
+  traceClass,
+  createExecutionTracer
+} from './execution-tracer';
+
 // Type exports
 export type {
   PerformanceMetrics,
@@ -62,7 +71,20 @@ export type {
   LogStreamOptions,
   AlertCondition,
   Alert,
-  AlertAction
+  AlertAction,
+  TraceEntry,
+  CallStats,
+  CallGraph,
+  CallGraphNode,
+  CallGraphEdge,
+  SequenceDiagram,
+  SequenceInteraction,
+  ChromeTraceEvent,
+  ChromeTraceFormat,
+  ExecutionTimeline,
+  TracerOptions,
+  AutoInstrumentTracerOptions,
+  TraceReport
 } from './types';
 
 /**
@@ -73,6 +95,7 @@ export type {
 export { profileFunction as quickProfile, profiler as profile } from './performance-profiler';
 export { createQueryInspector as quickQueryInspector, inspectQueries as quickInspect } from './query-inspector';
 export { createLogAnalyzer as quickLogAnalyzer, analyzeLogFile as quickAnalyzeFile } from './log-analyzer';
+export { traceFunction as quickTrace, executionTracer as tracer } from './execution-tracer';
 
 /**
  * Usage Examples:
@@ -172,4 +195,80 @@ export { createLogAnalyzer as quickLogAnalyzer, analyzeLogFile as quickAnalyzeFi
  * const html = analyzer.exportHTML();
  * const csv = analyzer.exportCSV();
  * const json = analyzer.exportJSON();
+ * 
+ * // Execution Tracing
+ * import { createExecutionTracer, traceFunction, traceClass } from './lib/dev-tools';
+ * 
+ * // Quick function tracing
+ * const tracedFunction = traceFunction(myFunction, 'MyFunction');
+ * const result = tracedFunction(args);
+ * 
+ * // Manual tracing
+ * import { executionTracer } from './lib/dev-tools';
+ * const callId = executionTracer.start('operation');
+ * // ... do work
+ * executionTracer.end(callId, result);
+ * 
+ * // Auto-instrument classes
+ * const TracedClass = traceClass(MyClass, {
+ *   includePrivate: false,
+ *   excludePatterns: [/^_internal/],
+ *   trackArgs: true,
+ *   trackReturnValues: true
+ * });
+ * 
+ * // Advanced tracer setup
+ * const tracer = createExecutionTracer({
+ *   maxDepth: 50,
+ *   maxHistory: 5000,
+ *   trackArgs: true,
+ *   trackReturnValues: true,
+ *   trackMemory: true,
+ *   asyncTracking: true,
+ *   excludePatterns: [/^_/, /^test/],
+ *   sampleRate: 0.8 // 80% sampling for performance
+ * });
+ * 
+ * // Wrap functions and classes
+ * const wrappedFn = tracer.wrap(myFunction, 'MyFunction');
+ * const instrumentedClass = tracer.autoInstrument(myClass);
+ * 
+ * // Listen for events
+ * tracer.on('trace', (trace) => console.log('Function called:', trace.functionName));
+ * tracer.on('error', ({ trace, error }) => console.error('Error in:', trace.functionName, error));
+ * tracer.on('maxDepthReached', ({ functionName, depth }) => 
+ *   console.warn('Max depth reached:', functionName, depth));
+ * 
+ * // Generate comprehensive reports
+ * const report = tracer.generateReport();
+ * console.log(`Traced ${report.summary.totalCalls} function calls`);
+ * console.log(`Max call depth: ${report.summary.maxDepth}`);
+ * console.log(`Error rate: ${(report.summary.errorRate * 100).toFixed(2)}%`);
+ * 
+ * // Get execution timeline
+ * const timeline = tracer.getTimeline();
+ * console.log(`Execution took ${timeline.duration.toFixed(2)}ms`);
+ * 
+ * // Generate call graph
+ * const callGraph = tracer.getCallGraph();
+ * console.log(`Call graph has ${callGraph.nodes.length} nodes and ${callGraph.edges.length} edges`);
+ * 
+ * // Generate sequence diagram (Mermaid format)
+ * const sequenceDiagram = tracer.getSequenceDiagram();
+ * console.log('Mermaid sequence diagram:');
+ * console.log(sequenceDiagram.mermaidCode);
+ * 
+ * // Export to various formats
+ * const chromeTrace = tracer.exportChromeTrace(); // Chrome DevTools format
+ * const csv = tracer.exportCSV();
+ * const json = JSON.stringify(tracer.getTimeline(), null, 2);
+ * 
+ * // Performance analysis
+ * const stats = tracer.getStats();
+ * Object.entries(stats).forEach(([functionName, stat]) => {
+ *   console.log(`${functionName}: ${stat.count} calls, avg ${stat.avgTime.toFixed(2)}ms`);
+ * });
+ * 
+ * // Reset tracer state
+ * tracer.reset();
  */
