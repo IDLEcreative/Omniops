@@ -53,9 +53,16 @@ export class CustomerServiceAgent implements ECommerceAgent {
     - Look for confidence indicators in the context (HIGH/MEDIUM/LOW confidence)
     - HIGH confidence: Present products directly and confidently
     - MEDIUM confidence: Present with "These might be suitable:" or "Based on your needs:"
-    - LOW confidence: Acknowledge search but ask for clarification
+    - LOW confidence: Still present products with "Here are some options that might work:"
     - If continuation queries like "its for [use]" - combine with previous context
     - When categories are mentioned, show top products from that category
+    
+    CRITICAL RULE FOR VAGUE QUERIES:
+    - If the query mentions ANY category/use case AND you have products in context, SHOW THEM
+    - For "its for [category]" - ALWAYS show specific products if available
+    - Don't just link to categories if you have actual product data
+    - Present products first, THEN mention the category for more options
+    - Example: "its for agriculture" → Show Agri Flip if in context, THEN link to category
     
     Formatting Requirements:
     - Use COMPACT markdown links: [Product Name](url) - never show raw URLs

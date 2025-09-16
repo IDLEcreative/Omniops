@@ -123,35 +123,62 @@ export async function getEnhancedChatContext(
       })));
     }
     
-    // Check product catalog for direct matches
-    const { data: products, error: productError } = await supabase
-      .from('product_catalog')
+    // Get business classification for proper terminology
+    const { data: classification } = await supabase
+      .from('business_classifications')
+      .select('business_type, entity_terminology')
+      .eq('domain_id', domainId)
+      .single();
+    
+    const terminology = classification?.entity_terminology || {
+      entity: 'item',
+      plural: 'items',
+      priceLabel: 'price'
+    };
+    
+    // Check entity catalog for direct matches (works for any business type)
+    const { data: entities, error: entityError } = await supabase
+      .from('entity_catalog')
       .select('*')
-      .or(`name.ilike.%${searchQuery}%,sku.ilike.%${searchQuery}%,category.ilike.%${searchQuery}%`)
+      .eq('domain_id', domainId)
+      .or(`name.ilike.%${searchQuery}%,primary_identifier.ilike.%${searchQuery}%,primary_category.ilike.%${searchQuery}%`)
       .limit(5);
     
-    if (!productError && products && products.length > 0) {
-      console.log(`[Context Enhancer] Found ${products.length} direct product matches`);
+    if (!entityError && entities && entities.length > 0) {
+      console.log(`[Context Enhancer] Found ${entities.length} direct ${terminology.plural} matches`);
       
-      // Format products as context chunks
-      for (const product of products) {
-        const productContent = `
-Product: ${product.name}
-SKU: ${product.sku || 'N/A'}
-Price: ${product.price ? `$${product.price}` : 'Contact for pricing'}
-Category: ${product.category || 'General'}
-In Stock: ${product.in_stock ? 'Yes' : 'No'}
-Description: ${product.description || 'No description available'}
-${product.specifications ? `Specifications: ${JSON.stringify(product.specifications)}` : ''}
+      // Format entities as context chunks based on business type
+      for (const entity of entities) {
+        let entityContent = `
+${entity.entity_type}: ${entity.name}
+${entity.primary_identifier ? `ID: ${entity.primary_identifier}` : ''}
+${entity.price ? `${terminology.priceLabel || 'Price'}: $${entity.price}` : ''}
+Category: ${entity.primary_category || 'General'}
+Available: ${entity.is_available ? 'Yes' : 'No'}
+${entity.description || ''}
         `.trim();
         
+        // Add business-specific attributes
+        if (entity.attributes) {
+          if (classification?.business_type === 'real_estate' && entity.attributes.bedrooms) {
+            entityContent += `\nBedrooms: ${entity.attributes.bedrooms}`;
+            entityContent += `\nBathrooms: ${entity.attributes.bathrooms || 'N/A'}`;
+            entityContent += `\nSquare Feet: ${entity.attributes.square_feet || 'N/A'}`;
+          } else if (classification?.business_type === 'healthcare' && entity.attributes.provider_name) {
+            entityContent += `\nProvider: ${entity.attributes.provider_name}`;
+            entityContent += `\nSpecialty: ${entity.attributes.specialty || 'N/A'}`;
+          } else if (entity.attributes.specifications) {
+            entityContent += `\nDetails: ${JSON.stringify(entity.attributes.specifications)}`;
+          }
+        }
+        
         allChunks.push({
-          content: productContent,
-          url: '', // Products don't have URLs yet
-          title: product.name,
+          content: entityContent,
+          url: '', // Entities may not have URLs
+          title: entity.name,
           similarity: 0.95, // High score for direct matches
-          source: 'product' as const,
-          metadata: product
+          source: 'product' as const, // Keep for compatibility
+          metadata: entity
         });
       }
     }
@@ -170,10 +197,11 @@ ${product.specifications ? `Specifications: ${JSON.stringify(product.specificati
       
       if (embeddingResults && embeddingResults.length > 0) {
         console.log(`[Context Enhancer] Found ${embeddingResults.length} additional embedding chunks`);
-      allChunks.push(...embeddingResults.map(r => ({
-        ...r,
-        source: 'embedding' as const
-      })));
+        allChunks.push(...embeddingResults.map(r => ({
+          ...r,
+          source: 'embedding' as const
+        })));
+      }
     }
     
     // 2. If enabled and we need more chunks, try smart search
@@ -431,3 +459,6 @@ export function analyzeQueryIntent(query: string): {
     suggestedChunks
   };
 }
+
+// Export alias for backward compatibility
+export { getEnhancedChatContext as getEnhancedContext };
