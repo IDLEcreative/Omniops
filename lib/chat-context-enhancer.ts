@@ -6,6 +6,7 @@
 import { searchSimilarContentEnhanced } from './enhanced-embeddings';
 import { smartSearch } from './search-wrapper';
 import { synonymExpander } from './synonym-expander-dynamic';
+import { QueryReformulator } from './query-reformulator';
 
 interface ContextChunk {
   content: string;
@@ -21,6 +22,8 @@ interface EnhancedContext {
   averageSimilarity: number;
   hasHighConfidence: boolean;
   contextSummary?: string;
+  reformulatedQuery?: string;
+  queryStrategy?: string;
 }
 
 /**
@@ -34,19 +37,32 @@ export async function getEnhancedChatContext(
     enableSmartSearch?: boolean;
     minChunks?: number;
     maxChunks?: number;
+    conversationHistory?: Array<{ role: string; content: string }>;
   } = {}
 ): Promise<EnhancedContext> {
   const {
     enableSmartSearch = true,
     minChunks = 20,  // Increased from 10 to 20 for better recall
-    maxChunks = 25   // Maximum chunks to retrieve (increased from 15)
+    maxChunks = 25,   // Maximum chunks to retrieve (increased from 15)
+    conversationHistory = []
   } = options;
 
   console.log(`[Context Enhancer] Getting enhanced context for: "${message.substring(0, 50)}..."`);
   
-  // Apply domain-specific synonym expansion to the query
-  const expandedQuery = await synonymExpander.expandQuery(message, domainId, 3);
-  const hasExpansion = expandedQuery !== message.toLowerCase().split(/\s+/).join(' ');
+  // Step 1: Reformulate query based on conversation context
+  const reformulated = QueryReformulator.reformulate(message, conversationHistory);
+  const searchQuery = reformulated.reformulated;
+  
+  if (reformulated.strategy !== 'direct') {
+    console.log(`[Context Enhancer] Query reformulated using ${reformulated.strategy} strategy`);
+    console.log(`  Original: "${message}"`);
+    console.log(`  Reformulated: "${searchQuery}"`);
+    console.log(`  Confidence: ${(reformulated.confidence * 100).toFixed(0)}%`);
+  }
+  
+  // Step 2: Apply domain-specific synonym expansion to the reformulated query
+  const expandedQuery = await synonymExpander.expandQuery(searchQuery, domainId, 3);
+  const hasExpansion = expandedQuery !== searchQuery.toLowerCase().split(/\s+/).join(' ');
   
   if (hasExpansion) {
     console.log(`[Context Enhancer] Expanded query: "${expandedQuery.substring(0, 100)}..."`);
@@ -125,7 +141,9 @@ export async function getEnhancedChatContext(
       totalChunks: sortedChunks.length,
       averageSimilarity: avgSimilarity,
       hasHighConfidence,
-      contextSummary
+      contextSummary,
+      reformulatedQuery: searchQuery,
+      queryStrategy: reformulated.strategy
     };
     
   } catch (error) {
@@ -183,7 +201,7 @@ function generateContextSummary(chunks: ContextChunk[]): string {
 /**
  * Format chunks for inclusion in chat prompt
  */
-export function formatChunksForPrompt(chunks: ContextChunk[]): string {
+export function formatChunksForPrompt(chunks: ContextChunk[], includeConfidenceGuide: boolean = true): string {
   if (chunks.length === 0) {
     return 'No relevant information found.';
   }
@@ -195,26 +213,40 @@ export function formatChunksForPrompt(chunks: ContextChunk[]): string {
   
   let formatted = '';
   
+  // Add confidence guide for the AI
+  if (includeConfidenceGuide) {
+    formatted += '## CONFIDENCE GUIDE FOR RESPONSES:\n';
+    formatted += '- HIGH confidence (>75%): Present these products/info directly and confidently\n';
+    formatted += '- MEDIUM confidence (55-75%): Present with "These might be suitable" or "Based on what you described"\n';
+    formatted += '- LOW confidence (<55%): Only use as supporting context, ask clarifying questions\n\n';
+  }
+  
   if (highConfidence.length > 0) {
-    formatted += '## Highly Relevant Information:\n\n';
+    formatted += '## HIGH CONFIDENCE - Present these directly:\n\n';
     formatted += highConfidence.map((c, i) => 
-      `### Source ${i + 1}: ${c.title || 'Product Information'} (${(c.similarity * 100).toFixed(0)}% match)\n${c.content}\nURL: ${c.url}\n`
+      `### Product ${i + 1}: ${c.title || 'Product Information'} [${(c.similarity * 100).toFixed(0)}% match]\n${c.content}\nURL: ${c.url}\n`
     ).join('\n---\n\n');
   }
   
   if (mediumConfidence.length > 0) {
-    formatted += '\n\n## Additional Context:\n\n';
+    formatted += '\n\n## MEDIUM CONFIDENCE - Present as suggestions:\n\n';
     formatted += mediumConfidence.map((c, i) => 
-      `### Source ${highConfidence.length + i + 1}: ${c.title || 'Related Information'}\n${c.content.substring(0, 500)}...\n`
+      `### Option ${highConfidence.length + i + 1}: ${c.title || 'Related Product'} [${(c.similarity * 100).toFixed(0)}% match]\n${c.content.substring(0, 500)}...\nURL: ${c.url}\n`
     ).join('\n---\n\n');
   }
   
-  if (lowConfidence.length > 0 && chunks.length < 5) {
-    formatted += '\n\n## Potentially Related:\n\n';
+  if (lowConfidence.length > 0 && chunks.length < 10) {
+    formatted += '\n\n## LOW CONFIDENCE - Use only as context:\n\n';
     formatted += lowConfidence.map(c => 
-      `- ${c.title}: ${c.content.substring(0, 200)}...\n`
+      `- ${c.title}: ${c.content.substring(0, 200)}... [${(c.similarity * 100).toFixed(0)}%]\n`
     ).join('');
   }
+  
+  // Add summary
+  formatted += '\n\n## SUMMARY:\n';
+  formatted += `- Found ${highConfidence.length} highly relevant products\n`;
+  formatted += `- Found ${mediumConfidence.length} possibly relevant products\n`;
+  formatted += `- Total context items: ${chunks.length}\n`;
   
   return formatted;
 }

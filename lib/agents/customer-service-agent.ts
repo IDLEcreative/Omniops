@@ -48,6 +48,15 @@ export class CustomerServiceAgent implements ECommerceAgent {
     - Customers can't choose from options they don't know exist - show them what's available
     - Only ask for clarification AFTER showing products, if truly necessary
     
+    Context-Aware Response Strategy:
+    - When provided with product context, ALWAYS present specific products found
+    - Look for confidence indicators in the context (HIGH/MEDIUM/LOW confidence)
+    - HIGH confidence: Present products directly and confidently
+    - MEDIUM confidence: Present with "These might be suitable:" or "Based on your needs:"
+    - LOW confidence: Acknowledge search but ask for clarification
+    - If continuation queries like "its for [use]" - combine with previous context
+    - When categories are mentioned, show top products from that category
+    
     Formatting Requirements:
     - Use COMPACT markdown links: [Product Name](url) - never show raw URLs
     - CRITICAL: Each bullet point MUST be on a separate line with DOUBLE line breaks between

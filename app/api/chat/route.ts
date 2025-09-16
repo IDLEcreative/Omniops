@@ -331,6 +331,9 @@ export async function POST(request: NextRequest) {
         },
         async () => {
           try {
+            // First fetch conversation history for context
+            const conversationHistory = await historyPromise;
+            
             // Use our enhanced context retrieval that gets 10-15 chunks
             const enhancedContext = await getEnhancedChatContext(
               message,
@@ -339,7 +342,8 @@ export async function POST(request: NextRequest) {
               {
                 enableSmartSearch: true,
                 minChunks: 20,  // Increased from 10 to 20 for better recall
-                maxChunks: 25   // Maximum context window (increased from 15)
+                maxChunks: 25,   // Maximum context window (increased from 15)
+                conversationHistory: conversationHistory as Array<{ role: string; content: string }>
               }
             );
             
@@ -347,7 +351,9 @@ export async function POST(request: NextRequest) {
               totalChunks: enhancedContext.totalChunks,
               avgSimilarity: enhancedContext.averageSimilarity,
               hasHighConfidence: enhancedContext.hasHighConfidence,
-              contextSummary: enhancedContext.contextSummary
+              contextSummary: enhancedContext.contextSummary,
+              reformulatedQuery: enhancedContext.reformulatedQuery,
+              queryStrategy: enhancedContext.queryStrategy
             });
             
             // Return chunks in the expected format
