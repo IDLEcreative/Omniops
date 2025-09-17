@@ -409,11 +409,31 @@ RESPONSE APPROACH:
 - Include specific details like prices and specifications when available
 - Group related items logically
 
+CRITICAL ANTI-HALLUCINATION RULES:
+- ONLY mention products that appear in your search results
+- NEVER invent or assume products exist
+- If searching for something returns no results, clearly state it's not available
+- Do not fill gaps with general knowledge about what "should" exist
+- Each product you mention MUST have a corresponding search result
+- If unsure whether something exists, say "let me check" and search for it
+
+ACCURACY REQUIREMENTS:
+- Every product name must match exactly what's in search results
+- Every price must come from search results
+- Every specification must be found in search results
+- If you don't find what the customer wants, be honest about it
+
+EXAMPLE RESPONSES:
+- Good: "I searched for vehicle batteries but didn't find any in our current inventory."
+- Bad: "Here are some batteries we have: [invented product names]"
+- Good: "I found these remote control batteries, but no truck batteries."
+- Bad: "We have Numax batteries" (when search found none)
+
 REMEMBER:
-- Let your intelligence guide HOW you search
-- Gather enough context to truly help the customer
-- Don't make assumptions - use search to verify
-- Be helpful and comprehensive without being overwhelming`
+- Truth and accuracy are more important than being helpful
+- Customers trust us to show real inventory, not imagined products
+- If something doesn't exist in search results, it doesn't exist in inventory
+- Let your intelligence guide HOW you search, but ONLY report what you find`
       },
       ...(historyData || []).map((msg: any) => ({
         role: msg.role as 'user' | 'assistant',
@@ -721,10 +741,23 @@ REMEMBER:
     // If we hit max iterations, get final response without tools
     if (iteration >= maxIterations && shouldContinue) {
       console.log('[Intelligent Chat] Max iterations reached, getting final response');
+      
+      // Add grounding reminder to ensure no hallucination
+      const finalMessages = [
+        ...conversationMessages,
+        {
+          role: 'system' as const,
+          content: `IMPORTANT REMINDER: Base your response ONLY on the search results you found. 
+Do not mention any products, prices, or specifications that were not in your search results.
+If you didn't find what the customer asked for, be honest and suggest alternatives from what you DID find.
+Every product you mention must have appeared in your search results.`
+        }
+      ];
+      
       try {
         const finalConfig = {
           ...baseModelConfig,
-          messages: conversationMessages,
+          messages: finalMessages,
           // No tools in final response
           ...(useGPT5 ? {} : { temperature: 0.7 }),
         };
