@@ -683,6 +683,320 @@ export interface MemoryMonitorOptions {
   enablePrediction?: boolean;     // enable memory usage prediction
 }
 
+// Dependency Analyzer Types
+export interface ModuleImport {
+  specifier: string;         // The import specifier (e.g., './utils', 'lodash')
+  source: string;           // Original source code
+  type: ImportType;         // Type of import
+  line: number;             // Line number in file
+  column: number;           // Column number in file
+  isExternal: boolean;      // Is it an external package
+  isRelative: boolean;      // Is it a relative import
+  resolvedPath?: string;    // Resolved absolute path
+  named?: string[];         // Named imports
+  default?: string;         // Default import name
+  namespace?: string;       // Namespace import name
+  dynamic?: boolean;        // Is it a dynamic import
+  conditional?: boolean;    // Is it conditional (inside if, try, etc)
+}
+
+export type ImportType = 'es6' | 'commonjs' | 'amd' | 'dynamic' | 'require' | 'import_meta';
+
+export interface ModuleExport {
+  name: string;             // Export name
+  type: ExportType;         // Type of export
+  line: number;             // Line number in file
+  column: number;           // Column number in file
+  source: string;           // Original source code
+  isDefault?: boolean;      // Is it default export
+  isReexport?: boolean;     // Is it a re-export
+  from?: string;            // Re-export source
+}
+
+export type ExportType = 'named' | 'default' | 'namespace' | 'assignment';
+
+export interface DependencyNode {
+  id: string;               // Unique identifier (file path)
+  path: string;             // Absolute file path
+  relativePath: string;     // Relative path from project root
+  name: string;             // File/module name
+  type: ModuleType;         // Type of module
+  size: number;             // File size in bytes
+  lines: number;            // Lines of code
+  imports: ModuleImport[];  // All imports in this module
+  exports: ModuleExport[];  // All exports in this module
+  dependencies: string[];   // Direct dependencies (file paths)
+  dependents: string[];     // Direct dependents (file paths)
+  isEntryPoint: boolean;    // Is it an entry point
+  isExternal: boolean;      // Is it an external package
+  lastModified?: number;    // Last modified timestamp
+  cyclicDependencies?: string[]; // Files this participates in cycles with
+}
+
+export type ModuleType = 'typescript' | 'javascript' | 'json' | 'css' | 'sass' | 'less' | 'image' | 'other';
+
+export interface DependencyGraph {
+  nodes: Map<string, DependencyNode>;
+  edges: DependencyEdge[];
+  entryPoints: string[];
+  externalPackages: Set<string>;
+  cycles: DependencyCycle[];
+  stats: DependencyStats;
+}
+
+export interface DependencyEdge {
+  from: string;             // Source file path
+  to: string;               // Target file path
+  type: DependencyType;     // Type of dependency
+  weight: number;           // Weight/strength of dependency (import count)
+  imports: ModuleImport[];  // Specific imports that create this edge
+  conditional: boolean;     // Is dependency conditional
+  dynamic: boolean;         // Is dependency loaded dynamically
+}
+
+export type DependencyType = 'static' | 'dynamic' | 'conditional' | 'type_only' | 'dev_only';
+
+export interface DependencyCycle {
+  id: string;               // Unique cycle identifier
+  nodes: string[];          // Files participating in cycle
+  edges: string[];          // Dependency chain (from -> to)
+  length: number;           // Cycle length
+  severity: CycleSeverity;  // How severe is this cycle
+  impact: number;           // Impact score (0-100)
+  suggestions: string[];    // How to break this cycle
+}
+
+export type CycleSeverity = 'low' | 'medium' | 'high' | 'critical';
+
+export interface ImpactAnalysis {
+  file: string;             // File being analyzed
+  directImpact: string[];   // Files that directly import this
+  indirectImpact: string[]; // Files that indirectly depend on this
+  totalImpact: number;      // Total number of affected files
+  riskScore: number;        // Risk score (0-100) if this file changes
+  criticalPaths: string[][]; // Critical paths through dependency graph
+  suggestions: string[];     // Recommendations for reducing impact
+}
+
+export interface UnusedDependency {
+  package: string;          // Package name
+  type: 'dependency' | 'devDependency' | 'peerDependency';
+  declaredIn: string;       // package.json location
+  reason: UnusedReason;     // Why it's considered unused
+  confidence: number;       // Confidence level (0-1)
+  potentialUsage: string[]; // Where it might be used
+  lastUsed?: string;        // Last known usage location
+  suggestions: string[];    // What to do about it
+}
+
+export type UnusedReason = 
+  | 'never_imported'        // Never imported anywhere
+  | 'only_type_imports'     // Only used for types
+  | 'only_dev_imports'      // Only used in dev/test files
+  | 'conditional_imports'   // Only conditionally imported
+  | 'dynamic_only';         // Only dynamically imported
+
+export interface BoundaryViolation {
+  id: string;               // Unique violation identifier
+  type: ViolationType;      // Type of boundary violation
+  severity: 'low' | 'medium' | 'high' | 'critical';
+  from: string;             // Source file
+  to: string;               // Target file
+  rule: string;             // Rule that was violated
+  description: string;      // Human-readable description
+  suggestion: string;       // How to fix it
+  line?: number;            // Line number where violation occurs
+  import?: ModuleImport;    // The problematic import
+}
+
+export type ViolationType = 
+  | 'layer_violation'       // Importing from wrong layer
+  | 'circular_dependency'   // Circular dependency
+  | 'direct_external'       // Direct import of external in wrong layer
+  | 'missing_barrel'        // Should use barrel export
+  | 'deep_import';          // Importing deep into module structure
+
+export interface DependencyStats {
+  totalFiles: number;
+  totalDependencies: number;
+  totalExternalPackages: number;
+  averageDependencies: number;
+  maxDependencies: number;
+  circularDependencies: number;
+  fanIn: {                  // Files with most dependents
+    max: number;
+    avg: number;
+    files: Array<{ file: string; count: number }>;
+  };
+  fanOut: {                 // Files with most dependencies
+    max: number;
+    avg: number;
+    files: Array<{ file: string; count: number }>;
+  };
+  depth: {                  // Dependency depth analysis
+    max: number;
+    avg: number;
+    distribution: Record<number, number>;
+  };
+  bundleSize: {             // Estimated bundle size impact
+    total: number;          // Total size in bytes
+    byFile: Map<string, number>;
+    byPackage: Map<string, number>;
+  };
+}
+
+export interface DependencyAnalyzerOptions {
+  rootPath?: string;                    // Root path to analyze
+  includeGlobs?: string[];             // Files to include
+  excludeGlobs?: string[];             // Files to exclude
+  followSymlinks?: boolean;            // Follow symbolic links
+  maxDepth?: number;                   // Maximum directory depth
+  includeNodeModules?: boolean;        // Include node_modules analysis
+  includeTests?: boolean;              // Include test files
+  packageJsonPath?: string;            // Path to package.json
+  tsconfigPath?: string;               // Path to tsconfig.json
+  
+  // Analysis options
+  detectCircularDependencies?: boolean; // Enable circular dependency detection
+  analyzeImpact?: boolean;             // Enable impact analysis
+  findUnusedDependencies?: boolean;    // Enable unused dependency detection
+  checkBoundaryViolations?: boolean;   // Check architectural boundaries
+  calculateBundleSize?: boolean;       // Estimate bundle size impact
+  enableCaching?: boolean;             // Enable analysis caching
+  cacheDir?: string;                   // Cache directory
+  
+  // Boundary rules (architectural constraints)
+  boundaryRules?: BoundaryRule[];      // Custom boundary rules
+  layers?: LayerDefinition[];          // Application layers
+  
+  // Performance options
+  maxFiles?: number;                   // Maximum files to analyze
+  enableWorkers?: boolean;             // Use worker threads for parsing
+  maxWorkers?: number;                 // Maximum worker threads
+  memoryLimit?: number;                // Memory limit in MB
+  
+  // Output options
+  generateVisualization?: boolean;     // Generate visualization data
+  exportFormats?: ExportFormat[];     // Export formats to generate
+  verbose?: boolean;                   // Verbose logging
+}
+
+export interface BoundaryRule {
+  name: string;
+  description: string;
+  from: string | RegExp;              // Source pattern
+  to: string | RegExp;                // Target pattern
+  allowed: boolean;                   // Is this dependency allowed
+  severity: 'low' | 'medium' | 'high' | 'critical';
+  message?: string;                   // Custom error message
+}
+
+export interface LayerDefinition {
+  name: string;
+  pattern: string | RegExp;
+  dependencies?: string[];            // Allowed layer dependencies
+  description?: string;
+}
+
+export type ExportFormat = 'json' | 'csv' | 'dot' | 'mermaid' | 'html' | 'd3';
+
+export interface VisualizationData {
+  nodes: VisualizationNode[];
+  links: VisualizationLink[];
+  clusters: VisualizationCluster[];
+  metadata: {
+    totalNodes: number;
+    totalLinks: number;
+    maxDepth: number;
+    entryPoints: string[];
+    cycles: number;
+  };
+}
+
+export interface VisualizationNode {
+  id: string;
+  name: string;
+  group: string;                      // Grouping for visualization
+  size: number;                       // Node size (based on file size or dependencies)
+  level: number;                      // Depth level in graph
+  type: ModuleType;
+  isEntryPoint: boolean;
+  inCycle: boolean;
+  fanIn: number;                      // Number of incoming dependencies
+  fanOut: number;                     // Number of outgoing dependencies
+  color?: string;                     // Custom color
+  icon?: string;                      // Icon identifier
+}
+
+export interface VisualizationLink {
+  source: string;
+  target: string;
+  weight: number;                     // Link weight (number of imports)
+  type: DependencyType;
+  dynamic: boolean;
+  conditional: boolean;
+  color?: string;                     // Custom color
+  style?: 'solid' | 'dashed' | 'dotted';
+}
+
+export interface VisualizationCluster {
+  id: string;
+  name: string;
+  nodes: string[];
+  type: 'directory' | 'cycle' | 'layer' | 'package';
+  color?: string;
+}
+
+export interface DependencyReport {
+  summary: {
+    totalFiles: number;
+    totalDependencies: number;
+    externalPackages: number;
+    circularDependencies: number;
+    unusedDependencies: number;
+    boundaryViolations: number;
+    riskScore: number;                // Overall risk score (0-100)
+    healthGrade: 'A' | 'B' | 'C' | 'D' | 'F';
+    analysisTime: number;            // Analysis duration in ms
+  };
+  
+  stats: DependencyStats;
+  graph: DependencyGraph;
+  cycles: DependencyCycle[];
+  unusedDependencies: UnusedDependency[];
+  boundaryViolations: BoundaryViolation[];
+  impactAnalysis: ImpactAnalysis[];
+  
+  recommendations: {
+    immediate: string[];              // Critical issues to fix now
+    refactoring: string[];           // Refactoring suggestions
+    architecture: string[];          // Architectural improvements
+    performance: string[];           // Performance optimizations
+    maintenance: string[];           // Maintainability improvements
+  };
+  
+  visualization?: VisualizationData;
+  
+  exportData?: {
+    json?: string;
+    csv?: string;
+    dot?: string;                    // GraphViz DOT format
+    mermaid?: string;                // Mermaid diagram
+    html?: string;                   // Interactive HTML report
+  };
+  
+  generatedAt: number;
+  options: DependencyAnalyzerOptions;
+  metadata: {
+    projectPath: string;
+    packageJsonPath?: string;
+    tsconfigPath?: string;
+    gitHash?: string;                // Current git commit hash
+    nodeVersion: string;
+    analyzerVersion: string;
+  };
+}
+
 export interface MemoryStatistics {
   totalSamples: number;
   timespan: {

@@ -53,6 +53,15 @@ export {
   loadTester
 } from './load-tester';
 
+// Dependency Analyzer exports
+export {
+  DependencyAnalyzer,
+  createDependencyAnalyzer,
+  analyzeDependencies,
+  quickDependencyAnalysis,
+  dependencyAnalyzer
+} from './dependency-analyzer';
+
 // Type exports
 export type {
   PerformanceMetrics,
@@ -123,7 +132,33 @@ export type {
   LoadTestResult,
   LoadTestOptions,
   LoadTestStats,
-  ConnectionPoolStats
+  ConnectionPoolStats,
+  ModuleImport,
+  ModuleExport,
+  ImportType,
+  ExportType,
+  DependencyNode,
+  ModuleType,
+  DependencyGraph,
+  DependencyEdge,
+  DependencyType,
+  DependencyCycle,
+  CycleSeverity,
+  ImpactAnalysis,
+  UnusedDependency,
+  UnusedReason,
+  BoundaryViolation,
+  ViolationType,
+  DependencyStats,
+  DependencyAnalyzerOptions,
+  BoundaryRule,
+  LayerDefinition,
+  ExportFormat,
+  VisualizationData,
+  VisualizationNode,
+  VisualizationLink,
+  VisualizationCluster,
+  DependencyReport
 } from './types';
 
 /**
@@ -137,6 +172,7 @@ export { createLogAnalyzer as quickLogAnalyzer, analyzeLogFile as quickAnalyzeFi
 export { traceFunction as quickTrace, executionTracer as tracer } from './execution-tracer';
 export { createMemoryMonitor as quickMemoryMonitor, memoryMonitor as monitor, quickMemoryCheck as quickMemory } from './memory-monitor';
 export { createLoadTester as quickLoadTester, loadTest as quickLoadTest, loadTester as tester } from './load-tester';
+export { createDependencyAnalyzer as quickDependencyAnalyzer, analyzeDependencies as quickAnalyzeDependencies, dependencyAnalyzer as analyzer } from './dependency-analyzer';
 
 /**
  * Usage Examples:
