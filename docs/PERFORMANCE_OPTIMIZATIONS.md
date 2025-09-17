@@ -292,6 +292,14 @@ psql -c "SELECT * FROM pg_stat_user_tables WHERE tablename = 'page_embeddings';"
 2. Schedule regular VACUUM FULL
 3. Monitor with pg_stat_user_tables
 
+## Related Documentation
+
+- [NPX_TOOLS_GUIDE.md](./NPX_TOOLS_GUIDE.md) - Complete guide for all monitoring and optimization tools
+- [PERFORMANCE_IMPROVEMENTS.md](./PERFORMANCE_IMPROVEMENTS.md) - Performance analysis findings
+- [DATABASE_CLEANUP.md](./DATABASE_CLEANUP.md) - Database cleanup procedures
+- [SUPABASE_SCHEMA.md](./SUPABASE_SCHEMA.md) - Database schema reference
+- [CLAUDE.md](../CLAUDE.md) - Project guidelines and configuration
+
 ## Contact
 
 For performance issues or questions:

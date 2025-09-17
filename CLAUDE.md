@@ -59,6 +59,17 @@ npx tsx test-database-cleanup.ts clean              # Clean all scraped data
 npx tsx test-database-cleanup.ts clean --domain=X   # Clean specific domain
 npx tsx test-database-cleanup.ts clean --dry-run    # Preview cleanup
 
+# Performance Monitoring & Optimization
+# See docs/NPX_TOOLS_GUIDE.md for monitoring tools
+# See docs/ALL_NPX_TOOLS_REFERENCE.md for COMPLETE list of 100+ NPX tools
+npx tsx monitor-embeddings-health.ts check          # Run health check
+npx tsx monitor-embeddings-health.ts auto           # Run auto-maintenance
+npx tsx monitor-embeddings-health.ts watch          # Start continuous monitoring
+npx tsx optimize-chunk-sizes.ts analyze             # Analyze chunk sizes
+npx tsx optimize-chunk-sizes.ts optimize            # Optimize oversized chunks
+npx tsx batch-rechunk-embeddings.ts --force         # Batch process oversized chunks
+npx tsx simple-rechunk.ts                           # Simple sequential rechunking
+
 # Dependencies
 npm run check:deps       # Check for dependency issues
 npm run check:all        # Run all checks (deps + lint + typecheck)
