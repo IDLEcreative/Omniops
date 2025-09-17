@@ -5,14 +5,15 @@
 
 // Increment this version whenever search logic changes
 // This ensures old cached results are invalidated
-export const SEARCH_CACHE_VERSION = '2.0.0';
+export const SEARCH_CACHE_VERSION = '3.0.0';
 
 // Version history for tracking changes
 export const VERSION_HISTORY = {
   '1.0.0': 'Initial cache implementation',
   '1.1.0': 'Added product enhancement logic',
   '1.2.0': 'Improved metadata search',
-  '2.0.0': 'Added short query detection for better brand/keyword searches'
+  '2.0.0': 'Added short query detection for better brand/keyword searches',
+  '3.0.0': 'Fixed Supabase OR limitation by using multiple queries'
 };
 
 /**

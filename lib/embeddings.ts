@@ -491,13 +491,56 @@ export async function searchSimilarContent(
         
         console.log(`[SHORT QUERY] Searching for "${query}" in domain ${domainData.id}`);
         
-        // Direct database search
-        const { data: searchResults, error } = await supabase
+        // Try multiple queries if needed to get all results
+        let allResults: any[] = [];
+        
+        // Search in title first (most specific)
+        const { data: titleResults } = await supabase
           .from('scraped_pages')
           .select('url, title, content, metadata')
           .eq('domain_id', domainData.id)
-          .or(searchConditions.join(','))
-          .limit(1000); // Get all matching results
+          .ilike('title', `%${query}%`)
+          .limit(500);
+        
+        if (titleResults) allResults.push(...titleResults);
+        
+        // Then search in URL
+        const { data: urlResults } = await supabase
+          .from('scraped_pages')
+          .select('url, title, content, metadata')
+          .eq('domain_id', domainData.id)
+          .ilike('url', `%${query.toLowerCase()}%`)
+          .limit(500);
+        
+        if (urlResults) {
+          // Add only unique results
+          urlResults.forEach((result: any) => {
+            if (!allResults.find(r => r.url === result.url)) {
+              allResults.push(result);
+            }
+          });
+        }
+        
+        // Finally search in content if we need more results
+        if (allResults.length < 200) {
+          const { data: contentResults } = await supabase
+            .from('scraped_pages')
+            .select('url, title, content, metadata')
+            .eq('domain_id', domainData.id)
+            .ilike('content', `%${query}%`)
+            .limit(300);
+          
+          if (contentResults) {
+            contentResults.forEach((result: any) => {
+              if (!allResults.find(r => r.url === result.url)) {
+                allResults.push(result);
+              }
+            });
+          }
+        }
+        
+        const searchResults = allResults;
+        const error = null;
 
         if (!error && searchResults && searchResults.length > 0) {
           // Prioritize product pages but include all results
