@@ -1,203 +1,562 @@
-# Enhanced Scraper System Integration Tests
+# Integration Tests Directory
 
-This directory contains comprehensive integration tests for the enhanced scraping system that validate the complete workflow from content extraction to AI optimization, pattern learning, rate limiting, and data storage.
+End-to-end integration tests for the Customer Service Agent application, validating complete system workflows, cross-component interactions, and real-world scenarios.
 
 ## Overview
 
-The integration tests ensure that all components of the enhanced scraping system work together correctly:
+The integration tests ensure that all components work together correctly as a complete system. These tests validate entire user journeys, API integrations, database operations, and external service interactions using realistic scenarios and comprehensive data flows.
 
-- **AI Content Extraction** - Token optimization, semantic chunking, metadata generation
-- **Pattern Learning** - Domain-specific pattern detection and reuse  
-- **Rate Limiting** - Adaptive throttling, circuit breakers, backoff strategies
-- **Content Deduplication** - Similarity detection, template patterns, compression
-- **Configuration Management** - Preset loading, runtime overrides, hot reload
-- **E-commerce Extraction** - Product data extraction with structured data support
+## Directory Structure
 
-## Test Structure
-
-### Main Test File
-- `enhanced-scraper-system.test.ts` - Main integration test suite with comprehensive scenarios
-
-### Helper Files  
-- `integration-test-helpers.ts` - Utilities for creating test data, mocks, and validation
-- `integration-setup.js` - Test environment setup and configuration
-- `global-setup.js` - One-time setup before all tests
-- `global-teardown.js` - Cleanup after all tests complete
-
-### Configuration Files
-- `jest.integration.config.js` - Jest configuration optimized for integration tests
-- `jest.env.js` - Environment variables for testing
+```
+__tests__/integration/
+├── README.md                           # This documentation
+├── enhanced-scraper-system.test.ts     # Main scraping system integration tests
+├── woocommerce-schema-fix.test.ts      # WooCommerce schema validation tests
+└── utils/
+    ├── integration-setup.js            # Test environment setup
+    ├── integration-test-helpers.ts     # Test utilities and helpers
+    ├── global-setup.js                 # One-time global setup
+    └── global-teardown.js              # Global cleanup
+```
 
 ## Test Categories
 
-### 1. E-commerce Scraping with AI Optimization
-Tests the complete pipeline from HTML extraction to AI optimization:
+### Enhanced Scraper System (`enhanced-scraper-system.test.ts`)
 
-```typescript
-// Tests token reduction, semantic chunking, metadata generation
-const optimizedContent = await AIContentExtractor.extractOptimized(testHTML, testURL);
-expect(optimizedContent.compressionRatio).toBeGreaterThan(0.1);
-```
+Comprehensive end-to-end tests for the AI-powered web scraping and content processing system.
 
-**Validates:**
-- Token reduction of 30-70%
-- Semantic chunk generation
-- Metadata creation (summary, key facts, Q&A pairs)
+#### Key Test Areas
+
+**1. E-commerce Scraping with AI Optimization**
+- Complete pipeline from HTML extraction to AI optimization
+- Token reduction and compression validation
+- Semantic chunking and metadata generation
 - Performance benchmarks (< 30 seconds processing)
-- Memory efficiency (< 100MB additional usage)
+- Memory efficiency monitoring (< 100MB additional usage)
 
-### 2. Pattern Learning Flow
-Tests the learning and application of extraction patterns:
-
-```typescript
-// First scrape learns patterns
-await PatternLearner.learnFromExtraction(url, products, extractionData);
-
-// Second scrape uses learned patterns for faster extraction
-const patterns = await PatternLearner.getPatterns(url);
-const result = await PatternLearner.applyPatterns(url, $);
-```
-
-**Validates:**
-- Pattern confidence scoring
-- Pattern merging and updating
+**2. Pattern Learning Flow**
+- Pattern detection and learning from extraction data
+- Pattern application for improved extraction efficiency
 - Cross-domain pattern recommendations
-- Performance improvement over time
+- Performance improvement measurement over time
 
-### 3. Rate Limiting Integration  
-Tests sophisticated rate limiting with multiple strategies:
-
-```typescript
-// Multiple rapid requests trigger throttling
-const responses = await Promise.all(requests);
-const rateLimitedCount = responses.filter(r => !r.allowed).length;
-expect(rateLimitedCount).toBeGreaterThan(0);
-```
-
-**Validates:**
-- Token bucket algorithm
-- Exponential backoff on 429 errors
-- Circuit breaker activation
+**3. Rate Limiting Integration**
+- Token bucket algorithm validation
+- Exponential backoff on rate limit errors
+- Circuit breaker activation and recovery
 - Adaptive throttling based on response times
 - Anti-detection measures (user agent rotation, timing randomization)
 
-### 4. Configuration Management
-Tests preset loading and runtime configuration:
+**4. Content Deduplication**
+- Similarity detection between content pieces
+- Template pattern recognition
+- Content compression and optimization
+- Duplicate content handling strategies
 
-```typescript
-const fastConfig = getCrawlerConfig('fast');
-const carefulConfig = getCrawlerConfig('careful');
-expect(fastConfig.maxConcurrency).toBeGreaterThan(carefulConfig.maxConcurrency);
-```
-
-**Validates:**
-- Preset configurations (fast, careful, ecommerce, etc.)
+**5. Configuration Management**
+- Preset configurations (fast, careful, ecommerce)
 - Environment variable overrides
-- AI optimization settings
-- Memory and performance tuning
+- Runtime configuration changes
+- AI optimization settings validation
 
-### 5. Complete Pipeline Test
-Tests the entire workflow end-to-end:
-
-```typescript
-// Rate limiting → AI optimization → Product extraction → Deduplication → Pattern learning
-const pipeline = await runCompletePipeline(testHTML, testURL);
-expect(pipeline.totalTime).toBeLessThan(15000);
-```
-
-**Validates:**
-- Data flow between components
-- Error handling and recovery
-- Performance benchmarks
-- Memory efficiency
-- Output structure compliance
-
-### 6. Migration Tool Test
-Tests optimization of existing scraped data:
+#### Example Test Scenarios
 
 ```typescript
-// Optimize existing unoptimized data
-const optimizedContent = await AIContentExtractor.extractOptimized(existingData.content, existingData.url);
-expect(optimizedContent.compressionRatio).toBeGreaterThan(0.1);
+describe('Enhanced Scraper System Integration', () => {
+  it('should complete full e-commerce scraping pipeline', async () => {
+    const testHTML = TestDataGenerator.generateEcommerceHTML(3)
+    const testURL = 'https://test-ecommerce.com/products'
+
+    // Full pipeline: Rate limiting → AI optimization → Product extraction → Deduplication
+    const startTime = performance.now()
+    
+    // 1. Check rate limiting
+    const rateLimitCheck = await rateLimiter.checkLimit(testURL)
+    expect(rateLimitCheck.allowed).toBe(true)
+    
+    // 2. AI optimization
+    const optimizedContent = await AIContentExtractor.extractOptimized(
+      testHTML, 
+      testURL
+    )
+    expect(optimizedContent.compressionRatio).toBeGreaterThan(0.1)
+    
+    // 3. Product extraction
+    const products = await EcommerceExtractor.extractProducts(
+      optimizedContent.content, 
+      testURL
+    )
+    expect(products).toHaveLength(3)
+    
+    // 4. Pattern learning
+    await PatternLearner.learnFromExtraction(testURL, products, {
+      selectors: optimizedContent.selectors,
+      confidence: 0.95
+    })
+    
+    const totalTime = performance.now() - startTime
+    expect(totalTime).toBeLessThan(15000) // 15 seconds max
+  })
+
+  it('should handle error recovery and fallbacks', async () => {
+    // Simulate various failure scenarios
+    const scenarios = [
+      { type: 'openai_timeout', service: 'OpenAI', expectedFallback: true },
+      { type: 'supabase_connection', service: 'Supabase', expectedFallback: true },
+      { type: 'rate_limit_exceeded', service: 'RateLimit', expectedFallback: false }
+    ]
+
+    for (const scenario of scenarios) {
+      const result = await runPipelineWithError(scenario)
+      
+      if (scenario.expectedFallback) {
+        expect(result.completed).toBe(true)
+        expect(result.usedFallback).toBe(true)
+      } else {
+        expect(result.completed).toBe(false)
+        expect(result.error).toContain(scenario.type)
+      }
+    }
+  })
+})
 ```
 
-**Validates:**
-- Batch processing capabilities
-- Token reduction for existing data
-- Migration report generation
-- Performance statistics
+### WooCommerce Integration (`woocommerce-schema-fix.test.ts`)
+
+Tests for WooCommerce API integration, product synchronization, and schema validation.
+
+#### Key Test Areas
+
+**1. Product Schema Validation**
+- WooCommerce product data structure validation
+- Price formatting and currency handling
+- Inventory status and stock management
+- Product variations and attributes
+
+**2. API Integration**
+- REST API authentication and authorization
+- Product catalog synchronization
+- Order processing and tracking
+- Customer data management
+- Webhook handling for real-time updates
+
+**3. Data Migration**
+- Legacy data format conversion
+- Schema updates and migrations
+- Data integrity validation
+- Rollback procedures
+
+#### Example Test Scenarios
+
+```typescript
+describe('WooCommerce Integration', () => {
+  it('should synchronize product catalog correctly', async () => {
+    const mockProducts = createMockWooCommerceProducts(10)
+    
+    // Mock WooCommerce API responses
+    setupWooCommerceMocks(mockProducts)
+    
+    // Synchronize products
+    const syncResult = await woocommerceSync.synchronizeProducts()
+    
+    expect(syncResult.totalProducts).toBe(10)
+    expect(syncResult.successfulSync).toBe(10)
+    expect(syncResult.errors).toHaveLength(0)
+    
+    // Verify database storage
+    const storedProducts = await database.getProducts()
+    expect(storedProducts).toHaveLength(10)
+    
+    // Verify schema compliance
+    storedProducts.forEach(product => {
+      expect(product).toMatchSchema(productSchema)
+    })
+  })
+
+  it('should handle API rate limiting gracefully', async () => {
+    // Simulate rate limiting responses
+    setupWooCommerceRateLimitMocks()
+    
+    const startTime = performance.now()
+    const result = await woocommerceSync.synchronizeProducts()
+    const endTime = performance.now()
+    
+    // Should complete despite rate limiting
+    expect(result.completed).toBe(true)
+    expect(result.rateLimitRetries).toBeGreaterThan(0)
+    
+    // Should take longer due to backoff
+    expect(endTime - startTime).toBeGreaterThan(5000)
+  })
+})
+```
 
 ## Test Data Generation
 
-The test suite includes sophisticated data generators:
+### Realistic Data Factories
 
-### E-commerce HTML Generator
 ```typescript
-TestDataFactory.createEcommerceProductHTML({
-  productCount: 3,
-  includeStructuredData: true,
-  platform: 'woocommerce',
-  includeReviews: true
-});
+class TestDataGenerator {
+  // E-commerce HTML with structured data
+  static generateEcommerceHTML(productCount: number = 1): string {
+    return `<!DOCTYPE html>
+      <html>
+        <head>
+          <title>E-commerce Test Store</title>
+          <script type="application/ld+json">
+            ${this.generateProductJsonLD(productCount)}
+          </script>
+        </head>
+        <body>
+          ${this.generateProductHTML(productCount)}
+        </body>
+      </html>`
+  }
+
+  // Template variations for pattern learning
+  static createTemplateVariations(count: number): string[] {
+    const templates = [
+      '<div class="product"><h1 class="title">{name}</h1><span class="price">{price}</span></div>',
+      '<article class="item"><h2 class="name">{name}</h2><div class="cost">{price}</div></article>',
+      '<section class="product-card"><h3 class="product-name">{name}</h3><p class="price-tag">{price}</p></section>'
+    ]
+    
+    return Array.from({ length: count }, (_, i) => 
+      this.populateTemplate(templates[i % templates.length], {
+        name: `Product ${i + 1}`,
+        price: `$${(20 + i * 5).toFixed(2)}`
+      })
+    )
+  }
+
+  // Large content for performance testing
+  static createLargeContentHTML(sectionCount: number): string {
+    const sections = Array.from({ length: sectionCount }, (_, i) => `
+      <section id="section-${i}">
+        <h2>Section ${i + 1}</h2>
+        <p>${this.generateLongText(200)}</p>
+        <ul>
+          ${Array.from({ length: 10 }, (_, j) => `<li>Item ${j + 1}</li>`).join('')}
+        </ul>
+      </section>
+    `).join('')
+    
+    return `<html><body>${sections}</body></html>`
+  }
+}
 ```
 
-Creates realistic e-commerce HTML with:
-- Structured data (JSON-LD, microdata)
-- Multiple product variations
-- Platform-specific markup
-- Navigation, headers, footers
-- Customer reviews and ratings
+### Mock Service Factories
 
-### Template Variation Generator
 ```typescript
-TestDataFactory.createTemplateVariations(5);
+class MockServiceFactory {
+  // Comprehensive Supabase mock
+  static createSupabaseMock() {
+    return {
+      from: jest.fn((table) => ({
+        select: jest.fn(() => ({ data: mockData[table] || [], error: null })),
+        insert: jest.fn((data) => ({ data: [data], error: null })),
+        update: jest.fn((data) => ({ data: [data], error: null })),
+        delete: jest.fn(() => ({ data: null, error: null })),
+        eq: jest.fn(() => this),
+        in: jest.fn(() => this),
+        gte: jest.fn(() => this),
+        lte: jest.fn(() => this),
+        order: jest.fn(() => this),
+        limit: jest.fn(() => this),
+        single: jest.fn(() => ({ data: mockData.single, error: null }))
+      })),
+      auth: {
+        getUser: jest.fn(() => ({ data: { user: mockUser }, error: null }))
+      }
+    }
+  }
+
+  // OpenAI API mock with realistic responses
+  static createOpenAIMock() {
+    return {
+      chat: {
+        completions: {
+          create: jest.fn().mockResolvedValue({
+            choices: [{
+              message: {
+                content: JSON.stringify({
+                  summary: 'Product page with 3 items',
+                  keyFacts: ['E-commerce site', 'Product catalog', 'In stock items'],
+                  questions: [
+                    { q: 'What products are available?', a: 'Amazing Products 1, 2, and 3' },
+                    { q: 'What are the prices?', a: 'Ranging from £29.99 to £49.99' }
+                  ]
+                })
+              }
+            }],
+            usage: { total_tokens: 150 }
+          })
+        }
+      },
+      embeddings: {
+        create: jest.fn().mockResolvedValue({
+          data: [{ embedding: Array(1536).fill(0.1) }]
+        })
+      }
+    }
+  }
+
+  // Redis mock for caching and rate limiting
+  static createRedisMock() {
+    const storage = new Map()
+    
+    return {
+      get: jest.fn((key) => Promise.resolve(storage.get(key) || null)),
+      set: jest.fn((key, value, options) => {
+        storage.set(key, value)
+        if (options?.EX) {
+          setTimeout(() => storage.delete(key), options.EX * 1000)
+        }
+        return Promise.resolve('OK')
+      }),
+      del: jest.fn((key) => {
+        const existed = storage.has(key)
+        storage.delete(key)
+        return Promise.resolve(existed ? 1 : 0)
+      }),
+      incr: jest.fn((key) => {
+        const current = parseInt(storage.get(key) || '0')
+        const incremented = current + 1
+        storage.set(key, incremented.toString())
+        return Promise.resolve(incremented)
+      }),
+      expire: jest.fn(() => Promise.resolve(1))
+    }
+  }
+}
 ```
-
-Generates similar content with variations for pattern detection testing.
-
-### Large Content Generator
-```typescript
-TestDataFactory.createLargeContentHTML(100);
-```
-
-Creates large documents for performance testing.
-
-## Mock Services
-
-All external services are comprehensively mocked:
-
-### Supabase Mock
-- Full CRUD operations
-- Query builder chain methods
-- Error simulation capabilities
-
-### Redis Mock  
-- In-memory storage simulation
-- Full Redis command support
-- Expiration handling
-
-### OpenAI Mock
-- Chat completions with structured responses
-- Embeddings generation
-- Token usage tracking
 
 ## Performance Monitoring
 
-Built-in performance measurement utilities:
+### Built-in Performance Utilities
 
 ```typescript
-PerformanceHelpers.startTimer('ai-optimization');
-const optimizedContent = await AIContentExtractor.extractOptimized(html, url);
-const duration = PerformanceHelpers.endTimer('ai-optimization');
+class PerformanceHelpers {
+  private static timers = new Map<string, number>()
+  private static metrics = new Map<string, number[]>()
+
+  static startTimer(operation: string): void {
+    this.timers.set(operation, performance.now())
+  }
+
+  static endTimer(operation: string): number {
+    const startTime = this.timers.get(operation)
+    if (!startTime) throw new Error(`Timer ${operation} was not started`)
+    
+    const duration = performance.now() - startTime
+    this.timers.delete(operation)
+    
+    // Store metric for analysis
+    const existing = this.metrics.get(operation) || []
+    existing.push(duration)
+    this.metrics.set(operation, existing)
+    
+    return duration
+  }
+
+  static async measureAsync<T>(
+    operation: string, 
+    fn: () => Promise<T>
+  ): Promise<{ result: T; duration: number }> {
+    this.startTimer(operation)
+    const result = await fn()
+    const duration = this.endTimer(operation)
+    return { result, duration }
+  }
+
+  static getMemoryUsage() {
+    const usage = process.memoryUsage()
+    return {
+      heapUsed: Math.round(usage.heapUsed / 1024 / 1024), // MB
+      heapTotal: Math.round(usage.heapTotal / 1024 / 1024), // MB
+      external: Math.round(usage.external / 1024 / 1024), // MB
+      rss: Math.round(usage.rss / 1024 / 1024) // MB
+    }
+  }
+
+  static getMetricsSummary() {
+    const summary: Record<string, any> = {}
+    
+    for (const [operation, times] of this.metrics.entries()) {
+      const sorted = times.sort((a, b) => a - b)
+      summary[operation] = {
+        count: times.length,
+        min: Math.round(sorted[0]),
+        max: Math.round(sorted[sorted.length - 1]),
+        avg: Math.round(times.reduce((a, b) => a + b, 0) / times.length),
+        median: Math.round(sorted[Math.floor(sorted.length / 2)]),
+        p95: Math.round(sorted[Math.floor(sorted.length * 0.95)])
+      }
+    }
+    
+    return summary
+  }
+}
 ```
 
-**Tracks:**
-- Processing times per operation
-- Memory usage before/after operations
-- Compression ratios achieved
-- Token reduction statistics
+### Performance Benchmarks
 
-## Running the Tests
+```typescript
+describe('Performance Benchmarks', () => {
+  it('should meet processing time requirements', async () => {
+    const testSizes = [
+      { name: 'small', html: TestDataGenerator.createLargeContentHTML(10) },
+      { name: 'medium', html: TestDataGenerator.createLargeContentHTML(50) },
+      { name: 'large', html: TestDataGenerator.createLargeContentHTML(100) }
+    ]
+
+    const benchmarks = {
+      small: { maxTime: 5000, maxMemory: 50 },   // 5s, 50MB
+      medium: { maxTime: 15000, maxMemory: 100 }, // 15s, 100MB
+      large: { maxTime: 30000, maxMemory: 200 }   // 30s, 200MB
+    }
+
+    for (const testCase of testSizes) {
+      const benchmark = benchmarks[testCase.name]
+      const initialMemory = PerformanceHelpers.getMemoryUsage()
+
+      const { duration } = await PerformanceHelpers.measureAsync(
+        `processing-${testCase.name}`,
+        async () => {
+          return await AIContentExtractor.extractOptimized(
+            testCase.html, 
+            `https://example.com/${testCase.name}`
+          )
+        }
+      )
+
+      const finalMemory = PerformanceHelpers.getMemoryUsage()
+      const memoryIncrease = finalMemory.heapUsed - initialMemory.heapUsed
+
+      expect(duration).toBeLessThan(benchmark.maxTime)
+      expect(memoryIncrease).toBeLessThan(benchmark.maxMemory)
+    }
+  })
+})
+```
+
+## Error Simulation & Recovery
+
+### Comprehensive Error Testing
+
+```typescript
+describe('Error Handling and Recovery', () => {
+  const errorScenarios = [
+    {
+      name: 'OpenAI API Timeout',
+      setup: () => mockOpenAI.chat.completions.create.mockRejectedValue(
+        new Error('Request timeout')
+      ),
+      expectedBehavior: 'fallback_to_basic_extraction'
+    },
+    {
+      name: 'Supabase Connection Lost',
+      setup: () => mockSupabase.from.mockImplementation(() => {
+        throw new Error('Connection lost')
+      }),
+      expectedBehavior: 'retry_with_exponential_backoff'
+    },
+    {
+      name: 'Rate Limit Exceeded',
+      setup: () => setupRateLimitExceeded(),
+      expectedBehavior: 'queue_for_later_processing'
+    },
+    {
+      name: 'Memory Pressure',
+      setup: () => simulateMemoryPressure(),
+      expectedBehavior: 'reduce_batch_size'
+    }
+  ]
+
+  errorScenarios.forEach(scenario => {
+    it(`should handle ${scenario.name} gracefully`, async () => {
+      scenario.setup()
+
+      const result = await runPipelineWithErrorHandling(testHTML, testURL)
+
+      expect(result.error).toBeNull()
+      expect(result.recoveryStrategy).toBe(scenario.expectedBehavior)
+      expect(result.completed).toBe(true)
+    })
+  })
+})
+```
+
+## Test Configuration
+
+### Jest Configuration
+
+```javascript
+// jest.integration.config.js
+module.exports = {
+  testEnvironment: 'node',
+  testMatch: ['**/__tests__/integration/**/*.test.ts'],
+  setupFilesAfterEnv: [
+    '<rootDir>/__tests__/utils/integration-setup.js'
+  ],
+  globalSetup: '<rootDir>/__tests__/utils/global-setup.js',
+  globalTeardown: '<rootDir>/__tests__/utils/global-teardown.js',
+  testTimeout: 120000, // 2 minutes
+  maxWorkers: '50%',
+  collectCoverageFrom: [
+    'lib/**/*.ts',
+    'app/api/**/*.ts',
+    '!**/*.d.ts'
+  ],
+  coverageThreshold: {
+    global: {
+      branches: 60,
+      functions: 60,
+      lines: 70,
+      statements: 70
+    }
+  }
+}
+```
+
+### Environment Setup
+
+```javascript
+// integration-setup.js
+beforeAll(async () => {
+  // Set test environment
+  process.env.NODE_ENV = 'test'
+  process.env.DISABLE_REAL_REQUESTS = 'true'
+  
+  // Initialize mock services
+  global.mockSupabase = MockServiceFactory.createSupabaseMock()
+  global.mockOpenAI = MockServiceFactory.createOpenAIMock()
+  global.mockRedis = MockServiceFactory.createRedisMock()
+  
+  // Setup test database
+  await setupTestDatabase()
+})
+
+afterAll(async () => {
+  // Cleanup test data
+  await cleanupTestDatabase()
+  
+  // Reset environment
+  delete process.env.DISABLE_REAL_REQUESTS
+})
+
+beforeEach(() => {
+  // Reset all mocks
+  jest.clearAllMocks()
+  
+  // Reset performance metrics
+  PerformanceHelpers.reset()
+})
+```
+
+## Running Integration Tests
 
 ### Basic Commands
 
@@ -205,168 +564,153 @@ const duration = PerformanceHelpers.endTimer('ai-optimization');
 # Run all integration tests
 npm run test:integration
 
-# Run with coverage
-npm run test:integration:coverage  
+# Run with coverage reporting
+npm run test:integration:coverage
 
-# Run in watch mode
+# Run in watch mode for development
 npm run test:integration:watch
+
+# Run specific test file
+npm run test:integration -- enhanced-scraper-system.test.ts
+
+# Run with verbose output
+npm run test:integration -- --verbose
 
 # Run all tests (unit + integration)
 npm run test:all
 ```
 
-### Individual Test Categories
+### Advanced Options
 
 ```bash
-# Run specific test describe block
-npm run test:integration -- --testNamePattern="E-commerce Scraping"
-
-# Run with verbose output
-npm run test:integration -- --verbose
-
-# Run with specific timeout
+# Run with custom timeout
 npm run test:integration -- --testTimeout=180000
+
+# Run specific test pattern
+npm run test:integration -- --testNamePattern="E-commerce"
+
+# Run with memory profiling
+node --max-old-space-size=4096 npm run test:integration
+
+# Run with performance monitoring
+npm run test:integration -- --detectOpenHandles --forceExit
 ```
 
-## Configuration Options
+## Debugging & Troubleshooting
 
-### Test Timeouts
-- Individual tests: 2 minutes (120,000ms)
-- Global timeout: Configurable per test
+### Common Issues
 
-### Memory Limits
-- Node.js max old space: 4GB
-- Test worker processes: 50% of available cores
-
-### Coverage Thresholds
-- Functions: 60%
-- Lines: 70% 
-- Branches: 60%
-- Statements: 70%
-
-## Environment Variables
-
-Required for testing:
+**1. Test Timeouts**
 ```bash
-NEXT_PUBLIC_SUPABASE_URL=https://test.supabase.co
-SUPABASE_SERVICE_ROLE_KEY=test-service-role-key
-REDIS_URL=redis://localhost:6379
-OPENAI_API_KEY=test-openai-key
-NODE_ENV=test
-DISABLE_REAL_REQUESTS=true
+# Increase timeout for complex operations
+npm run test:integration -- --testTimeout=300000
 ```
 
-## Debugging Tests
+**2. Memory Issues**
+```bash
+# Increase Node.js memory limit
+node --max-old-space-size=8192 npm run test:integration
+```
 
-### Enable Detailed Logging
+**3. Mock Synchronization**
 ```typescript
-// In test files, enable console output
+// Ensure mocks match real service behavior
 beforeEach(() => {
-  console.log = originalConsoleLog; // Re-enable console.log
-});
+  // Reset and reconfigure mocks
+  jest.clearAllMocks()
+  setupRealisticMocks()
+})
 ```
 
-### Memory Analysis
-```typescript
-// Check memory usage during tests
-const memoryUsage = PerformanceHelpers.getMemoryUsage();
-console.log('Memory usage:', memoryUsage);
-```
+### Performance Analysis
 
-### Performance Profiling
 ```typescript
-// Measure specific operations
-const result = await PerformanceHelpers.measureAsync('operation-name', async () => {
-  return await someExpensiveOperation();
-});
-console.log('Operation took:', result.duration, 'ms');
+// Add detailed performance logging
+afterEach(() => {
+  const metrics = PerformanceHelpers.getMetricsSummary()
+  const memory = PerformanceHelpers.getMemoryUsage()
+  
+  console.log('Test Performance Metrics:', metrics)
+  console.log('Memory Usage:', memory)
+})
 ```
 
 ## Continuous Integration
 
-The integration tests are designed to run reliably in CI/CD environments:
-
-- **Deterministic**: All external dependencies are mocked
-- **Fast**: Optimized for CI with proper timeouts
-- **Reliable**: No flaky tests or network dependencies  
-- **Comprehensive**: Full system coverage
-- **Memory Efficient**: Automatic cleanup and garbage collection
-
-### CI Configuration Example
+### CI/CD Configuration
 
 ```yaml
-# .github/workflows/test.yml
-- name: Run Integration Tests
-  run: |
-    npm run test:integration:coverage
-    npm run test:all
-  env:
-    NODE_ENV: test
-    CI: true
+# .github/workflows/integration-tests.yml
+name: Integration Tests
+on: [push, pull_request]
+
+jobs:
+  integration-tests:
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    
+    services:
+      redis:
+        image: redis:7
+        options: >-
+          --health-cmd "redis-cli ping"
+          --health-interval 10s
+          --health-timeout 5s
+          --health-retries 5
+
+    steps:
+      - uses: actions/checkout@v3
+      - uses: actions/setup-node@v3
+        with:
+          node-version: '18'
+          cache: 'npm'
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Run integration tests
+        run: npm run test:integration:coverage
+        env:
+          NODE_ENV: test
+          DISABLE_REAL_REQUESTS: true
+          CI: true
+
+      - name: Upload coverage
+        uses: codecov/codecov-action@v3
+        with:
+          directory: ./coverage
 ```
 
 ## Best Practices
 
-### Writing New Integration Tests
+### Writing Integration Tests
 
-1. **Use the test data factories** for consistent, realistic test data
-2. **Mock all external services** to ensure deterministic behavior
-3. **Validate complete workflows** rather than individual functions
-4. **Include performance assertions** for critical operations
-5. **Test error scenarios** and edge cases
-6. **Use validation helpers** for consistent structure checking
+1. **Test Complete Workflows**: Focus on end-to-end scenarios rather than individual functions
+2. **Use Realistic Data**: Generate data that matches production scenarios
+3. **Mock External Services**: Ensure tests are deterministic and fast
+4. **Include Performance Assertions**: Validate response times and resource usage
+5. **Test Error Scenarios**: Verify graceful handling of failures
+6. **Validate Data Flow**: Ensure data moves correctly between components
 
 ### Performance Considerations
 
-1. **Set reasonable timeouts** based on operation complexity
-2. **Monitor memory usage** to prevent memory leaks
-3. **Use batch operations** where possible for efficiency
-4. **Clean up resources** in afterEach/afterAll hooks
-5. **Measure and assert performance** for critical paths
+1. **Set Appropriate Timeouts**: Based on operation complexity
+2. **Monitor Resource Usage**: Track memory and CPU consumption
+3. **Use Parallel Processing**: Where safe and beneficial
+4. **Clean Up Resources**: Prevent memory leaks and handle cleanup
+5. **Batch Operations**: Group related operations for efficiency
 
 ### Maintenance
 
-1. **Update test data** when system requirements change
-2. **Review performance benchmarks** periodically
-3. **Add new test scenarios** for new features
-4. **Keep mocks synchronized** with real service APIs
-5. **Monitor test execution times** and optimize slow tests
+1. **Regular Updates**: Keep test data and scenarios current
+2. **Performance Monitoring**: Track test execution times over time
+3. **Mock Accuracy**: Ensure mocks stay synchronized with real services
+4. **Documentation**: Keep test documentation up to date
+5. **Coverage Analysis**: Monitor and improve test coverage
 
-## Contributing
+## Related Documentation
 
-When adding new integration tests:
-
-1. Follow the existing test structure and naming conventions
-2. Use the provided test utilities and helpers
-3. Include comprehensive assertions and validations
-4. Add performance measurements for new operations
-5. Update this README with new test categories or features
-
-## Troubleshooting
-
-### Common Issues
-
-**Tests timing out:**
-- Increase `testTimeout` in jest.integration.config.js
-- Check for unresolved promises or infinite loops
-
-**Memory errors:**
-- Increase `--max-old-space-size` in jest.env.js
-- Add more frequent garbage collection calls
-
-**Mock issues:**
-- Verify mock setup in integration-setup.js  
-- Check that mocks match the expected API signatures
-
-**Performance test failures:**
-- Review performance benchmarks for reasonableness
-- Consider CI environment performance differences
-
-### Getting Help
-
-1. Check the console output for detailed error messages
-2. Enable verbose logging with `--verbose` flag
-3. Review the test helpers and validation utilities
-4. Examine successful tests for patterns and examples
-
-The integration test suite provides confidence that the enhanced scraping system works correctly as a complete system, handling real-world scenarios with proper error handling, performance optimization, and data consistency.
+- [Main Tests README](/Users/jamesguy/Omniops/__tests__/README.md) - Overall testing strategy
+- [API Tests](/Users/jamesguy/Omniops/__tests__/api/README.md) - API endpoint tests
+- [Library Tests](/Users/jamesguy/Omniops/__tests__/lib/README.md) - Business logic tests
+- [System Architecture](/Users/jamesguy/Omniops/docs/ARCHITECTURE.md) - Overall system design

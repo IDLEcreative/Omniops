@@ -1,24 +1,50 @@
-# AI Customer Service Agent
+# OmniOps AI Customer Service Platform
 
-A modern, AI-powered customer service chat widget that can be embedded on any website. Built with Next.js, TypeScript, and integrated with various AI providers for intelligent customer support.
+An intelligent, AI-powered customer service platform that provides embeddable chat widgets for businesses. Built with Next.js 15, React 19, TypeScript, and Supabase, featuring advanced web scraping, WooCommerce integration, and privacy-compliant data handling.
 
-## 🚀 Features
+**Key Differentiators:**
+- **Intelligent Context Awareness**: Advanced RAG (Retrieval-Augmented Generation) system with semantic search
+- **Multi-Language Support**: Native support for 40+ languages with cultural context understanding
+- **E-commerce Integration**: Deep WooCommerce integration with customer verification and order tracking
+- **Privacy-First Architecture**: GDPR/CCPA compliant with comprehensive data protection
+- **Enterprise-Grade Scalability**: Multi-tenant architecture with domain-based isolation
 
-### Core Capabilities
-- **AI-Powered Conversations**: Intelligent responses using OpenAI GPT-4 or Anthropic Claude
-- **Embeddable Widget**: Simple script tag integration for any website
-- **Job Queue System**: Redis-based background processing for scalable operations
-- **Real-time Processing**: Asynchronous job processing with status tracking
-- **Multi-tenant Architecture**: Support multiple clients with isolated data
-- **Component-based UI**: Modern React components with TypeScript
+## Key Features
 
-### Technical Features
-- **Next.js 15**: Latest React framework with App Router
-- **TypeScript**: Full type safety throughout the application
-- **Redis Queue**: Background job processing and caching
-- **Docker Support**: Containerized deployment with worker services
-- **API-First Design**: RESTful APIs for all functionality
-- **Component Library**: Reusable UI components with documentation
+### AI-Powered Intelligence
+- **Advanced Conversational AI**: Powered by OpenAI GPT-4 with contextual understanding
+- **Retrieval-Augmented Generation (RAG)**: Semantic search across website content and documentation
+- **Multi-Language Support**: Native support for 40+ languages with cultural context
+- **Smart Context Switching**: Automatically adapts responses based on customer intent and history
+- **Hallucination Prevention**: Built-in safeguards to ensure accurate, factual responses
+
+### E-commerce & Customer Management
+- **WooCommerce Deep Integration**: Real-time order tracking, customer verification, and inventory management
+- **Customer Verification System**: Email and order-based authentication for secure interactions
+- **Abandoned Cart Recovery**: Automated tracking and recovery workflows
+- **Order Management**: Complete order lifecycle support with status updates
+- **Inventory Awareness**: Real-time stock level integration and notifications
+
+### Website Intelligence & Content Management
+- **Intelligent Web Scraping**: Automated content discovery and indexing with Crawlee + Playwright
+- **Content Extraction**: Mozilla Readability-powered clean content extraction
+- **Semantic Search**: Vector embeddings for contextually relevant information retrieval
+- **Real-time Content Updates**: Automated refresh and synchronization of website content
+- **Duplicate Detection**: Advanced deduplication to maintain clean content databases
+
+### Enterprise Architecture
+- **Multi-Tenant Design**: Complete domain-based isolation with encrypted credential storage
+- **Scalable Infrastructure**: Redis-based job queues with horizontal scaling support
+- **Security-First**: AES-256 encryption, rate limiting, and comprehensive input validation
+- **GDPR/CCPA Compliance**: Built-in privacy controls with data export and deletion capabilities
+- **Performance Optimized**: Sub-300ms response times with intelligent caching strategies
+
+### Developer Experience
+- **Modern Tech Stack**: Next.js 15, React 19, TypeScript 5, Tailwind CSS
+- **Component Library**: Comprehensive UI component system with Radix UI primitives
+- **API-First Design**: RESTful APIs with OpenAPI documentation and Zod validation
+- **Testing Framework**: Complete test coverage with Jest, MSW, and React Testing Library
+- **Docker Support**: Full containerization with development and production configurations
 
 ## 📋 Table of Contents
 

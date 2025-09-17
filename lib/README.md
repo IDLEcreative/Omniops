@@ -10,26 +10,38 @@ The `/lib` directory contains the foundational modules that power our customer s
 
 ```
 lib/
-├── agents/                     # Modular agent layer
+├── agents/                     # AI agents (📋 see agents/README.md)
 │   ├── ecommerce-agent.ts     # Interface for provider agents
 │   ├── customer-service-agent.ts  # Generic main agent (user-facing)
+│   ├── domain-agnostic-agent.ts   # Universal business agent
 │   └── woocommerce-agent.ts   # WooCommerce-specific specialization
 ├── __mocks__/                    # Mock implementations for testing
 │   ├── supabase/               # Supabase mocks
 │   ├── woocommerce-full.ts     # WooCommerce API mocks
 │   └── woocommerce.ts          # WooCommerce mocks
-├── auth/                       # Authentication utilities
+├── auth/                       # Authentication utilities (📋 see auth/README.md)
 │   └── utils.ts               # Auth helper functions
 ├── examples/                   # Usage examples and demos
 │   ├── rate-limiter-usage.ts  # Rate limiter implementation examples
 │   └── scrape-own-site.ts     # Own site scraping examples
-├── repositories/               # Data access layer (empty - future use)
-├── services/                   # Business logic services (empty - future use)
-├── supabase/                   # Database clients and configuration
+├── integrations/               # External integrations (📋 see integrations/README.md)
+│   └── customer-scraping-integration.ts  # Customer scraping workflows
+├── monitoring/                 # Monitoring utilities (📋 see monitoring/README.md)
+│   ├── dashboard-data.ts      # Dashboard analytics
+│   └── scrape-monitor.ts      # Scraping operation monitoring
+├── queue/                      # Job queue system (📋 see queue/README.md)
+│   ├── index.ts               # Main exports and public API
+│   ├── queue-manager.ts       # Core queue management with BullMQ
+│   ├── job-processor.ts       # Job processing worker
+│   ├── queue-utils.ts         # Utility functions and monitoring
+│   └── scrape-queue.ts        # Specialized scraping queue
+├── supabase/                   # Database clients (📋 see supabase/README.md)
 │   ├── __mocks__/             # Supabase test mocks
 │   ├── client.ts              # Browser Supabase client
 │   └── server.ts              # Server Supabase client
-├── woocommerce-api/            # Structured WooCommerce API modules
+├── utils/                      # Utility functions (📋 see utils/README.md)
+│   └── domain-validator.ts    # Domain validation and security
+├── woocommerce-api/            # WooCommerce API (📋 see woocommerce-api/README.md)
 │   ├── customers.ts           # Customer operations
 │   ├── index.ts               # Main exports and API wrapper
 │   ├── orders.ts              # Order management
@@ -333,9 +345,16 @@ When adding new utilities to this directory:
 
 ## Related Documentation
 
-- [Supabase Integration Guide](./supabase/README.md)
-- [WooCommerce API Reference](./woocommerce-api/README.md)
-- [Authentication Utilities](./auth/README.md)
-- [Utility Functions](./utils/README.md)
+### Library Components
+- [AI Agents Documentation](./agents/README.md) - Intelligent customer service agents and prompt engineering
+- [Authentication Utilities](./auth/README.md) - Security, session management, and auth helpers
+- [External Integrations](./integrations/README.md) - Third-party service integrations and workflows
+- [Monitoring Utilities](./monitoring/README.md) - Performance monitoring, analytics, and observability
+- [Job Queue System](./queue/README.md) - Background job processing with Redis and BullMQ
+- [Supabase Integration Guide](./supabase/README.md) - Database clients and configuration
+- [Utility Functions](./utils/README.md) - Common utilities and helper functions
+- [WooCommerce API Reference](./woocommerce-api/README.md) - Complete WooCommerce REST API implementation
+
+### Project Documentation
 - [Project Architecture](../docs/ARCHITECTURE.md)
 - [API Reference](../docs/API.md)
