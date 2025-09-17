@@ -3,55 +3,30 @@ import { createServiceRoleClient } from '@/lib/supabase-server';
 import { telemetryManager } from '@/lib/chat-telemetry';
 import { z } from 'zod';
 
-export const runtime = 'nodejs';
-export const dynamic = 'force-dynamic';
-
-// Query parameters schema
+// Query parameter schema
 const QuerySchema = z.object({
   period: z.enum(['hour', 'day', 'week', 'month']).optional().default('day'),
   domain: z.string().optional(),
+  model: z.string().optional(),
   includeDetails: z.boolean().optional().default(false),
+  includeLive: z.boolean().optional().default(true),
 });
 
-// Authentication check - require API key or admin auth
-function authenticateRequest(request: NextRequest): boolean {
-  const authHeader = request.headers.get('authorization');
-  
-  // Check for API key in header
-  const apiKey = request.headers.get('x-api-key');
-  if (apiKey && apiKey === process.env.MONITORING_API_KEY) {
-    return true;
-  }
-  
-  // Check for Bearer token (admin auth)
-  if (authHeader?.startsWith('Bearer ')) {
-    const token = authHeader.substring(7);
-    // In production, verify this token against Supabase auth
-    return token === process.env.ADMIN_TOKEN;
-  }
-  
-  return false;
-}
-
+/**
+ * GET /api/monitoring/chat
+ * Get comprehensive chat telemetry and cost analytics
+ */
 export async function GET(request: NextRequest) {
   try {
-    // Authenticate request
-    if (!authenticateRequest(request)) {
-      return NextResponse.json(
-        { error: 'Unauthorized' },
-        { status: 401 }
-      );
-    }
-
-    // Parse query parameters
-    const searchParams = Object.fromEntries(request.nextUrl.searchParams);
-    const query = QuerySchema.parse({
-      period: searchParams.period,
-      domain: searchParams.domain,
-      includeDetails: searchParams.includeDetails === 'true',
+    const { searchParams } = new URL(request.url);
+    const params = QuerySchema.parse({
+      period: searchParams.get('period') || 'day',
+      domain: searchParams.get('domain') || undefined,
+      model: searchParams.get('model') || undefined,
+      includeDetails: searchParams.get('details') === 'true',
+      includeLive: searchParams.get('live') !== 'false',
     });
 
-    // Get Supabase client
     const supabase = await createServiceRoleClient();
     if (!supabase) {
       return NextResponse.json(
@@ -60,32 +35,44 @@ export async function GET(request: NextRequest) {
       );
     }
 
-    // Calculate time range based on period
+    // Calculate period boundaries
     const now = new Date();
-    const periodHours = {
-      hour: 1,
-      day: 24,
-      week: 168,
-      month: 720,
-    };
-    const hoursAgo = periodHours[query.period];
-    const startTime = new Date(now.getTime() - hoursAgo * 60 * 60 * 1000);
-
-    // Build query
-    let telemetryQuery = supabase
-      .from('chat_telemetry')
-      .select('*')
-      .gte('created_at', startTime.toISOString())
-      .order('created_at', { ascending: false });
-
-    if (query.domain) {
-      telemetryQuery = telemetryQuery.eq('domain', query.domain);
+    let startDate: Date;
+    
+    switch (params.period) {
+      case 'hour':
+        startDate = new Date(now.getTime() - 60 * 60 * 1000);
+        break;
+      case 'day':
+        startDate = new Date(now.getTime() - 24 * 60 * 60 * 1000);
+        break;
+      case 'week':
+        startDate = new Date(now.getTime() - 7 * 24 * 60 * 60 * 1000);
+        break;
+      case 'month':
+        startDate = new Date(now.getTime() - 30 * 24 * 60 * 60 * 1000);
+        break;
     }
 
-    const { data: telemetryData, error } = await telemetryQuery;
+    // Build query
+    let query = supabase
+      .from('chat_telemetry')
+      .select('*')
+      .gte('created_at', startDate.toISOString())
+      .order('created_at', { ascending: false });
+
+    if (params.domain) {
+      query = query.eq('domain', params.domain);
+    }
+
+    if (params.model) {
+      query = query.eq('model', params.model);
+    }
+
+    const { data: telemetryData, error } = await query;
 
     if (error) {
-      console.error('Failed to fetch telemetry data:', error);
+      console.error('Error fetching telemetry:', error);
       return NextResponse.json(
         { error: 'Failed to fetch telemetry data' },
         { status: 500 }
@@ -93,52 +80,160 @@ export async function GET(request: NextRequest) {
     }
 
     // Calculate aggregated metrics
-    const metrics = calculateMetrics(telemetryData || []);
-
-    // Get current active sessions from memory
-    const activeSessions = telemetryManager.getAllMetrics();
-
-    // Prepare response
-    const response: any = {
-      period: query.period,
-      timeRange: {
-        start: startTime.toISOString(),
-        end: now.toISOString(),
+    const metrics = {
+      period: params.period,
+      periodStart: startDate.toISOString(),
+      periodEnd: now.toISOString(),
+      
+      // Request statistics
+      totalRequests: telemetryData?.length || 0,
+      successfulRequests: telemetryData?.filter(t => t.success).length || 0,
+      failedRequests: telemetryData?.filter(t => !t.success).length || 0,
+      successRate: telemetryData?.length 
+        ? ((telemetryData.filter(t => t.success).length / telemetryData.length) * 100).toFixed(2) 
+        : 0,
+      
+      // Token usage
+      tokenUsage: {
+        totalInput: telemetryData?.reduce((sum, t) => sum + (t.input_tokens || 0), 0) || 0,
+        totalOutput: telemetryData?.reduce((sum, t) => sum + (t.output_tokens || 0), 0) || 0,
+        totalTokens: telemetryData?.reduce((sum, t) => sum + (t.total_tokens || 0), 0) || 0,
+        avgInputPerRequest: telemetryData?.length 
+          ? Math.round(telemetryData.reduce((sum, t) => sum + (t.input_tokens || 0), 0) / telemetryData.length)
+          : 0,
+        avgOutputPerRequest: telemetryData?.length
+          ? Math.round(telemetryData.reduce((sum, t) => sum + (t.output_tokens || 0), 0) / telemetryData.length)
+          : 0,
       },
-      summary: metrics,
-      activeSessions: {
-        count: activeSessions.length,
-        sessions: activeSessions.map(s => ({
-          sessionId: s.sessionId,
-          uptime: s.uptime,
-          iterations: s.iterations,
-          searches: s.searches,
-        })),
+      
+      // Cost analytics
+      cost: {
+        totalCostUSD: telemetryData?.reduce((sum, t) => sum + (t.cost_usd || 0), 0).toFixed(4) || '0.0000',
+        avgCostPerRequest: telemetryData?.length
+          ? (telemetryData.reduce((sum, t) => sum + (t.cost_usd || 0), 0) / telemetryData.length).toFixed(6)
+          : '0.000000',
+        maxRequestCost: Math.max(...(telemetryData?.map(t => t.cost_usd || 0) || [0])).toFixed(6),
+        minRequestCost: telemetryData?.length
+          ? Math.min(...telemetryData.filter(t => t.cost_usd > 0).map(t => t.cost_usd)).toFixed(6)
+          : '0.000000',
+        costPerHour: telemetryData?.length
+          ? ((telemetryData.reduce((sum, t) => sum + (t.cost_usd || 0), 0) / 
+              ((now.getTime() - startDate.getTime()) / (60 * 60 * 1000)))).toFixed(4)
+          : '0.0000',
+        projectedDailyCost: telemetryData?.length
+          ? ((telemetryData.reduce((sum, t) => sum + (t.cost_usd || 0), 0) / 
+              ((now.getTime() - startDate.getTime()) / (24 * 60 * 60 * 1000)))).toFixed(2)
+          : '0.00',
+        projectedMonthlyCost: telemetryData?.length
+          ? ((telemetryData.reduce((sum, t) => sum + (t.cost_usd || 0), 0) / 
+              ((now.getTime() - startDate.getTime()) / (30 * 24 * 60 * 60 * 1000)))).toFixed(2)
+          : '0.00',
       },
+      
+      // Performance metrics
+      performance: {
+        avgDurationMs: telemetryData?.length
+          ? Math.round(telemetryData.reduce((sum, t) => sum + (t.duration_ms || 0), 0) / telemetryData.length)
+          : 0,
+        medianDurationMs: telemetryData?.length
+          ? telemetryData.map(t => t.duration_ms || 0).sort((a, b) => a - b)[Math.floor(telemetryData.length / 2)]
+          : 0,
+        p95DurationMs: telemetryData?.length
+          ? telemetryData.map(t => t.duration_ms || 0).sort((a, b) => a - b)[Math.floor(telemetryData.length * 0.95)]
+          : 0,
+        avgIterations: telemetryData?.length
+          ? (telemetryData.reduce((sum, t) => sum + (t.iterations || 0), 0) / telemetryData.length).toFixed(2)
+          : '0',
+        avgSearches: telemetryData?.length
+          ? (telemetryData.reduce((sum, t) => sum + (t.search_count || 0), 0) / telemetryData.length).toFixed(2)
+          : '0',
+      },
+      
+      // Model breakdown
+      modelBreakdown: telemetryData?.reduce((acc, t) => {
+        const model = t.model || 'unknown';
+        if (!acc[model]) {
+          acc[model] = {
+            requests: 0,
+            tokens: 0,
+            cost: 0,
+            avgDuration: 0,
+            durations: [],
+          };
+        }
+        acc[model].requests++;
+        acc[model].tokens += t.total_tokens || 0;
+        acc[model].cost += t.cost_usd || 0;
+        acc[model].durations.push(t.duration_ms || 0);
+        return acc;
+      }, {} as Record<string, any>),
+      
+      // Domain breakdown (if not filtering by domain)
+      domainBreakdown: !params.domain ? telemetryData?.reduce((acc, t) => {
+        const domain = t.domain || 'unknown';
+        if (!acc[domain]) {
+          acc[domain] = {
+            requests: 0,
+            cost: 0,
+            tokens: 0,
+          };
+        }
+        acc[domain].requests++;
+        acc[domain].cost += t.cost_usd || 0;
+        acc[domain].tokens += t.total_tokens || 0;
+        return acc;
+      }, {} as Record<string, any>) : undefined,
     };
 
-    // Include detailed data if requested
-    if (query.includeDetails && telemetryData) {
-      response.details = {
-        recentSessions: telemetryData.slice(0, 20).map(session => ({
-          sessionId: session.session_id,
-          timestamp: session.created_at,
-          duration: session.duration_ms,
-          iterations: session.iterations,
-          searches: session.search_count,
-          results: session.total_results,
-          success: session.success,
-          error: session.error,
-        })),
-        topQueries: extractTopQueries(telemetryData),
-        errorSummary: extractErrorSummary(telemetryData),
+    // Calculate average durations for model breakdown
+    Object.keys(metrics.modelBreakdown || {}).forEach(model => {
+      const data = metrics.modelBreakdown[model];
+      data.avgDuration = data.durations.length 
+        ? Math.round(data.durations.reduce((a: number, b: number) => a + b, 0) / data.durations.length)
+        : 0;
+      data.cost = data.cost.toFixed(6);
+      delete data.durations; // Remove raw data from response
+    });
+
+    // Format domain breakdown costs
+    Object.keys(metrics.domainBreakdown || {}).forEach(domain => {
+      metrics.domainBreakdown[domain].cost = metrics.domainBreakdown[domain].cost.toFixed(6);
+    });
+
+    // Include live session data if requested
+    let liveMetrics = {};
+    if (params.includeLive) {
+      const liveAnalytics = telemetryManager.getCostAnalytics(
+        params.period === 'hour' ? 1 : 
+        params.period === 'day' ? 24 :
+        params.period === 'week' ? 168 : 720
+      );
+      liveMetrics = {
+        activeSessions: telemetryManager.getAllMetrics().sessions.length,
+        liveAnalytics,
       };
     }
+
+    // Get hourly trend data
+    const hourlyTrend = await getHourlyTrend(supabase, startDate, params.domain);
+
+    // Check for cost alerts
+    const costAlerts = await checkCostAlerts(supabase, params.domain);
+
+    const response = {
+      success: true,
+      metrics,
+      hourlyTrend,
+      costAlerts: costAlerts.filter(a => a.exceeded),
+      liveMetrics,
+      details: params.includeDetails ? telemetryData?.slice(0, 100) : undefined,
+      timestamp: now.toISOString(),
+    };
 
     return NextResponse.json(response);
 
   } catch (error) {
-    console.error('[Monitoring API] Error:', error);
+    console.error('Error in chat monitoring API:', error);
     
     if (error instanceof z.ZodError) {
       return NextResponse.json(
@@ -148,156 +243,170 @@ export async function GET(request: NextRequest) {
     }
     
     return NextResponse.json(
-      { error: 'Internal server error' },
+      { error: 'Failed to retrieve monitoring data' },
       { status: 500 }
     );
   }
 }
 
-function calculateMetrics(data: any[]) {
-  if (!data || data.length === 0) {
-    return {
-      totalSessions: 0,
-      successRate: 0,
-      avgDuration: 0,
-      medianDuration: 0,
-      p95Duration: 0,
-      avgSearches: 0,
-      avgResults: 0,
-      avgIterations: 0,
-      errorRate: 0,
-    };
-  }
-
-  const durations = data
-    .filter(d => d.duration_ms)
-    .map(d => d.duration_ms)
-    .sort((a, b) => a - b);
-
-  const successCount = data.filter(d => d.success).length;
-  const errorCount = data.filter(d => d.error).length;
-
-  return {
-    totalSessions: data.length,
-    successRate: (successCount / data.length * 100).toFixed(2) + '%',
-    avgDuration: Math.round(
-      durations.reduce((sum, d) => sum + d, 0) / durations.length || 0
-    ),
-    medianDuration: durations[Math.floor(durations.length / 2)] || 0,
-    p95Duration: durations[Math.floor(durations.length * 0.95)] || 0,
-    avgSearches: (
-      data.reduce((sum, d) => sum + (d.search_count || 0), 0) / data.length
-    ).toFixed(1),
-    avgResults: (
-      data.reduce((sum, d) => sum + (d.total_results || 0), 0) / data.length
-    ).toFixed(1),
-    avgIterations: (
-      data.reduce((sum, d) => sum + (d.iterations || 0), 0) / data.length
-    ).toFixed(1),
-    errorRate: (errorCount / data.length * 100).toFixed(2) + '%',
-  };
-}
-
-function extractTopQueries(data: any[]): any[] {
-  const queryMap = new Map<string, number>();
-  
-  data.forEach(session => {
-    if (session.searches && Array.isArray(session.searches)) {
-      session.searches.forEach((search: any) => {
-        if (search.query) {
-          const count = queryMap.get(search.query) || 0;
-          queryMap.set(search.query, count + 1);
-        }
-      });
-    }
-  });
-
-  return Array.from(queryMap.entries())
-    .sort((a, b) => b[1] - a[1])
-    .slice(0, 10)
-    .map(([query, count]) => ({ query, count }));
-}
-
-function extractErrorSummary(data: any[]): any {
-  const errors = data.filter(d => d.error);
-  const errorTypes = new Map<string, number>();
-  
-  errors.forEach(session => {
-    const errorType = session.error?.split(':')[0] || 'Unknown';
-    const count = errorTypes.get(errorType) || 0;
-    errorTypes.set(errorType, count + 1);
-  });
-
-  return {
-    total: errors.length,
-    types: Array.from(errorTypes.entries()).map(([type, count]) => ({
-      type,
-      count,
-      percentage: ((count / errors.length) * 100).toFixed(1) + '%',
-    })),
-  };
-}
-
-// POST endpoint for clearing old telemetry data
+/**
+ * POST /api/monitoring/chat
+ * Perform monitoring actions or set alerts
+ */
 export async function POST(request: NextRequest) {
   try {
-    // Authenticate request
-    if (!authenticateRequest(request)) {
+    const body = await request.json();
+    const { action, ...params } = body;
+
+    const supabase = await createServiceRoleClient();
+    if (!supabase) {
       return NextResponse.json(
-        { error: 'Unauthorized' },
-        { status: 401 }
+        { error: 'Database connection unavailable' },
+        { status: 503 }
       );
     }
 
-    const body = await request.json();
-    const action = body.action;
-
-    if (action === 'cleanup') {
-      const supabase = await createServiceRoleClient();
-      if (!supabase) {
-        return NextResponse.json(
-          { error: 'Database connection unavailable' },
-          { status: 503 }
-        );
-      }
-
-      // Call cleanup function
-      const { data, error } = await supabase.rpc('cleanup_old_telemetry');
+    switch (action) {
+      case 'set-alert':
+        return await setCoastAlert(supabase, params);
       
-      if (error) {
-        console.error('Failed to cleanup telemetry:', error);
-        return NextResponse.json(
-          { error: 'Failed to cleanup telemetry' },
-          { status: 500 }
-        );
-      }
-
-      return NextResponse.json({
-        message: 'Telemetry cleanup completed',
-        deletedCount: data,
-      });
-    }
-
-    if (action === 'clear-memory') {
-      // Clear old sessions from memory
-      telemetryManager.clearOldSessions(3600000); // 1 hour
+      case 'check-alerts':
+        const alerts = await checkCostAlerts(supabase, params.domain);
+        return NextResponse.json({ success: true, alerts });
       
-      return NextResponse.json({
-        message: 'Memory sessions cleared',
-        activeSessions: telemetryManager.getAllMetrics().length,
-      });
+      case 'get-summary':
+        const summary = await getCostSummary(supabase, params.domain, params.days || 7);
+        return NextResponse.json({ success: true, summary });
+      
+      case 'cleanup-old-data':
+        const cleanupResult = await cleanupOldTelemetry(supabase);
+        return NextResponse.json({ success: true, ...cleanupResult });
+      
+      default:
+        return NextResponse.json(
+          { error: `Unknown action: ${action}` },
+          { status: 400 }
+        );
     }
-
-    return NextResponse.json(
-      { error: 'Invalid action' },
-      { status: 400 }
-    );
 
   } catch (error) {
-    console.error('[Monitoring API] POST Error:', error);
+    console.error('Error in chat monitoring POST:', error);
     return NextResponse.json(
-      { error: 'Internal server error' },
+      { error: 'Failed to perform monitoring action' },
       { status: 500 }
     );
   }
+}
+
+// Helper functions
+
+async function getHourlyTrend(supabase: any, startDate: Date, domain?: string) {
+  let query = supabase
+    .from('chat_telemetry_hourly_costs')
+    .select('*')
+    .gte('hour', startDate.toISOString())
+    .order('hour', { ascending: false });
+
+  if (domain) {
+    // Need to query the base table for domain-specific hourly data
+    const { data } = await supabase
+      .from('chat_telemetry')
+      .select('created_at, cost_usd, input_tokens, output_tokens')
+      .eq('domain', domain)
+      .gte('created_at', startDate.toISOString());
+
+    // Group by hour manually
+    const hourlyData: Record<string, any> = {};
+    data?.forEach((row: any) => {
+      const hour = new Date(row.created_at);
+      hour.setMinutes(0, 0, 0);
+      const hourKey = hour.toISOString();
+      
+      if (!hourlyData[hourKey]) {
+        hourlyData[hourKey] = {
+          hour: hourKey,
+          requests: 0,
+          cost: 0,
+          input_tokens: 0,
+          output_tokens: 0,
+        };
+      }
+      
+      hourlyData[hourKey].requests++;
+      hourlyData[hourKey].cost += row.cost_usd || 0;
+      hourlyData[hourKey].input_tokens += row.input_tokens || 0;
+      hourlyData[hourKey].output_tokens += row.output_tokens || 0;
+    });
+
+    return Object.values(hourlyData).map(h => ({
+      ...h,
+      cost: h.cost.toFixed(6),
+    }));
+  }
+
+  const { data } = await query;
+  return data || [];
+}
+
+async function checkCostAlerts(supabase: any, domain?: string) {
+  const { data } = await supabase
+    .rpc('check_cost_thresholds');
+  
+  if (domain) {
+    return data?.filter((a: any) => !a.domain || a.domain === domain) || [];
+  }
+  
+  return data || [];
+}
+
+async function setCoastAlert(supabase: any, params: any) {
+  const { domain, alert_type, threshold_usd } = params;
+  
+  const { data, error } = await supabase
+    .from('chat_cost_alerts')
+    .upsert({
+      domain,
+      alert_type,
+      threshold_usd,
+      enabled: true,
+    }, {
+      onConflict: 'domain,alert_type'
+    });
+
+  if (error) {
+    return NextResponse.json(
+      { error: 'Failed to set cost alert', details: error },
+      { status: 500 }
+    );
+  }
+
+  return NextResponse.json({ success: true, alert: data });
+}
+
+async function getCostSummary(supabase: any, domain: string | undefined, days: number) {
+  const { data, error } = await supabase
+    .rpc('get_chat_cost_summary', { 
+      p_domain: domain || null, 
+      p_days: days 
+    });
+
+  if (error) {
+    throw error;
+  }
+
+  return data;
+}
+
+async function cleanupOldTelemetry(supabase: any) {
+  const { data, error } = await supabase
+    .rpc('cleanup_old_telemetry');
+
+  if (error) {
+    throw error;
+  }
+
+  return {
+    deletedCount: data,
+    message: `Cleaned up ${data} old telemetry records`,
+  };
 }

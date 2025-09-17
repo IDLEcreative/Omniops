@@ -16,6 +16,18 @@ interface SearchOperation {
   source: string;
 }
 
+interface TokenUsage {
+  input: number;
+  output: number;
+  total: number;
+  costUSD: number;
+}
+
+interface ModelPricing {
+  inputPricePerMillion: number;
+  outputPricePerMillion: number;
+}
+
 interface ChatSession {
   sessionId: string;
   startTime: number;
@@ -24,9 +36,12 @@ interface ChatSession {
   model: string;
   iterations: number;
   searches: SearchOperation[];
-  tokensUsed?: number;
+  tokensUsed?: number; // Deprecated - kept for compatibility
+  tokenUsage?: TokenUsage;
   finalResponse?: string;
   error?: string;
+  modelConfig?: any;
+  domain?: string;
 }
 
 /**
@@ -38,6 +53,14 @@ export class ChatTelemetry {
   private metricsEnabled: boolean;
   private detailedLogging: boolean;
   private supabase: any;
+  private static readonly MODEL_PRICING: Record<string, ModelPricing> = {
+    'gpt-5-mini': { inputPricePerMillion: 0.25, outputPricePerMillion: 2.00 },
+    'gpt-4.1': { inputPricePerMillion: 10.00, outputPricePerMillion: 30.00 },
+    'gpt-4-turbo': { inputPricePerMillion: 10.00, outputPricePerMillion: 30.00 },
+    'gpt-4': { inputPricePerMillion: 30.00, outputPricePerMillion: 60.00 },
+    'gpt-3.5-turbo': { inputPricePerMillion: 0.50, outputPricePerMillion: 1.50 },
+    'default': { inputPricePerMillion: 5.00, outputPricePerMillion: 15.00 }
+  };
 
   constructor(
     sessionId: string, 
@@ -46,6 +69,7 @@ export class ChatTelemetry {
       metricsEnabled?: boolean;
       detailedLogging?: boolean;
       persistToDatabase?: boolean;
+      domain?: string;
     } = {}
   ) {
     this.session = {
@@ -53,7 +77,8 @@ export class ChatTelemetry {
       startTime: Date.now(),
       model,
       iterations: 0,
-      searches: []
+      searches: [],
+      domain: options.domain
     };
     
     this.metricsEnabled = options.metricsEnabled ?? true;
@@ -128,6 +153,71 @@ export class ChatTelemetry {
   }
 
   /**
+   * Track token usage from OpenAI response
+   */
+  trackTokenUsage(usage: { prompt_tokens?: number; completion_tokens?: number; total_tokens?: number }) {
+    if (!usage) return;
+
+    const inputTokens = usage.prompt_tokens || 0;
+    const outputTokens = usage.completion_tokens || 0;
+    const totalTokens = usage.total_tokens || (inputTokens + outputTokens);
+    const costUSD = this.calculateCost(inputTokens, outputTokens);
+
+    // Update or accumulate token usage
+    if (this.session.tokenUsage) {
+      this.session.tokenUsage.input += inputTokens;
+      this.session.tokenUsage.output += outputTokens;
+      this.session.tokenUsage.total += totalTokens;
+      this.session.tokenUsage.costUSD += costUSD;
+    } else {
+      this.session.tokenUsage = {
+        input: inputTokens,
+        output: outputTokens,
+        total: totalTokens,
+        costUSD
+      };
+    }
+
+    // Keep deprecated field for compatibility
+    this.session.tokensUsed = this.session.tokenUsage.total;
+
+    this.log('info', 'ai', 'Token usage tracked', {
+      input: inputTokens,
+      output: outputTokens,
+      total: totalTokens,
+      costUSD: costUSD.toFixed(6),
+      cumulativeCost: this.session.tokenUsage.costUSD.toFixed(6)
+    });
+  }
+
+  /**
+   * Calculate cost based on model and token usage
+   */
+  private calculateCost(inputTokens: number, outputTokens: number): number {
+    const pricing = ChatTelemetry.MODEL_PRICING[this.session.model] || 
+                   ChatTelemetry.MODEL_PRICING['default'];
+    
+    const inputCost = (inputTokens / 1000000) * pricing.inputPricePerMillion;
+    const outputCost = (outputTokens / 1000000) * pricing.outputPricePerMillion;
+    
+    return inputCost + outputCost;
+  }
+
+  /**
+   * Set model configuration for tracking
+   */
+  setModelConfig(config: any) {
+    this.session.modelConfig = config;
+  }
+
+  /**
+   * Get current token usage and cost
+   */
+  getTokenUsage(): TokenUsage | undefined {
+    return this.session.tokenUsage;
+  }
+
+  /**
    * Complete the session and generate summary
    */
   async complete(finalResponse?: string, error?: string) {
@@ -179,8 +269,21 @@ export class ChatTelemetry {
         avgTime: `${avgSearchTime.toFixed(0)}ms`,
         breakdown: searchBreakdown
       },
+      tokens: this.session.tokenUsage ? {
+        input: this.session.tokenUsage.input,
+        output: this.session.tokenUsage.output,
+        total: this.session.tokenUsage.total,
+        costUSD: this.session.tokenUsage.costUSD.toFixed(6),
+        costBreakdown: {
+          inputCost: ((this.session.tokenUsage.input / 1000000) * 
+            (ChatTelemetry.MODEL_PRICING[this.session.model]?.inputPricePerMillion || 5)).toFixed(6),
+          outputCost: ((this.session.tokenUsage.output / 1000000) * 
+            (ChatTelemetry.MODEL_PRICING[this.session.model]?.outputPricePerMillion || 15)).toFixed(6)
+        }
+      } : undefined,
       success: !this.session.error,
-      error: this.session.error
+      error: this.session.error,
+      domain: this.session.domain
     };
   }
 
@@ -202,13 +305,30 @@ export class ChatTelemetry {
         search_count: this.session.searches.length,
         total_results: this.session.searches.reduce((sum, s) => sum + s.resultCount, 0),
         searches: this.session.searches,
+        // Token tracking
+        input_tokens: this.session.tokenUsage?.input,
+        output_tokens: this.session.tokenUsage?.output,
+        // total_tokens is a generated column, don't insert
+        cost_usd: this.session.tokenUsage?.costUSD,
+        tokens_used: this.session.tokenUsage?.total, // Deprecated field for compatibility
+        // Model configuration
+        model_config: this.session.modelConfig,
+        // Status
         success: !this.session.error,
         error: this.session.error,
-        logs: this.logBuffer
+        logs: this.logBuffer,
+        // Domain tracking
+        domain: this.session.domain
       });
 
     if (error) {
       console.error('Failed to persist telemetry:', error);
+    } else {
+      this.log('info', 'performance', 'Telemetry persisted to database', {
+        sessionId: this.session.sessionId,
+        tokenUsage: this.session.tokenUsage,
+        cost: this.session.tokenUsage?.costUSD.toFixed(6)
+      });
     }
   }
 
@@ -222,7 +342,11 @@ export class ChatTelemetry {
       iterations: this.session.iterations,
       searches: this.session.searches.length,
       totalResults: this.session.searches.reduce((sum, s) => sum + s.resultCount, 0),
-      logCount: this.logBuffer.length
+      logCount: this.logBuffer.length,
+      tokenUsage: this.session.tokenUsage,
+      estimatedCost: this.session.tokenUsage?.costUSD,
+      model: this.session.model,
+      domain: this.session.domain
     };
   }
 
@@ -254,6 +378,10 @@ class TelemetryManager {
   createSession(sessionId: string, model: string, options?: any): ChatTelemetry {
     const telemetry = new ChatTelemetry(sessionId, model, options);
     this.sessions.set(sessionId, telemetry);
+    
+    // Log session creation with model info
+    console.log(`[TelemetryManager] Created session ${sessionId} with model ${model}`);
+    
     return telemetry;
   }
 
@@ -273,10 +401,69 @@ class TelemetryManager {
 
   getAllMetrics() {
     const metrics = [];
+    let totalCost = 0;
+    let totalTokens = { input: 0, output: 0, total: 0 };
+    
     for (const [id, session] of this.sessions.entries()) {
-      metrics.push(session.getMetrics());
+      const sessionMetrics = session.getMetrics();
+      metrics.push(sessionMetrics);
+      
+      if (sessionMetrics.tokenUsage) {
+        totalCost += sessionMetrics.tokenUsage.costUSD;
+        totalTokens.input += sessionMetrics.tokenUsage.input;
+        totalTokens.output += sessionMetrics.tokenUsage.output;
+        totalTokens.total += sessionMetrics.tokenUsage.total;
+      }
     }
-    return metrics;
+    
+    return {
+      sessions: metrics,
+      summary: {
+        activeSessions: metrics.length,
+        totalCostUSD: totalCost,
+        totalTokens,
+        avgCostPerSession: metrics.length > 0 ? totalCost / metrics.length : 0
+      }
+    };
+  }
+
+  /**
+   * Get cost analytics for monitoring
+   */
+  getCostAnalytics(hoursBack: number = 24) {
+    const cutoffTime = Date.now() - (hoursBack * 60 * 60 * 1000);
+    const relevantSessions = [];
+    
+    for (const [id, session] of this.sessions.entries()) {
+      const metrics = session.getMetrics();
+      if (session['session'].startTime >= cutoffTime) {
+        relevantSessions.push(metrics);
+      }
+    }
+    
+    const totalCost = relevantSessions.reduce((sum, s) => 
+      sum + (s.tokenUsage?.costUSD || 0), 0);
+    
+    const byModel = relevantSessions.reduce((acc, s) => {
+      if (!acc[s.model]) {
+        acc[s.model] = { count: 0, cost: 0, tokens: 0 };
+      }
+      acc[s.model].count++;
+      acc[s.model].cost += s.tokenUsage?.costUSD || 0;
+      acc[s.model].tokens += s.tokenUsage?.total || 0;
+      return acc;
+    }, {} as Record<string, any>);
+    
+    return {
+      period: `${hoursBack} hours`,
+      totalSessions: relevantSessions.length,
+      totalCostUSD: totalCost,
+      avgCostPerSession: relevantSessions.length > 0 ? totalCost / relevantSessions.length : 0,
+      modelBreakdown: byModel,
+      hourlyRate: totalCost / hoursBack,
+      projectedDailyCost: (totalCost / hoursBack) * 24,
+      projectedMonthlyCost: (totalCost / hoursBack) * 24 * 30
+    };
   }
 }
 

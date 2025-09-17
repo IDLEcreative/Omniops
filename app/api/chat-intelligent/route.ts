@@ -10,6 +10,7 @@ import { searchSimilarContent } from '@/lib/embeddings';
 import { getDynamicWooCommerceClient, searchProductsDynamic } from '@/lib/woocommerce-dynamic';
 import { sanitizeOutboundLinks } from '@/lib/link-sanitizer';
 import { extractQueryKeywords, isPriceQuery, extractPriceRange } from '@/lib/search-wrapper';
+import { ChatTelemetry, telemetryManager } from '@/lib/chat-telemetry';
 
 // Lazy load OpenAI client to avoid build-time errors
 let openai: OpenAI | null = null;
@@ -251,6 +252,8 @@ async function executeGetProductDetails(
 }
 
 export async function POST(request: NextRequest) {
+  let telemetry: ChatTelemetry | undefined;
+  
   try {
     // Check critical environment variables
     if (!validateSupabaseEnv() || !process.env.OPENAI_API_KEY) {
@@ -454,6 +457,17 @@ REMEMBER:
         };
     console.log(`[Intelligent Chat] Using model: ${baseModelConfig.model}`);
 
+    // Initialize telemetry after model config is defined
+    const telemetrySessionId = `chat_${conversationId}_${Date.now()}`;
+    telemetry = telemetryManager.createSession(telemetrySessionId, baseModelConfig.model || 'gpt-4.1', {
+      domain: domain || rateLimitDomain,
+      persistToDatabase: true,
+      detailedLogging: process.env.NODE_ENV === 'development'
+    });
+    
+    // Store model config in telemetry
+    telemetry.setModelConfig(baseModelConfig);
+
     // Initial AI call with tools
     let completion;
     try {
@@ -468,10 +482,16 @@ REMEMBER:
       };
       
       completion = await openaiClient.chat.completions.create(toolCallConfig as any);
+      
+      // Track token usage from initial call
+      if (completion.usage) {
+        telemetry?.trackTokenUsage(completion.usage);
+      }
     } catch (error: any) {
       // Fallback to GPT-4.1 if GPT-5-mini fails
       if (useGPT5) {
         console.log('[Intelligent Chat] GPT-5-mini failed, falling back to GPT-4.1...');
+        telemetry?.log('warn', 'ai', 'GPT-5-mini failed, falling back to GPT-4.1', { error: error.message });
         completion = await openaiClient.chat.completions.create({
           model: 'gpt-4.1' as any,
           messages: conversationMessages,
@@ -480,6 +500,11 @@ REMEMBER:
           temperature: 0.7,
           max_tokens: 1000,
         });
+        
+        // Track token usage from fallback
+        if (completion.usage) {
+          telemetry?.trackTokenUsage(completion.usage);
+        }
       } else {
         throw error;
       }
@@ -492,6 +517,7 @@ REMEMBER:
     while (shouldContinue && iteration < maxIterations) {
       iteration++;
       console.log(`[Intelligent Chat] Iteration ${iteration}/${maxIterations}`);
+      telemetry?.trackIteration(iteration, 0);
 
       const choice = completion.choices[0];
       if (!choice?.message) break;
@@ -543,6 +569,15 @@ REMEMBER:
 
           const executionTime = Date.now() - startTime;
           console.log(`[Intelligent Chat] Tool ${toolName} completed in ${executionTime}ms: ${result.results.length} results`);
+          
+          // Track search in telemetry
+          telemetry?.trackSearch({
+            tool: toolName,
+            query: toolArgs.query || toolArgs.category || toolArgs.productQuery || '',
+            resultCount: result.results.length,
+            source: result.source,
+            startTime: startTime
+          });
 
           return {
             toolCall,
@@ -646,6 +681,11 @@ REMEMBER:
           ...(useGPT5 ? {} : { temperature: 0.7 }),
         };
         completion = await openaiClient.chat.completions.create(iterationConfig as any);
+        
+        // Track token usage for iteration
+        if (completion.usage) {
+          telemetry?.trackTokenUsage(completion.usage);
+        }
       } catch (error: any) {
         // Fallback to GPT-4.1 if GPT-5-mini fails
         if (useGPT5 && baseModelConfig.model === 'gpt-5-mini') {
@@ -659,8 +699,14 @@ REMEMBER:
               temperature: 0.7,
               max_tokens: 1000,
             });
+            
+            // Track token usage from fallback
+            if (completion.usage) {
+              telemetry?.trackTokenUsage(completion.usage);
+            }
           } catch (fallbackError) {
             console.error('[Intelligent Chat] GPT-4.1 fallback also failed:', fallbackError);
+            telemetry?.log('error', 'ai', 'GPT-4.1 fallback failed', { error: fallbackError });
             finalResponse = 'I found some information but encountered an error processing it. Please try again.';
             break;
           }
@@ -684,6 +730,11 @@ REMEMBER:
         };
         const finalCompletion = await openaiClient.chat.completions.create(finalConfig as any);
         finalResponse = finalCompletion.choices[0]?.message?.content || finalResponse;
+        
+        // Track final completion tokens
+        if (finalCompletion.usage) {
+          telemetry?.trackTokenUsage(finalCompletion.usage);
+        }
       } catch (error: any) {
         // Fallback to GPT-4.1 if GPT-5-mini fails
         if (useGPT5 && baseModelConfig.model === 'gpt-5-mini') {
@@ -696,8 +747,14 @@ REMEMBER:
               max_tokens: 1000,
             });
             finalResponse = finalCompletion.choices[0]?.message?.content || finalResponse;
+            
+            // Track final fallback tokens
+            if (finalCompletion.usage) {
+              telemetry?.trackTokenUsage(finalCompletion.usage);
+            }
           } catch (fallbackError) {
             console.error('[Intelligent Chat] GPT-4.1 fallback also failed:', fallbackError);
+            telemetry?.log('error', 'ai', 'Final GPT-4.1 fallback failed', { error: fallbackError });
           }
         } else {
           console.error('[Intelligent Chat] Error getting final response:', error);
@@ -721,13 +778,17 @@ REMEMBER:
       : 'thompsonseparts.co.uk';
     finalResponse = sanitizeOutboundLinks(finalResponse, allowedDomain);
 
-    // Log search activity
-    console.log('[Intelligent Chat] Search Summary:', {
+    // Complete telemetry session with success
+    const telemetrySummary = await telemetry?.complete(finalResponse);
+    
+    // Log search activity with telemetry summary
+    console.log('[Intelligent Chat] Session Complete:', {
       totalIterations: iteration,
       totalSearches: searchLog.length,
       totalResults: allSearchResults.length,
       searchBreakdown: searchLog,
-      uniqueUrlsFound: Array.from(new Set(allSearchResults.map(r => r.url))).length
+      uniqueUrlsFound: Array.from(new Set(allSearchResults.map(r => r.url))).length,
+      telemetry: telemetrySummary
     });
 
     // Save assistant response
@@ -743,8 +804,9 @@ REMEMBER:
       console.error('[Chat] Failed to save assistant message:', assistantSaveError);
     }
 
-    // Return response with search metadata
-    return NextResponse.json<ChatResponse & { searchMetadata?: any }>({
+    // Return response with search metadata and cost info
+    const tokenUsage = telemetry?.getTokenUsage();
+    return NextResponse.json<ChatResponse & { searchMetadata?: any; tokenUsage?: any }>({
       message: finalResponse,
       conversation_id: conversationId!,
       sources: allSearchResults.slice(0, 10).map(r => ({
@@ -756,11 +818,22 @@ REMEMBER:
         iterations: iteration,
         totalSearches: searchLog.length,
         searchLog: searchLog
-      }
+      },
+      tokenUsage: tokenUsage ? {
+        input: tokenUsage.input,
+        output: tokenUsage.output,
+        total: tokenUsage.total,
+        estimatedCostUSD: tokenUsage.costUSD.toFixed(6)
+      } : undefined
     });
 
   } catch (error) {
     console.error('[Intelligent Chat API] Error:', error);
+    
+    // Complete telemetry with error
+    if (telemetry) {
+      await telemetry.complete(undefined, error instanceof Error ? error.message : 'Unknown error');
+    }
     
     if (error instanceof z.ZodError) {
       return NextResponse.json(
