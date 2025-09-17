@@ -1,159 +1,363 @@
-import { createClient } from '@supabase/supabase-js';
-import * as dotenv from 'dotenv';
+#!/usr/bin/env npx tsx
+/**
+ * Embeddings Health Monitor
+ * 
+ * Monitors and reports on the health and performance of the embeddings system
+ * including index efficiency, query performance, and data quality metrics.
+ */
 
-// Load environment variables
+import { createClient } from '@supabase/supabase-js';
+import dotenv from 'dotenv';
+
 dotenv.config({ path: '.env.local' });
 
-const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL!;
-const supabaseKey = process.env.SUPABASE_SERVICE_ROLE_KEY!;
-const supabase = createClient(supabaseUrl, supabaseKey);
+const supabase = createClient(
+  process.env.NEXT_PUBLIC_SUPABASE_URL!,
+  process.env.SUPABASE_SERVICE_ROLE_KEY!
+);
 
-async function monitorEmbeddingsHealth() {
-  console.log('🏥 Embeddings Health Monitor\n');
-  console.log('=' .repeat(60));
-  
-  try {
-    // 1. Check for NULL text_content
-    const { count: nullTextCount } = await supabase
-      .from('scraped_pages')
-      .select('*', { count: 'exact', head: true })
-      .is('text_content', null);
+interface HealthMetrics {
+  timestamp: string;
+  embeddings: {
+    totalCount: number;
+    withoutEmbedding: number;
+    orphanedRecords: number;
+    avgChunkSize: number;
+    duplicateChunks: number;
+  };
+  performance: {
+    avgSearchTime: number;
+    cacheHitRate: number;
+    indexBloat: number;
+    deadTuples: number;
+  };
+  storage: {
+    tableSize: string;
+    indexSize: string;
+    totalSize: string;
+  };
+  recommendations: string[];
+}
+
+class EmbeddingsHealthMonitor {
+  async checkHealth(): Promise<HealthMetrics> {
+    console.log('🔍 Starting embeddings health check...\n');
     
-    // 2. Check total pages
-    const { count: totalPages } = await supabase
-      .from('scraped_pages')
-      .select('*', { count: 'exact', head: true });
-    
-    // 3. Check recent embeddings for contamination
-    const { data: recentEmbeddings } = await supabase
+    const metrics: HealthMetrics = {
+      timestamp: new Date().toISOString(),
+      embeddings: await this.checkEmbeddingsData(),
+      performance: await this.checkPerformance(),
+      storage: await this.checkStorage(),
+      recommendations: []
+    };
+
+    metrics.recommendations = this.generateRecommendations(metrics);
+    return metrics;
+  }
+
+  private async checkEmbeddingsData() {
+    // Total embeddings count
+    const { count: totalCount } = await supabase
       .from('page_embeddings')
-      .select('chunk_text')
-      .order('created_at', { ascending: false })
-      .limit(100);
+      .select('*', { count: 'exact', head: true });
+
+    // Embeddings without vector
+    const { count: withoutEmbedding } = await supabase
+      .from('page_embeddings')
+      .select('*', { count: 'exact', head: true })
+      .is('embedding', null);
+
+    // Orphaned embeddings (no parent page)
+    const { data: orphanedData } = await supabase.rpc('execute_sql', {
+      query: `
+        SELECT COUNT(*) as count
+        FROM page_embeddings pe
+        LEFT JOIN scraped_pages sp ON pe.page_id = sp.id
+        WHERE sp.id IS NULL
+      `
+    });
+
+    // Average chunk size
+    const { data: avgSizeData } = await supabase.rpc('execute_sql', {
+      query: `
+        SELECT AVG(length(chunk_text)) as avg_size
+        FROM page_embeddings
+        WHERE chunk_text IS NOT NULL
+      `
+    });
+
+    // Duplicate chunks detection
+    const { data: duplicatesData } = await supabase.rpc('execute_sql', {
+      query: `
+        SELECT COUNT(*) as count FROM (
+          SELECT chunk_text, page_id, COUNT(*) 
+          FROM page_embeddings 
+          WHERE chunk_text IS NOT NULL
+          GROUP BY chunk_text, page_id 
+          HAVING COUNT(*) > 1
+        ) duplicates
+      `
+    });
+
+    return {
+      totalCount: totalCount || 0,
+      withoutEmbedding: withoutEmbedding || 0,
+      orphanedRecords: parseInt(orphanedData?.[0]?.count || '0'),
+      avgChunkSize: Math.round(parseFloat(avgSizeData?.[0]?.avg_size || '0')),
+      duplicateChunks: parseInt(duplicatesData?.[0]?.count || '0')
+    };
+  }
+
+  private async checkPerformance() {
+    // Get query performance stats
+    const { data: perfData } = await supabase.rpc('execute_sql', {
+      query: `
+        SELECT 
+          AVG(mean_time) as avg_search_time,
+          AVG(cache_hit_rate::numeric) as cache_hit_rate
+        FROM pg_stat_statements
+        WHERE query LIKE '%search_embeddings%'
+          AND calls > 10
+      `
+    });
+
+    // Check index bloat
+    const { data: bloatData } = await supabase.rpc('execute_sql', {
+      query: `
+        SELECT 
+          schemaname,
+          tablename,
+          n_dead_tup,
+          n_live_tup,
+          ROUND(n_dead_tup::numeric / NULLIF(n_live_tup + n_dead_tup, 0) * 100, 2) as bloat_ratio
+        FROM pg_stat_user_tables
+        WHERE tablename = 'page_embeddings'
+      `
+    });
+
+    return {
+      avgSearchTime: parseFloat(perfData?.[0]?.avg_search_time || '0'),
+      cacheHitRate: parseFloat(perfData?.[0]?.cache_hit_rate || '0'),
+      indexBloat: parseFloat(bloatData?.[0]?.bloat_ratio || '0'),
+      deadTuples: parseInt(bloatData?.[0]?.n_dead_tup || '0')
+    };
+  }
+
+  private async checkStorage() {
+    const { data: storageData } = await supabase.rpc('execute_sql', {
+      query: `
+        SELECT 
+          pg_size_pretty(pg_table_size('page_embeddings')) as table_size,
+          pg_size_pretty(pg_indexes_size('page_embeddings')) as index_size,
+          pg_size_pretty(pg_total_relation_size('page_embeddings')) as total_size
+      `
+    });
+
+    return {
+      tableSize: storageData?.[0]?.table_size || 'Unknown',
+      indexSize: storageData?.[0]?.index_size || 'Unknown',
+      totalSize: storageData?.[0]?.total_size || 'Unknown'
+    };
+  }
+
+  private generateRecommendations(metrics: HealthMetrics): string[] {
+    const recommendations: string[] = [];
+
+    // Check for missing embeddings
+    const missingPct = (metrics.embeddings.withoutEmbedding / metrics.embeddings.totalCount) * 100;
+    if (missingPct > 5) {
+      recommendations.push(
+        `⚠️ ${missingPct.toFixed(1)}% of chunks missing embeddings. Run: npm run embeddings:generate`
+      );
+    }
+
+    // Check for orphaned records
+    if (metrics.embeddings.orphanedRecords > 100) {
+      recommendations.push(
+        `🗑️ Found ${metrics.embeddings.orphanedRecords} orphaned embeddings. Run cleanup: npm run embeddings:cleanup`
+      );
+    }
+
+    // Check for duplicates
+    if (metrics.embeddings.duplicateChunks > 50) {
+      recommendations.push(
+        `📋 ${metrics.embeddings.duplicateChunks} duplicate chunks detected. Consider deduplication.`
+      );
+    }
+
+    // Check cache hit rate
+    if (metrics.performance.cacheHitRate < 95) {
+      recommendations.push(
+        `🎯 Cache hit rate is ${metrics.performance.cacheHitRate.toFixed(1)}%. Consider: VACUUM ANALYZE page_embeddings;`
+      );
+    }
+
+    // Check index bloat
+    if (metrics.performance.indexBloat > 20) {
+      recommendations.push(
+        `🔧 Index bloat at ${metrics.performance.indexBloat}%. Run: REINDEX TABLE page_embeddings;`
+      );
+    }
+
+    // Check dead tuples
+    if (metrics.performance.deadTuples > 10000) {
+      recommendations.push(
+        `♻️ ${metrics.performance.deadTuples} dead tuples. Run: VACUUM FULL page_embeddings;`
+      );
+    }
+
+    // Check average chunk size
+    if (metrics.embeddings.avgChunkSize < 100 || metrics.embeddings.avgChunkSize > 2000) {
+      recommendations.push(
+        `📏 Average chunk size is ${metrics.embeddings.avgChunkSize} chars. Optimal range is 200-1500.`
+      );
+    }
+
+    if (recommendations.length === 0) {
+      recommendations.push('✅ All health checks passed! System is running optimally.');
+    }
+
+    return recommendations;
+  }
+
+  async runMaintenanceCheck() {
+    const metrics = await this.checkHealth();
     
-    // Common contamination patterns
-    const navPatterns = [
-      'Shop by Category',
-      'Tipper Skip & Hookloaders',
-      'Facebook Twitter Email',
-      'Manage consent'
-    ];
+    console.log('📊 EMBEDDINGS HEALTH REPORT');
+    console.log('=' .repeat(50));
+    console.log(`📅 Timestamp: ${new Date(metrics.timestamp).toLocaleString()}\n`);
     
-    const cssPatterns = [
-      'font-size:',
-      'font-weight:',
-      '<style>',
-      'gform_wrapper'
-    ];
+    console.log('📈 DATA METRICS:');
+    console.log(`  • Total Embeddings: ${metrics.embeddings.totalCount.toLocaleString()}`);
+    console.log(`  • Missing Vectors: ${metrics.embeddings.withoutEmbedding.toLocaleString()}`);
+    console.log(`  • Orphaned Records: ${metrics.embeddings.orphanedRecords.toLocaleString()}`);
+    console.log(`  • Average Chunk Size: ${metrics.embeddings.avgChunkSize} chars`);
+    console.log(`  • Duplicate Chunks: ${metrics.embeddings.duplicateChunks}\n`);
     
-    let navContaminated = 0;
-    let cssContaminated = 0;
+    console.log('⚡ PERFORMANCE METRICS:');
+    console.log(`  • Avg Search Time: ${metrics.performance.avgSearchTime.toFixed(2)}ms`);
+    console.log(`  • Cache Hit Rate: ${metrics.performance.cacheHitRate.toFixed(1)}%`);
+    console.log(`  • Index Bloat: ${metrics.performance.indexBloat}%`);
+    console.log(`  • Dead Tuples: ${metrics.performance.deadTuples.toLocaleString()}\n`);
     
-    recentEmbeddings?.forEach(embedding => {
-      const text = embedding.chunk_text || '';
-      if (navPatterns.some(p => text.includes(p))) navContaminated++;
-      if (cssPatterns.some(p => text.includes(p))) cssContaminated++;
+    console.log('💾 STORAGE METRICS:');
+    console.log(`  • Table Size: ${metrics.storage.tableSize}`);
+    console.log(`  • Index Size: ${metrics.storage.indexSize}`);
+    console.log(`  • Total Size: ${metrics.storage.totalSize}\n`);
+    
+    console.log('🎯 RECOMMENDATIONS:');
+    metrics.recommendations.forEach(rec => {
+      console.log(`  ${rec}`);
     });
     
-    // 4. Check embeddings coverage
-    const { count: totalEmbeddings } = await supabase
-      .from('page_embeddings')
-      .select('*', { count: 'exact', head: true });
+    console.log('\n' + '=' .repeat(50));
     
-    // 5. Recent scraping activity
-    const { data: recentScrapes } = await supabase
-      .from('scraped_pages')
-      .select('scraped_at')
-      .order('scraped_at', { ascending: false })
-      .limit(1);
+    // Write to log file
+    const logEntry = {
+      ...metrics,
+      healthScore: this.calculateHealthScore(metrics)
+    };
     
-    const lastScraped = recentScrapes?.[0]?.scraped_at 
-      ? new Date(recentScrapes[0].scraped_at)
-      : null;
+    console.log(`\n💯 Overall Health Score: ${logEntry.healthScore}/100\n`);
     
-    const hoursSinceLastScrape = lastScraped 
-      ? (Date.now() - lastScraped.getTime()) / (1000 * 60 * 60)
-      : null;
+    return metrics;
+  }
+
+  private calculateHealthScore(metrics: HealthMetrics): number {
+    let score = 100;
     
-    // Generate Health Report
-    console.log('\n📊 Health Metrics:');
-    console.log('-'.repeat(40));
+    // Deduct for missing embeddings
+    const missingPct = (metrics.embeddings.withoutEmbedding / metrics.embeddings.totalCount) * 100;
+    score -= Math.min(missingPct * 2, 20);
     
-    // Text Content Health
-    const textContentHealth = ((totalPages || 0) - (nullTextCount || 0)) / (totalPages || 1) * 100;
-    console.log(`\n✅ Text Content Field:`);
-    console.log(`   Populated: ${(totalPages || 0) - (nullTextCount || 0)}/${totalPages} (${textContentHealth.toFixed(1)}%)`);
-    if (nullTextCount && nullTextCount > 0) {
-      console.log(`   ⚠️  ${nullTextCount} pages missing text_content`);
+    // Deduct for orphaned records
+    score -= Math.min(metrics.embeddings.orphanedRecords / 100, 10);
+    
+    // Deduct for poor cache hit rate
+    score -= Math.max(0, (100 - metrics.performance.cacheHitRate) / 2);
+    
+    // Deduct for index bloat
+    score -= Math.min(metrics.performance.indexBloat / 2, 15);
+    
+    // Deduct for duplicates
+    score -= Math.min(metrics.embeddings.duplicateChunks / 50, 10);
+    
+    return Math.max(0, Math.round(score));
+  }
+
+  async performAutoMaintenance() {
+    console.log('🔧 Running auto-maintenance tasks...\n');
+    
+    const metrics = await this.checkHealth();
+    
+    // Auto-vacuum if needed
+    if (metrics.performance.deadTuples > 10000 || metrics.performance.indexBloat > 20) {
+      console.log('♻️ Running VACUUM ANALYZE...');
+      await supabase.rpc('execute_sql', {
+        query: 'VACUUM ANALYZE page_embeddings;'
+      });
+      console.log('✅ Vacuum completed\n');
     }
     
-    // Embeddings Contamination
-    console.log(`\n🧪 Embeddings Quality (last 100):`);
-    console.log(`   Navigation contamination: ${navContaminated}%`);
-    console.log(`   CSS/JS contamination: ${cssContaminated}%`);
-    
-    if (navContaminated > 5 || cssContaminated > 5) {
-      console.log('   ⚠️  High contamination detected!');
-    } else {
-      console.log('   ✅ Clean embeddings');
+    // Clean orphaned records if too many
+    if (metrics.embeddings.orphanedRecords > 1000) {
+      console.log('🗑️ Cleaning orphaned embeddings...');
+      const { data } = await supabase.rpc('execute_sql', {
+        query: `
+          DELETE FROM page_embeddings
+          WHERE page_id NOT IN (SELECT id FROM scraped_pages)
+          RETURNING id
+        `
+      });
+      console.log(`✅ Cleaned ${data?.length || 0} orphaned records\n`);
     }
     
-    // Coverage
-    const avgEmbeddingsPerPage = (totalEmbeddings || 0) / (totalPages || 1);
-    console.log(`\n📈 Coverage:`);
-    console.log(`   Total pages: ${totalPages}`);
-    console.log(`   Total embeddings: ${totalEmbeddings}`);
-    console.log(`   Avg embeddings/page: ${avgEmbeddingsPerPage.toFixed(1)}`);
-    
-    // Activity
-    console.log(`\n⏰ Activity:`);
-    if (hoursSinceLastScrape !== null) {
-      if (hoursSinceLastScrape < 1) {
-        console.log(`   Last scrape: ${(hoursSinceLastScrape * 60).toFixed(0)} minutes ago`);
-      } else if (hoursSinceLastScrape < 24) {
-        console.log(`   Last scrape: ${hoursSinceLastScrape.toFixed(1)} hours ago`);
-      } else {
-        console.log(`   Last scrape: ${(hoursSinceLastScrape / 24).toFixed(1)} days ago`);
-      }
-    }
-    
-    // Overall Health Score
-    console.log('\n' + '=' .repeat(60));
-    const healthScore = (
-      textContentHealth * 0.5 +  // 50% weight
-      (100 - navContaminated) * 0.25 +  // 25% weight
-      (100 - cssContaminated) * 0.25  // 25% weight
-    );
-    
-    console.log('🏆 Overall Health Score: ' + getHealthEmoji(healthScore) + ` ${healthScore.toFixed(1)}%`);
-    
-    // Recommendations
-    if (healthScore < 90) {
-      console.log('\n💡 Recommendations:');
-      if (nullTextCount && nullTextCount > 0) {
-        console.log('   • Run force rescrape for pages with NULL text_content');
-      }
-      if (navContaminated > 5) {
-        console.log('   • Clean embeddings with navigation contamination');
-      }
-      if (cssContaminated > 5) {
-        console.log('   • Review content extraction for CSS/JS filtering');
-      }
-    } else {
-      console.log('\n✨ System is healthy! No action needed.');
-    }
-    
-  } catch (error) {
-    console.error('Error monitoring health:', error);
+    console.log('✨ Auto-maintenance completed!\n');
   }
 }
 
-function getHealthEmoji(score: number): string {
-  if (score >= 95) return '💚';
-  if (score >= 80) return '💛';
-  if (score >= 60) return '🧡';
-  return '❤️';
+// CLI Interface
+async function main() {
+  const monitor = new EmbeddingsHealthMonitor();
+  const command = process.argv[2];
+  
+  try {
+    switch (command) {
+      case 'check':
+        await monitor.runMaintenanceCheck();
+        break;
+      
+      case 'auto':
+        await monitor.performAutoMaintenance();
+        await monitor.runMaintenanceCheck();
+        break;
+      
+      case 'watch':
+        console.log('👁️ Starting continuous monitoring (Ctrl+C to stop)...\n');
+        await monitor.runMaintenanceCheck();
+        setInterval(async () => {
+          console.log('\n' + '='.repeat(50) + '\n');
+          await monitor.runMaintenanceCheck();
+        }, 60000); // Check every minute
+        break;
+      
+      default:
+        console.log('📚 Embeddings Health Monitor\n');
+        console.log('Usage:');
+        console.log('  npx tsx monitor-embeddings-health.ts check   - Run health check');
+        console.log('  npx tsx monitor-embeddings-health.ts auto    - Run auto-maintenance');
+        console.log('  npx tsx monitor-embeddings-health.ts watch   - Continuous monitoring');
+        process.exit(0);
+    }
+  } catch (error) {
+    console.error('❌ Error:', error);
+    process.exit(1);
+  }
 }
 
-// Run the monitor
-monitorEmbeddingsHealth();
+// Run if called directly
+if (require.main === module) {
+  main().catch(console.error);
+}
+
+export { EmbeddingsHealthMonitor };
