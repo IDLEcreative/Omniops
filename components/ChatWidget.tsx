@@ -313,7 +313,7 @@ export default function ChatWidget({
         ...demoConfig
       };
 
-      const response = await fetch('/api/chat', {
+      const response = await fetch('/api/chat-intelligent', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
