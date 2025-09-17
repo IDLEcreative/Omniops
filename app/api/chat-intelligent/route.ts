@@ -11,6 +11,8 @@ import { getDynamicWooCommerceClient, searchProductsDynamic } from '@/lib/woocom
 import { sanitizeOutboundLinks } from '@/lib/link-sanitizer';
 import { extractQueryKeywords, isPriceQuery, extractPriceRange } from '@/lib/search-wrapper';
 import { ChatTelemetry, telemetryManager } from '@/lib/chat-telemetry';
+import { SimpleCustomerVerification } from '@/lib/customer-verification-simple';
+import { QueryCache } from '@/lib/query-cache';
 
 // Lazy load OpenAI client to avoid build-time errors
 let openai: OpenAI | null = null;
@@ -64,8 +66,30 @@ const SEARCH_TOOLS = [
   {
     type: "function" as const,
     function: {
+      name: "search_woocommerce",
+      description: "Search WooCommerce store for products with pricing, availability, and specifications. Use this when looking for products to purchase, checking prices, or finding product details.",
+      parameters: {
+        type: "object",
+        properties: {
+          query: {
+            type: "string",
+            description: "The product search query (e.g., 'pump', 'battery', 'Cifa parts')"
+          },
+          limit: {
+            type: "number",
+            description: "Maximum number of products to return (default: 20)",
+            default: 20
+          }
+        },
+        required: ["query"]
+      }
+    }
+  },
+  {
+    type: "function" as const,
+    function: {
       name: "search_products",
-      description: "Search for products with a general query. Use this for broad product searches, brand names, or when the user asks about specific items.",
+      description: "Search website content for products and information. Use this for general searches when WooCommerce doesn't have results or for non-product queries.",
       parameters: {
         type: "object",
         properties: {
@@ -112,6 +136,23 @@ const SEARCH_TOOLS = [
   {
     type: "function" as const,
     function: {
+      name: "order_lookup",
+      description: "Look up order information when the user asks about their order, delivery status, or mentions an order number. This requires verification for security.",
+      parameters: {
+        type: "object",
+        properties: {
+          query: {
+            type: "string",
+            description: "The order-related query (e.g., 'my order 12345', 'where is my delivery', 'order status')"
+          }
+        },
+        required: ["query"]
+      }
+    }
+  },
+  {
+    type: "function" as const,
+    function: {
       name: "get_product_details",
       description: "Get detailed information about specific products when you need more comprehensive data than the general search provides.",
       parameters: {
@@ -133,6 +174,45 @@ const SEARCH_TOOLS = [
   }
 ];
 
+// WooCommerce search function - separate tool for e-commerce
+async function executeWooCommerceSearch(
+  query: string,
+  limit: number = 20,
+  domain: string
+): Promise<{ success: boolean; results: SearchResult[]; source: string }> {
+  console.log(`[Function Call] search_woocommerce: "${query}" (limit: ${limit})`);
+  
+  try {
+    // Get WooCommerce client for this domain
+    const wcClient = await getDynamicWooCommerceClient(domain);
+    if (!wcClient) {
+      console.log(`[Function Call] No WooCommerce configured for ${domain}`);
+      return { success: false, results: [], source: 'woocommerce' };
+    }
+    
+    // Search products in WooCommerce
+    const wcProducts = await searchProductsDynamic(wcClient, query, limit);
+    
+    if (wcProducts && wcProducts.length > 0) {
+      console.log(`[Function Call] WooCommerce returned ${wcProducts.length} products`);
+      const results = wcProducts.map(p => ({
+        content: `${p.name}\nPrice: £${p.price || p.regular_price || 'Contact for pricing'}\nSKU: ${p.sku || 'N/A'}\nIn Stock: ${p.in_stock !== false ? 'Yes' : 'No'}\n${(p.short_description || p.description || '').replace(/<[^>]+>/g, ' ').trim()}`,
+        url: p.permalink || '',
+        title: p.name,
+        similarity: 0.95 // High confidence for exact WooCommerce matches
+      }));
+      
+      return { success: true, results, source: 'woocommerce' };
+    }
+    
+    return { success: true, results: [], source: 'woocommerce' };
+    
+  } catch (error) {
+    console.error('[Function Call] WooCommerce search error:', error);
+    return { success: false, results: [], source: 'woocommerce' };
+  }
+}
+
 // Tool execution functions
 async function executeSearchProducts(
   query: string, 
@@ -142,26 +222,11 @@ async function executeSearchProducts(
   console.log(`[Function Call] search_products: "${query}" (limit: ${limit})`);
   
   try {
-    // Try WooCommerce search first for product queries
+    // Use semantic search for website content
     const browseDomain = /localhost|127\.0\.0\.1/i.test(domain)
       ? 'thompsonseparts.co.uk'
       : domain.replace(/^https?:\/\//, '').replace('www.', '');
     
-    const wcProducts = await searchProductsDynamic(browseDomain, query, limit);
-    
-    if (wcProducts && wcProducts.length > 0) {
-      console.log(`[Function Call] WooCommerce returned ${wcProducts.length} products`);
-      const results = wcProducts.map(p => ({
-        content: `${p.name}\nPrice: £${p.price || p.regular_price || 'Contact for pricing'}\nSKU: ${p.sku || 'N/A'}\n${(p.short_description || p.description || '').replace(/<[^>]+>/g, ' ').trim()}`,
-        url: p.permalink || '',
-        title: p.name,
-        similarity: 0.9
-      }));
-      
-      return { success: true, results, source: 'woocommerce' };
-    }
-    
-    // Fallback to semantic search
     const searchResults = await searchSimilarContent(query, browseDomain, limit, 0.2);
     console.log(`[Function Call] Semantic search returned ${searchResults.length} results`);
     
@@ -247,6 +312,73 @@ async function executeGetProductDetails(
       success: false, 
       results: [], 
       source: 'error' 
+    };
+  }
+}
+
+// Order verification function - only for security, not routing
+async function executeOrderLookup(
+  orderQuery: string,
+  sessionId: string,
+  domain: string
+): Promise<{ success: boolean; results: any[]; source: string; requiresVerification?: boolean }> {
+  console.log(`[Function Call] order_lookup: "${orderQuery}"`);
+  
+  try {
+    // Extract potential order number from query
+    const orderMatch = orderQuery.match(/#?\d{5,}/);
+    if (!orderMatch) {
+      return {
+        success: true,
+        results: [{
+          title: 'Order Information',
+          content: 'Please provide your order number to look up order details.',
+          url: ''
+        }],
+        source: 'verification'
+      };
+    }
+    
+    const orderNumber = orderMatch[0].replace('#', '');
+    
+    // Verify customer (minimal security check)
+    const verificationLevel = await SimpleCustomerVerification.verifyCustomer({
+      sessionId,
+      ipAddress: '',
+      orderNumber,
+      domain
+    });
+    
+    if (verificationLevel === 'none') {
+      return {
+        success: true,
+        results: [{
+          title: 'Verification Required',
+          content: 'For security reasons, please verify your order by providing additional information such as your email address or billing zip code.',
+          url: ''
+        }],
+        source: 'verification',
+        requiresVerification: true
+      };
+    }
+    
+    // If verified, return order lookup results (placeholder - would connect to order system)
+    return {
+      success: true,
+      results: [{
+        title: `Order #${orderNumber}`,
+        content: `Order verification successful. Please contact customer service for detailed order information.`,
+        url: ''
+      }],
+      source: 'orders'
+    };
+    
+  } catch (error) {
+    console.error('[Function Call] order_lookup error:', error);
+    return {
+      success: false,
+      results: [],
+      source: 'error'
     };
   }
 }
@@ -569,12 +701,16 @@ REMEMBER:
           // Execute the appropriate tool with timeout
           const toolPromise = (async () => {
             switch (toolName) {
+              case 'search_woocommerce':
+                return await executeWooCommerceSearch(toolArgs.query, toolArgs.limit, domain || '');
               case 'search_products':
                 return await executeSearchProducts(toolArgs.query, toolArgs.limit, domain || '');
               case 'search_by_category':
                 return await executeSearchByCategory(toolArgs.category, toolArgs.limit, domain || '');
               case 'get_product_details':
                 return await executeGetProductDetails(toolArgs.productQuery, toolArgs.includeSpecs, domain || '');
+              case 'order_lookup':
+                return await executeOrderLookup(toolArgs.query, session_id, domain || '');
               default:
                 throw new Error(`Unknown tool: ${toolName}`);
             }

@@ -54,7 +54,7 @@ export default function ChatPage() {
     setMessages(prev => [...prev, tempUserMessage]);
 
     try {
-      const response = await fetch('/api/chat', {
+      const response = await fetch('/api/chat-intelligent', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',

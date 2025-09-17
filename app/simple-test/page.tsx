@@ -22,7 +22,7 @@ export default function SimpleTestPage() {
     setMessages(prev => [...prev, { role: 'user', content: userMessage }]);
 
     try {
-      const response = await fetch('/api/chat', {
+      const response = await fetch('/api/chat-intelligent', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
