@@ -7,7 +7,12 @@
 import { Redis } from 'ioredis';
 import { getRedisClient } from './redis';
 import crypto from 'crypto';
-import { SEARCH_CACHE_VERSION, getVersionedCacheKey } from './cache-versioning';
+import { 
+  SEARCH_CACHE_VERSION, 
+  getVersionedCacheKey, 
+  isCurrentVersion,
+  getPreviousVersions 
+} from './cache-versioning';
 
 export interface CachedSearchResult {
   response: string;
@@ -114,7 +119,9 @@ export class SearchCacheManager {
   async cacheEmbedding(text: string, embedding: number[]): Promise<void> {
     try {
       const hash = crypto.createHash('md5').update(text).digest('hex');
-      const key = `embedding:cache:${hash}`;
+      const baseKey = `embedding:cache:${hash}`;
+      // Apply versioning to embedding cache as well
+      const key = getVersionedCacheKey(baseKey);
       
       await this.redis.setex(
         key, 
@@ -134,7 +141,9 @@ export class SearchCacheManager {
   async getCachedEmbedding(text: string): Promise<number[] | null> {
     try {
       const hash = crypto.createHash('md5').update(text).digest('hex');
-      const key = `embedding:cache:${hash}`;
+      const baseKey = `embedding:cache:${hash}`;
+      // Apply versioning to embedding cache as well
+      const key = getVersionedCacheKey(baseKey);
       
       const cached = await this.redis.get(key);
       if (!cached) return null;
@@ -189,14 +198,64 @@ export class SearchCacheManager {
   }
 
   /**
+   * Clear old version caches (cleanup after version bump)
+   */
+  async clearOldVersionCaches(): Promise<void> {
+    try {
+      const previousVersions = getPreviousVersions();
+      let totalDeleted = 0;
+      
+      for (const version of previousVersions) {
+        const searchPattern = `search:cache:*:v${version}`;
+        const embeddingPattern = `embedding:cache:*:v${version}`;
+        
+        const searchKeys = await this.redis.keys(searchPattern);
+        const embeddingKeys = await this.redis.keys(embeddingPattern);
+        
+        const versionKeys = [...searchKeys, ...embeddingKeys];
+        
+        if (versionKeys.length > 0) {
+          await this.redis.del(...versionKeys);
+          console.log(`[SearchCache] Cleared ${versionKeys.length} cache entries for version ${version}`);
+          totalDeleted += versionKeys.length;
+        }
+      }
+      
+      if (totalDeleted > 0) {
+        console.log(`[SearchCache] Total old version entries cleared: ${totalDeleted}`);
+      }
+    } catch (error) {
+      console.error('[SearchCache] Error clearing old version caches:', error);
+    }
+  }
+
+  /**
    * Clear all cache
    */
   async clearAllCache(): Promise<void> {
     try {
-      const searchKeys = await this.redis.keys('search:cache:*');
-      const embeddingKeys = await this.redis.keys('embedding:cache:*');
+      // Use versioned patterns to clear current version cache
+      const currentVersion = SEARCH_CACHE_VERSION;
+      const searchPattern = `search:cache:*:v${currentVersion}`;
+      const embeddingPattern = `embedding:cache:*:v${currentVersion}`;
       
-      const allKeys = [...searchKeys, ...embeddingKeys];
+      const searchKeys = await this.redis.keys(searchPattern);
+      const embeddingKeys = await this.redis.keys(embeddingPattern);
+      
+      // Also look for any unversioned keys (legacy)
+      const legacySearchKeys = await this.redis.keys('search:cache:*');
+      const legacyEmbeddingKeys = await this.redis.keys('embedding:cache:*');
+      
+      // Filter out versioned keys from legacy to avoid duplicates
+      const filteredLegacySearch = legacySearchKeys.filter(k => !k.includes(':v'));
+      const filteredLegacyEmbedding = legacyEmbeddingKeys.filter(k => !k.includes(':v'));
+      
+      const allKeys = [
+        ...searchKeys, 
+        ...embeddingKeys,
+        ...filteredLegacySearch,
+        ...filteredLegacyEmbedding
+      ];
       
       if (allKeys.length > 0) {
         await this.redis.del(...allKeys);
@@ -205,6 +264,15 @@ export class SearchCacheManager {
       
       // Clear LRU tracking
       await this.redis.del('search:cache:lru');
+      
+      // Clear metrics
+      await this.redis.del(
+        'metrics:cache:hits',
+        'metrics:cache:misses', 
+        'metrics:cache:writes',
+        'metrics:embedding:cache:hits',
+        'metrics:embedding:cache:writes'
+      );
     } catch (error) {
       console.error('[SearchCache] Error clearing cache:', error);
     }
@@ -222,9 +290,16 @@ export class SearchCacheManager {
     embeddingCacheHits: number;
     oldestEntry: number;
     newestEntry: number;
+    currentVersion: string;
+    versionedEntries: number;
+    legacyEntries: number;
   }> {
     try {
-      const searchKeys = await this.redis.keys('search:cache:*');
+      // Get all cache keys and separate by version
+      const allSearchKeys = await this.redis.keys('search:cache:*');
+      const versionedKeys = allSearchKeys.filter(k => k.includes(`:v${SEARCH_CACHE_VERSION}`));
+      const legacyKeys = allSearchKeys.filter(k => !k.includes(':v'));
+      
       const hits = parseInt(await this.redis.get('metrics:cache:hits') || '0');
       const misses = parseInt(await this.redis.get('metrics:cache:misses') || '0');
       const writes = parseInt(await this.redis.get('metrics:cache:writes') || '0');
@@ -240,14 +315,17 @@ export class SearchCacheManager {
       const total = hits + misses;
       
       return {
-        totalCached: searchKeys.length,
+        totalCached: allSearchKeys.length,
         cacheHits: hits,
         cacheMisses: misses,
         cacheWrites: writes,
         hitRate: total > 0 ? (hits / total) * 100 : 0,
         embeddingCacheHits: embHits,
         oldestEntry: timestamps.length > 0 ? Math.min(...timestamps) : 0,
-        newestEntry: timestamps.length > 0 ? Math.max(...timestamps) : 0
+        newestEntry: timestamps.length > 0 ? Math.max(...timestamps) : 0,
+        currentVersion: SEARCH_CACHE_VERSION,
+        versionedEntries: versionedKeys.length,
+        legacyEntries: legacyKeys.length
       };
     } catch (error) {
       console.error('[SearchCache] Error getting stats:', error);
@@ -259,7 +337,10 @@ export class SearchCacheManager {
         hitRate: 0,
         embeddingCacheHits: 0,
         oldestEntry: 0,
-        newestEntry: 0
+        newestEntry: 0,
+        currentVersion: SEARCH_CACHE_VERSION,
+        versionedEntries: 0,
+        legacyEntries: 0
       };
     }
   }

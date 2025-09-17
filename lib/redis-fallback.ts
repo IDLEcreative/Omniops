@@ -91,6 +91,103 @@ class InMemoryStore {
     return list.slice(actualStart, actualStop);
   }
 
+  // Sorted set operations for LRU tracking
+  private sortedSets: Map<string, Map<string, number>> = new Map();
+
+  async zadd(key: string, score: number, member: string): Promise<number> {
+    let set = this.sortedSets.get(key);
+    if (!set) {
+      set = new Map();
+      this.sortedSets.set(key, set);
+    }
+    const existed = set.has(member);
+    set.set(member, score);
+    return existed ? 0 : 1;
+  }
+
+  async zrange(key: string, start: number, stop: number, withScores?: 'WITHSCORES'): Promise<string[]> {
+    const set = this.sortedSets.get(key);
+    if (!set) return [];
+    
+    // Sort by score
+    const entries = Array.from(set.entries()).sort((a, b) => a[1] - b[1]);
+    
+    // Handle negative indices
+    const actualStart = start < 0 ? Math.max(0, entries.length + start) : start;
+    const actualStop = stop < 0 ? entries.length + stop : stop;
+    
+    const slice = entries.slice(actualStart, actualStop + 1);
+    
+    if (withScores === 'WITHSCORES') {
+      const result: string[] = [];
+      slice.forEach(([member, score]) => {
+        result.push(member, score.toString());
+      });
+      return result;
+    }
+    
+    return slice.map(([member]) => member);
+  }
+
+  async zrem(key: string, ...members: string[]): Promise<number> {
+    const set = this.sortedSets.get(key);
+    if (!set) return 0;
+    
+    let removed = 0;
+    for (const member of members) {
+      if (set.delete(member)) {
+        removed++;
+      }
+    }
+    
+    if (set.size === 0) {
+      this.sortedSets.delete(key);
+    }
+    
+    return removed;
+  }
+
+  async zcard(key: string): Promise<number> {
+    const set = this.sortedSets.get(key);
+    return set ? set.size : 0;
+  }
+
+  // Pattern matching for keys
+  async keys(pattern: string): Promise<string[]> {
+    const results: string[] = [];
+    
+    // Convert Redis pattern to regex
+    const regexPattern = pattern
+      .replace(/[.+^${}()|[\]\\]/g, '\\$&') // Escape regex special chars
+      .replace(/\*/g, '.*') // Convert * to .*
+      .replace(/\?/g, '.'); // Convert ? to .
+    
+    const regex = new RegExp(`^${regexPattern}$`);
+    
+    // Check regular keys
+    for (const key of this.store.keys()) {
+      if (regex.test(key)) {
+        results.push(key);
+      }
+    }
+    
+    // Check list keys
+    for (const key of this.lists.keys()) {
+      if (regex.test(key) && !results.includes(key)) {
+        results.push(key);
+      }
+    }
+    
+    // Check sorted set keys
+    for (const key of this.sortedSets.keys()) {
+      if (regex.test(key) && !results.includes(key)) {
+        results.push(key);
+      }
+    }
+    
+    return results;
+  }
+
   // Clean up expired items periodically
   cleanup() {
     const now = Date.now();
@@ -99,6 +196,15 @@ class InMemoryStore {
         this.store.delete(key);
       }
     }
+  }
+
+  // Quit method for compatibility
+  async quit(): Promise<'OK'> {
+    // Clear all data when quitting
+    this.store.clear();
+    this.lists.clear();
+    this.sortedSets.clear();
+    return 'OK';
   }
 }
 
@@ -284,6 +390,78 @@ export class RedisClientWithFallback {
       }
     }
     return this.fallback ? await this.fallback.lrange(key, start, stop) : [];
+  }
+
+  // Sorted set operations for LRU tracking
+  async zadd(key: string, score: number, member: string): Promise<number> {
+    if (this.isRedisAvailable && this.client) {
+      try {
+        return await this.client.zadd(key, score, member);
+      } catch (error) {
+        logger.warn('[Redis] Zadd operation failed, using fallback:', error as Error);
+      }
+    }
+    return this.fallback ? await this.fallback.zadd(key, score, member) : 0;
+  }
+
+  async zrange(key: string, start: number, stop: number, withScores?: 'WITHSCORES'): Promise<string[]> {
+    if (this.isRedisAvailable && this.client) {
+      try {
+        if (withScores) {
+          return await this.client.zrange(key, start, stop, 'WITHSCORES');
+        }
+        return await this.client.zrange(key, start, stop);
+      } catch (error) {
+        logger.warn('[Redis] Zrange operation failed, using fallback:', error as Error);
+      }
+    }
+    return this.fallback ? await this.fallback.zrange(key, start, stop, withScores) : [];
+  }
+
+  async zrem(key: string, ...members: string[]): Promise<number> {
+    if (this.isRedisAvailable && this.client) {
+      try {
+        return await this.client.zrem(key, ...members);
+      } catch (error) {
+        logger.warn('[Redis] Zrem operation failed, using fallback:', error as Error);
+      }
+    }
+    return this.fallback ? await this.fallback.zrem(key, ...members) : 0;
+  }
+
+  async zcard(key: string): Promise<number> {
+    if (this.isRedisAvailable && this.client) {
+      try {
+        return await this.client.zcard(key);
+      } catch (error) {
+        logger.warn('[Redis] Zcard operation failed, using fallback:', error as Error);
+      }
+    }
+    return this.fallback ? await this.fallback.zcard(key) : 0;
+  }
+
+  // Pattern matching for cache invalidation
+  async keys(pattern: string): Promise<string[]> {
+    if (this.isRedisAvailable && this.client) {
+      try {
+        return await this.client.keys(pattern);
+      } catch (error) {
+        logger.warn('[Redis] Keys operation failed, using fallback:', error as Error);
+      }
+    }
+    return this.fallback ? await this.fallback.keys(pattern) : [];
+  }
+
+  // Quit method for compatibility
+  async quit(): Promise<'OK'> {
+    if (this.isRedisAvailable && this.client) {
+      try {
+        return await this.client.quit();
+      } catch (error) {
+        logger.warn('[Redis] Quit operation failed:', error as Error);
+      }
+    }
+    return this.fallback ? await this.fallback.quit() : 'OK';
   }
 
   // Status check
