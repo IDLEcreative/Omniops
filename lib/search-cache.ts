@@ -7,6 +7,7 @@
 import { Redis } from 'ioredis';
 import { getRedisClient } from './redis';
 import crypto from 'crypto';
+import { SEARCH_CACHE_VERSION, getVersionedCacheKey } from './cache-versioning';
 
 export interface CachedSearchResult {
   response: string;
@@ -37,7 +38,9 @@ export class SearchCacheManager {
     const limitStr = limit ? `:${limit}` : '';
     const keyData = domain ? `${domain}:${normalized}${limitStr}` : `${normalized}${limitStr}`;
     const hash = crypto.createHash('md5').update(keyData).digest('hex');
-    return `search:cache:${hash}`;
+    const baseKey = `search:cache:${hash}`;
+    // Include version in key so changing version invalidates cache
+    return getVersionedCacheKey(baseKey);
   }
 
   /**

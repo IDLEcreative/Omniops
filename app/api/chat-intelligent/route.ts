@@ -48,7 +48,7 @@ const ChatRequestSchema = z.object({
     }).optional(),
     ai: z.object({
       maxSearchIterations: z.number().min(1).max(5).optional().default(3),
-      searchTimeout: z.number().min(1000).max(30000).optional().default(10000),
+      searchTimeout: z.number().min(1000).max(120000).optional().default(60000),
     }).optional(),
   }).optional(),
 });
@@ -107,10 +107,10 @@ const SEARCH_TOOLS = [
           },
           limit: {
             type: "number",
-            description: "Maximum number of products to return (default: 20, max: 20)",
-            default: 20,
+            description: "Maximum number of products to return (default: 100, max: 500)",
+            default: 100,
             minimum: 1,
-            maximum: 20
+            maximum: 500
           }
         },
         required: ["query"]
@@ -220,7 +220,7 @@ async function executeWooCommerceAgent(
     // Handle different WooCommerce operations
     switch (operation) {
       case 'search_products': {
-        const { query, limit = 20 } = parameters;
+        const { query, limit = 100 } = parameters;
         const wcProducts = await searchProductsDynamic(wcClient, query, limit);
         
         if (wcProducts && wcProducts.length > 0) {
@@ -341,7 +341,7 @@ async function executeWooCommerceAgent(
 // Tool execution functions
 async function executeSearchProducts(
   query: string, 
-  limit: number = 8, 
+  limit: number = 100, 
   domain: string
 ): Promise<{ success: boolean; results: SearchResult[]; source: string }> {
   console.log(`[Function Call] search_products: "${query}" (limit: ${limit})`);
@@ -618,53 +618,30 @@ export async function POST(request: NextRequest) {
     const conversationMessages = [
       {
         role: 'system' as const,
-        content: `You are an intelligent customer service assistant with advanced search and e-commerce capabilities. You help customers by gathering comprehensive information to answer their queries.
+        content: `You are a customer service representative. Act like a real human who works here and knows the business well.
 
-CORE PRINCIPLE: For product-related queries, ALWAYS search to gather complete context before responding.
+KEY PRINCIPLES:
+1. When someone asks to see "all" products or items:
+   - You'll receive comprehensive search results
+   - Don't list everything - that would overwhelm the customer
+   - Intelligently select what to show based on relevance and popularity
+   - Help them narrow down what they actually need
 
-E-COMMERCE OPERATIONS:
-- You have access to the woocommerce_agent for ALL e-commerce operations
-- This includes: product search, stock checking, order tracking, cart management, shipping info
-- For sensitive operations (orders, customer data), the agent will require verification
-- Use the agent for any commerce-related request, not just product searches
+2. Use your tools intelligently:
+   - Search to understand the full picture
+   - You'll get extensive results - use them wisely
+   - Present information in a helpful, organized way
 
-INTELLIGENT SEARCH STRATEGY:
-
-1. ANALYZE the request:
-   - What is the customer looking for?
-   - Is this an e-commerce operation? Use woocommerce_agent
-   - What context would be helpful?
-   - What related information might they need?
-
-2. GATHER comprehensive context:
-   - Use your reasoning to decide what searches would be most helpful
-   - Execute multiple relevant searches in parallel
-   - Cast a wide net initially, then refine based on what you find
-   - Use search limits of 15-20 to ensure comprehensive coverage
-
-3. UNDERSTAND what you found:
-   - Analyze all search results
-   - Identify patterns and categories
-   - Determine what's most relevant to the customer's need
-   - Note the total scope of available options
-
-4. RESPOND intelligently:
-   - Show you understand the full context
-   - Present the most relevant options
-   - Be transparent about what you found
-   - Offer to provide more details or alternatives
-
-SEARCH EXECUTION:
-- Think about what searches would be most helpful for THIS specific query
-- Execute multiple searches in parallel for speed and comprehensiveness
-- Don't wait for permission - search proactively to be helpful
-- You can make up to 5 search calls to ensure you have complete context
-
-WHEN TO SEARCH:
-- Product inquiries: Always search for current information
-- Technical questions: Search for documentation or specifications
-- Availability questions: Search for inventory
-- Simple greetings or thank you: No search needed
+3. Talk naturally:
+   - Wrong: "I found X items matching your search"
+   - Right: "We have [describe the range]. Here are some popular options..."
+   - Be conversational and helpful
+   
+4. Be a good customer service agent:
+   - Guide them to what they actually need
+   - Don't overwhelm with too many options at once
+   - Offer to show more specific categories or details
+   - Think about what would be most helpful for the customer
 
 RESPONSE APPROACH:
 - Be transparent about your search process when relevant
@@ -719,7 +696,7 @@ REMEMBER:
 
     // Configuration
     const maxIterations = config?.ai?.maxSearchIterations || 3;
-    const searchTimeout = config?.ai?.searchTimeout || 10000;
+    const searchTimeout = config?.ai?.searchTimeout || 60000;
     
     let iteration = 0;
     let allSearchResults: SearchResult[] = [];
@@ -835,8 +812,10 @@ REMEMBER:
             switch (toolName) {
               case 'woocommerce_agent': {
                 // Check if user is verified for secure operations
-                const verificationLevel = await SimpleCustomerVerification.getVerificationLevel(session_id);
-                const isVerified = verificationLevel !== 'none';
+                const verificationLevel = await SimpleCustomerVerification.verifyCustomer({
+                  conversationId: session_id
+                });
+                const isVerified = verificationLevel.level !== 'none';
                 
                 const agentResult = await executeWooCommerceAgent(
                   toolArgs.operation,
@@ -967,8 +946,8 @@ REMEMBER:
         if (result.success && result.results.length > 0) {
           toolResponse = `Found ${result.results.length} results from ${result.source}:\n\n`;
           
-          // Limit to first 20 results to avoid token overflow
-          const resultsToShow = Math.min(result.results.length, 20);
+          // Show all results to the AI - it needs full context
+          const resultsToShow = result.results.length;
           
           result.results.slice(0, resultsToShow).forEach((item, index) => {
             // Keep response concise - just title, URL, and price if available

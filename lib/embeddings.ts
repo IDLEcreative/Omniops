@@ -462,6 +462,72 @@ export async function searchSimilarContent(
     return [];
   }
 
+  // SHORT QUERY DETECTION: For short queries (1-2 words), use keyword search instead of embeddings
+  // Embeddings work poorly for single words because they lack semantic context
+  const queryWords = query.trim().split(/\s+/);
+  const isShortQuery = queryWords.length <= 2;
+  
+  if (isShortQuery) {
+    console.log(`[SHORT QUERY] Detected short query: "${query}" - using keyword search`);
+    
+    try {
+      // Get domain_id
+      const searchDomain = domain.replace('www.', '');
+      const { data: domainData } = await supabase
+        .from('domains')
+        .select('id')
+        .eq('domain', searchDomain)
+        .single();
+      
+      if (domainData?.id) {
+        // Build search conditions for each word
+        const searchConditions = [];
+        for (const word of queryWords) {
+          const wordLower = word.toLowerCase();
+          searchConditions.push(`url.ilike.%${wordLower}%`);
+          searchConditions.push(`title.ilike.%${wordLower}%`);
+          searchConditions.push(`content.ilike.%${wordLower}%`);
+        }
+        
+        console.log(`[SHORT QUERY] Searching for "${query}" in domain ${domainData.id}`);
+        
+        // Direct database search
+        const { data: searchResults, error } = await supabase
+          .from('scraped_pages')
+          .select('url, title, content, metadata')
+          .eq('domain_id', domainData.id)
+          .or(searchConditions.join(','))
+          .limit(1000); // Get all matching results
+
+        if (!error && searchResults && searchResults.length > 0) {
+          // Prioritize product pages but include all results
+          const results = searchResults
+            .map((row: any) => ({
+              content: row.content || '',
+              url: row.url || '',
+              title: row.title || 'Untitled',
+              // Give higher score to product pages
+              similarity: row.url?.includes('/product/') ? 0.95 : 0.85
+            }))
+            .sort((a, b) => b.similarity - a.similarity);
+
+          console.log(`[SHORT QUERY] Found ${results.length} results for "${query}"`);
+          
+          // Cache the results
+          await cacheManager.cacheResult(query, { 
+            response: '', 
+            chunks: results 
+          }, domain, limit);
+
+          return results;
+        }
+      }
+    } catch (error) {
+      console.error('[SHORT QUERY] Error:', error);
+      // Fall through to regular search
+    }
+  }
+
   // Helper: simple keyword extraction that preserves SKU-like tokens (e.g., DC66-10P)
   function extractKeywords(text: string, max = 5): string[] {
     const stop = new Set([
@@ -510,7 +576,7 @@ export async function searchSimilarContent(
           .select('url, title, content')
           .eq('domain_id', domainId)
           .or('url.ilike.%agri%,title.ilike.%agri%,content.ilike.%agricultural%')
-          .limit(20);
+          .limit(500);
         
         if (agriResults && agriResults.length > 0) {
           console.log(`[RAG Metadata] Found ${agriResults.length} agricultural products`);
@@ -534,7 +600,7 @@ export async function searchSimilarContent(
         .select('url, title, content, metadata')
         .eq('domain_id', domainId)
         .not('metadata', 'is', null)
-        .limit(100); // Get more to search through
+        .limit(500); // Get more to search through
       
       if (error) {
         console.error('[RAG Metadata] Query error:', error);
@@ -588,7 +654,8 @@ export async function searchSimilarContent(
       }
       
       // Calculate dynamic similarity scores based on match quality
-      return filtered.slice(0, 10).map((row: any) => {
+      // Return all filtered results, no artificial limit
+      return filtered.map((row: any) => {
         // Calculate how well this product matches the query
         const metadataStr = JSON.stringify(row.metadata || {}).toLowerCase();
         const contentStr = (row.content || '').toLowerCase();
@@ -654,7 +721,7 @@ export async function searchSimilarContent(
         .select('url, title, content')
         .eq('domain_id', domainId)
         .or(orConditions.join(','))
-        .limit(10);
+        .limit(500);
       
       if (!data || data.length === 0) return [];
       
@@ -732,7 +799,7 @@ export async function searchSimilarContent(
             .select('url, title, content, metadata')
             .eq('domain_id', domainId)
             .or(metadataConditions.join(','))
-            .limit(limit);
+            .limit(500);
           
           if (metadataResults && metadataResults.length > 0) {
             console.log(`[RAG Fallback] Found ${metadataResults.length} results via metadata search`);
@@ -760,7 +827,7 @@ export async function searchSimilarContent(
           .select('url, title, content')
           .eq('domain_id', domainId)
           .or(orConditions.join(','))
-          .limit(limit);
+          .limit(500);
           
         if (keywordResults && keywordResults.length > 0) {
           console.log(`[RAG Fallback] Found ${keywordResults.length} results via keyword search`);
@@ -788,7 +855,7 @@ export async function searchSimilarContent(
           let q = supabase
             .from('scraped_pages')
             .select('url, title, content')
-            .limit(limit);
+            .limit(500);
           // Filter by domain_id if available, otherwise use URL pattern
           if (domainId) {
             q = q.eq('domain_id', domainId);
@@ -829,7 +896,7 @@ export async function searchSimilarContent(
             }
 
             if (products && products.length > 0) {
-              return products.slice(0, limit).map((p: any) => ({
+              return products.map((p: any) => ({
                 content: `${p.name || ''}\nPrice: ${p.price || p.regular_price || ''}\n${(p.short_description || p.description || '').replace(/<[^>]+>/g, ' ').trim()}`.trim(),
                 url: p.permalink || '',
                 title: p.name || (p.sku ? `SKU ${p.sku}` : 'Product'),
@@ -855,7 +922,7 @@ export async function searchSimilarContent(
       let q = supabase
         .from('scraped_pages')
         .select('url, title, content')
-        .limit(limit);
+        .limit(500);
       
       // Filter by domain_id if available, otherwise use URL pattern
       if (domainId) {
@@ -935,7 +1002,7 @@ export async function searchSimilarContent(
             console.log('[RAG] Woo text search returned', products?.length || 0, 'items');
           }
           if (products && products.length > 0) {
-            return products.slice(0, limit).map((p: any) => ({
+            return products.map((p: any) => ({
               content: `${p.name || ''}\nPrice: ${p.price || p.regular_price || ''}\n${(p.short_description || p.description || '').replace(/<[^>]+>/g, ' ').trim()}`.trim(),
               url: p.permalink || '',
               title: p.name || (p.sku ? `SKU ${p.sku}` : 'Product'),
@@ -973,7 +1040,7 @@ export async function searchSimilarContent(
               }
             }
             if (resp && resp.length > 0) {
-              return resp.slice(0, limit).map((p: any) => ({
+              return resp.map((p: any) => ({
                 content: `${p.name || ''}\nPrice: ${p.price || p.regular_price || ''}\n${String(p.short_description || p.description || '').replace(/<[^>]+>/g, ' ').trim()}`.trim(),
                 url: p.permalink || '',
                 title: p.name || (p.sku ? `SKU ${p.sku}` : 'Product'),
@@ -996,7 +1063,7 @@ export async function searchSimilarContent(
         let q = supabase
           .from('scraped_pages')
           .select('url, title, content')
-          .limit(limit);
+          .limit(500);
         if (domainId) q = q.eq('domain_id', domainId);
         // Prioritize product URLs
         q = (q as any).or('url.ilike.%/product/%');
@@ -1243,7 +1310,9 @@ export async function searchSimilarContent(
         // Then sort by similarity score
         return (b.similarity || 0) - (a.similarity || 0);
       })
-      .slice(0, limit);
+      // Don't limit the final results - let the AI see everything
+      // The limit param is just for database query optimization
+      ;
     
     console.log(`[RAG] Combined results: ${combined.length} (semantic: ${mapped.length}, metadata: ${metadataResults.length}, keyword: ${keywordResults.length})`);
     
