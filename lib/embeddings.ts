@@ -608,6 +608,74 @@ export async function searchSimilarContent(
     try {
       const keywords = searchQuery.toLowerCase().split(/\s+/).filter(word => word.length > 2);
       
+      // Enhanced category detection for broader searches
+      const isCategorySearch = [
+        'pumps', 'pump', 'hydraulic', 'pneumatic', 'valves', 'valve', 'filters', 'filter'
+      ].some(term => keywords.includes(term));
+      
+      if (isCategorySearch) {
+        console.log(`[RAG Metadata] Category search detected for: ${keywords.join(', ')}`);
+        
+        // For category searches, cast a wider net
+        const categoryTerms = keywords.filter(kw => 
+          ['hydraulic', 'pneumatic', 'electric', 'pump', 'pumps', 'valve', 'valves', 'filter', 'filters'].includes(kw)
+        );
+        
+        if (categoryTerms.length > 0) {
+          // Search in title and URL for category terms
+          const orConditions = [];
+          categoryTerms.forEach(term => {
+            orConditions.push(`title.ilike.%${term}%`);
+            orConditions.push(`url.ilike.%${term}%`);
+            orConditions.push(`content.ilike.%${term}%`);
+          });
+          
+          const { data: categoryResults } = await supabase
+            .from('scraped_pages')
+            .select('url, title, content, metadata')
+            .eq('domain_id', domainId)
+            .or(orConditions.join(','))
+            .limit(500);
+          
+          if (categoryResults && categoryResults.length > 0) {
+            console.log(`[RAG Metadata] Found ${categoryResults.length} category matches`);
+            
+            return categoryResults.map((row: any) => {
+              const titleLower = (row.title || '').toLowerCase();
+              const urlLower = (row.url || '').toLowerCase();
+              
+              let score = 0.5;
+              
+              // Count matches in title and URL (most relevant for categories)
+              const titleMatches = categoryTerms.filter(term => titleLower.includes(term)).length;
+              const urlMatches = categoryTerms.filter(term => urlLower.includes(term)).length;
+              
+              // Higher score for title matches
+              if (titleMatches > 0) {
+                score += (titleMatches / categoryTerms.length) * 0.3;
+              }
+              
+              // Medium score for URL matches
+              if (urlMatches > 0) {
+                score += (urlMatches / categoryTerms.length) * 0.15;
+              }
+              
+              // Bonus for product pages
+              if (row.url?.includes('/product/')) {
+                score += 0.1;
+              }
+              
+              return {
+                content: row.content || '',
+                url: row.url || '',
+                title: row.title || 'Untitled',
+                similarity: Math.min(score, 0.9)
+              };
+            });
+          }
+        }
+      }
+      
       // CRITICAL: For agricultural queries, also search without metadata filter
       const isAgricultural = searchQuery.toLowerCase().includes('agri') || searchQuery.toLowerCase().includes('agricultural');
       
@@ -637,7 +705,7 @@ export async function searchSimilarContent(
         }
       }
       
-      // Original metadata search logic
+      // Original metadata search logic for specific product searches
       const { data: results, error } = await supabase
         .from('scraped_pages')
         .select('url, title, content, metadata')
@@ -1288,56 +1356,97 @@ export async function searchSimilarContent(
       return fallback;
     }
     
-    // Check if results are good quality for agricultural queries
-    // ALWAYS run parallel searches for better coverage
-    console.log(`[RAG PARALLEL] Starting parallel search for query: "${query}"`);
-    console.log(`[RAG PARALLEL] Domain ID: ${domainId}`);
-    
-    // Run all search strategies in parallel for speed and coverage
-    const [metadataResults, keywordResults] = await Promise.all([
-      // 1. Search metadata for category/SKU matches
-      searchMetadata(domainId, query),
-      // 2. Search keywords in content
-      searchKeywords(domainId, query)
-    ]);
-    
-    console.log(`[RAG PARALLEL] Search complete - Metadata: ${metadataResults.length}, Keywords: ${keywordResults.length}`);
-    
-    // Combine all results
-    const allResults = new Map<string, any>(); // Use Map to dedupe by URL
-    
-    // Add semantic results first (already have them in 'mapped')
-    mapped.forEach((r: any) => {
-      allResults.set(r.url, { ...r, source: 'semantic' });
-    });
-    
-    // Add metadata matches with boost
-    metadataResults.forEach((r: any) => {
-      if (allResults.has(r.url)) {
-        // Boost existing result
-        const existing = allResults.get(r.url);
-        existing.similarity = Math.max(existing.similarity, r.similarity);
-        existing.source = 'semantic+metadata';
-      } else {
-        allResults.set(r.url, { ...r, source: 'metadata' });
-      }
-    });
-    
-    // Add keyword matches
-    keywordResults.forEach((r: any) => {
-      if (!allResults.has(r.url)) {
-        allResults.set(r.url, { ...r, source: 'keyword' });
-      }
-    });
-    
-    // Convert back to array and sort by relevance
-    const combined = Array.from(allResults.values())
-      .sort((a, b) => {
-        // Check how many query keywords appear in each result
-        const queryKeywords = query.toLowerCase().split(/\s+/).filter(w => w.length > 2);
+    // ADAPTIVE SEARCH STRATEGY: Choose search method based on query type
+    if (queryAnalysis.type === 'specific') {
+      console.log(`[SPECIFIC SEARCH] Using precise search strategy for specific product query`);
+      
+      // For specific queries, prioritize semantic results and only add others if needed
+      let finalResults = mapped;
+      
+      // If semantic search didn't find enough specific results, add targeted keyword search
+      if (finalResults.length < 3) {
+        console.log(`[SPECIFIC SEARCH] Semantic found ${finalResults.length}, adding targeted keyword search`);
+        const keywordResults = await searchKeywords(domainId, query);
         
-        if (queryKeywords.length >= 2) {
-          // For multi-word queries, prioritize results with more keyword matches
+        // Only add keyword results that are highly relevant
+        const relevantKeywordResults = keywordResults.filter(r => {
+          const titleLower = r.title.toLowerCase();
+          const queryLower = query.toLowerCase();
+          // Require most query words to be in title for specific searches
+          const wordsInTitle = queryWords.filter(word => 
+            titleLower.includes(word.toLowerCase())
+          ).length;
+          return wordsInTitle >= Math.max(2, queryWords.length * 0.7);
+        });
+        
+        // Merge results without duplicates
+        const urlSet = new Set(finalResults.map(r => r.url));
+        relevantKeywordResults.forEach(r => {
+          if (!urlSet.has(r.url)) {
+            finalResults.push({ ...r, source: 'keyword-targeted' });
+          }
+        });
+      }
+      
+      console.log(`[SPECIFIC SEARCH] Final results: ${finalResults.length}`);
+      
+      // Cache and return specific search results
+      await cacheManager.cacheResult(query, { 
+        response: '', 
+        chunks: finalResults,
+        metadata: {
+          sourcesUsed: ['semantic', 'keyword-targeted'],
+          chunksRetrieved: finalResults.length,
+          searchMethod: 'specific'
+        }
+      }, domain, limit);
+      
+      return finalResults;
+    }
+    
+    // For CATEGORY queries, use comprehensive parallel search
+    if (queryAnalysis.type === 'category') {
+      console.log(`[CATEGORY SEARCH] Using comprehensive search for category query`);
+      
+      // Run all search strategies in parallel for maximum coverage
+      const [metadataResults, keywordResults] = await Promise.all([
+        searchMetadata(domainId, query),
+        searchKeywords(domainId, query)
+      ]);
+      
+      console.log(`[CATEGORY SEARCH] Metadata: ${metadataResults.length}, Keywords: ${keywordResults.length}, Semantic: ${mapped.length}`);
+      
+      // Combine all results with deduplication
+      const allResults = new Map<string, any>();
+      
+      // Add semantic results first
+      mapped.forEach((r: any) => {
+        allResults.set(r.url, { ...r, source: 'semantic' });
+      });
+      
+      // Add metadata matches with boost
+      metadataResults.forEach((r: any) => {
+        if (allResults.has(r.url)) {
+          const existing = allResults.get(r.url);
+          existing.similarity = Math.max(existing.similarity, r.similarity);
+          existing.source = 'semantic+metadata';
+        } else {
+          allResults.set(r.url, { ...r, source: 'metadata' });
+        }
+      });
+      
+      // Add keyword matches
+      keywordResults.forEach((r: any) => {
+        if (!allResults.has(r.url)) {
+          allResults.set(r.url, { ...r, source: 'keyword' });
+        }
+      });
+      
+      const combined = Array.from(allResults.values())
+        .sort((a, b) => {
+          // For category searches, prioritize relevance and product pages
+          const queryKeywords = query.toLowerCase().split(/\s+/).filter(w => w.length > 2);
+          
           const aMatches = queryKeywords.filter(kw => 
             a.title?.toLowerCase().includes(kw) || a.url?.toLowerCase().includes(kw)
           ).length;
@@ -1345,24 +1454,58 @@ export async function searchSimilarContent(
             b.title?.toLowerCase().includes(kw) || b.url?.toLowerCase().includes(kw)
           ).length;
           
-          // Prioritize results with more keyword matches
-          if (aMatches > bMatches) return -1;
-          if (bMatches > aMatches) return 1;
+          // First priority: Results with more keyword matches
+          if (aMatches !== bMatches) return bMatches - aMatches;
+          
+          // Second priority: Product pages over category pages
+          const aIsProduct = a.url?.includes('/product/') ? 1 : 0;
+          const bIsProduct = b.url?.includes('/product/') ? 1 : 0;
+          if (aIsProduct !== bIsProduct) return bIsProduct - aIsProduct;
+          
+          // Third priority: Similarity score
+          return (b.similarity || 0) - (a.similarity || 0);
+        });
+      
+      console.log(`[CATEGORY SEARCH] Combined results: ${combined.length}`);
+      
+      await cacheManager.cacheResult(query, { 
+        response: '', 
+        chunks: combined,
+        metadata: {
+          sourcesUsed: ['semantic', 'metadata', 'keyword'],
+          chunksRetrieved: combined.length,
+          searchMethod: 'category'
         }
-        
-        // Then sort by similarity score
-        return (b.similarity || 0) - (a.similarity || 0);
-      })
-      // Don't limit the final results - let the AI see everything
-      // The limit param is just for database query optimization
-      ;
+      }, domain, limit);
+      
+      return combined;
+    }
     
-    console.log(`[RAG] Combined results: ${combined.length} (semantic: ${mapped.length}, metadata: ${metadataResults.length}, keyword: ${keywordResults.length})`);
+    // For GENERAL queries, use balanced approach
+    console.log(`[GENERAL SEARCH] Using balanced search approach`);
+    
+    // Add just keyword results to supplement semantic results
+    const keywordResults = await searchKeywords(domainId, query);
+    
+    const allResults = new Map<string, any>();
+    mapped.forEach((r: any) => {
+      allResults.set(r.url, { ...r, source: 'semantic' });
+    });
+    
+    keywordResults.forEach((r: any) => {
+      if (!allResults.has(r.url)) {
+        allResults.set(r.url, { ...r, source: 'keyword' });
+      }
+    });
+    
+    const combined = Array.from(allResults.values())
+      .sort((a, b) => (b.similarity || 0) - (a.similarity || 0));
+    
+    console.log(`[GENERAL SEARCH] Combined results: ${combined.length}`);
     
     if (combined.length === 0) {
       // Final fallback if everything failed
       const fallbackResults = await fallbackKeywordSearch(domainId);
-      // Cache even fallback results
       await cacheManager.cacheResult(query, { 
         response: '', 
         chunks: fallbackResults 
@@ -1378,7 +1521,7 @@ export async function searchSimilarContent(
       metadata: {
         sourcesUsed: [...new Set(combined.map((r: any) => r.source))],
         chunksRetrieved: combined.length,
-        searchMethod: 'hybrid'
+        searchMethod: 'general'
       }
     }, domain, limit);
     

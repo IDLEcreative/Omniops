@@ -1,0 +1,76 @@
+{
+  "timestamp": "2025-09-17T17:26:32.405Z",
+  "databaseIndexes": {
+    "total": 39,
+    "vectorIndexes": 3,
+    "fulltextIndexes": 8,
+    "domainIndexes": 12,
+    "status": "passed"
+  },
+  "parallelOptimizer": {
+    "functionsExist": true,
+    "decompositionWorking": true,
+    "status": "passed"
+  },
+  "performanceTests": [
+    {
+      "scenario": "Simple Product Search",
+      "query": "show me pumps",
+      "responseTime": 89.36462500000016,
+      "parallelExecution": false,
+      "toolsExecuted": 0,
+      "searchResults": 0,
+      "success": false,
+      "error": "HTTP 400: Bad Request"
+    },
+    {
+      "scenario": "Multiple Product Search",
+      "query": "find pumps and check hydraulic filters",
+      "responseTime": 88.05704100000003,
+      "parallelExecution": false,
+      "toolsExecuted": 0,
+      "searchResults": 0,
+      "success": false,
+      "error": "HTTP 400: Bad Request"
+    },
+    {
+      "scenario": "Comma-Separated List",
+      "query": "search for brake pads, hydraulic pumps, filters",
+      "responseTime": 69.43925000000036,
+      "parallelExecution": false,
+      "toolsExecuted": 0,
+      "searchResults": 0,
+      "success": false,
+      "error": "HTTP 400: Bad Request"
+    },
+    {
+      "scenario": "Multiple SKUs",
+      "query": "check stock for BP-001 and check availability of HYD-250",
+      "responseTime": 54.860083000000486,
+      "parallelExecution": false,
+      "toolsExecuted": 0,
+      "searchResults": 0,
+      "success": false,
+      "error": "HTTP 400: Bad Request"
+    },
+    {
+      "scenario": "Complex Multi-Intent",
+      "query": "find gear pumps and check shipping costs and show categories",
+      "responseTime": 60.22087499999998,
+      "parallelExecution": false,
+      "toolsExecuted": 0,
+      "searchResults": 0,
+      "success": false,
+      "error": "HTTP 400: Bad Request"
+    }
+  ],
+  "summary": {
+    "averageResponseTime": 0,
+    "parallelExecutionRate": 0,
+    "successRate": 0,
+    "recommendations": [
+      "Parallel execution rate < 60% - review query decomposition logic",
+      "Success rate < 80% - investigate API failures"
+    ]
+  }
+}

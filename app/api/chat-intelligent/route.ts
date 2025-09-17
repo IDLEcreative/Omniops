@@ -13,6 +13,7 @@ import { extractQueryKeywords, isPriceQuery, extractPriceRange } from '@/lib/sea
 import { ChatTelemetry, telemetryManager } from '@/lib/chat-telemetry';
 import { SimpleCustomerVerification } from '@/lib/customer-verification-simple';
 import { QueryCache } from '@/lib/query-cache';
+import { getWooCommerceAPICache } from '@/lib/woocommerce-api-cache';
 
 // Lazy load OpenAI client to avoid build-time errors
 let openai: OpenAI | null = null;
@@ -217,11 +218,29 @@ async function executeWooCommerceAgent(
       };
     }
     
+    // Get API cache instance
+    const apiCache = getWooCommerceAPICache();
+    
     // Handle different WooCommerce operations
     switch (operation) {
       case 'search_products': {
         const { query, limit = 100 } = parameters;
-        const wcProducts = await searchProductsDynamic(wcClient, query, limit);
+        
+        // Use cache to eliminate 20-60s delays
+        const cacheResult = await apiCache.getOrFetch(
+          'search_products',
+          { query, limit },
+          domain,
+          async () => searchProductsDynamic(wcClient, query, limit)
+        );
+        
+        const wcProducts = cacheResult.data;
+        
+        if (cacheResult.fromCache) {
+          console.log(`[WooCommerce Agent] Cache HIT - saved ~20-60s response time`);
+        } else {
+          console.log(`[WooCommerce Agent] Cache MISS - fetched in ${cacheResult.responseTime}ms`);
+        }
         
         if (wcProducts && wcProducts.length > 0) {
           console.log(`[WooCommerce Agent] Found ${wcProducts.length} products`);
@@ -240,15 +259,41 @@ async function executeWooCommerceAgent(
       
       case 'get_product_details': {
         const { productId } = parameters;
-        const product = await wcClient.get(`products/${productId}`);
-        return { success: true, data: product.data };
+        
+        // Cache product details for 10 minutes
+        const cacheResult = await apiCache.getOrFetch(
+          'get_product_details',
+          { productId },
+          domain,
+          async () => (await wcClient.get(`products/${productId}`)).data
+        );
+        
+        if (cacheResult.fromCache) {
+          console.log(`[WooCommerce Agent] Product details cache HIT`);
+        }
+        
+        return { success: true, data: cacheResult.data };
       }
       
       case 'check_stock': {
         const { sku } = parameters;
-        const products = await wcClient.get('products', { sku });
-        if (products.data.length > 0) {
-          const product = products.data[0];
+        
+        // Cache stock checks for 1 minute (more dynamic data)
+        const cacheResult = await apiCache.getOrFetch(
+          'check_stock',
+          { sku },
+          domain,
+          async () => (await wcClient.get('products', { sku })).data
+        );
+        
+        const products = cacheResult.data;
+        
+        if (cacheResult.fromCache) {
+          console.log(`[WooCommerce Agent] Stock check cache HIT`);
+        }
+        
+        if (products.length > 0) {
+          const product = products[0];
           return {
             success: true,
             data: {
@@ -305,19 +350,38 @@ async function executeWooCommerceAgent(
       }
       
       case 'get_categories': {
-        const categories = await wcClient.get('products/categories');
-        return { success: true, data: categories.data };
+        // Cache categories for 30 minutes (rarely change)
+        const cacheResult = await apiCache.getOrFetch(
+          'get_categories',
+          {},
+          domain,
+          async () => (await wcClient.get('products/categories')).data
+        );
+        
+        if (cacheResult.fromCache) {
+          console.log(`[WooCommerce Agent] Categories cache HIT - saved ~20s`);
+        }
+        
+        return { success: true, data: cacheResult.data };
       }
       
       case 'get_shipping_options': {
-        // Would calculate shipping based on cart/location
-        return {
-          success: true,
-          data: [
+        // Cache shipping options for 1 hour (stable data)
+        const cacheResult = await apiCache.getOrFetch(
+          'get_shipping_options',
+          {},
+          domain,
+          async () => [
             { method: 'standard', cost: 5.99, days: '3-5' },
             { method: 'express', cost: 12.99, days: '1-2' }
           ]
-        };
+        );
+        
+        if (cacheResult.fromCache) {
+          console.log(`[WooCommerce Agent] Shipping options cache HIT`);
+        }
+        
+        return { success: true, data: cacheResult.data };
       }
       
       default:
@@ -352,7 +416,17 @@ async function executeSearchProducts(
       ? 'thompsonseparts.co.uk'
       : domain.replace(/^https?:\/\//, '').replace('www.', '');
     
-    const searchResults = await searchSimilarContent(query, browseDomain, limit, 0.2);
+    // Adjust similarity threshold based on query characteristics
+    let similarityThreshold = 0.2;
+    const queryWords = query.trim().split(/\s+/);
+    
+    // For specific product searches, use higher threshold to reduce noise
+    if (queryWords.length >= 4 && /\b(proportional|solenoid|valve|pump)\b/i.test(query)) {
+      similarityThreshold = 0.3;
+      console.log(`[Function Call] Specific product detected, using higher threshold: ${similarityThreshold}`);
+    }
+    
+    const searchResults = await searchSimilarContent(query, browseDomain, limit, similarityThreshold);
     console.log(`[Function Call] Semantic search returned ${searchResults.length} results`);
     
     return { 
