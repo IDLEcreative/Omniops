@@ -32,9 +32,10 @@ export class SearchCacheManager {
   /**
    * Generate cache key for a search query
    */
-  private getCacheKey(query: string, domain?: string): string {
+  private getCacheKey(query: string, domain?: string, limit?: number): string {
     const normalized = query.toLowerCase().trim();
-    const keyData = domain ? `${domain}:${normalized}` : normalized;
+    const limitStr = limit ? `:${limit}` : '';
+    const keyData = domain ? `${domain}:${normalized}${limitStr}` : `${normalized}${limitStr}`;
     const hash = crypto.createHash('md5').update(keyData).digest('hex');
     return `search:cache:${hash}`;
   }
@@ -42,9 +43,9 @@ export class SearchCacheManager {
   /**
    * Get cached search result
    */
-  async getCachedResult(query: string, domain?: string): Promise<CachedSearchResult | null> {
+  async getCachedResult(query: string, domain?: string, limit?: number): Promise<CachedSearchResult | null> {
     try {
-      const key = this.getCacheKey(query, domain);
+      const key = this.getCacheKey(query, domain, limit);
       const cached = await this.redis.get(key);
       
       if (!cached) return null;
@@ -75,10 +76,11 @@ export class SearchCacheManager {
   async cacheResult(
     query: string, 
     result: Omit<CachedSearchResult, 'cachedAt'>,
-    domain?: string
+    domain?: string,
+    limit?: number
   ): Promise<void> {
     try {
-      const key = this.getCacheKey(query, domain);
+      const key = this.getCacheKey(query, domain, limit);
       
       const cacheData: CachedSearchResult = {
         ...result,
@@ -173,9 +175,9 @@ export class SearchCacheManager {
   /**
    * Invalidate specific query cache
    */
-  async invalidateQuery(query: string, domain?: string): Promise<void> {
+  async invalidateQuery(query: string, domain?: string, limit?: number): Promise<void> {
     try {
-      const key = this.getCacheKey(query, domain);
+      const key = this.getCacheKey(query, domain, limit);
       await this.redis.del(key);
       await this.redis.zrem('search:cache:lru', key);
     } catch (error) {

@@ -74,8 +74,8 @@ const SEARCH_TOOLS = [
           },
           limit: {
             type: "number",
-            description: "Maximum number of products to return (default: 8, max: 20)",
-            default: 8,
+            description: "Maximum number of products to return (default: 20, max: 20)",
+            default: 20,
             minimum: 1,
             maximum: 20
           }
@@ -146,7 +146,7 @@ async function executeSearchProducts(
       ? 'thompsonseparts.co.uk'
       : domain.replace(/^https?:\/\//, '').replace('www.', '');
     
-    const wcProducts = await searchProductsDynamic(browseDomain, query, Math.min(limit, 10));
+    const wcProducts = await searchProductsDynamic(browseDomain, query, limit);
     
     if (wcProducts && wcProducts.length > 0) {
       console.log(`[Function Call] WooCommerce returned ${wcProducts.length} products`);
@@ -358,38 +358,59 @@ export async function POST(request: NextRequest) {
     const conversationMessages = [
       {
         role: 'system' as const,
-        content: `You are an intelligent customer service assistant with search capabilities. You can search for products and information to help customers.
+        content: `You are an intelligent customer service assistant with advanced search capabilities. You help customers by gathering comprehensive information to answer their queries.
 
-CORE PRINCIPLES:
-- Be helpful, conversational, and professional
-- Use the search tools to find relevant information when needed
-- Don't make assumptions - search for information when you're unsure
-- Present search results naturally in your response
-- For product queries, use search_products to find relevant items
-- For general topics or policies, use search_by_category
-- For specific product details, use get_product_details
+CORE PRINCIPLE: For product-related queries, ALWAYS search to gather complete context before responding.
 
-SEARCH STRATEGY - ReAct Pattern:
-1. REASON: Analyze what the user is asking for
-2. ACT: Use appropriate search tools to gather information
-3. OBSERVE: Review the search results
-4. REASON: Determine if you need more information or can respond
-5. ACT: Search again if needed, or provide the final response
+INTELLIGENT SEARCH STRATEGY:
 
-SEARCH GUIDELINES:
-- For greetings or simple questions, respond directly without searching
-- For product inquiries, always search for current information
-- You can make up to 3 search calls per conversation to get complete information
-- Combine information from multiple searches when helpful
-- Always acknowledge when information comes from search results
+1. ANALYZE the request:
+   - What is the customer looking for?
+   - What context would be helpful?
+   - What related information might they need?
 
-RESPONSE FORMATTING:
-- Use bullet points (•) for product lists
-- Include prices when available: [Product Name](url) - £price
-- Keep responses concise but informative
-- Only link to same-domain URLs
+2. GATHER comprehensive context:
+   - Use your reasoning to decide what searches would be most helpful
+   - Execute multiple relevant searches in parallel
+   - Cast a wide net initially, then refine based on what you find
+   - Use search limits of 15-20 to ensure comprehensive coverage
 
-IMPORTANT: Never invent product details, prices, or specifications. Always search for accurate information.`
+3. UNDERSTAND what you found:
+   - Analyze all search results
+   - Identify patterns and categories
+   - Determine what's most relevant to the customer's need
+   - Note the total scope of available options
+
+4. RESPOND intelligently:
+   - Show you understand the full context
+   - Present the most relevant options
+   - Be transparent about what you found
+   - Offer to provide more details or alternatives
+
+SEARCH EXECUTION:
+- Think about what searches would be most helpful for THIS specific query
+- Execute multiple searches in parallel for speed and comprehensiveness
+- Don't wait for permission - search proactively to be helpful
+- You can make up to 5 search calls to ensure you have complete context
+
+WHEN TO SEARCH:
+- Product inquiries: Always search for current information
+- Technical questions: Search for documentation or specifications
+- Availability questions: Search for inventory
+- Simple greetings or thank you: No search needed
+
+RESPONSE APPROACH:
+- Be transparent about your search process when relevant
+- Show awareness of the breadth of options available
+- Present information in a clear, organized way
+- Include specific details like prices and specifications when available
+- Group related items logically
+
+REMEMBER:
+- Let your intelligence guide HOW you search
+- Gather enough context to truly help the customer
+- Don't make assumptions - use search to verify
+- Be helpful and comprehensive without being overwhelming`
       },
       ...(historyData || []).map((msg: any) => ({
         role: msg.role as 'user' | 'assistant',
@@ -417,15 +438,52 @@ IMPORTANT: Never invent product details, prices, or specifications. Always searc
     let allSearchResults: SearchResult[] = [];
     let searchLog: Array<{ tool: string; query: string; resultCount: number; source: string }> = [];
 
+    // Use GPT-5-mini reasoning model for better search intelligence
+    const useGPT5 = process.env.USE_GPT5_MINI === 'true';
+    const baseModelConfig = useGPT5 
+      ? {
+          model: 'gpt-5-mini' as any,
+          max_completion_tokens: 2500,  // Increased to accommodate reasoning + output
+          reasoning_effort: 'low',       // Low reasoning for balanced quality and speed
+          // GPT-5 doesn't support custom temperature
+        }
+      : {
+          model: 'gpt-4.1' as any,       // Use same fallback as main chat route
+          temperature: 0.7,
+          max_tokens: 1000,              // Higher for intelligent search responses
+        };
+    console.log(`[Intelligent Chat] Using model: ${baseModelConfig.model}`);
+
     // Initial AI call with tools
-    let completion = await openaiClient.chat.completions.create({
-      model: 'gpt-4',
-      messages: conversationMessages,
-      tools: SEARCH_TOOLS,
-      tool_choice: 'auto',
-      temperature: 0.7,
-      max_tokens: 1000,
-    });
+    let completion;
+    try {
+      // Merge config with tool-calling parameters
+      const toolCallConfig = {
+        ...baseModelConfig,
+        messages: conversationMessages,
+        tools: SEARCH_TOOLS,
+        tool_choice: 'auto',
+        // Only add temperature if not GPT-5
+        ...(useGPT5 ? {} : { temperature: 0.7 }),
+      };
+      
+      completion = await openaiClient.chat.completions.create(toolCallConfig as any);
+    } catch (error: any) {
+      // Fallback to GPT-4.1 if GPT-5-mini fails
+      if (useGPT5) {
+        console.log('[Intelligent Chat] GPT-5-mini failed, falling back to GPT-4.1...');
+        completion = await openaiClient.chat.completions.create({
+          model: 'gpt-4.1' as any,
+          messages: conversationMessages,
+          tools: SEARCH_TOOLS,
+          tool_choice: 'auto',
+          temperature: 0.7,
+          max_tokens: 1000,
+        });
+      } else {
+        throw error;
+      }
+    }
 
     let finalResponse = '';
     let shouldContinue = true;
@@ -449,16 +507,16 @@ IMPORTANT: Never invent product details, prices, or specifications. Always searc
         break;
       }
 
-      // Execute tool calls
+      // Execute tool calls IN PARALLEL for faster, more comprehensive results
+      console.log(`[Intelligent Chat] Executing ${toolCalls.length} tools in parallel...`);
       const toolResults: Array<{ tool_call_id: string; content: string }> = [];
       
-      for (const toolCall of toolCalls) {
+      // Prepare all tool executions
+      const toolExecutions = toolCalls.map(async (toolCall) => {
         const toolName = toolCall.function.name;
         const toolArgs = JSON.parse(toolCall.function.arguments || '{}');
         
-        console.log(`[Intelligent Chat] Executing tool: ${toolName}`, toolArgs);
-
-        let result: { success: boolean; results: SearchResult[]; source: string };
+        console.log(`[Intelligent Chat] Starting tool: ${toolName}`, toolArgs);
         const startTime = Date.now();
 
         try {
@@ -476,21 +534,43 @@ IMPORTANT: Never invent product details, prices, or specifications. Always searc
             }
           })();
 
-          result = await Promise.race([
+          const result = await Promise.race([
             toolPromise,
             new Promise<{ success: boolean; results: SearchResult[]; source: string }>((_, reject) => 
               setTimeout(() => reject(new Error('Tool execution timeout')), searchTimeout)
             )
           ]);
 
+          const executionTime = Date.now() - startTime;
+          console.log(`[Intelligent Chat] Tool ${toolName} completed in ${executionTime}ms: ${result.results.length} results`);
+
+          return {
+            toolCall,
+            toolName,
+            toolArgs,
+            result,
+            executionTime
+          };
+
         } catch (error) {
           console.error(`[Intelligent Chat] Tool ${toolName} failed:`, error);
-          result = { success: false, results: [], source: 'error' };
+          return {
+            toolCall,
+            toolName,
+            toolArgs,
+            result: { success: false, results: [], source: 'error' },
+            executionTime: Date.now() - startTime
+          };
         }
+      });
 
-        const executionTime = Date.now() - startTime;
-        console.log(`[Intelligent Chat] Tool ${toolName} completed in ${executionTime}ms: ${result.results.length} results`);
-
+      // Execute all tools in parallel
+      const toolExecutionResults = await Promise.all(toolExecutions);
+      
+      // Process results
+      for (const execution of toolExecutionResults) {
+        const { toolCall, toolName, toolArgs, result } = execution;
+        
         // Log search activity
         searchLog.push({
           tool: toolName,
@@ -502,16 +582,35 @@ IMPORTANT: Never invent product details, prices, or specifications. Always searc
         // Collect all results
         allSearchResults.push(...result.results);
 
-        // Format results for AI
+        // Format results for AI - keep concise to avoid overwhelming the model
         let toolResponse = '';
         if (result.success && result.results.length > 0) {
           toolResponse = `Found ${result.results.length} results from ${result.source}:\n\n`;
-          result.results.forEach((item, index) => {
+          
+          // Limit to first 20 results to avoid token overflow
+          const resultsToShow = Math.min(result.results.length, 20);
+          
+          result.results.slice(0, resultsToShow).forEach((item, index) => {
+            // Keep response concise - just title, URL, and price if available
             toolResponse += `${index + 1}. ${item.title}\n`;
             toolResponse += `   URL: ${item.url}\n`;
-            toolResponse += `   Content: ${item.content.substring(0, 200)}${item.content.length > 200 ? '...' : ''}\n`;
-            toolResponse += `   Relevance: ${(item.similarity * 100).toFixed(1)}%\n\n`;
+            
+            // Extract price if available in content
+            const priceMatch = item.content.match(/£[\d,]+\.?\d*/);
+            if (priceMatch) {
+              toolResponse += `   Price: ${priceMatch[0]}\n`;
+            }
+            
+            // Only add brief snippet for first 5 items
+            if (index < 5) {
+              toolResponse += `   Preview: ${item.content.substring(0, 100)}...\n`;
+            }
+            toolResponse += '\n';
           });
+          
+          if (result.results.length > resultsToShow) {
+            toolResponse += `... and ${result.results.length - resultsToShow} more results\n`;
+          }
         } else {
           toolResponse = `No results found. The search returned 0 results.`;
         }
@@ -539,18 +638,37 @@ IMPORTANT: Never invent product details, prices, or specifications. Always searc
 
       // Get AI's next response
       try {
-        completion = await openaiClient.chat.completions.create({
-          model: 'gpt-4',
+        const iterationConfig = {
+          ...baseModelConfig,
           messages: conversationMessages,
           tools: SEARCH_TOOLS,
           tool_choice: 'auto',
-          temperature: 0.7,
-          max_tokens: 1000,
-        });
-      } catch (error) {
-        console.error('[Intelligent Chat] Error in follow-up completion:', error);
-        finalResponse = 'I found some information but encountered an error processing it. Please try again.';
-        break;
+          ...(useGPT5 ? {} : { temperature: 0.7 }),
+        };
+        completion = await openaiClient.chat.completions.create(iterationConfig as any);
+      } catch (error: any) {
+        // Fallback to GPT-4.1 if GPT-5-mini fails
+        if (useGPT5 && baseModelConfig.model === 'gpt-5-mini') {
+          console.log('[Intelligent Chat] GPT-5-mini failed in iteration, falling back to GPT-4.1...');
+          try {
+            completion = await openaiClient.chat.completions.create({
+              model: 'gpt-4.1' as any,
+              messages: conversationMessages,
+              tools: SEARCH_TOOLS,
+              tool_choice: 'auto',
+              temperature: 0.7,
+              max_tokens: 1000,
+            });
+          } catch (fallbackError) {
+            console.error('[Intelligent Chat] GPT-4.1 fallback also failed:', fallbackError);
+            finalResponse = 'I found some information but encountered an error processing it. Please try again.';
+            break;
+          }
+        } else {
+          console.error('[Intelligent Chat] Error in follow-up completion:', error);
+          finalResponse = 'I found some information but encountered an error processing it. Please try again.';
+          break;
+        }
       }
     }
 
@@ -558,15 +676,32 @@ IMPORTANT: Never invent product details, prices, or specifications. Always searc
     if (iteration >= maxIterations && shouldContinue) {
       console.log('[Intelligent Chat] Max iterations reached, getting final response');
       try {
-        const finalCompletion = await openaiClient.chat.completions.create({
-          model: 'gpt-4',
+        const finalConfig = {
+          ...baseModelConfig,
           messages: conversationMessages,
-          temperature: 0.7,
-          max_tokens: 1000,
-        });
+          // No tools in final response
+          ...(useGPT5 ? {} : { temperature: 0.7 }),
+        };
+        const finalCompletion = await openaiClient.chat.completions.create(finalConfig as any);
         finalResponse = finalCompletion.choices[0]?.message?.content || finalResponse;
-      } catch (error) {
-        console.error('[Intelligent Chat] Error getting final response:', error);
+      } catch (error: any) {
+        // Fallback to GPT-4.1 if GPT-5-mini fails
+        if (useGPT5 && baseModelConfig.model === 'gpt-5-mini') {
+          console.log('[Intelligent Chat] GPT-5-mini failed in final response, falling back to GPT-4.1...');
+          try {
+            const finalCompletion = await openaiClient.chat.completions.create({
+              model: 'gpt-4.1' as any,
+              messages: conversationMessages,
+              temperature: 0.7,
+              max_tokens: 1000,
+            });
+            finalResponse = finalCompletion.choices[0]?.message?.content || finalResponse;
+          } catch (fallbackError) {
+            console.error('[Intelligent Chat] GPT-4.1 fallback also failed:', fallbackError);
+          }
+        } else {
+          console.error('[Intelligent Chat] Error getting final response:', error);
+        }
       }
     }
 

@@ -10,6 +10,7 @@ import { searchSimilarContent } from '@/lib/embeddings';
 import { getDynamicWooCommerceClient, searchProductsDynamic } from '@/lib/woocommerce-dynamic';
 import { sanitizeOutboundLinks } from '@/lib/link-sanitizer';
 import { extractQueryKeywords, isPriceQuery, extractPriceRange } from '@/lib/search-wrapper';
+import { ChatTelemetry, telemetryManager } from '@/lib/chat-telemetry';
 
 // Lazy load OpenAI client to avoid build-time errors
 let openai: OpenAI | null = null;
@@ -251,6 +252,9 @@ async function executeGetProductDetails(
 }
 
 export async function POST(request: NextRequest) {
+  // Initialize telemetry at the very start
+  let telemetry: ChatTelemetry | null = null;
+  
   try {
     // Check critical environment variables
     if (!validateSupabaseEnv() || !process.env.OPENAI_API_KEY) {
@@ -267,6 +271,29 @@ export async function POST(request: NextRequest) {
     const body = await request.json();
     const validatedData = ChatRequestSchema.parse(body);
     const { message, conversation_id, session_id, domain, config } = validatedData;
+
+    // Initialize telemetry with session data
+    try {
+      telemetry = telemetryManager.createSession(
+        session_id,
+        'gpt-4',
+        {
+          metricsEnabled: true,
+          detailedLogging: process.env.NODE_ENV === 'development',
+          persistToDatabase: true
+        }
+      );
+      
+      // Log initial request data
+      telemetry.log('info', 'performance', 'Chat request started', {
+        message: message.substring(0, 100),
+        domain,
+        hasConversationId: !!conversation_id
+      });
+    } catch (telemetryError) {
+      // Telemetry should not break the main flow
+      console.warn('Failed to initialize telemetry:', telemetryError);
+    }
 
     // Check rate limit
     const rateLimitDomain = domain || request.headers.get('host') || 'unknown';
@@ -358,38 +385,74 @@ export async function POST(request: NextRequest) {
     const conversationMessages = [
       {
         role: 'system' as const,
-        content: `You are an intelligent customer service assistant with search capabilities. You can search for products and information to help customers.
+        content: `You are an intelligent customer service assistant who works like a real human agent - you gather ALL relevant context BEFORE responding.
 
-CORE PRINCIPLES:
-- Be helpful, conversational, and professional
-- Use the search tools to find relevant information when needed
-- Don't make assumptions - search for information when you're unsure
-- Present search results naturally in your response
-- For product queries, use search_products to find relevant items
-- For general topics or policies, use search_by_category
-- For specific product details, use get_product_details
+CRITICAL: COMPREHENSIVE SEARCH FIRST APPROACH
+When asked about products or information, you MUST:
+1. IMMEDIATELY search comprehensively using multiple tools in parallel
+2. GATHER all available information before formulating any response
+3. UNDERSTAND the full context of what you found
+4. ONLY THEN provide an intelligent, context-aware response
 
-SEARCH STRATEGY - ReAct Pattern:
-1. REASON: Analyze what the user is asking for
-2. ACT: Use appropriate search tools to gather information
-3. OBSERVE: Review the search results
-4. REASON: Determine if you need more information or can respond
-5. ACT: Search again if needed, or provide the final response
+PRODUCT SEARCH STRATEGY (ALWAYS DO THIS):
+For ANY product or brand query (e.g., "Cifa products", "pumps", "hydraulic equipment"):
+1. ALWAYS execute MULTIPLE searches in parallel:
+   - search_products with the exact brand/product name
+   - search_products with variations (e.g., "Cifa pump", "Cifa hydraulic", "Cifa water", "Cifa parts")
+   - search_by_category for related categories (e.g., "pumps", "hydraulic equipment", "agricultural")
+   - get_product_details for any specific models mentioned
+2. GATHER COMPLETE CONTEXT:
+   - Collect ALL matching products (don't stop at first few)
+   - Understand the total inventory (e.g., "We have over 30 Cifa products")
+   - Categorize what you found (pumps vs accessories vs parts)
+3. RESPOND WITH FULL AWARENESS:
+   - Mention total available inventory ("We carry over X Cifa products")
+   - Present the most relevant options based on context
+   - Acknowledge the breadth of options available
 
-SEARCH GUIDELINES:
-- For greetings or simple questions, respond directly without searching
-- For product inquiries, always search for current information
-- You can make up to 3 search calls per conversation to get complete information
-- Combine information from multiple searches when helpful
-- Always acknowledge when information comes from search results
+SEARCH EXECUTION PATTERN - The 3-Step Process:
+1. GATHER PHASE (Use multiple tools simultaneously):
+   - Execute ALL relevant searches in parallel
+   - Don't wait for one search before starting another
+   - Cast a wide net to ensure nothing is missed
+   
+2. UNDERSTAND PHASE (Analyze what you found):
+   - Review ALL search results comprehensively
+   - Identify patterns and categories
+   - Understand the full scope of available products
+   
+3. RESPOND PHASE (Present intelligent response):
+   - Lead with awareness of full inventory
+   - Present most relevant items first
+   - Offer to provide more details on specific categories
+
+PARALLEL SEARCH EXAMPLES:
+For "Show me Cifa products":
+- SIMULTANEOUSLY run: search_products("Cifa"), search_products("Cifa pump"), search_products("Cifa hydraulic"), search_by_category("pumps")
+
+For "I need a hydraulic pump":
+- SIMULTANEOUSLY run: search_products("hydraulic pump"), search_by_category("pumps"), search_products("pump hydraulic")
+
+RESPONSE APPROACH:
+- Start with the big picture: "I found over 30 Cifa products in our inventory..."
+- Then get specific: "The most popular ones include..."
+- Be comprehensive: "We also have accessories, parts, and related items..."
+- Offer navigation: "Would you like to see more details about pumps specifically, or browse our accessories?"
+
+CRITICAL RULES:
+- NEVER respond with partial information when more is available
+- ALWAYS mention the total scope of what you found
+- GATHER FIRST, THINK SECOND, RESPOND THIRD
+- Use parallel searches - don't execute sequentially
+- If you find 30 products, be aware you found 30, not just the first 5
 
 RESPONSE FORMATTING:
 - Use bullet points (•) for product lists
 - Include prices when available: [Product Name](url) - £price
-- Keep responses concise but informative
-- Only link to same-domain URLs
+- Group similar items together
+- Mention total counts: "From our 30+ Cifa products..."
 
-IMPORTANT: Never invent product details, prices, or specifications. Always search for accurate information.`
+REMEMBER: You're like a real customer service agent who knows their entire inventory. Search comprehensively FIRST, understand what you have, THEN help the customer intelligently.`
       },
       ...(historyData || []).map((msg: any) => ({
         role: msg.role as 'user' | 'assistant',
@@ -441,6 +504,9 @@ IMPORTANT: Never invent product details, prices, or specifications. Always searc
       // Check if AI wants to call tools
       const toolCalls = choice.message.tool_calls;
       
+      // Track iteration in telemetry
+      telemetry?.trackIteration(iteration, toolCalls?.length || 0);
+      
       if (!toolCalls || toolCalls.length === 0) {
         // No tool calls - AI is ready to respond
         finalResponse = choice.message.content || 'I apologize, but I was unable to generate a response.';
@@ -449,17 +515,19 @@ IMPORTANT: Never invent product details, prices, or specifications. Always searc
         break;
       }
 
-      // Execute tool calls
-      const toolResults: Array<{ tool_call_id: string; content: string }> = [];
+      // Execute tool calls IN PARALLEL for comprehensive context gathering
+      console.log(`[Intelligent Chat] Executing ${toolCalls.length} tools in parallel for comprehensive search`);
+      const parallelStartTime = Date.now();
       
-      for (const toolCall of toolCalls) {
+      // Create promises for all tool executions
+      const toolPromises = toolCalls.map(async (toolCall) => {
         const toolName = toolCall.function.name;
         const toolArgs = JSON.parse(toolCall.function.arguments || '{}');
         
-        console.log(`[Intelligent Chat] Executing tool: ${toolName}`, toolArgs);
+        console.log(`[Intelligent Chat] Starting parallel execution of: ${toolName}`, toolArgs);
+        const startTime = Date.now();
 
         let result: { success: boolean; results: SearchResult[]; source: string };
-        const startTime = Date.now();
 
         try {
           // Execute the appropriate tool with timeout
@@ -491,6 +559,36 @@ IMPORTANT: Never invent product details, prices, or specifications. Always searc
         const executionTime = Date.now() - startTime;
         console.log(`[Intelligent Chat] Tool ${toolName} completed in ${executionTime}ms: ${result.results.length} results`);
 
+        // Track search in telemetry
+        telemetry?.trackSearch({
+          tool: toolName,
+          query: toolArgs.query || toolArgs.category || toolArgs.productQuery || '',
+          resultCount: result.results.length,
+          source: result.source,
+          startTime
+        });
+
+        // Return all data for processing
+        return {
+          toolCall,
+          toolName,
+          toolArgs,
+          result,
+          executionTime
+        };
+      });
+
+      // Wait for ALL tools to complete in parallel
+      const toolExecutionResults = await Promise.all(toolPromises);
+      const parallelExecutionTime = Date.now() - parallelStartTime;
+      console.log(`[Intelligent Chat] All ${toolCalls.length} tools completed in ${parallelExecutionTime}ms (parallel execution)`);
+
+      // Process results and build responses
+      const toolResults: Array<{ tool_call_id: string; content: string }> = [];
+      
+      for (const execResult of toolExecutionResults) {
+        const { toolCall, toolName, toolArgs, result } = execResult;
+        
         // Log search activity
         searchLog.push({
           tool: toolName,
@@ -521,6 +619,14 @@ IMPORTANT: Never invent product details, prices, or specifications. Always searc
           content: toolResponse
         });
       }
+      
+      // Log parallel execution stats
+      console.log(`[Intelligent Chat] Parallel execution complete:`, {
+        totalTools: toolCalls.length,
+        totalTime: parallelExecutionTime,
+        averageTimePerTool: Math.round(parallelExecutionTime / toolCalls.length),
+        totalResultsFound: allSearchResults.length
+      });
 
       // Add tool results to conversation
       conversationMessages.push({
@@ -608,6 +714,9 @@ IMPORTANT: Never invent product details, prices, or specifications. Always searc
       console.error('[Chat] Failed to save assistant message:', assistantSaveError);
     }
 
+    // Complete telemetry with success
+    await telemetry?.complete(finalResponse);
+
     // Return response with search metadata
     return NextResponse.json<ChatResponse & { searchMetadata?: any }>({
       message: finalResponse,
@@ -626,6 +735,10 @@ IMPORTANT: Never invent product details, prices, or specifications. Always searc
 
   } catch (error) {
     console.error('[Intelligent Chat API] Error:', error);
+    
+    // Complete telemetry with error
+    const errorMessage = error instanceof Error ? error.message : 'Unknown error';
+    await telemetry?.complete(undefined, errorMessage);
     
     if (error instanceof z.ZodError) {
       return NextResponse.json(

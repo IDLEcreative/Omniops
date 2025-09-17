@@ -443,7 +443,7 @@ export async function searchSimilarContent(
 }>> {
   // Check cache first for performance
   const cacheManager = getSearchCacheManager();
-  const cachedResult = await cacheManager.getCachedResult(query, domain);
+  const cachedResult = await cacheManager.getCachedResult(query, domain, limit);
   
   if (cachedResult && cachedResult.chunks) {
     console.log('[Cache] HIT - Returning cached search results');
@@ -1254,7 +1254,7 @@ export async function searchSimilarContent(
       await cacheManager.cacheResult(query, { 
         response: '', 
         chunks: fallbackResults 
-      }, domain);
+      }, domain, limit);
       console.log(`[Cache] Cached fallback results (${Date.now() - searchStartTime}ms)`);
       return fallbackResults;
     }
@@ -1268,7 +1268,7 @@ export async function searchSimilarContent(
         chunksRetrieved: combined.length,
         searchMethod: 'hybrid'
       }
-    }, domain);
+    }, domain, limit);
     
     const searchDuration = Date.now() - searchStartTime;
     console.log(`[Cache] Cached search results (${searchDuration}ms)`);
