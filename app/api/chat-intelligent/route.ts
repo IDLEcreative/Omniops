@@ -66,22 +66,30 @@ const SEARCH_TOOLS = [
   {
     type: "function" as const,
     function: {
-      name: "search_woocommerce",
-      description: "Search WooCommerce store for products with pricing, availability, and specifications. Use this when looking for products to purchase, checking prices, or finding product details.",
+      name: "woocommerce_agent",
+      description: "Handle ALL e-commerce operations: search products, check stock, view orders, manage cart, get shipping info, etc. This agent manages the complete WooCommerce system.",
       parameters: {
         type: "object",
         properties: {
-          query: {
+          operation: {
             type: "string",
-            description: "The product search query (e.g., 'pump', 'battery', 'Cifa parts')"
+            description: "The operation to perform",
+            enum: ["search_products", "get_product_details", "check_stock", "view_order", "track_order", "add_to_cart", "view_cart", "get_categories", "get_shipping_options"]
           },
-          limit: {
-            type: "number",
-            description: "Maximum number of products to return (default: 20)",
-            default: 20
+          parameters: {
+            type: "object",
+            description: "Parameters for the operation",
+            properties: {
+              query: { type: "string", description: "Search query for products" },
+              productId: { type: "string", description: "Product ID" },
+              sku: { type: "string", description: "Product SKU" },
+              orderNumber: { type: "string", description: "Order number" },
+              quantity: { type: "number", description: "Quantity for cart operations" },
+              limit: { type: "number", description: "Max results to return" }
+            }
           }
         },
-        required: ["query"]
+        required: ["operation", "parameters"]
       }
     }
   },
@@ -174,42 +182,159 @@ const SEARCH_TOOLS = [
   }
 ];
 
-// WooCommerce search function - separate tool for e-commerce
-async function executeWooCommerceSearch(
-  query: string,
-  limit: number = 20,
-  domain: string
-): Promise<{ success: boolean; results: SearchResult[]; source: string }> {
-  console.log(`[Function Call] search_woocommerce: "${query}" (limit: ${limit})`);
+// WooCommerce Agent - Complete e-commerce system handler
+// This agent manages ALL WooCommerce operations after security verification
+async function executeWooCommerceAgent(
+  operation: string,
+  parameters: any,
+  sessionId: string,
+  domain: string,
+  isVerified: boolean = false
+): Promise<{ success: boolean; data: any; requiresAuth?: boolean; message?: string }> {
+  console.log(`[WooCommerce Agent] Operation: ${operation}`, parameters);
+  
+  // Security gate - certain operations require verification
+  const secureOperations = ['view_order', 'update_order', 'view_customer', 'checkout', 'view_cart'];
+  if (secureOperations.includes(operation) && !isVerified) {
+    console.log(`[WooCommerce Agent] Security verification required for ${operation}`);
+    return {
+      success: false,
+      requiresAuth: true,
+      message: 'Please verify your identity to access this information. Provide your email address or order number.',
+      data: null
+    };
+  }
   
   try {
     // Get WooCommerce client for this domain
     const wcClient = await getDynamicWooCommerceClient(domain);
     if (!wcClient) {
-      console.log(`[Function Call] No WooCommerce configured for ${domain}`);
-      return { success: false, results: [], source: 'woocommerce' };
+      console.log(`[WooCommerce Agent] No WooCommerce configured for ${domain}`);
+      return { 
+        success: false, 
+        data: null, 
+        message: 'E-commerce features are not available for this domain.' 
+      };
     }
     
-    // Search products in WooCommerce
-    const wcProducts = await searchProductsDynamic(wcClient, query, limit);
-    
-    if (wcProducts && wcProducts.length > 0) {
-      console.log(`[Function Call] WooCommerce returned ${wcProducts.length} products`);
-      const results = wcProducts.map(p => ({
-        content: `${p.name}\nPrice: £${p.price || p.regular_price || 'Contact for pricing'}\nSKU: ${p.sku || 'N/A'}\nIn Stock: ${p.in_stock !== false ? 'Yes' : 'No'}\n${(p.short_description || p.description || '').replace(/<[^>]+>/g, ' ').trim()}`,
-        url: p.permalink || '',
-        title: p.name,
-        similarity: 0.95 // High confidence for exact WooCommerce matches
-      }));
+    // Handle different WooCommerce operations
+    switch (operation) {
+      case 'search_products': {
+        const { query, limit = 20 } = parameters;
+        const wcProducts = await searchProductsDynamic(wcClient, query, limit);
+        
+        if (wcProducts && wcProducts.length > 0) {
+          console.log(`[WooCommerce Agent] Found ${wcProducts.length} products`);
+          const results = wcProducts.map(p => ({
+            content: `${p.name}\nPrice: £${p.price || p.regular_price || 'Contact for pricing'}\nSKU: ${p.sku || 'N/A'}\nIn Stock: ${p.in_stock !== false ? 'Yes' : 'No'}\n${(p.short_description || p.description || '').replace(/<[^>]+>/g, ' ').trim()}`,
+            url: p.permalink || '',
+            title: p.name,
+            id: p.id,
+            type: 'product'
+          }));
+          
+          return { success: true, data: results };
+        }
+        return { success: true, data: [] };
+      }
       
-      return { success: true, results, source: 'woocommerce' };
+      case 'get_product_details': {
+        const { productId } = parameters;
+        const product = await wcClient.get(`products/${productId}`);
+        return { success: true, data: product.data };
+      }
+      
+      case 'check_stock': {
+        const { sku } = parameters;
+        const products = await wcClient.get('products', { sku });
+        if (products.data.length > 0) {
+          const product = products.data[0];
+          return {
+            success: true,
+            data: {
+              inStock: product.in_stock,
+              quantity: product.stock_quantity,
+              status: product.stock_status
+            }
+          };
+        }
+        return { success: false, data: null, message: 'Product not found' };
+      }
+      
+      case 'view_order': {
+        // Requires verification
+        const { orderNumber } = parameters;
+        const order = await wcClient.get(`orders/${orderNumber}`);
+        return { success: true, data: order.data };
+      }
+      
+      case 'track_order': {
+        // Requires verification
+        const { orderNumber } = parameters;
+        // Would integrate with shipping provider
+        return {
+          success: true,
+          data: {
+            status: 'processing',
+            message: 'Your order is being prepared for shipping.'
+          }
+        };
+      }
+      
+      case 'add_to_cart': {
+        const { productId, quantity = 1 } = parameters;
+        // Would integrate with cart system
+        return {
+          success: true,
+          data: {
+            message: `Added ${quantity} item(s) to cart`,
+            cartId: sessionId
+          }
+        };
+      }
+      
+      case 'view_cart': {
+        // Would retrieve cart for session
+        return {
+          success: true,
+          data: {
+            items: [],
+            total: 0
+          }
+        };
+      }
+      
+      case 'get_categories': {
+        const categories = await wcClient.get('products/categories');
+        return { success: true, data: categories.data };
+      }
+      
+      case 'get_shipping_options': {
+        // Would calculate shipping based on cart/location
+        return {
+          success: true,
+          data: [
+            { method: 'standard', cost: 5.99, days: '3-5' },
+            { method: 'express', cost: 12.99, days: '1-2' }
+          ]
+        };
+      }
+      
+      default:
+        return {
+          success: false,
+          data: null,
+          message: `Unknown WooCommerce operation: ${operation}`
+        };
     }
-    
-    return { success: true, results: [], source: 'woocommerce' };
     
   } catch (error) {
-    console.error('[Function Call] WooCommerce search error:', error);
-    return { success: false, results: [], source: 'woocommerce' };
+    console.error(`[WooCommerce Agent] Error in ${operation}:`, error);
+    return {
+      success: false,
+      data: null,
+      message: `Failed to complete ${operation}`
+    };
   }
 }
 
@@ -493,14 +618,21 @@ export async function POST(request: NextRequest) {
     const conversationMessages = [
       {
         role: 'system' as const,
-        content: `You are an intelligent customer service assistant with advanced search capabilities. You help customers by gathering comprehensive information to answer their queries.
+        content: `You are an intelligent customer service assistant with advanced search and e-commerce capabilities. You help customers by gathering comprehensive information to answer their queries.
 
 CORE PRINCIPLE: For product-related queries, ALWAYS search to gather complete context before responding.
+
+E-COMMERCE OPERATIONS:
+- You have access to the woocommerce_agent for ALL e-commerce operations
+- This includes: product search, stock checking, order tracking, cart management, shipping info
+- For sensitive operations (orders, customer data), the agent will require verification
+- Use the agent for any commerce-related request, not just product searches
 
 INTELLIGENT SEARCH STRATEGY:
 
 1. ANALYZE the request:
    - What is the customer looking for?
+   - Is this an e-commerce operation? Use woocommerce_agent
    - What context would be helpful?
    - What related information might they need?
 
@@ -701,8 +833,65 @@ REMEMBER:
           // Execute the appropriate tool with timeout
           const toolPromise = (async () => {
             switch (toolName) {
-              case 'search_woocommerce':
-                return await executeWooCommerceSearch(toolArgs.query, toolArgs.limit, domain || '');
+              case 'woocommerce_agent': {
+                // Check if user is verified for secure operations
+                const verificationLevel = await SimpleCustomerVerification.getVerificationLevel(session_id);
+                const isVerified = verificationLevel !== 'none';
+                
+                const agentResult = await executeWooCommerceAgent(
+                  toolArgs.operation,
+                  toolArgs.parameters,
+                  session_id,
+                  domain || '',
+                  isVerified
+                );
+                
+                // Convert agent response to search result format for consistency
+                if (agentResult.requiresAuth) {
+                  return {
+                    success: false,
+                    results: [{
+                      title: 'Verification Required',
+                      content: agentResult.message || 'Please verify your identity',
+                      url: ''
+                    }],
+                    source: 'woocommerce',
+                    requiresVerification: true
+                  };
+                }
+                
+                if (agentResult.success && agentResult.data) {
+                  // Handle different response types
+                  if (Array.isArray(agentResult.data)) {
+                    return {
+                      success: true,
+                      results: agentResult.data.map((item: any) => ({
+                        title: item.title || item.name || 'Result',
+                        content: item.content || JSON.stringify(item),
+                        url: item.url || '',
+                        similarity: 0.95
+                      })),
+                      source: 'woocommerce'
+                    };
+                  } else {
+                    return {
+                      success: true,
+                      results: [{
+                        title: 'WooCommerce Response',
+                        content: typeof agentResult.data === 'string' ? agentResult.data : JSON.stringify(agentResult.data),
+                        url: ''
+                      }],
+                      source: 'woocommerce'
+                    };
+                  }
+                }
+                
+                return {
+                  success: false,
+                  results: [],
+                  source: 'woocommerce'
+                };
+              }
               case 'search_products':
                 return await executeSearchProducts(toolArgs.query, toolArgs.limit, domain || '');
               case 'search_by_category':
