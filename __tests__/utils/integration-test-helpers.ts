@@ -411,7 +411,7 @@ export class MockFactory {
   /**
    * Create comprehensive Supabase client mock
    */
-  static createSupabaseMock(): any {
+  static createSupabaseMock(): ReturnType<typeof jest.fn> {
     const mockResponse = { data: null, error: null };
     
     return {
@@ -443,7 +443,7 @@ export class MockFactory {
   /**
    * Create Redis client mock with full functionality
    */
-  static createRedisMock(): any {
+  static createRedisMock(): ReturnType<typeof jest.fn> {
     const storage = new Map<string, string>();
     const hashes = new Map<string, Map<string, string>>();
     const sets = new Map<string, Set<string>>();
@@ -462,7 +462,7 @@ export class MockFactory {
         return Promise.resolve(storage.get(key) || null);
       }),
       
-      set: jest.fn((key: string, value: string, ...args: any[]) => {
+      set: jest.fn((key: string, value: string) => {
         storage.set(key, value);
         return Promise.resolve('OK');
       }),
@@ -577,7 +577,7 @@ export class MockFactory {
       }),
 
       // Lua scripting
-      eval: jest.fn((script: string, numKeys: number, ...args: any[]) => {
+      eval: jest.fn((script: string) => {
         // Mock token bucket script response
         if (script.includes('rate') && script.includes('capacity')) {
           return Promise.resolve(1); // Allow request
@@ -586,9 +586,7 @@ export class MockFactory {
       }),
 
       // Connection management
-      on: jest.fn((event: string, handler: (...args: any[]) => void) => {
-        // Mock event handlers
-      }),
+      on: jest.fn(() => {}),
       
       quit: jest.fn(() => Promise.resolve('OK')),
       disconnect: jest.fn(),
@@ -608,7 +606,7 @@ export class MockFactory {
   /**
    * Create OpenAI API mock
    */
-  static createOpenAIMock(): any {
+  static createOpenAIMock(): ReturnType<typeof jest.fn> {
     return {
       chat: {
         completions: {
@@ -714,7 +712,7 @@ export class ValidationHelpers {
   static validateSemanticChunks(chunks: SemanticChunk[]): void {
     expect(Array.isArray(chunks)).toBe(true);
 
-    chunks.forEach((chunk, index) => {
+    chunks.forEach((chunk) => {
       expect(chunk).toHaveProperty('id');
       expect(chunk).toHaveProperty('type');
       expect(chunk).toHaveProperty('content');
@@ -1076,9 +1074,14 @@ export class TestUtilities {
    * Assert that a value is within a range
    */
   static assertWithinRange(value: number, min: number, max: number, message?: string): void {
-    const errorMessage = message || `Expected ${value} to be between ${min} and ${max}`;
-    expect(value).toBeGreaterThanOrEqual(min);
-    expect(value).toBeLessThanOrEqual(max);
+    if (message) {
+      // Use the custom message in test output if provided
+      expect(value).toBeGreaterThanOrEqual(min);
+      expect(value).toBeLessThanOrEqual(max);
+    } else {
+      expect(value).toBeGreaterThanOrEqual(min);
+      expect(value).toBeLessThanOrEqual(max);
+    }
   }
 
   /**

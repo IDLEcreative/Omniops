@@ -15,8 +15,8 @@ jest.mock('@/lib/rate-limit', () => ({
 }));
 
 describe('Chat API Route - Async Performance', () => {
-  let mockSupabase: any;
-  let mockOpenAI: any;
+  let mockSupabase: ReturnType<typeof createServiceRoleClient>;
+  let mockOpenAI: jest.Mocked<OpenAI>;
   let performanceMarkers: { [key: string]: number } = {};
 
   beforeEach(() => {

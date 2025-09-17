@@ -11,16 +11,13 @@ import {
   getCategories,
   getProductStock,
   searchProducts,
-  ProductSchema,
-  OrderSchema,
-  CustomerSchema,
 } from '@/lib/woocommerce'
 
 // Mock the WooCommerce Rest API
 jest.mock('@woocommerce/woocommerce-rest-api')
 
 describe('WooCommerce Integration', () => {
-  let mockWooCommerceInstance: any
+  let mockWooCommerceInstance: jest.Mocked<WooCommerceRestApi>
 
   beforeEach(() => {
     jest.clearAllMocks()
@@ -39,14 +36,14 @@ describe('WooCommerce Integration', () => {
     }
 
     // Mock the constructor
-    ;(WooCommerceRestApi as any).mockImplementation(
+    ;(WooCommerceRestApi as jest.MockedClass<typeof WooCommerceRestApi>).mockImplementation(
       () => mockWooCommerceInstance
     )
   })
 
   describe('createWooCommerceClient', () => {
     it('should create a WooCommerce client with proper configuration', () => {
-      const client = createWooCommerceClient()
+      createWooCommerceClient()
       
       expect(WooCommerceRestApi).toHaveBeenCalledWith({
         url: 'https://test-store.com',
@@ -120,7 +117,7 @@ describe('WooCommerce Integration', () => {
     it('should fetch products with custom parameters', async () => {
       mockWooCommerceInstance.get.mockResolvedValue({ data: mockProductData })
 
-      const products = await getProducts({
+      await getProducts({
         search: 'test',
         category: 5,
         per_page: 10,
@@ -243,7 +240,7 @@ describe('WooCommerce Integration', () => {
     it('should fetch orders with filters', async () => {
       mockWooCommerceInstance.get.mockResolvedValue({ data: mockOrderData })
 
-      const orders = await getOrders({
+      await getOrders({
         customer: 1,
         status: ['processing', 'completed'],
         after: '2024-01-01T00:00:00',

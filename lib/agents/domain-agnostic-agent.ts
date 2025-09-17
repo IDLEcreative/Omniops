@@ -39,9 +39,9 @@ export class DomainAgnosticAgent {
     
     if (classification) {
       this.businessContext = {
-        businessType: classification.business_type,
-        terminology: classification.entity_terminology,
-        confidence: classification.confidence
+        businessType: (classification as any).business_type,
+        terminology: (classification as any).entity_terminology,
+        confidence: (classification as any).confidence
       };
     } else {
       // Default context if not classified

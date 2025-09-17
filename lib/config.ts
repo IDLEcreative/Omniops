@@ -72,6 +72,11 @@ export const WidgetConfigSchema = z.object({
     temperature: z.number().min(0).max(2).default(0.7),
     systemPrompt: z.string().optional(),
     maxTokens: z.number().default(500),
+    trustAIPresentation: z.boolean().default(true), // Trust AI to decide what to present
+    postProcessing: z.object({
+      enabled: z.boolean().default(false), // Disable manipulation by default
+      forceProducts: z.boolean().default(false), // Don't force product injection
+    }),
   }),
 
   // Behavior

@@ -128,7 +128,7 @@ export async function POST(request: NextRequest) {
 /**
  * Helper function to get simplified monitoring data for lightweight requests
  */
-export async function getSimpleMonitoringData() {
+async function getSimpleMonitoringData() {
   try {
     const monitor = getMonitor();
     const metrics = await monitor.getMetrics();

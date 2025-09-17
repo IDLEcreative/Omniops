@@ -137,12 +137,28 @@ export async function getEnhancedChatContext(
     };
     
     // First check scraped_pages metadata for product information
+    // Build search conditions using individual search terms for better recall
+    const searchTerms = searchQuery.toLowerCase().split(/\s+/).filter(term => term.length > 2);
+    
+    // Build OR conditions for each significant term
+    let searchConditions = [];
+    
+    // Add full query search
+    searchConditions.push(`title.ilike.%${searchQuery}%`);
+    searchConditions.push(`content.ilike.%${searchQuery}%`);
+    
+    // Add individual term searches for broader matching
+    for (const term of searchTerms) {
+      searchConditions.push(`title.ilike.%${term}%`);
+      searchConditions.push(`url.ilike.%${term}%`);
+    }
+    
     const { data: productPages, error: productPagesError } = await supabase
       .from('scraped_pages')
       .select('url, title, content, metadata')
       .eq('domain_id', domainId)
-      .or(`title.ilike.%${searchQuery}%,content.ilike.%${searchQuery}%`)
-      .limit(10);
+      .or(searchConditions.join(','))
+      .limit(30); // Get more results for better coverage
     
     if (!productPagesError && productPages && productPages.length > 0) {
       console.log(`[Context Enhancer] Checking ${productPages.length} scraped pages for product data...`);
@@ -154,8 +170,28 @@ export async function getEnhancedChatContext(
             // Check if product matches search query
             const productName = product.name || '';
             const productSku = product.sku || '';
-            const matchesQuery = productName.toLowerCase().includes(searchQuery.toLowerCase()) ||
-                                productSku.toLowerCase().includes(searchQuery.toLowerCase());
+            const productDesc = product.description || '';
+            
+            // Flexible matching - check if product contains any of the search terms
+            let matchesQuery = false;
+            
+            // First try exact query match
+            matchesQuery = productName.toLowerCase().includes(searchQuery.toLowerCase()) ||
+                          productSku.toLowerCase().includes(searchQuery.toLowerCase()) ||
+                          productDesc.toLowerCase().includes(searchQuery.toLowerCase());
+            
+            // If no exact match, check if product contains multiple search terms
+            if (!matchesQuery && searchTerms.length > 1) {
+              // Count how many search terms match the product
+              const matchingTerms = searchTerms.filter(term => 
+                productName.toLowerCase().includes(term) ||
+                productSku.toLowerCase().includes(term) ||
+                productDesc.toLowerCase().includes(term)
+              );
+              
+              // Include if at least 2 terms match, or if it's a significant term match
+              matchesQuery = matchingTerms.length >= Math.min(2, Math.ceil(searchTerms.length / 2));
+            }
             
             if (matchesQuery) {
               // Format product as content chunk with price

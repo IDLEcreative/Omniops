@@ -1,0 +1,40 @@
+{
+  "timestamp": "2025-09-16T15:41:41.567Z",
+  "domain": "thompsonseparts.co.uk",
+  "results": {
+    "textSearch": {
+      "before": {
+        "method": "ILIKE",
+        "avgTime": 1916.085986
+      },
+      "after": {
+        "method": "Full-text",
+        "avgTime": 740.7896113333333
+      },
+      "improvement": 2.5865454329890953
+    },
+    "jsonbSearch": {
+      "filter": {
+        "avgTime": 104.69338833333313
+      },
+      "indexed": {
+        "avgTime": 867.1883893333337
+      },
+      "improvement": 0.12072738706040335
+    },
+    "concurrency": {
+      "sequential": {
+        "time": 314.14145800000006
+      },
+      "concurrent": {
+        "time": 155.7626250000012
+      },
+      "improvement": 2.016796121662675
+    },
+    "performance": {
+      "estimatedThroughput": "1 queries/sec",
+      "p50ResponseTime": "741ms",
+      "cacheHitRatio": "N/A"
+    }
+  }
+}

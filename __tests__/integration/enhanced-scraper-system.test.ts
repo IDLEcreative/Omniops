@@ -1,12 +1,10 @@
-import { describe, it, expect, jest, beforeEach, afterEach, beforeAll, afterAll } from '@jest/globals';
+import { describe, it, expect, jest, beforeEach, afterEach, beforeAll } from '@jest/globals';
 import { AIContentExtractor, SemanticChunk, AIOptimizedContent } from '@/lib/ai-content-extractor';
-import { PatternLearner, DomainPatterns, ExtractedPattern } from '@/lib/pattern-learner';
+import { PatternLearner, DomainPatterns } from '@/lib/pattern-learner';
 import { EnhancedRateLimiter, RateLimiterPresets, RateLimitResponse } from '@/lib/rate-limiter-enhanced';
-import { ContentDeduplicator, ContentHash, DeduplicationMetrics } from '@/lib/content-deduplicator';
+import { ContentDeduplicator } from '@/lib/content-deduplicator';
 import { getCrawlerConfig, getAIOptimizationConfig } from '@/lib/crawler-config';
 import { EcommerceExtractor } from '@/lib/ecommerce-extractor';
-import { NormalizedProduct } from '@/lib/product-normalizer';
-import type { AIOptimizationConfig } from '@/lib/scraper-api';
 
 // Test Data Generators and Fixtures
 class TestDataGenerator {

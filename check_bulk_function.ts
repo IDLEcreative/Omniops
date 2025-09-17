@@ -44,7 +44,7 @@ async function checkBulkInsertFunction() {
       console.log('Test result:', testResult);
     }
   } else {
-    console.log('Function definition found:', data?.definition);
+    console.log('Function definition found:', (data as any)?.definition);
   }
   
   // Check table column type

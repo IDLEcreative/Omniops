@@ -604,7 +604,7 @@ function mapPriorityToJobPriority(priority: string): JobPriority {
  * Validate domain accessibility endpoint
  * GET /api/customer/config/validate?domain=example.com
  */
-export async function validateDomain(domain: string) {
+async function validateDomain(domain: string) {
   try {
     const validation = domainValidator.validateUrl(domain)
     

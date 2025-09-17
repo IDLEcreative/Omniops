@@ -60,7 +60,7 @@ export class ProductExtractor {
       }
 
       // Check if this looks like a product page
-      if (!this.isLikelyProductPage(page.url, page.title, page.content)) {
+      if (!this.isLikelyProductPage((page as any).url, (page as any).title, (page as any).content)) {
         return null;
       }
 
@@ -97,9 +97,9 @@ export class ProductExtractor {
           "searchKeywords": "keywords for search optimization"
         }
         
-        Page URL: ${page.url}
-        Page Title: ${page.title}
-        Page Content: ${page.content?.substring(0, 4000)}
+        Page URL: ${(page as any).url}
+        Page Title: ${(page as any).title}
+        Page Content: ${(page as any).content?.substring(0, 4000)}
       `;
 
       const response = await this.openai.chat.completions.create({
@@ -119,7 +119,7 @@ export class ProductExtractor {
         response_format: { type: 'json_object' },
       });
 
-      const extractedData = JSON.parse(response.choices[0].message.content || '{}');
+      const extractedData = JSON.parse(response.choices[0]?.message?.content || '{}');
       
       // Validate and clean the data
       const validatedData = ProductDataSchema.parse(extractedData);
@@ -137,7 +137,7 @@ export class ProductExtractor {
           confidence_score: confidence,
           raw_data: extractedData,
           extracted_at: new Date().toISOString(),
-        });
+        } as any);
 
       if (insertError) {
         console.error('Failed to store product data:', insertError);
@@ -194,7 +194,7 @@ export class ProductExtractor {
       return;
     }
 
-    const pageIds = pages.map(p => p.id);
+    const pageIds = pages.map(p => (p as any).id);
     await this.extractBatch(pageIds);
   }
 

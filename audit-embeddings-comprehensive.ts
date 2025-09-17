@@ -88,8 +88,8 @@ async function analyzeCategory(category: string, domainId: string, sampleSize: n
     samples.push({
       url: page.url,
       title: page.title || 'No title',
-      hasChunks,
-      hasEmbeddings,
+      hasChunks: hasChunks || false,
+      hasEmbeddings: hasEmbeddings || false,
       scrapedAt: page.created_at
     });
   }
@@ -155,8 +155,8 @@ async function analyzeRandomSample(domainId: string, sampleSize: number = 20): P
     samples.push({
       url: page.url,
       title: page.title || 'No title',
-      hasChunks,
-      hasEmbeddings,
+      hasChunks: hasChunks || false,
+      hasEmbeddings: hasEmbeddings || false,
       scrapedAt: page.created_at
     });
   }

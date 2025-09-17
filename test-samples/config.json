@@ -1,0 +1,25 @@
+{
+  "name": "test-samples",
+  "version": "1.0.0",
+  "settings": {
+    "enableLogging": true,
+    "apiTimeout": 5000,
+    "maxRetries": 3,
+    "features": {
+      "analytics": true,
+      "debugging": false,
+      "caching": true
+    }
+  },
+  "endpoints": {
+    "api": "https://api.example.com",
+    "cdn": "https://cdn.example.com",
+    "websocket": "wss://ws.example.com"
+  },
+  "theme": {
+    "primary": "#007acc",
+    "secondary": "#ff6b6b",
+    "background": "#f5f5f5",
+    "text": "#333333"
+  }
+}

@@ -5,13 +5,13 @@ import { describe, it, expect, jest, beforeEach } from '@jest/globals'
 
 // Set up global Response polyfill before any imports
 global.Response = class Response {
-  body: any
+  body: unknown
   status: number
   statusText: string
   headers: Headers
   ok: boolean
 
-  constructor(body?: any, init?: ResponseInit) {
+  constructor(body?: unknown, init?: ResponseInit) {
     this.body = body
     this.status = init?.status || 200
     this.statusText = init?.statusText || 'OK'
@@ -32,12 +32,12 @@ global.Response = class Response {
     }
     return JSON.stringify(this.body)
   }
-} as any
+} as typeof globalThis.Response
 
 // Use native Headers from undici/Node where available
 
 // Mock the static json method on Response
-Response.json = function(data: any, init?: ResponseInit) {
+Response.json = function(data: unknown, init?: ResponseInit) {
   return new Response(JSON.stringify(data), {
     ...init,
     headers: {

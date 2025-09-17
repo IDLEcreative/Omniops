@@ -547,40 +547,88 @@ export async function searchSimilarContent(
         
         // Convert metadata to searchable string
         const metadataStr = JSON.stringify(row.metadata).toLowerCase();
+        const contentStr = (row.content || '').toLowerCase();
+        const titleStr = (row.title || '').toLowerCase();
         
-        // Check if ANY keyword matches in metadata
-        return keywords.some(keyword => {
-          // Check various metadata fields
-          const inCategory = row.metadata.productCategory?.toLowerCase().includes(keyword);
-          const inSku = row.metadata.productSku?.toLowerCase().includes(keyword);
-          const inBrand = row.metadata.productBrand?.toLowerCase().includes(keyword);
-          const inFullText = metadataStr.includes(keyword);
+        // For queries with multiple specific terms, ensure better relevance
+        // Don't hardcode any specific brands or companies
+        const significantKeywords = keywords.filter(kw => kw.length > 3);
+        
+        if (significantKeywords.length >= 2) {
+          // For multi-word specific queries, require multiple matches for relevance
+          const matchCount = significantKeywords.filter(keyword => {
+            const inMetadata = metadataStr.includes(keyword);
+            const inContent = contentStr.includes(keyword);
+            const inTitle = titleStr.includes(keyword);
+            return inMetadata || inContent || inTitle;
+          }).length;
           
-          // Check breadcrumbs if they exist
-          let inBreadcrumbs = false;
-          if (row.metadata.ecommerceData?.breadcrumbs) {
-            inBreadcrumbs = row.metadata.ecommerceData.breadcrumbs.some((crumb: any) => 
-              crumb.name?.toLowerCase().includes(keyword)
-            );
-          }
-          
-          return inCategory || inSku || inBrand || inBreadcrumbs || inFullText;
-        });
+          // Require at least 60% of significant keywords to match
+          const requiredMatches = Math.max(2, Math.ceil(significantKeywords.length * 0.6));
+          if (matchCount < requiredMatches) return false;
+        }
+        
+        // For non-brand queries, require multiple keyword matches for relevance
+        const matchCount = keywords.filter(keyword => {
+          const inMetadata = metadataStr.includes(keyword);
+          const inContent = contentStr.includes(keyword);
+          const inTitle = titleStr.includes(keyword);
+          return inMetadata || inContent || inTitle;
+        }).length;
+        
+        // Require at least half the keywords to match
+        return matchCount >= Math.max(2, Math.ceil(keywords.length / 2));
       }) || [];
       
       console.log(`[RAG Metadata] Found ${filtered.length} matches for keywords: ${keywords.join(', ')}`);
       
       // Log sample matches for debugging
       if (filtered.length > 0) {
-        console.log(`[RAG Metadata] Sample match: ${filtered[0].title}`);
+        console.log(`[RAG Metadata] Sample match: ${filtered[0]?.title || 'Unknown'}`);
       }
       
-      return filtered.slice(0, 10).map((row: any) => ({
-        content: row.content || '',
-        url: row.url || '',
-        title: row.title || 'Untitled',
-        similarity: 0.85, // High score for metadata matches
-      }));
+      // Calculate dynamic similarity scores based on match quality
+      return filtered.slice(0, 10).map((row: any) => {
+        // Calculate how well this product matches the query
+        const metadataStr = JSON.stringify(row.metadata || {}).toLowerCase();
+        const contentStr = (row.content || '').toLowerCase();
+        const titleStr = (row.title || '').toLowerCase();
+        
+        let score = 0.5; // Base score for any match
+        
+        // Count keyword matches
+        const matchedKeywords = keywords.filter(kw => 
+          titleStr.includes(kw) || contentStr.includes(kw) || metadataStr.includes(kw)
+        );
+        
+        // Higher score for more keyword matches
+        score += (matchedKeywords.length / keywords.length) * 0.3;
+        
+        // Bonus for title matches (most relevant)
+        const titleMatches = keywords.filter(kw => titleStr.includes(kw)).length;
+        if (titleMatches > 0) {
+          score += (titleMatches / keywords.length) * 0.15;
+        }
+        
+        // Boost for exact phrase matches in title
+        // Check if multiple keywords appear together in title (indicates specific product)
+        if (matchedKeywords.length >= 2) {
+          const allInTitle = matchedKeywords.every(kw => titleStr.includes(kw));
+          if (allInTitle) {
+            score += 0.1; // Extra boost for multi-word matches in title
+          }
+        }
+        
+        // Cap at 0.95 to leave room for perfect semantic matches
+        score = Math.min(score, 0.95);
+        
+        return {
+          content: row.content || '',
+          url: row.url || '',
+          title: row.title || 'Untitled',
+          similarity: score,
+        };
+      });
     } catch (error) {
       console.error('[RAG Metadata] Error:', error);
       return [];
@@ -611,12 +659,44 @@ export async function searchSimilarContent(
       if (!data || data.length === 0) return [];
       
       console.log(`[RAG Keywords] Found ${data.length} keyword matches`);
-      return data.map((row: any) => ({
-        content: row.content || '',
-        url: row.url || '',
-        title: row.title || 'Untitled',
-        similarity: 0.65, // Moderate score for keyword matches
-      }));
+      
+      // Calculate dynamic scores based on keyword match quality
+      return data.map((row: any) => {
+        const titleStr = (row.title || '').toLowerCase();
+        const contentStr = (row.content || '').toLowerCase();
+        
+        let score = 0.4; // Base score for any keyword match
+        
+        // Count how many keywords match
+        const titleMatches = keywords.filter(kw => titleStr.includes(kw)).length;
+        const contentMatches = keywords.filter(kw => contentStr.includes(kw)).length;
+        
+        // Higher score for more keyword matches
+        score += (Math.max(titleMatches, contentMatches) / keywords.length) * 0.25;
+        
+        // Bonus for title matches
+        if (titleMatches > 0) {
+          score += (titleMatches / keywords.length) * 0.15;
+        }
+        
+        // Boost products where all keywords appear (indicates high relevance)
+        const allKeywordsPresent = keywords.every(kw => 
+          titleStr.includes(kw) || contentStr.includes(kw)
+        );
+        
+        if (allKeywordsPresent) {
+          score += 0.2; // Significant boost for complete matches
+        } else if (titleMatches === keywords.length) {
+          score += 0.15; // Boost if all keywords in title
+        }
+        
+        return {
+          content: row.content || '',
+          url: row.url || '',
+          title: row.title || 'Untitled',
+          similarity: Math.min(score, 0.9), // Cap at 0.9
+        };
+      });
     } catch (error) {
       console.error('[RAG Keywords] Error:', error);
       return [];
@@ -1143,9 +1223,24 @@ export async function searchSimilarContent(
     // Convert back to array and sort by relevance
     const combined = Array.from(allResults.values())
       .sort((a, b) => {
-        // Prioritize metadata matches for product searches
-        if (a.source.includes('metadata') && !b.source.includes('metadata')) return -1;
-        if (b.source.includes('metadata') && !a.source.includes('metadata')) return 1;
+        // Check how many query keywords appear in each result
+        const queryKeywords = query.toLowerCase().split(/\s+/).filter(w => w.length > 2);
+        
+        if (queryKeywords.length >= 2) {
+          // For multi-word queries, prioritize results with more keyword matches
+          const aMatches = queryKeywords.filter(kw => 
+            a.title?.toLowerCase().includes(kw) || a.url?.toLowerCase().includes(kw)
+          ).length;
+          const bMatches = queryKeywords.filter(kw => 
+            b.title?.toLowerCase().includes(kw) || b.url?.toLowerCase().includes(kw)
+          ).length;
+          
+          // Prioritize results with more keyword matches
+          if (aMatches > bMatches) return -1;
+          if (bMatches > aMatches) return 1;
+        }
+        
+        // Then sort by similarity score
         return (b.similarity || 0) - (a.similarity || 0);
       })
       .slice(0, limit);

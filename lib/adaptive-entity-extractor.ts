@@ -33,16 +33,16 @@ export class AdaptiveEntityExtractor {
       .eq('domain_id', domainId)
       .single();
     
-    if (existing) {
+    if (existing && existing !== null) {
       this.businessClassification = {
-        primaryType: existing.business_type as BusinessType,
-        confidence: existing.confidence,
-        indicators: existing.indicators,
-        suggestedSchema: existing.extraction_config?.schema,
-        extractionStrategy: existing.extraction_config?.strategy,
-        terminology: existing.entity_terminology
+        primaryType: (existing as any).business_type as BusinessType,
+        confidence: (existing as any).confidence,
+        indicators: (existing as any).indicators,
+        suggestedSchema: (existing as any).extraction_config?.schema,
+        extractionStrategy: (existing as any).extraction_config?.strategy,
+        terminology: (existing as any).entity_terminology
       };
-      console.log(`Using existing classification: ${existing.business_type}`);
+      console.log(`Using existing classification: ${(existing as any).business_type}`);
       return;
     }
     
@@ -59,11 +59,11 @@ export class AdaptiveEntityExtractor {
     }
     
     // Classify the business
-    const sampleContent = pages.map(p => p.content || '');
+    const sampleContent = pages.map(p => (p as any).content || '');
     const classification = await BusinessClassifier.classifyBusiness(
       domainId,
       sampleContent,
-      pages[0].metadata
+      pages[0] ? (pages[0] as any).metadata : undefined
     );
     
     // Store classification
@@ -79,7 +79,7 @@ export class AdaptiveEntityExtractor {
           schema: classification.suggestedSchema,
           strategy: classification.extractionStrategy
         }
-      });
+      } as any);
     
     this.businessClassification = classification;
     console.log(`Classified as: ${classification.primaryType} (${(classification.confidence * 100).toFixed(0)}% confidence)`);
@@ -107,7 +107,7 @@ export class AdaptiveEntityExtractor {
     
     // Build extraction prompt based on business type
     const extractionPrompt = this.buildExtractionPrompt(
-      page,
+      page as any,
       this.businessClassification
     );
     
@@ -128,10 +128,10 @@ export class AdaptiveEntityExtractor {
       response_format: { type: 'json_object' }
     });
     
-    const extracted = JSON.parse(response.choices[0].message.content || '{}');
+    const extracted = JSON.parse(response.choices[0]?.message?.content || '{}');
     
     // Store in flexible entity catalog
-    await this.storeEntity(page, extracted, this.businessClassification);
+    await this.storeEntity(page as any, extracted, this.businessClassification);
     
     return extracted;
   }
@@ -247,8 +247,8 @@ Return ONLY valid JSON matching the structure above.`;
     
     // Map extracted data to flexible schema
     const entity = {
-      page_id: page.id,
-      domain_id: page.domain_id,
+      page_id: (page as any).id,
+      domain_id: (page as any).domain_id,
       entity_type: terminology.entityName,
       name: extracted.name || 'Unnamed ' + terminology.entityName,
       description: extracted.description,
@@ -275,7 +275,7 @@ Return ONLY valid JSON matching the structure above.`;
     // Upsert to entity catalog
     const { error } = await this.supabase
       .from('entity_catalog')
-      .upsert(entity);
+      .upsert(entity as any);
     
     if (error) {
       console.error('Failed to store entity:', error);
@@ -374,14 +374,14 @@ Return ONLY valid JSON matching the structure above.`;
     
     for (const page of pages) {
       try {
-        console.log(`Extracting from: ${page.title || page.url}`);
-        await this.extractEntities(page.id);
+        console.log(`Extracting from: ${(page as any).title || (page as any).url}`);
+        await this.extractEntities((page as any).id);
         processed++;
         
         // Rate limiting
         await new Promise(resolve => setTimeout(resolve, 1000));
       } catch (error) {
-        console.error(`Failed to extract from ${page.id}:`, error);
+        console.error(`Failed to extract from ${(page as any).id}:`, error);
         failed++;
       }
     }

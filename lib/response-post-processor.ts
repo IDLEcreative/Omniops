@@ -36,7 +36,7 @@ export class ResponsePostProcessor {
       
       // Check for SKU if present in content
       const skuMatch = product.content.match(/SKU:\s*([A-Z0-9-]+)/i);
-      const hasSku = skuMatch && responseLower.includes(skuMatch[1].toLowerCase());
+      const hasSku = skuMatch && skuMatch[1] && responseLower.includes(skuMatch[1].toLowerCase());
       
       return hasProductName || hasProductUrl || hasSku;
     });
@@ -118,7 +118,7 @@ export class ResponsePostProcessor {
       } else if (product.content.length > 50) {
         // Use first sentence of content
         const firstSentence = product.content.split('.')[0];
-        if (firstSentence.length < 150) {
+        if (firstSentence && firstSentence.length < 150) {
           description = ` - ${firstSentence}`;
         }
       }
@@ -148,6 +148,8 @@ export class ResponsePostProcessor {
    */
   private static generateSubtleAppendix(products: ContextChunk[]): string {
     const product = products[0]; // Just mention the top one
+    if (!product) return '';
+    
     const title = product.title.replace(/ - Thompsons.*$/, '').trim();
     
     return `\n\nYou might also want to check out our [${title}](${product.url}) which could be suitable for your needs.\n`;

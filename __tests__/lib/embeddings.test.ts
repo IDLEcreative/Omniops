@@ -17,8 +17,8 @@ jest.mock('@/lib/supabase-server')
 process.env.OPENAI_API_KEY = 'test-api-key'
 
 describe('Embeddings Service', () => {
-  let mockOpenAIInstance: any
-  let mockSupabaseClient: any
+  let mockOpenAIInstance: jest.Mocked<OpenAI>
+  let mockSupabaseClient: ReturnType<typeof createServiceRoleClient>
 
   beforeEach(() => {
     jest.clearAllMocks()
@@ -334,7 +334,7 @@ describe('Embeddings Service', () => {
         error: null
       })
 
-      const results = await searchSimilar(Array(1536).fill(0.5), 10, 0.8)
+      await searchSimilar(Array(1536).fill(0.5), 10, 0.8)
 
       expect(mockSupabaseClient.rpc).toHaveBeenCalledWith('match_embeddings', {
         query_embedding: expect.any(Array),

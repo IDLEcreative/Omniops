@@ -3,6 +3,7 @@ import { JSDOM } from 'jsdom';
 import * as cheerio from 'cheerio';
 import { createHash } from 'crypto';
 import { extractBusinessInfo, selectiveStripBoilerplate, smartHtmlToText, BusinessInfo } from './business-content-extractor';
+import { extractProductData, formatProductContent, ProductData } from './product-content-extractor';
 
 // We'll skip Turndown for now to avoid import issues - can use HTML directly
 // or convert to text without markdown formatting

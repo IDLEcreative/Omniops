@@ -21,7 +21,7 @@ const mockEmbeddingResponse = {
 process.env.OPENAI_API_KEY = 'test-openai-key'
 
 describe('/api/scrape', () => {
-  let mockSupabaseClient: any
+  let mockSupabaseClient: ReturnType<typeof createServiceRoleClient>
 
   beforeEach(() => {
     jest.clearAllMocks()
@@ -47,7 +47,7 @@ describe('/api/scrape', () => {
     MockedOpenAI.mockClear()
     MockedOpenAI.prototype.embeddings = {
       create: jest.fn().mockResolvedValue(mockEmbeddingResponse),
-    } as any
+    } as unknown as OpenAI['embeddings']
 
     // Mock scraper functions
     ;(scrapePage as jest.Mock).mockResolvedValue({
@@ -64,7 +64,7 @@ describe('/api/scrape', () => {
   })
 
   describe('POST', () => {
-    const createRequest = (body: any) => {
+    const createRequest = (body: unknown) => {
       return new NextRequest('http://localhost:3000/api/scrape', {
         method: 'POST',
         headers: {
@@ -81,7 +81,7 @@ describe('/api/scrape', () => {
       }
 
       const response = await POST(createRequest(requestBody))
-      const data = await response.json()
+      await response.json()
 
       expect(response.status).toBe(200)
       expect(data).toEqual({
@@ -127,7 +127,7 @@ describe('/api/scrape', () => {
       }
 
       const response = await POST(createRequest(requestBody))
-      const data = await response.json()
+      await response.json()
 
       expect(response.status).toBe(200)
       
@@ -148,7 +148,7 @@ describe('/api/scrape', () => {
       }
 
       const response = await POST(createRequest(requestBody))
-      const data = await response.json()
+      await response.json()
 
       expect(response.status).toBe(200)
       expect(data).toEqual({
@@ -269,7 +269,7 @@ describe('/api/scrape', () => {
       }
 
       const response = await POST(createRequest(requestBody))
-      const data = await response.json()
+      await response.json()
 
       expect(response.status).toBe(200)
       

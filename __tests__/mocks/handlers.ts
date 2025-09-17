@@ -2,7 +2,7 @@ import { http, HttpResponse } from 'msw'
 
 export const handlers = [
   // OpenAI API mock
-  http.post('https://api.openai.com/v1/chat/completions', ({ request }) => {
+  http.post('https://api.openai.com/v1/chat/completions', () => {
     // Can vary response based on request content for more realistic testing
     return HttpResponse.json({
       id: 'chatcmpl-test',
@@ -29,7 +29,7 @@ export const handlers = [
 
   // OpenAI Embeddings API mock
   http.post('https://api.openai.com/v1/embeddings', async ({ request }) => {
-    const body = await request.json() as any
+    const body = await request.json() as { input: string | string[]; model?: string }
     const input = Array.isArray(body.input) ? body.input : [body.input]
     
     return HttpResponse.json({
@@ -64,7 +64,7 @@ export const handlers = [
   }),
 
   http.post('*/auth/v1/signup', async ({ request }) => {
-    const body = await request.json() as any
+    const body = await request.json() as { email: string; password?: string }
     return HttpResponse.json({
       user: {
         id: 'new-user-id',
@@ -89,7 +89,7 @@ export const handlers = [
   }),
 
   // Supabase Database mocks
-  http.post('*/rest/v1/rpc/match_embeddings', async ({ request }) => {
+  http.post('*/rest/v1/rpc/match_embeddings', async () => {
     return HttpResponse.json([
       {
         id: 'chunk-1',
@@ -119,7 +119,7 @@ export const handlers = [
   }),
 
   http.post('*/rest/v1/conversations', async ({ request }) => {
-    const body = await request.json() as any
+    const body = await request.json() as { session_id?: string }
     return HttpResponse.json({
       id: 'conv-' + Date.now(),
       session_id: body.session_id,
@@ -129,7 +129,7 @@ export const handlers = [
   }),
 
   http.post('*/rest/v1/messages', async ({ request }) => {
-    const body = await request.json() as any
+    const body = await request.json() as { conversation_id: string; content: string; role: string }
     return HttpResponse.json({
       id: 'msg-' + Date.now(),
       conversation_id: body.conversation_id,
@@ -185,7 +185,7 @@ export const handlers = [
   }),
 
   http.post('*/wp-json/wc/v3/products', async ({ request }) => {
-    const body = await request.json() as any
+    const body = await request.json() as Record<string, unknown>
     return HttpResponse.json({
       id: Date.now(),
       ...body,
@@ -256,7 +256,7 @@ export const handlers = [
   }),
 
   http.post('*/wp-json/wc/v3/orders', async ({ request }) => {
-    const body = await request.json() as any
+    const body = await request.json() as Record<string, unknown>
     return HttpResponse.json({
       id: Date.now(),
       number: String(1000 + Date.now() % 1000),

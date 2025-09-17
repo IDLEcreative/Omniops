@@ -28,6 +28,8 @@ export class QueryReformulator {
     /^(mainly\s+for|mostly\s+for)\s+/i,
     /^(the\s+one\s+for|one\s+for)\s+/i,
     /^(something\s+for)\s+/i,
+    /^(for\s+use\s+in|for\s+use\s+with)\s+/i,
+    /^(suitable\s+for|good\s+for|works\s+for)\s+/i,
   ];
 
   // Patterns that reference previous mentions
@@ -257,7 +259,7 @@ export class QueryReformulator {
     if (hasReference && recentUserMessages.length > 0) {
       // Get entities from last message
       const lastMessage = recentUserMessages[recentUserMessages.length - 1];
-      const lastEntities = this.extractEntities(lastMessage);
+      const lastEntities = this.extractEntities(lastMessage || '');
       const currentEntities = this.extractEntities(currentMessage);
       
       // Merge entities
@@ -281,7 +283,7 @@ export class QueryReformulator {
         reformulated,
         confidence: 0.7,
         strategy: 'contextual',
-        context: [lastMessage]
+        context: [lastMessage || '']
       };
     }
 

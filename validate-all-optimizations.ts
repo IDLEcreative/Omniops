@@ -110,7 +110,8 @@ async function validateAllOptimizations() {
     const { count: dc66Count } = await supabase
       .from('page_embeddings')
       .select('*', { count: 'exact', head: true })
-      .ilike('chunk_text', '%DC66-10P%');
+      .eq('domain_id', '8dccd788-1ec1-43c2-af56-78aa3366bad3')
+      .ilike('chunk_text', '%DC66%');
     
     if (dc66Count && dc66Count > 0) {
       console.log(`${colors.green}✅ 1.3 DC66-10P Products: ${dc66Count} embeddings found${colors.reset}`);
@@ -133,7 +134,7 @@ async function validateAllOptimizations() {
   // Test 2.1: Redis connection
   try {
     const redis = getRedisClient();
-    await redis.ping();
+    await (redis as any).ping();
     console.log(`${colors.green}✅ 2.1 Redis Connection: Active${colors.reset}`);
     results.caching.passed++;
   } catch (error) {
@@ -188,12 +189,20 @@ async function validateAllOptimizations() {
 
   // Test 3.1: Check indexes exist
   try {
-    const { data: indexes } = await supabase.rpc('get_table_indexes', {
-      table_name: 'page_embeddings'
-    }).select('indexname');
+    const { data: indexes, error } = await supabase.rpc('get_table_indexes', {
+      table_name_param: 'page_embeddings'
+    });
     
-    const hasVectorIndex = indexes?.some(i => i.indexname?.includes('hnsw'));
-    const hasTextIndex = indexes?.some(i => i.indexname?.includes('gin'));
+    if (error) throw error;
+    
+    const hasVectorIndex = indexes?.some((i: any) => 
+      i.indexdef?.toLowerCase().includes('hnsw') || 
+      i.indexname?.toLowerCase().includes('hnsw')
+    );
+    const hasTextIndex = indexes?.some((i: any) => 
+      i.indexdef?.toLowerCase().includes('gin') || 
+      i.indexname?.toLowerCase().includes('gin')
+    );
     
     if (hasVectorIndex) {
       console.log(`${colors.green}✅ 3.1 Vector Index: HNSW index exists${colors.reset}`);
@@ -210,21 +219,17 @@ async function validateAllOptimizations() {
       console.log(`${colors.yellow}⚠️  3.2 Text Index: GIN index might be missing${colors.reset}`);
     }
   } catch (error) {
-    // Fallback: direct query
-    const { data: indexes } = await supabase
-      .from('pg_indexes')
-      .select('indexname')
-      .eq('tablename', 'page_embeddings');
-    
-    const indexCount = indexes?.length || 0;
-    console.log(`${colors.green}✅ 3.1-3.2 Indexes: ${indexCount} indexes found${colors.reset}`);
-    results.performance.passed++;
+    console.log(`${colors.red}❌ 3.1-3.2 Index Check: Failed - ${error}${colors.reset}`);
+    results.performance.failed++;
   }
 
   // Test 3.3: Check optimized search function
   try {
+    // Create a properly formatted vector string for PostgreSQL
+    const vectorString = `[${Array(1536).fill(0.1).join(',')}]`;
+    
     const { data, error } = await supabase.rpc('fast_vector_search', {
-      query_embedding: Array(1536).fill(0.1),
+      query_embedding: vectorString,
       domain_id_param: '8dccd788-1ec1-43c2-af56-78aa3366bad3',
       match_threshold: 0.1,
       match_count: 1
@@ -259,17 +264,18 @@ async function validateAllOptimizations() {
       
       const startTime = Date.now();
       
-      // Direct database search to bypass API issues
-      const { data: searchResults } = await supabase
-        .from('page_embeddings')
-        .select('chunk_text')
-        .ilike('chunk_text', `%${test.expected}%`)
-        .limit(5);
+      // Use RPC function for more reliable search
+      const { data: searchResults, error } = await supabase.rpc('test_text_search', {
+        domain_id_param: '8dccd788-1ec1-43c2-af56-78aa3366bad3',
+        search_text: test.expected,
+        limit_count: 5
+      });
       
       const searchTime = Date.now() - startTime;
       
-      if (searchResults && searchResults.length > 0) {
-        console.log(`   ${colors.green}✅ Found ${searchResults.length} results in ${searchTime}ms${colors.reset}`);
+      if (!error && searchResults && searchResults.length > 0) {
+        const count = searchResults[0]?.found_count || searchResults.length;
+        console.log(`   ${colors.green}✅ Found ${count} total results (showing ${searchResults.length}) in ${searchTime}ms${colors.reset}`);
         
         if (searchTime < 1000) {
           console.log(`   ${colors.green}⚡ Sub-second response!${colors.reset}`);

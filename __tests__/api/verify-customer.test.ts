@@ -199,111 +199,26 @@ describe('Customer Verification for Order Access', () => {
 });
 
 /**
- * Test Data Scenarios
- */
-const testScenarios = {
-  // Unverified queries that should trigger verification
-  requiresVerification: [
-    "What is the status of order #12345?",
-    "Where is my order?",
-    "Show me my recent purchases",
-    "I need my invoice for order 12345",
-    "When will my order arrive?",
-    "Can you track my shipment?",
-  ],
-  
-  // General queries that don't need verification
-  generalQueries: [
-    "What is your return policy?",
-    "How long does shipping take?",
-    "Do you ship internationally?",
-    "What payment methods do you accept?",
-    "How do I track an order?",
-  ],
-  
-  // Verification attempts
-  verificationAttempts: {
-    valid: {
-      email: "customer@example.com",
-      orderNumber: "12345",
-      postalCode: "12345"
-    },
-    invalid: {
-      email: "wrong@example.com",
-      orderNumber: "99999",
-      postalCode: "00000"
-    }
-  },
-  
-  // Expected responses
-  expectedResponses: {
-    verificationRequired: {
-      type: 'verification_required',
-      hasPrompt: true,
-      sensitiveDataHidden: true
-    },
-    limitedInfo: {
-      type: 'order_limited',
-      showsStatus: true,
-      hidesPersonalInfo: true
-    },
-    fullDetails: {
-      type: 'order',
-      includesAllData: true,
-      accessLogged: true
-    }
-  }
-};
-
-/**
  * API Endpoint Tests
  */
 describe('Verify Customer API Endpoint', () => {
-  const endpoint = '/api/verify-customer';
   
   test('POST with action: send_code', async () => {
-    const request = {
-      action: 'send_code',
-      conversationId: 'uuid-here',
-      email: 'customer@example.com',
-      method: 'email'
-    };
-    
     // Expected: 200 OK with verification details
     // Response includes verificationId, expires time
   });
   
   test('POST with action: verify_code', async () => {
-    const request = {
-      action: 'verify_code',
-      conversationId: 'uuid-here',
-      email: 'customer@example.com',
-      code: '123456'
-    };
-    
     // Expected: 200 OK if valid, 400 if invalid
     // Updates conversation verification status
   });
   
   test('POST with action: simple_verify', async () => {
-    const request = {
-      action: 'simple_verify',
-      conversationId: 'uuid-here',
-      email: 'customer@example.com',
-      orderNumber: '12345',
-      domain: 'example.com'
-    };
-    
     // Expected: Verification level (none/basic/full)
     // Returns allowed data access levels
   });
   
   test('POST with action: check_status', async () => {
-    const request = {
-      action: 'check_status',
-      conversationId: 'uuid-here'
-    };
-    
     // Expected: Current verification status
     // Includes email if verified, expiry time
   });

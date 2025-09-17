@@ -135,7 +135,6 @@ describe('OrderModificationService', () => {
   describe('Modification status checks', () => {
     it('should validate allowed statuses for cancellation', () => {
       const allowedStatuses = ['pending', 'processing', 'on-hold'];
-      const notAllowedStatuses = ['completed', 'shipped', 'delivered', 'refunded'];
       
       // This would need mock WooCommerce client to test properly
       // Just checking the constants are defined correctly
@@ -144,7 +143,6 @@ describe('OrderModificationService', () => {
     
     it('should validate allowed statuses for address updates', () => {
       const allowedStatuses = ['pending', 'processing', 'on-hold'];
-      const notAllowedStatuses = ['completed', 'shipped', 'delivered'];
       
       expect(allowedStatuses).toEqual(['pending', 'processing', 'on-hold']);
     });

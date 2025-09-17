@@ -1,14 +1,13 @@
 import { describe, it, expect, jest, beforeEach } from '@jest/globals'
 import { ChatService } from '@/lib/chat-service'
 import { createServiceRoleClient } from '@/lib/supabase-server'
-import type { SupabaseClient } from '@supabase/supabase-js'
 
 // Mock dependencies
 jest.mock('@/lib/supabase-server')
 
 describe('ChatService', () => {
   let chatService: ChatService
-  let mockSupabaseClient: any
+  let mockSupabaseClient: ReturnType<typeof createServiceRoleClient>
 
   beforeEach(() => {
     jest.clearAllMocks()

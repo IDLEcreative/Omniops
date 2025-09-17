@@ -516,7 +516,7 @@ class SearchPipelineChaosTest {
       recommendations.push('Improve fuzzy matching for partial SKUs and typos');
     }
     
-    if (this.results.find(r => r.scenario.includes('Invalid'))?.errors.length > 0) {
+    if ((this.results.find(r => r.scenario.includes('Invalid'))?.errors.length ?? 0) > 0) {
       recommendations.push('Add input validation and sanitization layers');
     }
 

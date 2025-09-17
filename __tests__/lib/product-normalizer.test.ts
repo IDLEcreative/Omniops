@@ -1,9 +1,6 @@
-import { describe, it, expect, beforeEach } from '@jest/globals'
+import { describe, it, expect } from '@jest/globals'
 import { 
-  ProductNormalizer, 
-  NormalizedPrice, 
-  NormalizedProduct,
-  ProductSpecification 
+  ProductNormalizer
 } from '@/lib/product-normalizer'
 
 describe('ProductNormalizer', () => {

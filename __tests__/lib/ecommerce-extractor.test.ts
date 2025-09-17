@@ -1,6 +1,5 @@
-import { describe, it, expect, jest, beforeEach, afterEach } from '@jest/globals'
-import { EcommerceExtractor, EcommerceExtractedContent } from '@/lib/ecommerce-extractor'
-import * as cheerio from 'cheerio'
+import { describe, it, expect, jest, beforeEach } from '@jest/globals'
+import { EcommerceExtractor } from '@/lib/ecommerce-extractor'
 
 // Mock the dependencies
 const mockContentExtractor = {
@@ -410,7 +409,7 @@ describe('EcommerceExtractor', () => {
 
   describe('Product Listing Extraction', () => {
     beforeEach(() => {
-      mockProductNormalizer.normalizeProduct.mockImplementation((product, index) => ({
+      mockProductNormalizer.normalizeProduct.mockImplementation((product) => ({
         name: product.name,
         price: { amount: parseFloat(product.price?.current?.replace(/[^0-9.]/g, '') || '0'), currency: 'USD', formatted: product.price?.current || '$0' },
         scrapedAt: new Date().toISOString()

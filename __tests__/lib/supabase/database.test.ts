@@ -16,7 +16,7 @@ jest.mock('next/headers', () => ({
 }))
 
 describe('Supabase Database Integration', () => {
-  let mockSupabaseClient: any
+  let mockSupabaseClient: ReturnType<typeof createClient>
 
   beforeEach(() => {
     jest.clearAllMocks()

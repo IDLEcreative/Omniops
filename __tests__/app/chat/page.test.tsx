@@ -1,5 +1,5 @@
 import { describe, it, expect, jest, beforeEach } from '@jest/globals'
-import { render, screen, fireEvent, waitFor } from '@/__tests__/utils/test-utils'
+import { render, screen, waitFor } from '@/__tests__/utils/test-utils'
 import ChatPage from '@/app/chat/page'
 import { server } from '@/__tests__/mocks/server'
 import { http, HttpResponse } from 'msw'
@@ -206,7 +206,7 @@ describe('Chat Page', () => {
     // Mock API to track conversation ID
     server.use(
       http.post('/api/chat', async ({ request }) => {
-        const body = await request.json() as any
+        const body = await request.json() as { conversation_id?: string; message: string }
         requestCount++
 
         if (requestCount === 1) {

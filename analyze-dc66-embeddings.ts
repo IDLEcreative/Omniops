@@ -47,7 +47,7 @@ async function analyzeEmbeddings() {
   dc66Embeddings?.forEach((emb, idx) => {
     // Find all DC66 variants in the text
     const matches = emb.chunk_text.match(/DC66[^\s,;).]*/g) || [];
-    matches.forEach(m => dc66Variants.add(m));
+    matches.forEach((m: string) => dc66Variants.add(m));
 
     if (idx < 5) { // Show first 5 in detail
       console.log(`\nEmbedding ${idx + 1}:`);
@@ -96,7 +96,7 @@ async function analyzeEmbeddings() {
       input: testQuery,
     });
 
-    const queryEmbedding = embeddingResponse.data[0].embedding;
+    const queryEmbedding = embeddingResponse.data[0]?.embedding;
 
     // Test with domain filter
     const { data: withDomain, error: e1 } = await supabase.rpc(

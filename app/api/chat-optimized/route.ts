@@ -89,7 +89,16 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    const supabase = createServiceRoleClient();
+    const supabase = await createServiceRoleClient();
+    if (!supabase) {
+      return new Response(
+        JSON.stringify({
+          error: 'Service temporarily unavailable',
+          message: 'Database connection unavailable.'
+        }),
+        { status: 503, headers: { 'Content-Type': 'application/json' } }
+      );
+    }
     
     // Get domain configuration with minimal queries
     let domainData = null;
@@ -153,6 +162,7 @@ export async function POST(request: NextRequest) {
     const contextPromise = domainId ? getEnhancedContext(
       message,
       domain!,
+      domainId,
       { 
         enableSmartSearch: config?.features?.websiteScraping?.enabled ?? true,
         maxChunks: 8, // Reduced for faster processing
@@ -161,14 +171,14 @@ export async function POST(request: NextRequest) {
     ) : Promise.resolve(null);
 
     // Get conversation history (limit to last 3 messages for speed)
-    const historyPromise = conversation_id ? 
-      supabase
+    const historyPromise: Promise<Array<{role: string, content: string}>> = conversation_id ? 
+      Promise.resolve(supabase
         .from('messages')
         .select('role, content')
         .eq('conversation_id', conversation_id)
         .order('created_at', { ascending: false })
         .limit(3)
-        .then(res => res.data?.reverse() || [])
+        .then(res => res.data?.reverse() || []))
       : Promise.resolve([]);
 
     // Wait for both operations
@@ -195,7 +205,7 @@ export async function POST(request: NextRequest) {
     // Prepare messages for OpenAI
     const openAIMessages = [
       { role: 'system' as const, content: systemContext },
-      ...historyData.map((msg: any) => ({
+      ...historyData.map((msg: {role: string, content: string}) => ({
         role: msg.role as 'user' | 'assistant',
         content: msg.content
       })),
@@ -249,7 +259,7 @@ export async function POST(request: NextRequest) {
 
             // Save message to database (non-blocking)
             if (conversation_id) {
-              supabase
+              void Promise.resolve(supabase
                 .from('messages')
                 .insert([
                   {
@@ -264,9 +274,9 @@ export async function POST(request: NextRequest) {
                     content: fullContent,
                     session_id
                   }
-                ])
+                ]))
                 .then(() => console.log('[Chat Optimized] Messages saved'))
-                .catch(err => console.error('[Chat Optimized] Failed to save messages:', err));
+                .catch((err: Error) => console.error('[Chat Optimized] Failed to save messages:', err));
             }
 
             controller.close();
@@ -309,7 +319,7 @@ export async function POST(request: NextRequest) {
 
     // Save messages (non-blocking)
     if (conversation_id) {
-      supabase
+      void Promise.resolve(supabase
         .from('messages')
         .insert([
           {
@@ -324,9 +334,9 @@ export async function POST(request: NextRequest) {
             content: assistantMessage,
             session_id
           }
-        ])
+        ]))
         .then(() => console.log('[Chat Optimized] Messages saved'))
-        .catch(err => console.error('[Chat Optimized] Failed to save messages:', err));
+        .catch((err: Error) => console.error('[Chat Optimized] Failed to save messages:', err));
     }
 
     return new Response(

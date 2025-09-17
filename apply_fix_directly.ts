@@ -52,7 +52,7 @@ async function applyFix() {
     const { data: stored } = await supabase
       .from('page_embeddings')
       .select('id, embedding')
-      .eq('chunk_text', testData[0].chunk_text)
+      .eq('chunk_text', testData[0]?.chunk_text || '')
       .single();
       
     if (stored) {

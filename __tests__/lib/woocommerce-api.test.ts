@@ -8,7 +8,7 @@ import { createWooCommerceClient } from '@/lib/woocommerce-full'
 
 describe('WooCommerceAPI', () => {
   let wooApi: WooCommerceAPI
-  let mockWooClient: any
+  let mockWooClient: ReturnType<typeof createWooCommerceClient>
 
   beforeEach(() => {
     jest.clearAllMocks()

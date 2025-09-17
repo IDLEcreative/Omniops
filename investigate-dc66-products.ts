@@ -133,8 +133,8 @@ async function investigateScrapedPages() {
                 i === 1 ? 'relay_control_matches' : 
                 'albright_matches';
     
-    if (data?.rows) {
-      findings[key] = data.rows.map((row: any) => ({
+    if ((data as any)?.rows) {
+      findings[key] = (data as any).rows.map((row: any) => ({
         id: row.id,
         url: row.url,
         title: row.title,
@@ -143,7 +143,7 @@ async function investigateScrapedPages() {
         content_snippet: row.content?.substring(0, 500)
       }));
       
-      data.rows.forEach((row: any) => findings.domains_checked.add(row.domain_id));
+      (data as any).rows.forEach((row: any) => findings.domains_checked.add(row.domain_id));
     }
   }
   
@@ -261,7 +261,7 @@ async function investigateEmbeddings() {
       input: query,
     });
     
-    const queryEmbedding = embeddingResponse.data[0].embedding;
+    const queryEmbedding = embeddingResponse.data[0]?.embedding;
     
     // Search for similar embeddings
     const { data, error } = await supabase.rpc('match_page_sections', {
@@ -398,7 +398,7 @@ async function testSearchFunctionality() {
     });
     
     const { data: embedResults } = await supabase.rpc('match_page_sections', {
-      embedding: embeddingResponse.data[0].embedding,
+      embedding: embeddingResponse.data[0]?.embedding,
       match_threshold: 0.5,
       match_count: 5
     });
@@ -479,13 +479,13 @@ async function analyzeDataPipeline() {
     `
   }).single();
   
-  if (scrapedWithoutExtraction?.rows?.length > 0) {
+  if ((scrapedWithoutExtraction as any)?.rows?.length > 0) {
     findings.pipeline_stages.extraction.issues.push(
-      `${scrapedWithoutExtraction.rows.length} pages with DC66 content have no product extractions`
+      `${(scrapedWithoutExtraction as any).rows.length} pages with DC66 content have no product extractions`
     );
     findings.missing_links.push({
       stage: 'scraping -> extraction',
-      affected_pages: scrapedWithoutExtraction.rows
+      affected_pages: (scrapedWithoutExtraction as any).rows
     });
   }
   
@@ -501,13 +501,13 @@ async function analyzeDataPipeline() {
     `
   }).single();
   
-  if (extractedWithoutEmbedding?.rows?.length > 0) {
+  if ((extractedWithoutEmbedding as any)?.rows?.length > 0) {
     findings.pipeline_stages.embedding.issues.push(
-      `${extractedWithoutEmbedding.rows.length} product extractions have no embeddings`
+      `${(extractedWithoutEmbedding as any).rows.length} product extractions have no embeddings`
     );
     findings.missing_links.push({
       stage: 'extraction -> embedding',
-      affected_items: extractedWithoutEmbedding.rows
+      affected_items: (extractedWithoutEmbedding as any).rows
     });
   }
   
@@ -557,8 +557,8 @@ async function generateFinalReport() {
   
   // Determine root causes
   if (!scrapedPagesFound) {
-    report.root_causes.push('Products not present in scraped content - pages may not have been scraped');
-    report.action_plan.push({
+    (report.root_causes as any[]).push('Products not present in scraped content - pages may not have been scraped');
+    (report.action_plan as any[]).push({
       priority: 'HIGH',
       action: 'Scrape product pages containing DC66-10P products',
       details: 'Ensure crawler visits product listing and detail pages'
@@ -566,8 +566,8 @@ async function generateFinalReport() {
   }
   
   if (scrapedPagesFound && !structuredExtractionsFound) {
-    report.root_causes.push('Content extraction failing to identify products');
-    report.action_plan.push({
+    (report.root_causes as any[]).push('Content extraction failing to identify products');
+    (report.action_plan as any[]).push({
       priority: 'HIGH',
       action: 'Fix product extraction logic',
       details: 'Review extraction patterns for SKU formats like DC66-10P'
@@ -575,8 +575,8 @@ async function generateFinalReport() {
   }
   
   if (structuredExtractionsFound && !embeddingsFound) {
-    report.root_causes.push('Embeddings not generated for product content');
-    report.action_plan.push({
+    (report.root_causes as any[]).push('Embeddings not generated for product content');
+    (report.action_plan as any[]).push({
       priority: 'MEDIUM',
       action: 'Generate embeddings for product pages',
       details: 'Run embedding generation for domains with DC66 products'
@@ -584,8 +584,8 @@ async function generateFinalReport() {
   }
   
   if (!searchWorking) {
-    report.root_causes.push('Search functionality not returning relevant results');
-    report.action_plan.push({
+    (report.root_causes as any[]).push('Search functionality not returning relevant results');
+    (report.action_plan as any[]).push({
       priority: 'HIGH',
       action: 'Tune search parameters',
       details: 'Adjust similarity thresholds and query processing'
@@ -593,7 +593,7 @@ async function generateFinalReport() {
   }
   
   // Add optimization recommendations
-  report.action_plan.push({
+  (report.action_plan as any[]).push({
     priority: 'LOW',
     action: 'Implement product-specific indexing',
     details: 'Create dedicated product search index with SKU-based retrieval'
@@ -614,7 +614,7 @@ async function generateFinalReport() {
   
   console.log('\n📋 ACTION PLAN:');
   console.log('---------------');
-  report.action_plan.forEach((action, i) => {
+  report.action_plan.forEach((action: any, i: number) => {
     console.log(`${i + 1}. [${action.priority}] ${action.action}`);
     console.log(`   ${action.details}`);
   });

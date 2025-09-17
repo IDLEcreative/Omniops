@@ -40,9 +40,9 @@ const mockChatResponse = {
 }
 
 describe('/api/chat', () => {
-  let mockSupabaseClient: any
-  let mockAdminSupabaseClient: any
-  let mockOpenAIInstance: any
+  let mockSupabaseClient: ReturnType<typeof createClient>
+  let mockAdminSupabaseClient: ReturnType<typeof createServiceRoleClient>
+  let mockOpenAIInstance: jest.Mocked<OpenAI>
 
   beforeEach(() => {
     jest.clearAllMocks()
@@ -98,7 +98,7 @@ describe('/api/chat', () => {
   })
 
   describe('POST', () => {
-    const createRequest = (body: any) => {
+    const createRequest = (body: unknown) => {
       return new NextRequest('http://localhost:3000/api/chat', {
         method: 'POST',
         headers: {
@@ -368,7 +368,7 @@ describe('/api/chat', () => {
       })
 
       const response = await POST(createRequest(requestBody))
-      const data = await response.json()
+      await response.json()
 
       expect(response.status).toBe(200)
       expect(mockSearchProducts).toHaveBeenCalledWith('I want to buy a product', 3)

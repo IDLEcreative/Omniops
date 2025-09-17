@@ -1,10 +1,9 @@
 import { describe, it, expect, jest, beforeEach, afterEach } from '@jest/globals'
-import { PatternLearner, ExtractedPattern, DomainPatterns } from '@/lib/pattern-learner'
-import { NormalizedProduct } from '@/lib/product-normalizer'
+import { PatternLearner, DomainPatterns } from '@/lib/pattern-learner'
 // Use centralized Supabase mock from __mocks__
 import supabaseMockModule from '@supabase/supabase-js'
-const mockSupabaseClient = (supabaseMockModule as any)._mockSupabaseClient
-const { MockQueryBuilder } = supabaseMockModule as any
+const mockSupabaseClient = (supabaseMockModule as { _mockSupabaseClient: unknown })._mockSupabaseClient
+const { MockQueryBuilder } = supabaseMockModule as { MockQueryBuilder: unknown }
 
 // Mock environment variables
 const originalEnv = process.env
@@ -333,7 +332,7 @@ describe('PatternLearner', () => {
 
       const qbGet = new MockQueryBuilder()
       qbGet.single.mockResolvedValue({ data: existingPatterns, error: null })
-      const qbUpdate = new MockQueryBuilder() as any
+      const qbUpdate = new MockQueryBuilder() as { update: jest.Mock }
       qbUpdate.update = jest.fn().mockReturnThis()
       mockSupabaseClient.from
         .mockReturnValueOnce(qbGet)
@@ -383,7 +382,7 @@ describe('PatternLearner', () => {
 
       const qbExisting = new MockQueryBuilder()
       qbExisting.single.mockResolvedValue({ data: existingPatterns, error: null })
-      const qbUpdate2 = new MockQueryBuilder() as any
+      const qbUpdate2 = new MockQueryBuilder() as { update: jest.Mock }
       qbUpdate2.update = jest.fn().mockReturnThis()
       mockSupabaseClient.from
         .mockReturnValueOnce(qbExisting)
@@ -437,7 +436,7 @@ describe('PatternLearner', () => {
 
       const qbExisting2 = new MockQueryBuilder()
       qbExisting2.single.mockResolvedValue({ data: existingPatterns, error: null })
-      const qbUpdate3 = new MockQueryBuilder() as any
+      const qbUpdate3 = new MockQueryBuilder() as { update: jest.Mock }
       qbUpdate3.update = jest.fn().mockReturnThis()
       mockSupabaseClient.from
         .mockReturnValueOnce(qbExisting2)
@@ -485,7 +484,7 @@ describe('PatternLearner', () => {
       ]
 
       const qbRec = new MockQueryBuilder()
-      qbRec.then = (resolve: any) => Promise.resolve({ data: platformPatterns, error: null }).then(resolve)
+      qbRec.then = (resolve: (value: unknown) => void) => Promise.resolve({ data: platformPatterns, error: null }).then(resolve)
       mockSupabaseClient.from.mockReturnValue(qbRec)
 
       const recommendations = await PatternLearner.getRecommendations('https://newshop.com/product', 'woocommerce')
@@ -511,7 +510,7 @@ describe('PatternLearner', () => {
 
     it('should return empty array when no platform patterns found', async () => {
       const qbRecEmpty = new MockQueryBuilder()
-      qbRecEmpty.then = (resolve: any) => Promise.resolve({ data: [], error: null }).then(resolve)
+      qbRecEmpty.then = (resolve: (value: unknown) => void) => Promise.resolve({ data: [], error: null }).then(resolve)
       mockSupabaseClient.from.mockReturnValue(qbRecEmpty)
 
       const recommendations = await PatternLearner.getRecommendations('https://example.com/product', 'unknown-platform')

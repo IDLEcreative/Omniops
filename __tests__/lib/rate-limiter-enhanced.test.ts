@@ -434,7 +434,7 @@ describe('Rate Limiter Integration', () => {
         attempts++;
         if (attempts === 1) {
           const error = new Error('Too Many Requests');
-          (error as any).response = { status: 429 };
+          (error as Error & { response?: { status: number } }).response = { status: 429 };
           throw error;
         }
         return { url, attempts };

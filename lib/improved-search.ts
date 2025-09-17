@@ -197,7 +197,7 @@ export async function searchWithImprovements(
           if (pageData) {
             // Option 1: Use full page content if available
             if (pageData.content && pageData.content.length > 100) {
-              const index = results.findIndex(r => r.url === productUrl);
+              const index = results.findIndex((r: any) => r.url === productUrl);
               if (index >= 0) {
                 results[index].content = pageData.content;
                 results[index].enhanced = true;

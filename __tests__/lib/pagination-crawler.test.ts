@@ -1,6 +1,5 @@
-import { describe, it, expect, jest, beforeEach, afterEach } from '@jest/globals'
-import { PaginationCrawler, PaginationOptions, CatalogResult } from '@/lib/pagination-crawler'
-import { NormalizedProduct } from '@/lib/product-normalizer'
+import { describe, it, expect, jest, beforeEach } from '@jest/globals'
+import { PaginationCrawler, PaginationOptions } from '@/lib/pagination-crawler'
 
 // Mock the dependencies
 const mockExtractEcommerce = jest.fn()
@@ -22,7 +21,7 @@ const createMockPage = () => ({
 })
 
 describe('PaginationCrawler', () => {
-  let mockPage: any
+  let mockPage: ReturnType<typeof createMockPage>
   let crawler: PaginationCrawler
 
   beforeEach(() => {
@@ -419,7 +418,7 @@ describe('PaginationCrawler', () => {
 
       mockExtractEcommerce.mockResolvedValue(responses[0])
 
-      const result = await crawler.crawlCatalog('https://example.com/products', mockPage)
+      await crawler.crawlCatalog('https://example.com/products', mockPage)
 
       expect(mockPage.goto).toHaveBeenCalledTimes(1) // Should only visit once
     })

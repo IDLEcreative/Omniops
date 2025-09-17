@@ -1,0 +1,221 @@
+{
+  "validationSummary": {
+    "timestamp": "2025-09-17T08:53:19.929Z",
+    "totalTests": 10,
+    "successfulTests": 3,
+    "failedTests": 7,
+    "overallSuccess": false,
+    "successRate": 30,
+    "totalDuration": 29,
+    "productionReady": false
+  },
+  "performanceMetrics": {
+    "totalFiles": 0,
+    "analysisTime": 29,
+    "filesPerSecond": 0,
+    "memoryUsed": 0.13,
+    "cacheHitRate": null
+  },
+  "accuracyMetrics": {
+    "circularDependencies": {
+      "detected": 0,
+      "falsePositives": 0,
+      "falseNegatives": 1,
+      "accuracy": 0
+    },
+    "unusedDependencies": {
+      "detected": 6,
+      "falsePositives": 0,
+      "accuracy": 100
+    },
+    "importParsing": {
+      "totalImports": 0,
+      "parsedCorrectly": 0,
+      "accuracy": 0
+    }
+  },
+  "featureResults": [
+    {
+      "feature": "Basic Functionality",
+      "status": "FAIL",
+      "duration": 3,
+      "details": {
+        "totalFiles": 0,
+        "totalDependencies": 0,
+        "externalPackages": 0,
+        "healthGrade": "B"
+      }
+    },
+    {
+      "feature": "Import/Export Parsing",
+      "status": "FAIL",
+      "duration": 1,
+      "details": {
+        "totalImports": 0,
+        "es6Imports": 0,
+        "commonjsImports": 0,
+        "dynamicImports": 0,
+        "namedImports": 0,
+        "defaultImports": 0,
+        "accuracy": 0
+      }
+    },
+    {
+      "feature": "Circular Dependency Detection",
+      "status": "FAIL",
+      "duration": 1,
+      "details": {
+        "expectedCycles": 1,
+        "detectedCycles": 0,
+        "accuracy": 0
+      }
+    },
+    {
+      "feature": "Impact Analysis",
+      "status": "FAIL",
+      "duration": 1,
+      "details": {
+        "totalAnalyses": 0,
+        "hasHighImpactFiles": false,
+        "averageImpact": 0,
+        "topImpactFile": "none"
+      }
+    },
+    {
+      "feature": "Unused Dependency Detection",
+      "status": "PASS",
+      "duration": 0,
+      "details": {
+        "expectedUnusedDeps": 3,
+        "detectedUnusedDeps": 6,
+        "accuracy": 100,
+        "unusedDeps": [
+          {
+            "package": "lodash",
+            "type": "dependency",
+            "confidence": 0.9
+          },
+          {
+            "package": "react",
+            "type": "dependency",
+            "confidence": 0.9
+          },
+          {
+            "package": "unused-package",
+            "type": "dependency",
+            "confidence": 0.9
+          },
+          {
+            "package": "typescript",
+            "type": "devDependency",
+            "confidence": 0.9
+          },
+          {
+            "package": "@types/node",
+            "type": "devDependency",
+            "confidence": 0.9
+          },
+          {
+            "package": "unused-dev-package",
+            "type": "devDependency",
+            "confidence": 0.9
+          }
+        ]
+      }
+    },
+    {
+      "feature": "Bundle Size Analysis",
+      "status": "FAIL",
+      "duration": 1,
+      "details": {
+        "totalBundleSize": 0,
+        "hasFileSizes": false,
+        "largestFiles": [],
+        "averageFileSize": null
+      }
+    },
+    {
+      "feature": "Performance",
+      "status": "FAIL",
+      "duration": 1,
+      "details": {
+        "filesPerSecond": 0,
+        "memoryUsedMB": 0.13,
+        "cacheSpeedup": null,
+        "analysisTime": 1,
+        "cachedAnalysisTime": 0
+      }
+    },
+    {
+      "feature": "Export Formats",
+      "status": "PASS",
+      "duration": 18,
+      "details": {
+        "supportedFormats": 5,
+        "generatedFormats": 5,
+        "formatSizes": [
+          {
+            "format": "json",
+            "size": 4999
+          },
+          {
+            "format": "csv",
+            "size": 56
+          },
+          {
+            "format": "dot",
+            "size": 58
+          },
+          {
+            "format": "mermaid",
+            "size": 8
+          },
+          {
+            "format": "html",
+            "size": 2188
+          }
+        ],
+        "allFormatsGenerated": true
+      }
+    },
+    {
+      "feature": "Boundary Violations",
+      "status": "PASS",
+      "duration": 1,
+      "details": {
+        "violations": 0,
+        "hasViolationDetection": true,
+        "rulesConfigured": 1
+      }
+    },
+    {
+      "feature": "Visualization Data",
+      "status": "FAIL",
+      "duration": 1,
+      "details": {
+        "hasVisualization": true,
+        "nodes": 0,
+        "links": 0,
+        "clusters": 0,
+        "metadata": {
+          "totalNodes": 0,
+          "totalLinks": 0,
+          "maxDepth": null,
+          "entryPoints": [],
+          "cycles": 0
+        }
+      }
+    }
+  ],
+  "recommendations": [
+    "Fix basic functionality issues before proceeding with other features",
+    "Improve regex patterns for import/export detection",
+    "Review circular dependency detection algorithm",
+    "Address issues with Impact Analysis",
+    "Address issues with Bundle Size Analysis",
+    "Optimize analysis speed and memory usage",
+    "Address issues with Visualization Data",
+    "Consider implementing parallel processing for better performance"
+  ],
+  "productionReadinessAssessment": "NOT PRODUCTION READY - Multiple critical failures: Basic Functionality, Import/Export Parsing, Circular Dependency Detection, Performance"
+}

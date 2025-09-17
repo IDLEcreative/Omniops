@@ -116,7 +116,7 @@ async function forensicInvestigation() {
       input: 'DC66-10P cable entry system',
     });
 
-    const queryEmbedding = embeddingResponse.data[0].embedding;
+    const queryEmbedding = embeddingResponse.data[0]?.embedding;
     console.log('Generated embedding for "DC66-10P cable entry system"');
 
     // Perform vector search

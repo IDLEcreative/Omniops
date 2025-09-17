@@ -7,7 +7,7 @@ import {
 } from '@/lib/chat-context-enhancer';
 
 // Mock data for testing
-const createMockChunk = (overrides: any = {}) => ({
+const createMockChunk = (overrides: Record<string, unknown> = {}) => ({
   content: 'Mock content for testing enhanced context window',
   url: `https://example.com/product/${overrides.id || 1}`,
   title: `Mock Product ${overrides.id || 1}`,
@@ -204,7 +204,7 @@ describe('Enhanced Context Window Implementation Tests', () => {
       const enhancedChunks = createMockChunks(enhancedChunkCount, 0.85);
       
       // Calculate token usage
-      const calculateTokens = (chunks: any[]) => 
+      const calculateTokens = (chunks: ReturnType<typeof createMockChunk>[]) => 
         chunks.reduce((sum, chunk) => sum + Math.ceil(chunk.content.length / 4), 0);
       
       const traditionalTokens = calculateTokens(traditionalChunks);

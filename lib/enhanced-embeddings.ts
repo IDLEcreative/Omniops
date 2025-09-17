@@ -465,7 +465,9 @@ export async function searchSimilarContentEnhanced(
         // Move Agri Flip to position 5 (high enough to be visible but not overwhelming)
         const agriFlipItem = mapped[agriFlipIndex];
         mapped.splice(agriFlipIndex, 1); // Remove from current position
-        mapped.splice(4, 0, agriFlipItem); // Insert at position 5
+        if (agriFlipItem) {
+          mapped.splice(4, 0, agriFlipItem); // Insert at position 5
+        }
       }
     }
     
