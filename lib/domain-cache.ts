@@ -236,11 +236,11 @@ class DomainCacheService {
 }
 
 // Singleton instance
-let domainCache: DomainCacheService | null = null;
+let domainCacheInstance: DomainCacheService | null = null;
 
 export function getDomainCache(): DomainCacheService {
-  if (!domainCache) {
-    domainCache = new DomainCacheService();
+  if (!domainCacheInstance) {
+    domainCacheInstance = new DomainCacheService();
     
     // Preload common domains on initialization
     const commonDomains = [
@@ -250,12 +250,12 @@ export function getDomainCache(): DomainCacheService {
     ];
     
     // Non-blocking preload
-    domainCache.preloadDomains(commonDomains).catch(err => {
+    domainCacheInstance.preloadDomains(commonDomains).catch(err => {
       console.error('[DomainCache] Preload failed:', err);
     });
   }
   
-  return domainCache;
+  return domainCacheInstance;
 }
 
 // Export for direct use
