@@ -35,6 +35,7 @@
     "embeddings:clean": "tsx clean-contaminated-embeddings.ts",
     "embeddings:test": "tsx test-navigation-fix.ts",
     "embeddings:health": "tsx monitor-embeddings-health.ts",
+    "reindex": "tsx scripts/reindex.ts",
     "redis:start": "redis-server docker/redis.conf",
     "redis:cli": "redis-cli",
     "redis:flush": "redis-cli FLUSHALL",
@@ -45,7 +46,7 @@
   },
   "dependencies": {
     "@crawlee/playwright": "^3.14.1",
-    "@mozilla/readability": "^0.5.0",
+    "@mozilla/readability": "^0.6.0",
     "@radix-ui/react-avatar": "^1.1.0",
     "@radix-ui/react-collapsible": "^1.1.0",
     "@radix-ui/react-dropdown-menu": "^2.1.0",
