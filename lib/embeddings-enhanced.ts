@@ -5,7 +5,8 @@
 
 import { MetadataExtractor, type EnhancedEmbeddingMetadata } from './metadata-extractor';
 import { createClient, createServiceRoleClient } from '@/lib/supabase/server';
-import { splitIntoChunks, generateEmbeddingVectors, generateQueryEmbedding } from './embeddings';
+import { generateQueryEmbedding } from './embeddings';
+import { splitIntoChunks, generateEmbeddingVectors } from './embeddings-functions';
 
 /**
  * Generate embeddings with enhanced metadata

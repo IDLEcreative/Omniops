@@ -324,3 +324,10 @@ export async function searchSimilarContentOptimized(
 
 // Export the optimized function as the main search function
 export const searchSimilarContent = searchSimilarContentOptimized;
+
+// Re-export the missing functions from embeddings-functions.ts
+export { 
+  generateEmbeddings, 
+  splitIntoChunks, 
+  generateEmbeddingVectors 
+} from './embeddings-functions';
