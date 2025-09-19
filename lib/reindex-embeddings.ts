@@ -194,19 +194,34 @@ export class EmbeddingReindexer {
     this.updateProgress('clearing', 0, 100, 'Clearing old embeddings...', onProgress);
     
     if (domainId) {
-      // First, get page IDs for the domain
-      const { data: pages, error: pagesError } = await this.supabase
-        .from('scraped_pages')
-        .select('id')
-        .eq('domain_id', domainId);
+      // Get all page IDs for the domain using pagination
+      const pageIds: string[] = [];
+      let offset = 0;
+      const limit = 1000;
+      let hasMore = true;
       
-      if (pagesError) throw new Error(`Failed to fetch pages: ${pagesError.message}`);
-      if (!pages || pages.length === 0) {
+      while (hasMore) {
+        const { data: pages, error: pagesError } = await this.supabase
+          .from('scraped_pages')
+          .select('id')
+          .eq('domain_id', domainId)
+          .range(offset, offset + limit - 1);
+        
+        if (pagesError) throw new Error(`Failed to fetch pages: ${pagesError.message}`);
+        
+        if (pages && pages.length > 0) {
+          pageIds.push(...pages.map(p => p.id));
+          offset += pages.length;
+          hasMore = pages.length === limit;
+        } else {
+          hasMore = false;
+        }
+      }
+      
+      if (pageIds.length === 0) {
         this.updateProgress('clearing', 100, 100, 'No pages to clear', onProgress);
         return;
       }
-      
-      const pageIds = pages.map(p => p.id);
       
       // Delete embeddings for those pages in batches
       for (let i = 0; i < pageIds.length; i += 100) {
@@ -253,19 +268,38 @@ export class EmbeddingReindexer {
    * Get pages to reindex
    */
   private async getPages(domainId?: string): Promise<any[]> {
-    const query = this.supabase
-      .from('scraped_pages')
-      .select('id, url, title, text_content, content, domain_id, scraped_at')
-      .order('scraped_at', { ascending: false });
+    const allPages: any[] = [];
+    let offset = 0;
+    const limit = 500; // Reduced from 1000 to avoid timeout
+    let hasMore = true;
     
-    if (domainId) {
-      query.eq('domain_id', domainId);
+    while (hasMore) {
+      const query = this.supabase
+        .from('scraped_pages')
+        .select('id, url, title, text_content, content, domain_id, scraped_at')
+        .order('scraped_at', { ascending: false })
+        .range(offset, offset + limit - 1);
+      
+      if (domainId) {
+        query.eq('domain_id', domainId);
+      }
+      
+      const { data, error } = await query;
+      
+      if (error) throw new Error(`Failed to fetch pages: ${error.message}`);
+      
+      if (data && data.length > 0) {
+        allPages.push(...data);
+        offset += data.length;
+        hasMore = data.length === limit;
+      } else {
+        hasMore = false;
+      }
+      
+      console.log(`Fetched ${allPages.length} pages so far...`);
     }
     
-    const { data, error } = await query;
-    
-    if (error) throw new Error(`Failed to fetch pages: ${error.message}`);
-    return data || [];
+    return allPages;
   }
   
   /**

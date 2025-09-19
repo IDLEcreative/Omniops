@@ -164,6 +164,7 @@ Required environment variables (copy `.env.example` to `.env.local`):
 open -a "Docker"
 
 # Build and run the entire application stack
+DOCKER_BUILDKIT=1 docker-compose build  # Optimized build (59% faster with cache)
 docker-compose up -d                    # Production mode
 docker-compose -f docker-compose.dev.yml up -d  # Development with hot reload
 
@@ -174,10 +175,14 @@ docker-compose logs -f app              # View application logs
 docker-compose logs -f redis            # View Redis logs
 
 # Rebuild after code changes
-docker-compose up -d --build            # Rebuild and restart
+DOCKER_BUILDKIT=1 docker-compose build --no-cache  # Full rebuild
+DOCKER_BUILDKIT=1 docker-compose up -d --build     # Rebuild and restart (uses cache)
 
 # Access running container
 docker exec -it omniops-app sh         # Shell into app container
+
+# Performance monitoring
+npx tsx profile-docker-quick.ts        # Profile Docker build performance
 ```
 
 #### Docker Files Structure

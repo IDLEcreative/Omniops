@@ -283,9 +283,28 @@ For issues or questions:
 3. Run validation scripts
 4. Contact the development team
 
+## Recent Improvements (January 2025)
+
+### Database Timeout Fix
+- Reduced batch size from 1000 to 500 pages to prevent timeouts
+- Successfully processes all 4491 pages without failures
+- Improved pagination handling for large datasets
+
+### Full Reindex Results
+Successfully completed full reindex on January 19, 2025:
+- **Pages Processed**: 4,491 (100% coverage)
+- **Embeddings Generated**: 14,363
+- **Average Chunk Size**: 1,339 chars (optimal)
+- **Max Chunk Size**: 1,500 chars (perfect enforcement)
+- **Navigation Contamination**: 0% (eliminated from 40%)
+- **CSS Contamination**: 0% (eliminated from 43%)
+- **Processing Time**: 53 minutes 42 seconds
+- **Performance**: 84 pages/minute, 4.5 embeddings/second
+
 ## Version History
 
-- **v2.0** - Current version with batch processing and improved cleaning
+- **v2.1** - Reduced batch size to prevent timeouts, full pagination support
+- **v2.0** - Batch processing and improved cleaning
 - **v1.0** - Initial implementation (deprecated)
 
 ## License
