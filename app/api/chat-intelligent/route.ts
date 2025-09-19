@@ -11,6 +11,7 @@ import { z } from 'zod';
 import { checkDomainRateLimit } from '@/lib/rate-limit';
 import { searchSimilarContent } from '@/lib/embeddings';
 import { getDynamicWooCommerceClient, searchProductsDynamic } from '@/lib/woocommerce-dynamic';
+import { getProductOverview, ProductOverview } from '@/lib/search-overview';
 import { sanitizeOutboundLinks } from '@/lib/link-sanitizer';
 import { ChatTelemetry, telemetryManager } from '@/lib/chat-telemetry';
 
@@ -119,14 +120,14 @@ const OPTIMIZED_TOOLS = [
   }
 ];
 
-// Optimized tool execution with timeout
+// Optimized tool execution with timeout and full metadata
 async function executeSmartSearch(
   query: string, 
   searchType: string = "mixed",
   limit: number = 50, 
   domain: string,
   timeoutMs: number = 5000
-): Promise<{ success: boolean; results: any[]; source: string; executionTime: number }> {
+): Promise<{ success: boolean; results: any[]; source: string; executionTime: number; overview?: ProductOverview }> {
   const startTime = Date.now();
   console.log(`[Smart Search] Starting: "${query}" (type: ${searchType}, limit: ${limit})`);
   
@@ -138,9 +139,21 @@ async function executeSmartSearch(
     // Parallel search strategy for comprehensive results
     const searchPromises: Promise<any[]>[] = [];
     
+    // Get product overview in parallel for full visibility
+    console.log(`[Smart Search] Getting overview for query: "${query}", domain: "${browseDomain}"`);
+    const overviewPromise = getProductOverview(query, browseDomain)
+      .then(result => {
+        console.log(`[Smart Search] Overview result:`, result ? `${result.total} total items` : 'null');
+        return result;
+      })
+      .catch(err => {
+        console.error('[Smart Search] Overview error:', err.message);
+        return null;
+      });
+    
     // Always add semantic search as primary method
     searchPromises.push(
-      searchSimilarContent(query, browseDomain, limit, 0.15, timeoutMs - 500)
+      searchSimilarContent(query, browseDomain, Math.min(limit, 20), 0.15, timeoutMs - 500)
         .then(results => results.map(r => ({ ...r, type: 'content' })))
         .catch(err => {
           console.error(`[Smart Search] Semantic search error:`, err.message);
@@ -166,10 +179,10 @@ async function executeSmartSearch(
       );
     }
     
-    // Execute searches with timeout
-    const allResults = await Promise.race([
-      Promise.all(searchPromises).then(results => results.flat()),
-      new Promise<any[]>((_, reject) => 
+    // Execute searches with timeout (including overview)
+    const [allResults, overview] = await Promise.race([
+      Promise.all([Promise.all(searchPromises).then(results => results.flat()), overviewPromise]),
+      new Promise<[any[], ProductOverview | null]>((_, reject) => 
         setTimeout(() => reject(new Error('Search timeout')), timeoutMs)
       )
     ]);
@@ -187,7 +200,8 @@ async function executeSmartSearch(
       success: true, 
       results: uniqueResults, 
       source: searchType,
-      executionTime 
+      executionTime,
+      overview 
     };
     
   } catch (error: any) {
@@ -276,18 +290,26 @@ export async function POST(request: NextRequest) {
         role: 'system' as const,
         content: `You are a helpful customer service assistant. ALWAYS use the smart_search tool when users ask about products, inventory, or availability.
 
-CRITICAL SEARCH RULES:
-- For queries containing "all", "every", "complete", "entire", "how many", "list" → Use limit: 500
-- For queries about counting or totals → Use limit: 500 to get accurate counts
-- For specific product queries → Use limit: 20-50
-- For general information → Use limit: 10-20
+IMPORTANT: You now receive FULL VISIBILITY of search results:
+- Total count of ALL matching items
+- Category and brand breakdowns
+- Detailed information for top results
+- Awareness of additional items beyond the detailed results
 
-When users ask "How many X products" or similar counting questions:
-1. ALWAYS search with limit: 500 to get all results
-2. Count the actual results returned
-3. Report the exact count to the user
+This means:
+- You can accurately answer "How many X do you have?" without re-searching
+- You can filter and recommend from the COMPLETE catalog
+- You can provide category/brand statistics immediately
+- You DO NOT need to search multiple times for refinements
 
-Never guess or estimate - always search first with appropriate limits.`
+SEARCH STRATEGY:
+- For initial queries → Use limit: 20-50 for detailed results (you'll see total count regardless)
+- For counting/statistics → The total count is always provided
+- For filtering → You already have the full list, just describe what's available
+
+When users ask follow-up questions like "show me just the pumps from those results":
+- You already have the category breakdown - use it directly
+- No need to search again unless they want different products entirely`
       },
       {
         role: 'user' as const,
@@ -361,16 +383,44 @@ Never guess or estimate - always search first with appropriate limits.`
             allSearchResults.push(...result.results);
           }
           
-          // Format concise response
+          // Format response with full visibility metadata
           let toolResponse = '';
-          if (result.results.length > 0) {
-            toolResponse = `Found ${result.results.length} results:\n`;
-            result.results.slice(0, 3).forEach((item, idx) => {
+          if (result.results.length > 0 || result.overview?.total) {
+            const total = result.overview?.total || result.results.length;
+            const returned = result.results.length;
+            
+            // Provide complete context to AI
+            toolResponse = `Found ${total} total matches (showing ${returned} detailed results)\n\n`;
+            
+            // Include category/brand breakdown if available
+            if (result.overview?.categories && result.overview.categories.length > 0) {
+              toolResponse += 'Categories: ';
+              toolResponse += result.overview.categories.map(c => `${c.value} (${c.count})`).join(', ');
+              toolResponse += '\n';
+            }
+            
+            if (result.overview?.brands && result.overview.brands.length > 0) {
+              toolResponse += 'Brands: ';
+              toolResponse += result.overview.brands.map(b => `${b.value} (${b.count})`).join(', ');
+              toolResponse += '\n';
+            }
+            
+            toolResponse += '\nDetailed results:\n';
+            result.results.slice(0, Math.min(5, returned)).forEach((item, idx) => {
               toolResponse += `${idx + 1}. ${item.title}\n`;
               if (item.type === 'product' && item.content.includes('£')) {
-                toolResponse += `   ${item.content.split('\n')[1]}\n`; // Price line
+                toolResponse += `   ${item.content.split('\n')[1]}\n`;
               }
             });
+            
+            // If we have many more results, list some IDs for awareness
+            if (result.overview?.allIds && result.overview.allIds.length > returned) {
+              const additionalCount = result.overview.allIds.length - returned;
+              toolResponse += `\n[${additionalCount} additional items available, including: `;
+              toolResponse += result.overview.allIds.slice(returned, returned + 10).map(i => i.title).join(', ');
+              if (additionalCount > 10) toolResponse += ', ...';
+              toolResponse += ']';
+            }
           } else {
             toolResponse = 'No results found.';
           }

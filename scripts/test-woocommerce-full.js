@@ -1,4 +1,3 @@
-import fetch from 'node-fetch';
 
 const API_URL = 'http://localhost:3000';
 const DOMAIN = 'thompsonseparts.co.uk';

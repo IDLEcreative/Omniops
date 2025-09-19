@@ -10,7 +10,6 @@ console.log('Consumer Secret:', process.env.WOOCOMMERCE_CONSUMER_SECRET ? `✓ S
 if (process.env.WOOCOMMERCE_URL && process.env.WOOCOMMERCE_CONSUMER_KEY && process.env.WOOCOMMERCE_CONSUMER_SECRET) {
   console.log('\n=== Testing WooCommerce API Connection ===');
   
-  import fetch from 'node-fetch';
   const url = process.env.WOOCOMMERCE_URL;
   const consumerKey = process.env.WOOCOMMERCE_CONSUMER_KEY;
   const consumerSecret = process.env.WOOCOMMERCE_CONSUMER_SECRET;

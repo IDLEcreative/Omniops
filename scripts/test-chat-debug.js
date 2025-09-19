@@ -1,4 +1,3 @@
-import fetch from 'node-fetch';
 
 async function testChatDebug() {
   console.log('Testing chat with debug info...\n');

@@ -4,7 +4,6 @@
  * Test the scraper API endpoint for Thompson's Parts website
  */
 
-import fetch from 'node-fetch';
 
 async function testScraperAPI() {
   const url = 'https://www.thompsonseparts.co.uk/';

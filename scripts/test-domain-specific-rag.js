@@ -1,4 +1,3 @@
-import fetch from 'node-fetch';
 
 async function testDomainSpecificRAG() {
   console.log('Testing domain-specific RAG responses...\n');

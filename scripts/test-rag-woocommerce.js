@@ -1,4 +1,3 @@
-import fetch from 'node-fetch';
 
 async function testRAGWithWooCommerce() {
   console.log('Testing RAG + WooCommerce Integration in Chat Widget...\n');

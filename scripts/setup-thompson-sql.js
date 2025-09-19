@@ -1,4 +1,3 @@
-import fetch from 'node-fetch';
 
 // Your actual Supabase credentials
 const SUPABASE_URL = 'https://birugqyuqhiahxvxeyqg.supabase.co';

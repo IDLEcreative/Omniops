@@ -2,7 +2,6 @@
 import dotenv from 'dotenv';
 dotenv.config({ path: '.env.local' });
 
-import fetch from 'node-fetch';
 const consumerKey = process.env.WOOCOMMERCE_CONSUMER_KEY;
 const consumerSecret = process.env.WOOCOMMERCE_CONSUMER_SECRET;
 

@@ -1,5 +1,4 @@
 // Test the embed widget API behavior
-import fetch from 'node-fetch';
 
 async function testEmbedWidget() {
   console.log('Testing embed widget responses...\n');

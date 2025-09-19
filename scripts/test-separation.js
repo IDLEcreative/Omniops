@@ -1,4 +1,3 @@
-import fetch from 'node-fetch';
 
 const CHAT_URL = 'http://localhost:3000/api/chat';
 const STOCK_URL = 'http://localhost:3000/api/woocommerce/stock';

@@ -13,7 +13,6 @@
  * 5. Dynamic Iteration Control - Stopping early when confident or continuing when uncertain
  */
 
-import fetch from 'node-fetch';
 import { v4 as uuidv4 } from 'uuid';
 
 // Test configuration

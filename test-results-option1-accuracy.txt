@@ -1,0 +1,100 @@
+
+
+🎯 OPTION 1 FULL VISIBILITY ACCURACY TEST REPORT
+NaN
+
+📊 TEST SUMMARY:
+   Total Tests: 8
+   Passed: 0 ✅
+   Failed: 8 ❌
+   Accuracy Rate: 0.0%
+   Average Response Time: 66ms
+
+📋 DETAILED RESULTS:
+NaN
+
+1. Total Product Count
+   Query: "How many total products do you have?"
+   Status: ❌ FAIL
+   Response Time: 92ms
+   Errors: HTTP 400: Bad Request
+   AI Response: ""
+
+2. Cifa Product Count
+   Query: "Show me all Cifa products"
+   Status: ❌ FAIL
+   Response Time: 87ms
+   Errors: HTTP 400: Bad Request
+   AI Response: ""
+
+3. Category Breakdown
+   Query: "What categories of products exist?"
+   Status: ❌ FAIL
+   Response Time: 71ms
+   Errors: HTTP 400: Bad Request
+   AI Response: ""
+
+4. Initial Search for Filtering Test
+   Query: "List all pumps"
+   Status: ❌ FAIL
+   Response Time: 57ms
+   Errors: HTTP 400: Bad Request
+   AI Response: ""
+
+5. Follow-up Filtering
+   Query: "Which ones are over £500?"
+   Status: ❌ FAIL
+   Response Time: 55ms
+   Errors: HTTP 400: Bad Request
+   AI Response: ""
+
+6. Large Result Performance
+   Query: "Show me all available products"
+   Status: ❌ FAIL
+   Response Time: 55ms
+   Errors: HTTP 400: Bad Request
+   AI Response: ""
+
+7. Empty Result Handling
+   Query: "Do you have any zxyzkhjweruht products?"
+   Status: ❌ FAIL
+   Response Time: 54ms
+   Errors: HTTP 400: Bad Request
+   AI Response: ""
+
+8. Single Result Precision
+   Query: "Tell me about the CIFA Mixer Filter Housing Assembly"
+   Status: ❌ FAIL
+   Response Time: 55ms
+   Errors: HTTP 400: Bad Request
+   AI Response: ""
+
+
+🚀 PERFORMANCE ANALYSIS:
+NaN
+   Fast (< 5s): 8 tests
+   Medium (5-10s): 0 tests
+   Slow (> 10s): 0 tests
+
+
+🔍 KEY FINDINGS:
+NaN
+   ⚠️  Option 1 implementation needs improvement
+   ✅ Response times are acceptable
+
+
+💡 RECOMMENDATIONS:
+NaN
+   • Review search overview implementation
+   • Improve total count reporting
+   • Address specific test failures:
+     - Total Product Count: HTTP 400: Bad Request
+     - Cifa Product Count: HTTP 400: Bad Request
+     - Category Breakdown: HTTP 400: Bad Request
+     - Initial Search for Filtering Test: HTTP 400: Bad Request
+     - Follow-up Filtering: HTTP 400: Bad Request
+     - Large Result Performance: HTTP 400: Bad Request
+     - Empty Result Handling: HTTP 400: Bad Request
+     - Single Result Precision: HTTP 400: Bad Request
+
+NaN

@@ -7,7 +7,6 @@
 
 import { ContentExtractor } from './lib/content-extractor';
 import { extractBusinessInfo } from './lib/business-content-extractor';
-import fetch from 'node-fetch';
 
 // Test HTML with typical e-commerce elements
 const testHTML = `

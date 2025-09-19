@@ -1,4 +1,3 @@
-import fetch from 'node-fetch';
 
 async function testRAGWidget() {
   console.log('Testing RAG capabilities in chat widget...\n');

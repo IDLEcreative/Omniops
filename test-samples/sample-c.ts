@@ -3,7 +3,6 @@
  */
 
 import { validateData } from './utils';
-import fetch from 'node-fetch';
 
 interface DataLoader {
   getData(): Promise<any[]>;

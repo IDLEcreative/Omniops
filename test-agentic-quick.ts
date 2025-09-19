@@ -5,7 +5,6 @@
  * Tests core agentic behaviors with shorter timeouts
  */
 
-import fetch from 'node-fetch';
 import { v4 as uuidv4 } from 'uuid';
 
 const BASE_URL = 'http://localhost:3000';

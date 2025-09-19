@@ -5,7 +5,6 @@
  * Tests how the system handles general category queries vs specific products
  */
 
-import fetch from 'node-fetch';
 
 const API_BASE = 'http://localhost:3001';
 const DOMAIN = 'thompsonseparts.co.uk';

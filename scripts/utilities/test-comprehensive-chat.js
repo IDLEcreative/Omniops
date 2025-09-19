@@ -1,5 +1,4 @@
 // Comprehensive test to understand AI response patterns
-import fetch from 'node-fetch';
 
 async function sleep(ms) {
   return new Promise(resolve => setTimeout(resolve, ms));
