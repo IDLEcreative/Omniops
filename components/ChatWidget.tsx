@@ -320,7 +320,7 @@ export default function ChatWidget({
         },
         body: JSON.stringify({
           message: userMessage,
-          conversation_id: conversationId || undefined, // Only send if not empty
+          conversation_id: conversationId && conversationId.length > 0 ? conversationId : undefined, // Only send if not empty
           session_id: sessionId,
           domain: storeDomain || domain, // Use storeDomain if available for WooCommerce
           demoId: demoId || undefined,

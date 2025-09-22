@@ -278,8 +278,8 @@ export async function POST(request: NextRequest) {
     // Simplified conversation management - skip if not needed
     let conversationId = conversation_id;
     if (!conversationId) {
-      // Generate a temporary ID without DB write for speed
-      conversationId = `temp_${session_id}_${Date.now()}`;
+      // Generate a proper UUID without DB write for speed
+      conversationId = crypto.randomUUID();
     }
 
     // Skip saving messages for performance - can be done async later
