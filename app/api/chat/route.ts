@@ -326,13 +326,27 @@ export async function POST(request: NextRequest) {
       );
     }
 
+    // Look up domain_id if we have a domain
+    let domainId: string | null = null;
+    if (domain) {
+      const { data: domainData } = await adminSupabase
+        .from('domains')
+        .select('id')
+        .eq('domain', domain.replace(/^https?:\/\//, '').replace('www.', ''))
+        .single();
+      domainId = domainData?.id || null;
+    }
+
     // Get or create conversation
     let conversationId = conversation_id;
     
     if (!conversationId) {
       const { data: newConversation, error: convError } = await adminSupabase
         .from('conversations')
-        .insert({ session_id })
+        .insert({ 
+          session_id,
+          domain_id: domainId
+        })
         .select()
         .single();
       
@@ -350,7 +364,8 @@ export async function POST(request: NextRequest) {
           .from('conversations')
           .insert({ 
             id: conversationId,
-            session_id 
+            session_id,
+            domain_id: domainId
           });
         
         if (createError) {
