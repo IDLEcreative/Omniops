@@ -122,6 +122,7 @@ export class EmbeddingReindexer {
             if (!dryRun) {
               const embeddingCount = await this.generateAndSaveEmbeddings(
                 page.id,
+                page.domain_id,  // Pass domain_id from page
                 page.url,
                 page.title || '',
                 chunks
@@ -388,6 +389,7 @@ export class EmbeddingReindexer {
    */
   private async generateAndSaveEmbeddings(
     pageId: string,
+    domainId: string,  // CRITICAL: Add domain_id parameter
     pageUrl: string,
     pageTitle: string,
     chunks: string[]
@@ -408,6 +410,7 @@ export class EmbeddingReindexer {
         // Prepare batch insert
         const embeddings = response.data.map((item: any, idx: number) => ({
           page_id: pageId,
+          domain_id: domainId,  // CRITICAL: Include domain_id for search to work!
           chunk_text: batch[idx],
           embedding: item.embedding,
           metadata: {

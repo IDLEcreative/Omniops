@@ -110,6 +110,7 @@ async function regenerateEmbeddings(domainFilter?: string) {
       // Save new embeddings
       const embeddingRecords = chunks.map((chunk, index) => ({
         page_id: page.id,
+        domain_id: page.domain_id,  // CRITICAL: Include domain_id for search to work!
         chunk_text: chunk,
         embedding: embeddings[index],
         metadata: {

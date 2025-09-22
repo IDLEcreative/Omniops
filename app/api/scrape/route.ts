@@ -152,11 +152,20 @@ export async function POST(request: NextRequest) {
       // Single page scrape
       const pageData = await scrapePage(url, { turboMode: turbo });
       
+      // Get or create domain
+      const domain = new URL(url).hostname.replace('www.', '');
+      const { data: domainData } = await supabase
+        .from('domains')
+        .upsert({ domain })
+        .select()
+        .single();
+      
       // Save to database
       const { data: savedPage, error: pageError } = await supabase
         .from('scraped_pages')
         .upsert({
           url: pageData.url,
+          domain_id: domainData?.id,  // Include domain_id!
           title: pageData.title,
           content: pageData.content,
           metadata: pageData.metadata,
@@ -198,6 +207,7 @@ export async function POST(request: NextRequest) {
       // Save embeddings
       const embeddingRecords = chunks.map((chunk, index) => ({
         page_id: savedPage.id,
+        domain_id: domainData?.id,  // CRITICAL: Include domain_id for search to work!
         chunk_text: chunk,
         embedding: embeddings[index],
         metadata: { chunk_index: index },
@@ -294,11 +304,20 @@ async function processCrawlResults(jobId: string, supabase: any) {
             const batchResults = await Promise.allSettled(
               batch.map(async (page) => {
                 try {
+                  // Get domain_id
+                  const domain = new URL(page.url).hostname.replace('www.', '');
+                  const { data: domainData } = await supabase
+                    .from('domains')
+                    .upsert({ domain })
+                    .select()
+                    .single();
+                  
                   // Save page
                   const { data: savedPage, error: pageError } = await supabase
                     .from('scraped_pages')
                     .upsert({
                       url: page.url,
+                      domain_id: domainData?.id,  // Include domain_id!
                       title: page.title,
                       content: page.content,
                       metadata: page.metadata,
@@ -343,6 +362,7 @@ async function processCrawlResults(jobId: string, supabase: any) {
                   // Prepare all embedding records for batch insert
                   const embeddingRecords = chunks.map((chunk, index) => ({
                     page_id: savedPage.id,
+                    domain_id: domainData?.id,  // CRITICAL: Include domain_id for search to work!
                     chunk_text: chunk,
                     embedding: embeddings[index],
                     metadata: { 

@@ -126,97 +126,99 @@ export async function searchSimilarContentOptimized(
       return [];
     }
     
-    // SHORT QUERY OPTIMIZATION - for 1-2 word queries, use fast keyword search
+    // SMART HYBRID SEARCH - Keyword first with vector fallback for short queries
     const queryWords = query.trim().split(/\s+/);
     const isShortQuery = queryWords.length <= 2;
+    const MIN_KEYWORD_RESULTS = 3; // Minimum results before falling back to vector
     
     if (isShortQuery) {
       // For multi-word short queries, identify the most important keyword
-      // Filter out common words like "products", "items", "all", etc.
       const commonWords = ['products', 'items', 'all', 'the', 'a', 'an', 'show', 'me', 'list'];
       const significantWords = queryWords.filter(w => !commonWords.includes(w.toLowerCase()));
-      const searchKeyword = significantWords[0] || queryWords[0]; // Use most significant word
+      const searchKeyword = significantWords[0] || queryWords[0];
       
-      console.log(`[OPTIMIZATION] Short query (${queryWords.length} words): "${query}" - using keyword search for: "${searchKeyword}"`);
+      console.log(`[HYBRID] Short query (${queryWords.length} words): "${query}" - trying keyword search first`);
       
-      const keywordTimer = new QueryTimer('Keyword Search', 10000);
+      const keywordTimer = new QueryTimer('Keyword Search', 3000); // Shorter timeout for keyword
       
-      // Use multiple separate queries to avoid .or() limitation
-      let allResults: any[] = [];
+      let keywordResults: any[] = [];
       
-      console.log(`[DEBUG] Searching for keyword: "${searchKeyword}" in domain_id: ${domainId}`);
-      
-      const { data: titleResults, error: titleError } = await supabase
-        .from('scraped_pages')
-        .select('url, title, content')
-        .eq('domain_id', domainId)
-        .ilike('title', `%${searchKeyword}%`)
-        .limit(500) // Get ALL matching results
-;
-      
-      console.log(`[DEBUG] Title search results: ${titleResults?.length || 0}, error: ${titleError?.message || 'none'}`);
-      
-      if (titleResults) allResults.push(...titleResults);
-      
-      // Then search in URL (use primary keyword)
-      const { data: urlResults } = await supabase
-        .from('scraped_pages')
-        .select('url, title, content')
-        .eq('domain_id', domainId)
-        .ilike('url', `%${searchKeyword!.toLowerCase()}%`)
-        .limit(500)
-;
-      
-      if (urlResults) {
-        // Add only unique URLs
-        const existingUrls = new Set(allResults.map(r => r.url));
-        const newResults = urlResults.filter(r => !existingUrls.has(r.url));
-        allResults.push(...newResults);
-      }
-      
-      keywordTimer.end();
-      
-      console.log(`[OPTIMIZATION] Keyword search found ${allResults.length} total results`);
-      
-      if (allResults.length > 0) {
-        // Sort by relevance - products first, then by title match
-        allResults.sort((a, b) => {
-          const aIsProduct = a.url?.includes('/product/');
-          const bIsProduct = b.url?.includes('/product/');
-          if (aIsProduct && !bIsProduct) return -1;
-          if (!aIsProduct && bIsProduct) return 1;
+      try {
+        // Try keyword search first
+        const { data: titleResults } = await supabase
+          .from('scraped_pages')
+          .select('url, title, content')
+          .eq('domain_id', domainId)
+          .ilike('title', `%${searchKeyword}%`)
+          .limit(100); // Reduced limit for faster response
+        
+        if (titleResults) keywordResults.push(...titleResults);
+        
+        // Also search in URLs
+        const { data: urlResults } = await supabase
+          .from('scraped_pages')
+          .select('url, title, content')
+          .eq('domain_id', domainId)
+          .ilike('url', `%${searchKeyword!.toLowerCase()}%`)
+          .limit(100);
+        
+        if (urlResults) {
+          const existingUrls = new Set(keywordResults.map(r => r.url));
+          const newResults = urlResults.filter(r => !existingUrls.has(r.url));
+          keywordResults.push(...newResults);
+        }
+        
+        keywordTimer.end();
+        console.log(`[HYBRID] Keyword search found ${keywordResults.length} results`);
+        
+        // Check if we have enough good results
+        if (keywordResults.length >= MIN_KEYWORD_RESULTS) {
+          // Sort and return keyword results
+          keywordResults.sort((a, b) => {
+            const aIsProduct = a.url?.includes('/product/');
+            const bIsProduct = b.url?.includes('/product/');
+            if (aIsProduct && !bIsProduct) return -1;
+            if (!aIsProduct && bIsProduct) return 1;
+            
+            const aInTitle = a.title?.toLowerCase().includes(query.toLowerCase());
+            const bInTitle = b.title?.toLowerCase().includes(query.toLowerCase());
+            if (aInTitle && !bInTitle) return -1;
+            if (!aInTitle && bInTitle) return 1;
+            
+            return 0;
+          });
           
-          const aInTitle = a.title?.toLowerCase().includes(query.toLowerCase());
-          const bInTitle = b.title?.toLowerCase().includes(query.toLowerCase());
-          if (aInTitle && !bInTitle) return -1;
-          if (!aInTitle && bInTitle) return 1;
+          const searchResults = keywordResults
+            .slice(0, Math.min(limit, keywordResults.length))
+            .map((row: any) => ({
+              content: row.content?.substring(0, 500) || '',
+              url: row.url || '',
+              title: row.title || 'Untitled',
+              similarity: row.url?.includes('/product/') ? 0.95 : 0.85,
+              searchMethod: 'keyword' // Track which method was used
+            }));
           
-          return 0;
-        });
+          console.log(`[HYBRID] Returning ${searchResults.length} keyword results`);
+          
+          // Cache and return
+          await cacheManager.cacheResult(query, { 
+            response: '', 
+            chunks: searchResults 
+          }, domain, limit);
+          
+          return searchResults;
+        }
         
-        const searchResults = allResults
-          .slice(0, Math.min(limit, allResults.length))
-          .map((row: any) => ({
-            content: row.content?.substring(0, 500) || '',
-            url: row.url || '',
-            title: row.title || 'Untitled',
-            similarity: row.url?.includes('/product/') ? 0.95 : 0.85
-          }));
+        // Not enough keyword results, fall through to vector search
+        console.log(`[HYBRID] Only ${keywordResults.length} keyword results, falling back to vector search`);
         
-        console.log(`[OPTIMIZATION] Returning ${searchResults.length} results to client`);
-        
-        // Cache and return
-        await cacheManager.cacheResult(query, { 
-          response: '', 
-          chunks: searchResults 
-        }, domain, limit);
-        
-        return searchResults;
+      } catch (error) {
+        console.log(`[HYBRID] Keyword search error, falling back to vector: ${error}`);
       }
     }
     
-    // VECTOR SEARCH - for longer queries
-    console.log('[OPTIMIZATION] Using vector search for complex query');
+    // VECTOR SEARCH - for longer queries or when keyword search has insufficient results
+    console.log(`[HYBRID] Using vector search for: "${query}"`);
     
     // Generate embedding with timeout
     const embeddingTimer = new QueryTimer('Generate Embedding', 2000);
