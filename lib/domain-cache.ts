@@ -94,7 +94,7 @@ class DomainCacheService {
       try {
         const { data, error } = await supabase
           .from('customer_configs')
-          .select('customer_id')
+          .select('id')
           .eq('domain', normalizedDomain)
           .eq('active', true)
           .single();
@@ -108,10 +108,10 @@ class DomainCacheService {
           return null;
         }
         
-        if (data?.customer_id) {
+        if (data?.id) {
           // Cache the result
-          this.setCacheEntry(normalizedDomain, data.customer_id);
-          return data.customer_id;
+          this.setCacheEntry(normalizedDomain, data.id);
+          return data.id;
         }
         
         return null;

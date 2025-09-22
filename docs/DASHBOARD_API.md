@@ -4,6 +4,14 @@
 
 The Dashboard API provides real-time analytics and metrics for the customer service chat system. All endpoints return data from the Supabase database and include intelligent fallbacks for when data is unavailable.
 
+The API includes 6 core endpoints:
+- **Conversations**: Chat session metrics and recent activity
+- **Analytics**: Performance metrics, satisfaction scores, and query analysis
+- **Scraped**: Content indexing statistics and domain coverage
+- **WooCommerce**: E-commerce integration status and product metrics
+- **Telemetry**: Cost tracking, token usage, and AI model analytics
+- **Missing Products**: Customer demand intelligence for inventory optimization
+
 ## Base URL
 
 ```
@@ -174,7 +182,97 @@ Returns e-commerce integration status and metrics.
 
 ---
 
-### 5. Missing Products Endpoint
+### 5. Telemetry Endpoint
+
+**GET** `/api/dashboard/telemetry`
+
+Returns comprehensive telemetry data including cost analytics, token usage, and performance metrics.
+
+#### Query Parameters
+
+| Parameter | Type | Default | Description |
+|-----------|------|---------|-------------|
+| days | number | 7 | Number of days to analyze |
+| domain | string | - | Filter by specific domain |
+
+#### Response
+
+```json
+{
+  "overview": {
+    "totalRequests": 156,
+    "successfulRequests": 150,
+    "failedRequests": 6,
+    "successRate": 96,
+    "errorRate": 4,
+    "activeSessions": 2,
+    "timeRange": "Last 7 days"
+  },
+  "cost": {
+    "total": "12.5430",
+    "average": "0.080404",
+    "projectedDaily": "1.79",
+    "projectedMonthly": "53.70",
+    "perHour": "0.0745",
+    "trend": "stable"
+  },
+  "tokens": {
+    "totalInput": 245000,
+    "totalOutput": 89000,
+    "total": 334000,
+    "avgPerRequest": 2141
+  },
+  "performance": {
+    "avgResponseTime": 2340,
+    "totalSearches": 423,
+    "avgSearchesPerRequest": "2.7",
+    "avgIterations": "1.8"
+  },
+  "modelUsage": [
+    {
+      "model": "gpt-4-turbo",
+      "count": 100,
+      "cost": "8.2300",
+      "tokens": 215000,
+      "percentage": 64
+    }
+  ],
+  "domainBreakdown": [
+    {
+      "domain": "example.com",
+      "requests": 85,
+      "cost": "6.8900"
+    }
+  ],
+  "hourlyTrend": [
+    {
+      "hour": "2025-01-15T10:00:00Z",
+      "cost": 0.245,
+      "requests": 12
+    }
+  ],
+  "live": {
+    "activeSessions": 2,
+    "currentCost": "0.002450",
+    "sessionsData": []
+  }
+}
+```
+
+#### Fields
+
+- `overview`: High-level metrics including success rates and active sessions
+- `cost`: Comprehensive cost analytics with projections
+- `tokens`: Token usage statistics (input, output, total)
+- `performance`: Average response times and search statistics
+- `modelUsage`: Breakdown by AI model with costs and usage
+- `domainBreakdown`: Per-domain usage and costs
+- `hourlyTrend`: Hourly cost and request data for charts
+- `live`: Real-time session information
+
+---
+
+### 6. Missing Products Endpoint
 
 **GET** `/api/dashboard/missing-products`
 

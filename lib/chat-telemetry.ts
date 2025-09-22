@@ -47,12 +47,25 @@ interface ChatSession {
 /**
  * Telemetry class for comprehensive observability
  */
+// Singleton Supabase client for all telemetry
+let telemetrySupabase: any = null;
+
+function getTelemetrySupabase() {
+  if (!telemetrySupabase && process.env.SUPABASE_SERVICE_ROLE_KEY) {
+    telemetrySupabase = createClient(
+      process.env.NEXT_PUBLIC_SUPABASE_URL!,
+      process.env.SUPABASE_SERVICE_ROLE_KEY!
+    );
+  }
+  return telemetrySupabase;
+}
+
 export class ChatTelemetry {
   private session: ChatSession;
   private logBuffer: any[] = [];
   private metricsEnabled: boolean;
   private detailedLogging: boolean;
-  private supabase: any;
+  private persistToDatabase: boolean;
   private static readonly MODEL_PRICING: Record<string, ModelPricing> = {
     'gpt-5-mini': { inputPricePerMillion: 0.25, outputPricePerMillion: 2.00 },
     'gpt-4.1': { inputPricePerMillion: 10.00, outputPricePerMillion: 30.00 },
@@ -83,13 +96,7 @@ export class ChatTelemetry {
     
     this.metricsEnabled = options.metricsEnabled ?? true;
     this.detailedLogging = options.detailedLogging ?? process.env.NODE_ENV === 'development';
-    
-    if (options.persistToDatabase && process.env.SUPABASE_SERVICE_ROLE_KEY) {
-      this.supabase = createClient(
-        process.env.NEXT_PUBLIC_SUPABASE_URL!,
-        process.env.SUPABASE_SERVICE_ROLE_KEY!
-      );
-    }
+    this.persistToDatabase = options.persistToDatabase ?? false;
   }
 
   /**
@@ -232,7 +239,8 @@ export class ChatTelemetry {
     console.log('\n📊 CHAT SESSION SUMMARY', summary);
 
     // Persist to database if enabled
-    if (this.supabase) {
+    const supabase = this.persistToDatabase ? getTelemetrySupabase() : null;
+    if (supabase) {
       try {
         await this.persistSession();
       } catch (err) {
@@ -291,9 +299,10 @@ export class ChatTelemetry {
    * Persist session to database for analytics
    */
   private async persistSession() {
-    if (!this.supabase) return;
+    const supabase = this.persistToDatabase ? getTelemetrySupabase() : null;
+    if (!supabase) return;
 
-    const { error } = await this.supabase
+    const { error } = await supabase
       .from('chat_telemetry')
       .insert({
         session_id: this.session.sessionId,
@@ -376,6 +385,9 @@ class TelemetryManager {
   }
 
   createSession(sessionId: string, model: string, options?: any): ChatTelemetry {
+    // Clean up old sessions first (automatic garbage collection)
+    this.clearOldSessions(300000); // Clear sessions older than 5 minutes
+    
     const telemetry = new ChatTelemetry(sessionId, model, options);
     this.sessions.set(sessionId, telemetry);
     
