@@ -20,21 +20,38 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   const supabase = createClient()
 
   useEffect(() => {
-    const getUser = async () => {
+    const initAuth = async () => {
       try {
-        const { data: { user }, error } = await supabase.auth.getUser()
-        if (error) {
-          console.error('Auth error:', error.message)
+        // First check if we have a session
+        const { data: { session }, error: sessionError } = await supabase.auth.getSession()
+        
+        if (sessionError) {
+          // Only log actual errors, not missing sessions
+          if (sessionError.message !== 'Auth session missing!') {
+            console.error('Session error:', sessionError.message)
+          }
         }
-        setUser(user)
+        
+        // Set user from session if it exists
+        setUser(session?.user ?? null)
+        
+        // Only try to get user if we have a session
+        if (session) {
+          const { data: { user }, error: userError } = await supabase.auth.getUser()
+          if (userError) {
+            console.error('Failed to get user details:', userError.message)
+          } else if (user) {
+            setUser(user)
+          }
+        }
       } catch (err) {
-        console.error('Failed to get user:', err)
+        console.error('Auth initialization failed:', err)
       } finally {
         setLoading(false)
       }
     }
 
-    getUser()
+    initAuth()
 
     const { data: { subscription } } = supabase.auth.onAuthStateChange(
       (_event, session) => {
