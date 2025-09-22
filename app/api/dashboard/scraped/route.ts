@@ -3,7 +3,7 @@ import { createServiceRoleClient } from '@/lib/supabase-server';
 
 export async function GET(request: NextRequest) {
   try {
-    const supabase = createServiceRoleClient();
+    const supabase = await createServiceRoleClient();
     
     // Count total scraped pages
     const { count: totalPages, error: pagesError } = await supabase

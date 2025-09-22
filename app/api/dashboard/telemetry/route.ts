@@ -8,7 +8,7 @@ export async function GET(request: NextRequest) {
     const days = parseInt(searchParams.get('days') || '7');
     const domain = searchParams.get('domain') || undefined;
     
-    const supabase = createServiceRoleClient();
+    const supabase = await createServiceRoleClient();
     
     // Get date range
     const endDate = new Date();

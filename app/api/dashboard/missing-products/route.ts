@@ -10,7 +10,7 @@ interface MissingProduct {
 
 export async function GET(request: NextRequest) {
   try {
-    const supabase = createServiceRoleClient();
+    const supabase = await createServiceRoleClient();
     
     // Get date range
     const searchParams = request.nextUrl.searchParams;

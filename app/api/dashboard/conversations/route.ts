@@ -23,7 +23,7 @@ export async function GET(request: NextRequest) {
     // Try to create Supabase client
     let supabase;
     try {
-      supabase = createServiceRoleClient();
+      supabase = await createServiceRoleClient();
       if (!supabase) {
         console.warn('[Dashboard] Supabase client is null, returning defaults');
         return NextResponse.json(defaultResponse);

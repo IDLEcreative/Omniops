@@ -3,7 +3,7 @@ import { createServiceRoleClient } from '@/lib/supabase-server';
 
 export async function GET(request: NextRequest) {
   try {
-    const supabase = createServiceRoleClient();
+    const supabase = await createServiceRoleClient();
     
     // Check if WooCommerce is configured for any domain
     const { data: configs, error: configError } = await supabase
