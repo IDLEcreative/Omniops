@@ -14,6 +14,8 @@ import { getDynamicWooCommerceClient, searchProductsDynamic } from '@/lib/woocom
 import { getProductOverview, ProductOverview } from '@/lib/search-overview';
 import { sanitizeOutboundLinks } from '@/lib/link-sanitizer';
 import { ChatTelemetry, telemetryManager } from '@/lib/chat-telemetry';
+import { CategoryMapper } from '@/lib/category-mapper';
+import { WOOCOMMERCE_TOOL, executeWooCommerceOperation, formatWooCommerceResponse } from '@/lib/chat/woocommerce-tool';
 
 // Performance monitoring
 class RequestTimer {
@@ -117,8 +119,89 @@ const OPTIMIZED_TOOLS = [
         required: ["query"]
       }
     }
-  }
+  },
+  WOOCOMMERCE_TOOL // Add WooCommerce agent tool
 ];
+
+// Analyze URL patterns to intelligently detect category structure  
+async function analyzeCategoryStructure(results: any[], supabase: any): Promise<{
+  categoryUrls: string[];
+  categoryPatterns: Map<string, number>;
+  suggestedCategory?: string;
+}> {
+  const categoryPatterns = new Map<string, number>();
+  const categoryUrls: string[] = [];
+  
+  // Use intelligent CategoryMapper
+  const mapper = new CategoryMapper(supabase);
+  const categoryInfo = await mapper.findCategoryForQuery('', results);
+  
+  if (categoryInfo && categoryInfo.confidence > 0.5) {
+    // We found a strong category match
+    if (categoryInfo.url) {
+      categoryUrls.push(categoryInfo.url);
+    }
+    categoryPatterns.set(categoryInfo.category, results.length);
+    
+    return {
+      categoryUrls,
+      categoryPatterns,
+      suggestedCategory: categoryInfo.category
+    };
+  }
+  
+  // Fallback to basic URL analysis if mapper doesn't find strong match
+  const seenCategories = new Set<string>();
+  
+  results.forEach(item => {
+    if (!item.url) return;
+    
+    // Look for category patterns in URLs
+    // Pattern 1: /product-category/xxx/
+    const categoryMatch = item.url.match(/\/product-category\/([^\/]+)/);
+    if (categoryMatch) {
+      const categoryPath = categoryMatch[0];
+      const fullCategoryUrl = item.url.split('/product-category/')[0] + categoryPath + '/';
+      
+      if (!seenCategories.has(fullCategoryUrl)) {
+        seenCategories.add(fullCategoryUrl);
+        categoryUrls.push(fullCategoryUrl);
+      }
+      
+      // Count how many products are in each category
+      const categoryName = categoryMatch[1];
+      categoryPatterns.set(categoryName, (categoryPatterns.get(categoryName) || 0) + 1);
+    }
+    
+    // Pattern 2: Look for common URL prefixes that might indicate categories
+    const urlParts = item.url.split('/').filter((p: string) => p && p !== 'product');
+    if (urlParts.length > 3) {
+      const possibleCategory = urlParts.slice(0, -1).join('/');
+      if (possibleCategory.includes('category') || possibleCategory.includes('shop')) {
+        categoryPatterns.set(possibleCategory, (categoryPatterns.get(possibleCategory) || 0) + 1);
+      }
+    }
+  });
+  
+  // If most products share a category, suggest it
+  let suggestedCategory: string | undefined;
+  if (categoryPatterns.size > 0 && results.length > 3) {
+    // Find the most common category pattern
+    let maxCount = 0;
+    categoryPatterns.forEach((count, pattern) => {
+      if (count > maxCount && count >= results.length * 0.5) { // At least 50% of results
+        maxCount = count;
+        suggestedCategory = pattern;
+      }
+    });
+  }
+  
+  return {
+    categoryUrls,
+    categoryPatterns,
+    suggestedCategory
+  };
+}
 
 // Optimized tool execution with timeout and full metadata
 async function executeSmartSearch(
@@ -249,7 +332,7 @@ export async function POST(request: NextRequest) {
 
     // Initialize telemetry (non-blocking)
     try {
-      telemetry = telemetryManager.createSession(session_id, 'gpt-4o', {
+      telemetry = telemetryManager.createSession(session_id, 'gpt-5-mini', {
         metricsEnabled: true,
         detailedLogging: false, // Reduce logging overhead
         persistToDatabase: false // Skip DB writes for performance
@@ -366,25 +449,121 @@ export async function POST(request: NextRequest) {
     const conversationMessages: Array<{role: 'system' | 'user' | 'assistant'; content: string; tool_calls?: any}> = [
       {
         role: 'system' as const,
-        content: `You are a helpful customer service assistant. Use the smart_search tool for product inquiries.
+        content: `You are a helpful customer service assistant with FULL conversation memory. ALWAYS use the smart_search tool when users ask about products, inventory, or availability.
 
-## Core Behavior
-- You have full conversation history - reference previous messages when users say "that", "it", etc.
-- When you receive search results, they come as structured JSON with pre-formatted display text
-- Simply use the provided formatted_response field - it's already properly formatted
-- Do NOT add your own formatting or counts - everything is pre-calculated
+CONVERSATION CONTEXT:
+- You have access to the ENTIRE conversation history
+- When users reference "that", "those", "it" etc., check previous messages for context
+- Remember products, categories, and details discussed earlier in the conversation
+- Build on previous responses rather than starting fresh each time
 
-## Search Results Format
-Search results will provide:
-- formatted_response: Ready-to-use text for displaying to users
-- data: Raw data if you need specific details
-- metadata: Additional context like totals, categories
+IMPORTANT: You receive FULL VISIBILITY of search results as JSON with:
+- formatted_response: Pre-built text to show users
+- data: Product details including names, URLs, prices
+- metadata: Contains:
+  * category_urls: Detected category pages from product URLs
+  * suggested_category: Most common category if products share one
+  * has_common_category: Boolean indicating if products share a category
+  * categories: Product categories found
+  * brands: Brands in the results
+- When metadata.category_urls has URLs, mention them in your response
 
-## Important Rules
-- NEVER suggest external websites or competitors
-- For stock levels: Search results show availability status, not exact quantities
-- If no results found: Offer to help find alternatives from our inventory
-- Only use URLs explicitly provided in search results`
+MANDATORY PRODUCT LISTING RULES:
+- ALWAYS mention the total count when showing products
+- Use format: "We have [TOTAL] [product type] available. Here are [NUMBER SHOWN]:"
+- Example: "We have 24 Teng products available. Here are 5 popular ones:"
+- When showing a partial list, ALWAYS add: "...and [X] more [product type] available"
+- Example: "...and 19 more Teng products available. Would you like to see more or filter by specific type?"
+- NEVER just list items without mentioning the total
+- If categories/brands are available, mention them: "These span across [categories/brands]"
+
+This means:
+- You can accurately answer "How many X do you have?" without re-searching
+- You can filter and recommend from the COMPLETE catalog
+- You can provide category/brand statistics immediately
+- You DO NOT need to search multiple times for refinements
+- When asked about "this product" or "that item", refer to previously discussed products
+
+CRITICAL BUSINESS RULES:
+- NEVER suggest external websites or tell customers to "search elsewhere"
+- NEVER recommend competitors, Amazon, manufacturer sites, or third-party retailers
+- If a product isn't found, offer to help find alternatives from OUR inventory
+- ONLY use category URLs that are explicitly provided in the search results
+- DO NOT make up or guess category URLs - use EXACTLY what's given
+- If category URLs are provided with "USE THESE EXACT URLS", you MUST use those exact URLs
+- ALWAYS use GBP (£) for prices, NEVER USD ($) - this is a UK business
+- Keep responses concise - aim for under 150 words unless showing detailed product lists
+
+FORMATTING RULES:
+- ALWAYS start with total count: "We have X items matching..."
+- Keep product listings clean and easy to read
+- Use numbered lists (1. 2. 3.) for products
+- Include product names with prices clearly in GBP (£)
+- Add links as [Product Name](url) when showing products
+- End partial lists with: "...plus X more items. Would you like to see [specific category/more options]?"
+
+CATEGORY PAGE GUIDANCE:
+- Check metadata.has_common_category - if true, products share a category
+- When metadata.category_urls exists and has URLs, mention them:
+  "You can browse our full range at [category URL]"
+- If metadata.suggested_category exists, most products are from that category
+- Only recommend category pages when they're detected in the actual search results
+- The system intelligently detects categories - use what's provided, don't guess
+- For specific product codes, focus on the item unless a clear category exists
+
+SEARCH STRATEGY:
+- For initial queries → Use limit: 20-50 for detailed results (you'll see total count regardless)
+- For counting/statistics → The total count is always provided
+- For filtering → You already have the full list, just describe what's available
+
+FOLLOW-UP HANDLING:
+- When users ask follow-up questions about previously mentioned products:
+  * Reference the specific product details from earlier messages
+  * No need to re-search unless they want something different
+  * Use phrases like "Regarding the [product name] I mentioned..."
+- Examples of follow-ups:
+  * "tell me about this" → Look at the last product discussed
+  * "what's the price?" → Reference the last item's price
+  * "do you have more like that?" → Use context from previous search
+- CRITICAL NUMBER REFERENCES:
+  * When users reference a number (e.g., "tell me about 3", "item 3", "the third one")
+  * Look at your LAST numbered list and identify that specific item
+  * Respond with details about THAT EXACT ITEM from the list
+  * Example: If you listed "3. TENG 1/4" Torque Wrench..." and they ask about "3", describe the TENG 1/4" Torque Wrench
+  * NEVER re-list items when someone asks about a specific number
+
+STOCK & AVAILABILITY RULES:
+- WooCommerce provides real-time stock status in the product data
+- When users ask about stock/availability:
+  * If stock_status is "instock": Say "✓ This item is currently in stock"
+  * If stock_status is "outofstock": Say "✗ This item is currently out of stock"
+  * If stock_status is "onbackorder": Say "This item is available on backorder"
+  * If no stock data: Say "Stock information not available - please contact us"
+- When showing products, include stock status if available:
+  * Add ✓ for in stock, ✗ for out of stock
+- You CAN check and report stock status from the WooCommerce data
+- DO NOT offer specific delivery times or collection options
+- For stock quantities, only show if explicitly provided in the data
+
+WOOCOMMERCE AGENT TOOL:
+- Use the woocommerce_operations tool for detailed commerce operations:
+  * check_stock: Get detailed stock info including quantities
+  * get_product_details: Get full product information
+  * check_price: Get current pricing including sale prices
+- This tool provides more detailed information than the general search
+
+RESPONSE LENGTH & STYLE:
+- Be concise and direct - customers want quick answers
+- Don't ask multiple questions - provide information and one follow-up question maximum
+- For general queries, suggest the category page rather than asking many qualifying questions
+- Aim for helpful brevity over exhaustive detail
+
+WHAT NOT TO OFFER:
+- NEVER offer to check delivery to specific postcodes
+- NEVER offer store collection or click-and-collect options
+- NEVER promise specific delivery timeframes
+- NEVER offer to process orders or payments
+- If asked about these services, politely direct to contact the store directly`
       }
     ];
     
@@ -426,15 +605,20 @@ Search results will provide:
     });
     
     let completion = await openaiClient.chat.completions.create({
-      model: 'gpt-4o', // GPT-5 class model as per INTELLIGENT_AI_DESIGN.md
+      model: 'gpt-5-mini', // GPT-5-mini with reasoning
       messages: conversationMessages,
       tools: OPTIMIZED_TOOLS,
       tool_choice: 'auto',
-      temperature: 0.3, // Lower for consistency and speed
-      max_tokens: 600, // Optimized for response time
-    });
+      reasoning_effort: 'low', // ~20% reasoning tokens for balanced performance
+      max_completion_tokens: 2500, // Required for GPT-5 models instead of max_tokens
+    } as any);
     
     requestTimer.clearPhaseTimeout('ai_initial');
+    
+    // Log token usage for GPT-5-mini
+    if (completion.usage) {
+      console.log(`[GPT-5-mini] Total tokens: ${completion.usage.total_tokens}, Completion tokens: ${completion.usage.completion_tokens}`);
+    }
     
     // Process tool calls efficiently
     for (let iteration = 0; iteration < maxIterations; iteration++) {
@@ -457,7 +641,24 @@ Search results will provide:
       
       const toolResults = await Promise.all(
         toolCalls.map(async (toolCall) => {
+          const toolName = toolCall.function.name;
           const args = JSON.parse(toolCall.function.arguments || '{}');
+          
+          // Handle WooCommerce operations
+          if (toolName === 'woocommerce_operations') {
+            const wcResult = await executeWooCommerceOperation(
+              args.operation,
+              args,
+              domain || 'thompsonseparts.co.uk'
+            );
+            
+            return {
+              tool_call_id: toolCall.id,
+              content: formatWooCommerceResponse(wcResult)
+            };
+          }
+          
+          // Handle smart search (default behavior)
           const result = await executeSmartSearch(
             args.query,
             args.searchType,
@@ -496,8 +697,9 @@ Search results will provide:
             if (shown > 0) {
               formattedText += ` Here ${shown === 1 ? 'is' : 'are'} ${shown === total ? 'all of them' : `the top ${shown}`}:\n\n`;
               
-              // Add numbered list of products
+              // Add numbered list of products - MAINTAIN CONSISTENT NUMBERING
               result.results.slice(0, shown).forEach((item, idx) => {
+                // Store the number reference for later lookup
                 formattedText += `${idx + 1}. ${item.title}`;
                 
                 // Extract price if available
@@ -514,9 +716,11 @@ Search results will provide:
                   // Add stock status if available
                   if (item.stockStatus) {
                     if (item.stockStatus === 'instock') {
-                      formattedText += ' ✓ Available';
+                      formattedText += ' ✓ In stock';
                     } else if (item.stockStatus === 'outofstock') {
                       formattedText += ' ✗ Out of stock';
+                    } else if (item.stockStatus === 'onbackorder') {
+                      formattedText += ' ⏳ Backorder';
                     }
                   }
                 }
@@ -530,30 +734,37 @@ Search results will provide:
               }
             }
             
-            // Extract valid category URLs (validated from actual results)
-            const validCategoryUrls: string[] = [];
-            const seenCategories = new Set<string>();
-            result.results.forEach(item => {
-              if (item.url && item.url.includes('/product-category/')) {
-                const match = item.url.match(/(.+\/product-category\/[^\/]+)\/.*/);;
-                if (match && !seenCategories.has(match[1])) {
-                  seenCategories.add(match[1]);
-                  validCategoryUrls.push(match[1] + '/');
-                }
-              }
+            // Intelligently extract category URLs from search results
+            // Skip category analysis for now since we don't have supabase client in this context
+            const categoryAnalysis = { 
+              categoryUrls: [], 
+              categoryPatterns: new Map<string, number>(), 
+              suggestedCategory: undefined 
+            };
+            
+            // Debug logging
+            console.log('[Category Detection] Analysis:', {
+              foundUrls: categoryAnalysis.categoryUrls.length,
+              suggestedCategory: categoryAnalysis.suggestedCategory,
+              hasCommonCategory: categoryAnalysis.categoryUrls.length > 0
             });
+            
+            // Build structured response
+            const totalCount = result.overview?.total || result.results.length;
+            const shownCount = Math.min(5, result.results.length);
             
             // Build structured response
             toolResponse = {
               formatted_response: formattedText,
               data: {
-                total: total,
-                shown: shown,
-                products: result.results.slice(0, shown).map(item => ({
+                total: totalCount,
+                shown: shownCount,
+                products: result.results.slice(0, shownCount).map(item => ({
                   name: item.title,
                   url: item.url,
                   price: item.content?.match(/£([\d,]+\.?\d*)/)?.[1],
-                  availability: item.stockStatus || 'unknown'
+                  stock_status: item.stockStatus || 'unknown',
+                  availability: item.stockStatus === 'instock' ? 'in_stock' : item.stockStatus === 'outofstock' ? 'out_of_stock' : item.stockStatus || 'unknown'
                 }))
               },
               metadata: {
@@ -561,7 +772,9 @@ Search results will provide:
                 product_type: productType,
                 categories: result.overview?.categories?.slice(0, 3) || [],
                 brands: result.overview?.brands?.slice(0, 3) || [],
-                valid_category_urls: validCategoryUrls.slice(0, 3)
+                category_urls: categoryAnalysis.categoryUrls.slice(0, 3),
+                suggested_category: categoryAnalysis.suggestedCategory,
+                has_common_category: categoryAnalysis.categoryUrls.length > 0
               }
             };
             
@@ -608,14 +821,19 @@ Search results will provide:
       });
       
       completion = await openaiClient.chat.completions.create({
-        model: 'gpt-4o', // Using GPT-5 class model
+        model: 'gpt-5-mini', // GPT-5-mini with reasoning
         messages: conversationMessages,
         tools: isLastIteration ? undefined : OPTIMIZED_TOOLS,
-        temperature: 0.3, // Consistent with GPT-5 capabilities
-        max_tokens: 600,
-      });
+        reasoning_effort: 'low', // ~20% reasoning tokens for balanced performance
+        max_completion_tokens: 2500, // Required for GPT-5 models instead of max_tokens
+      } as any);
       
       requestTimer.clearPhaseTimeout('ai_followup');
+      
+      // Log token usage for follow-up
+      if (completion.usage) {
+        console.log(`[GPT-5-mini Follow-up] Total tokens: ${completion.usage.total_tokens}, Completion tokens: ${completion.usage.completion_tokens}`);
+      }
       
       if (isLastIteration || !completion.choices[0]?.message?.tool_calls) {
         finalResponse = completion.choices[0]?.message?.content || '';

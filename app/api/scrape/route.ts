@@ -171,7 +171,26 @@ export async function POST(request: NextRequest) {
       chunkHashCache.clear();
       
       // Generate embeddings for the content with deduplication
-      const chunks = splitIntoChunks(pageData.content);
+      // Include metadata like categories in the content for better search
+      let enrichedContent = pageData.content;
+      
+      // Add product category if available
+      if (pageData.metadata?.productCategory) {
+        enrichedContent = `Category: ${pageData.metadata.productCategory}\n\n${enrichedContent}`;
+      }
+      
+      // Add breadcrumbs from ecommerceData if available
+      if (pageData.metadata?.ecommerceData?.breadcrumbs?.length > 0) {
+        const breadcrumbText = pageData.metadata.ecommerceData.breadcrumbs.map((b: any) => b.name).join(' > ');
+        enrichedContent = `${breadcrumbText}\n\n${enrichedContent}`;
+      }
+      
+      // Add brand if available
+      if (pageData.metadata?.productBrand) {
+        enrichedContent = `Brand: ${pageData.metadata.productBrand}\n${enrichedContent}`;
+      }
+      
+      const chunks = splitIntoChunks(enrichedContent);
       console.log(`Generated ${chunks.length} unique chunks for ${url}`);
       
       const embeddings = await generateEmbeddings(chunks);
@@ -296,7 +315,26 @@ async function processCrawlResults(jobId: string, supabase: any) {
                 chunkHashCache.clear();
                 
                 // Generate embeddings using optimized function with deduplication
-                const chunks = splitIntoChunks(page.content);
+                // Include metadata like categories in the content for better search
+                let enrichedContent = page.content;
+                
+                // Add product category if available
+                if (page.metadata?.productCategory) {
+                  enrichedContent = `Category: ${page.metadata.productCategory}\n\n${enrichedContent}`;
+                }
+                
+                // Add breadcrumbs from ecommerceData if available
+                if (page.metadata?.ecommerceData?.breadcrumbs?.length > 0) {
+                  const breadcrumbText = page.metadata.ecommerceData.breadcrumbs.map((b: any) => b.name).join(' > ');
+                  enrichedContent = `${breadcrumbText}\n\n${enrichedContent}`;
+                }
+                
+                // Add brand if available
+                if (page.metadata?.productBrand) {
+                  enrichedContent = `Brand: ${page.metadata.productBrand}\n${enrichedContent}`;
+                }
+                
+                const chunks = splitIntoChunks(enrichedContent);
                 
                 if (chunks.length > 0) {
                   console.log(`Processing ${chunks.length} unique chunks for ${page.url}`);

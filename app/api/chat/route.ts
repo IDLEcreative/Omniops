@@ -272,11 +272,14 @@ export async function POST(request: NextRequest) {
     const validatedData = ChatRequestSchema.parse(body);
     const { message, conversation_id, session_id, domain, config } = validatedData;
 
+    // Check if GPT-5 mini is enabled
+    const useGPT5Mini = process.env.USE_GPT5_MINI === 'true';
+    
     // Initialize telemetry with session data
     try {
       telemetry = telemetryManager.createSession(
         session_id,
-        'gpt-4',
+        useGPT5Mini ? 'gpt-5-mini' : 'gpt-4',
         {
           metricsEnabled: true,
           detailedLogging: process.env.NODE_ENV === 'development',
@@ -395,30 +398,35 @@ FORMATTING RULES:
 - Present product lists with simple numbering (1. 2. 3.) or dashes (-)
 - Keep all text clean and simple without special formatting characters
 
-CRITICAL: When your search returns exactly 20 results (or another round number like 10, 50), that's usually because it hit a limit, NOT because that's all we have. A real customer service person would know this.
+CRITICAL: You have access to FULL PRODUCT DATA in each search with total counts. ALWAYS mention the total when listing products.
 
 KEY PRINCIPLES:
-1. When someone asks to see "all" products or items:
-   - If you get exactly 20 results, we probably have more (searches have limits)
-   - Say "We have an extensive range of [item], let me show you some..." not "I found 20 items"
-   - Help them narrow down what they actually need
+1. MANDATORY PRODUCT LISTING FORMAT:
+   - ALWAYS start with: "We have [TOTAL] [product type] available"
+   - Example: "We have 24 Teng products available. Here are 5 popular ones:"
+   - After showing partial list: "...and [X] more [product type] available"
+   - NEVER just list items without mentioning the total count
 
-2. Use your tools intelligently:
-   - Search multiple things at once to understand the full picture
-   - When you get 20 results, that's likely a search limit, not our full inventory
-   - Acknowledge the broader inventory: "We carry many [items], here are some popular ones..."
+2. NUMBERED LIST REFERENCES:
+   - When users say "tell me about 3" or "item 3" or "the third one"
+   - They mean item #3 from your LAST numbered list
+   - Respond with details about THAT SPECIFIC ITEM
+   - DON'T re-list all items or get confused
 
-3. Talk naturally:
-   - Wrong: "I found 20 items matching your search"
-   - Right: "We have an extensive selection of those items. Here are some of our popular ones..."
-   - If unsure of exact count: "We carry a wide range of..." or "We have many options for..."
-   
-4. Be helpful:
-   - Guide them to what they actually need
-   - Don't overwhelm with too many options
-   - Offer to narrow down or show specific categories
+3. STOCK & AVAILABILITY:
+   - NEVER claim to check live stock levels
+   - If asked about stock, say: "To check current stock, please contact us at [phone] or visit our store"
+   - DON'T offer to check postcodes or delivery options
+   - DON'T offer click-and-collect or store pickup
 
-Remember: You're a helpful human, not a search engine. When searches return exactly 20/50/100 items, that's usually a limit, not the total inventory.`
+4. WHAT NOT TO OFFER:
+   - NEVER offer to check delivery to specific postcodes
+   - NEVER offer store collection options
+   - NEVER promise specific delivery timeframes
+   - NEVER offer to process orders or payments
+   - Direct these queries to: "Please contact our store directly"
+
+Remember: Be honest about system limitations while remaining helpful.`
       },
       ...(historyData || []).map((msg: any) => ({
         role: msg.role as 'user' | 'assistant',
@@ -446,15 +454,23 @@ Remember: You're a helpful human, not a search engine. When searches return exac
     let allSearchResults: SearchResult[] = [];
     let searchLog: Array<{ tool: string; query: string; resultCount: number; source: string }> = [];
 
-    // Initial AI call with tools
-    let completion = await openaiClient.chat.completions.create({
+    // Initial AI call with tools - use GPT-5-mini if enabled
+    const modelConfig = useGPT5Mini ? {
+      model: 'gpt-5-mini',
+      reasoning_effort: 'low',
+      max_completion_tokens: 2500
+    } : {
       model: 'gpt-4',
+      temperature: 0.7,
+      max_tokens: 500
+    };
+    
+    let completion = await openaiClient.chat.completions.create({
+      ...modelConfig,
       messages: conversationMessages,
       tools: SEARCH_TOOLS,
-      tool_choice: 'auto',
-      temperature: 0.7,
-      max_tokens: 1000,
-    });
+      tool_choice: 'auto'
+    } as any);
 
     let finalResponse = '';
     let shouldContinue = true;
@@ -615,14 +631,22 @@ Remember: You're a helpful human, not a search engine. When searches return exac
 
       // Get AI's next response
       try {
-        completion = await openaiClient.chat.completions.create({
+        const iterationConfig = useGPT5Mini ? {
+          model: 'gpt-5-mini',
+          reasoning_effort: 'low',
+          max_completion_tokens: 2500
+        } : {
           model: 'gpt-4',
+          temperature: 0.7,
+          max_tokens: 1000
+        };
+        
+        completion = await openaiClient.chat.completions.create({
+          ...iterationConfig,
           messages: conversationMessages,
           tools: SEARCH_TOOLS,
-          tool_choice: 'auto',
-          temperature: 0.7,
-          max_tokens: 1000,
-        });
+          tool_choice: 'auto'
+        } as any);
       } catch (error) {
         console.error('[Intelligent Chat] Error in follow-up completion:', error);
         finalResponse = 'I found some information but encountered an error processing it. Please try again.';
@@ -634,12 +658,20 @@ Remember: You're a helpful human, not a search engine. When searches return exac
     if (iteration >= maxIterations && shouldContinue) {
       console.log('[Intelligent Chat] Max iterations reached, getting final response');
       try {
-        const finalCompletion = await openaiClient.chat.completions.create({
+        const finalConfig = useGPT5Mini ? {
+          model: 'gpt-5-mini',
+          reasoning_effort: 'low',
+          max_completion_tokens: 2500
+        } : {
           model: 'gpt-4',
-          messages: conversationMessages,
           temperature: 0.7,
-          max_tokens: 1000,
-        });
+          max_tokens: 1000
+        };
+        
+        const finalCompletion = await openaiClient.chat.completions.create({
+          ...finalConfig,
+          messages: conversationMessages
+        } as any);
         finalResponse = finalCompletion.choices[0]?.message?.content || finalResponse;
       } catch (error) {
         console.error('[Intelligent Chat] Error getting final response:', error);

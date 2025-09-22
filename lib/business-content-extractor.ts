@@ -253,8 +253,8 @@ export function selectiveStripBoilerplate($: cheerio.CheerioAPI): void {
     }
   });
   
-  // Remove breadcrumbs (they're navigation)
-  $('.breadcrumb, .breadcrumbs, [aria-label="breadcrumb"]').remove();
+  // PRESERVE breadcrumbs for category extraction (important for product categorization)
+  // $('.breadcrumb, .breadcrumbs, [aria-label="breadcrumb"]').remove();
   
   // Remove comment sections
   $('.comments, #comments, .disqus, #disqus_thread').remove();

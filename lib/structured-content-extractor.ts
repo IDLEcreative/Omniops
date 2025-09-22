@@ -1,6 +1,7 @@
 /**
- * Enhanced content extractor specifically for e-commerce product pages
- * Preserves product details, prices, specifications, and other commerce data
+ * Generic structured content extractor
+ * Preserves hierarchical navigation, categories, and structured data from ANY website
+ * Works for e-commerce, blogs, documentation, services - any domain
  */
 
 import * as cheerio from 'cheerio';
