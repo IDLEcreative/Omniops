@@ -359,77 +359,25 @@ export async function POST(request: NextRequest) {
     const conversationMessages: Array<{role: 'system' | 'user' | 'assistant'; content: string; tool_calls?: any}> = [
       {
         role: 'system' as const,
-        content: `You are a helpful customer service assistant with FULL conversation memory. ALWAYS use the smart_search tool when users ask about products, inventory, or availability.
+        content: `You are a helpful customer service assistant. Use the smart_search tool for product inquiries.
 
-CONVERSATION CONTEXT:
-- You have access to the ENTIRE conversation history
-- When users reference "that", "those", "it" etc., check previous messages for context
-- Remember products, categories, and details discussed earlier in the conversation
-- Build on previous responses rather than starting fresh each time
+## Core Behavior
+- You have full conversation history - reference previous messages when users say "that", "it", etc.
+- When you receive search results, they come as structured JSON with pre-formatted display text
+- Simply use the provided formatted_response field - it's already properly formatted
+- Do NOT add your own formatting or counts - everything is pre-calculated
 
-IMPORTANT: You receive FULL VISIBILITY of search results:
-- Total count of ALL matching items
-- Category and brand breakdowns
-- Detailed information for top results
-- Awareness of additional items beyond the detailed results
+## Search Results Format
+Search results will provide:
+- formatted_response: Ready-to-use text for displaying to users
+- data: Raw data if you need specific details
+- metadata: Additional context like totals, categories
 
-MANDATORY PRODUCT LISTING RULES:
-- ALWAYS mention the total count when showing products
-- Use format: "We have [TOTAL] [product type] available. Here are [NUMBER SHOWN]:"
-- Example: "We have 24 Teng products available. Here are 5 popular ones:"
-- When showing a partial list, ALWAYS add: "...and [X] more [product type] available"
-- Example: "...and 19 more Teng products available. Would you like to see more or filter by specific type?"
-- NEVER just list items without mentioning the total
-- If categories/brands are available, mention them: "These span across [categories/brands]"
-
-This means:
-- You can accurately answer "How many X do you have?" without re-searching
-- You can filter and recommend from the COMPLETE catalog
-- You can provide category/brand statistics immediately
-- You DO NOT need to search multiple times for refinements
-- When asked about "this product" or "that item", refer to previously discussed products
-
-CRITICAL RULES:
-- NEVER suggest external websites or tell customers to "search elsewhere"
-- NEVER recommend competitors, manufacturer sites, or third-party retailers
-- If a product isn't found, offer to help find alternatives from OUR inventory
-- ONLY use category URLs that are explicitly provided in the search results
-- DO NOT make up or guess category URLs - use EXACTLY what's given
-- If category URLs are provided with "USE THESE EXACT URLS", you MUST use those exact URLs
-
-FORMATTING RULES:
-- ALWAYS start with total count: "We have X items matching..."
-- Keep product listings clean and easy to read
-- Use numbered lists (1. 2. 3.) for products
-- Include product names with prices clearly
-- Add links as [Product Name](url) when showing products
-- End partial lists with: "...plus X more items. Would you like to see [specific category/more options]?"
-
-SEARCH STRATEGY:
-- For initial queries → Use limit: 20-50 for detailed results (you'll see total count regardless)
-- For counting/statistics → The total count is always provided
-- For filtering → You already have the full list, just describe what's available
-
-FOLLOW-UP HANDLING:
-- When users ask follow-up questions about previously mentioned products:
-  * Reference the specific product details from earlier messages
-  * No need to re-search unless they want something different
-  * Use phrases like "Regarding the [product name] I mentioned..."
-- Examples of follow-ups:
-  * "tell me about this" → Look at the last product discussed
-  * "what's the price?" → Reference the last item's price
-  * "do you have more like that?" → Use context from previous search
-
-STOCK & AVAILABILITY RULES:
-- NEVER make up stock quantities - the count of search results is NOT stock level
-- When users ask about stock/availability, inform them that you need to check the live inventory system
-- Suggest: "I can search for the product, but for real-time stock levels, please use our stock checking system"
-- If availability data shows "instock" in search results, say "This item shows as available"
-- If availability shows "outofstock", say "This item appears to be out of stock"
-- If availability shows "Unknown" or missing, say "Stock status unclear - please verify with our inventory system"
-- For specific quantity questions, say "For exact stock quantities, our inventory system needs to be checked directly"
-- DO NOT confuse the number of search results with inventory quantity
-- Note: Real-time stock checking requires calling the WooCommerce API at /api/woocommerce/stock`
+## Important Rules
+- NEVER suggest external websites or competitors
+- For stock levels: Search results show availability status, not exact quantities
+- If no results found: Offer to help find alternatives from our inventory
+- Only use URLs explicitly provided in search results`
       }
     ];
     
@@ -515,77 +463,106 @@ STOCK & AVAILABILITY RULES:
             allSearchResults.push(...result.results);
           }
           
-          // Format response with full visibility metadata
-          let toolResponse = '';
+          // Format response as structured JSON with pre-formatted display text
+          let toolResponse: any = {};
+          
           if (result.results.length > 0 || result.overview?.total) {
             const total = result.overview?.total || result.results.length;
-            const returned = result.results.length;
+            const shown = Math.min(5, result.results.length);
+            const remaining = total - shown;
             
-            // Provide complete context to AI - EMPHASIZE TOTAL COUNT
-            toolResponse = `IMPORTANT: TOTAL COUNT = ${total} items found\n`;
-            toolResponse += `You MUST tell the user: "We have ${total} [item type] available"\n`;
-            toolResponse += `Showing detailed info for ${returned} items below:\n\n`;
+            // Determine product type from query or results
+            const queryLower = args.query.toLowerCase();
+            let productType = 'products';
+            if (queryLower.includes('pump')) productType = 'pumps';
+            else if (queryLower.includes('starter')) productType = 'starter chargers';
+            else if (queryLower.includes('charger')) productType = 'chargers';
+            else if (queryLower.includes('cifa')) productType = 'Cifa products';
+            else if (queryLower.includes('teng')) productType = 'Teng products';
+            else if (result.overview?.categories?.[0]) {
+              productType = result.overview.categories[0].value.toLowerCase();
+            }
             
-            // Extract ACTUAL category URLs from the results
-            const categoryUrls = new Set<string>();
+            // Build pre-formatted response text
+            let formattedText = `We have ${total} ${productType} available.`;
+            
+            if (shown > 0) {
+              formattedText += ` Here ${shown === 1 ? 'is' : 'are'} ${shown === total ? 'all of them' : `the top ${shown}`}:\n\n`;
+              
+              // Add numbered list of products
+              result.results.slice(0, shown).forEach((item, idx) => {
+                formattedText += `${idx + 1}. ${item.title}`;
+                
+                // Extract price if available
+                if (item.type === 'product' && item.content) {
+                  const priceMatch = item.content.match(/£([\d,]+\.?\d*)/);;
+                  if (priceMatch) {
+                    formattedText += ` - Price: £${priceMatch[1]}`;
+                  }
+                  
+                  // Add stock status if available
+                  if (item.stockStatus) {
+                    if (item.stockStatus === 'instock') {
+                      formattedText += ' ✓ Available';
+                    } else if (item.stockStatus === 'outofstock') {
+                      formattedText += ' ✗ Out of stock';
+                    }
+                  }
+                }
+                formattedText += '\n';
+              });
+              
+              // Add footer for remaining items
+              if (remaining > 0) {
+                formattedText += `\n...and ${remaining} more ${productType} available.`;
+                formattedText += ' Would you like to see more options or filter by a specific type?';
+              }
+            }
+            
+            // Extract valid category URLs (validated from actual results)
+            const validCategoryUrls: string[] = [];
+            const seenCategories = new Set<string>();
             result.results.forEach(item => {
-              if (item.url) {
-                const categoryMatch = item.url.match(/\/product-category\/([^\/]+(?:\/[^\/]+)*)\//);
-                if (categoryMatch) {
-                  categoryUrls.add(`/product-category/${categoryMatch[1]}/`);
+              if (item.url && item.url.includes('/product-category/')) {
+                const match = item.url.match(/(.+\/product-category\/[^\/]+)\/.*/);;
+                if (match && !seenCategories.has(match[1])) {
+                  seenCategories.add(match[1]);
+                  validCategoryUrls.push(match[1] + '/');
                 }
               }
             });
             
-            // Include category/brand breakdown if available
-            if (result.overview?.categories && result.overview.categories.length > 0) {
-              toolResponse += 'Categories found: ';
-              toolResponse += result.overview.categories.map(c => `${c.value} (${c.count})`).join(', ');
-              toolResponse += '\n';
-            }
-            
-            // Add ACTUAL category URLs found in results
-            if (categoryUrls.size > 0) {
-              toolResponse += '\nActual category pages from results:\n';
-              Array.from(categoryUrls).slice(0, 3).forEach(url => {
-                toolResponse += `- ${url}\n`;
-              });
-              toolResponse += 'USE THESE EXACT URLS when suggesting categories to browse.\n\n';
-            }
-            
-            if (result.overview?.brands && result.overview.brands.length > 0) {
-              toolResponse += 'Brands: ';
-              toolResponse += result.overview.brands.map(b => `${b.value} (${b.count})`).join(', ');
-              toolResponse += '\n';
-            }
-            
-            toolResponse += '\nDetailed results:\n';
-            result.results.slice(0, Math.min(5, returned)).forEach((item, idx) => {
-              toolResponse += `${idx + 1}. ${item.title}\n`;
-              if (item.type === 'product' && item.content.includes('£')) {
-                toolResponse += `   ${item.content.split('\n')[1]}\n`;
+            // Build structured response
+            toolResponse = {
+              formatted_response: formattedText,
+              data: {
+                total: total,
+                shown: shown,
+                products: result.results.slice(0, shown).map(item => ({
+                  name: item.title,
+                  url: item.url,
+                  price: item.content?.match(/£([\d,]+\.?\d*)/)?.[1],
+                  availability: item.stockStatus || 'unknown'
+                }))
+              },
+              metadata: {
+                query: args.query,
+                product_type: productType,
+                categories: result.overview?.categories?.slice(0, 3) || [],
+                brands: result.overview?.brands?.slice(0, 3) || [],
+                valid_category_urls: validCategoryUrls.slice(0, 3)
               }
-              // Include the URL if available
-              if (item.url) {
-                toolResponse += `   URL: ${item.url}\n`;
-              }
-            });
+            };
             
-            // Category pages are already included above if categories were found
-            // The AI will use the category information provided to suggest relevant browsing options
+            toolResponse = JSON.stringify(toolResponse, null, 2);
             
-            // If we have many more results, list some IDs for awareness
-            if (result.overview?.allIds && result.overview.allIds.length > returned) {
-              const additionalCount = result.overview.allIds.length - returned;
-              toolResponse += `\nREMINDER: ${additionalCount} MORE items exist beyond those shown above!\n`;
-              toolResponse += `You MUST mention to the user: "...plus ${additionalCount} more items available"\n`;
-              toolResponse += `Additional items include: `;
-              toolResponse += result.overview.allIds.slice(returned, returned + 10).map(i => i.title).join(', ');
-              if (additionalCount > 10) toolResponse += ', ...';
-              toolResponse += '\n';
-            }
           } else {
-            toolResponse = 'No results found for this specific search. I can help you browse our categories or search for alternative products.';
+            // No results found
+            toolResponse = JSON.stringify({
+              formatted_response: "I couldn't find any products matching that search. Would you like me to try a different search or help you browse our product categories?",
+              data: { total: 0, shown: 0, products: [] },
+              metadata: { query: args.query }
+            });
           }
           
           return {
