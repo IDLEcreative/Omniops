@@ -210,7 +210,7 @@ export class EmbeddingReindexer {
         if (pagesError) throw new Error(`Failed to fetch pages: ${pagesError.message}`);
         
         if (pages && pages.length > 0) {
-          pageIds.push(...pages.map(p => p.id));
+          pageIds.push(...pages.map((p: any) => p.id));
           offset += pages.length;
           hasMore = pages.length === limit;
         } else {
@@ -406,14 +406,14 @@ export class EmbeddingReindexer {
         });
         
         // Prepare batch insert
-        const embeddings = response.data.map((item, idx) => ({
+        const embeddings = response.data.map((item: any, idx: number) => ({
           page_id: pageId,
           chunk_text: batch[idx],
           embedding: item.embedding,
           metadata: {
             chunk_index: i + idx,
             total_chunks: chunks.length,
-            chunk_size: batch[idx].length,
+            chunk_size: batch![idx]?.length || 0,
             url: pageUrl,
             title: pageTitle,
             reindexed: true,

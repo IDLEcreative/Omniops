@@ -197,8 +197,8 @@ export class ChatTelemetry {
     const pricing = ChatTelemetry.MODEL_PRICING[this.session.model] || 
                    ChatTelemetry.MODEL_PRICING['default'];
     
-    const inputCost = (inputTokens / 1000000) * pricing.inputPricePerMillion;
-    const outputCost = (outputTokens / 1000000) * pricing.outputPricePerMillion;
+    const inputCost = (inputTokens / 1000000) * pricing!.inputPricePerMillion;
+    const outputCost = (outputTokens / 1000000) * pricing!.outputPricePerMillion;
     
     return inputCost + outputCost;
   }

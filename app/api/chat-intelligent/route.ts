@@ -201,7 +201,7 @@ async function executeSmartSearch(
       results: uniqueResults, 
       source: searchType,
       executionTime,
-      overview 
+      overview: overview || undefined
     };
     
   } catch (error: any) {
@@ -302,6 +302,13 @@ This means:
 - You can provide category/brand statistics immediately
 - You DO NOT need to search multiple times for refinements
 
+CRITICAL RULES:
+- NEVER suggest external websites or tell customers to "search elsewhere"
+- NEVER recommend competitors, manufacturer sites, or third-party retailers
+- If a product isn't found, offer to help find alternatives from OUR inventory
+- When showing products, ALWAYS include relevant category pages for browsing more options
+- Present category links naturally as "Browse more [category] products" or similar
+
 SEARCH STRATEGY:
 - For initial queries → Use limit: 20-50 for detailed results (you'll see total count regardless)
 - For counting/statistics → The total count is always provided
@@ -394,8 +401,16 @@ When users ask follow-up questions like "show me just the pumps from those resul
             
             // Include category/brand breakdown if available
             if (result.overview?.categories && result.overview.categories.length > 0) {
-              toolResponse += 'Categories: ';
+              toolResponse += 'Categories found: ';
               toolResponse += result.overview.categories.map(c => `${c.value} (${c.count})`).join(', ');
+              toolResponse += '\n';
+              
+              // Add category page suggestions based on found categories
+              toolResponse += 'Suggested category pages:\n';
+              result.overview.categories.slice(0, 3).forEach(cat => {
+                const categorySlug = cat.value.toLowerCase().replace(/\s+/g, '-').replace(/[^\w-]/g, '');
+                toolResponse += `- Browse all ${cat.value}: /product-category/${categorySlug}/\n`;
+              });
               toolResponse += '\n';
             }
             
@@ -411,7 +426,14 @@ When users ask follow-up questions like "show me just the pumps from those resul
               if (item.type === 'product' && item.content.includes('£')) {
                 toolResponse += `   ${item.content.split('\n')[1]}\n`;
               }
+              // Include the URL if available
+              if (item.url) {
+                toolResponse += `   URL: ${item.url}\n`;
+              }
             });
+            
+            // Category pages are already included above if categories were found
+            // The AI will use the category information provided to suggest relevant browsing options
             
             // If we have many more results, list some IDs for awareness
             if (result.overview?.allIds && result.overview.allIds.length > returned) {
@@ -422,7 +444,7 @@ When users ask follow-up questions like "show me just the pumps from those resul
               toolResponse += ']';
             }
           } else {
-            toolResponse = 'No results found.';
+            toolResponse = 'No results found for this specific search. I can help you browse our categories or search for alternative products.';
           }
           
           return {

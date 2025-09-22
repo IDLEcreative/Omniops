@@ -53,7 +53,7 @@ export function formatSize(bytes: number): string {
   return `${size.toFixed(2)} ${units[unitIndex]}`;
 }
 
-export function debounce<T extends (...args: any[]) => any>(
+export function debounce<T extends (...args: any[]) => any>(this: any,
   func: T,
   wait: number
 ): (...args: Parameters<T>) => void {
@@ -61,7 +61,7 @@ export function debounce<T extends (...args: any[]) => any>(
   
   return (...args: Parameters<T>) => {
     clearTimeout(timeout);
-    timeout = setTimeout(() => func.apply(this, args), wait);
+    timeout = setTimeout(() => func.apply(undefined, args), wait);
   };
 }
 
@@ -73,7 +73,7 @@ export function throttle<T extends (...args: any[]) => any>(
   
   return (...args: Parameters<T>) => {
     if (!inThrottle) {
-      func.apply(this, args);
+      func.apply(undefined, args);
       inThrottle = true;
       setTimeout(() => inThrottle = false, limit);
     }

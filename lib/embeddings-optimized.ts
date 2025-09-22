@@ -121,8 +121,7 @@ export async function searchSimilarContentOptimized(
       .from('domains')
       .select('id')
       .eq('domain', searchDomain)
-      .single()
-      .abortSignal(AbortSignal.timeout(1000));
+      .single();
     
     domainTimer.end();
     
@@ -253,8 +252,7 @@ export async function searchSimilarContentOptimized(
       chunks: results,
       metadata: {
         searchMethod: 'vector',
-        queryWords: queryWords.length,
-        domainId
+        chunksRetrieved: results.length
       }
     }, domain, limit);
     

@@ -36,7 +36,7 @@ export class SampleA {
 
   async loadData() {
     const loader = await loadModule();
-    return loader.getData();
+    return (loader as any).getData();
   }
 
   processWithB() {

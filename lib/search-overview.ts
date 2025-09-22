@@ -90,7 +90,7 @@ export async function getProductOverview(
         .from('scraped_pages')
         .select('id', { count: 'exact' })
         .eq('domain_id', domainId)
-        .ilike('url', `%${searchKeyword.toLowerCase()}%`);
+        .ilike('url', `%${searchKeyword!.toLowerCase()}%`);
       
       titleDataQuery = supabase
         .from('scraped_pages')
@@ -103,7 +103,7 @@ export async function getProductOverview(
         .from('scraped_pages')
         .select('id, url, title')
         .eq('domain_id', domainId)
-        .ilike('url', `%${searchKeyword.toLowerCase()}%`)
+        .ilike('url', `%${searchKeyword!.toLowerCase()}%`)
         .limit(500);
     }
     
@@ -130,7 +130,7 @@ export async function getProductOverview(
         .from('scraped_pages')
         .select('url')
         .eq('domain_id', domainId)
-        .or(`title.ilike.%${searchKeyword}%,url.ilike.%${searchKeyword.toLowerCase()}%`);
+        .or(`title.ilike.%${searchKeyword}%,url.ilike.%${searchKeyword!.toLowerCase()}%`);
       
       if (urlsError) {
         console.error('[ProductOverview] URLs query error:', urlsError);
@@ -164,10 +164,12 @@ export async function getProductOverview(
     
     allMatches.forEach((item, url) => {
       // Extract category from URL pattern (e.g., /product-category/pumps/)
-      const categoryMatch = url.match(/\/product-category\/([^\/]+)/);
+      const categoryMatch = url?.match(/\/product-category\/([^\/]+)/);
       if (categoryMatch) {
-        const category = categoryMatch[1].replace(/-/g, ' ');
-        categories.set(category, (categories.get(category) || 0) + 1);
+        const category = categoryMatch[1]?.replace(/-/g, ' ');
+        if (category) {
+          categories.set(category, (categories.get(category) || 0) + 1);
+        }
       }
       
       // Extract brand from title patterns (common: "Brand Name Product")
@@ -175,7 +177,7 @@ export async function getProductOverview(
       if (titleParts.length > 1) {
         const potentialBrand = titleParts[0];
         // Simple heuristic: if first word is capitalized and appears multiple times
-        if (potentialBrand && potentialBrand[0] === potentialBrand[0].toUpperCase()) {
+        if (potentialBrand && potentialBrand[0] === potentialBrand[0]?.toUpperCase()) {
           brands.set(potentialBrand, (brands.get(potentialBrand) || 0) + 1);
         }
       }
@@ -214,7 +216,7 @@ export async function getProductOverview(
     try {
       const redis = await getRedisClient();
       if (redis) {
-        await redis.set(cacheKey, JSON.stringify(overview), 'EX', 300);
+        await redis.set(cacheKey, JSON.stringify(overview));
         console.log(`[ProductOverview] Cached result for query: "${query}" (TTL: 5min)`);
       }
     } catch (error) {

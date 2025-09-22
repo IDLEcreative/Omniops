@@ -152,7 +152,7 @@ export async function searchSimilarContentOptimized(
         .eq('domain_id', domainId)
         .ilike('title', `%${searchKeyword}%`)
         .limit(500) // Get ALL matching results
-        .abortSignal(AbortSignal.timeout(5000));
+;
       
       console.log(`[DEBUG] Title search results: ${titleResults?.length || 0}, error: ${titleError?.message || 'none'}`);
       
@@ -163,9 +163,9 @@ export async function searchSimilarContentOptimized(
         .from('scraped_pages')
         .select('url, title, content')
         .eq('domain_id', domainId)
-        .ilike('url', `%${searchKeyword.toLowerCase()}%`)
+        .ilike('url', `%${searchKeyword!.toLowerCase()}%`)
         .limit(500)
-        .abortSignal(AbortSignal.timeout(5000));
+;
       
       if (urlResults) {
         // Add only unique URLs
@@ -295,8 +295,7 @@ export async function searchSimilarContentOptimized(
       chunks: results,
       metadata: {
         searchMethod: 'vector',
-        queryWords: queryWords.length,
-        domainId
+        chunksRetrieved: results.length
       }
     }, domain, limit);
     

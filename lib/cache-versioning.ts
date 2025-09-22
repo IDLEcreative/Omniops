@@ -35,9 +35,9 @@ export function isCurrentVersion(cacheKey: string): boolean {
 /**
  * Extract version from a cache key
  */
-export function extractVersion(cacheKey: string): string | null {
+export function extractVersion(cacheKey: string): string | undefined {
   const match = cacheKey.match(/:v(\d+\.\d+\.\d+)$/);
-  return match ? match[1] : null;
+  return match ? match[1] : undefined;
 }
 
 /**

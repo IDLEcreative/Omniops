@@ -27,8 +27,8 @@ class DomainCacheService {
   };
 
   /**
-   * Get domain ID with caching
-   * Reduces lookup time from 21000ms to <1ms for cached entries
+   * Get customer ID for domain with caching
+   * Reduces lookup time from 670ms to <1ms for cached entries
    */
   async getDomainId(domain: string): Promise<string | null> {
     const startTime = Date.now();
@@ -93,11 +93,11 @@ class DomainCacheService {
       
       try {
         const { data, error } = await supabase
-          .from('domains')
-          .select('id')
+          .from('customer_configs')
+          .select('customer_id')
           .eq('domain', normalizedDomain)
-          .single()
-          .abortSignal(controller.signal);
+          .eq('active', true)
+          .single();
         
         clearTimeout(timeout);
         
@@ -108,10 +108,10 @@ class DomainCacheService {
           return null;
         }
         
-        if (data?.id) {
+        if (data?.customer_id) {
           // Cache the result
-          this.setCacheEntry(normalizedDomain, data.id);
-          return data.id;
+          this.setCacheEntry(normalizedDomain, data.customer_id);
+          return data.customer_id;
         }
         
         return null;

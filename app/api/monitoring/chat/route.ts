@@ -224,7 +224,7 @@ export async function GET(request: NextRequest) {
       success: true,
       metrics,
       hourlyTrend,
-      costAlerts: costAlerts.filter(a => a.exceeded),
+      costAlerts: costAlerts.filter((a: any) => a.exceeded),
       liveMetrics,
       details: params.includeDetails ? telemetryData?.slice(0, 100) : undefined,
       timestamp: now.toISOString(),

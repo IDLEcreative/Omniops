@@ -202,7 +202,7 @@ class DockerProfiler {
           .map(line => {
             const [size, ...commandParts] = line.split('\t');
             return {
-              size: size.trim(),
+              size: size!.trim(),
               command: commandParts.join(' ').substring(0, 60) + '...'
             };
           })
@@ -483,8 +483,8 @@ class DockerProfiler {
     if (this.metrics.imageAnalysis) {
       // Parse size string to MB for comparison
       const sizeStr = this.metrics.imageAnalysis.appSize;
-      const sizeMatch = sizeStr.match(/(\d+(?:\.\d+)?)\s*(MB|GB)/i);
-      if (sizeMatch) {
+      const sizeMatch = sizeStr?.match(/(\d+(?:\.\d+)?)\s*(MB|GB)/i);
+      if (sizeMatch && sizeMatch[1] && sizeMatch[2]) {
         const size = parseFloat(sizeMatch[1]);
         const unit = sizeMatch[2].toUpperCase();
         const sizeMB = unit === 'GB' ? size * 1024 : size;

@@ -247,8 +247,8 @@ export class SearchCacheManager {
       const legacyEmbeddingKeys = await this.redis.keys('embedding:cache:*');
       
       // Filter out versioned keys from legacy to avoid duplicates
-      const filteredLegacySearch = legacySearchKeys.filter(k => !k.includes(':v'));
-      const filteredLegacyEmbedding = legacyEmbeddingKeys.filter(k => !k.includes(':v'));
+      const filteredLegacySearch = legacySearchKeys.filter((k: string) => !k.includes(':v'));
+      const filteredLegacyEmbedding = legacyEmbeddingKeys.filter((k: string) => !k.includes(':v'));
       
       const allKeys = [
         ...searchKeys, 
@@ -297,8 +297,8 @@ export class SearchCacheManager {
     try {
       // Get all cache keys and separate by version
       const allSearchKeys = await this.redis.keys('search:cache:*');
-      const versionedKeys = allSearchKeys.filter(k => k.includes(`:v${SEARCH_CACHE_VERSION}`));
-      const legacyKeys = allSearchKeys.filter(k => !k.includes(':v'));
+      const versionedKeys = allSearchKeys.filter((k: string) => k.includes(`:v${SEARCH_CACHE_VERSION}`));
+      const legacyKeys = allSearchKeys.filter((k: string) => !k.includes(':v'));
       
       const hits = parseInt(await this.redis.get('metrics:cache:hits') || '0');
       const misses = parseInt(await this.redis.get('metrics:cache:misses') || '0');

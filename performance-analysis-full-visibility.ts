@@ -36,7 +36,7 @@ function generateProducts(count: number): Product[] {
       price: Math.random() * 1000 + 50,
       sku: `SKU-${i.toString().padStart(6, '0')}`,
       description: `This is a detailed description for product ${i}. It contains technical specifications, features, and usage instructions that could be quite lengthy in a real scenario.`.repeat(3),
-      category: categories[i % categories.length],
+      category: categories[i % categories.length] || 'General',
       specs: {
         weight: `${Math.random() * 100 + 1}kg`,
         dimensions: `${Math.floor(Math.random() * 100)}x${Math.floor(Math.random() * 100)}x${Math.floor(Math.random() * 100)}cm`,
@@ -357,7 +357,7 @@ async function testConcurrency(userCount: number) {
   const results = await Promise.all(userPromises);
   const totalTime = performance.now() - startTime;
   
-  const avgResponseTime = results.reduce((sum, r) => sum + r.metrics.totalTime, 0) / results.length;
+  const avgResponseTime = results.reduce((sum, r) => sum + r!.metrics.totalTime, 0) / results.length;
   
   return {
     userCount,
