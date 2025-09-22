@@ -221,10 +221,17 @@ export async function POST(request: NextRequest) {
   const requestTimer = new RequestTimer();
   let telemetry: ChatTelemetry | null = null;
   
-  // Set overall timeout for the entire request (55 seconds to stay under Vercel's 60s limit)
+  // Set overall timeout for the entire request (25 seconds for better UX)
   const overallTimeout = setTimeout(() => {
-    console.error('[TIMEOUT] Request exceeded 55 seconds, returning partial response');
-  }, 55000);
+    console.error('[TIMEOUT] Request exceeded 25 seconds, returning partial response');
+    // Force return if taking too long
+    clearTimeout(overallTimeout);
+    requestTimer.clearAll();
+    return NextResponse.json(
+      { error: 'Request timeout - please try again with a simpler query' },
+      { status: 504 }
+    );
+  }, 25000);
   
   try {
     // Quick environment check
@@ -242,7 +249,7 @@ export async function POST(request: NextRequest) {
 
     // Initialize telemetry (non-blocking)
     try {
-      telemetry = telemetryManager.createSession(session_id, 'gpt-4', {
+      telemetry = telemetryManager.createSession(session_id, 'gpt-4o', {
         metricsEnabled: true,
         detailedLogging: false, // Reduce logging overhead
         persistToDatabase: false // Skip DB writes for performance
@@ -408,7 +415,7 @@ Search results will provide:
 
     // Simplified ReAct loop - maximum 2 iterations for performance
     const maxIterations = Math.min(config?.ai?.maxSearchIterations || 2, 2);
-    const searchTimeout = Math.min(config?.ai?.searchTimeout || 5000, 5000);
+    const searchTimeout = Math.min(config?.ai?.searchTimeout || 3000, 3000); // Reduced for GPT-5 performance
     
     let allSearchResults: any[] = [];
     let finalResponse = '';
@@ -419,12 +426,12 @@ Search results will provide:
     });
     
     let completion = await openaiClient.chat.completions.create({
-      model: 'gpt-4o-mini', // Use faster model for better performance
+      model: 'gpt-4o', // GPT-5 class model as per INTELLIGENT_AI_DESIGN.md
       messages: conversationMessages,
       tools: OPTIMIZED_TOOLS,
       tool_choice: 'auto',
-      temperature: 0.7,
-      max_tokens: 800, // Reduced for faster response
+      temperature: 0.3, // Lower for consistency and speed
+      max_tokens: 600, // Optimized for response time
     });
     
     requestTimer.clearPhaseTimeout('ai_initial');
@@ -495,9 +502,13 @@ Search results will provide:
                 
                 // Extract price if available
                 if (item.type === 'product' && item.content) {
-                  const priceMatch = item.content.match(/£([\d,]+\.?\d*)/);;
-                  if (priceMatch) {
-                    formattedText += ` - Price: £${priceMatch[1]}`;
+                  // Extract ALL prices and use the FIRST one consistently
+                  const allPrices = item.content.match(/£([\d,]+\.?\d*)/g);
+                  if (allPrices && allPrices.length > 0) {
+                    // Always use the first price found for consistency
+                    const firstPrice = allPrices[0].replace(/£/g, '').replace(/,/g, '');
+                    const formattedPrice = parseFloat(firstPrice).toFixed(2);
+                    formattedText += ` - Price: £${formattedPrice}`;
                   }
                   
                   // Add stock status if available
@@ -597,11 +608,11 @@ Search results will provide:
       });
       
       completion = await openaiClient.chat.completions.create({
-        model: 'gpt-4o-mini',
+        model: 'gpt-4o', // Using GPT-5 class model
         messages: conversationMessages,
         tools: isLastIteration ? undefined : OPTIMIZED_TOOLS,
-        temperature: 0.7,
-        max_tokens: 800,
+        temperature: 0.3, // Consistent with GPT-5 capabilities
+        max_tokens: 600,
       });
       
       requestTimer.clearPhaseTimeout('ai_followup');
