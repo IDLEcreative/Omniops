@@ -275,22 +275,73 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    // Simplified conversation management - skip if not needed
+    // Conversation management - ensure we have a valid conversation ID
     let conversationId = conversation_id;
     if (!conversationId) {
-      // Generate a proper UUID without DB write for speed
-      conversationId = crypto.randomUUID();
+      // Create a new conversation
+      const { data: newConversation, error: createError } = await adminSupabase
+        .from('conversations')
+        .insert({ 
+          session_id: session_id,
+          metadata: { domain },
+          created_at: new Date().toISOString()
+        })
+        .select('id')
+        .single();
+      
+      if (createError) {
+        console.error('[Chat API] Failed to create conversation:', createError);
+        // Fallback to UUID if database write fails
+        conversationId = crypto.randomUUID();
+      } else {
+        conversationId = newConversation.id;
+      }
     }
 
-    // Skip saving messages for performance - can be done async later
+    // Save user message asynchronously (non-blocking for speed)
+    const saveUserMessage = adminSupabase
+      .from('messages')
+      .insert({
+        conversation_id: conversationId,
+        role: 'user',
+        content: message,
+        created_at: new Date().toISOString()
+      })
+      .then(({ error }) => {
+        if (error) console.error('[Chat API] Failed to save user message:', error);
+      });
     
-    // Build minimal conversation context
+    // Load conversation history in parallel with message save
+    const [historyData] = await Promise.all([
+      adminSupabase
+        .from('messages')
+        .select('role, content')
+        .eq('conversation_id', conversationId)
+        .order('created_at', { ascending: true })
+        .limit(10)
+        .then(({ data, error }) => {
+          if (error) {
+            console.error('[Chat API] Failed to load history:', error);
+            return [];
+          }
+          return data || [];
+        }),
+      saveUserMessage // Run in parallel
+    ]);
+    
+    // Build conversation context with history
     const conversationMessages = [
       {
         role: 'system' as const,
-        content: `You are a helpful customer service assistant. ALWAYS use the smart_search tool when users ask about products, inventory, or availability.
+        content: `You are a helpful customer service assistant with FULL conversation memory. ALWAYS use the smart_search tool when users ask about products, inventory, or availability.
 
-IMPORTANT: You now receive FULL VISIBILITY of search results:
+CONVERSATION CONTEXT:
+- You have access to the ENTIRE conversation history
+- When users reference "that", "those", "it" etc., check previous messages for context
+- Remember products, categories, and details discussed earlier in the conversation
+- Build on previous responses rather than starting fresh each time
+
+IMPORTANT: You receive FULL VISIBILITY of search results:
 - Total count of ALL matching items
 - Category and brand breakdowns
 - Detailed information for top results
@@ -301,6 +352,7 @@ This means:
 - You can filter and recommend from the COMPLETE catalog
 - You can provide category/brand statistics immediately
 - You DO NOT need to search multiple times for refinements
+- When asked about "this product" or "that item", refer to previously discussed products
 
 CRITICAL RULES:
 - NEVER suggest external websites or tell customers to "search elsewhere"
@@ -311,28 +363,43 @@ CRITICAL RULES:
 - If category URLs are provided with "USE THESE EXACT URLS", you MUST use those exact URLs
 
 FORMATTING RULES:
-- Use simple bullet points: * Product Name - Price
-- Do NOT use markdown bold (**text**) for product names
 - Keep product listings clean and easy to read
-- Include links inline: [Product Name](url) or just show the product name with price
-- Example format:
-  * Teng 1/2" Torque Wrench - £125.00
-  * Hydraulic Pump A4VTG71 - £450.00
+- Use numbered lists (1. 2. 3.) for products
+- Include product names with prices clearly
+- Add links as [Product Name](url) when showing products
 
 SEARCH STRATEGY:
 - For initial queries → Use limit: 20-50 for detailed results (you'll see total count regardless)
 - For counting/statistics → The total count is always provided
 - For filtering → You already have the full list, just describe what's available
 
-When users ask follow-up questions like "show me just the pumps from those results":
-- You already have the category breakdown - use it directly
-- No need to search again unless they want different products entirely`
-      },
-      {
-        role: 'user' as const,
-        content: message
+FOLLOW-UP HANDLING:
+- When users ask follow-up questions about previously mentioned products:
+  * Reference the specific product details from earlier messages
+  * No need to re-search unless they want something different
+  * Use phrases like "Regarding the [product name] I mentioned..."
+- Examples of follow-ups:
+  * "tell me about this" → Look at the last product discussed
+  * "what's the price?" → Reference the last item's price
+  * "do you have more like that?" → Use context from previous search`
       }
     ];
+    
+    // Add conversation history (excluding the current message which we'll add after)
+    historyData.forEach(msg => {
+      if (msg.role === 'user' || msg.role === 'assistant') {
+        conversationMessages.push({
+          role: msg.role as 'user' | 'assistant',
+          content: msg.content
+        });
+      }
+    });
+    
+    // Add current user message
+    conversationMessages.push({
+      role: 'user' as const,
+      content: message
+    });
 
     // Get OpenAI client
     const openaiClient = getOpenAIClient();
@@ -518,6 +585,19 @@ When users ask follow-up questions like "show me just the pumps from those resul
     
     // Clean up response
     finalResponse = finalResponse.replace(/\n{3,}/g, '\n\n').trim();
+    
+    // Save assistant response asynchronously
+    adminSupabase
+      .from('messages')
+      .insert({
+        conversation_id: conversationId,
+        role: 'assistant',
+        content: finalResponse,
+        created_at: new Date().toISOString()
+      })
+      .then(({ error }) => {
+        if (error) console.error('[Chat API] Failed to save assistant message:', error);
+      });
     
     // Sanitize links
     const allowedDomain = (domain && !/localhost|127\.0\.0\.1|vercel/i.test(domain))
