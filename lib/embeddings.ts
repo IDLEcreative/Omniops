@@ -150,7 +150,7 @@ export async function searchSimilarContentOptimized(
           .select('url, title, content')
           .eq('domain_id', domainId)
           .ilike('title', `%${searchKeyword}%`)
-          .limit(100); // Reduced limit for faster response
+          .limit(Math.max(limit * 2, 200)); // Dynamic limit based on request
         
         if (titleResults) keywordResults.push(...titleResults);
         
@@ -160,7 +160,7 @@ export async function searchSimilarContentOptimized(
           .select('url, title, content')
           .eq('domain_id', domainId)
           .ilike('url', `%${searchKeyword!.toLowerCase()}%`)
-          .limit(100);
+          .limit(Math.max(limit * 2, 200));
         
         if (urlResults) {
           const existingUrls = new Set(keywordResults.map(r => r.url));

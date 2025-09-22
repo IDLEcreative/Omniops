@@ -236,7 +236,7 @@ async function executeSmartSearch(
     
     // Always add semantic search as primary method
     searchPromises.push(
-      searchSimilarContent(query, browseDomain, Math.min(limit, 20), 0.15, timeoutMs - 500)
+      searchSimilarContent(query, browseDomain, limit, 0.15, timeoutMs - 500)
         .then(results => results.map(r => ({ ...r, type: 'content' })))
         .catch(err => {
           console.error(`[Smart Search] Semantic search error:`, err.message);
@@ -247,7 +247,7 @@ async function executeSmartSearch(
     // Also try WooCommerce if it's for products (but don't rely on it)
     if (searchType === "products" || searchType === "mixed") {
       searchPromises.push(
-        searchProductsDynamic(browseDomain, query, Math.min(limit, 5))
+        searchProductsDynamic(browseDomain, query, Math.min(limit, 20))
           .then(products => products?.map(p => ({
             content: `${p.name}\nPrice: £${p.price || p.regular_price || 'Contact'}\nSKU: ${p.sku || 'N/A'}\nAvailability: ${p.stock_status || 'Unknown'}`,
             url: p.permalink || '',
@@ -351,17 +351,13 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    // Initialize Supabase (with timeout)
-    const supabasePromise = createServiceRoleClient();
-    const adminSupabase = await Promise.race([
-      supabasePromise,
-      new Promise<null>((resolve) => setTimeout(() => resolve(null), 2000))
-    ]);
+    // Initialize Supabase with pure async/await
+    const adminSupabase = await createServiceRoleClient();
     
     if (!adminSupabase) {
       clearTimeout(overallTimeout);
       return NextResponse.json(
-        { error: 'Database connection timeout' },
+        { error: 'Database connection unavailable' },
         { status: 503 }
       );
     }
@@ -457,9 +453,11 @@ CONVERSATION CONTEXT:
 - Remember products, categories, and details discussed earlier in the conversation
 - Build on previous responses rather than starting fresh each time
 
-IMPORTANT: You receive FULL VISIBILITY of search results as JSON with:
-- formatted_response: Pre-built text to show users
-- data: Product details including names, URLs, prices
+IMPORTANT: You receive FULL VISIBILITY of ALL search results as JSON with:
+- formatted_response: Pre-built text showing first 10 items (for display)
+- data: COMPLETE list of ALL products found (not just first 10!)
+  * You have access to ALL products for filtering, counting, and analysis
+  * This enables you to answer follow-ups without re-searching
 - metadata: Contains:
   * category_urls: Detected category pages from product URLs
   * suggested_category: Most common category if products share one
@@ -676,7 +674,9 @@ WHAT NOT TO OFFER:
           
           if (result.results.length > 0 || result.overview?.total) {
             const total = result.overview?.total || result.results.length;
-            const shown = Math.min(5, result.results.length);
+            // For display purposes, show reasonable number but AI gets all
+            const displayLimit = 10; // Show first 10 in formatted text
+            const shown = Math.min(displayLimit, result.results.length);
             const remaining = total - shown;
             
             // Determine product type from query or results
@@ -751,15 +751,17 @@ WHAT NOT TO OFFER:
             
             // Build structured response
             const totalCount = result.overview?.total || result.results.length;
-            const shownCount = Math.min(5, result.results.length);
+            // IMPORTANT: Send ALL results to AI for full contextual awareness
+            // AI can choose to display subset but needs full data for follow-ups
+            const allResults = result.results;
             
             // Build structured response
             toolResponse = {
               formatted_response: formattedText,
               data: {
                 total: totalCount,
-                shown: shownCount,
-                products: result.results.slice(0, shownCount).map(item => ({
+                shown: allResults.length, // AI gets ALL results
+                products: allResults.map(item => ({
                   name: item.title,
                   url: item.url,
                   price: item.content?.match(/£([\d,]+\.?\d*)/)?.[1],
