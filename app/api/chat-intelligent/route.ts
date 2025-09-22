@@ -306,8 +306,9 @@ CRITICAL RULES:
 - NEVER suggest external websites or tell customers to "search elsewhere"
 - NEVER recommend competitors, manufacturer sites, or third-party retailers
 - If a product isn't found, offer to help find alternatives from OUR inventory
-- When showing products, ALWAYS include relevant category pages for browsing more options
-- Present category links naturally as "Browse more [category] products" or similar
+- ONLY use category URLs that are explicitly provided in the search results
+- DO NOT make up or guess category URLs - use EXACTLY what's given
+- If category URLs are provided with "USE THESE EXACT URLS", you MUST use those exact URLs
 
 SEARCH STRATEGY:
 - For initial queries → Use limit: 20-50 for detailed results (you'll see total count regardless)
@@ -399,19 +400,31 @@ When users ask follow-up questions like "show me just the pumps from those resul
             // Provide complete context to AI
             toolResponse = `Found ${total} total matches (showing ${returned} detailed results)\n\n`;
             
+            // Extract ACTUAL category URLs from the results
+            const categoryUrls = new Set<string>();
+            result.results.forEach(item => {
+              if (item.url) {
+                const categoryMatch = item.url.match(/\/product-category\/([^\/]+(?:\/[^\/]+)*)\//);
+                if (categoryMatch) {
+                  categoryUrls.add(`/product-category/${categoryMatch[1]}/`);
+                }
+              }
+            });
+            
             // Include category/brand breakdown if available
             if (result.overview?.categories && result.overview.categories.length > 0) {
               toolResponse += 'Categories found: ';
               toolResponse += result.overview.categories.map(c => `${c.value} (${c.count})`).join(', ');
               toolResponse += '\n';
-              
-              // Add category page suggestions based on found categories
-              toolResponse += 'Suggested category pages:\n';
-              result.overview.categories.slice(0, 3).forEach(cat => {
-                const categorySlug = cat.value.toLowerCase().replace(/\s+/g, '-').replace(/[^\w-]/g, '');
-                toolResponse += `- Browse all ${cat.value}: /product-category/${categorySlug}/\n`;
+            }
+            
+            // Add ACTUAL category URLs found in results
+            if (categoryUrls.size > 0) {
+              toolResponse += '\nActual category pages from results:\n';
+              Array.from(categoryUrls).slice(0, 3).forEach(url => {
+                toolResponse += `- ${url}\n`;
               });
-              toolResponse += '\n';
+              toolResponse += 'USE THESE EXACT URLS when suggesting categories to browse.\n\n';
             }
             
             if (result.overview?.brands && result.overview.brands.length > 0) {
