@@ -310,6 +310,15 @@ CRITICAL RULES:
 - DO NOT make up or guess category URLs - use EXACTLY what's given
 - If category URLs are provided with "USE THESE EXACT URLS", you MUST use those exact URLs
 
+FORMATTING RULES:
+- Use simple bullet points: * Product Name - Price
+- Do NOT use markdown bold (**text**) for product names
+- Keep product listings clean and easy to read
+- Include links inline: [Product Name](url) or just show the product name with price
+- Example format:
+  * Teng 1/2" Torque Wrench - £125.00
+  * Hydraulic Pump A4VTG71 - £450.00
+
 SEARCH STRATEGY:
 - For initial queries → Use limit: 20-50 for detailed results (you'll see total count regardless)
 - For counting/statistics → The total count is always provided
