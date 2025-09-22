@@ -166,11 +166,12 @@ async function executeSmartSearch(
       searchPromises.push(
         searchProductsDynamic(browseDomain, query, Math.min(limit, 5))
           .then(products => products?.map(p => ({
-            content: `${p.name}\nPrice: £${p.price || p.regular_price || 'Contact'}\nSKU: ${p.sku || 'N/A'}`,
+            content: `${p.name}\nPrice: £${p.price || p.regular_price || 'Contact'}\nSKU: ${p.sku || 'N/A'}\nAvailability: ${p.stock_status || 'Unknown'}`,
             url: p.permalink || '',
             title: p.name,
             similarity: 0.95,
-            type: 'product'
+            type: 'product',
+            stockStatus: p.stock_status
           })) || [])
           .catch(err => {
             // WooCommerce not configured is expected, just return empty
@@ -275,10 +276,35 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    // Conversation management - ensure we have a valid conversation ID
+    // Conversation management - ensure we have a valid conversation record
     let conversationId = conversation_id;
-    if (!conversationId) {
-      // Create a new conversation
+    
+    // Check if conversation exists (if ID was provided) or create new
+    if (conversationId) {
+      // Check if this conversation exists in the database
+      const { data: existingConv } = await adminSupabase
+        .from('conversations')
+        .select('id')
+        .eq('id', conversationId)
+        .single();
+      
+      // If it doesn't exist, create it with the provided ID
+      if (!existingConv) {
+        const { error: createError } = await adminSupabase
+          .from('conversations')
+          .insert({ 
+            id: conversationId,
+            session_id: session_id,
+            metadata: { domain },
+            created_at: new Date().toISOString()
+          });
+        
+        if (createError) {
+          console.error('[Chat API] Failed to create conversation with provided ID:', createError);
+        }
+      }
+    } else {
+      // No ID provided, create a new conversation
       const { data: newConversation, error: createError } = await adminSupabase
         .from('conversations')
         .insert({ 
@@ -290,7 +316,7 @@ export async function POST(request: NextRequest) {
         .single();
       
       if (createError) {
-        console.error('[Chat API] Failed to create conversation:', createError);
+        console.error('[Chat API] Failed to create new conversation:', createError);
         // Fallback to UUID if database write fails
         conversationId = crypto.randomUUID();
       } else {
@@ -330,7 +356,7 @@ export async function POST(request: NextRequest) {
     ]);
     
     // Build conversation context with history
-    const conversationMessages = [
+    const conversationMessages: Array<{role: 'system' | 'user' | 'assistant'; content: string; tool_calls?: any}> = [
       {
         role: 'system' as const,
         content: `You are a helpful customer service assistant with FULL conversation memory. ALWAYS use the smart_search tool when users ask about products, inventory, or availability.
@@ -346,6 +372,15 @@ IMPORTANT: You receive FULL VISIBILITY of search results:
 - Category and brand breakdowns
 - Detailed information for top results
 - Awareness of additional items beyond the detailed results
+
+MANDATORY PRODUCT LISTING RULES:
+- ALWAYS mention the total count when showing products
+- Use format: "We have [TOTAL] [product type] available. Here are [NUMBER SHOWN]:"
+- Example: "We have 24 Teng products available. Here are 5 popular ones:"
+- When showing a partial list, ALWAYS add: "...and [X] more [product type] available"
+- Example: "...and 19 more Teng products available. Would you like to see more or filter by specific type?"
+- NEVER just list items without mentioning the total
+- If categories/brands are available, mention them: "These span across [categories/brands]"
 
 This means:
 - You can accurately answer "How many X do you have?" without re-searching
@@ -363,10 +398,12 @@ CRITICAL RULES:
 - If category URLs are provided with "USE THESE EXACT URLS", you MUST use those exact URLs
 
 FORMATTING RULES:
+- ALWAYS start with total count: "We have X items matching..."
 - Keep product listings clean and easy to read
 - Use numbered lists (1. 2. 3.) for products
 - Include product names with prices clearly
 - Add links as [Product Name](url) when showing products
+- End partial lists with: "...plus X more items. Would you like to see [specific category/more options]?"
 
 SEARCH STRATEGY:
 - For initial queries → Use limit: 20-50 for detailed results (you'll see total count regardless)
@@ -381,7 +418,18 @@ FOLLOW-UP HANDLING:
 - Examples of follow-ups:
   * "tell me about this" → Look at the last product discussed
   * "what's the price?" → Reference the last item's price
-  * "do you have more like that?" → Use context from previous search`
+  * "do you have more like that?" → Use context from previous search
+
+STOCK & AVAILABILITY RULES:
+- NEVER make up stock quantities - the count of search results is NOT stock level
+- When users ask about stock/availability, inform them that you need to check the live inventory system
+- Suggest: "I can search for the product, but for real-time stock levels, please use our stock checking system"
+- If availability data shows "instock" in search results, say "This item shows as available"
+- If availability shows "outofstock", say "This item appears to be out of stock"
+- If availability shows "Unknown" or missing, say "Stock status unclear - please verify with our inventory system"
+- For specific quantity questions, say "For exact stock quantities, our inventory system needs to be checked directly"
+- DO NOT confuse the number of search results with inventory quantity
+- Note: Real-time stock checking requires calling the WooCommerce API at /api/woocommerce/stock`
       }
     ];
     
@@ -473,8 +521,10 @@ FOLLOW-UP HANDLING:
             const total = result.overview?.total || result.results.length;
             const returned = result.results.length;
             
-            // Provide complete context to AI
-            toolResponse = `Found ${total} total matches (showing ${returned} detailed results)\n\n`;
+            // Provide complete context to AI - EMPHASIZE TOTAL COUNT
+            toolResponse = `IMPORTANT: TOTAL COUNT = ${total} items found\n`;
+            toolResponse += `You MUST tell the user: "We have ${total} [item type] available"\n`;
+            toolResponse += `Showing detailed info for ${returned} items below:\n\n`;
             
             // Extract ACTUAL category URLs from the results
             const categoryUrls = new Set<string>();
@@ -527,10 +577,12 @@ FOLLOW-UP HANDLING:
             // If we have many more results, list some IDs for awareness
             if (result.overview?.allIds && result.overview.allIds.length > returned) {
               const additionalCount = result.overview.allIds.length - returned;
-              toolResponse += `\n[${additionalCount} additional items available, including: `;
+              toolResponse += `\nREMINDER: ${additionalCount} MORE items exist beyond those shown above!\n`;
+              toolResponse += `You MUST mention to the user: "...plus ${additionalCount} more items available"\n`;
+              toolResponse += `Additional items include: `;
               toolResponse += result.overview.allIds.slice(returned, returned + 10).map(i => i.title).join(', ');
               if (additionalCount > 10) toolResponse += ', ...';
-              toolResponse += ']';
+              toolResponse += '\n';
             }
           } else {
             toolResponse = 'No results found for this specific search. I can help you browse our categories or search for alternative products.';
