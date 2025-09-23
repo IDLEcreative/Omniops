@@ -162,7 +162,7 @@ async function executeSearchProducts(
     }
     
     // Fallback to semantic search
-    const searchResults = await searchSimilarContent(query, browseDomain, limit, 0.2);
+    const searchResults = await searchSimilarContent(query, browseDomain, limit, 0.6);
     console.log(`[Function Call] Semantic search returned ${searchResults.length} results`);
     
     return { 
@@ -194,7 +194,7 @@ async function executeSearchByCategory(
       : domain.replace(/^https?:\/\//, '').replace('www.', '');
     
     // Use semantic search for category-based queries
-    const searchResults = await searchSimilarContent(category, browseDomain, limit, 0.15);
+    const searchResults = await searchSimilarContent(category, browseDomain, limit, 0.6);
     console.log(`[Function Call] Category search returned ${searchResults.length} results`);
     
     return { 
@@ -232,7 +232,7 @@ async function executeGetProductDetails(
     }
     
     // Use higher similarity threshold for specific product details
-    const searchResults = await searchSimilarContent(enhancedQuery, browseDomain, 5, 0.3);
+    const searchResults = await searchSimilarContent(enhancedQuery, browseDomain, 5, 0.6);
     console.log(`[Function Call] Product details search returned ${searchResults.length} results`);
     
     return { 
@@ -410,7 +410,7 @@ FORMATTING RULES:
 - Do NOT use asterisks (*) for emphasis or bold text
 - Do NOT use underscores (_) for italics  
 - Do NOT use backticks (\`) for code or inline formatting
-- Present product lists with simple numbering (1. 2. 3.) or dashes (-)
+- Present product lists with bullet points (- ) NOT numbers
 - Keep all text clean and simple without special formatting characters
 
 CRITICAL: You have access to FULL PRODUCT DATA in each search with total counts. ALWAYS mention the total when listing products.
@@ -418,15 +418,18 @@ CRITICAL: You have access to FULL PRODUCT DATA in each search with total counts.
 KEY PRINCIPLES:
 1. MANDATORY PRODUCT LISTING FORMAT:
    - ALWAYS start with: "We have [TOTAL] [product type] available"
-   - Example: "We have 24 Teng products available. Here are 5 popular ones:"
-   - After showing partial list: "...and [X] more [product type] available"
+   - Example: "We have 24 Teng products available. Here are some popular ones:"
+   - Use bullet points (- ) for each product, NOT numbers
+   - After showing partial list: "...plus [X] more [product type] available"
    - NEVER just list items without mentioning the total count
 
-2. NUMBERED LIST REFERENCES:
-   - When users say "tell me about 3" or "item 3" or "the third one"
-   - They mean item #3 from your LAST numbered list
-   - Respond with details about THAT SPECIFIC ITEM
-   - DON'T re-list all items or get confused
+2. PRODUCT REFERENCES:
+   - When users ask about a specific product after seeing a list:
+     → They'll use the product name or description
+     → Example: "tell me more about the roller cabinet" or "the red one"
+   - If users say a number like "show me 8":
+     → This means show 8 products, not item #8
+     → Use search_products with appropriate limit
 
 3. STOCK & AVAILABILITY:
    - NEVER claim to check live stock levels
