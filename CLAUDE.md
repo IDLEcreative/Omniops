@@ -1,12 +1,36 @@
 # CLAUDE.md
 
+## 🚨 CRITICAL: BRAND-AGNOSTIC APPLICATION 🚨
+
+**THIS IS A MULTI-TENANT, BRAND-AGNOSTIC SYSTEM**
+
+### ABSOLUTELY NO HARDCODING OF:
+- ❌ Company names, logos, or branding
+- ❌ Specific product names, SKUs, or product types
+- ❌ Industry-specific terminology (e.g., "pumps", "parts", "Cifa products")
+- ❌ Business-specific categories or classifications
+- ❌ Domain names or company-specific URLs
+- ❌ Company-specific email addresses or contact info
+- ❌ Industry-specific assumptions (e.g., assuming it's always e-commerce)
+
+### THIS SYSTEM MUST WORK EQUALLY FOR:
+- ✅ E-commerce stores (any product type)
+- ✅ Restaurants and food services
+- ✅ Real estate and housing
+- ✅ Healthcare providers
+- ✅ Educational institutions
+- ✅ Service businesses
+- ✅ ANY other business type
+
+**VIOLATION CONSEQUENCES**: Hardcoding specific information will break the system for other tenants and violate the multi-tenant architecture. All business-specific data must come from the database configuration, NOT from code.
+
+---
+
 This file provides guidance to Claude Code (claude.ai/code) when working with code in this repository.
 
 ## Project Overview
 
-This is an AI-powered customer service chat widget built with Next.js 15, React 19, TypeScript, and Supabase. The application provides an embeddable chat widget that can be integrated into any website, with features including web scraping, WooCommerce integration, and privacy-compliant data handling.
-
-This is a Gerenal purpose customer service agent, please DO NOT HARDCODE any companies specific information into the code or specific product information, this could effect another company using the system
+This is a General purpose AI-powered customer service chat widget built with Next.js 15, React 19, TypeScript, and Supabase. The application provides an embeddable chat widget that can be integrated into any website, with features including web scraping, WooCommerce integration, and privacy-compliant data handling
 
 
 ### FILE LENGTH

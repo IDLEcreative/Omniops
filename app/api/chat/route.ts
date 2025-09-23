@@ -162,7 +162,7 @@ async function executeSearchProducts(
     }
     
     // Fallback to semantic search
-    const searchResults = await searchSimilarContent(query, browseDomain, limit, 0.6);
+    const searchResults = await searchSimilarContent(query, browseDomain, limit, 0.2);
     console.log(`[Function Call] Semantic search returned ${searchResults.length} results`);
     
     return { 
@@ -194,7 +194,7 @@ async function executeSearchByCategory(
       : domain.replace(/^https?:\/\//, '').replace('www.', '');
     
     // Use semantic search for category-based queries
-    const searchResults = await searchSimilarContent(category, browseDomain, limit, 0.6);
+    const searchResults = await searchSimilarContent(category, browseDomain, limit, 0.15);
     console.log(`[Function Call] Category search returned ${searchResults.length} results`);
     
     return { 
@@ -232,7 +232,7 @@ async function executeGetProductDetails(
     }
     
     // Use higher similarity threshold for specific product details
-    const searchResults = await searchSimilarContent(enhancedQuery, browseDomain, 5, 0.6);
+    const searchResults = await searchSimilarContent(enhancedQuery, browseDomain, 5, 0.3);
     console.log(`[Function Call] Product details search returned ${searchResults.length} results`);
     
     return { 
@@ -274,7 +274,7 @@ export async function POST(request: NextRequest) {
 
     // Check if GPT-5 mini is enabled
     const useGPT5Mini = process.env.USE_GPT5_MINI === 'true';
-    
+
     // Initialize telemetry with session data
     try {
       telemetry = telemetryManager.createSession(
@@ -403,48 +403,9 @@ export async function POST(request: NextRequest) {
     const conversationMessages = [
       {
         role: 'system' as const,
-        content: `You are a customer service representative. Act like a real human who works here and knows the business well.
+        content: `You are a helpful customer service representative. Use the conversation history to maintain context.
 
-FORMATTING RULES:
-- Use plain text only - NO markdown formatting
-- Do NOT use asterisks (*) for emphasis or bold text
-- Do NOT use underscores (_) for italics  
-- Do NOT use backticks (\`) for code or inline formatting
-- Present product lists with bullet points (- ) NOT numbers
-- Keep all text clean and simple without special formatting characters
-
-CRITICAL: You have access to FULL PRODUCT DATA in each search with total counts. ALWAYS mention the total when listing products.
-
-KEY PRINCIPLES:
-1. MANDATORY PRODUCT LISTING FORMAT:
-   - ALWAYS start with: "We have [TOTAL] [product type] available"
-   - Example: "We have 24 Teng products available. Here are some popular ones:"
-   - Use bullet points (- ) for each product, NOT numbers
-   - After showing partial list: "...plus [X] more [product type] available"
-   - NEVER just list items without mentioning the total count
-
-2. PRODUCT REFERENCES:
-   - When users ask about a specific product after seeing a list:
-     → They'll use the product name or description
-     → Example: "tell me more about the roller cabinet" or "the red one"
-   - If users say a number like "show me 8":
-     → This means show 8 products, not item #8
-     → Use search_products with appropriate limit
-
-3. STOCK & AVAILABILITY:
-   - NEVER claim to check live stock levels
-   - If asked about stock, say: "To check current stock, please contact us at [phone] or visit our store"
-   - DON'T offer to check postcodes or delivery options
-   - DON'T offer click-and-collect or store pickup
-
-4. WHAT NOT TO OFFER:
-   - NEVER offer to check delivery to specific postcodes
-   - NEVER offer store collection options
-   - NEVER promise specific delivery timeframes
-   - NEVER offer to process orders or payments
-   - Direct these queries to: "Please contact our store directly"
-
-Remember: Be honest about system limitations while remaining helpful.`
+When searches return exactly 20 results (or round numbers), that's usually a search limit, not the total inventory.`
       },
       ...(historyData || []).map((msg: any) => ({
         role: msg.role as 'user' | 'assistant',
@@ -705,6 +666,10 @@ Remember: Be honest about system limitations while remaining helpful.`
     finalResponse = finalResponse.replace(/\n{3,}/g, '\n\n');
     finalResponse = finalResponse.replace(/\n\s+•/g, '\n• ');
     finalResponse = finalResponse.replace(/([^•\n]) • /g, '$1\n• ');
+    
+    // Convert numbered lists to bullet points
+    // This regex matches lines starting with numbers followed by . or )
+    finalResponse = finalResponse.replace(/^(\s*)(\d+)[.)]\s*/gm, '$1- ');
 
     // Sanitize outbound links
     const allowedDomain = (domain && !/localhost|127\.0\.0\.1|vercel/i.test(domain))
