@@ -75,10 +75,10 @@ const SEARCH_TOOLS = [
           },
           limit: {
             type: "number",
-            description: "Maximum number of products to return (default: 8, max: 20)",
-            default: 8,
+            description: "Maximum number of products to return (default: 100, max: 1000)",
+            default: 100,
             minimum: 1,
-            maximum: 20
+            maximum: 1000
           }
         },
         required: ["query"]
@@ -99,10 +99,10 @@ const SEARCH_TOOLS = [
           },
           limit: {
             type: "number",
-            description: "Maximum number of results to return (default: 6, max: 15)",
-            default: 6,
+            description: "Maximum number of results to return (default: 100, max: 1000)",
+            default: 100,
             minimum: 1,
-            maximum: 15
+            maximum: 1000
           }
         },
         required: ["category"]
@@ -136,7 +136,7 @@ const SEARCH_TOOLS = [
 // Tool execution functions
 async function executeSearchProducts(
   query: string, 
-  limit: number = 8, 
+  limit: number = 100, 
   domain: string
 ): Promise<{ success: boolean; results: SearchResult[]; source: string }> {
   console.log(`[Function Call] search_products: "${query}" (limit: ${limit})`);
@@ -147,7 +147,7 @@ async function executeSearchProducts(
       ? 'thompsonseparts.co.uk'
       : domain.replace(/^https?:\/\//, '').replace('www.', '');
     
-    const wcProducts = await searchProductsDynamic(browseDomain, query, Math.min(limit, 10));
+    const wcProducts = await searchProductsDynamic(browseDomain, query, limit);
     
     if (wcProducts && wcProducts.length > 0) {
       console.log(`[Function Call] WooCommerce returned ${wcProducts.length} products`);
@@ -183,7 +183,7 @@ async function executeSearchProducts(
 
 async function executeSearchByCategory(
   category: string, 
-  limit: number = 6, 
+  limit: number = 100, 
   domain: string
 ): Promise<{ success: boolean; results: SearchResult[]; source: string }> {
   console.log(`[Function Call] search_by_category: "${category}" (limit: ${limit})`);
@@ -405,7 +405,7 @@ export async function POST(request: NextRequest) {
         role: 'system' as const,
         content: `You are a helpful customer service representative. Use the conversation history to maintain context.
 
-When searches return exactly 20 results (or round numbers), that's usually a search limit, not the total inventory.`
+You have full visibility of ALL search results. When you search, you see the complete inventory.`
       },
       ...(historyData || []).map((msg: any) => ({
         role: msg.role as 'user' | 'assistant',
@@ -561,14 +561,10 @@ When searches return exactly 20 results (or round numbers), that's usually a sea
         // Collect all results
         allSearchResults.push(...result.results);
 
-        // Format results for AI with limit awareness
+        // Format results for AI
         let toolResponse = '';
         if (result.success && result.results.length > 0) {
-          // Check if we likely hit a search limit
-          const hitLimit = [10, 20, 25, 50, 100].includes(result.results.length);
-          const limitNote = hitLimit ? ` (Note: Got exactly ${result.results.length} results - likely hit search limit, more may exist)` : '';
-          
-          toolResponse = `Found ${result.results.length} results from ${result.source}${limitNote}:\n\n`;
+          toolResponse = `Found ${result.results.length} results from ${result.source}:\n\n`;
           result.results.forEach((item, index) => {
             toolResponse += `${index + 1}. ${item.title}\n`;
             toolResponse += `   URL: ${item.url}\n`;

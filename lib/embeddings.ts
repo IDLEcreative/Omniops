@@ -237,7 +237,7 @@ export async function searchSimilarContentOptimized(
       query_embedding: queryEmbedding,
       p_domain_id: domainId,
       match_threshold: similarityThreshold,
-      match_count: Math.min(limit, 20), // Optimized limit for performance vs results
+      match_count: limit, // Full visibility - no artificial limits
     }).abortSignal(AbortSignal.timeout(5000));
     
     vectorTimer.end();
