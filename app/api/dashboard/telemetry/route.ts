@@ -9,6 +9,9 @@ export async function GET(request: NextRequest) {
     const domain = searchParams.get('domain') || undefined;
     
     const supabase = await createServiceRoleClient();
+    if (!supabase) {
+      throw new Error('Failed to create Supabase client');
+    }
     
     // Get date range
     const endDate = new Date();
@@ -53,7 +56,13 @@ export async function GET(request: NextRequest) {
       : 0;
     
     // Model usage breakdown
-    const modelUsage = telemetryData?.reduce((acc, t) => {
+    interface ModelUsageItem {
+      count: number;
+      cost: number | string;
+      tokens: number;
+      percentage: number;
+    }
+    const modelUsage = telemetryData?.reduce<Record<string, ModelUsageItem>>((acc, t) => {
       const model = t.model || 'unknown';
       if (!acc[model]) {
         acc[model] = {
@@ -67,20 +76,28 @@ export async function GET(request: NextRequest) {
       acc[model].cost += t.cost_usd || 0;
       acc[model].tokens += t.total_tokens || 0;
       return acc;
-    }, {} as Record<string, any>) || {};
+    }, {}) || {};
     
     // Calculate percentages for model usage
     Object.keys(modelUsage).forEach(model => {
-      modelUsage[model].percentage = totalRequests > 0
-        ? Math.round((modelUsage[model].count / totalRequests) * 100)
-        : 0;
-      modelUsage[model].cost = modelUsage[model].cost.toFixed(4);
+      if (modelUsage[model]) {
+        modelUsage[model].percentage = totalRequests > 0
+          ? Math.round((modelUsage[model].count / totalRequests) * 100)
+          : 0;
+        modelUsage[model].cost = typeof modelUsage[model].cost === 'number' 
+          ? modelUsage[model].cost.toFixed(4)
+          : modelUsage[model].cost;
+      }
     });
     
     // Domain breakdown (if not filtered by domain)
-    let domainBreakdown = {};
+    interface DomainBreakdownItem {
+      requests: number;
+      cost: number | string;
+    }
+    let domainBreakdown: Record<string, DomainBreakdownItem> = {};
     if (!domain) {
-      domainBreakdown = telemetryData?.reduce((acc, t) => {
+      domainBreakdown = telemetryData?.reduce<Record<string, DomainBreakdownItem>>((acc, t) => {
         const d = t.domain || 'unknown';
         if (!acc[d]) {
           acc[d] = { requests: 0, cost: 0 };
@@ -88,10 +105,14 @@ export async function GET(request: NextRequest) {
         acc[d].requests++;
         acc[d].cost += t.cost_usd || 0;
         return acc;
-      }, {} as Record<string, any>) || {};
+      }, {}) || {};
       
       Object.keys(domainBreakdown).forEach(d => {
-        domainBreakdown[d].cost = domainBreakdown[d].cost.toFixed(4);
+        if (domainBreakdown[d]) {
+          domainBreakdown[d].cost = typeof domainBreakdown[d].cost === 'number'
+            ? domainBreakdown[d].cost.toFixed(4)
+            : domainBreakdown[d].cost;
+        }
       });
     }
     
@@ -167,12 +188,12 @@ export async function GET(request: NextRequest) {
       // Breakdowns
       modelUsage: Object.entries(modelUsage).map(([model, data]) => ({
         model,
-        ...data
+        ...(data as ModelUsageItem)
       })),
       
       domainBreakdown: Object.entries(domainBreakdown).map(([domain, data]) => ({
         domain,
-        ...data
+        ...(data as DomainBreakdownItem)
       })),
       
       // Hourly trend for charts
@@ -245,7 +266,10 @@ export async function GET(request: NextRequest) {
 }
 
 // Helper function to get hourly trend data
-async function getHourlyTrend(supabase: any, startDate: Date, domain?: string) {
+async function getHourlyTrend(supabase: ReturnType<typeof createServiceRoleClient> extends Promise<infer T> ? T : never, startDate: Date, domain?: string) {
+  if (!supabase) {
+    return [];
+  }
   try {
     let query = supabase
       .from('chat_telemetry')

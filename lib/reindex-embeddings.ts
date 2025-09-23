@@ -310,7 +310,7 @@ export class EmbeddingReindexer {
     if (!text || text.length === 0) return [];
     
     // Clean the text first
-    let cleanText = this.cleanText(text);
+    const cleanText = this.cleanText(text);
     if (cleanText.length < 100) return [];
     
     const chunks: string[] = [];

@@ -61,7 +61,10 @@ export class CategoryMapper {
         if (!categoryPatterns.has(category.name)) {
           categoryPatterns.set(category.name, new Set());
         }
-        categoryPatterns.get(category.name)?.add(page.url);
+        const patternSet = categoryPatterns.get(category.name);
+        if (patternSet) {
+          patternSet.add(page.url);
+        }
         
         // Track potential category URL
         if (category.url && !categoryUrls.has(category.name)) {
@@ -80,7 +83,7 @@ export class CategoryMapper {
       mappings.set(category, {
         pattern: this.generatePattern(category, Array.from(urls)),
         category_name: category,
-        category_url: categoryUrls.get(category),
+        category_url: categoryUrls.get(category) || undefined,
         product_count: urls.size,
         confidence: this.calculateConfidence(urls.size, pages.length)
       });
@@ -101,10 +104,13 @@ export class CategoryMapper {
     const categoryPattern = /(?:category|categories|filed under|posted in|tagged):\s*([^,\n]+)/gi;
     let match;
     
-    while ((match = categoryPattern.exec(page.content)) !== null) {
-      const categoryName = this.humanizeName(match[1].trim());
-      if (categoryName.length > 2 && categoryName.length < 50) {
-        categories.push({ name: categoryName });
+    while ((match = categoryPattern.exec(page.content || '')) !== null) {
+      const matchedText = match[1];
+      if (matchedText) {
+        const categoryName = this.humanizeName(matchedText.trim());
+        if (categoryName.length > 2 && categoryName.length < 50) {
+          categories.push({ name: categoryName });
+        }
       }
     }
     
@@ -130,14 +136,14 @@ export class CategoryMapper {
   private extractBrand(title: string, content: string): string | null {
     // Common brand patterns in titles
     const brandMatch = title.match(/^([A-Z][a-z]+(?:\s+[A-Z][a-z]+)?)\s+/);
-    if (brandMatch) {
+    if (brandMatch && brandMatch[1]) {
       return brandMatch[1];
     }
     
     // Look for "Brand:" or "Manufacturer:" in content
     const brandPattern = /(?:Brand|Manufacturer|Make):\s*([A-Za-z0-9\s]+)/i;
     const contentMatch = content.match(brandPattern);
-    if (contentMatch) {
+    if (contentMatch && contentMatch[1]) {
       return contentMatch[1].trim();
     }
     
@@ -155,9 +161,9 @@ export class CategoryMapper {
     let match;
     
     while ((match = typePattern.exec(content)) !== null) {
-      const type = match[1].trim();
-      if (type.length > 2 && type.length < 50) {
-        types.push({ name: this.humanizeName(type) });
+      const type = match[1];
+      if (type && type.trim().length > 2 && type.trim().length < 50) {
+        types.push({ name: this.humanizeName(type.trim()) });
       }
     }
     

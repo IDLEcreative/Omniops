@@ -171,7 +171,7 @@ class BatchRechunker {
     const estimatedTime = (totalCount / BATCH_SIZE) * (DELAY_BETWEEN_BATCHES / 1000);
     console.log(`⏱️  Estimated time: ${Math.ceil(estimatedTime / 60)} minutes\n`);
     
-    let offset = 0;
+    const offset = 0;
     let hasMore = true;
     
     const startTime = Date.now();

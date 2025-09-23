@@ -301,7 +301,7 @@ Response Guidelines:
     
     const { terminology } = this.businessContext;
     
-    let context = `## System Instructions
+    const context = `## System Instructions
 ${this.getAdaptiveSystemPrompt(!!customerContext)}
 
 ## Customer Context

@@ -4,6 +4,9 @@ import { createServiceRoleClient } from '@/lib/supabase-server';
 export async function GET(request: NextRequest) {
   try {
     const supabase = await createServiceRoleClient();
+    if (!supabase) {
+      throw new Error('Failed to create Supabase client');
+    }
     
     // Get date range from query params
     const searchParams = request.nextUrl.searchParams;
@@ -22,10 +25,10 @@ export async function GET(request: NextRequest) {
     
     // Calculate response times (simplified - tracks message pairs)
     const responseTimes: number[] = [];
-    for (let i = 0; i < messages.length - 1; i++) {
-      if (messages[i].role === 'user' && messages[i + 1].role === 'assistant') {
-        const userTime = new Date(messages[i].created_at).getTime();
-        const assistantTime = new Date(messages[i + 1].created_at).getTime();
+    for (let i = 0; i < (messages?.length ?? 0) - 1; i++) {
+      if (messages && messages[i] && messages[i + 1] && messages[i]?.role === 'user' && messages[i + 1]?.role === 'assistant') {
+        const userTime = new Date(messages[i]?.created_at ?? '').getTime();
+        const assistantTime = new Date(messages[i + 1]?.created_at ?? '').getTime();
         const responseTime = (assistantTime - userTime) / 1000; // Convert to seconds
         if (responseTime < 60) { // Filter out unrealistic times (> 1 minute)
           responseTimes.push(responseTime);
@@ -47,7 +50,7 @@ export async function GET(request: NextRequest) {
     let negativeCount = 0;
     let totalUserMessages = 0;
     
-    messages.forEach(msg => {
+    messages?.forEach(msg => {
       if (msg.role === 'user') {
         totalUserMessages++;
         const content = msg.content.toLowerCase();
@@ -67,12 +70,12 @@ export async function GET(request: NextRequest) {
     const failedSearches: string[] = [];
     const searchQueries = new Map<string, number>();
     
-    messages.forEach(msg => {
+    messages?.forEach(msg => {
       if (msg.role === 'assistant' && failedSearchPatterns.test(msg.content)) {
         // Look for the previous user message
-        const msgIndex = messages.indexOf(msg);
-        if (msgIndex > 0 && messages[msgIndex - 1].role === 'user') {
-          const query = messages[msgIndex - 1].content.substring(0, 100);
+        const msgIndex = messages?.indexOf(msg) ?? -1;
+        if (msgIndex > 0 && messages && messages[msgIndex - 1] && messages[msgIndex - 1]?.role === 'user') {
+          const query = messages[msgIndex - 1]?.content.substring(0, 100) ?? '';
           failedSearches.push(query);
           searchQueries.set(query, (searchQueries.get(query) || 0) + 1);
         }
@@ -90,7 +93,7 @@ export async function GET(request: NextRequest) {
       }));
     
     // Calculate resolution rate (conversations that didn't escalate or have issues)
-    const conversationsWithIssues = messages.filter(msg => 
+    const conversationsWithIssues = messages?.filter(msg => 
       msg.role === 'user' && negativePatterns.test(msg.content)
     ).length;
     
@@ -107,7 +110,7 @@ export async function GET(request: NextRequest) {
     
     const languageCounts = { english: 0, spanish: 0, french: 0, german: 0, other: 0 };
     
-    messages.forEach(msg => {
+    messages?.forEach(msg => {
       if (msg.role === 'user') {
         const content = msg.content.toLowerCase();
         if (languagePatterns.spanish.test(content)) languageCounts.spanish++;
@@ -138,9 +141,9 @@ export async function GET(request: NextRequest) {
       failedSearches: failedSearches.slice(0, 5),
       languageDistribution,
       metrics: {
-        totalMessages: messages.length,
+        totalMessages: messages?.length ?? 0,
         userMessages: totalUserMessages,
-        avgMessagesPerDay: Math.round(messages.length / days)
+        avgMessagesPerDay: Math.round((messages?.length ?? 0) / days)
       }
     });
     

@@ -49,8 +49,13 @@ async function fixNullDomainIds() {
       .order('created_at', { ascending: true });
     
     if (domains && domains.length > 0) {
-      const defaultDomainId = domains[0].id;
-      console.log(`Using default domain: ${domains[0].domain} (${defaultDomainId})`);
+      const firstDomain = domains[0];
+      if (!firstDomain) {
+        console.log('⚠️ No valid domain found. Skipping conversation fix.');
+        return;
+      }
+      const defaultDomainId = firstDomain.id;
+      console.log(`Using default domain: ${firstDomain.domain} (${defaultDomainId})`);
       
       // First try to recover from metadata
       const { data: conversationsWithMetadata } = await supabase
@@ -65,11 +70,12 @@ async function fixNullDomainIds() {
         for (const conv of conversationsWithMetadata) {
           if (conv.metadata && typeof conv.metadata === 'object') {
             const metadataDomain = (conv.metadata as any).domain;
-            if (metadataDomain) {
+            if (metadataDomain && typeof metadataDomain === 'string') {
               // Try to find matching domain
+              const normalizedDomain = metadataDomain.replace(/^https?:\/\//, '').replace('www.', '');
               const matchingDomain = domains.find(d => 
                 d.domain === metadataDomain || 
-                d.domain === metadataDomain.replace(/^https?:\/\//, '').replace('www.', '')
+                d.domain === normalizedDomain
               );
               
               if (matchingDomain) {
@@ -110,10 +116,12 @@ async function fixNullDomainIds() {
     console.log('\n🗑️ Cleaning up orphaned scraped pages...');
     
     // Show what we're about to delete
-    if (scrapedNulls) {
+    if (scrapedNulls && Array.isArray(scrapedNulls)) {
       console.log('Pages to be deleted:');
       scrapedNulls.forEach((page: any) => {
-        console.log(`  - ${page.url}`);
+        if (page && page.url) {
+          console.log(`  - ${page.url}`);
+        }
       });
     }
     

@@ -104,7 +104,7 @@ export async function executeWooCommerceOperation(
             let message = `${product.name}: `;
             if (product.stock_status === 'instock') {
               message += '✓ Currently in stock';
-              if (params.includeQuantity && product.stock_quantity !== null) {
+              if (params.includeQuantity && product.stock_quantity !== null && product.stock_quantity !== undefined) {
                 message += ` (${product.stock_quantity} units available)`;
               }
             } else if (product.stock_status === 'outofstock') {
@@ -152,6 +152,13 @@ export async function executeWooCommerceOperation(
 
           if (products && products.length > 0) {
             const product = products[0];
+            if (!product) {
+              return {
+                success: false,
+                data: null,
+                message: "Product data not available"
+              };
+            }
             return {
               success: true,
               data: {
@@ -241,6 +248,13 @@ export async function executeWooCommerceOperation(
 
           if (products && products.length > 0) {
             const product = products[0];
+            if (!product) {
+              return {
+                success: false,
+                data: null,
+                message: "Product data not available"
+              };
+            }
             const priceInfo = {
               regularPrice: product.regular_price,
               salePrice: product.sale_price,

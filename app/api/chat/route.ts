@@ -466,8 +466,8 @@ Remember: Be honest about system limitations while remaining helpful.`
     const searchTimeout = config?.ai?.searchTimeout || 10000;
     
     let iteration = 0;
-    let allSearchResults: SearchResult[] = [];
-    let searchLog: Array<{ tool: string; query: string; resultCount: number; source: string }> = [];
+    const allSearchResults: SearchResult[] = [];
+    const searchLog: Array<{ tool: string; query: string; resultCount: number; source: string }> = [];
 
     // Initial AI call with tools - use GPT-5-mini if enabled
     const modelConfig = useGPT5Mini ? {

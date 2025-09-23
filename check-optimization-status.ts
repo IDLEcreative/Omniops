@@ -39,12 +39,17 @@ async function checkOptimizationStatus() {
     `
   }).single();
   
-  if (indexes) {
+  if (indexes && Array.isArray(indexes)) {
     console.log('Critical performance indexes:');
     indexes.forEach((idx: any) => {
       console.log(`  ✅ ${idx.indexname}`);
       console.log(`     Size: ${idx.size}, Used: ${idx.times_used} times`);
     });
+  } else if (indexes && typeof indexes === 'object') {
+    // Handle case where indexes is a single object instead of array
+    console.log('Critical performance indexes:');
+    console.log(`  ✅ ${(indexes as any).indexname}`);
+    console.log(`     Size: ${(indexes as any).size}, Used: ${(indexes as any).times_used} times`);
   }
   
   // 2. Check functions
@@ -81,11 +86,13 @@ async function checkOptimizationStatus() {
     `
   }).single();
   
-  if (vacuumSettings?.[0]?.reloptions) {
+  if (vacuumSettings && Array.isArray(vacuumSettings) && vacuumSettings[0]?.reloptions) {
     console.log('  ✅ Custom autovacuum settings applied:');
-    vacuumSettings[0].reloptions.forEach((opt: string) => {
-      console.log(`     ${opt}`);
-    });
+    if (Array.isArray(vacuumSettings[0].reloptions)) {
+      vacuumSettings[0].reloptions.forEach((opt: string) => {
+        console.log(`     ${opt}`);
+      });
+    }
   } else {
     console.log('  ⚠️  Using default autovacuum settings');
   }
@@ -109,7 +116,7 @@ async function checkOptimizationStatus() {
     `
   }).single();
   
-  if (stats) {
+  if (stats && Array.isArray(stats)) {
     stats.forEach((stat: any) => {
       console.log(`\n  ${stat.tablename}:`);
       console.log(`    Live rows: ${stat.live_rows?.toLocaleString() || 0}`);

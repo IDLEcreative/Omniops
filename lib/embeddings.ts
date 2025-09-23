@@ -141,7 +141,7 @@ export async function searchSimilarContentOptimized(
       
       const keywordTimer = new QueryTimer('Keyword Search', 3000); // Shorter timeout for keyword
       
-      let keywordResults: any[] = [];
+      const keywordResults: any[] = [];
       
       try {
         // Try keyword search first

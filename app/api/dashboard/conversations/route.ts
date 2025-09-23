@@ -74,7 +74,7 @@ export async function GET(request: NextRequest) {
       : 0;
     
     // Fetch recent conversations (optional - don't fail if this errors)
-    let recent = [];
+    const recent = [];
     try {
       const { data: recentConversations, error } = await supabase
         .from('conversations')

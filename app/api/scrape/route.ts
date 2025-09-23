@@ -184,18 +184,18 @@ export async function POST(request: NextRequest) {
       let enrichedContent = pageData.content;
       
       // Add product category if available
-      if (pageData.metadata?.productCategory) {
+      if (pageData.metadata && pageData.metadata.productCategory) {
         enrichedContent = `Category: ${pageData.metadata.productCategory}\n\n${enrichedContent}`;
       }
       
       // Add breadcrumbs from ecommerceData if available
-      if (pageData.metadata?.ecommerceData?.breadcrumbs?.length > 0) {
+      if (pageData.metadata && pageData.metadata.ecommerceData?.breadcrumbs && Array.isArray(pageData.metadata.ecommerceData.breadcrumbs) && pageData.metadata.ecommerceData.breadcrumbs.length > 0) {
         const breadcrumbText = pageData.metadata.ecommerceData.breadcrumbs.map((b: any) => b.name).join(' > ');
         enrichedContent = `${breadcrumbText}\n\n${enrichedContent}`;
       }
       
       // Add brand if available
-      if (pageData.metadata?.productBrand) {
+      if (pageData.metadata && pageData.metadata.productBrand) {
         enrichedContent = `Brand: ${pageData.metadata.productBrand}\n${enrichedContent}`;
       }
       
@@ -338,18 +338,18 @@ async function processCrawlResults(jobId: string, supabase: any) {
                 let enrichedContent = page.content;
                 
                 // Add product category if available
-                if (page.metadata?.productCategory) {
+                if (page.metadata && page.metadata.productCategory) {
                   enrichedContent = `Category: ${page.metadata.productCategory}\n\n${enrichedContent}`;
                 }
                 
                 // Add breadcrumbs from ecommerceData if available
-                if (page.metadata?.ecommerceData?.breadcrumbs?.length > 0) {
+                if (page.metadata && page.metadata.ecommerceData?.breadcrumbs && Array.isArray(page.metadata.ecommerceData.breadcrumbs) && page.metadata.ecommerceData.breadcrumbs.length > 0) {
                   const breadcrumbText = page.metadata.ecommerceData.breadcrumbs.map((b: any) => b.name).join(' > ');
                   enrichedContent = `${breadcrumbText}\n\n${enrichedContent}`;
                 }
                 
                 // Add brand if available
-                if (page.metadata?.productBrand) {
+                if (page.metadata && page.metadata.productBrand) {
                   enrichedContent = `Brand: ${page.metadata.productBrand}\n${enrichedContent}`;
                 }
                 

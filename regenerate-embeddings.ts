@@ -124,15 +124,20 @@ async function regenerateEmbeddings(domainFilter?: string) {
       }));
 
       // Use bulk insert if available
-      const { error: insertError } = await supabase.rpc('bulk_insert_embeddings', {
-        embeddings: embeddingRecords
-      }).catch(async (rpcError) => {
+      let insertError;
+      try {
+        const result = await supabase.rpc('bulk_insert_embeddings', {
+          embeddings: embeddingRecords
+        });
+        insertError = result.error;
+      } catch (rpcError) {
         // Fallback to regular insert if RPC fails
         console.log('Using fallback insert method...');
-        return await supabase
+        const fallbackResult = await supabase
           .from('page_embeddings')
           .insert(embeddingRecords);
-      });
+        insertError = fallbackResult.error;
+      }
 
       if (insertError) {
         throw insertError;
@@ -163,10 +168,16 @@ const args = process.argv.slice(2);
 let domainFilter: string | undefined;
 
 for (let i = 0; i < args.length; i++) {
-  if (args[i] === '--domain' && args[i + 1]) {
+  const currentArg = args[i];
+  if (!currentArg) continue;
+  
+  if (currentArg === '--domain' && args[i + 1]) {
     domainFilter = args[i + 1];
-  } else if (args[i].startsWith('--domain=')) {
-    domainFilter = args[i].split('=')[1];
+  } else if (currentArg.startsWith('--domain=')) {
+    const splitResult = currentArg.split('=');
+    if (splitResult[1]) {
+      domainFilter = splitResult[1];
+    }
   }
 }
 

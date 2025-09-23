@@ -9,13 +9,26 @@ interface Product {
   price: string;
   regular_price?: string;
   sale_price?: string;
+  on_sale?: boolean;
   description?: string;
   short_description?: string;
   sku?: string;
   stock_status?: string;
+  stock_quantity?: number | null;
+  manage_stock?: boolean;
+  backorders?: string;
   categories?: Array<{ id: number; name: string }>;
   images?: Array<{ src: string; alt?: string }>;
   permalink?: string;
+  attributes?: Array<{ 
+    id: number;
+    name: string;
+    position?: number;
+    visible?: boolean;
+    variation?: boolean;
+    options?: string[];
+  }>;
+  variations?: number[];
 }
 
 // Get WooCommerce client with dynamic configuration

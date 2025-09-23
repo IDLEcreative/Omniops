@@ -141,7 +141,7 @@ export async function getEnhancedChatContext(
     const searchTerms = searchQuery.toLowerCase().split(/\s+/).filter(term => term.length > 2);
     
     // Build OR conditions for each significant term
-    let searchConditions = [];
+    const searchConditions = [];
     
     // Add full query search
     searchConditions.push(`title.ilike.%${searchQuery}%`);

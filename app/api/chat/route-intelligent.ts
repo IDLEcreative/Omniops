@@ -435,8 +435,8 @@ Remember: You're a helpful human, not a search engine. When searches return exac
     const searchTimeout = config?.ai?.searchTimeout || 10000;
     
     let iteration = 0;
-    let allSearchResults: SearchResult[] = [];
-    let searchLog: Array<{ tool: string; query: string; resultCount: number; source: string }> = [];
+    const allSearchResults: SearchResult[] = [];
+    const searchLog: Array<{ tool: string; query: string; resultCount: number; source: string }> = [];
 
     // Initial AI call with tools
     let completion = await openaiClient.chat.completions.create({

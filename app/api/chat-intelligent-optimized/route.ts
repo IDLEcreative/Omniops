@@ -294,7 +294,7 @@ Focus on answering the user's specific question directly.`
     const maxIterations = Math.min(config?.ai?.maxSearchIterations || 2, 2);
     const searchTimeout = Math.min(config?.ai?.searchTimeout || 5000, 5000);
     
-    let allSearchResults: any[] = [];
+    const allSearchResults: any[] = [];
     let finalResponse = '';
     
     // First AI call with tools

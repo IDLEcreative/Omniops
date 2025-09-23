@@ -301,7 +301,7 @@ export async function POST(request: NextRequest) {
 // Helper functions
 
 async function getHourlyTrend(supabase: any, startDate: Date, domain?: string) {
-  let query = supabase
+  const query = supabase
     .from('chat_telemetry_hourly_costs')
     .select('*')
     .gte('hour', startDate.toISOString())

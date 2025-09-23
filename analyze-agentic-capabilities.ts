@@ -350,7 +350,8 @@ class AgenticAnalyzer {
       console.log(`   3. Implement pattern tracking to learn from successful searches`);
     }
     
-    if (this.features.find(f => f.name === 'Result Quality Assessment')?.score! < 15) {
+    const qualityAssessmentScore = this.features.find(f => f.name === 'Result Quality Assessment')?.score;
+    if (qualityAssessmentScore && qualityAssessmentScore < 15) {
       console.log(`   4. Add explicit result quality scoring and confidence metrics`);
     }
     

@@ -61,12 +61,13 @@ export class AICategoryInferencer {
 
       const result = JSON.parse(response.choices[0]?.message?.content || '{}');
       
+      const primaryCategory = result.primary_category || 'General Products';
       const inference: CategoryInference = {
-        primaryCategory: result.primary_category || 'General Products',
+        primaryCategory,
         secondaryCategories: result.secondary_categories || [],
         confidence: result.confidence || 0.5,
         reasoning: result.reasoning || 'Based on product analysis',
-        suggestedUrl: this.generateCategoryUrl(result.primary_category)
+        suggestedUrl: this.generateCategoryUrl(primaryCategory)
       };
 
       // Cache the result
@@ -155,12 +156,13 @@ Don't force any specific category structure - adapt to what you see.`;
   ): CategoryInference {
     // If we have existing categories from the site, use them
     if (existingCategories && existingCategories.length > 0) {
+      const primaryCategory = existingCategories[0]!; // Safe because we checked length > 0
       return {
-        primaryCategory: existingCategories[0],
+        primaryCategory,
         secondaryCategories: existingCategories.slice(1, 3),
         confidence: 0.8,
         reasoning: 'Categories extracted from site structure',
-        suggestedUrl: this.generateCategoryUrl(existingCategories[0])
+        suggestedUrl: this.generateCategoryUrl(primaryCategory)
       };
     }
     

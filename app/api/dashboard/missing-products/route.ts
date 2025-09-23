@@ -8,6 +8,13 @@ interface MissingProduct {
   examples: string[];
 }
 
+interface ProductCategory {
+  tools: string[];
+  parts: string[];
+  equipment: string[];
+  other: string[];
+}
+
 export async function GET(request: NextRequest) {
   try {
     const supabase = await createServiceRoleClient();
@@ -19,7 +26,7 @@ export async function GET(request: NextRequest) {
     startDate.setDate(startDate.getDate() - days);
     
     // Fetch messages that indicate product not found
-    const { data: messages, error } = await supabase
+    const { data: messages, error } = await supabase!
       .from('messages')
       .select('content, created_at, conversation_id')
       .eq('role', 'assistant')
@@ -44,7 +51,7 @@ export async function GET(request: NextRequest) {
     // For each "not found" message, look at the conversation to find what was requested
     for (const msg of messages || []) {
       // Get the user's original query from the same conversation
-      const { data: userMsg, error: userError } = await supabase
+      const { data: userMsg, error: userError } = await supabase!
         .from('messages')
         .select('content')
         .eq('conversation_id', msg.conversation_id)
@@ -74,7 +81,7 @@ export async function GET(request: NextRequest) {
           const keywords = query
             .replace(/[^a-z0-9\s-]/gi, '')
             .split(/\s+/)
-            .filter(word => 
+            .filter((word: string) => 
               word.length > 3 && 
               !['have', 'need', 'want', 'looking', 'find', 'show', 'where', 'what', 'which', 'your', 'with', 'from', 'that', 'this'].includes(word)
             );
@@ -89,7 +96,7 @@ export async function GET(request: NextRequest) {
             name: productName,
             count: 0,
             lastRequested: msg.created_at,
-            examples: []
+            examples: [] as string[]
           };
           
           existing.count++;
@@ -148,7 +155,7 @@ export async function GET(request: NextRequest) {
         parts: categories.parts.slice(0, 5),
         equipment: categories.equipment.slice(0, 5),
         other: categories.other.slice(0, 5)
-      },
+      } as ProductCategory,
       recommendations: generateRecommendations(sortedMissing)
     });
     
@@ -168,7 +175,7 @@ export async function GET(request: NextRequest) {
           parts: [],
           equipment: [],
           other: []
-        },
+        } satisfies ProductCategory,
         recommendations: []
       },
       { status: 200 }

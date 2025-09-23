@@ -4,6 +4,9 @@ import { createServiceRoleClient } from '@/lib/supabase-server';
 export async function GET(request: NextRequest) {
   try {
     const supabase = await createServiceRoleClient();
+    if (!supabase) {
+      throw new Error('Failed to create Supabase client');
+    }
     
     // Count total scraped pages
     const { count: totalPages, error: pagesError } = await supabase
@@ -75,7 +78,7 @@ export async function GET(request: NextRequest) {
         uniqueDomains: uniqueDomains.size,
         totalEmbeddings: totalEmbeddings || 0,
         avgContentLength,
-        embeddingCoverage: totalPages > 0 
+        embeddingCoverage: totalPages && totalPages > 0 
           ? Math.round(((totalEmbeddings || 0) / totalPages) * 100) 
           : 0
       },

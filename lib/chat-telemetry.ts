@@ -414,7 +414,7 @@ class TelemetryManager {
   getAllMetrics() {
     const metrics = [];
     let totalCost = 0;
-    let totalTokens = { input: 0, output: 0, total: 0 };
+    const totalTokens = { input: 0, output: 0, total: 0 };
     
     for (const [id, session] of this.sessions.entries()) {
       const sessionMetrics = session.getMetrics();

@@ -106,6 +106,7 @@ export const ProductSchema = BaseSchema.extend({
   price: z.string(),
   regular_price: z.string(),
   sale_price: z.string().optional(),
+  on_sale: z.boolean().optional(),
   date_on_sale_from: z.string().nullable(),
   date_on_sale_to: z.string().nullable(),
   virtual: z.boolean(),

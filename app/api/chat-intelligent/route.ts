@@ -594,7 +594,7 @@ WHAT NOT TO OFFER:
     const maxIterations = Math.min(config?.ai?.maxSearchIterations || 2, 2);
     const searchTimeout = Math.min(config?.ai?.searchTimeout || 3000, 3000); // Reduced for GPT-5 performance
     
-    let allSearchResults: any[] = [];
+    const allSearchResults: any[] = [];
     let finalResponse = '';
     
     // First AI call with tools
