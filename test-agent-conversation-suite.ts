@@ -58,33 +58,42 @@ class ConversationTester {
   }
 
   async sendMessage(message: string): Promise<ChatResponse> {
-    const response = await fetch(API_URL, {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-      },
-      body: JSON.stringify({
-        message,
-        conversation_id: this.conversationId,
-        session_id: this.sessionId,
-        domain: TEST_DOMAIN,
-        config: {
-          features: {
-            woocommerce: { enabled: true },
-            websiteScraping: { enabled: true },
-          },
+    // Create abort controller with 30 second timeout per request
+    const controller = new AbortController();
+    const timeout = setTimeout(() => controller.abort(), 30000);
+    
+    try {
+      const response = await fetch(API_URL, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
         },
-      } as ChatRequest),
-    });
+        body: JSON.stringify({
+          message,
+          conversation_id: this.conversationId,
+          session_id: this.sessionId,
+          domain: TEST_DOMAIN,
+          config: {
+            features: {
+              woocommerce: { enabled: true },
+              websiteScraping: { enabled: true },
+            },
+          },
+        } as ChatRequest),
+        signal: controller.signal,
+      });
 
-    if (!response.ok) {
-      throw new Error(`Chat API error: ${response.status} ${response.statusText}`);
+      if (!response.ok) {
+        throw new Error(`Chat API error: ${response.status} ${response.statusText}`);
+      }
+
+      const data: ChatResponse = await response.json();
+      this.conversationId = data.conversation_id;
+      this.messageHistory.push({ input: message, response: data.message });
+      return data;
+    } finally {
+      clearTimeout(timeout);
     }
-
-    const data: ChatResponse = await response.json();
-    this.conversationId = data.conversation_id;
-    this.messageHistory.push({ input: message, response: data.message });
-    return data;
   }
 
   async runScenario(scenario: TestScenario): Promise<boolean> {

@@ -17,7 +17,7 @@ async function testQuery(query, description) {
   try {
     const startTime = Date.now();
     
-    const response = await fetch(`${BASE_URL}/api/chat-intelligent`, {
+    const response = await fetch(`${BASE_URL}/api/chat`, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({

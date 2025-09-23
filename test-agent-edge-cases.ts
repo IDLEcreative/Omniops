@@ -36,6 +36,10 @@ class EdgeCaseTester {
       ...options,
     };
 
+    // Create abort controller with 30 second timeout
+    const controller = new AbortController();
+    const timeout = setTimeout(() => controller.abort(), 30000);
+
     try {
       const response = await fetch(API_URL, {
         method: 'POST',
@@ -43,12 +47,15 @@ class EdgeCaseTester {
           'Content-Type': 'application/json',
         },
         body: JSON.stringify(request),
+        signal: controller.signal,
       });
 
       const data = await response.json();
       return { ok: response.ok, status: response.status, data };
     } catch (error) {
       return { ok: false, error };
+    } finally {
+      clearTimeout(timeout);
     }
   }
 

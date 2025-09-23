@@ -11,25 +11,34 @@ const API_URL = 'http://localhost:3000/api/chat';
 const TEST_DOMAIN = 'thompsonseparts.co.uk';
 
 async function sendMessage(message: string, sessionId: string, conversationId?: string) {
-  const response = await fetch(API_URL, {
-    method: 'POST',
-    headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify({
-      message,
-      session_id: sessionId,
-      conversation_id: conversationId,
-      domain: TEST_DOMAIN,
-      config: {
-        features: {
-          woocommerce: { enabled: true },
-          websiteScraping: { enabled: true },
+  // Create abort controller with 30 second timeout
+  const controller = new AbortController();
+  const timeout = setTimeout(() => controller.abort(), 30000);
+  
+  try {
+    const response = await fetch(API_URL, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        message,
+        session_id: sessionId,
+        conversation_id: conversationId,
+        domain: TEST_DOMAIN,
+        config: {
+          features: {
+            woocommerce: { enabled: true },
+            websiteScraping: { enabled: true },
+          },
         },
-      },
-    }),
-  });
+      }),
+      signal: controller.signal,
+    });
 
-  const data = await response.json();
-  return data;
+    const data = await response.json();
+    return data;
+  } finally {
+    clearTimeout(timeout);
+  }
 }
 
 async function runQuickDemo() {

@@ -313,7 +313,7 @@ export default function ChatWidget({
         ...demoConfig
       };
 
-      const response = await fetch('/api/chat-intelligent', {
+      const response = await fetch('/api/chat', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -328,7 +328,17 @@ export default function ChatWidget({
         }),
       });
 
-      const data = await response.json();
+      let data;
+      const contentType = response.headers.get('content-type');
+      
+      if (contentType && contentType.includes('application/json')) {
+        data = await response.json();
+      } else {
+        // If not JSON, likely an HTML error page
+        const text = await response.text();
+        console.error('Received non-JSON response:', text.substring(0, 200));
+        throw new Error('Server returned an invalid response format. Please try again.');
+      }
 
       if (!response.ok) {
         throw new Error(data.error || 'Failed to send message');
