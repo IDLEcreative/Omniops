@@ -1,4 +1,5 @@
 import { createServerClient } from '@supabase/ssr'
+import { createClient as createSupabaseClient } from '@supabase/supabase-js'
 import { cookies } from 'next/headers'
 
 // Cache validation results for the duration of the request
@@ -95,6 +96,7 @@ export async function createClient() {
 /**
  * Creates a Supabase client with service role permissions
  * Safe for production - returns null if env vars are missing
+ * Uses createClient directly for service role (not SSR client which is for cookies)
  */
 export async function createServiceRoleClient() {
   try {
@@ -108,16 +110,12 @@ export async function createServiceRoleClient() {
       return null
     }
     
-    return createServerClient(
+    // Use createClient directly for service role, not createServerClient
+    // createServerClient is for cookie-based auth, not service role
+    return createSupabaseClient(
       supabaseUrl,
       serviceRoleKey,
       {
-        cookies: {
-          getAll() {
-            return []
-          },
-          setAll() {},
-        },
         db: {
           schema: 'public',
         },

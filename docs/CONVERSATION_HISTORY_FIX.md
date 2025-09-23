@@ -1,33 +1,49 @@
 # Conversation History Fix Documentation
 
 ## Problem
-The chatbot was not maintaining conversation context between messages. When customers provided their email and received order information, follow-up questions like "on hold?" were not understood in context, causing the bot to respond as if it was a new conversation.
+The chatbot was not maintaining conversation context between messages. When users referenced previous messages (e.g., "tell me about item 10" from a numbered list), the AI couldn't access the conversation history. Additionally, when customers provided their email and received order information, follow-up questions were not understood in context.
 
-## Root Cause
-The issue was caused by aggressive caching of conversation history in `/app/api/chat/route.ts`. The `QueryCache.execute()` function was caching empty conversation history for 5 minutes with the key `history_${conversationId}`. This meant:
+## Root Causes
 
-1. First message: No history exists, caches `[]` for 5 minutes
-2. Second message: Returns cached `[]` even though first message was saved to database
-3. Third message: Still returns cached `[]` even though multiple messages exist
+### Issue 1: Caching Problem (Previously Fixed)
+The `QueryCache.execute()` function was caching empty conversation history for 5 minutes, preventing fresh data retrieval.
+
+### Issue 2: Missing domain_id in Conversations (Fixed 2025-09-23)
+- **Problem**: The `conversations` table has a NOT NULL constraint on `domain_id`, but the API was creating conversations without it
+- **Impact**: Database inserts were silently failing, preventing conversation and message storage
+
+### Issue 3: Incorrect Service Role Client
+- **Problem**: Using `createServerClient` from `@supabase/ssr` for service role authentication instead of direct client
+- **Impact**: The SSR client is designed for cookie-based auth, not service role keys
+
+### Issue 4: Asynchronous Message Saving
+- **Problem**: Messages were saved with `.then()` without awaiting completion
+- **Impact**: Race conditions where history was loaded before messages were saved
 
 ## Solution
-Removed the caching layer for conversation history since it changes with every message and should always fetch fresh data from the database.
+Multiple fixes were required to fully resolve the conversation history issues.
 
 ### Key Changes
 
-#### 1. `/app/api/chat/route.ts`
+#### 1. `/app/api/chat/route.ts` (Previous Fix)
 - **Removed history caching**: Changed from `QueryCache.execute()` to direct database query
 - **Fixed conversation creation**: Added logic to ensure conversation record exists when conversation_id is provided
 - **Added error handling**: Improved error logging for message save operations
-- **Enhanced debugging**: Added comprehensive logging for troubleshooting
 
-#### 2. `/lib/woocommerce-ai-instructions.ts`
+#### 2. `/app/api/chat-intelligent/route.ts` (2025-09-23 Fix)
+- **Added domain_id handling**: Fetch or create domain before creating conversations
+- **Fixed message saving**: Changed from `.then()` to proper async/await
+- **Increased history limit**: From 10 to 20 messages for better context
+- **Added domain validation**: Ensures domain exists before conversation creation
+
+#### 3. `/lib/supabase/server.ts` (2025-09-23 Fix)
+- **Fixed service role client**: Changed from `createServerClient` to `createSupabaseClient`
+- **Removed SSR dependency**: Service role doesn't need cookie handling
+- **Improved connection pooling**: Better configuration for service role operations
+
+#### 4. `/lib/woocommerce-ai-instructions.ts`
 - **Improved context instructions**: Enhanced AI prompts to better understand conversation context
 - **Added follow-up handling**: Specific instructions for handling questions about previously mentioned orders
-
-#### 3. `/lib/customer-verification-simple.ts`
-- **Better verification flow**: Improved customer verification to work with conversation history
-- **Guest checkout support**: Enhanced handling of orders without registered customers
 
 ## Testing
 The fix was verified with the following test flow:

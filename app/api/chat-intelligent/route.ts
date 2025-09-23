@@ -362,6 +362,53 @@ export async function POST(request: NextRequest) {
       );
     }
 
+    // Get or create domain record first
+    const domainName = domain || 'thompsonseparts.co.uk';
+    let domainId: string | null = null;
+    
+    // Fetch domain ID
+    const { data: domainRecord } = await adminSupabase
+      .from('domains')
+      .select('id')
+      .eq('domain', domainName)
+      .single();
+    
+    if (domainRecord) {
+      domainId = domainRecord.id;
+    } else {
+      // Create domain if it doesn't exist
+      const { data: newDomain, error: domainError } = await adminSupabase
+        .from('domains')
+        .insert({ 
+          domain: domainName,
+          created_at: new Date().toISOString()
+        })
+        .select('id')
+        .single();
+      
+      if (domainError) {
+        console.error('[Chat API] Failed to create domain:', domainError);
+        // Try to use default domain
+        const { data: defaultDomain } = await adminSupabase
+          .from('domains')
+          .select('id')
+          .eq('domain', 'thompsonseparts.co.uk')
+          .single();
+        domainId = defaultDomain?.id || null;
+      } else {
+        domainId = newDomain.id;
+      }
+    }
+    
+    if (!domainId) {
+      clearTimeout(overallTimeout);
+      console.error('[Chat API] Could not get or create domain');
+      return NextResponse.json(
+        { error: 'Domain configuration error' },
+        { status: 500 }
+      );
+    }
+
     // Conversation management - ensure we have a valid conversation record
     let conversationId = conversation_id;
     
@@ -380,8 +427,9 @@ export async function POST(request: NextRequest) {
           .from('conversations')
           .insert({ 
             id: conversationId,
+            domain_id: domainId, // Now we have the required domain_id
             session_id: session_id,
-            metadata: { domain },
+            metadata: { domain: domainName },
             created_at: new Date().toISOString()
           });
         
@@ -394,8 +442,9 @@ export async function POST(request: NextRequest) {
       const { data: newConversation, error: createError } = await adminSupabase
         .from('conversations')
         .insert({ 
+          domain_id: domainId, // Now we have the required domain_id
           session_id: session_id,
-          metadata: { domain },
+          metadata: { domain: domainName },
           created_at: new Date().toISOString()
         })
         .select('id')
@@ -410,36 +459,44 @@ export async function POST(request: NextRequest) {
       }
     }
 
-    // Save user message asynchronously (non-blocking for speed)
-    const saveUserMessage = adminSupabase
-      .from('messages')
-      .insert({
-        conversation_id: conversationId,
-        role: 'user',
-        content: message,
-        created_at: new Date().toISOString()
-      })
-      .then(({ error }) => {
-        if (error) console.error('[Chat API] Failed to save user message:', error);
-      });
-    
-    // Load conversation history in parallel with message save
-    const [historyData] = await Promise.all([
-      adminSupabase
+    // Save user message (await to ensure it's saved before loading history)
+    const saveUserMessage = async () => {
+      const { error } = await adminSupabase
         .from('messages')
-        .select('role, content')
-        .eq('conversation_id', conversationId)
-        .order('created_at', { ascending: true })
-        .limit(10)
-        .then(({ data, error }) => {
-          if (error) {
-            console.error('[Chat API] Failed to load history:', error);
-            return [];
-          }
-          return data || [];
-        }),
-      saveUserMessage // Run in parallel
-    ]);
+        .insert({
+          conversation_id: conversationId,
+          role: 'user',
+          content: message,
+          created_at: new Date().toISOString()
+        });
+      
+      if (error) {
+        console.error('[Chat API] Failed to save user message:', error);
+        console.error('[Chat API] Conversation ID:', conversationId);
+        console.error('[Chat API] Message:', message.substring(0, 100));
+      } else {
+        console.log('[Chat API] User message saved successfully');
+      }
+    };
+    
+    // Save the user message first, then load history
+    // This ensures the current message is saved before we try to load history for the next request
+    await saveUserMessage();
+    
+    // Now load conversation history (will include all previous messages but not the current one)
+    const { data: historyData, error: historyError } = await adminSupabase
+      .from('messages')
+      .select('role, content')
+      .eq('conversation_id', conversationId)
+      .order('created_at', { ascending: true })
+      .limit(20); // Increased limit to ensure we get full context
+    
+    if (historyError) {
+      console.error('[Chat API] Failed to load history:', historyError);
+    }
+    
+    const history = historyData || [];
+    console.log(`[Chat API] Loaded ${history.length} messages from history for conversation ${conversationId}`);
     
     // Build conversation context with history
     const conversationMessages: Array<{role: 'system' | 'user' | 'assistant'; content: string; tool_calls?: any}> = [
@@ -565,9 +622,10 @@ WHAT NOT TO OFFER:
       }
     ];
     
-    // Add conversation history (excluding the current message which we'll add after)
-    historyData.forEach(msg => {
-      if (msg.role === 'user' || msg.role === 'assistant') {
+    // Add conversation history (excluding the current message which was just saved)
+    // Filter out the current message to avoid duplication
+    history.forEach(msg => {
+      if ((msg.role === 'user' || msg.role === 'assistant') && msg.content !== message) {
         conversationMessages.push({
           role: msg.role as 'user' | 'assistant',
           content: msg.content
@@ -846,18 +904,22 @@ WHAT NOT TO OFFER:
     // Clean up response
     finalResponse = finalResponse.replace(/\n{3,}/g, '\n\n').trim();
     
-    // Save assistant response asynchronously
-    adminSupabase
+    // Save assistant response (await to ensure it's saved)
+    const { error: assistantSaveError } = await adminSupabase
       .from('messages')
       .insert({
         conversation_id: conversationId,
         role: 'assistant',
         content: finalResponse,
         created_at: new Date().toISOString()
-      })
-      .then(({ error }) => {
-        if (error) console.error('[Chat API] Failed to save assistant message:', error);
       });
+    
+    if (assistantSaveError) {
+      console.error('[Chat API] Failed to save assistant message:', assistantSaveError);
+      console.error('[Chat API] Conversation ID:', conversationId);
+    } else {
+      console.log('[Chat API] Assistant message saved successfully');
+    }
     
     // Sanitize links
     const allowedDomain = (domain && !/localhost|127\.0\.0\.1|vercel/i.test(domain))
