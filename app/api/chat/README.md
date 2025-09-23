@@ -1,16 +1,22 @@
-# Chat API
+# Chat API - Intelligent Implementation
 
-The legacy chat endpoint providing AI-powered customer service responses.
+The unified intelligent chat endpoint providing AI-powered customer service responses with advanced features.
 
-## Overview
+## Current Implementation (September 2025)
 
-This endpoint provides traditional chat functionality with basic tool calling and semantic search. For enhanced performance and better reasoning capabilities, consider using the `/api/chat-intelligent` endpoint instead.
+This is now the single, consolidated chat endpoint with all intelligent features:
+- **GPT-5-mini support**: Automatically uses GPT-5-mini when `USE_GPT5_MINI=true` environment variable is set
+- **Natural inventory handling**: Recognizes search limits (20/50/100 results) as limits, not total inventory
+- **Domain ID tracking**: Proper multi-tenant conversation association
+- **Parallel tool execution**: Concurrent searches for faster responses
+- **Smart telemetry**: Comprehensive performance and usage tracking
+- **ReAct loop**: Iterative reasoning for better answers
 
 ## Endpoints
 
 ### POST `/api/chat`
 
-Processes chat messages and returns AI-generated responses with contextual information.
+Processes chat messages using intelligent AI reasoning with tool calling capabilities.
 
 #### Authentication
 - **Type**: Domain-based rate limiting (no authentication required)
@@ -32,7 +38,7 @@ Processes chat messages and returns AI-generated responses with contextual infor
     },
     "ai": {
       "maxSearchIterations": 3,
-      "searchTimeout": 60000
+      "searchTimeout": 10000
     }
   }
 }
@@ -52,7 +58,7 @@ Processes chat messages and returns AI-generated responses with contextual infor
 
 ```json
 {
-  "message": "I found several hydraulic pumps suitable for construction equipment...",
+  "message": "We have an extensive range of hydraulic pumps suitable for construction equipment. Here are some popular options...",
   "conversation_id": "550e8400-e29b-41d4-a716-446655440000",
   "sources": [
     {
@@ -60,11 +66,116 @@ Processes chat messages and returns AI-generated responses with contextual infor
       "title": "Heavy Duty Hydraulic Pump",
       "relevance": 0.92
     }
-  ]
+  ],
+  "searchMetadata": {
+    "iterations": 2,
+    "totalSearches": 3,
+    "searchLog": [
+      {
+        "tool": "search_products",
+        "query": "hydraulic pumps construction",
+        "resultCount": 20,
+        "source": "woocommerce"
+      }
+    ]
+  }
 }
 ```
 
-#### Error Responses
+## Key Features
+
+### Intelligent Search & Response
+- **Parallel Tool Execution**: Searches multiple sources simultaneously
+- **Natural Language**: Handles search limits intelligently ("We have an extensive range..." vs "Found exactly 20 items")
+- **ReAct Loop**: Iteratively searches and reasons until finding the best answer
+- **Multi-source Integration**: Combines WooCommerce products and semantic search
+
+### Model Selection
+- **GPT-4** (default): Standard high-quality responses
+- **GPT-5-mini** (when enabled): Faster responses with reasoning_effort='low'
+  - Enable with: `USE_GPT5_MINI=true` in environment variables
+
+### Tool Functions
+- `search_products`: Product search with WooCommerce priority
+- `search_by_category`: Category-based browsing
+- `get_product_details`: Detailed product information with specs
+
+### Anti-Hallucination
+- Strict grounding to search results
+- Transparent about search limits
+- No invented information
+- Admits uncertainty when appropriate
+
+## Performance Metrics
+
+- **Response Time**: 2-8 seconds (depending on search complexity)
+- **Parallel Execution**: All tool calls run concurrently
+- **Token Usage**: 
+  - GPT-4: ~500-2000 tokens per request
+  - GPT-5-mini: ~2500 max completion tokens
+- **Search Iterations**: Max 3 by default (configurable)
+
+## Telemetry
+
+Built-in telemetry tracks:
+- Session metrics and model usage
+- Search performance and sources
+- Iteration counts and tool usage
+- Response times and error rates
+
+## Configuration
+
+### Environment Variables
+```bash
+# Required
+OPENAI_API_KEY=sk-...
+NEXT_PUBLIC_SUPABASE_URL=https://...
+NEXT_PUBLIC_SUPABASE_ANON_KEY=eyJ...
+SUPABASE_SERVICE_ROLE_KEY=eyJ...
+
+# Optional
+USE_GPT5_MINI=true  # Enable GPT-5-mini model
+NODE_ENV=development  # Enable detailed logging
+```
+
+### Domain Configuration
+Configure domains in `customer_configs` table:
+```sql
+INSERT INTO customer_configs (domain, woocommerce_url, woocommerce_consumer_key, woocommerce_consumer_secret)
+VALUES ('example.com', 'https://example.com', 'ck_...', 'cs_...');
+```
+
+## Examples
+
+### Basic Query
+```bash
+curl -X POST 'http://localhost:3000/api/chat' \
+  -H 'Content-Type: application/json' \
+  -d '{
+    "message": "What products do you have?",
+    "session_id": "user-123",
+    "domain": "example.com"
+  }'
+```
+
+### With Custom Configuration
+```bash
+curl -X POST 'http://localhost:3000/api/chat' \
+  -H 'Content-Type: application/json' \
+  -d '{
+    "message": "Show me pumps under £500",
+    "session_id": "user-123",
+    "domain": "example.com",
+    "config": {
+      "ai": {
+        "maxSearchIterations": 5,
+        "searchTimeout": 15000
+      }
+    }
+  }'
+```
+
+## Error Handling
 
 ```json
 // Rate limit exceeded
@@ -75,124 +186,34 @@ Processes chat messages and returns AI-generated responses with contextual infor
 // Service unavailable
 {
   "error": "Service temporarily unavailable",
-  "message": "The chat service is currently undergoing maintenance. Please try again later."
+  "message": "The chat service is currently undergoing maintenance."
 }
 
 // Invalid request
 {
   "error": "Invalid request format",
-  "details": [
-    {
-      "path": ["message"],
-      "message": "String must contain at least 1 character(s)"
-    }
-  ]
+  "details": [...]
 }
 ```
 
-## Features
+## Database Schema
 
-### AI-Powered Search
-- **Semantic Search**: Uses OpenAI embeddings for content matching
-- **WooCommerce Integration**: Searches products when configured
-- **Multi-source Results**: Combines website content and e-commerce data
+The chat system uses:
+- `conversations`: Stores conversation metadata with domain_id
+- `messages`: Stores individual messages with role (user/assistant)
+- `domains`: Links domains to customer configurations
+- `customer_configs`: Stores WooCommerce credentials and settings
 
-### Anti-Hallucination System
-- Strict grounding to search results only
-- No invented product names or specifications
-- Transparent about missing information
+## Monitoring & Debugging
 
-### Tool Functions
-- `search_products`: Search website content for products
-- `search_by_category`: Browse by category or topic
-- `get_product_details`: Get detailed product information
-- `order_lookup`: Look up order information (requires verification)
-- `woocommerce_agent`: Complete e-commerce operations
-
-## Rate Limiting
-
-- **Default**: 100 requests per minute per domain
-- **Headers**: Response includes rate limit information
-  - `X-RateLimit-Limit`: Maximum requests allowed
-  - `X-RateLimit-Remaining`: Requests remaining in window
-  - `X-RateLimit-Reset`: Reset time (Unix timestamp)
-
-## Performance
-
-- **Average Response Time**: ~2-5 seconds
-- **Token Usage**: ~500-2000 tokens per request
-- **Search Timeout**: 60 seconds (configurable)
-- **Max Iterations**: 3 search rounds (configurable)
-
-## Examples
-
-### Basic Product Search
-```bash
-curl -X POST 'http://localhost:3000/api/chat' \
-  -H 'Content-Type: application/json' \
-  -d '{
-    "message": "Do you have any torque wrenches?",
-    "session_id": "user-123",
-    "domain": "example.com"
-  }'
-```
-
-### With Configuration
-```bash
-curl -X POST 'http://localhost:3000/api/chat' \
-  -H 'Content-Type: application/json' \
-  -d '{
-    "message": "Show me all pumps under £500",
-    "session_id": "user-123",
-    "domain": "example.com",
-    "config": {
-      "features": {
-        "woocommerce": { "enabled": true }
-      },
-      "ai": {
-        "maxSearchIterations": 5,
-        "searchTimeout": 90000
-      }
-    }
-  }'
-```
-
-### Order Lookup
-```bash
-curl -X POST 'http://localhost:3000/api/chat' \
-  -H 'Content-Type: application/json' \
-  -d '{
-    "message": "What is the status of order #12345?",
-    "session_id": "user-123",
-    "domain": "example.com"
-  }'
-```
-
-## Domain Configuration
-
-The chat system requires proper domain configuration in the `customer_configs` table:
-
-```sql
--- Example configuration
-INSERT INTO customer_configs (domain, woocommerce_url, woocommerce_consumer_key, woocommerce_consumer_secret)
-VALUES ('example.com', 'https://example.com', 'ck_...', 'cs_...');
-```
-
-## Monitoring
-
-- All requests are logged to `conversations` and `messages` tables
-- No built-in telemetry (use `/api/chat-intelligent` for detailed analytics)
-- Errors logged to console with structured information
-
-## Migration Path
-
-For enhanced performance and features, migrate to:
-- `/api/chat-intelligent` - Better reasoning, parallel search, telemetry
-- Consider configuration updates for optimal results
+- Console logs prefixed with `[Intelligent Chat]` for debugging
+- Telemetry data available via `ChatTelemetry` class
+- Search metadata included in responses for transparency
+- Parallel execution stats logged for performance analysis
 
 ## Related Endpoints
 
-- `/api/chat-intelligent` - Enhanced chat with better AI reasoning
 - `/api/scrape` - Website content indexing
 - `/api/woocommerce/*` - E-commerce integrations
-- `/api/customer/config` - Domain configuration management
+- `/api/customer/config` - Domain configuration
+- `/api/privacy/*` - GDPR compliance endpoints
