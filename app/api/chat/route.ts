@@ -157,7 +157,10 @@ async function executeSearchProducts(
   limit: number = 100,
   domain: string
 ): Promise<{ success: boolean; results: SearchResult[]; source: string }> {
-  console.log(`[Function Call] search_products: "${query}" (limit: ${limit})`);
+  // Adaptive limit: reduce for targeted queries to improve speed
+  const queryWords = query.trim().split(/\s+/).length;
+  const adaptiveLimit = queryWords > 3 ? Math.min(50, limit) : limit;
+  console.log(`[Function Call] search_products: "${query}" (limit: ${adaptiveLimit}, original: ${limit}, words: ${queryWords})`);
 
   try {
     // Normalize domain - no hardcoded fallbacks
@@ -168,8 +171,8 @@ async function executeSearchProducts(
       return { success: false, results: [], source: 'invalid-domain' };
     }
 
-    const wcProducts = await searchProductsDynamic(browseDomain, query, limit);
-    
+    const wcProducts = await searchProductsDynamic(browseDomain, query, adaptiveLimit);
+
     if (wcProducts && wcProducts.length > 0) {
       console.log(`[Function Call] WooCommerce returned ${wcProducts.length} products`);
       const results = wcProducts.map(p => ({
@@ -178,12 +181,12 @@ async function executeSearchProducts(
         title: p.name,
         similarity: 0.9
       }));
-      
+
       return { success: true, results, source: 'woocommerce' };
     }
-    
+
     // Fallback to semantic search
-    const searchResults = await searchSimilarContent(query, browseDomain, limit, 0.2);
+    const searchResults = await searchSimilarContent(query, browseDomain, adaptiveLimit, 0.2);
     console.log(`[Function Call] Semantic search returned ${searchResults.length} results`);
     
     return { 
@@ -578,13 +581,13 @@ When customer asks "What can I use instead of [product]?" or "What's an alternat
     const allSearchResults: SearchResult[] = [];
     const searchLog: Array<{ tool: string; query: string; resultCount: number; source: string }> = [];
 
-    // Initial AI call with tools - use GPT-5-mini if enabled
+    // Initial AI call with tools - use GPT-5-mini if enabled (preferred for reasoning capability)
     const modelConfig = useGPT5Mini ? {
       model: 'gpt-5-mini',
       reasoning_effort: 'low',
       max_completion_tokens: 2500
     } : {
-      model: 'gpt-4',
+      model: 'gpt-4',  // Fallback to GPT-4 (keep for compatibility)
       temperature: 0.7,
       max_tokens: 500
     };
@@ -772,7 +775,7 @@ Please let me know if you'd like to search for something else or need assistance
           reasoning_effort: 'low',
           max_completion_tokens: 2500
         } : {
-          model: 'gpt-4',
+          model: 'gpt-4',  // Fallback to GPT-4
           temperature: 0.7,
           max_tokens: 1000
         };
@@ -790,28 +793,11 @@ Please let me know if you'd like to search for something else or need assistance
       }
     }
 
-    // If we hit max iterations, get final response without tools
+    // If we hit max iterations, use last completion's content (avoid redundant API call)
     if (iteration >= maxIterations && shouldContinue) {
-      console.log('[Intelligent Chat] Max iterations reached, getting final response');
-      try {
-        const finalConfig = useGPT5Mini ? {
-          model: 'gpt-5-mini',
-          reasoning_effort: 'low',
-          max_completion_tokens: 2500
-        } : {
-          model: 'gpt-4',
-          temperature: 0.7,
-          max_tokens: 1000
-        };
-        
-        const finalCompletion = await openaiClient.chat.completions.create({
-          ...finalConfig,
-          messages: conversationMessages
-        } as any);
-        finalResponse = finalCompletion.choices[0]?.message?.content || finalResponse;
-      } catch (error) {
-        console.error('[Intelligent Chat] Error getting final response:', error);
-      }
+      console.log('[Intelligent Chat] Max iterations reached, using last response');
+      finalResponse = completion.choices[0]?.message?.content ||
+        'I apologize, but I need more time to gather all the information. Please try asking more specifically.';
     }
 
     // If no final response yet, get it from the last completion

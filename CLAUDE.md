@@ -32,6 +32,14 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 This is a General purpose AI-powered customer service chat widget built with Next.js 15, React 19, TypeScript, and Supabase. The application provides an embeddable chat widget that can be integrated into any website, with features including web scraping, WooCommerce integration, and privacy-compliant data handling
 
+## Key Documentation
+
+- **[Search Architecture](docs/SEARCH_ARCHITECTURE.md)** - CRITICAL: Explains actual search result limits (100-200, NOT 20!), hybrid search behavior, and token usage
+- **[Performance Optimization](docs/PERFORMANCE_OPTIMIZATION.md)** - Response time analysis, bottlenecks, and optimization recommendations
+- **[Supabase Schema](SUPABASE_SCHEMA.md)** - Complete database schema reference
+- **[Hallucination Prevention](docs/HALLUCINATION_PREVENTION.md)** - Anti-hallucination safeguards and testing
+- **[Docker Setup](DOCKER_README.md)** - Complete Docker configuration and commands
+
 
 ### FILE LENGTH
 - **STRICT RULE**: All files must be under 300 LOC
