@@ -76,7 +76,7 @@ export async function getDynamicWooCommerceClient(domain: string): Promise<WooCo
 // Dynamic search products function
 export async function searchProductsDynamic(domain: string, query: string, limit: number = 10): Promise<Product[]> {
   const wc = await getDynamicWooCommerceClient(domain);
-  
+
   if (!wc) {
     return [];
   }
@@ -92,3 +92,7 @@ export async function searchProductsDynamic(domain: string, query: string, limit
     return [];
   }
 }
+
+// Note: Order lookup has been moved to the CommerceProvider pattern
+// See: lib/agents/commerce-provider.ts and lib/agents/providers/woocommerce-provider.ts
+// This enables multi-platform support (WooCommerce, Shopify, etc.)

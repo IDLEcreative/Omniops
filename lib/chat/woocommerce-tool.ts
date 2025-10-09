@@ -204,13 +204,91 @@ export async function executeWooCommerceOperation(
           };
         }
 
-        // This would integrate with order management
-        // For now, return a placeholder
-        return {
-          success: false,
-          data: null,
-          message: "Order checking requires full WooCommerce order API integration"
-        };
+        try {
+          let order = null;
+
+          // Try to get order by ID first
+          if (params.orderId) {
+            const numericId = parseInt(params.orderId, 10);
+            if (!isNaN(numericId)) {
+              try {
+                order = await wc.getOrder(numericId);
+              } catch (error) {
+                // Order not found by ID, will try email search
+                console.log(`[WooCommerce Agent] Order ID ${numericId} not found`);
+              }
+            }
+          }
+
+          // If not found by ID, try searching by order number or email
+          if (!order && (params.orderId || params.email)) {
+            const searchTerm = params.email || params.orderId;
+            const orders = await wc.getOrders({
+              search: searchTerm,
+              per_page: 1,
+            });
+
+            if (orders && orders.length > 0) {
+              order = orders[0];
+            }
+          }
+
+          if (!order) {
+            return {
+              success: false,
+              data: null,
+              message: `No order found for ${params.email ? 'email' : 'order ID'}: ${params.email || params.orderId}`
+            };
+          }
+
+          // Format order information
+          const orderInfo = {
+            id: order.id,
+            number: order.number || order.id.toString(),
+            status: order.status,
+            date: order.date_created,
+            total: order.total,
+            currency: (order as any).currency_symbol || order.currency || '$',
+            items: order.line_items?.map((item: any) => ({
+              name: item.name,
+              quantity: item.quantity,
+              total: item.total
+            })) || [],
+            billing: order.billing ? {
+              firstName: order.billing.first_name,
+              lastName: order.billing.last_name,
+              email: order.billing.email
+            } : null,
+            shipping: order.shipping,
+            trackingNumber: (order.shipping as any)?.tracking_number || null,
+            permalink: (order as any).permalink || null
+          };
+
+          const itemsList = orderInfo.items.map(item => `${item.name} (x${item.quantity})`).join(', ');
+          let message = `Order #${orderInfo.number} - Status: ${orderInfo.status}\n`;
+          message += `Date: ${orderInfo.date}\n`;
+          message += `Total: ${orderInfo.currency}${orderInfo.total}\n`;
+          message += `Items: ${itemsList}\n`;
+          if (orderInfo.billing) {
+            message += `Customer: ${orderInfo.billing.firstName} ${orderInfo.billing.lastName}`;
+          }
+          if (orderInfo.trackingNumber) {
+            message += `\nTracking: ${orderInfo.trackingNumber}`;
+          }
+
+          return {
+            success: true,
+            data: orderInfo,
+            message
+          };
+        } catch (error) {
+          console.error('[WooCommerce Agent] Order lookup error:', error);
+          return {
+            success: false,
+            data: null,
+            message: "Failed to retrieve order information"
+          };
+        }
       }
 
       case "get_shipping_info": {

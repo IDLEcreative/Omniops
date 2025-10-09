@@ -97,24 +97,12 @@ export class SearchIntelligence {
   
   /**
    * Predict likely follow-up queries based on patterns
+   * Uses only learned patterns - no hardcoded business logic
    */
   private predictNextQueries(currentQuery: string): string[] {
     const predictions: string[] = [];
-    
-    // Common patterns based on query type
-    if (currentQuery.toLowerCase().includes('cifa')) {
-      predictions.push('pumps', 'hydraulic', 'valves');
-    }
-    
-    if (currentQuery.toLowerCase().includes('pump')) {
-      predictions.push('fittings', 'gaskets', 'hydraulic oil');
-    }
-    
-    if (currentQuery.toLowerCase().includes('show all')) {
-      predictions.push('in stock', 'under 500', 'most popular');
-    }
-    
-    // Learn from history
+
+    // Learn from history only - no hardcoded predictions
     const lastQuery = this.queryHistory[this.queryHistory.length - 1];
     if (lastQuery) {
       const pattern = `${lastQuery} -> ${currentQuery}`;
@@ -124,7 +112,12 @@ export class SearchIntelligence {
         predictions.push(...knownPattern.sequence.slice(2, 4));
       }
     }
-    
+
+    // Generic follow-ups based on query structure (not content)
+    if (currentQuery.toLowerCase().includes('show all') || currentQuery.toLowerCase().includes('list')) {
+      predictions.push('in stock', 'price range', 'availability');
+    }
+
     return predictions.slice(0, 3); // Limit pre-fetching
   }
   
@@ -213,22 +206,26 @@ export class SearchIntelligence {
   
   /**
    * Extract categories from query
+   * Extracts words that appear to be category names (nouns)
+   * No hardcoded categories - works for any business type
    */
   private extractCategories(query: string): string[] {
     const categories: string[] = [];
     const queryLower = query.toLowerCase();
-    
-    const knownCategories = [
-      'pumps', 'valves', 'motors', 'hydraulic',
-      'fittings', 'gaskets', 'filters', 'starters'
-    ];
-    
-    knownCategories.forEach(cat => {
-      if (queryLower.includes(cat)) {
-        categories.push(cat);
+
+    // Extract potential category words (3+ chars, not common words)
+    const words = queryLower.split(/\s+/);
+    const commonWords = ['the', 'and', 'for', 'are', 'with', 'show', 'list', 'all', 'get', 'find'];
+
+    words.forEach(word => {
+      if (word.length >= 3 && !commonWords.includes(word)) {
+        // Check if word ends with common category indicators (plural nouns)
+        if (word.endsWith('s') || word.endsWith('ing') || word.endsWith('ed')) {
+          categories.push(word);
+        }
       }
     });
-    
+
     return categories;
   }
   

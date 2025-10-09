@@ -8,6 +8,7 @@ import { z } from 'zod';
 import { checkDomainRateLimit } from '@/lib/rate-limit';
 import { searchSimilarContent } from '@/lib/embeddings';
 import { getDynamicWooCommerceClient, searchProductsDynamic } from '@/lib/woocommerce-dynamic';
+import { getCommerceProvider } from '@/lib/agents/commerce-provider';
 import { sanitizeOutboundLinks } from '@/lib/link-sanitizer';
 import { extractQueryKeywords, isPriceQuery, extractPriceRange } from '@/lib/search-wrapper';
 import { ChatTelemetry, telemetryManager } from '@/lib/chat-telemetry';
@@ -65,13 +66,13 @@ const SEARCH_TOOLS = [
     type: "function" as const,
     function: {
       name: "search_products",
-      description: "Search for products with a general query. Use this for broad product searches, brand names, or when the user asks about specific items.",
+      description: "Search for products or items with a general query. Use this for broad searches, brand names, or when the user asks about specific items.",
       parameters: {
         type: "object",
         properties: {
           query: {
             type: "string",
-            description: "The search query for products (e.g., 'hydraulic pump', 'Cifa parts', 'torque wrench')"
+            description: "The search query for products. Should match what the user is looking for."
           },
           limit: {
             type: "number",
@@ -119,7 +120,7 @@ const SEARCH_TOOLS = [
         properties: {
           productQuery: {
             type: "string",
-            description: "Specific product query to get detailed information (e.g., 'DC66-10P Agri Flip', 'model XYZ specifications')"
+            description: "Specific product query to get detailed information"
           },
           includeSpecs: {
             type: "boolean",
@@ -130,23 +131,43 @@ const SEARCH_TOOLS = [
         required: ["productQuery"]
       }
     }
+  },
+  {
+    type: "function" as const,
+    function: {
+      name: "lookup_order",
+      description: "Look up an order by order number or ID. Use this when a customer asks about order status, tracking, or order details.",
+      parameters: {
+        type: "object",
+        properties: {
+          orderId: {
+            type: "string",
+            description: "The order number or ID to look up"
+          }
+        },
+        required: ["orderId"]
+      }
+    }
   }
 ];
 
 // Tool execution functions
 async function executeSearchProducts(
-  query: string, 
-  limit: number = 100, 
+  query: string,
+  limit: number = 100,
   domain: string
 ): Promise<{ success: boolean; results: SearchResult[]; source: string }> {
   console.log(`[Function Call] search_products: "${query}" (limit: ${limit})`);
-  
+
   try {
-    // Try WooCommerce search first for product queries
-    const browseDomain = /localhost|127\.0\.0\.1/i.test(domain)
-      ? 'thompsonseparts.co.uk'
-      : domain.replace(/^https?:\/\//, '').replace('www.', '');
-    
+    // Normalize domain - no hardcoded fallbacks
+    const browseDomain = domain.replace(/^https?:\/\//, '').replace('www.', '');
+
+    if (!browseDomain || /localhost|127\.0\.0\.1/i.test(browseDomain)) {
+      console.log('[Search] Invalid or localhost domain - cannot search without valid domain');
+      return { success: false, results: [], source: 'invalid-domain' };
+    }
+
     const wcProducts = await searchProductsDynamic(browseDomain, query, limit);
     
     if (wcProducts && wcProducts.length > 0) {
@@ -182,17 +203,21 @@ async function executeSearchProducts(
 }
 
 async function executeSearchByCategory(
-  category: string, 
-  limit: number = 100, 
+  category: string,
+  limit: number = 100,
   domain: string
 ): Promise<{ success: boolean; results: SearchResult[]; source: string }> {
   console.log(`[Function Call] search_by_category: "${category}" (limit: ${limit})`);
-  
+
   try {
-    const browseDomain = /localhost|127\.0\.0\.1/i.test(domain)
-      ? 'thompsonseparts.co.uk'
-      : domain.replace(/^https?:\/\//, '').replace('www.', '');
-    
+    // Normalize domain - no hardcoded fallbacks
+    const browseDomain = domain.replace(/^https?:\/\//, '').replace('www.', '');
+
+    if (!browseDomain || /localhost|127\.0\.0\.1/i.test(browseDomain)) {
+      console.log('[Search] Invalid or localhost domain - cannot search without valid domain');
+      return { success: false, results: [], source: 'invalid-domain' };
+    }
+
     // Use semantic search for category-based queries
     const searchResults = await searchSimilarContent(category, browseDomain, limit, 0.15);
     console.log(`[Function Call] Category search returned ${searchResults.length} results`);
@@ -214,39 +239,116 @@ async function executeSearchByCategory(
 }
 
 async function executeGetProductDetails(
-  productQuery: string, 
-  includeSpecs: boolean = true, 
+  productQuery: string,
+  includeSpecs: boolean = true,
   domain: string
 ): Promise<{ success: boolean; results: SearchResult[]; source: string }> {
   console.log(`[Function Call] get_product_details: "${productQuery}" (includeSpecs: ${includeSpecs})`);
-  
+
   try {
-    const browseDomain = /localhost|127\.0\.0\.1/i.test(domain)
-      ? 'thompsonseparts.co.uk'
-      : domain.replace(/^https?:\/\//, '').replace('www.', '');
-    
+    // Normalize domain - no hardcoded fallbacks
+    const browseDomain = domain.replace(/^https?:\/\//, '').replace('www.', '');
+
+    if (!browseDomain || /localhost|127\.0\.0\.1/i.test(browseDomain)) {
+      console.log('[Search] Invalid or localhost domain - cannot search without valid domain');
+      return { success: false, results: [], source: 'invalid-domain' };
+    }
+
     // Enhanced query for detailed product information
     let enhancedQuery = productQuery;
     if (includeSpecs) {
       enhancedQuery = `${productQuery} specifications technical details features`;
     }
-    
+
     // Use higher similarity threshold for specific product details
     const searchResults = await searchSimilarContent(enhancedQuery, browseDomain, 5, 0.3);
     console.log(`[Function Call] Product details search returned ${searchResults.length} results`);
-    
-    return { 
-      success: true, 
-      results: searchResults, 
-      source: 'semantic' 
+
+    return {
+      success: true,
+      results: searchResults,
+      source: 'semantic'
     };
-    
+
   } catch (error) {
     console.error('[Function Call] get_product_details error:', error);
-    return { 
-      success: false, 
-      results: [], 
-      source: 'error' 
+    return {
+      success: false,
+      results: [],
+      source: 'error'
+    };
+  }
+}
+
+async function executeLookupOrder(
+  orderId: string,
+  domain: string
+): Promise<{ success: boolean; results: SearchResult[]; source: string }> {
+  console.log(`[Function Call] lookup_order: "${orderId}"`);
+
+  try {
+    // Normalize domain - no hardcoded fallbacks
+    const browseDomain = domain.replace(/^https?:\/\//, '').replace('www.', '');
+
+    if (!browseDomain || /localhost|127\.0\.0\.1/i.test(browseDomain)) {
+      console.log('[Search] Invalid or localhost domain - cannot lookup order without valid domain');
+      return { success: false, results: [], source: 'invalid-domain' };
+    }
+
+    // Use commerce provider abstraction for multi-platform support
+    const provider = await getCommerceProvider(browseDomain);
+
+    if (!provider) {
+      console.log('[Function Call] No commerce provider available for domain');
+      return {
+        success: false,
+        results: [],
+        source: 'no-provider'
+      };
+    }
+
+    const order = await provider.lookupOrder(orderId);
+
+    if (!order) {
+      console.log(`[Function Call] No order found for ID: ${orderId}`);
+      return {
+        success: false,
+        results: [],
+        source: provider.platform
+      };
+    }
+
+    console.log(`[Function Call] Order found via ${provider.platform}: ${order.id} - Status: ${order.status}`);
+
+    // Format order information as a search result
+    const itemsList = order.items.map(item => `${item.name} (x${item.quantity})`).join(', ');
+    const orderInfo = `Order #${order.number}
+Status: ${order.status}
+Date: ${order.date}
+Total: ${order.currency}${order.total}
+Items: ${itemsList || 'No items'}
+${order.billing ? `Customer: ${order.billing.firstName} ${order.billing.lastName}` : ''}
+${order.trackingNumber ? `Tracking: ${order.trackingNumber}` : ''}`;
+
+    const result: SearchResult = {
+      content: orderInfo,
+      url: order.permalink || '',
+      title: `Order #${order.number}`,
+      similarity: 1.0
+    };
+
+    return {
+      success: true,
+      results: [result],
+      source: provider.platform
+    };
+
+  } catch (error) {
+    console.error('[Function Call] lookup_order error:', error);
+    return {
+      success: false,
+      results: [],
+      source: 'error'
     };
   }
 }
@@ -405,7 +507,15 @@ export async function POST(request: NextRequest) {
         role: 'system' as const,
         content: `You are a helpful customer service representative. Use the conversation history to maintain context.
 
-You have full visibility of ALL search results. When you search, you see the complete inventory.`
+You have full visibility of ALL search results. When you search, you see the complete inventory.
+
+CRITICAL: When a customer asks about products or items:
+1. ALWAYS search first using available tools before asking clarifying questions
+2. Use the actual search results to inform your response
+3. Only ask clarifying questions if the search returns NO results or if results are genuinely ambiguous
+4. For product searches, use the customer's exact terms first, then try variations if needed
+
+For order inquiries (tracking, status, "chasing order"), use the lookup_order tool immediately.`
       },
       ...(historyData || []).map((msg: any) => ({
         role: msg.role as 'user' | 'assistant',
@@ -500,6 +610,8 @@ You have full visibility of ALL search results. When you search, you see the com
                 return await executeSearchByCategory(toolArgs.category, toolArgs.limit, domain || '');
               case 'get_product_details':
                 return await executeGetProductDetails(toolArgs.productQuery, toolArgs.includeSpecs, domain || '');
+              case 'lookup_order':
+                return await executeLookupOrder(toolArgs.orderId, domain || '');
               default:
                 throw new Error(`Unknown tool: ${toolName}`);
             }
@@ -572,7 +684,21 @@ You have full visibility of ALL search results. When you search, you see the com
             toolResponse += `   Relevance: ${(item.similarity * 100).toFixed(1)}%\n\n`;
           });
         } else {
-          toolResponse = `No results found. The search returned 0 results.`;
+          // Provide contextual error messages based on tool type
+          const queryTerm = toolArgs.query || toolArgs.category || toolArgs.productQuery || toolArgs.orderId || 'this search';
+
+          if (result.source === 'invalid-domain') {
+            toolResponse = `Cannot perform search - domain not configured properly.`;
+          } else if (toolName === 'lookup_order') {
+            toolResponse = `I couldn't find any information about order ${queryTerm}. The order number might be incorrect, or it hasn't been entered into the system yet. Please ask the customer to double-check the order number.`;
+          } else {
+            toolResponse = `I couldn't find any information about "${queryTerm}". This might mean:
+- The search term needs to be more specific or spelled differently
+- The item might not be in the current inventory
+- Try using alternative terms or checking the spelling
+
+Please let me know if you'd like to search for something else or need assistance finding what you're looking for.`;
+          }
         }
 
         toolResults.push({
@@ -667,11 +793,10 @@ You have full visibility of ALL search results. When you search, you see the com
     // This regex matches lines starting with numbers followed by . or )
     finalResponse = finalResponse.replace(/^(\s*)(\d+)[.)]\s*/gm, '$1- ');
 
-    // Sanitize outbound links
-    const allowedDomain = (domain && !/localhost|127\.0\.0\.1|vercel/i.test(domain))
-      ? domain
-      : 'thompsonseparts.co.uk';
-    finalResponse = sanitizeOutboundLinks(finalResponse, allowedDomain);
+    // Sanitize outbound links - only if we have a valid domain
+    if (domain && !/localhost|127\.0\.0\.1|vercel/i.test(domain)) {
+      finalResponse = sanitizeOutboundLinks(finalResponse, domain);
+    }
 
     // Log search activity
     console.log('[Intelligent Chat] Search Summary:', {
