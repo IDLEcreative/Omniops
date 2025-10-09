@@ -372,7 +372,7 @@ async function runTests() {
     console.log('-' .repeat(70));
     
     // Small delay between tests
-    await new Promise(resolve => setTimeout(resolve, 1000));
+    await new Promise(resolve => setTimeout(resolve, 500));
   }
   
   // Summary
