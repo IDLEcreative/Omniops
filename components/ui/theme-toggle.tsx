@@ -2,32 +2,14 @@
 
 import { Moon, Sun } from "lucide-react"
 import { useTheme } from "next-themes"
-import { useEffect, useState } from "react"
-
 import { Button } from "@/components/ui/button"
 
 export function ThemeToggle() {
-  const { theme, setTheme } = useTheme()
-  const [mounted, setMounted] = useState(false)
+  const { theme, setTheme, resolvedTheme } = useTheme()
 
-  useEffect(() => {
-    setMounted(true)
-  }, [])
-
-  // Prevent hydration mismatch by not rendering theme-specific attributes until mounted
-  if (!mounted) {
-    return (
-      <Button
-        variant="outline"
-        size="icon"
-        aria-label="Toggle theme"
-        disabled={true}
-      >
-        <Sun className="h-[1.2rem] w-[1.2rem] rotate-0 scale-100 transition-all dark:-rotate-90 dark:scale-0" />
-        <Moon className="absolute h-[1.2rem] w-[1.2rem] rotate-90 scale-0 transition-all dark:rotate-0 dark:scale-100" />
-        <span className="sr-only">Toggle theme</span>
-      </Button>
-    )
+  const toggleTheme = () => {
+    const newTheme = resolvedTheme === "dark" ? "light" : "dark"
+    setTheme(newTheme)
   }
 
   return (
@@ -35,11 +17,8 @@ export function ThemeToggle() {
       variant="outline"
       size="icon"
       aria-label="Toggle theme"
-      aria-pressed={theme === "dark"}
-      title={theme === "dark" ? "Switch to light mode" : "Switch to dark mode"}
-      onClick={() => {
-        setTheme(theme === "dark" ? "light" : "dark")
-      }}
+      onClick={toggleTheme}
+      suppressHydrationWarning
     >
       <Sun className="h-[1.2rem] w-[1.2rem] rotate-0 scale-100 transition-all dark:-rotate-90 dark:scale-0" />
       <Moon className="absolute h-[1.2rem] w-[1.2rem] rotate-90 scale-0 transition-all dark:rotate-0 dark:scale-100" />
