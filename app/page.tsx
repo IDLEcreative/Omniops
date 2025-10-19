@@ -330,7 +330,7 @@ export default function Home() {
             <div className="flex flex-col sm:flex-row items-center justify-center gap-4">
               <Button size="lg" variant="outline" asChild>
                 <Link href="/signup">
-                  Start Free Trial
+                  Get Started
                   <ChevronRight className="ml-2 h-4 w-4" />
                 </Link>
               </Button>
@@ -596,7 +596,7 @@ export default function Home() {
             </p>
             <Badge variant="secondary" className="text-base px-4 py-2">
               <Sparkles className="mr-1 h-4 w-4" />
-              All plans include 14-day free trial • No credit card required
+              Flexible monthly billing • Cancel anytime
             </Badge>
           </div>
 
@@ -631,11 +631,11 @@ export default function Home() {
                       </li>
                     ))}
                   </ul>
-                  <Button 
-                    className="w-full" 
+                  <Button
+                    className="w-full"
                     variant={plan.popular ? "default" : "outline"}
                   >
-                    {plan.price === "Custom" ? "Contact Sales" : "Start Free Trial"}
+                    {plan.price === "Custom" ? "Contact Sales" : "Get Started"}
                   </Button>
                 </CardContent>
               </Card>
@@ -658,7 +658,7 @@ export default function Home() {
               <div className="flex flex-col sm:flex-row gap-4 justify-center">
                 <Button size="lg" variant="secondary" asChild>
                   <Link href="/signup">
-                    Start Free Trial
+                    Get Started
                     <ArrowRight className="ml-2 h-4 w-4" />
                   </Link>
                 </Button>
