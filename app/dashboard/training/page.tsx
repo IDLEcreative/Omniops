@@ -5,6 +5,7 @@ import dynamic from 'next/dynamic';
 import { cn } from '@/lib/utils';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
+import { EmptyState } from '@/components/ui/empty-state';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Textarea } from '@/components/ui/textarea';
@@ -725,13 +726,14 @@ export default function TrainingPage() {
               })}
               
               {trainingData.length === 0 && (
-                <div className="text-center py-16">
-                  <div className="mx-auto w-20 h-20 bg-muted rounded-full flex items-center justify-center mb-4">
-                    <Bot className="h-10 w-10 text-muted-foreground" />
-                  </div>
-                  <p className="font-semibold text-lg mb-1">No training data yet</p>
-                  <p className="text-sm text-muted-foreground">Add content above to start training your AI assistant</p>
-                </div>
+                <EmptyState
+                  icon={Brain}
+                  title="No training data yet"
+                  description="Start by adding website URLs, uploading documents, or creating Q&A pairs above to train your AI assistant"
+                  actionLabel="Add Your First Source"
+                  onAction={() => setActiveTab('scraping')}
+                  variant="default"
+                />
               )}
               
               {hasMore && (

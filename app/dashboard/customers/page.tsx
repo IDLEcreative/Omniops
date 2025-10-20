@@ -3,6 +3,7 @@
 import { useState } from "react";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
+import { EmptyState } from "@/components/ui/empty-state";
 import { Badge } from "@/components/ui/badge";
 import { Input } from "@/components/ui/input";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
@@ -194,7 +195,19 @@ export default function CustomersPage() {
         </CardHeader>
         <CardContent>
           <div className="space-y-4">
-            {filteredCustomers.map((customer) => (
+            {filteredCustomers.length === 0 ? (
+              <EmptyState
+                icon={Users}
+                title={searchTerm || filterStatus !== "all" ? "No matching customers" : "No customers yet"}
+                description={
+                  searchTerm || filterStatus !== "all"
+                    ? "Try adjusting your search or filter settings"
+                    : "Customer profiles will appear here once they start using your chat widget"
+                }
+                variant="default"
+              />
+            ) : (
+            filteredCustomers.map((customer) => (
               <div
                 key={customer.id}
                 className="p-4 rounded-lg border hover:bg-accent/50 transition-colors"
@@ -246,7 +259,8 @@ export default function CustomersPage() {
                   </div>
                 </div>
               </div>
-            ))}
+            ))
+            )}
           </div>
         </CardContent>
       </Card>

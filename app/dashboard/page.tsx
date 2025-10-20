@@ -36,6 +36,7 @@ import {
   AlertCircle,
 } from "lucide-react";
 import { Alert, AlertDescription } from "@/components/ui/alert";
+import { EmptyState } from "@/components/ui/empty-state";
 import { useDashboardOverview, type DashboardOverview } from "@/hooks/use-dashboard-overview";
 
 const PERIOD_OPTIONS = [
@@ -412,10 +413,15 @@ export default function DashboardPage() {
             <CardContent>
               <div className="h-[300px]">
                 {overview.trend.length === 0 ? (
-                  <div className="h-full flex flex-col items-center justify-center text-muted-foreground text-sm bg-muted/20 rounded-lg">
-                    <BarChart3 className="h-10 w-10 mb-3" />
-                    <p>No conversations recorded in the selected period.</p>
-                  </div>
+                  <EmptyState
+                    icon={BarChart3}
+                    title="No conversations yet"
+                    description={`Start by adding the chat widget to your website. Conversations from the last ${days} day${days === 1 ? '' : 's'} will appear here.`}
+                    actionLabel="View Setup Guide"
+                    actionHref="/dashboard/settings"
+                    variant="card"
+                    className="h-full"
+                  />
                 ) : (
                   <div className="flex items-end justify-between h-full gap-3">
                     {overview.trend.map((point) => {
@@ -460,7 +466,12 @@ export default function DashboardPage() {
               <CardContent>
                 <div className="space-y-4">
                   {overview.recentConversations.length === 0 ? (
-                    <p className="text-sm text-muted-foreground">No recent conversations yet.</p>
+                    <EmptyState
+                      icon={MessageSquare}
+                      title="No conversations yet"
+                      description="Once customers start chatting, their conversations will appear here"
+                      variant="compact"
+                    />
                   ) : (
                     overview.recentConversations.map((conversation) => (
                       <div key={conversation.id} className="flex items-start space-x-3">
@@ -584,7 +595,12 @@ export default function DashboardPage() {
             <CardContent>
               <div className="space-y-3">
                 {overview.languageDistribution.length === 0 ? (
-                  <p className="text-sm text-muted-foreground">No multilingual conversations yet.</p>
+                  <EmptyState
+                    icon={Users}
+                    title="No language data yet"
+                    description="Language distribution will appear as conversations come in"
+                    variant="compact"
+                  />
                 ) : (
                   overview.languageDistribution.map((item, index) => (
                     <div key={item.language + index}>

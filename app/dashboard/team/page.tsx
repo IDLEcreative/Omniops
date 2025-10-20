@@ -3,6 +3,7 @@
 import { useState } from "react";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
+import { EmptyState } from "@/components/ui/empty-state";
 import { Badge } from "@/components/ui/badge";
 import { Input } from "@/components/ui/input";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
@@ -182,7 +183,22 @@ export default function TeamPage() {
             </CardHeader>
             <CardContent>
               <div className="space-y-4">
-                {filteredMembers.map((member) => <MemberCard key={member.id} member={member} />)}
+                {filteredMembers.length === 0 ? (
+                  <EmptyState
+                    icon={Users}
+                    title={searchTerm || selectedRole !== "all" ? "No matching team members" : "No team members yet"}
+                    description={
+                      searchTerm || selectedRole !== "all"
+                        ? "Try adjusting your search or filter settings"
+                        : "Invite team members to collaborate on customer support"
+                    }
+                    actionLabel="Invite Team Member"
+                    onAction={() => setShowInviteModal(true)}
+                    variant="default"
+                  />
+                ) : (
+                  filteredMembers.map((member) => <MemberCard key={member.id} member={member} />)
+                )}
               </div>
             </CardContent>
           </Card>

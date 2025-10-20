@@ -4,6 +4,7 @@ import type { ComponentProps } from "react";
 import { useEffect, useMemo, useState } from "react";
 import { Alert, AlertDescription } from "@/components/ui/alert";
 import { Avatar, AvatarFallback } from "@/components/ui/avatar";
+import { EmptyState } from "@/components/ui/empty-state";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
@@ -17,7 +18,7 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { Bot, Calendar, Filter, MessageCircle, RefreshCw, Search } from "lucide-react";
+import { Bot, Calendar, Clock, Filter, Globe, MessageCircle, RefreshCw, Search } from "lucide-react";
 import { useDashboardConversations } from "@/hooks/use-dashboard-conversations";
 
 type DateRangeValue = "24h" | "7d" | "30d" | "90d";
@@ -186,7 +187,12 @@ export default function ConversationsPage() {
                 </div>
               ))
             ) : (
-              <p className="text-sm text-muted-foreground">No peak hour signal detected in this range.</p>
+              <EmptyState
+                icon={Clock}
+                title="No peak hours data"
+                description="Peak hour patterns will emerge as more conversations are recorded"
+                variant="compact"
+              />
             )}
           </CardContent>
         </Card>
@@ -209,7 +215,12 @@ export default function ConversationsPage() {
                 </div>
               ))
             ) : (
-              <p className="text-sm text-muted-foreground">No language diversity recorded for this range.</p>
+              <EmptyState
+                icon={Globe}
+                title="No language data"
+                description="Language diversity metrics will appear as international customers engage"
+                variant="compact"
+              />
             )}
           </CardContent>
         </Card>
@@ -244,9 +255,12 @@ export default function ConversationsPage() {
                     {loading && !data ? (
                       <SkeletonList count={6} />
                     ) : filteredConversations.length === 0 ? (
-                      <p className="p-4 text-sm text-muted-foreground">
-                        No conversations match the current filters.
-                      </p>
+                      <EmptyState
+                        icon={MessageCircle}
+                        title={searchTerm ? "No matches found" : "No conversations yet"}
+                        description={searchTerm ? "Try adjusting your search terms" : "Conversations will appear here once customers start chatting"}
+                        variant="default"
+                      />
                     ) : (
                       filteredConversations.map((conversation) => (
                         <button
@@ -354,9 +368,13 @@ export default function ConversationsPage() {
                   </div>
                 </>
               ) : (
-                <div className="flex flex-1 items-center justify-center text-sm text-muted-foreground">
-                  Select a conversation to view details.
-                </div>
+                <EmptyState
+                  icon={MessageCircle}
+                  title="Select a conversation"
+                  description="Choose a conversation from the list to view details"
+                  variant="default"
+                  className="flex-1"
+                />
               )}
             </div>
           </div>

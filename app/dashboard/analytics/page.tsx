@@ -3,6 +3,7 @@
 import { useMemo, useState } from "react";
 import { Alert, AlertDescription } from "@/components/ui/alert";
 import { Badge } from "@/components/ui/badge";
+import { EmptyState } from "@/components/ui/empty-state";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Progress } from "@/components/ui/progress";
@@ -19,6 +20,7 @@ import {
   Download,
   MessageSquare,
   RefreshCw,
+  Search,
   TrendingUp,
   Users,
 } from "lucide-react";
@@ -251,7 +253,12 @@ export default function AnalyticsPage() {
                   </div>
                 )}
                 {!loading && dailySentiment.length === 0 && (
-                  <p className="text-sm text-muted-foreground">No sentiment data recorded for this range.</p>
+                  <EmptyState
+                    icon={TrendingUp}
+                    title="No sentiment data yet"
+                    description="Sentiment analysis will appear as conversations are processed"
+                    variant="default"
+                  />
                 )}
                 {dailySentiment.map((entry) => (
                   <div
@@ -293,7 +300,12 @@ export default function AnalyticsPage() {
                   </div>
                 )}
                 {!loading && topQueries.length === 0 && (
-                  <p className="text-sm text-muted-foreground">No recurring queries detected for this range.</p>
+                  <EmptyState
+                    icon={MessageSquare}
+                    title="No query patterns yet"
+                    description="Popular customer queries will be identified as conversations accumulate"
+                    variant="default"
+                  />
                 )}
                 {topQueries.map((item) => (
                   <div key={item.query} className="space-y-2">
@@ -327,7 +339,12 @@ export default function AnalyticsPage() {
                   </div>
                 )}
                 {!loading && failedSearches.length === 0 && (
-                  <p className="text-sm text-muted-foreground">No failed searches during this range.</p>
+                  <EmptyState
+                    icon={Search}
+                    title="No failed searches"
+                    description="When searches don't return results, they'll be listed here for review"
+                    variant="compact"
+                  />
                 )}
                 {failedSearches.map((query, index) => (
                   <div key={`${query}-${index}`} className="rounded-md border bg-card px-3 py-2 text-sm">
@@ -351,9 +368,12 @@ export default function AnalyticsPage() {
                   </div>
                 )}
                 {!loading && languageDistribution.length === 0 && (
-                  <p className="text-sm text-muted-foreground">
-                    No multilingual interactions recorded for this range.
-                  </p>
+                  <EmptyState
+                    icon={Users}
+                    title="No language data"
+                    description="Language diversity will be tracked as international users engage"
+                    variant="compact"
+                  />
                 )}
                 {languageDistribution.map((lang, index) => (
                   <div key={lang.language} className="flex items-center space-x-3">
