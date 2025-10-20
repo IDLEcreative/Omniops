@@ -1,4 +1,5 @@
-import { describe, it, expect, jest, beforeEach, afterEach } from '@jest/core';
+import { describe, it, expect, beforeEach, afterEach } from '@jest/globals';
+import { jest } from '@jest/globals';
 import {
   checkUserPermission,
   getUserOrganizations,

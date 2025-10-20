@@ -1,7 +1,8 @@
 import { NextRequest } from 'next/server';
 import { GET, POST } from '@/app/api/organizations/[id]/invitations/route';
 import { createServerClient } from '@/lib/supabase/server';
-import { describe, it, expect, jest, beforeAll, afterAll, beforeEach } from '@jest/core';
+import { describe, it, expect, beforeAll, afterAll, beforeEach } from '@jest/globals';
+import { jest } from '@jest/globals';
 
 // Mock Next.js request/response
 jest.mock('@/lib/supabase/server');

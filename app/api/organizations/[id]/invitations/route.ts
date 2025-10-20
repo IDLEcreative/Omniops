@@ -45,6 +45,27 @@ export async function GET(
       );
     }
 
+    // Get organization details including seat information
+    const { data: organization } = await supabase
+      .from('organizations')
+      .select('name, seat_limit, plan_type')
+      .eq('id', organizationId)
+      .single();
+
+    // Count current members
+    const { count: currentMemberCount } = await supabase
+      .from('organization_members')
+      .select('*', { count: 'exact', head: true })
+      .eq('organization_id', organizationId);
+
+    // Count pending invitations
+    const { count: pendingInvitationCount } = await supabase
+      .from('organization_invitations')
+      .select('*', { count: 'exact', head: true })
+      .eq('organization_id', organizationId)
+      .is('accepted_at', null)
+      .gt('expires_at', new Date().toISOString());
+
     // Fetch pending invitations
     const { data: invitations, error: invitationsError } = await supabase
       .from('organization_invitations')
@@ -91,6 +112,14 @@ export async function GET(
 
     return NextResponse.json({
       invitations: invitationsWithDetails,
+      seat_usage: {
+        used: currentMemberCount || 0,
+        pending: pendingInvitationCount || 0,
+        total: currentMemberCount! + pendingInvitationCount!,
+        limit: organization?.seat_limit || 5,
+        available: Math.max(0, (organization?.seat_limit || 5) - (currentMemberCount! + pendingInvitationCount!)),
+        plan_type: organization?.plan_type || 'free'
+      }
     });
   } catch (error) {
     console.error('Error in GET /api/organizations/[id]/invitations:', error);
@@ -103,7 +132,7 @@ export async function GET(
 
 /**
  * POST /api/organizations/[id]/invitations
- * Create a new invitation
+ * Create a new invitation with seat limit validation
  */
 export async function POST(
   request: NextRequest,
@@ -157,6 +186,56 @@ export async function POST(
     }
 
     const { email, role } = validation.data;
+
+    // ===== SEAT LIMIT VALIDATION =====
+    // Get organization details
+    const { data: organization, error: orgError } = await supabase
+      .from('organizations')
+      .select('name, seat_limit, plan_type')
+      .eq('id', organizationId)
+      .single();
+
+    if (orgError || !organization) {
+      return NextResponse.json(
+        { error: 'Failed to fetch organization details' },
+        { status: 500 }
+      );
+    }
+
+    // Count current members
+    const { count: currentMemberCount } = await supabase
+      .from('organization_members')
+      .select('*', { count: 'exact', head: true })
+      .eq('organization_id', organizationId);
+
+    // Count pending invitations (excluding expired ones)
+    const { count: pendingInvitationCount } = await supabase
+      .from('organization_invitations')
+      .select('*', { count: 'exact', head: true })
+      .eq('organization_id', organizationId)
+      .is('accepted_at', null)
+      .gt('expires_at', new Date().toISOString());
+
+    const totalSeatsUsed = (currentMemberCount || 0) + (pendingInvitationCount || 0);
+    const seatLimit = organization.seat_limit || 5;
+
+    // Check if adding this invitation would exceed the limit
+    if (totalSeatsUsed >= seatLimit) {
+      return NextResponse.json(
+        {
+          error: 'Seat limit reached',
+          details: {
+            message: `Your ${organization.plan_type} plan allows ${seatLimit} team members. You currently have ${currentMemberCount} members and ${pendingInvitationCount} pending invitations.`,
+            current_members: currentMemberCount,
+            pending_invitations: pendingInvitationCount,
+            seat_limit: seatLimit,
+            plan_type: organization.plan_type,
+            upgrade_required: true
+          }
+        },
+        { status: 403 }
+      );
+    }
 
     // Check if user is already a member
     const { data: existingMember } = await supabase
@@ -243,6 +322,13 @@ export async function POST(
         invitation,
         // Return invitation link for now (until email is implemented)
         invitation_link: `${process.env.NEXT_PUBLIC_APP_URL || 'http://localhost:3000'}/invitations/accept?token=${token}`,
+        seat_usage: {
+          used: currentMemberCount! + 1,
+          pending: pendingInvitationCount! + 1,
+          total: totalSeatsUsed + 1,
+          limit: seatLimit,
+          available: Math.max(0, seatLimit - (totalSeatsUsed + 1))
+        }
       },
       { status: 201 }
     );
