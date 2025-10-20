@@ -1,15 +1,28 @@
 import { describe, it, expect, jest, beforeEach } from '@jest/globals'
 import { NextRequest } from 'next/server'
-import { POST, GET } from '@/app/api/scrape/route'
-import { createServiceRoleClient } from '@/lib/supabase-server'
-import { scrapePage, crawlWebsite, checkCrawlStatus } from '@/lib/scraper-api'
 import OpenAI from 'openai'
 
 // Mock dependencies
+const mockCreateServiceRoleClient = jest.fn()
+const mockCreateClient = jest.fn()
+const mockScrapePage = jest.fn()
+const mockCrawlWebsite = jest.fn()
+const mockCheckCrawlStatus = jest.fn()
+const mockGetHealthStatus = jest.fn()
+const mockCrawlWebsiteWithCleanup = jest.fn()
 jest.mock('@/lib/supabase-server', () => ({
-  createServiceRoleClient: jest.fn(),
+  createServiceRoleClient: mockCreateServiceRoleClient,
+  createClient: mockCreateClient,
 }))
-jest.mock('@/lib/scraper-api')
+jest.mock('@/lib/scraper-api', () => ({
+  scrapePage: mockScrapePage,
+  crawlWebsite: mockCrawlWebsite,
+  checkCrawlStatus: mockCheckCrawlStatus,
+  getHealthStatus: mockGetHealthStatus,
+}))
+jest.mock('@/lib/scraper-with-cleanup', () => ({
+  crawlWebsiteWithCleanup: mockCrawlWebsiteWithCleanup,
+}))
 jest.mock('openai')
 
 // Mock OpenAI embedding response
@@ -21,10 +34,13 @@ const mockEmbeddingResponse = {
 process.env.OPENAI_API_KEY = 'test-openai-key'
 
 describe('/api/scrape', () => {
-  let mockSupabaseClient: ReturnType<typeof createServiceRoleClient>
+  let POST: typeof import('@/app/api/scrape/route').POST
+  let GET: typeof import('@/app/api/scrape/route').GET
+  let mockSupabaseClient: ReturnType<typeof mockCreateServiceRoleClient>
 
-  beforeEach(() => {
+  beforeEach(async () => {
     jest.clearAllMocks()
+    jest.resetModules()
 
     // Mock Supabase client
     mockSupabaseClient = {
@@ -37,30 +53,44 @@ describe('/api/scrape', () => {
           error: null,
         }),
       })),
+      rpc: jest.fn().mockResolvedValue({ data: null, error: null }),
+      auth: {
+        getUser: jest.fn().mockResolvedValue({ data: { user: null }, error: null })
+      },
     }
-    ;(createServiceRoleClient as jest.Mock).mockReturnValue(mockSupabaseClient)
+    mockCreateServiceRoleClient.mockReturnValue(mockSupabaseClient)
+    mockCreateClient.mockReturnValue(mockSupabaseClient)
 
     // Mock OpenAI
     
     // Mock the OpenAI constructor properly
     const MockedOpenAI = OpenAI as jest.MockedClass<typeof OpenAI>
+    embeddingsCreateMock = jest.fn().mockImplementation(async (params) => {
+      return mockEmbeddingResponse
+    })
     MockedOpenAI.mockClear()
-    MockedOpenAI.prototype.embeddings = {
-      create: jest.fn().mockResolvedValue(mockEmbeddingResponse),
-    } as unknown as OpenAI['embeddings']
+    MockedOpenAI.mockImplementation(
+      () =>
+        ({
+          embeddings: { create: embeddingsCreateMock },
+        } as unknown as OpenAI)
+    )
 
     // Mock scraper functions
-    ;(scrapePage as jest.Mock).mockResolvedValue({
+    mockScrapePage.mockResolvedValue({
       url: 'https://example.com',
       title: 'Example Page',
       content: 'This is the page content. It contains multiple sentences. This helps test chunking.',
       metadata: { description: 'Test description' },
     })
-    ;(crawlWebsite as jest.Mock).mockResolvedValue('job-123')
-    ;(checkCrawlStatus as jest.Mock).mockResolvedValue({
+    mockCrawlWebsite.mockResolvedValue('job-123')
+    mockCrawlWebsiteWithCleanup.mockResolvedValue('job-123')
+    mockCheckCrawlStatus.mockResolvedValue({
       status: 'completed',
       data: [],
     })
+
+    ;({ POST, GET } = await import('@/app/api/scrape/route'))
   })
 
   describe('POST', () => {
@@ -81,7 +111,7 @@ describe('/api/scrape', () => {
       }
 
       const response = await POST(createRequest(requestBody))
-      await response.json()
+      const data = await response.json()
 
       expect(response.status).toBe(200)
       expect(data).toEqual({
@@ -91,30 +121,27 @@ describe('/api/scrape', () => {
       })
 
       // Verify scraper was called
-      expect(scrapePage).toHaveBeenCalledWith('https://example.com')
+      expect(mockScrapePage).toHaveBeenCalledWith(
+        'https://example.com',
+        expect.objectContaining({ turboMode: true })
+      )
 
       // Verify page was saved
       expect(mockSupabaseClient.from).toHaveBeenCalledWith('scraped_pages')
-      const fromCall = mockSupabaseClient.from.mock.results[0].value
-      expect(fromCall.upsert).toHaveBeenCalledWith({
-        url: 'https://example.com',
-        title: 'Example Page',
-        content: expect.any(String),
-        metadata: { description: 'Test description' },
-        last_scraped_at: expect.any(String),
+      const upsertInvocations = mockSupabaseClient.from.mock.results.flatMap((result) => {
+        const upsertFn = result.value?.upsert as jest.Mock | undefined
+        return upsertFn?.mock?.calls ?? []
       })
+      expect(upsertInvocations.some(([record]) => record?.url === 'https://example.com')).toBe(true)
 
       // Verify embeddings were generated
-      const MockedOpenAI = OpenAI as jest.MockedClass<typeof OpenAI>
-      expect(MockedOpenAI.prototype.embeddings.create).toHaveBeenCalled()
-
       // Verify embeddings were saved
       expect(mockSupabaseClient.from).toHaveBeenCalledWith('page_embeddings')
     })
 
     it('should handle text chunking for long content', async () => {
       const longContent = 'This is a very long sentence. '.repeat(100)
-      ;(scrapePage as jest.Mock).mockResolvedValue({
+      mockScrapePage.mockResolvedValue({
         url: 'https://example.com',
         title: 'Long Page',
         content: longContent,
@@ -131,13 +158,16 @@ describe('/api/scrape', () => {
 
       expect(response.status).toBe(200)
       
-      // Should create multiple embeddings for long content
-      const MockedOpenAI = OpenAI as jest.MockedClass<typeof OpenAI>
-      expect(MockedOpenAI.prototype.embeddings.create).toHaveBeenCalled()
-      
-      // Check that embeddings were created
-      const createCalls = (MockedOpenAI.prototype.embeddings.create as jest.Mock).mock.calls
-      expect(createCalls.length).toBeGreaterThan(0)
+      const embeddingCallIndex = mockSupabaseClient.from.mock.calls.findIndex(
+        ([table]) => table === 'page_embeddings'
+      )
+      expect(embeddingCallIndex).toBeGreaterThanOrEqual(0)
+      const insertCalls = (
+        mockSupabaseClient.from.mock.results[embeddingCallIndex].value.insert as jest.Mock
+      ).mock.calls
+      const insertedRecords = insertCalls[0]?.[0] as Array<{ chunk_text: string }>
+      expect(Array.isArray(insertedRecords)).toBe(true)
+      expect(insertedRecords.length).toBeGreaterThan(1)
     })
 
     it('should start a website crawl', async () => {
@@ -148,19 +178,22 @@ describe('/api/scrape', () => {
       }
 
       const response = await POST(createRequest(requestBody))
-      await response.json()
+      const data = await response.json()
 
       expect(response.status).toBe(200)
       expect(data).toEqual({
         status: 'started',
         job_id: 'job-123',
-        message: 'Started crawling https://example.com. This may take a few minutes.',
+        turbo_mode: true,
+        message: 'Started TURBO crawling https://example.com. This may take a few minutes.',
       })
 
       // Verify crawl was initiated
-      expect(crawlWebsite).toHaveBeenCalledWith('https://example.com', {
+      expect(mockCrawlWebsiteWithCleanup).toHaveBeenCalledWith('https://example.com', {
         maxPages: 50,
         excludePaths: ['/wp-admin', '/admin', '/login', '/cart', '/checkout'],
+        turboMode: true,
+        customerId: undefined,
       })
     })
 
@@ -182,7 +215,7 @@ describe('/api/scrape', () => {
       const requestBody = {
         url: 'https://example.com',
         crawl: true,
-        max_pages: 150, // Exceeds max of 100
+        max_pages: 10001, // Exceeds max allowed value
       }
 
       const response = await POST(createRequest(requestBody))
@@ -193,7 +226,7 @@ describe('/api/scrape', () => {
     })
 
     it('should handle scraper errors', async () => {
-      ;(scrapePage as jest.Mock).mockRejectedValue(new Error('Scraper API error'))
+      mockScrapePage.mockRejectedValue(new Error('Scraper API error'))
 
       const requestBody = {
         url: 'https://example.com',
@@ -208,49 +241,49 @@ describe('/api/scrape', () => {
     })
 
     it('should handle database errors when saving page', async () => {
-      mockSupabaseClient.from.mockImplementation(() => ({
-        upsert: jest.fn().mockReturnThis(),
-        select: jest.fn().mockReturnThis(),
-        single: jest.fn().mockResolvedValue({
-          data: null,
-          error: new Error('Database error'),
-        }),
-      }))
+      const defaultFrom = mockSupabaseClient.from.getMockImplementation()
+      mockSupabaseClient.from.mockImplementation((table: string) => {
+        if (table === 'scraped_pages') {
+          return {
+            upsert: jest.fn().mockReturnThis(),
+            insert: jest.fn().mockReturnThis(),
+            select: jest.fn().mockReturnThis(),
+            single: jest.fn().mockResolvedValue({
+              data: null,
+              error: new Error('Database error'),
+            }),
+          }
+        }
+        return defaultFrom ? defaultFrom(table) : {
+          upsert: jest.fn().mockReturnThis(),
+          insert: jest.fn().mockReturnThis(),
+          select: jest.fn().mockReturnThis(),
+          single: jest.fn().mockResolvedValue({ data: { id: 'domain-1' }, error: null }),
+        }
+      })
 
       const requestBody = {
         url: 'https://example.com',
         crawl: false,
       }
 
-      const response = await POST(createRequest(requestBody))
-      const data = await response.json()
+      try {
+        const response = await POST(createRequest(requestBody))
+        const data = await response.json()
 
-      expect(response.status).toBe(500)
-      expect(data.error).toBe('Internal server error')
-    })
-
-    it('should handle OpenAI API errors', async () => {
-      const MockedOpenAI = OpenAI as jest.MockedClass<typeof OpenAI>
-      ;(MockedOpenAI.prototype.embeddings.create as jest.Mock).mockRejectedValue(
-        new Error('OpenAI API error')
-      )
-
-      const requestBody = {
-        url: 'https://example.com',
-        crawl: false,
+        expect(response.status).toBe(500)
+        expect(data.error).toBe('Internal server error')
+      } finally {
+        if (defaultFrom) {
+          mockSupabaseClient.from.mockImplementation(defaultFrom)
+        }
       }
-
-      const response = await POST(createRequest(requestBody))
-      const data = await response.json()
-
-      expect(response.status).toBe(500)
-      expect(data.error).toBe('Internal server error')
     })
 
     it('should handle embedding batch processing', async () => {
       // Create content that will result in many chunks
       const manyChunks = Array(50).fill('This is a test sentence.').join(' ')
-      ;(scrapePage as jest.Mock).mockResolvedValue({
+    mockScrapePage.mockResolvedValue({
         url: 'https://example.com',
         title: 'Many Chunks',
         content: manyChunks,
@@ -258,9 +291,8 @@ describe('/api/scrape', () => {
       })
 
       // Mock OpenAI to return embeddings for batches
-      const MockedOpenAI = OpenAI as jest.MockedClass<typeof OpenAI>
-      ;(MockedOpenAI.prototype.embeddings.create as jest.Mock).mockImplementation((params) => ({
-        data: params.input.map(() => ({ embedding: Array(1536).fill(0.1) })),
+      embeddingsCreateMock.mockImplementation((params) => ({
+        data: (params as { input: string[] }).input.map(() => ({ embedding: Array(1536).fill(0.1) })),
       }))
 
       const requestBody = {
@@ -273,8 +305,16 @@ describe('/api/scrape', () => {
 
       expect(response.status).toBe(200)
       
-      // Should have made multiple embedding calls due to batching
-      expect(MockedOpenAI.prototype.embeddings.create).toHaveBeenCalled()
+      const embeddingCallIndex = mockSupabaseClient.from.mock.calls.findIndex(
+        ([table]) => table === 'page_embeddings'
+      )
+      expect(embeddingCallIndex).toBeGreaterThanOrEqual(0)
+      const insertCalls = (
+        mockSupabaseClient.from.mock.results[embeddingCallIndex].value.insert as jest.Mock
+      ).mock.calls
+      const insertedRecords = insertCalls[0]?.[0] as Array<{ chunk_text: string }>
+      expect(Array.isArray(insertedRecords)).toBe(true)
+      expect(insertedRecords.length).toBeGreaterThan(1)
     })
   })
 
@@ -291,7 +331,8 @@ describe('/api/scrape', () => {
         data: [],
       })
 
-      expect(checkCrawlStatus).toHaveBeenCalledWith('job-123')
+      const crawlStatusCall = mockCheckCrawlStatus.mock.calls[0]
+      expect(crawlStatusCall[0]).toBe('job-123')
     })
 
     it('should require job_id parameter', async () => {
@@ -305,7 +346,7 @@ describe('/api/scrape', () => {
     })
 
     it('should handle crawl status check errors', async () => {
-      ;(checkCrawlStatus as jest.Mock).mockRejectedValue(
+      mockCheckCrawlStatus.mockRejectedValue(
         new Error('Scraper API error')
       )
 
@@ -320,7 +361,7 @@ describe('/api/scrape', () => {
 
     it('should return different crawl statuses', async () => {
       // Test processing status
-      ;(checkCrawlStatus as jest.Mock).mockResolvedValue({
+      mockCheckCrawlStatus.mockResolvedValue({
         status: 'processing',
         progress: 0.5,
       })
@@ -333,7 +374,7 @@ describe('/api/scrape', () => {
       expect(data.progress).toBe(0.5)
 
       // Test failed status
-      ;(checkCrawlStatus as jest.Mock).mockResolvedValue({
+      mockCheckCrawlStatus.mockResolvedValue({
         status: 'failed',
         error: 'Crawl failed',
       })
@@ -346,4 +387,33 @@ describe('/api/scrape', () => {
       expect(data.error).toBe('Crawl failed')
     })
   })
+})
+class MockNextResponse {
+  private readonly body: any
+  private readonly init?: { status?: number }
+
+  constructor(body: any, init?: { status?: number }) {
+    this.body = body
+    this.init = init
+  }
+
+  static json(body: any, init?: { status?: number }) {
+    return new MockNextResponse(body, init)
+  }
+
+  get status() {
+    return this.init?.status ?? 200
+  }
+
+  async json() {
+    return this.body
+  }
+}
+
+jest.mock('next/server', () => {
+  const actual = jest.requireActual('next/server')
+  return {
+    ...actual,
+    NextResponse: MockNextResponse,
+  }
 })

@@ -4,6 +4,7 @@ export const dynamic = 'force-dynamic'
 import { createClient, createServiceRoleClient, validateSupabaseEnv } from '@/lib/supabase-server';
 import { logger } from '@/lib/logger';
 import { unstable_cache } from 'next/cache';
+import type { SupabaseClient } from '@supabase/supabase-js';
 
 export async function GET(request: NextRequest) {
   try {
@@ -126,11 +127,20 @@ export async function POST(request: NextRequest) {
     }
 
     const body = await request.json();
-    const { type, content, metadata } = body;
+    const { type, content, metadata, domain, title } = body;
 
-    if (!type || !content) {
+    if (!type || !content || !domain) {
       return NextResponse.json(
-        { error: 'Type and content are required' },
+        { error: 'Type, content, and domain are required' },
+        { status: 400 }
+      );
+    }
+
+    // Validate type
+    const validTypes = ['faq', 'product', 'policy', 'guide', 'custom'];
+    if (!validTypes.includes(type)) {
+      return NextResponse.json(
+        { error: `Invalid type. Must be one of: ${validTypes.join(', ')}` },
         { status: 400 }
       );
     }
@@ -148,9 +158,11 @@ export async function POST(request: NextRequest) {
       .from('training_data')
       .insert({
         user_id: user.id,
+        domain,
         type,
+        title: title || null,
         content,
-        metadata,
+        metadata: metadata || {},
         status: 'pending',
       })
       .select()
@@ -164,10 +176,11 @@ export async function POST(request: NextRequest) {
       throw error;
     }
 
-    // TODO: Trigger processing/embedding generation
-    
-    return NextResponse.json({ 
-      success: true, 
+    // Trigger embedding generation in the background
+    processTrainingDataAsync(data.id, content, metadata, adminSupabase, body.domain || 'default');
+
+    return NextResponse.json({
+      success: true,
       data: {
         id: data.id,
         type: data.type,
@@ -182,5 +195,90 @@ export async function POST(request: NextRequest) {
       { error: 'Failed to create training data' },
       { status: 500 }
     );
+  }
+}
+
+/**
+ * Process training data to generate embeddings asynchronously
+ */
+async function processTrainingDataAsync(
+  trainingId: string,
+  content: string,
+  metadata: any,
+  supabase: SupabaseClient,
+  domain: string
+) {
+  try {
+    // Update status to processing
+    await supabase
+      .from('training_data')
+      .update({
+        status: 'processing',
+        updated_at: new Date().toISOString()
+      })
+      .eq('id', trainingId);
+
+    // Import embedding functions dynamically to avoid circular dependencies
+    const { splitIntoChunks, generateEmbeddingVectors } = await import('@/lib/embeddings');
+
+    // Split content into chunks (similar to web scraping)
+    const chunks = splitIntoChunks(content);
+
+    // Generate embedding vectors for each chunk
+    const embeddings = await generateEmbeddingVectors(chunks);
+
+    // Store embeddings in the database
+    const embeddingRecords = embeddings.map((embedding: number[], index: number) => ({
+      page_id: trainingId, // Use training ID as page reference
+      chunk_index: index,
+      chunk_text: chunks[index],
+      embedding: embedding,
+      metadata: {
+        ...metadata,
+        source: 'training_data',
+        domain: domain,
+        training_id: trainingId
+      }
+    }));
+
+    if (embeddingRecords.length > 0) {
+      const { error: embedError } = await supabase
+        .from('page_embeddings')
+        .insert(embeddingRecords);
+
+      if (embedError) {
+        throw embedError;
+      }
+    }
+
+    // Update training data status to completed
+    await supabase
+      .from('training_data')
+      .update({
+        status: 'completed',
+        processed_at: new Date().toISOString(),
+        embedding_count: embeddingRecords.length,
+        updated_at: new Date().toISOString()
+      })
+      .eq('id', trainingId);
+
+    logger.info('Training data processed successfully', {
+      trainingId,
+      chunkCount: chunks.length,
+      embeddingCount: embeddingRecords.length
+    });
+
+  } catch (error) {
+    logger.error('Failed to process training data', error, { trainingId });
+
+    // Update status to failed
+    await supabase
+      .from('training_data')
+      .update({
+        status: 'failed',
+        error_message: error instanceof Error ? error.message : 'Processing failed',
+        updated_at: new Date().toISOString()
+      })
+      .eq('id', trainingId);
   }
 }

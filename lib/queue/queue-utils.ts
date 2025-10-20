@@ -1,14 +1,18 @@
-import { 
-  getQueueManager, 
-  JobData, 
+import {
+  getQueueManager,
+  JobData,
   SinglePageJobData,
   FullCrawlJobData,
   RefreshJobData,
-  JobPriority, 
-  JobStatus, 
-  JobType 
+  JobPriority,
+  JobStatus,
+  JobType
 } from './queue-manager';
 import { getJobProcessor, ProcessingMetrics } from './job-processor';
+
+// Re-export types that other modules need
+export type { JobStatus, JobType } from './queue-manager';
+export { JobPriority } from './queue-manager'; // JobPriority is an enum, not a type
 
 /**
  * Utility functions for queue management and job operations
@@ -234,6 +238,24 @@ export class QueueMonitor {
   private static jobProcessor = getJobProcessor();
 
   /**
+   * Check Redis connection health
+   */
+  private static async checkRedisConnection(): Promise<boolean> {
+    try {
+      const queue = (this.queueManager as any).queue;
+      if (!queue || !queue.client) {
+        return false;
+      }
+      // Ping Redis to verify connection
+      await queue.client.ping();
+      return true;
+    } catch (error) {
+      console.error('Redis health check failed:', error);
+      return false;
+    }
+  }
+
+  /**
    * Get comprehensive queue health status
    */
   static async getQueueHealth(): Promise<{
@@ -281,7 +303,7 @@ export class QueueMonitor {
         metrics: processingMetrics,
       },
       redis: {
-        connected: true, // TODO: Add actual Redis health check
+        connected: await this.checkRedisConnection(),
       },
       deduplication: {
         totalKeys: deduplicationStats.enabled ? deduplicationStats.stats?.totalKeys || 0 : 0,

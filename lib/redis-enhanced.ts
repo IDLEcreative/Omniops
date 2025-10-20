@@ -1,6 +1,12 @@
 import Redis from 'ioredis';
 import { EventEmitter } from 'events';
 
+const shouldBypassRedis =
+  process.env.REDIS_DISABLE === 'true' ||
+  process.env.NODE_ENV === 'test' ||
+  !!process.env.JEST_WORKER_ID ||
+  process.env.REDIS_URL === 'memory';
+
 // Enhanced Redis client with circuit breaker and fallback
 export class ResilientRedisClient extends EventEmitter {
   private redis: Redis | null = null;
@@ -14,6 +20,12 @@ export class ResilientRedisClient extends EventEmitter {
   
   constructor(private redisUrl: string = process.env.REDIS_URL || 'redis://localhost:6379') {
     super();
+    if (shouldBypassRedis || this.redisUrl.startsWith('memory://')) {
+      this.circuitBreakerOpen = true;
+      this.isConnected = false;
+      console.warn('[Redis] Using in-memory fallback storage');
+      return;
+    }
     this.connect();
   }
 

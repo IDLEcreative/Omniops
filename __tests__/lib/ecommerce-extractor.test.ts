@@ -28,6 +28,11 @@ jest.mock('@/lib/product-normalizer', () => ({
   ProductNormalizer: mockProductNormalizer
 }))
 
+beforeAll(() => {
+  // Ensure mocks are initialized before tests run
+  expect(typeof mockProductNormalizer.normalizeProduct).toBe('function')
+})
+
 describe('EcommerceExtractor', () => {
   beforeEach(() => {
     jest.clearAllMocks()
@@ -312,7 +317,6 @@ describe('EcommerceExtractor', () => {
       `
       
       const result = await EcommerceExtractor.extractEcommerce(html, 'https://example.com/product/fallback')
-      
       // Should fallback to DOM extraction
       expect(mockProductNormalizer.normalizeProduct).toHaveBeenCalled()
     })

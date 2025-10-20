@@ -13,7 +13,8 @@ const ExportRequestSchema = z.object({
 export async function POST(request: NextRequest) {
   try {
     const body = await request.json();
-    const { session_id, email, domain } = ExportRequestSchema.parse(body);
+  const { session_id, email, domain } = ExportRequestSchema.parse(body);
+  const actorHeader = request.headers.get('x-actor');
 
     if (!session_id && !email) {
       return NextResponse.json(
@@ -51,10 +52,9 @@ export async function POST(request: NextRequest) {
       query = query.eq('user_email', email);
     }
 
-    const { data: conversations, error } = await query;
-
-    if (error) {
-      throw error;
+    const { data: conversations, error: fetchError } = await query;
+    if (fetchError) {
+      throw fetchError;
     }
 
     // Format data for export
@@ -69,7 +69,17 @@ export async function POST(request: NextRequest) {
       },
     };
 
-    // Return as JSON (could also generate CSV or PDF)
+    await supabase.from('gdpr_audit_log').insert({
+      domain,
+      request_type: 'export',
+      session_id,
+      email,
+      actor: actorHeader ?? null,
+      status: 'completed',
+      deleted_count: null,
+      message: `Export generated with ${exportData.metadata.total_conversations} conversations.`,
+    });
+
     return NextResponse.json(exportData, {
       headers: {
         'Content-Disposition': `attachment; filename="chat-export-${Date.now()}.json"`,

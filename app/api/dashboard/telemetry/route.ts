@@ -2,6 +2,92 @@ import { NextRequest, NextResponse } from 'next/server';
 import { createServiceRoleClient } from '@/lib/supabase-server';
 import { telemetryManager } from '@/lib/chat-telemetry';
 
+type RollupRow = {
+  bucket_start: string;
+  bucket_end: string;
+  granularity?: string;
+  total_requests: number | null;
+  success_count: number | null;
+  failure_count: number | null;
+  total_input_tokens: number | null;
+  total_output_tokens: number | null;
+  total_cost_usd: string | number | null;
+  avg_duration_ms: number | null;
+  avg_searches: string | number | null;
+  avg_iterations: string | number | null;
+};
+
+type HourlyTrendPoint = {
+  hour: string;
+  cost: number;
+  requests: number;
+};
+
+type LiveSessionMetric = {
+  sessionId: string;
+  uptime: number;
+  estimatedCost?: number;
+  model: string;
+};
+
+type DomainRollupRow = {
+  bucket_start: string;
+  bucket_end: string;
+  granularity?: string;
+  domain: string;
+  total_requests: number | null;
+  success_count: number | null;
+  failure_count: number | null;
+  total_input_tokens: number | string | null;
+  total_output_tokens: number | string | null;
+  total_cost_usd: number | string | null;
+  avg_duration_ms: number | null;
+  avg_searches: number | string | null;
+  avg_iterations: number | string | null;
+};
+
+type ModelRollupRow = {
+  bucket_start: string;
+  bucket_end: string;
+  granularity?: string;
+  domain: string | null;
+  model: string;
+  total_requests: number | null;
+  success_count: number | null;
+  failure_count: number | null;
+  total_input_tokens: number | string | null;
+  total_output_tokens: number | string | null;
+  total_cost_usd: number | string | null;
+  avg_duration_ms: number | null;
+  avg_searches: number | string | null;
+  avg_iterations: number | string | null;
+};
+
+interface ModelUsageTotals {
+  count: number;
+  cost: number;
+  tokens: number;
+}
+
+interface DomainBreakdownMetrics {
+  requests: number;
+  cost: number;
+}
+
+interface RollupAggregate {
+  totalRequests: number;
+  successfulRequests: number;
+  failedRequests: number;
+  totalInputTokens: number;
+  totalOutputTokens: number;
+  totalCost: number;
+  avgDuration: number;
+  totalSearches: number;
+  avgSearchesPerRequest: number;
+  avgIterations: number;
+  trendPoints: HourlyTrendPoint[];
+}
+
 export async function GET(request: NextRequest) {
   try {
     const searchParams = request.nextUrl.searchParams;
@@ -18,10 +104,31 @@ export async function GET(request: NextRequest) {
     const startDate = new Date();
     startDate.setDate(startDate.getDate() - days);
     
-    // Build query for historical data
+    const rollupGranularity = days <= 2 ? 'hour' : 'day';
+    const canUseRollups = !domain;
+    let rollupAggregate: RollupAggregate | null = null;
+    let baseRollups: RollupRow[] = [];
+
+    if (canUseRollups) {
+      const { data: rollups, error: rollupError } = await supabase
+        .from('chat_telemetry_rollups')
+        .select('bucket_start, bucket_end, total_requests, success_count, failure_count, total_input_tokens, total_output_tokens, total_cost_usd, avg_duration_ms, avg_searches, avg_iterations')
+        .eq('granularity', rollupGranularity)
+        .gte('bucket_start', startDate.toISOString())
+        .lt('bucket_start', endDate.toISOString())
+        .order('bucket_start', { ascending: true });
+
+      if (rollupError) {
+        console.warn('[Dashboard] Error fetching telemetry rollups:', rollupError);
+      } else if (rollups && rollups.length > 0) {
+        baseRollups = rollups as RollupRow[];
+        rollupAggregate = aggregateRollups(baseRollups);
+      }
+    }
+
     let query = supabase
       .from('chat_telemetry')
-      .select('*')
+      .select('created_at, success, cost_usd, input_tokens, output_tokens, total_tokens, duration_ms, iterations, search_count, model, domain')
       .gte('created_at', startDate.toISOString())
       .order('created_at', { ascending: false });
     
@@ -36,84 +143,95 @@ export async function GET(request: NextRequest) {
       throw error;
     }
     
-    // Calculate key metrics
-    const totalRequests = telemetryData?.length || 0;
-    const successfulRequests = telemetryData?.filter(t => t.success).length || 0;
-    const failedRequests = telemetryData?.filter(t => !t.success).length || 0;
+    const telemetryRows = telemetryData ?? [];
     
-    // Token usage stats
-    const totalInputTokens = telemetryData?.reduce((sum, t) => sum + (t.input_tokens || 0), 0) || 0;
-    const totalOutputTokens = telemetryData?.reduce((sum, t) => sum + (t.output_tokens || 0), 0) || 0;
-    const totalTokens = telemetryData?.reduce((sum, t) => sum + (t.total_tokens || 0), 0) || 0;
+    const totalRequests = rollupAggregate?.totalRequests ?? telemetryRows.length;
+    const successfulRequests = rollupAggregate?.successfulRequests ?? telemetryRows.filter((t) => t.success).length;
+    const failedRequests = rollupAggregate?.failedRequests ?? telemetryRows.filter((t) => !t.success).length;
     
-    // Cost calculations
-    const totalCost = telemetryData?.reduce((sum, t) => sum + (t.cost_usd || 0), 0) || 0;
+    const totalInputTokens = rollupAggregate?.totalInputTokens ?? telemetryRows.reduce((sum, t) => sum + numberFromValue(t.input_tokens), 0);
+    const totalOutputTokens = rollupAggregate?.totalOutputTokens ?? telemetryRows.reduce((sum, t) => sum + numberFromValue(t.output_tokens), 0);
+    const totalTokens = rollupAggregate
+      ? rollupAggregate.totalInputTokens + rollupAggregate.totalOutputTokens
+      : telemetryRows.reduce((sum, t) => sum + numberFromValue(t.total_tokens), 0);
+    
+    const totalCost = rollupAggregate?.totalCost ?? telemetryRows.reduce((sum, t) => sum + numberFromValue(t.cost_usd), 0);
     const avgCostPerRequest = totalRequests > 0 ? totalCost / totalRequests : 0;
     
-    // Performance metrics
-    const avgDuration = totalRequests > 0
-      ? telemetryData.reduce((sum, t) => sum + (t.duration_ms || 0), 0) / totalRequests
+    const avgDuration = rollupAggregate?.avgDuration ?? (
+      totalRequests > 0
+        ? telemetryRows.reduce((sum, t) => sum + numberFromValue(t.duration_ms), 0) / totalRequests
+        : 0
+    );
+
+    const totalSearchesRaw = telemetryRows.reduce((sum, t) => sum + numberFromValue(t.search_count), 0);
+    const totalSearches = rollupAggregate?.totalSearches ?? totalSearchesRaw;
+    const avgSearchesPerRequestNumber = totalRequests > 0
+      ? (rollupAggregate ? rollupAggregate.avgSearchesPerRequest : totalSearches / totalRequests)
       : 0;
+    const avgIterationsNumber = rollupAggregate?.avgIterations ?? (
+      telemetryRows.length
+        ? telemetryRows.reduce((sum, t) => sum + numberFromValue(t.iterations), 0) / telemetryRows.length
+        : 0
+    );
+
+    const rollupTrend = rollupAggregate?.trendPoints ?? [];
+    const hourlyTrend: HourlyTrendPoint[] = rollupTrend.length > 0
+      ? rollupTrend
+      : await getTrendFromRaw(supabase, startDate, domain);
+
+    const [domainRollups, modelRollups] = await Promise.all([
+      fetchDomainRollups(supabase, rollupGranularity, startDate, endDate, domain),
+      fetchModelRollups(supabase, rollupGranularity, startDate, endDate, domain),
+    ]);
     
-    // Model usage breakdown
-    interface ModelUsageItem {
-      count: number;
-      cost: number | string;
-      tokens: number;
-      percentage: number;
-    }
-    const modelUsage = telemetryData?.reduce<Record<string, ModelUsageItem>>((acc, t) => {
-      const model = t.model || 'unknown';
-      if (!acc[model]) {
-        acc[model] = {
-          count: 0,
-          cost: 0,
-          tokens: 0,
-          percentage: 0
-        };
+    const rollupTimestamps: number[] = [];
+    const collectBucketTime = (value?: string) => {
+      if (!value) return;
+      const timestamp = Date.parse(value);
+      if (!Number.isNaN(timestamp)) {
+        rollupTimestamps.push(timestamp);
       }
-      acc[model].count++;
-      acc[model].cost += t.cost_usd || 0;
-      acc[model].tokens += t.total_tokens || 0;
-      return acc;
-    }, {}) || {};
+    };
+    baseRollups.forEach((row) => collectBucketTime(row.bucket_end || row.bucket_start));
+    domainRollups.forEach((row) => collectBucketTime(row.bucket_end || row.bucket_start));
+    modelRollups.forEach((row) => collectBucketTime(row.bucket_end || row.bucket_start));
     
-    // Calculate percentages for model usage
-    Object.keys(modelUsage).forEach(model => {
-      if (modelUsage[model]) {
-        modelUsage[model].percentage = totalRequests > 0
-          ? Math.round((modelUsage[model].count / totalRequests) * 100)
-          : 0;
-        modelUsage[model].cost = typeof modelUsage[model].cost === 'number' 
-          ? modelUsage[model].cost.toFixed(4)
-          : modelUsage[model].cost;
-      }
-    });
+    const latestRollupMs = rollupTimestamps.length > 0 ? Math.max(...rollupTimestamps) : null;
+    const freshnessMinutes = latestRollupMs !== null
+      ? Math.max(0, (Date.now() - latestRollupMs) / 60000)
+      : null;
+    const rollupDataAvailable = baseRollups.length > 0 || domainRollups.length > 0 || modelRollups.length > 0;
+    const rollupSource: 'rollup' | 'raw' = rollupDataAvailable ? 'rollup' : 'raw';
+    const staleThresholdMinutes = 60;
+    const rollupStale = rollupDataAvailable
+      ? freshnessMinutes === null || freshnessMinutes > staleThresholdMinutes
+      : true;
     
-    // Domain breakdown (if not filtered by domain)
-    interface DomainBreakdownItem {
-      requests: number;
-      cost: number | string;
+    const totalSearchesCount = Math.round(totalSearches);
+    const avgSearchesPerRequest = Number.isFinite(avgSearchesPerRequestNumber)
+      ? avgSearchesPerRequestNumber.toFixed(1)
+      : '0';
+    const avgIterationsDisplay = Number.isFinite(avgIterationsNumber)
+      ? avgIterationsNumber.toFixed(1)
+      : '0';
+    
+    // Model usage breakdown (prefer rollups, fallback to raw telemetry)
+    let modelUsageMap: Record<string, ModelUsageTotals> = {};
+    if (modelRollups.length > 0) {
+      modelUsageMap = summarizeModelRollups(modelRollups);
     }
-    let domainBreakdown: Record<string, DomainBreakdownItem> = {};
-    if (!domain) {
-      domainBreakdown = telemetryData?.reduce<Record<string, DomainBreakdownItem>>((acc, t) => {
-        const d = t.domain || 'unknown';
-        if (!acc[d]) {
-          acc[d] = { requests: 0, cost: 0 };
-        }
-        acc[d].requests++;
-        acc[d].cost += t.cost_usd || 0;
-        return acc;
-      }, {}) || {};
-      
-      Object.keys(domainBreakdown).forEach(d => {
-        if (domainBreakdown[d]) {
-          domainBreakdown[d].cost = typeof domainBreakdown[d].cost === 'number'
-            ? domainBreakdown[d].cost.toFixed(4)
-            : domainBreakdown[d].cost;
-        }
-      });
+    if (Object.keys(modelUsageMap).length === 0) {
+      modelUsageMap = summarizeModelUsageFromRaw(telemetryRows);
+    }
+    
+    // Domain breakdown (prefer rollups, fallback to raw telemetry)
+    let domainBreakdownMap: Record<string, DomainBreakdownMetrics> = {};
+    if (domainRollups.length > 0) {
+      domainBreakdownMap = summarizeDomainRollups(domainRollups);
+    }
+    if (Object.keys(domainBreakdownMap).length === 0) {
+      domainBreakdownMap = summarizeDomainBreakdownFromRaw(telemetryRows, domain);
     }
     
     // Get live session metrics
@@ -127,19 +245,10 @@ export async function GET(request: NextRequest) {
     const projectedDailyCost = costPerHour * 24;
     const projectedMonthlyCost = projectedDailyCost * 30;
     
-    // Get hourly trend for sparkline
-    const hourlyTrend = await getHourlyTrend(supabase, startDate, domain);
-    
     // Error rate calculation
     const errorRate = totalRequests > 0
       ? Math.round((failedRequests / totalRequests) * 100)
       : 0;
-    
-    // Search operation statistics
-    const totalSearches = telemetryData?.reduce((sum, t) => sum + (t.search_count || 0), 0) || 0;
-    const avgSearchesPerRequest = totalRequests > 0
-      ? (totalSearches / totalRequests).toFixed(1)
-      : '0';
     
     return NextResponse.json({
       // Overview metrics
@@ -178,41 +287,51 @@ export async function GET(request: NextRequest) {
       // Performance
       performance: {
         avgResponseTime: Math.round(avgDuration),
-        totalSearches,
+        totalSearches: totalSearchesCount,
         avgSearchesPerRequest,
-        avgIterations: telemetryData?.length
-          ? (telemetryData.reduce((sum, t) => sum + (t.iterations || 0), 0) / telemetryData.length).toFixed(1)
-          : '0'
+        avgIterations: avgIterationsDisplay
       },
       
       // Breakdowns
-      modelUsage: Object.entries(modelUsage).map(([model, data]) => ({
-        model,
-        ...(data as ModelUsageItem)
+      modelUsage: Object.entries(modelUsageMap).map(([modelName, usage]) => ({
+        model: modelName,
+        count: usage.count,
+        cost: usage.cost.toFixed(4),
+        tokens: usage.tokens,
+        percentage: totalRequests > 0
+          ? Math.round((usage.count / totalRequests) * 100)
+          : 0
       })),
       
-      domainBreakdown: Object.entries(domainBreakdown).map(([domain, data]) => ({
-        domain,
-        ...(data as DomainBreakdownItem)
+      domainBreakdown: Object.entries(domainBreakdownMap).map(([domainName, metrics]) => ({
+        domain: domainName,
+        requests: metrics.requests,
+        cost: metrics.cost.toFixed(4)
       })),
       
       // Hourly trend for charts
-      hourlyTrend: hourlyTrend.map((h: any) => ({
-        hour: h.hour,
-        cost: parseFloat(h.cost || 0),
-        requests: h.requests || 0
+      hourlyTrend: hourlyTrend.map((point) => ({
+        hour: point.hour,
+        cost: Number(point.cost.toFixed(6)),
+        requests: point.requests
       })),
       
       // Live session info
       live: {
         activeSessions,
         currentCost: liveTotalCost.toFixed(6),
-        sessionsData: liveMetrics.sessions.slice(0, 5).map((s: any) => ({
-          id: s.sessionId,
-          uptime: Math.round(s.uptime / 1000), // Convert to seconds
-          cost: s.estimatedCost?.toFixed(6) || '0',
-          model: s.model
+        sessionsData: (liveMetrics.sessions as LiveSessionMetric[]).slice(0, 5).map((session) => ({
+          id: session.sessionId,
+          uptime: Math.round(session.uptime / 1000), // Convert to seconds
+          cost: session.estimatedCost?.toFixed(6) || '0',
+          model: session.model
         }))
+      },
+
+      health: {
+        rollupFreshnessMinutes: freshnessMinutes !== null ? Number(freshnessMinutes.toFixed(2)) : null,
+        rollupSource,
+        stale: rollupStale
       }
     });
     
@@ -258,6 +377,11 @@ export async function GET(request: NextRequest) {
           activeSessions: 0,
           currentCost: '0.000000',
           sessionsData: []
+        },
+        health: {
+          rollupFreshnessMinutes: null,
+          rollupSource: 'raw',
+          stale: true
         }
       },
       { status: 200 }
@@ -265,8 +389,12 @@ export async function GET(request: NextRequest) {
   }
 }
 
-// Helper function to get hourly trend data
-async function getHourlyTrend(supabase: ReturnType<typeof createServiceRoleClient> extends Promise<infer T> ? T : never, startDate: Date, domain?: string) {
+// Helper to build trend data directly from telemetry rows when rollups are unavailable
+async function getTrendFromRaw(
+  supabase: ReturnType<typeof createServiceRoleClient> extends Promise<infer T> ? T : never,
+  startDate: Date,
+  domain?: string
+): Promise<HourlyTrendPoint[]> {
   if (!supabase) {
     return [];
   }
@@ -289,9 +417,10 @@ async function getHourlyTrend(supabase: ReturnType<typeof createServiceRoleClien
     }
     
     // Group by hour
-    const hourlyData: Record<string, any> = {};
+    const hourlyData: Record<string, HourlyTrendPoint> = {};
     
-    data?.forEach((row: any) => {
+    const rows = (data ?? []) as Array<{ created_at: string; cost_usd: number | string | null }>;
+    rows.forEach((row) => {
       const hour = new Date(row.created_at);
       hour.setMinutes(0, 0, 0);
       const hourKey = hour.toISOString();
@@ -304,43 +433,256 @@ async function getHourlyTrend(supabase: ReturnType<typeof createServiceRoleClien
         };
       }
       
-      hourlyData[hourKey].cost += row.cost_usd || 0;
+      hourlyData[hourKey].cost += Number(row.cost_usd || 0);
       hourlyData[hourKey].requests++;
     });
     
     return Object.values(hourlyData)
       .sort((a, b) => new Date(a.hour).getTime() - new Date(b.hour).getTime())
-      .map(h => ({
-        ...h,
-        cost: h.cost.toFixed(6)
+      .map((point) => ({
+        hour: point.hour,
+        cost: point.cost,
+        requests: point.requests
       }));
     
   } catch (error) {
-    console.error('Error calculating hourly trend:', error);
+    console.error('Error calculating hourly trend from raw data:', error);
     return [];
   }
 }
 
+function aggregateRollups(rows: RollupRow[]): RollupAggregate {
+  const accumulator = rows.reduce(
+    (acc, row) => {
+      const requests = row.total_requests ?? 0;
+      const successes = row.success_count ?? 0;
+      const failures = row.failure_count ?? 0;
+      const inputTokens = numberFromValue(row.total_input_tokens);
+      const outputTokens = numberFromValue(row.total_output_tokens);
+      const cost = numberFromValue(row.total_cost_usd);
+      const avgDuration = numberFromValue(row.avg_duration_ms);
+      const avgSearches = numberFromValue(row.avg_searches);
+      const avgIterations = numberFromValue(row.avg_iterations);
+
+      acc.totalRequests += requests;
+      acc.successfulRequests += successes;
+      acc.failedRequests += failures;
+      acc.totalInputTokens += inputTokens;
+      acc.totalOutputTokens += outputTokens;
+      acc.totalCost += cost;
+      acc.durationWeightedSum += avgDuration * requests;
+      acc.searchesWeightedSum += avgSearches * requests;
+      acc.iterationsWeightedSum += avgIterations * requests;
+      acc.points.push({
+        hour: row.bucket_start,
+        cost,
+        requests
+      });
+      return acc;
+    },
+    {
+      totalRequests: 0,
+      successfulRequests: 0,
+      failedRequests: 0,
+      totalInputTokens: 0,
+      totalOutputTokens: 0,
+      totalCost: 0,
+      durationWeightedSum: 0,
+      searchesWeightedSum: 0,
+      iterationsWeightedSum: 0,
+      points: [] as HourlyTrendPoint[]
+    }
+  );
+
+  const totalRequests = accumulator.totalRequests;
+  const avgDuration = totalRequests > 0 ? accumulator.durationWeightedSum / totalRequests : 0;
+  const totalSearches = accumulator.searchesWeightedSum;
+  const avgSearchesPerRequest = totalRequests > 0 ? totalSearches / totalRequests : 0;
+  const avgIterations = totalRequests > 0 ? accumulator.iterationsWeightedSum / totalRequests : 0;
+
+  const trendPoints = accumulator.points.sort(
+    (a, b) => new Date(a.hour).getTime() - new Date(b.hour).getTime()
+  );
+
+  return {
+    totalRequests,
+    successfulRequests: accumulator.successfulRequests,
+    failedRequests: accumulator.failedRequests,
+    totalInputTokens: accumulator.totalInputTokens,
+    totalOutputTokens: accumulator.totalOutputTokens,
+    totalCost: accumulator.totalCost,
+    avgDuration,
+    totalSearches,
+    avgSearchesPerRequest,
+    avgIterations,
+    trendPoints
+  };
+}
+
+async function fetchDomainRollups(
+  supabase: ReturnType<typeof createServiceRoleClient> extends Promise<infer T> ? T : never,
+  granularity: string,
+  startDate: Date,
+  endDate: Date,
+  domain?: string
+): Promise<DomainRollupRow[]> {
+  if (!supabase) return [];
+  try {
+    let query = supabase
+      .from('chat_telemetry_domain_rollups')
+      .select('bucket_start, bucket_end, domain, total_requests, success_count, failure_count, total_input_tokens, total_output_tokens, total_cost_usd, avg_duration_ms, avg_searches, avg_iterations')
+      .eq('granularity', granularity)
+      .gte('bucket_start', startDate.toISOString())
+      .lt('bucket_start', endDate.toISOString())
+      .order('bucket_start', { ascending: true });
+
+    if (domain) {
+      query = query.eq('domain', domain);
+    }
+
+    const { data, error } = await query;
+    if (error) {
+      console.warn('[Dashboard] Failed to load domain rollups:', error);
+      return [];
+    }
+    return (data ?? []) as DomainRollupRow[];
+  } catch (err) {
+    console.error('[Dashboard] Exception loading domain rollups:', err);
+    return [];
+  }
+}
+
+async function fetchModelRollups(
+  supabase: ReturnType<typeof createServiceRoleClient> extends Promise<infer T> ? T : never,
+  granularity: string,
+  startDate: Date,
+  endDate: Date,
+  domain?: string
+): Promise<ModelRollupRow[]> {
+  if (!supabase) return [];
+  try {
+    let query = supabase
+      .from('chat_telemetry_model_rollups')
+      .select('bucket_start, bucket_end, domain, model, total_requests, success_count, failure_count, total_input_tokens, total_output_tokens, total_cost_usd, avg_duration_ms, avg_searches, avg_iterations')
+      .eq('granularity', granularity)
+      .gte('bucket_start', startDate.toISOString())
+      .lt('bucket_start', endDate.toISOString())
+      .order('bucket_start', { ascending: true });
+
+    if (domain) {
+      query = query.eq('domain', domain);
+    }
+
+    const { data, error } = await query;
+    if (error) {
+      console.warn('[Dashboard] Failed to load model rollups:', error);
+      return [];
+    }
+    return (data ?? []) as ModelRollupRow[];
+  } catch (err) {
+    console.error('[Dashboard] Exception loading model rollups:', err);
+    return [];
+  }
+}
+
+function summarizeDomainRollups(rows: DomainRollupRow[]): Record<string, DomainBreakdownMetrics> {
+  return rows.reduce<Record<string, DomainBreakdownMetrics>>((acc, row) => {
+    const domainKey = row.domain || 'unknown';
+    if (!acc[domainKey]) {
+      acc[domainKey] = { requests: 0, cost: 0 };
+    }
+    acc[domainKey].requests += row.total_requests ?? 0;
+    acc[domainKey].cost += numberFromValue(row.total_cost_usd);
+    return acc;
+  }, {});
+}
+
+function summarizeModelRollups(rows: ModelRollupRow[]): Record<string, ModelUsageTotals> {
+  return rows.reduce<Record<string, ModelUsageTotals>>((acc, row) => {
+    const modelKey = row.model || 'unknown';
+    if (!acc[modelKey]) {
+      acc[modelKey] = { count: 0, cost: 0, tokens: 0 };
+    }
+    acc[modelKey].count += row.total_requests ?? 0;
+    acc[modelKey].cost += numberFromValue(row.total_cost_usd);
+    acc[modelKey].tokens += numberFromValue(row.total_input_tokens) + numberFromValue(row.total_output_tokens);
+    return acc;
+  }, {});
+}
+
+function summarizeDomainBreakdownFromRaw(
+  rows: Array<{ domain?: string | null; cost_usd?: number | string | null }>,
+  domainFilter?: string
+): Record<string, DomainBreakdownMetrics> {
+  return rows.reduce<Record<string, DomainBreakdownMetrics>>((acc, row) => {
+    const domainValue = (typeof row.domain === 'string' && row.domain.trim().length > 0)
+      ? row.domain.trim()
+      : 'unknown';
+    if (domainFilter && domainValue !== domainFilter) {
+      return acc;
+    }
+    if (!acc[domainValue]) {
+      acc[domainValue] = { requests: 0, cost: 0 };
+    }
+    acc[domainValue].requests += 1;
+    acc[domainValue].cost += numberFromValue(row.cost_usd);
+    return acc;
+  }, {});
+}
+
+function summarizeModelUsageFromRaw(
+  rows: Array<{ model?: string | null; cost_usd?: number | string | null; total_tokens?: number | string | null }>
+): Record<string, ModelUsageTotals> {
+  return rows.reduce<Record<string, ModelUsageTotals>>((acc, row) => {
+    const modelValue = (typeof row.model === 'string' && row.model.trim().length > 0)
+      ? row.model.trim()
+      : 'unknown';
+    if (!acc[modelValue]) {
+      acc[modelValue] = { count: 0, cost: 0, tokens: 0 };
+    }
+    acc[modelValue].count += 1;
+    acc[modelValue].cost += numberFromValue(row.cost_usd);
+    acc[modelValue].tokens += numberFromValue(row.total_tokens);
+    return acc;
+  }, {});
+}
+
+function numberFromValue(value: unknown): number {
+  if (typeof value === 'number') {
+    return Number.isFinite(value) ? value : 0;
+  }
+  if (typeof value === 'string') {
+    const parsed = Number.parseFloat(value);
+    return Number.isFinite(parsed) ? parsed : 0;
+  }
+  return 0;
+}
+
 // Helper function to calculate trend direction
-function calculateTrend(hourlyData: any[]): string {
-  if (!hourlyData || hourlyData.length < 2) return 'stable';
-  
-  const recentHours = hourlyData.slice(-6); // Last 6 hours
-  if (recentHours.length < 2) return 'stable';
-  
-  const firstHalfAvg = recentHours
-    .slice(0, Math.floor(recentHours.length / 2))
-    .reduce((sum, h) => sum + parseFloat(h.cost), 0) / Math.floor(recentHours.length / 2);
-  
-  const secondHalfAvg = recentHours
-    .slice(Math.floor(recentHours.length / 2))
-    .reduce((sum, h) => sum + parseFloat(h.cost), 0) / (recentHours.length - Math.floor(recentHours.length / 2));
-  
-  const changePercent = firstHalfAvg > 0 
-    ? ((secondHalfAvg - firstHalfAvg) / firstHalfAvg) * 100
+function calculateTrend(trend: Array<{ cost: number }> = []): string {
+  if (!trend || trend.length < 2) return 'stable';
+
+  const recent = trend.slice(-6);
+  if (recent.length < 2) return 'stable';
+
+  const midpoint = Math.floor(recent.length / 2);
+  const firstHalf = recent.slice(0, midpoint);
+  const secondHalf = recent.slice(midpoint);
+
+  const firstAverage = averageCost(firstHalf);
+  const secondAverage = averageCost(secondHalf);
+
+  const changePercent = firstAverage > 0
+    ? ((secondAverage - firstAverage) / firstAverage) * 100
     : 0;
-  
+
   if (changePercent > 20) return 'increasing';
   if (changePercent < -20) return 'decreasing';
   return 'stable';
+}
+
+function averageCost(points: Array<{ cost: number }>): number {
+  if (!points.length) return 0;
+  const sum = points.reduce((acc, point) => acc + Number(point.cost ?? 0), 0);
+  return sum / points.length;
 }

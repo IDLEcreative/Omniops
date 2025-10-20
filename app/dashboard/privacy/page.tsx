@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useCallback, useEffect, useState } from "react";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Button } from "@/components/ui/button";
@@ -19,7 +19,6 @@ import {
   Shield,
   Lock,
   Eye,
-  EyeOff,
   Download,
   Trash2,
   Clock,
@@ -31,80 +30,116 @@ import {
   Activity,
   Globe,
   UserX,
-  Calendar,
   Archive,
-  Settings,
   Save,
   RotateCcw,
 } from "lucide-react";
 import { Alert, AlertDescription } from "@/components/ui/alert";
+import { useGdprExport } from "@/hooks/use-gdpr-export";
+import { useGdprDelete } from "@/hooks/use-gdpr-delete";
+
+type RequestField = 'domain' | 'sessionId' | 'email' | 'confirm';
+
+const AUDIT_PAGE_SIZE = 25;
+const ACTOR_HEADER = 'dashboard-privacy';
+
+function toDateISOString(value: string, mode: 'start' | 'end'): string | null {
+  if (!value) {
+    return null;
+  }
+  const date = new Date(value);
+  if (Number.isNaN(date.getTime())) {
+    return null;
+  }
+
+  if (mode === 'start') {
+    date.setUTCHours(0, 0, 0, 0);
+  } else {
+    date.setUTCHours(23, 59, 59, 999);
+  }
+
+  return date.toISOString();
+}
+
+const DEFAULT_PRIVACY_SETTINGS = {
+  // Data Retention
+  chatRetentionDays: "365",
+  archiveAfterDays: "90",
+  autoDeleteInactive: true,
+  
+  // GDPR Compliance
+  cookieConsent: true,
+  dataProcessingConsent: true,
+  rightToForgotten: true,
+  dataPortability: true,
+  consentRecords: true,
+  
+  // Security Settings
+  encryptionAtRest: true,
+  encryptionInTransit: true,
+  anonymizeIPs: true,
+  secureHeaders: true,
+  auditLogging: true,
+  
+  // Privacy Features
+  dataMinimization: true,
+  pseudonymization: false,
+  purposeLimitation: true,
+  storageMinimization: true,
+};
 
 // Mock data for audit log
-const auditLogData = [
-  {
-    id: 1,
-    action: "Data Export Requested",
-    user: "admin@company.com",
-    timestamp: "2025-01-15 14:30:22",
-    details: "Full customer data export",
-    status: "completed",
-  },
-  {
-    id: 2,
-    action: "Privacy Settings Updated",
-    user: "admin@company.com",
-    timestamp: "2025-01-15 12:15:45",
-    details: "Cookie consent banner enabled",
-    status: "completed",
-  },
-  {
-    id: 3,
-    action: "Data Deletion Request",
-    user: "customer@example.com",
-    timestamp: "2025-01-14 16:45:12",
-    details: "User ID: 12345 - All personal data",
-    status: "pending",
-  },
-  {
-    id: 4,
-    action: "Security Audit",
-    user: "system",
-    timestamp: "2025-01-14 09:00:00",
-    details: "Automated security compliance check",
-    status: "completed",
-  },
-];
+type AuditEntry = {
+  id: string;
+  domain: string;
+  request_type: "export" | "delete";
+  session_id: string | null;
+  email: string | null;
+  actor: string | null;
+  status: string;
+  deleted_count: number | null;
+  message: string | null;
+  created_at: string;
+};
 
 export default function PrivacyPage() {
   const [isDirty, setIsDirty] = useState(false);
-  const [settings, setSettings] = useState({
-    // Data Retention
-    chatRetentionDays: "365",
-    archiveAfterDays: "90",
-    autoDeleteInactive: true,
-    
-    // GDPR Compliance
-    cookieConsent: true,
-    dataProcessingConsent: true,
-    rightToForgotten: true,
-    dataPortability: true,
-    consentRecords: true,
-    
-    // Security Settings
-    encryptionAtRest: true,
-    encryptionInTransit: true,
-    anonymizeIPs: true,
-    secureHeaders: true,
-    auditLogging: true,
-    
-    // Privacy Features
-    dataMinimization: true,
-    pseudonymization: false,
-    purposeLimitation: true,
-    storageMinimization: true,
-  });
+  const [settings, setSettings] = useState({ ...DEFAULT_PRIVACY_SETTINGS });
 
-  const handleSettingChange = (key: string, value: any) => {
+  const initialRequestState = {
+    domain: '',
+    sessionId: '',
+    email: '',
+    confirm: false,
+  };
+
+  const [requestForm, setRequestForm] = useState(initialRequestState);
+  const [successMessage, setSuccessMessage] = useState<string | null>(null);
+  const { loading: exportLoading, error: exportError, download } = useGdprExport();
+  const {
+    loading: deleteLoading,
+    error: deleteError,
+    deletedCount,
+    remove,
+  } = useGdprDelete();
+  const combinedError = exportError || deleteError;
+  const [auditEntries, setAuditEntries] = useState<AuditEntry[]>([]);
+  const [auditCount, setAuditCount] = useState(0);
+  const [auditLoading, setAuditLoading] = useState(false);
+  const [auditError, setAuditError] = useState<string | null>(null);
+  const [auditFilter, setAuditFilter] = useState<'all' | 'export' | 'delete'>('all');
+  const [auditOptionsLoading, setAuditOptionsLoading] = useState(false);
+  const [auditOptionsError, setAuditOptionsError] = useState<string | null>(null);
+  const [availableAuditDomains, setAvailableAuditDomains] = useState<string[]>([]);
+  const [availableAuditActors, setAvailableAuditActors] = useState<string[]>([]);
+  const [auditDomain, setAuditDomain] = useState('');
+  const [auditActor, setAuditActor] = useState('');
+  const [auditStartDate, setAuditStartDate] = useState('');
+  const [auditEndDate, setAuditEndDate] = useState('');
+  const [auditPage, setAuditPage] = useState(0);
+  const [auditExportLoading, setAuditExportLoading] = useState(false);
+  const [auditExportError, setAuditExportError] = useState<string | null>(null);
+  const handleSettingChange = (key: string, value: string | number | boolean) => {
     setSettings(prev => ({ ...prev, [key]: value }));
     setIsDirty(true);
   };
@@ -116,15 +151,187 @@ export default function PrivacyPage() {
 
   const handleReset = () => {
     setIsDirty(false);
+    setSettings({ ...DEFAULT_PRIVACY_SETTINGS });
+    setRequestForm(initialRequestState);
+    setSuccessMessage(null);
+    setAuditFilter('all');
+    setAuditDomain('');
+    setAuditActor('');
+    setAuditStartDate('');
+    setAuditEndDate('');
+    setAuditPage(0);
+    setAuditEntries([]);
+    setAuditCount(0);
+    setAuditError(null);
+    setAuditOptionsError(null);
+    setAuditExportError(null);
   };
 
-  const handleDataExport = () => {
-    console.log("Initiating data export...");
+  const handleRequestChange = (key: RequestField, value: string | boolean) => {
+    setRequestForm(prev => ({ ...prev, [key]: value }));
+    setSuccessMessage(null);
   };
 
-  const handleDataDeletion = () => {
-    console.log("Initiating data deletion...");
+  const handleExportRequest = async () => {
+    const success = await download({
+      domain: requestForm.domain.trim(),
+      sessionId: requestForm.sessionId.trim() || undefined,
+      email: requestForm.email.trim() || undefined,
+      actor: ACTOR_HEADER,
+    });
+
+    if (success) {
+      setSuccessMessage('Export started. A JSON file will download shortly.');
+      await fetchAuditLog();
+    }
   };
+
+  const handleDeleteRequest = async () => {
+    const count = await remove({
+      domain: requestForm.domain.trim(),
+      sessionId: requestForm.sessionId.trim() || undefined,
+      email: requestForm.email.trim() || undefined,
+      confirm: requestForm.confirm,
+      actor: ACTOR_HEADER,
+    });
+
+    if (typeof count === 'number') {
+      setSuccessMessage(
+        count === 0
+          ? 'No conversations matched the deletion request.'
+          : `Deleted ${count} conversation${count === 1 ? '' : 's'} for the requested user.`,
+      );
+      setRequestForm(prev => ({ ...prev, confirm: false }));
+      await fetchAuditLog();
+    }
+  };
+
+  const fetchAuditLog = useCallback(async () => {
+    setAuditLoading(true);
+    setAuditError(null);
+    try {
+      const params = new URLSearchParams();
+      if (auditFilter !== 'all') {
+        params.set('request_type', auditFilter);
+      }
+      if (auditDomain.trim()) {
+        params.set('domain', auditDomain.trim());
+      }
+      if (auditActor.trim()) {
+        params.set('actor', auditActor.trim());
+      }
+      const startIso = toDateISOString(auditStartDate, 'start');
+      if (startIso) {
+        params.set('start_date', startIso);
+      }
+      const endIso = toDateISOString(auditEndDate, 'end');
+      if (endIso) {
+        params.set('end_date', endIso);
+      }
+      params.set('limit', AUDIT_PAGE_SIZE.toString());
+      params.set('offset', String(auditPage * AUDIT_PAGE_SIZE));
+
+      const url = params.toString().length > 0 ? `/api/gdpr/audit?${params.toString()}` : '/api/gdpr/audit';
+      const response = await fetch(url);
+      if (!response.ok) {
+        const { error: message } = await response.json();
+        throw new Error(message ?? 'Failed to load audit log');
+      }
+      const payload = await response.json();
+      setAuditEntries(payload.entries ?? []);
+      setAuditCount(typeof payload.count === 'number' ? payload.count : (payload.entries ?? []).length);
+    } catch (err) {
+      setAuditError((err as Error).message);
+      setAuditEntries([]);
+      setAuditCount(0);
+    } finally {
+      setAuditLoading(false);
+    }
+  }, [auditFilter, auditDomain, auditActor, auditStartDate, auditEndDate, auditPage]);
+
+  const fetchAuditOptions = useCallback(async () => {
+    setAuditOptionsLoading(true);
+    setAuditOptionsError(null);
+    try {
+      const response = await fetch('/api/gdpr/audit/options');
+      if (!response.ok) {
+        const { error: message } = await response.json();
+        throw new Error(message ?? 'Failed to load audit filter options');
+      }
+      const payload = await response.json();
+      setAvailableAuditDomains(Array.isArray(payload.domains) ? payload.domains : []);
+      setAvailableAuditActors(Array.isArray(payload.actors) ? payload.actors : []);
+    } catch (err) {
+      setAuditOptionsError((err as Error).message);
+      setAvailableAuditDomains([]);
+      setAvailableAuditActors([]);
+    } finally {
+      setAuditOptionsLoading(false);
+    }
+  }, []);
+
+  useEffect(() => {
+    fetchAuditLog();
+  }, [fetchAuditLog]);
+
+  useEffect(() => {
+    fetchAuditOptions();
+  }, [fetchAuditOptions]);
+
+  const handleAuditExport = useCallback(async () => {
+    setAuditExportLoading(true);
+    setAuditExportError(null);
+    try {
+      const params = new URLSearchParams();
+      if (auditFilter !== 'all') {
+        params.set('request_type', auditFilter);
+      }
+      if (auditDomain.trim()) {
+        params.set('domain', auditDomain.trim());
+      }
+      if (auditActor.trim()) {
+        params.set('actor', auditActor.trim());
+      }
+      const startIso = toDateISOString(auditStartDate, 'start');
+      if (startIso) {
+        params.set('start_date', startIso);
+      }
+      const endIso = toDateISOString(auditEndDate, 'end');
+      if (endIso) {
+        params.set('end_date', endIso);
+      }
+      params.set('format', 'csv');
+      params.set('limit', '5000');
+
+      const url = `/api/gdpr/audit?${params.toString()}`;
+      const response = await fetch(url);
+      if (!response.ok) {
+        const maybeJson = await response.json().catch(() => null);
+        const message = maybeJson && typeof maybeJson.error === 'string'
+          ? maybeJson.error
+          : 'Failed to export audit log.';
+        throw new Error(message);
+      }
+
+      const blob = await response.blob();
+      const downloadUrl = URL.createObjectURL(blob);
+      const link = document.createElement('a');
+      link.href = downloadUrl;
+      link.download = `gdpr-audit-${new Date().toISOString().slice(0, 10)}.csv`;
+      document.body.appendChild(link);
+      link.click();
+      document.body.removeChild(link);
+      URL.revokeObjectURL(downloadUrl);
+      setSuccessMessage('GDPR audit CSV download started.');
+    } catch (err) {
+      setAuditExportError((err as Error).message);
+    } finally {
+      setAuditExportLoading(false);
+    }
+  }, [auditActor, auditDomain, auditEndDate, auditFilter, auditStartDate]);
+
+  const auditStart = auditEntries.length === 0 ? 0 : auditPage * AUDIT_PAGE_SIZE + 1;
+  const auditEnd = auditEntries.length === 0 ? 0 : auditStart + auditEntries.length - 1;
 
   return (
     <div className="p-8 space-y-8">
@@ -360,16 +567,87 @@ export default function PrivacyPage() {
                     onCheckedChange={(checked) => handleSettingChange('dataPortability', checked)}
                   />
                 </div>
+                <div className="space-y-4 rounded-lg border p-4">
+                  <div className="space-y-2">
+                    <Label>Customer Domain</Label>
+                    <Input
+                      value={requestForm.domain}
+                      onChange={(event) => handleRequestChange('domain', event.target.value)}
+                      placeholder="e.g. acme.com"
+                    />
+                  </div>
 
-                <div className="space-y-2">
-                  <Button onClick={handleDataExport} className="w-full">
-                    <Download className="h-4 w-4 mr-2" />
-                    Export All User Data
-                  </Button>
-                  <Button onClick={handleDataDeletion} variant="destructive" className="w-full">
-                    <Trash2 className="h-4 w-4 mr-2" />
-                    Process Deletion Requests
-                  </Button>
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    <div className="space-y-2">
+                      <Label>Session ID</Label>
+                      <Input
+                        value={requestForm.sessionId}
+                        onChange={(event) => handleRequestChange('sessionId', event.target.value)}
+                        placeholder="visitor-session-123"
+                      />
+                      <p className="text-xs text-muted-foreground">
+                        Provide a session ID or email to locate the user
+                      </p>
+                    </div>
+                    <div className="space-y-2">
+                      <Label>Email Address</Label>
+                      <Input
+                        type="email"
+                        value={requestForm.email}
+                        onChange={(event) => handleRequestChange('email', event.target.value)}
+                        placeholder="customer@example.com"
+                      />
+                    </div>
+                  </div>
+
+                  <div className="flex items-center justify-between rounded-md border px-3 py-2">
+                    <div className="space-y-0.5">
+                      <Label>Confirm deletion request</Label>
+                      <p className="text-xs text-muted-foreground">
+                        Toggle on to acknowledge the user has confirmed deletion
+                      </p>
+                    </div>
+                    <Switch
+                      checked={requestForm.confirm}
+                      onCheckedChange={(checked) => handleRequestChange('confirm', checked)}
+                    />
+                  </div>
+
+                  {combinedError && (
+                    <Alert variant="destructive">
+                      <AlertDescription>{combinedError}</AlertDescription>
+                    </Alert>
+                  )}
+
+                  {successMessage && (
+                    <Alert>
+                      <AlertDescription>{successMessage}</AlertDescription>
+                    </Alert>
+                  )}
+
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
+                    <Button
+                      onClick={handleExportRequest}
+                      disabled={exportLoading || deleteLoading}
+                    >
+                      <Download className="h-4 w-4 mr-2" />
+                      {exportLoading ? 'Exporting…' : 'Export User Data'}
+                    </Button>
+                    <Button
+                      onClick={handleDeleteRequest}
+                      variant="destructive"
+                      disabled={deleteLoading}
+                    >
+                      <Trash2 className="h-4 w-4 mr-2" />
+                      {deleteLoading ? 'Processing…' : 'Delete User Data'}
+                    </Button>
+                  </div>
+
+                  {deletedCount !== null && (
+                    <p className="text-xs text-muted-foreground text-right">
+                      Last deletion removed {deletedCount} conversation{deletedCount === 1 ? '' : 's'}.
+                    </p>
+                  )}
                 </div>
               </CardContent>
             </Card>
@@ -631,54 +909,221 @@ export default function PrivacyPage() {
             <CardHeader>
               <CardTitle className="flex items-center">
                 <FileText className="h-5 w-5 mr-2" />
-                Security Audit Log
+                GDPR Audit Log
               </CardTitle>
               <CardDescription>
-                Recent privacy and security related activities
+                Export/delete history sourced from Supabase `gdpr_audit_log`
               </CardDescription>
             </CardHeader>
             <CardContent>
               <div className="space-y-4">
-                {auditLogData.map((entry) => (
-                  <div key={entry.id} className="flex items-center justify-between p-4 border rounded-lg">
-                    <div className="flex-1">
-                      <div className="flex items-center space-x-3">
-                        <div className={`h-2 w-2 rounded-full ${
-                          entry.status === 'completed' ? 'bg-green-500' :
-                          entry.status === 'pending' ? 'bg-yellow-500' : 'bg-red-500'
-                        }`} />
-                        <span className="font-medium">{entry.action}</span>
-                        <Badge variant={
-                          entry.status === 'completed' ? 'default' :
-                          entry.status === 'pending' ? 'secondary' : 'destructive'
-                        }>
-                          {entry.status}
-                        </Badge>
-                      </div>
-                      <p className="text-sm text-muted-foreground mt-1">
-                        {entry.details}
-                      </p>
-                      <p className="text-xs text-muted-foreground mt-1">
-                        By {entry.user} • {entry.timestamp}
-                      </p>
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
+                  <div className="space-y-2">
+                    <Label htmlFor="audit-domain">Domain</Label>
+                    <Select
+                      value={auditDomain || 'all'}
+                      onValueChange={(value) => {
+                        const nextDomain = value === 'all' ? '' : value;
+                        setAuditDomain(nextDomain);
+                        setAuditPage(0);
+                      }}
+                    >
+                      <SelectTrigger id="audit-domain" disabled={auditOptionsLoading}>
+                        <SelectValue placeholder={auditOptionsLoading ? 'Loading domains…' : 'All domains'} />
+                      </SelectTrigger>
+                      <SelectContent>
+                        <SelectItem value="all">All domains</SelectItem>
+                        {availableAuditDomains.map((domain) => (
+                          <SelectItem key={domain} value={domain}>
+                            {domain}
+                          </SelectItem>
+                        ))}
+                      </SelectContent>
+                    </Select>
+                  </div>
+                  <div className="space-y-2">
+                    <Label htmlFor="audit-actor">Actor</Label>
+                    <Select
+                      value={auditActor || 'all'}
+                      onValueChange={(value) => {
+                        const nextActor = value === 'all' ? '' : value;
+                        setAuditActor(nextActor);
+                        setAuditPage(0);
+                      }}
+                    >
+                      <SelectTrigger id="audit-actor" disabled={auditOptionsLoading}>
+                        <SelectValue placeholder={auditOptionsLoading ? 'Loading actors…' : 'All actors'} />
+                      </SelectTrigger>
+                      <SelectContent>
+                        <SelectItem value="all">All actors</SelectItem>
+                        {availableAuditActors.map((actor) => (
+                          <SelectItem key={actor} value={actor}>
+                            {actor}
+                          </SelectItem>
+                        ))}
+                      </SelectContent>
+                    </Select>
+                  </div>
+                </div>
+
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
+                  <div className="space-y-2">
+                    <Label htmlFor="audit-start-date">Start date</Label>
+                    <Input
+                      id="audit-start-date"
+                      type="date"
+                      value={auditStartDate}
+                      max={auditEndDate || undefined}
+                      onChange={(event) => {
+                        setAuditStartDate(event.target.value);
+                        setAuditPage(0);
+                      }}
+                    />
+                  </div>
+                  <div className="space-y-2">
+                    <Label htmlFor="audit-end-date">End date</Label>
+                    <Input
+                      id="audit-end-date"
+                      type="date"
+                      value={auditEndDate}
+                      min={auditStartDate || undefined}
+                      onChange={(event) => {
+                        setAuditEndDate(event.target.value);
+                        setAuditPage(0);
+                      }}
+                    />
+                  </div>
+                </div>
+
+                <div className="flex flex-wrap items-center justify-between gap-3">
+                  <div className="flex items-center gap-3">
+                    <Label>Filter</Label>
+                    <div className="flex gap-2">
+                      {(['all', 'export', 'delete'] as const).map((option) => (
+                        <Button
+                          key={option}
+                          type="button"
+                          variant={auditFilter === option ? 'default' : 'outline'}
+                          size="sm"
+                          onClick={() => {
+                            setAuditFilter(option);
+                            setAuditPage(0);
+                          }}
+                        >
+                          {option === 'all' ? 'All' : option === 'export' ? 'Exports' : 'Deletions'}
+                        </Button>
+                      ))}
                     </div>
                   </div>
-                ))}
-              </div>
-
-              <div className="flex items-center justify-between mt-6 pt-4 border-t">
-                <p className="text-sm text-muted-foreground">
-                  Showing 4 of 247 audit entries
-                </p>
-                <div className="space-x-2">
-                  <Button variant="outline" size="sm">
-                    <Download className="h-4 w-4 mr-2" />
-                    Export Log
-                  </Button>
-                  <Button variant="outline" size="sm">
-                    View All
-                  </Button>
+                  <div className="flex gap-2">
+                    <Button variant="outline" size="sm" onClick={() => fetchAuditOptions()} disabled={auditOptionsLoading}>
+                      Sync filters
+                    </Button>
+                    <Button
+                      variant="outline"
+                      size="sm"
+                      onClick={handleAuditExport}
+                      disabled={auditExportLoading}
+                    >
+                      {auditExportLoading ? 'Exporting…' : 'Export CSV'}
+                    </Button>
+                    <Button variant="outline" size="sm" onClick={() => fetchAuditLog()} disabled={auditLoading}>
+                      Refresh
+                    </Button>
+                  </div>
                 </div>
+
+                {auditOptionsError && (
+                  <Alert variant="destructive">
+                    <AlertDescription>{auditOptionsError}</AlertDescription>
+                  </Alert>
+                )}
+
+                {auditExportError && (
+                  <Alert variant="destructive">
+                    <AlertDescription>{auditExportError}</AlertDescription>
+                  </Alert>
+                )}
+
+                {auditError && (
+                  <Alert variant="destructive">
+                    <AlertDescription>{auditError}</AlertDescription>
+                  </Alert>
+                )}
+
+                {auditLoading ? (
+                  <p className="text-sm text-muted-foreground">Loading audit entries…</p>
+                ) : auditEntries.length === 0 ? (
+                  <p className="text-sm text-muted-foreground">No audit entries found for the selected filters.</p>
+                ) : (
+                  <div className="space-y-4">
+                    {auditEntries.map((entry) => (
+                      <div key={entry.id} className="flex items-start justify-between p-4 border rounded-lg">
+                        <div className="flex-1 space-y-1">
+                          <div className="flex items-center gap-2">
+                            <Badge variant={entry.request_type === 'export' ? 'secondary' : 'destructive'}>
+                              {entry.request_type === 'export' ? 'Export' : 'Delete'}
+                            </Badge>
+                            <Badge
+                              variant={
+                                entry.status === 'completed'
+                                  ? 'default'
+                                  : entry.status === 'pending'
+                                  ? 'secondary'
+                                  : 'destructive'
+                              }
+                            >
+                              {entry.status}
+                            </Badge>
+                            <span className="text-xs text-muted-foreground">
+                              {new Date(entry.created_at).toLocaleString()}
+                            </span>
+                          </div>
+                          <p className="text-sm font-medium">
+                            {entry.message ?? 'Processed GDPR request'}
+                          </p>
+                          <p className="text-xs text-muted-foreground">
+                            Actor: {entry.actor ?? 'Dashboard'} • Domain: {entry.domain}
+                          </p>
+                          <p className="text-xs text-muted-foreground">
+                            Identifier: {entry.email ?? entry.session_id ?? 'Unspecified'}
+                          </p>
+                          {typeof entry.deleted_count === 'number' && entry.request_type === 'delete' && (
+                            <p className="text-xs text-muted-foreground">
+                              Deleted conversations: {entry.deleted_count}
+                            </p>
+                          )}
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+                )}
+
+                {auditEntries.length > 0 && (
+                  <div className="flex items-center justify-between pt-4 border-t">
+                    <p className="text-sm text-muted-foreground">
+                      Showing {auditStart}-{auditEnd} of {auditCount} entries
+                    </p>
+                    <div className="flex gap-2">
+                      <Button
+                        variant="outline"
+                        size="sm"
+                        onClick={() => setAuditPage((page) => Math.max(page - 1, 0))}
+                        disabled={auditPage === 0 || auditLoading}
+                      >
+                        Previous
+                      </Button>
+                      <Button
+                        variant="outline"
+                        size="sm"
+                        onClick={() => setAuditPage((page) => page + 1)}
+                        disabled={(auditPage + 1) * AUDIT_PAGE_SIZE >= auditCount || auditLoading}
+                      >
+                        Next
+                      </Button>
+                    </div>
+                  </div>
+                )}
               </div>
             </CardContent>
           </Card>

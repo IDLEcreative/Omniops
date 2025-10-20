@@ -9,16 +9,10 @@ import { createClient } from '@/lib/supabase-server'
 import { logger } from '@/lib/logger'
 import { scrapeJobManager } from '@/lib/scrape-job-manager'
 import { domainValidator } from '@/lib/utils/domain-validator'
-// import { getQueueManager, JobPriority, JobUtils } from '@/lib/queue'
+import { JobUtils, JobPriority } from '@/lib/queue/queue-utils'
 
-// Define JobPriority locally since queue system isn't fully set up yet
-export enum JobPriority {
-  CRITICAL = 10,
-  HIGH = 5,
-  NORMAL = 0,
-  LOW = -5,
-  DEFERRED = -10,
-}
+// Re-export JobPriority for consumers
+export { JobPriority } from '@/lib/queue/queue-utils'
 
 export interface CustomerScrapingConfig {
   customerId?: string
@@ -112,32 +106,40 @@ export class CustomerScrapingIntegration {
         }
       }
 
-      // TODO: Add to queue for immediate processing
-      // For now, we'll simulate queue addition since queue system is not fully set up
-      const queueResult = {
-        success: true,
-        queueJobId: `queue_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`,
-        message: 'Job would be queued for processing (simulated)'
-      }
+      // Add to queue for immediate processing
+      const queueResult = await JobUtils.createSinglePageJob(domain, {
+        customerId: config.customerId,
+        isNewCustomer: config.scrapeType === 'initial',
+        config: config.config,
+        priority: config.priority || JobPriority.NORMAL,
+        metadata: {
+          ...config.metadata,
+          customerConfigId: config.customerConfigId,
+          jobId: jobResult.jobId,
+          scrapeType: config.scrapeType || 'initial'
+        }
+      })
       
-      logger.info('Scraping job created and would be queued', {
+      logger.info('Scraping job created and queued for processing', {
         jobId: jobResult.jobId,
         domain,
-        queueJobId: queueResult.queueJobId
+        queueJobId: queueResult.jobId,
+        deduplicated: queueResult.deduplicated
       })
 
       logger.info('Customer scraping integration completed successfully', {
         customerConfigId: config.customerConfigId,
         domain,
         jobId: jobResult.jobId,
-        queueJobId: queueResult.queueJobId,
-        strategy: scrapingStrategy.scrapeType
+        queueJobId: queueResult.jobId,
+        strategy: scrapingStrategy.scrapeType,
+        deduplicated: queueResult.deduplicated
       })
 
       return {
         success: true,
         jobId: jobResult.jobId,
-        queueJobId: queueResult.queueJobId,
+        queueJobId: queueResult.jobId,
         warnings
       }
 
@@ -435,22 +437,29 @@ export class CustomerScrapingIntegration {
     }
   ): Promise<{ success: boolean, queueJobId?: string, error?: string }> {
     try {
-      // TODO: Implement actual queue integration when queue system is ready
-      // For now, simulate queue addition
-      
-      const queueJobId = `queue_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`
-      
-      logger.info('Simulating queue job creation', {
+      // Add job to processing queue
+      const queueResult = await JobUtils.createSinglePageJob(options.domain, {
+        customerId: options.customerConfigId,
+        isNewCustomer: options.isNewCustomer,
+        priority: options.priority,
+        metadata: {
+          scrapeJobId: jobId,
+          customerConfigId: options.customerConfigId
+        }
+      })
+
+      logger.info('Job added to processing queue', {
         scrapeJobId: jobId,
         domain: options.domain,
         priority: options.priority,
         isNewCustomer: options.isNewCustomer,
-        queueJobId
+        queueJobId: queueResult.jobId,
+        deduplicated: queueResult.deduplicated
       })
 
       return {
         success: true,
-        queueJobId
+        queueJobId: queueResult.jobId
       }
 
     } catch (error) {

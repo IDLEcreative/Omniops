@@ -222,24 +222,17 @@ export async function discoverNewPages(
       
       for (const sitemapUrl of sitemapUrls) {
         try {
-          // TODO: Implement sitemap parsing
-          // This would require adding a sitemap parsing library
-          // For now, we'll just log the discovered sitemap URLs
-          console.log(`Found sitemap: ${sitemapUrl}`);
-          
-          // Placeholder for when sitemap parsing is implemented:
-          // const sitemapPages = await parseSitemap(sitemapUrl);
-          // const newSitemapPages = sitemapPages.filter(page => 
-          //   !existingUrls.has(page.url) && 
-          //   isRelevantUrl(page.url)
-          // );
-          // newPages.push(...newSitemapPages.map(page => ({
-          //   url: page.url,
-          //   priority: page.priority || 0.5,
-          //   lastModified: page.lastModified,
-          //   discovered_via: `sitemap:${sitemapUrl}`
-          // })));
-          
+          // Parse sitemap XML
+          const sitemapPages = await parseSitemap(sitemapUrl);
+          const newSitemapPages = sitemapPages.filter(page =>
+            !existingUrls.has(page.url) &&
+            isRelevantUrl(page.url)
+          );
+
+          console.log(`Found ${newSitemapPages.length} new pages from sitemap: ${sitemapUrl}`);
+
+          newPages.push(...newSitemapPages.map(page => page.url));
+
         } catch (sitemapError) {
           console.warn(`Error processing sitemap ${sitemapUrl}:`, sitemapError);
         }
@@ -408,6 +401,82 @@ export async function discoverNewPages(
     } catch (error) {
       return false;
     }
+  }
+}
+
+// Parse sitemap XML to extract URLs
+async function parseSitemap(sitemapUrl: string): Promise<Array<{
+  url: string;
+  lastModified?: string;
+  priority?: number;
+}>> {
+  try {
+    const response = await fetch(sitemapUrl);
+    if (!response.ok) {
+      throw new Error(`Failed to fetch sitemap: ${response.status}`);
+    }
+
+    const xmlText = await response.text();
+    const urls: Array<{ url: string; lastModified?: string; priority?: number }> = [];
+
+    // Basic XML parsing for sitemap
+    // Extract <url> entries
+    const urlRegex = /<url>([\s\S]*?)<\/url>/g;
+    const locRegex = /<loc>(.*?)<\/loc>/;
+    const lastmodRegex = /<lastmod>(.*?)<\/lastmod>/;
+    const priorityRegex = /<priority>(.*?)<\/priority>/;
+
+    let match;
+    while ((match = urlRegex.exec(xmlText)) !== null) {
+      const urlBlock = match[1];
+      if (!urlBlock) continue;
+
+      const locMatch = locRegex.exec(urlBlock);
+      if (locMatch && locMatch[1]) {
+        const urlEntry: any = {
+          url: locMatch[1].trim()
+        };
+
+        const lastmodMatch = lastmodRegex.exec(urlBlock);
+        if (lastmodMatch && lastmodMatch[1]) {
+          urlEntry.lastModified = lastmodMatch[1].trim();
+        }
+
+        const priorityMatch = priorityRegex.exec(urlBlock);
+        if (priorityMatch && priorityMatch[1]) {
+          urlEntry.priority = parseFloat(priorityMatch[1]);
+        }
+
+        urls.push(urlEntry);
+      }
+    }
+
+    // Check if it's a sitemap index
+    const sitemapRegex = /<sitemap>([\s\S]*?)<\/sitemap>/g;
+    const sitemapLocRegex = /<loc>(.*?)<\/loc>/;
+
+    const sitemapMatches = xmlText.match(sitemapRegex);
+    if (sitemapMatches) {
+      // It's a sitemap index, recursively parse child sitemaps
+      for (const sitemapBlock of sitemapMatches) {
+        const sitemapLocMatch = sitemapLocRegex.exec(sitemapBlock);
+        if (sitemapLocMatch && sitemapLocMatch[1]) {
+          const childSitemapUrl = sitemapLocMatch[1].trim();
+          console.log(`Parsing child sitemap: ${childSitemapUrl}`);
+          try {
+            const childUrls = await parseSitemap(childSitemapUrl);
+            urls.push(...childUrls);
+          } catch (err) {
+            console.warn(`Failed to parse child sitemap ${childSitemapUrl}:`, err);
+          }
+        }
+      }
+    }
+
+    return urls;
+  } catch (error) {
+    console.error(`Error parsing sitemap ${sitemapUrl}:`, error);
+    return [];
   }
 }
 

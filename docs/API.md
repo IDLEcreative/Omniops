@@ -313,6 +313,34 @@ Delete all data associated with a session.
 }
 ```
 
+#### List Audit Entries
+
+```http
+GET /api/gdpr/audit?request_type=export&limit=50
+```
+
+Retrieve recent GDPR audit entries (exports/deletions). Supports optional `request_type` filter (`export` or `delete`) and `limit` (1-200, defaults to 50).
+
+**Response:**
+```json
+{
+  "entries": [
+    {
+      "id": "uuid",
+      "domain": "example.com",
+      "request_type": "export",
+      "session_id": "session-123",
+      "email": "user@example.com",
+      "actor": "dashboard",
+      "status": "completed",
+      "deleted_count": null,
+      "message": "Export generated.",
+      "created_at": "2025-10-20T12:00:00.000Z"
+    }
+  ]
+}
+```
+
 **Response:**
 ```json
 {

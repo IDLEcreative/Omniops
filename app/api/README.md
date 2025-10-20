@@ -144,6 +144,10 @@ api/
 - Export user data
 - JSON format download
 
+**GET** `/api/gdpr/audit`
+- Fetch recent GDPR export/delete activity
+- Supports filtering by request type and pagination
+
 ### WooCommerce APIs
 
 **GET** `/api/woocommerce/products`

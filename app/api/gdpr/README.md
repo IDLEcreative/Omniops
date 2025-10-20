@@ -232,6 +232,13 @@ curl -X POST 'http://localhost:3000/api/gdpr/export' \
   }'
 ```
 
+### Fetch Recent Audit Entries
+```bash
+curl 'http://localhost:3000/api/gdpr/audit?request_type=delete&limit=25'
+```
+
+Returns all recent GDPR export/delete requests stored in `gdpr_audit_log`.
+
 ## Error Handling
 
 ### Common Errors

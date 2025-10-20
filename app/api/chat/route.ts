@@ -12,6 +12,7 @@ import { getCommerceProvider } from '@/lib/agents/commerce-provider';
 import { sanitizeOutboundLinks } from '@/lib/link-sanitizer';
 import { extractQueryKeywords, isPriceQuery, extractPriceRange } from '@/lib/search-wrapper';
 import { ChatTelemetry, telemetryManager } from '@/lib/chat-telemetry';
+import { trackAsync } from '@/lib/monitoring/performance-tracker';
 
 // Lazy load OpenAI client to avoid build-time errors
 let openai: OpenAI | null = null;

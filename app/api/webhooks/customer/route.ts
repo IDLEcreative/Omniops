@@ -30,7 +30,8 @@ interface SupabaseWebhookPayload {
 export async function POST(request: NextRequest) {
   try {
     const supabase = createClient()
-    
+    let payload: any
+
     // Verify webhook signature if configured
     const webhookSecret = process.env.SUPABASE_WEBHOOK_SECRET
     if (webhookSecret) {
@@ -39,14 +40,40 @@ export async function POST(request: NextRequest) {
         logger.warn('Webhook received without signature', { url: request.url })
         return NextResponse.json({ error: 'Missing signature' }, { status: 401 })
       }
-      
-      // TODO: Implement signature verification
-      // For now, we'll log and continue
-      logger.info('Webhook signature present', { signature: signature.substring(0, 10) + '...' })
+
+      // Verify the webhook signature using HMAC-SHA256
+      const crypto = await import('crypto')
+      const body = await request.text()
+      const expectedSignature = crypto
+        .createHmac('sha256', webhookSecret)
+        .update(body)
+        .digest('hex')
+
+      // Compare signatures in constant time to prevent timing attacks
+      const signatureMatches = crypto.timingSafeEqual(
+        Buffer.from(signature, 'hex'),
+        Buffer.from(expectedSignature, 'hex')
+      )
+
+      if (!signatureMatches) {
+        logger.warn('Invalid webhook signature', {
+          url: request.url,
+          receivedSignature: signature.substring(0, 10) + '...'
+        })
+        return NextResponse.json({ error: 'Invalid signature' }, { status: 401 })
+      }
+
+      // Parse the verified body
+      payload = JSON.parse(body)
+      logger.info('Webhook signature verified', {
+        type: payload.type || payload.event
+      })
+    } else {
+      // No signature verification required
+      payload = await request.json()
     }
 
-    const payload = await request.json()
-    logger.info('Received webhook payload', { 
+    logger.info('Processing webhook payload', {
       type: payload.type || payload.event,
       table: payload.table,
       domain: payload.domain || payload.record?.domain

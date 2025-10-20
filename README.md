@@ -674,6 +674,31 @@ See **[COMPONENT_TYPES.md](components/COMPONENT_TYPES.md)** for detailed type de
 - **Rate Limiting**: API endpoints protected from abuse
 - **CORS Protection**: Cross-origin requests controlled
 - **Content Security Policy**: XSS and injection protection
+- **Webhook Signature Verification**: HMAC-SHA256 signature validation for webhooks
+
+### Webhook Security Configuration
+
+To enable webhook signature verification for Supabase webhooks:
+
+1. **Generate a webhook secret**:
+   ```bash
+   openssl rand -hex 32
+   ```
+
+2. **Add to environment variables**:
+   ```env
+   SUPABASE_WEBHOOK_SECRET=your_generated_secret_here
+   ```
+
+3. **Configure in Supabase Dashboard**:
+   - Go to Database → Webhooks
+   - Add the same secret to your webhook configuration
+   - The webhook will use HMAC-SHA256 for signature verification
+
+4. **Webhook endpoint**: `/api/webhooks/customer`
+   - Automatically verifies signatures when `SUPABASE_WEBHOOK_SECRET` is set
+   - Returns 401 for invalid or missing signatures
+   - Uses timing-safe comparison to prevent timing attacks
 
 ### Best Practices
 
@@ -683,6 +708,7 @@ See **[COMPONENT_TYPES.md](components/COMPONENT_TYPES.md)** for detailed type de
 4. **Implement proper authentication** and authorization
 5. **Keep dependencies updated** to patch security vulnerabilities
 6. **Monitor for security issues** in production
+7. **Always use webhook signature verification** in production
 
 ## 📊 Monitoring
 

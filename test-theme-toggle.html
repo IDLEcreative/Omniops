@@ -1,0 +1,70 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Theme Toggle Test</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+        tailwind.config = {
+            darkMode: 'class',
+        }
+    </script>
+</head>
+<body class="min-h-screen bg-white dark:bg-gray-900 text-black dark:text-white transition-colors">
+    <div class="container mx-auto p-8">
+        <h1 class="text-3xl font-bold mb-4">Theme Toggle Test</h1>
+
+        <button
+            id="themeToggle"
+            class="px-4 py-2 bg-blue-500 text-white rounded hover:bg-blue-600 dark:bg-blue-700 dark:hover:bg-blue-800"
+            onclick="toggleTheme()"
+        >
+            Toggle Theme
+        </button>
+
+        <div class="mt-8">
+            <p class="mb-2">Current Theme: <strong id="currentTheme">Light</strong></p>
+            <p class="mb-2">HTML Class: <strong id="htmlClass">-</strong></p>
+            <p class="mb-2">LocalStorage: <strong id="localStorage">-</strong></p>
+        </div>
+
+        <div class="mt-8 p-4 bg-gray-100 dark:bg-gray-800 rounded">
+            <h2 class="text-xl font-semibold mb-2">Test Card</h2>
+            <p>This card should change colors when you toggle the theme.</p>
+        </div>
+    </div>
+
+    <script>
+        function updateDisplay() {
+            const isDark = document.documentElement.classList.contains('dark');
+            document.getElementById('currentTheme').textContent = isDark ? 'Dark' : 'Light';
+            document.getElementById('htmlClass').textContent = document.documentElement.className || 'none';
+            document.getElementById('localStorage').textContent = localStorage.getItem('theme') || 'not set';
+        }
+
+        function toggleTheme() {
+            const html = document.documentElement;
+            const isDark = html.classList.contains('dark');
+
+            if (isDark) {
+                html.classList.remove('dark');
+                localStorage.setItem('theme', 'light');
+            } else {
+                html.classList.add('dark');
+                localStorage.setItem('theme', 'dark');
+            }
+
+            updateDisplay();
+            console.log('Theme toggled to:', isDark ? 'light' : 'dark');
+        }
+
+        // Initialize
+        const savedTheme = localStorage.getItem('theme');
+        if (savedTheme === 'dark') {
+            document.documentElement.classList.add('dark');
+        }
+        updateDisplay();
+    </script>
+</body>
+</html>

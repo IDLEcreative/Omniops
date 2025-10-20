@@ -1,9 +1,34 @@
-import { ContentExtractor, ExtractedContent } from './content-extractor';
+import { ContentExtractor, ExtractedContent } from '@/lib/content-extractor';
 import * as cheerio from 'cheerio';
-import { ProductNormalizer, NormalizedProduct } from './product-normalizer';
-import { PatternLearner } from './pattern-learner';
-import { configManager } from './scraper-config';
-import { PriceParser, ParsedPrice } from './price-parser';
+import type { NormalizedProduct } from '@/lib/product-normalizer';
+import { configManager } from '@/lib/scraper-config';
+import { PriceParser, ParsedPrice } from '@/lib/price-parser';
+
+type ProductNormalizerClass = typeof import('@/lib/product-normalizer').ProductNormalizer;
+type PatternLearnerClass = typeof import('@/lib/pattern-learner').PatternLearner;
+
+declare const require: NodeRequire;
+
+let cachedProductNormalizer: ProductNormalizerClass | null = null;
+let cachedPatternLearner: PatternLearnerClass | null = null;
+
+const getProductNormalizer = (): ProductNormalizerClass => {
+  if (!cachedProductNormalizer) {
+    // eslint-disable-next-line @typescript-eslint/no-var-requires
+    const mod = require('@/lib/product-normalizer') as { ProductNormalizer: ProductNormalizerClass };
+    cachedProductNormalizer = mod.ProductNormalizer;
+  }
+  return cachedProductNormalizer;
+};
+
+const getPatternLearner = (): PatternLearnerClass => {
+  if (!cachedPatternLearner) {
+    // eslint-disable-next-line @typescript-eslint/no-var-requires
+    const mod = require('@/lib/pattern-learner') as { PatternLearner: PatternLearnerClass };
+    cachedPatternLearner = mod.PatternLearner;
+  }
+  return cachedPatternLearner;
+};
 
 export interface ProductData {
   name?: string;
@@ -113,6 +138,7 @@ export class EcommerceExtractor extends ContentExtractor {
         'h1.product-name',
         'h1[class*="product"]',
         '[data-product-name]',
+        'h1:not([class])',
       ],
       price: [
         '[itemprop="price"]',
@@ -349,7 +375,7 @@ export class EcommerceExtractor extends ContentExtractor {
       switch (method) {
         case 'learned-patterns':
           if (config.extraction.strategies.patternLearningEnabled) {
-            const learnedProduct = await PatternLearner.applyPatterns(url, $);
+            const learnedProduct = await getPatternLearner().applyPatterns(url, $);
             if (learnedProduct && learnedProduct.name) {
               rawProduct = learnedProduct;
               extractionMethod = 'learned-patterns';
@@ -391,11 +417,11 @@ export class EcommerceExtractor extends ContentExtractor {
       rawProduct.variants = this.extractVariants($);
       
       // Normalize the product
-      const normalizedProduct = ProductNormalizer.normalizeProduct(rawProduct);
+      const normalizedProduct = getProductNormalizer().normalizeProduct(rawProduct);
       
       // Learn from successful extraction
       if (normalizedProduct && normalizedProduct.name) {
-        await PatternLearner.learnFromExtraction(url, [normalizedProduct], {
+        await getPatternLearner().learnFromExtraction(url, [normalizedProduct], {
           platform: this.detectPlatform($),
           extractionMethod
         });
@@ -592,11 +618,12 @@ export class EcommerceExtractor extends ContentExtractor {
     });
     
     // Normalize all products
-    const normalizedProducts = products.map(p => ProductNormalizer.normalizeProduct(p));
+    const normalizer = getProductNormalizer();
+    const normalizedProducts = products.map(p => normalizer.normalizeProduct(p));
     
     // Learn from successful extraction if we found products
     if (normalizedProducts.length > 0) {
-      await PatternLearner.learnFromExtraction(url, normalizedProducts, {
+      await getPatternLearner().learnFromExtraction(url, normalizedProducts, {
         platform,
         extractionMethod: 'dom-listing'
       });

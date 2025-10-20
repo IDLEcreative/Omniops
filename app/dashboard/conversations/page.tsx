@@ -1,13 +1,14 @@
 "use client";
 
-import { useState } from "react";
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { Button } from "@/components/ui/button";
+import type { ComponentProps } from "react";
+import { useEffect, useMemo, useState } from "react";
+import { Alert, AlertDescription } from "@/components/ui/alert";
+import { Avatar, AvatarFallback } from "@/components/ui/avatar";
 import { Badge } from "@/components/ui/badge";
+import { Button } from "@/components/ui/button";
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { ScrollArea } from "@/components/ui/scroll-area";
-import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import {
   Select,
   SelectContent,
@@ -15,414 +16,389 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
-import {
-  Search,
-  Filter,
-  MessageSquare,
-  Clock,
-  CheckCircle,
-  XCircle,
-  AlertCircle,
-  Globe,
-  User,
-  Bot,
-  MoreVertical,
-  Send,
-  Paperclip,
-  Smile,
-} from "lucide-react";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { Bot, Calendar, Filter, MessageCircle, RefreshCw, Search } from "lucide-react";
+import { useDashboardConversations } from "@/hooks/use-dashboard-conversations";
 
-const conversations = [
-  {
-    id: "1",
-    customer: {
-      name: "Alice Johnson",
-      email: "alice@example.com",
-      avatar: "/avatars/alice.jpg",
-    },
-    status: "active",
-    priority: "high",
-    language: "EN",
-    lastMessage: "I need help with my recent order #12345",
-    lastMessageTime: "2 min ago",
-    unreadCount: 3,
-    assignedTo: "AI Bot",
-    tags: ["order-inquiry", "urgent"],
-    satisfaction: null,
-  },
-  {
-    id: "2",
-    customer: {
-      name: "Bob Smith",
-      email: "bob@example.com",
-      avatar: "/avatars/bob.jpg",
-    },
-    status: "waiting",
-    priority: "medium",
-    language: "EN",
-    lastMessage: "The payment process is not working properly",
-    lastMessageTime: "5 min ago",
-    unreadCount: 1,
-    assignedTo: "AI Bot",
-    tags: ["payment", "technical"],
-    satisfaction: null,
-  },
-  {
-    id: "3",
-    customer: {
-      name: "Carlos Rodriguez",
-      email: "carlos@example.com",
-      avatar: "/avatars/carlos.jpg",
-    },
-    status: "resolved",
-    priority: "low",
-    language: "ES",
-    lastMessage: "Gracias por la ayuda!",
-    lastMessageTime: "1 hour ago",
-    unreadCount: 0,
-    assignedTo: "AI Bot",
-    tags: ["resolved"],
-    satisfaction: "positive",
-  },
-];
+type DateRangeValue = "24h" | "7d" | "30d" | "90d";
 
-const messages = [
-  {
-    id: "1",
-    sender: "customer",
-    content: "Hi, I need help with my recent order #12345",
-    timestamp: "10:23 AM",
-  },
-  {
-    id: "2",
-    sender: "bot",
-    content: "Hello Alice! I'd be happy to help you with order #12345. Let me look that up for you.",
-    timestamp: "10:23 AM",
-  },
-  {
-    id: "3",
-    sender: "bot",
-    content: "I found your order. It was placed on January 20th and is currently in transit. Your tracking number is TRK123456789.",
-    timestamp: "10:24 AM",
-  },
-  {
-    id: "4",
-    sender: "customer",
-    content: "When will it arrive? I need it by Friday.",
-    timestamp: "10:25 AM",
-  },
-  {
-    id: "5",
-    sender: "bot",
-    content: "Based on the tracking information, your order is scheduled to arrive on Thursday, January 25th. It should arrive before your Friday deadline.",
-    timestamp: "10:25 AM",
-  },
-];
+const RANGE_TO_DAYS: Record<DateRangeValue, number> = {
+  "24h": 1,
+  "7d": 7,
+  "30d": 30,
+  "90d": 90,
+};
+
+const STATUS_LABELS: Record<"active" | "waiting" | "resolved", string> = {
+  active: "Active",
+  waiting: "Waiting",
+  resolved: "Resolved",
+};
+
+type BadgeVariant = ComponentProps<typeof Badge>["variant"];
+
+const levelVariant: Record<string, BadgeVariant> = {
+  high: "secondary",
+  medium: "outline",
+  low: "outline",
+};
 
 export default function ConversationsPage() {
-  const [selectedConversation, setSelectedConversation] = useState(conversations[0]);
-  const [messageInput, setMessageInput] = useState("");
-  const [filterStatus, setFilterStatus] = useState("all");
+  const [selectedRange, setSelectedRange] = useState<DateRangeValue>("7d");
+  const [selectedConversationId, setSelectedConversationId] = useState<string | null>(null);
+  const [searchTerm, setSearchTerm] = useState("");
+  const [refreshing, setRefreshing] = useState(false);
 
-  const getStatusIcon = (status: string) => {
-    switch (status) {
-      case "active":
-        return <div className="h-2 w-2 bg-green-500 rounded-full animate-pulse" />;
-      case "waiting":
-        return <Clock className="h-4 w-4 text-yellow-500" />;
-      case "resolved":
-        return <CheckCircle className="h-4 w-4 text-gray-400" />;
-      default:
-        return null;
+  const days = RANGE_TO_DAYS[selectedRange] ?? 7;
+  const { data, loading, error, refresh } = useDashboardConversations({ days });
+
+  useEffect(() => {
+    if (loading) return;
+    const first = data?.recent?.[0];
+    if (first) {
+      setSelectedConversationId((current) => current ?? first.id);
+    }
+  }, [data, loading]);
+
+  const selectedConversation = useMemo(() => {
+    if (!data) return null;
+    return data.recent.find((item) => item.id === selectedConversationId) ?? null;
+  }, [data, selectedConversationId]);
+
+  const totalStatus = useMemo(() => {
+    if (!data) return 0;
+    return Object.values(data.statusCounts).reduce((acc, value) => acc + value, 0);
+  }, [data]);
+
+  const handleRefresh = async () => {
+    setRefreshing(true);
+    try {
+      await refresh();
+    } finally {
+      setRefreshing(false);
     }
   };
 
-  const getStatusColor = (status: string) => {
-    switch (status) {
-      case "active":
-        return "secondary";
-      case "waiting":
-        return "outline";
-      case "resolved":
-        return "default";
-      default:
-        return "outline";
-    }
-  };
+  const filteredConversations = useMemo(() => {
+    if (!data) return [];
+    if (!searchTerm.trim()) return data.recent;
+    const term = searchTerm.toLowerCase();
+    return data.recent.filter((conversation) => {
+      const messageMatch = conversation.message.toLowerCase().includes(term);
+      const customerMatch = (conversation.customerName?.toLowerCase() ?? "").includes(term);
+      return messageMatch || customerMatch;
+    });
+  }, [data, searchTerm]);
 
   return (
-    <div className="flex h-[calc(100vh-4rem)]">
-      {/* Conversation List */}
-      <div className="w-96 border-r border-gray-200 dark:border-gray-700 flex flex-col">
-        {/* Header */}
-        <div className="p-4 border-b border-gray-200 dark:border-gray-700">
-          <h2 className="text-lg font-semibold mb-4">Conversations</h2>
-          
-          {/* Search and Filter */}
-          <div className="space-y-3">
-            <div className="relative">
-              <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-gray-400" />
+    <div className="flex-1 space-y-6 p-6">
+      <div className="flex flex-wrap items-center justify-between gap-4">
+        <div>
+          <h1 className="text-3xl font-bold">Conversations</h1>
+          <p className="text-muted-foreground">
+            Monitor live conversations, recent sentiment, and language coverage.
+          </p>
+        </div>
+        <div className="flex items-center space-x-3">
+          <Select value={selectedRange} onValueChange={(value) => setSelectedRange(value as DateRangeValue)}>
+            <SelectTrigger className="w-34">
+              <Calendar className="h-4 w-4 mr-2" />
+              <SelectValue placeholder="Select range" />
+            </SelectTrigger>
+            <SelectContent>
+              <SelectItem value="24h">Last 24 hours</SelectItem>
+              <SelectItem value="7d">Last 7 days</SelectItem>
+              <SelectItem value="30d">Last 30 days</SelectItem>
+              <SelectItem value="90d">Last 90 days</SelectItem>
+            </SelectContent>
+          </Select>
+          <Button
+            variant="outline"
+            size="icon"
+            onClick={handleRefresh}
+            disabled={loading || refreshing}
+          >
+            <RefreshCw className={`h-4 w-4 ${refreshing ? "animate-spin" : ""}`} />
+          </Button>
+        </div>
+      </div>
+
+      {error && (
+        <Alert variant="destructive">
+          <AlertDescription>
+            We couldn’t load conversation stats. Try refreshing or adjust the date range.
+          </AlertDescription>
+        </Alert>
+      )}
+
+      <div className="grid grid-cols-1 lg:grid-cols-3 gap-4">
+        <Card>
+          <CardHeader>
+            <CardTitle>Total Conversations</CardTitle>
+            <CardDescription>Count and change vs previous period</CardDescription>
+          </CardHeader>
+          <CardContent className="space-y-2">
+            <div className="text-3xl font-bold">
+              {loading && !data ? <SkeletonBar /> : data?.total.toLocaleString() ?? "—"}
+            </div>
+            <div className="text-sm text-muted-foreground">
+              Change: {loading && !data ? "—" : `${(data?.change ?? 0).toFixed(1)}%`}
+            </div>
+          </CardContent>
+        </Card>
+
+        <Card>
+          <CardHeader>
+            <CardTitle>Status Breakdown</CardTitle>
+            <CardDescription>Active vs waiting vs resolved conversations</CardDescription>
+          </CardHeader>
+          <CardContent className="space-y-3">
+            {(["active", "waiting", "resolved"] as const).map((status) => {
+              const count = data?.statusCounts[status] ?? 0;
+              const percentage = totalStatus > 0 ? Math.round((count / totalStatus) * 100) : 0;
+              return (
+                <div key={status} className="flex items-center justify-between">
+                  <div className="flex items-center space-x-2">
+                    <Badge variant={statusBadgeVariant(status)}>{STATUS_LABELS[status]}</Badge>
+                  </div>
+                  <div className="text-sm font-medium">
+                    {loading && !data ? "—" : `${count.toLocaleString()} · ${percentage}%`}
+                  </div>
+                </div>
+              );
+            })}
+          </CardContent>
+        </Card>
+
+        <Card>
+          <CardHeader>
+            <CardTitle>Peak Hours</CardTitle>
+            <CardDescription>Highest-volume times in this range</CardDescription>
+          </CardHeader>
+          <CardContent className="space-y-2">
+            {loading && !data ? (
+              <SkeletonList count={3} />
+            ) : data && data.peakHours.length > 0 ? (
+              data.peakHours.map((entry) => (
+                <div key={entry.hour} className="flex items-center justify-between text-sm">
+                  <span>{entry.label}</span>
+                  <Badge variant={levelVariant[entry.level] ?? "outline"}>{entry.count}</Badge>
+                </div>
+              ))
+            ) : (
+              <p className="text-sm text-muted-foreground">No peak hour signal detected in this range.</p>
+            )}
+          </CardContent>
+        </Card>
+      </div>
+
+      <div className="grid grid-cols-1 lg:grid-cols-12 gap-4">
+        <Card className="lg:col-span-4">
+          <CardHeader>
+            <CardTitle>Language Distribution</CardTitle>
+            <CardDescription>Share of conversations by language</CardDescription>
+          </CardHeader>
+          <CardContent className="space-y-3">
+            {loading && !data ? (
+              <SkeletonList count={4} />
+            ) : data && data.languages.length > 0 ? (
+              data.languages.map((entry) => (
+                <div key={entry.language} className="flex items-center justify-between text-sm">
+                  <span>{entry.language}</span>
+                  <span className="font-medium">{entry.percentage}%</span>
+                </div>
+              ))
+            ) : (
+              <p className="text-sm text-muted-foreground">No language diversity recorded for this range.</p>
+            )}
+          </CardContent>
+        </Card>
+
+        <div className="lg:col-span-8 flex flex-col border rounded-lg">
+          <div className="p-4 border-b flex items-center gap-2">
+            <div className="relative flex-1">
+              <Search className="absolute left-2.5 top-2.5 h-4 w-4 text-muted-foreground" />
               <Input
-                placeholder="Search conversations..."
-                className="pl-9"
+                className="pl-8"
+                placeholder="Search conversations…"
+                value={searchTerm}
+                onChange={(event) => setSearchTerm(event.target.value)}
               />
             </div>
-            
-            <div className="flex space-x-2">
-              <Select value={filterStatus} onValueChange={setFilterStatus}>
-                <SelectTrigger className="flex-1">
-                  <SelectValue placeholder="All Status" />
-                </SelectTrigger>
-                <SelectContent>
-                  <SelectItem value="all">All Status</SelectItem>
-                  <SelectItem value="active">Active</SelectItem>
-                  <SelectItem value="waiting">Waiting</SelectItem>
-                  <SelectItem value="resolved">Resolved</SelectItem>
-                </SelectContent>
-              </Select>
-              
-              <Button variant="outline" size="icon">
-                <Filter className="h-4 w-4" />
-              </Button>
-            </div>
+            <Button variant="outline" size="icon">
+              <Filter className="h-4 w-4" />
+            </Button>
           </div>
-        </div>
 
-        {/* Tabs */}
-        <Tabs defaultValue="all" className="flex-1 flex flex-col">
-          <TabsList className="grid w-full grid-cols-4 px-4">
-            <TabsTrigger value="all">All</TabsTrigger>
-            <TabsTrigger value="unassigned">Unassigned</TabsTrigger>
-            <TabsTrigger value="mine">Mine</TabsTrigger>
-            <TabsTrigger value="archived">Archived</TabsTrigger>
-          </TabsList>
-          
-          <TabsContent value="all" className="flex-1 mt-0">
-            <ScrollArea className="h-full">
-              {conversations.map((conversation) => (
-                <div
-                  key={conversation.id}
-                  className={`p-4 border-b border-gray-200 dark:border-gray-700 cursor-pointer hover:bg-gray-50 dark:hover:bg-gray-800 ${
-                    selectedConversation?.id === conversation.id
-                      ? "bg-gray-50 dark:bg-gray-800"
-                      : ""
-                  }`}
-                  onClick={() => setSelectedConversation(conversation)}
-                >
-                  <div className="flex items-start space-x-3">
-                    <Avatar>
-                      <AvatarImage src={conversation.customer.avatar} />
-                      <AvatarFallback>
-                        {conversation.customer.name.charAt(0)}
-                      </AvatarFallback>
-                    </Avatar>
-                    
-                    <div className="flex-1 min-w-0">
-                      <div className="flex items-center justify-between">
-                        <p className="font-medium truncate">
-                          {conversation.customer.name}
-                        </p>
-                        <span className="text-xs text-gray-500">
-                          {conversation.lastMessageTime}
-                        </span>
-                      </div>
-                      
-                      <p className="text-sm text-gray-600 dark:text-gray-400 truncate mt-1">
-                        {conversation.lastMessage}
+          <div className="flex h-[600px]">
+            <div className="w-80 border-r">
+              <Tabs defaultValue="all" className="flex h-full flex-col">
+                <TabsList className="grid grid-cols-4 px-4">
+                  <TabsTrigger value="all">All</TabsTrigger>
+                  <TabsTrigger value="active">Active</TabsTrigger>
+                  <TabsTrigger value="waiting">Waiting</TabsTrigger>
+                  <TabsTrigger value="resolved">Resolved</TabsTrigger>
+                </TabsList>
+                <TabsContent value="all" className="flex-1 mt-0">
+                  <ScrollArea className="h-full">
+                    {loading && !data ? (
+                      <SkeletonList count={6} />
+                    ) : filteredConversations.length === 0 ? (
+                      <p className="p-4 text-sm text-muted-foreground">
+                        No conversations match the current filters.
                       </p>
-                      
-                      <div className="flex items-center justify-between mt-2">
-                        <div className="flex items-center space-x-2">
-                          {getStatusIcon(conversation.status)}
-                          <Badge variant={getStatusColor(conversation.status) as any} className="text-xs">
-                            {conversation.status}
-                          </Badge>
-                          <Badge variant="outline" className="text-xs">
-                            {conversation.language}
-                          </Badge>
-                          {conversation.priority === "high" && (
-                            <AlertCircle className="h-3 w-3 text-red-500" />
-                          )}
+                    ) : (
+                      filteredConversations.map((conversation) => (
+                        <button
+                          key={conversation.id}
+                          type="button"
+                          className={`w-full border-b px-4 py-3 text-left transition hover:bg-muted ${
+                            selectedConversationId === conversation.id ? "bg-muted" : ""
+                          }`}
+                          onClick={() => setSelectedConversationId(conversation.id)}
+                        >
+                          <div className="flex items-center justify-between text-xs text-muted-foreground">
+                            <span>{formatRelativeTime(conversation.timestamp)}</span>
+                            <Badge variant={statusBadgeVariant(conversation.status)}>
+                              {STATUS_LABELS[conversation.status]}
+                            </Badge>
+                          </div>
+                          <p className="mt-1 text-sm font-medium">
+                            {conversation.customerName ?? "Customer"}
+                          </p>
+                          <p className="mt-1 line-clamp-2 text-sm text-muted-foreground">
+                            {conversation.message}
+                          </p>
+                        </button>
+                      ))
+                    )}
+                  </ScrollArea>
+                </TabsContent>
+              </Tabs>
+            </div>
+
+            <div className="flex-1 flex flex-col">
+              {selectedConversation ? (
+                <>
+                  <div className="border-b p-4">
+                    <div className="flex items-center justify-between">
+                      <div className="flex items-center space-x-3">
+                        <Avatar>
+                          <AvatarFallback>
+                            {(selectedConversation.customerName?.charAt(0) ?? "C").toUpperCase()}
+                          </AvatarFallback>
+                        </Avatar>
+                        <div>
+                          <div className="flex items-center space-x-2">
+                            <h3 className="font-semibold">
+                              {selectedConversation.customerName ?? "Customer"}
+                            </h3>
+                            <Badge variant={statusBadgeVariant(selectedConversation.status)}>
+                              {STATUS_LABELS[selectedConversation.status]}
+                            </Badge>
+                          </div>
+                          <p className="text-xs text-muted-foreground">
+                            Last message {formatRelativeTime(selectedConversation.timestamp)}
+                          </p>
                         </div>
-                        {conversation.unreadCount > 0 && (
-                          <span className="bg-indigo-600 text-white text-xs rounded-full px-2 py-0.5">
-                            {conversation.unreadCount}
-                          </span>
-                        )}
+                      </div>
+                      <div className="flex items-center space-x-2">
+                        <Button variant="outline" size="sm">
+                          Assign Human
+                        </Button>
+                        <Button variant="outline" size="sm">
+                          Close
+                        </Button>
+                        <Button variant="ghost" size="icon">
+                          <Bot className="h-4 w-4" />
+                        </Button>
                       </div>
                     </div>
                   </div>
-                </div>
-              ))}
-            </ScrollArea>
-          </TabsContent>
-        </Tabs>
-      </div>
 
-      {/* Conversation Detail */}
-      <div className="flex-1 flex flex-col">
-        {/* Conversation Header */}
-        <div className="p-4 border-b border-gray-200 dark:border-gray-700">
-          <div className="flex items-center justify-between">
-            <div className="flex items-center space-x-3">
-              <Avatar>
-                <AvatarImage src={selectedConversation?.customer?.avatar} />
-                <AvatarFallback>
-                  {selectedConversation?.customer?.name?.charAt(0)}
-                </AvatarFallback>
-              </Avatar>
-              
-              <div>
-                <div className="flex items-center space-x-2">
-                  <h3 className="font-semibold">{selectedConversation?.customer?.name}</h3>
-                  {selectedConversation && getStatusIcon(selectedConversation.status)}
-                </div>
-                <p className="text-sm text-gray-500">{selectedConversation?.customer?.email}</p>
-              </div>
-            </div>
-            
-            <div className="flex items-center space-x-2">
-              <Button variant="outline" size="sm">
-                Assign to Human
-              </Button>
-              <Button variant="outline" size="sm">
-                Mark Resolved
-              </Button>
-              <Button variant="ghost" size="icon">
-                <MoreVertical className="h-4 w-4" />
-              </Button>
-            </div>
-          </div>
-          
-          {/* Tags */}
-          <div className="flex items-center space-x-2 mt-3">
-            {selectedConversation?.tags?.map((tag) => (
-              <Badge key={tag} variant="secondary" className="text-xs">
-                {tag}
-              </Badge>
-            ))}
-            <Button variant="ghost" size="sm" className="h-6 px-2 text-xs">
-              + Add tag
-            </Button>
-          </div>
-        </div>
+                  <ScrollArea className="flex-1 p-4">
+                    <div className="space-y-4">
+                      <div className="rounded-lg border bg-muted/40 p-4">
+                        <p className="text-sm text-muted-foreground">
+                          Transcript not available in this snapshot. Use the conversation view to
+                          drill into full history.
+                        </p>
+                      </div>
+                      <div>
+                        <h4 className="text-sm font-semibold mb-2">Latest Message</h4>
+                        <p className="rounded-lg border bg-card p-4 text-sm leading-relaxed">
+                          {selectedConversation.message}
+                        </p>
+                      </div>
+                    </div>
+                  </ScrollArea>
 
-        {/* Messages */}
-        <ScrollArea className="flex-1 p-4">
-          <div className="space-y-4">
-            {messages.map((message) => (
-              <div
-                key={message.id}
-                className={`flex ${
-                  message.sender === "customer" ? "justify-start" : "justify-end"
-                }`}
-              >
-                <div
-                  className={`max-w-lg px-4 py-2 rounded-lg ${
-                    message.sender === "customer"
-                      ? "bg-gray-100 dark:bg-gray-800"
-                      : "bg-indigo-600 text-white"
-                  }`}
-                >
-                  <div className="flex items-center space-x-2 mb-1">
-                    {message.sender === "bot" && <Bot className="h-4 w-4" />}
-                    <span className="text-xs opacity-75">{message.timestamp}</span>
+                  <div className="border-t p-4">
+                    <div className="flex items-center space-x-3">
+                      <Input
+                        placeholder="Type a reply..."
+                        value=""
+                        readOnly
+                        className="text-sm"
+                      />
+                      <Button variant="secondary" size="icon" disabled>
+                        <Bot className="h-4 w-4" />
+                      </Button>
+                      <Button size="icon" disabled>
+                        <MessageCircle className="h-4 w-4" />
+                      </Button>
+                    </div>
+                    <p className="mt-2 text-xs text-muted-foreground">
+                      Responding available in the conversation workspace.
+                    </p>
                   </div>
-                  <p className="text-sm">{message.content}</p>
+                </>
+              ) : (
+                <div className="flex flex-1 items-center justify-center text-sm text-muted-foreground">
+                  Select a conversation to view details.
                 </div>
-              </div>
-            ))}
-          </div>
-        </ScrollArea>
-
-        {/* Message Input */}
-        <div className="p-4 border-t border-gray-200 dark:border-gray-700">
-          <div className="flex items-center space-x-2">
-            <Button variant="ghost" size="icon">
-              <Paperclip className="h-4 w-4" />
-            </Button>
-            <Input
-              placeholder="Type a message..."
-              value={messageInput}
-              onChange={(e) => setMessageInput(e.target.value)}
-              className="flex-1"
-            />
-            <Button variant="ghost" size="icon">
-              <Smile className="h-4 w-4" />
-            </Button>
-            <Button size="icon">
-              <Send className="h-4 w-4" />
-            </Button>
+              )}
+            </div>
           </div>
         </div>
       </div>
+    </div>
+  );
+}
 
-      {/* Customer Info Sidebar */}
-      <div className="w-80 border-l border-gray-200 dark:border-gray-700 p-4">
-        <h3 className="font-semibold mb-4">Customer Information</h3>
-        
-        <div className="space-y-4">
-          <Card>
-            <CardHeader className="pb-3">
-              <CardTitle className="text-sm">Contact Details</CardTitle>
-            </CardHeader>
-            <CardContent className="space-y-2">
-              <div>
-                <p className="text-xs text-gray-500">Email</p>
-                <p className="text-sm">{selectedConversation?.customer?.email}</p>
-              </div>
-              <div>
-                <p className="text-xs text-gray-500">Language</p>
-                <p className="text-sm">English (US)</p>
-              </div>
-              <div>
-                <p className="text-xs text-gray-500">Time Zone</p>
-                <p className="text-sm">PST (UTC-8)</p>
-              </div>
-            </CardContent>
-          </Card>
+function formatRelativeTime(value: string) {
+  const date = new Date(value);
+  const delta = Date.now() - date.getTime();
+  const minutes = Math.round(delta / 60000);
+  if (minutes < 1) return "just now";
+  if (minutes < 60) return `${minutes} min ago`;
+  const hours = Math.round(minutes / 60);
+  if (hours < 24) return `${hours} hr ago`;
+  const days = Math.round(hours / 24);
+  return `${days} day${days === 1 ? "" : "s"} ago`;
+}
 
-          <Card>
-            <CardHeader className="pb-3">
-              <CardTitle className="text-sm">Previous Conversations</CardTitle>
-            </CardHeader>
-            <CardContent>
-              <div className="space-y-2">
-                <div className="text-sm">
-                  <p className="font-medium">Order inquiry</p>
-                  <p className="text-xs text-gray-500">Resolved - 3 days ago</p>
-                </div>
-                <div className="text-sm">
-                  <p className="font-medium">Technical support</p>
-                  <p className="text-xs text-gray-500">Resolved - 1 week ago</p>
-                </div>
-              </div>
-            </CardContent>
-          </Card>
+function statusBadgeVariant(status: "active" | "waiting" | "resolved"): BadgeVariant {
+  switch (status) {
+    case "resolved":
+      return "outline";
+    case "waiting":
+      return "secondary";
+    default:
+      return "default";
+  }
+}
 
-          <Card>
-            <CardHeader className="pb-3">
-              <CardTitle className="text-sm">Customer Insights</CardTitle>
-            </CardHeader>
-            <CardContent>
-              <div className="space-y-2 text-sm">
-                <div className="flex justify-between">
-                  <span className="text-gray-500">Total conversations</span>
-                  <span>12</span>
-                </div>
-                <div className="flex justify-between">
-                  <span className="text-gray-500">Avg. response time</span>
-                  <span>2.3 min</span>
-                </div>
-                <div className="flex justify-between">
-                  <span className="text-gray-500">Satisfaction</span>
-                  <span className="text-green-600">95%</span>
-                </div>
-              </div>
-            </CardContent>
-          </Card>
-        </div>
-      </div>
+function SkeletonBar() {
+  return <span className="inline-block h-6 w-24 rounded bg-muted animate-pulse" />;
+}
+
+function SkeletonList({ count }: { count: number }) {
+  return (
+    <div className="space-y-2">
+      {Array.from({ length: count }).map((_, index) => (
+        <div key={index} className="h-8 w-full rounded bg-muted animate-pulse" />
+      ))}
     </div>
   );
 }

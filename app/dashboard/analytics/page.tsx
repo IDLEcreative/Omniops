@@ -1,10 +1,11 @@
 "use client";
 
-import { useState } from "react";
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { Button } from "@/components/ui/button";
+import { useMemo, useState } from "react";
+import { Alert, AlertDescription } from "@/components/ui/alert";
 import { Badge } from "@/components/ui/badge";
+import { Button } from "@/components/ui/button";
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
+import { Progress } from "@/components/ui/progress";
 import {
   Select,
   SelectContent,
@@ -12,103 +13,188 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import {
-  BarChart3,
-  LineChart,
-  PieChart,
-  TrendingUp,
-  TrendingDown,
-  Users,
-  MessageSquare,
-  Clock,
-  Target,
   Calendar,
   Download,
-  Filter,
+  MessageSquare,
   RefreshCw,
+  TrendingUp,
+  Users,
 } from "lucide-react";
-import { Progress } from "@/components/ui/progress";
+import { useDashboardAnalytics } from "@/hooks/use-dashboard-analytics";
 
-const metricsData = {
-  conversations: {
-    total: 45832,
-    change: 12.5,
-    trend: "up",
-  },
-  responseTime: {
-    average: "1.2s",
-    change: -15.3,
-    trend: "down",
-  },
-  satisfaction: {
-    score: 4.7,
-    change: 3.2,
-    trend: "up",
-  },
-  resolution: {
-    rate: "89%",
-    change: 5.1,
-    trend: "up",
-  },
+type DateRangeValue = "24h" | "7d" | "30d" | "90d" | "custom";
+
+const RANGE_TO_DAYS: Record<DateRangeValue, number> = {
+  "24h": 1,
+  "7d": 7,
+  "30d": 30,
+  "90d": 90,
+  custom: 30,
 };
 
-const topQueries = [
-  { query: "How to reset password", count: 1234, percentage: 15 },
-  { query: "Order status check", count: 987, percentage: 12 },
-  { query: "Refund policy", count: 876, percentage: 11 },
-  { query: "Shipping information", count: 765, percentage: 9 },
-  { query: "Account verification", count: 654, percentage: 8 },
-];
+const formatNumber = (value: number | undefined) =>
+  value !== undefined ? value.toLocaleString() : "—";
 
-const languageDistribution = [
-  { language: "English", percentage: 65, color: "bg-blue-500" },
-  { language: "Spanish", percentage: 20, color: "bg-green-500" },
-  { language: "French", percentage: 10, color: "bg-yellow-500" },
-  { language: "German", percentage: 3, color: "bg-purple-500" },
-  { language: "Other", percentage: 2, color: "bg-gray-500" },
-];
+const formatSeconds = (seconds: number | undefined) => {
+  if (seconds === undefined) return "—";
+  if (seconds >= 60) {
+    const mins = Math.floor(seconds / 60);
+    const secs = Math.round(seconds % 60);
+    return `${mins}m ${secs}s`;
+  }
+  return `${seconds.toFixed(1)}s`;
+};
+
+const formatScore = (score: number | undefined) =>
+  score !== undefined ? `${score.toFixed(2)}/5` : "—";
+
+const formatRate = (rate: number | undefined) =>
+  rate !== undefined ? `${rate.toFixed(1)}%` : "—";
+
+const getLanguageColor = (color?: string, fallbackIndex = 0) => {
+  if (color) return color;
+  const palette = ["bg-blue-500", "bg-green-500", "bg-purple-500", "bg-yellow-500", "bg-gray-500"];
+  return palette[fallbackIndex % palette.length];
+};
 
 export default function AnalyticsPage() {
-  const [dateRange, setDateRange] = useState("7d");
+  const [dateRange, setDateRange] = useState<DateRangeValue>("7d");
   const [isRefreshing, setIsRefreshing] = useState(false);
 
-  const handleRefresh = () => {
+  const days = RANGE_TO_DAYS[dateRange] ?? 7;
+  const { data: analytics, loading, error, refresh } = useDashboardAnalytics({ days });
+
+  const metricsCards = useMemo(() => {
+    return [
+      {
+        title: "Total Messages",
+        icon: MessageSquare,
+        value: formatNumber(analytics?.metrics.totalMessages),
+        descriptor: `${formatNumber(analytics?.metrics.userMessages)} from customers`,
+      },
+      {
+        title: "Avg Response Time",
+        icon: ClockIcon,
+        value: formatSeconds(analytics?.responseTime),
+        descriptor: "Median turnaround per message",
+      },
+      {
+        title: "Satisfaction Score",
+        icon: Users,
+        value: formatScore(analytics?.satisfactionScore),
+        descriptor: `${formatNumber(analytics?.metrics.positiveMessages)} positive interactions`,
+      },
+      {
+        title: "Resolution Rate",
+        icon: TrendingUp,
+        value: formatRate(analytics?.resolutionRate),
+        descriptor: `${formatNumber(analytics?.metrics.avgMessagesPerDay)} msgs/day on average`,
+      },
+    ];
+  }, [analytics]);
+
+  const dailySentiment = analytics?.dailySentiment ?? [];
+  const topQueries = analytics?.topQueries ?? [];
+  const languageDistribution = analytics?.languageDistribution ?? [];
+  const failedSearches = analytics?.failedSearches ?? [];
+
+  const sentimentSummary = useMemo(() => {
+    const positive = analytics?.metrics.positiveMessages ?? 0;
+    const negative = analytics?.metrics.negativeMessages ?? 0;
+    const total = analytics?.metrics.userMessages ?? 0;
+    const positiveRate = total > 0 ? Math.round((positive / total) * 100) : 0;
+    const negativeRate = total > 0 ? Math.round((negative / total) * 100) : 0;
+    return { positive, negative, total, positiveRate, negativeRate };
+  }, [analytics]);
+
+  const insights = useMemo(() => {
+    if (!analytics) return [];
+    const items: Array<{ title: string; body: string; tone: "positive" | "neutral" | "caution" }> = [];
+
+    if (analytics.responseTime > 5) {
+      items.push({
+        title: "Response time opportunity",
+        body: `Average response time is ${formatSeconds(analytics.responseTime)}. Consider reviewing escalation rules for your busiest period.`,
+        tone: "caution",
+      });
+    } else if (analytics.responseTime) {
+      items.push({
+        title: "Fast responses",
+        body: `Agents respond in ${formatSeconds(analytics.responseTime)} on average—keep the current shift coverage.`,
+        tone: "positive",
+      });
+    }
+
+    if (analytics.failedSearches.length > 0) {
+      items.push({
+        title: "Knowledge gaps detected",
+        body: `Customers recently searched for “${analytics.failedSearches[0]}” without success. Add supporting content or train the model on this topic.`,
+        tone: "caution",
+      });
+    }
+
+    const topQuery = analytics.topQueries[0];
+    if (topQuery) {
+      items.push({
+        title: "Trending topic",
+        body: `“${topQuery.query}” accounts for ${topQuery.percentage}% of recent questions. Prepare snippets or macros to respond faster.`,
+        tone: "neutral",
+      });
+    }
+
+    if (!items.length) {
+      items.push({
+        title: "Stable performance",
+        body: "Analytics show consistent behaviour across all monitored metrics. Continue monitoring for emerging trends.",
+        tone: "positive",
+      });
+    }
+
+    return items;
+  }, [analytics]);
+
+  const handleRefresh = async () => {
     setIsRefreshing(true);
-    setTimeout(() => setIsRefreshing(false), 1000);
+    try {
+      await refresh();
+    } finally {
+      setIsRefreshing(false);
+    }
   };
 
   return (
-    <div className="p-8">
-      {/* Header */}
-      <div className="flex items-center justify-between mb-8">
+    <div className="p-8 space-y-6">
+      <div className="flex items-center justify-between flex-wrap gap-4">
         <div>
-          <h1 className="text-3xl font-bold text-gray-900 dark:text-white">
-            Analytics Dashboard
-          </h1>
-          <p className="text-gray-600 dark:text-gray-400 mt-2">
-            Comprehensive insights into your customer service performance
+          <h1 className="text-3xl font-bold">Analytics Dashboard</h1>
+          <p className="text-muted-foreground">
+            Track agent throughput, satisfaction, and trending topics across the selected period.
           </p>
         </div>
-        
         <div className="flex items-center space-x-3">
-          <Select value={dateRange} onValueChange={setDateRange}>
+          <Select value={dateRange} onValueChange={(value) => setDateRange(value as DateRangeValue)}>
             <SelectTrigger className="w-40">
               <Calendar className="h-4 w-4 mr-2" />
-              <SelectValue />
+              <SelectValue placeholder="Select range" />
             </SelectTrigger>
             <SelectContent>
               <SelectItem value="24h">Last 24 hours</SelectItem>
               <SelectItem value="7d">Last 7 days</SelectItem>
               <SelectItem value="30d">Last 30 days</SelectItem>
               <SelectItem value="90d">Last 90 days</SelectItem>
-              <SelectItem value="custom">Custom range</SelectItem>
+              <SelectItem value="custom">Custom (30 days)</SelectItem>
             </SelectContent>
           </Select>
-          
-          <Button variant="outline" size="icon" onClick={handleRefresh}>
+          <Button
+            variant="outline"
+            size="icon"
+            onClick={handleRefresh}
+            disabled={loading || isRefreshing}
+          >
             <RefreshCw className={`h-4 w-4 ${isRefreshing ? "animate-spin" : ""}`} />
           </Button>
-          
           <Button variant="outline">
             <Download className="h-4 w-4 mr-2" />
             Export
@@ -116,387 +202,312 @@ export default function AnalyticsPage() {
         </div>
       </div>
 
-      {/* Key Metrics */}
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
-        <Card>
-          <CardHeader className="pb-3">
-            <CardTitle className="text-sm font-medium text-gray-600">
-              Total Conversations
-            </CardTitle>
-          </CardHeader>
-          <CardContent>
-            <div className="flex items-baseline justify-between">
-              <span className="text-2xl font-bold">{metricsData.conversations.total.toLocaleString()}</span>
-              <div className="flex items-center">
-                <TrendingUp className="h-4 w-4 text-green-500 mr-1" />
-                <span className="text-sm text-green-500">
-                  {metricsData.conversations.change}%
-                </span>
-              </div>
-            </div>
-          </CardContent>
-        </Card>
+      {error && (
+        <Alert variant="destructive">
+          <AlertDescription>We couldn’t load analytics. Try refreshing or adjust the range.</AlertDescription>
+        </Alert>
+      )}
 
-        <Card>
-          <CardHeader className="pb-3">
-            <CardTitle className="text-sm font-medium text-gray-600">
-              Avg Response Time
-            </CardTitle>
-          </CardHeader>
-          <CardContent>
-            <div className="flex items-baseline justify-between">
-              <span className="text-2xl font-bold">{metricsData.responseTime.average}</span>
-              <div className="flex items-center">
-                <TrendingDown className="h-4 w-4 text-green-500 mr-1" />
-                <span className="text-sm text-green-500">
-                  {Math.abs(metricsData.responseTime.change)}%
-                </span>
+      <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-4 gap-4">
+        {metricsCards.map((card) => (
+          <Card key={card.title} className="overflow-hidden">
+            <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+              <CardTitle className="text-sm font-medium">{card.title}</CardTitle>
+              <card.icon className="h-4 w-4 text-muted-foreground" />
+            </CardHeader>
+            <CardContent>
+              <div className="text-2xl font-bold">
+                {loading && !analytics ? <span className="inline-block h-6 w-24 bg-muted animate-pulse rounded" /> : card.value}
               </div>
-            </div>
-          </CardContent>
-        </Card>
-
-        <Card>
-          <CardHeader className="pb-3">
-            <CardTitle className="text-sm font-medium text-gray-600">
-              Satisfaction Score
-            </CardTitle>
-          </CardHeader>
-          <CardContent>
-            <div className="flex items-baseline justify-between">
-              <span className="text-2xl font-bold">{metricsData.satisfaction.score}/5</span>
-              <div className="flex items-center">
-                <TrendingUp className="h-4 w-4 text-green-500 mr-1" />
-                <span className="text-sm text-green-500">
-                  {metricsData.satisfaction.change}%
-                </span>
-              </div>
-            </div>
-          </CardContent>
-        </Card>
-
-        <Card>
-          <CardHeader className="pb-3">
-            <CardTitle className="text-sm font-medium text-gray-600">
-              Resolution Rate
-            </CardTitle>
-          </CardHeader>
-          <CardContent>
-            <div className="flex items-baseline justify-between">
-              <span className="text-2xl font-bold">{metricsData.resolution.rate}</span>
-              <div className="flex items-center">
-                <TrendingUp className="h-4 w-4 text-green-500 mr-1" />
-                <span className="text-sm text-green-500">
-                  {metricsData.resolution.change}%
-                </span>
-              </div>
-            </div>
-          </CardContent>
-        </Card>
+              <p className="text-xs text-muted-foreground mt-2">{card.descriptor}</p>
+            </CardContent>
+          </Card>
+        ))}
       </div>
 
-      {/* Analytics Tabs */}
       <Tabs defaultValue="overview" className="space-y-4">
-        <TabsList className="grid w-full grid-cols-5">
+        <TabsList className="grid w-full grid-cols-4">
           <TabsTrigger value="overview">Overview</TabsTrigger>
           <TabsTrigger value="conversations">Conversations</TabsTrigger>
           <TabsTrigger value="performance">Performance</TabsTrigger>
-          <TabsTrigger value="customers">Customers</TabsTrigger>
           <TabsTrigger value="ai-insights">AI Insights</TabsTrigger>
         </TabsList>
 
         <TabsContent value="overview" className="space-y-6">
           <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-            {/* Conversation Trends */}
             <Card>
               <CardHeader>
-                <CardTitle className="flex items-center justify-between">
-                  <span>Conversation Trends</span>
-                  <LineChart className="h-5 w-5 text-gray-400" />
-                </CardTitle>
+                <CardTitle>Daily Sentiment & Satisfaction</CardTitle>
                 <CardDescription>
-                  Daily conversation volume over selected period
+                  Summaries of each day’s sentiment and satisfaction score.
                 </CardDescription>
               </CardHeader>
-              <CardContent>
-                <div className="h-64 flex items-center justify-center bg-gray-50 dark:bg-gray-800 rounded-md">
-                  <p className="text-gray-500">Line chart visualization</p>
-                </div>
+              <CardContent className="space-y-3">
+                {loading && !analytics && (
+                  <div className="space-y-2">
+                    {Array.from({ length: 4 }).map((_, idx) => (
+                      <div key={idx} className="h-12 w-full rounded-md bg-muted animate-pulse" />
+                    ))}
+                  </div>
+                )}
+                {!loading && dailySentiment.length === 0 && (
+                  <p className="text-sm text-muted-foreground">No sentiment data recorded for this range.</p>
+                )}
+                {dailySentiment.map((entry) => (
+                  <div
+                    key={entry.date}
+                    className="flex items-center justify-between rounded-md border bg-card px-3 py-2"
+                  >
+                    <div>
+                      <p className="text-sm font-medium">
+                        {new Date(entry.date).toLocaleDateString(undefined, {
+                          month: "short",
+                          day: "numeric",
+                        })}
+                      </p>
+                      <p className="text-xs text-muted-foreground">
+                        {entry.total} messages · {formatScore(entry.satisfactionScore)}
+                      </p>
+                    </div>
+                    <div className="flex items-center space-x-2 text-xs">
+                      <Badge variant="secondary">{entry.positive} 👍</Badge>
+                      <Badge variant="outline">{entry.neutral} 😐</Badge>
+                      <Badge variant="destructive">{entry.negative} 👎</Badge>
+                    </div>
+                  </div>
+                ))}
               </CardContent>
             </Card>
 
-            {/* Response Time Distribution */}
             <Card>
               <CardHeader>
-                <CardTitle className="flex items-center justify-between">
-                  <span>Response Time Distribution</span>
-                  <BarChart3 className="h-5 w-5 text-gray-400" />
-                </CardTitle>
-                <CardDescription>
-                  Distribution of bot response times
-                </CardDescription>
+                <CardTitle>Top Customer Queries</CardTitle>
+                <CardDescription>Most frequent queries during this period.</CardDescription>
               </CardHeader>
-              <CardContent>
-                <div className="h-64 flex items-center justify-center bg-gray-50 dark:bg-gray-800 rounded-md">
-                  <p className="text-gray-500">Bar chart visualization</p>
-                </div>
-              </CardContent>
-            </Card>
-          </div>
-
-          {/* Top Queries */}
-          <Card>
-            <CardHeader>
-              <CardTitle>Top Customer Queries</CardTitle>
-              <CardDescription>
-                Most common questions asked by customers
-              </CardDescription>
-            </CardHeader>
-            <CardContent>
-              <div className="space-y-4">
-                {topQueries.map((item, index) => (
-                  <div key={index} className="space-y-2">
+              <CardContent className="space-y-4">
+                {loading && !analytics && (
+                  <div className="space-y-2">
+                    {Array.from({ length: 5 }).map((_, idx) => (
+                      <div key={idx} className="h-10 w-full rounded-md bg-muted animate-pulse" />
+                    ))}
+                  </div>
+                )}
+                {!loading && topQueries.length === 0 && (
+                  <p className="text-sm text-muted-foreground">No recurring queries detected for this range.</p>
+                )}
+                {topQueries.map((item) => (
+                  <div key={item.query} className="space-y-2">
                     <div className="flex items-center justify-between">
                       <span className="text-sm font-medium">{item.query}</span>
-                      <span className="text-sm text-gray-500">{item.count} queries</span>
+                      <span className="text-xs text-muted-foreground">
+                        {item.count.toLocaleString()} · {item.percentage}%
+                      </span>
                     </div>
                     <Progress value={item.percentage} className="h-2" />
                   </div>
                 ))}
-              </div>
-            </CardContent>
-          </Card>
+              </CardContent>
+            </Card>
+          </div>
         </TabsContent>
 
         <TabsContent value="conversations" className="space-y-6">
           <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-            {/* Conversation Status */}
             <Card>
               <CardHeader>
-                <CardTitle>Conversation Status</CardTitle>
+                <CardTitle>Failed Searches</CardTitle>
+                <CardDescription>Topics that returned no results.</CardDescription>
               </CardHeader>
-              <CardContent>
-                <div className="space-y-4">
-                  <div className="flex items-center justify-between">
-                    <div className="flex items-center space-x-2">
-                      <div className="h-3 w-3 bg-green-500 rounded-full" />
-                      <span className="text-sm">Active</span>
-                    </div>
-                    <span className="text-sm font-medium">234</span>
+              <CardContent className="space-y-3">
+                {loading && !analytics && (
+                  <div className="space-y-2">
+                    {Array.from({ length: 4 }).map((_, idx) => (
+                      <div key={idx} className="h-8 w-full rounded-md bg-muted animate-pulse" />
+                    ))}
                   </div>
-                  <div className="flex items-center justify-between">
-                    <div className="flex items-center space-x-2">
-                      <div className="h-3 w-3 bg-yellow-500 rounded-full" />
-                      <span className="text-sm">Waiting</span>
-                    </div>
-                    <span className="text-sm font-medium">87</span>
+                )}
+                {!loading && failedSearches.length === 0 && (
+                  <p className="text-sm text-muted-foreground">No failed searches during this range.</p>
+                )}
+                {failedSearches.map((query, index) => (
+                  <div key={`${query}-${index}`} className="rounded-md border bg-card px-3 py-2 text-sm">
+                    {query}
                   </div>
-                  <div className="flex items-center justify-between">
-                    <div className="flex items-center space-x-2">
-                      <div className="h-3 w-3 bg-gray-500 rounded-full" />
-                      <span className="text-sm">Resolved</span>
-                    </div>
-                    <span className="text-sm font-medium">1,892</span>
-                  </div>
-                </div>
+                ))}
               </CardContent>
             </Card>
 
-            {/* Language Distribution */}
             <Card>
               <CardHeader>
                 <CardTitle>Language Distribution</CardTitle>
+                <CardDescription>Share of user messages by language.</CardDescription>
               </CardHeader>
-              <CardContent>
-                <div className="space-y-3">
-                  {languageDistribution.map((lang) => (
-                    <div key={lang.language} className="flex items-center space-x-3">
-                      <div className={`h-3 w-3 rounded-full ${lang.color}`} />
-                      <span className="text-sm flex-1">{lang.language}</span>
-                      <span className="text-sm font-medium">{lang.percentage}%</span>
-                    </div>
-                  ))}
-                </div>
+              <CardContent className="space-y-3">
+                {loading && !analytics && (
+                  <div className="space-y-2">
+                    {Array.from({ length: 4 }).map((_, idx) => (
+                      <div key={idx} className="h-6 w-full rounded-md bg-muted animate-pulse" />
+                    ))}
+                  </div>
+                )}
+                {!loading && languageDistribution.length === 0 && (
+                  <p className="text-sm text-muted-foreground">
+                    No multilingual interactions recorded for this range.
+                  </p>
+                )}
+                {languageDistribution.map((lang, index) => (
+                  <div key={lang.language} className="flex items-center space-x-3">
+                    <div className={`h-3 w-3 rounded-full ${getLanguageColor(lang.color, index)}`} />
+                    <span className="text-sm flex-1">{lang.language}</span>
+                    <span className="text-sm font-medium">{lang.percentage}%</span>
+                  </div>
+                ))}
               </CardContent>
             </Card>
 
-            {/* Peak Hours */}
             <Card>
               <CardHeader>
-                <CardTitle>Peak Conversation Hours</CardTitle>
+                <CardTitle>Sentiment Breakdown</CardTitle>
+                <CardDescription>Positive vs. negative interactions.</CardDescription>
               </CardHeader>
-              <CardContent>
-                <div className="space-y-3">
-                  <div className="flex items-center justify-between">
-                    <span className="text-sm">9:00 AM - 11:00 AM</span>
-                    <Badge variant="secondary">High</Badge>
-                  </div>
-                  <div className="flex items-center justify-between">
-                    <span className="text-sm">2:00 PM - 4:00 PM</span>
-                    <Badge variant="secondary">High</Badge>
-                  </div>
-                  <div className="flex items-center justify-between">
-                    <span className="text-sm">7:00 PM - 9:00 PM</span>
-                    <Badge variant="outline">Medium</Badge>
-                  </div>
+              <CardContent className="space-y-4">
+                <div className="flex justify-between text-sm">
+                  <span>Positive</span>
+                  <span className="font-medium">
+                    {formatNumber(sentimentSummary.positive)} ({sentimentSummary.positiveRate}%)
+                  </span>
                 </div>
+                <Progress value={sentimentSummary.positiveRate} className="h-2" />
+                <div className="flex justify-between text-sm">
+                  <span>Negative</span>
+                  <span className="font-medium">
+                    {formatNumber(sentimentSummary.negative)} ({sentimentSummary.negativeRate}%)
+                  </span>
+                </div>
+                <Progress value={sentimentSummary.negativeRate} className="h-2 bg-red-100" />
+                <p className="text-xs text-muted-foreground">
+                  Based on {formatNumber(sentimentSummary.total)} user messages.
+                </p>
               </CardContent>
             </Card>
           </div>
         </TabsContent>
 
         <TabsContent value="performance" className="space-y-6">
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+          <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
             <Card>
               <CardHeader>
-                <CardTitle>Bot Accuracy</CardTitle>
-                <CardDescription>Intent recognition accuracy</CardDescription>
+                <CardTitle>Response Metrics</CardTitle>
+                <CardDescription>Speed and volume indicators.</CardDescription>
               </CardHeader>
-              <CardContent>
-                <div className="space-y-4">
-                  <div className="text-3xl font-bold">94.7%</div>
-                  <Progress value={94.7} />
-                  <p className="text-sm text-gray-500">
-                    Based on 10,234 interactions
-                  </p>
+              <CardContent className="space-y-3 text-sm">
+                <div className="flex justify-between">
+                  <span>Average response time</span>
+                  <span className="font-medium">{formatSeconds(analytics?.responseTime)}</span>
+                </div>
+                <div className="flex justify-between">
+                  <span>Messages per day</span>
+                  <span className="font-medium">{formatNumber(analytics?.metrics.avgMessagesPerDay)}</span>
+                </div>
+                <div className="flex justify-between">
+                  <span>Total messages</span>
+                  <span className="font-medium">{formatNumber(analytics?.metrics.totalMessages)}</span>
                 </div>
               </CardContent>
             </Card>
 
             <Card>
               <CardHeader>
-                <CardTitle>Escalation Rate</CardTitle>
-                <CardDescription>Conversations escalated to humans</CardDescription>
+                <CardTitle>Satisfaction</CardTitle>
+                <CardDescription>User feedback trends.</CardDescription>
               </CardHeader>
-              <CardContent>
-                <div className="space-y-4">
-                  <div className="text-3xl font-bold">12.3%</div>
-                  <Progress value={12.3} className="bg-red-100" />
-                  <p className="text-sm text-gray-500">
-                    Lower is better
-                  </p>
+              <CardContent className="space-y-3 text-sm">
+                <div className="flex justify-between">
+                  <span>Score</span>
+                  <span className="font-medium">{formatScore(analytics?.satisfactionScore)}</span>
+                </div>
+                <div className="flex justify-between">
+                  <span>Positive messages</span>
+                  <span className="font-medium">{formatNumber(analytics?.metrics.positiveMessages)}</span>
+                </div>
+                <div className="flex justify-between">
+                  <span>Negative messages</span>
+                  <span className="font-medium">{formatNumber(analytics?.metrics.negativeMessages)}</span>
                 </div>
               </CardContent>
             </Card>
 
             <Card>
               <CardHeader>
-                <CardTitle>First Contact Resolution</CardTitle>
-                <CardDescription>Issues resolved in first interaction</CardDescription>
+                <CardTitle>Resolution</CardTitle>
+                <CardDescription>Completion and deflection rate.</CardDescription>
               </CardHeader>
-              <CardContent>
-                <div className="space-y-4">
-                  <div className="text-3xl font-bold">78.5%</div>
-                  <Progress value={78.5} />
-                  <p className="text-sm text-gray-500">
-                    Industry average: 71%
-                  </p>
+              <CardContent className="space-y-3 text-sm">
+                <div className="flex justify-between">
+                  <span>Resolution rate</span>
+                  <span className="font-medium">{formatRate(analytics?.resolutionRate)}</span>
+                </div>
+                <div className="flex justify-between">
+                  <span>Customer messages handled</span>
+                  <span className="font-medium">{formatNumber(analytics?.metrics.userMessages)}</span>
+                </div>
+                <div className="flex justify-between">
+                  <span>Net sentiment</span>
+                  <span className="font-medium">
+                    {formatNumber(
+                      (analytics?.metrics.positiveMessages ?? 0) -
+                        (analytics?.metrics.negativeMessages ?? 0),
+                    )}
+                  </span>
                 </div>
               </CardContent>
             </Card>
           </div>
         </TabsContent>
 
-        <TabsContent value="customers" className="space-y-6">
-          <Card>
-            <CardHeader>
-              <CardTitle>Customer Insights</CardTitle>
-              <CardDescription>
-                Understanding your customer base
-              </CardDescription>
-            </CardHeader>
-            <CardContent>
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                <div className="space-y-4">
-                  <h4 className="font-medium">Customer Segments</h4>
-                  <div className="space-y-2">
-                    <div className="flex justify-between">
-                      <span className="text-sm">New Customers</span>
-                      <span className="text-sm font-medium">34%</span>
-                    </div>
-                    <div className="flex justify-between">
-                      <span className="text-sm">Returning Customers</span>
-                      <span className="text-sm font-medium">52%</span>
-                    </div>
-                    <div className="flex justify-between">
-                      <span className="text-sm">VIP Customers</span>
-                      <span className="text-sm font-medium">14%</span>
-                    </div>
-                  </div>
-                </div>
-                
-                <div className="space-y-4">
-                  <h4 className="font-medium">Satisfaction by Segment</h4>
-                  <div className="space-y-2">
-                    <div className="flex justify-between items-center">
-                      <span className="text-sm">New Customers</span>
-                      <div className="flex items-center space-x-2">
-                        <Progress value={85} className="w-20" />
-                        <span className="text-sm">4.2/5</span>
-                      </div>
-                    </div>
-                    <div className="flex justify-between items-center">
-                      <span className="text-sm">Returning</span>
-                      <div className="flex items-center space-x-2">
-                        <Progress value={92} className="w-20" />
-                        <span className="text-sm">4.6/5</span>
-                      </div>
-                    </div>
-                    <div className="flex justify-between items-center">
-                      <span className="text-sm">VIP</span>
-                      <div className="flex items-center space-x-2">
-                        <Progress value={96} className="w-20" />
-                        <span className="text-sm">4.8/5</span>
-                      </div>
-                    </div>
-                  </div>
-                </div>
-              </div>
-            </CardContent>
-          </Card>
-        </TabsContent>
-
         <TabsContent value="ai-insights" className="space-y-6">
           <Card>
             <CardHeader>
-              <CardTitle>AI-Generated Insights</CardTitle>
-              <CardDescription>
-                Actionable recommendations based on your data
-              </CardDescription>
+              <CardTitle>AI Insights</CardTitle>
+              <CardDescription>Generated from current analytics snapshot.</CardDescription>
             </CardHeader>
-            <CardContent>
-              <div className="space-y-4">
-                <div className="p-4 bg-blue-50 dark:bg-blue-900/20 rounded-lg border border-blue-200 dark:border-blue-800">
-                  <h4 className="font-medium text-blue-900 dark:text-blue-100 mb-2">
-                    📈 Optimize Response Times
-                  </h4>
-                  <p className="text-sm text-blue-700 dark:text-blue-300">
-                    Response times spike 23% during 2-4 PM. Consider adding more intents for common afternoon queries or implementing smart routing.
-                  </p>
+            <CardContent className="space-y-4">
+              {insights.map((insight, index) => (
+                <div
+                  key={index}
+                  className={`rounded-lg border p-4 ${
+                    insight.tone === "positive"
+                      ? "bg-green-50 dark:bg-green-900/20 border-green-200 dark:border-green-800"
+                      : insight.tone === "caution"
+                      ? "bg-amber-50 dark:bg-amber-900/20 border-amber-200 dark:border-amber-800"
+                      : "bg-blue-50 dark:bg-blue-900/20 border-blue-200 dark:border-blue-800"
+                  }`}
+                >
+                  <h4 className="text-sm font-medium">{insight.title}</h4>
+                  <p className="text-sm text-muted-foreground mt-2">{insight.body}</p>
                 </div>
-                
-                <div className="p-4 bg-green-50 dark:bg-green-900/20 rounded-lg border border-green-200 dark:border-green-800">
-                  <h4 className="font-medium text-green-900 dark:text-green-100 mb-2">
-                    🎯 High Performing Topics
-                  </h4>
-                  <p className="text-sm text-green-700 dark:text-green-300">
-                    Your bot excels at handling order status queries (98% success rate). Consider expanding similar structured responses to other topics.
-                  </p>
-                </div>
-                
-                <div className="p-4 bg-amber-50 dark:bg-amber-900/20 rounded-lg border border-amber-200 dark:border-amber-800">
-                  <h4 className="font-medium text-amber-900 dark:text-amber-100 mb-2">
-                    ⚡ Training Opportunity
-                  </h4>
-                  <p className="text-sm text-amber-700 dark:text-amber-300">
-                    15% of escalations involve refund requests. Adding more training data for refund scenarios could reduce escalations by ~40%.
-                  </p>
-                </div>
-              </div>
+              ))}
             </CardContent>
           </Card>
         </TabsContent>
       </Tabs>
     </div>
+  );
+}
+
+function ClockIcon(props: React.SVGProps<SVGSVGElement>) {
+  return (
+    <svg
+      {...props}
+      viewBox="0 0 24 24"
+      fill="none"
+      stroke="currentColor"
+      strokeWidth={2}
+      strokeLinecap="round"
+      strokeLinejoin="round"
+    >
+      <circle cx="12" cy="12" r="10" />
+      <polyline points="12 6 12 12 16 14" />
+    </svg>
   );
 }

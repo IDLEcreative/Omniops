@@ -131,3 +131,5 @@ export interface WooCommerceSearchResponse {
   results: Array<WooCommerceProduct | WooCommerceOrder | WooCommerceCustomer>;
   total: number;
 }
+
+export * from './dashboard';

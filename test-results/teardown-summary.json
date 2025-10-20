@@ -1,0 +1,12 @@
+{
+  "teardownTime": "2025-10-20T19:15:49.481Z",
+  "setupTime": null,
+  "duration": null,
+  "testResultsPath": "/Users/jamesguy/Omniops/test-results",
+  "generatedFiles": [
+    "browser-availability.json",
+    "screenshots",
+    "traces",
+    "videos"
+  ]
+}

@@ -15,6 +15,7 @@ export async function POST(request: NextRequest) {
   try {
     const body = await request.json();
     const { session_id, email, domain, confirm } = DeleteRequestSchema.parse(body);
+    const actorHeader = request.headers.get('x-actor');
 
     if (!confirm) {
       return NextResponse.json(
@@ -58,6 +59,17 @@ export async function POST(request: NextRequest) {
     }
 
     if (!conversations || conversations.length === 0) {
+      await supabase.from('gdpr_audit_log').insert({
+        domain,
+        request_type: 'delete',
+        session_id,
+        email,
+        actor: actorHeader ?? null,
+        status: 'completed',
+        deleted_count: 0,
+        message: 'No data found to delete',
+      });
+
       return NextResponse.json({
         message: 'No data found to delete',
         deleted_count: 0,
@@ -75,12 +87,15 @@ export async function POST(request: NextRequest) {
       throw deleteError;
     }
 
-    // Log the deletion for audit purposes
-    console.log('GDPR deletion completed:', {
+    await supabase.from('gdpr_audit_log').insert({
       domain,
-      user_identifier: email || session_id,
-      conversations_deleted: conversationIds.length,
-      timestamp: new Date().toISOString(),
+      request_type: 'delete',
+      session_id,
+      email,
+      actor: actorHeader ?? null,
+      status: 'completed',
+      deleted_count: conversationIds.length,
+      message: `Deleted ${conversationIds.length} conversation(s).`,
     });
 
     return NextResponse.json({

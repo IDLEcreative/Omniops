@@ -1,0 +1,634 @@
+{
+  "openapi": "3.0.0",
+  "info": {
+    "title": "Omniops API",
+    "version": "2.0.0",
+    "description": "AI-powered customer service platform API",
+    "contact": {
+      "name": "API Support",
+      "email": "api-support@omniops.ai"
+    }
+  },
+  "servers": [
+    {
+      "url": "https://api.omniops.ai",
+      "description": "Production server"
+    },
+    {
+      "url": "http://localhost:3000/api",
+      "description": "Development server"
+    }
+  ],
+  "security": [
+    {
+      "bearerAuth": []
+    }
+  ],
+  "paths": {
+    "/chat": {
+      "post": {
+        "summary": "Send chat message",
+        "description": "Process a chat message and return AI-generated response",
+        "tags": ["Chat"],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/ChatRequest"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Successful response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ChatResponse"
+                }
+              }
+            }
+          },
+          "400": {
+            "$ref": "#/components/responses/BadRequest"
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized"
+          },
+          "429": {
+            "$ref": "#/components/responses/RateLimited"
+          }
+        }
+      }
+    },
+    "/analytics/intelligence": {
+      "get": {
+        "summary": "Get business intelligence metrics",
+        "description": "Retrieve analytics including customer journey, content gaps, and conversion funnels",
+        "tags": ["Analytics"],
+        "parameters": [
+          {
+            "name": "metric",
+            "in": "query",
+            "description": "Type of metric to retrieve",
+            "schema": {
+              "type": "string",
+              "enum": ["journey", "content-gaps", "peak-usage", "conversion-funnel", "all"],
+              "default": "all"
+            }
+          },
+          {
+            "name": "domain",
+            "in": "query",
+            "description": "Filter by specific domain",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "days",
+            "in": "query",
+            "description": "Number of days to analyze",
+            "schema": {
+              "type": "integer",
+              "default": 7
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Analytics data",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/AnalyticsResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/monitoring/metrics": {
+      "get": {
+        "summary": "Get performance metrics",
+        "description": "Retrieve real-time performance metrics in JSON or Prometheus format",
+        "tags": ["Monitoring"],
+        "parameters": [
+          {
+            "name": "format",
+            "in": "query",
+            "description": "Response format",
+            "schema": {
+              "type": "string",
+              "enum": ["json", "prometheus"],
+              "default": "json"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Performance metrics",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/MetricsResponse"
+                }
+              },
+              "text/plain": {
+                "schema": {
+                  "type": "string",
+                  "description": "Prometheus format metrics"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/scrape": {
+      "post": {
+        "summary": "Start web scraping",
+        "description": "Initiate web scraping job for a domain",
+        "tags": ["Scraping"],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/ScrapeRequest"
+              }
+            }
+          }
+        },
+        "responses": {
+          "202": {
+            "description": "Job queued",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ScrapeJobResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/scrape/status/{jobId}": {
+      "get": {
+        "summary": "Get scraping job status",
+        "description": "Check the status of a web scraping job",
+        "tags": ["Scraping"],
+        "parameters": [
+          {
+            "name": "jobId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Job status",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/JobStatusResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/training": {
+      "post": {
+        "summary": "Add training data",
+        "description": "Add custom training data to improve AI responses",
+        "tags": ["Training"],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/TrainingRequest"
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "description": "Training data created",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/TrainingResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/gdpr/export": {
+      "post": {
+        "summary": "Export user data",
+        "description": "Request GDPR-compliant data export for a user",
+        "tags": ["Privacy"],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/GDPRExportRequest"
+              }
+            }
+          }
+        },
+        "responses": {
+          "202": {
+            "description": "Export request accepted",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/GDPRExportResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    }
+  },
+  "components": {
+    "securitySchemes": {
+      "bearerAuth": {
+        "type": "http",
+        "scheme": "bearer",
+        "bearerFormat": "JWT"
+      }
+    },
+    "schemas": {
+      "ChatRequest": {
+        "type": "object",
+        "required": ["message"],
+        "properties": {
+          "message": {
+            "type": "string",
+            "description": "User's chat message"
+          },
+          "conversationId": {
+            "type": "string",
+            "format": "uuid",
+            "description": "Existing conversation ID"
+          },
+          "context": {
+            "type": "object",
+            "properties": {
+              "pageUrl": {
+                "type": "string",
+                "format": "uri"
+              },
+              "userId": {
+                "type": "string"
+              }
+            }
+          }
+        }
+      },
+      "ChatResponse": {
+        "type": "object",
+        "properties": {
+          "response": {
+            "type": "string",
+            "description": "AI-generated response"
+          },
+          "conversationId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "searchResults": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "properties": {
+                "content": {
+                  "type": "string"
+                },
+                "source": {
+                  "type": "string"
+                },
+                "relevance": {
+                  "type": "number",
+                  "minimum": 0,
+                  "maximum": 1
+                }
+              }
+            }
+          },
+          "metadata": {
+            "type": "object",
+            "properties": {
+              "model": {
+                "type": "string"
+              },
+              "tokensUsed": {
+                "type": "integer"
+              },
+              "searchCount": {
+                "type": "integer"
+              }
+            }
+          }
+        }
+      },
+      "AnalyticsResponse": {
+        "type": "object",
+        "properties": {
+          "timeRange": {
+            "type": "object",
+            "properties": {
+              "start": {
+                "type": "string",
+                "format": "date-time"
+              },
+              "end": {
+                "type": "string",
+                "format": "date-time"
+              }
+            }
+          },
+          "customerJourney": {
+            "type": "object",
+            "properties": {
+              "conversionRate": {
+                "type": "number"
+              },
+              "avgSessionsBeforeConversion": {
+                "type": "number"
+              },
+              "commonPaths": {
+                "type": "array",
+                "items": {
+                  "type": "object"
+                }
+              }
+            }
+          },
+          "contentGaps": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "properties": {
+                "query": {
+                  "type": "string"
+                },
+                "frequency": {
+                  "type": "integer"
+                },
+                "avgConfidence": {
+                  "type": "number"
+                }
+              }
+            }
+          }
+        }
+      },
+      "MetricsResponse": {
+        "type": "object",
+        "properties": {
+          "operations": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "properties": {
+                "operation": {
+                  "type": "string"
+                },
+                "count": {
+                  "type": "integer"
+                },
+                "successRate": {
+                  "type": "number"
+                },
+                "avgDuration": {
+                  "type": "number"
+                },
+                "p50": {
+                  "type": "number"
+                },
+                "p95": {
+                  "type": "number"
+                },
+                "p99": {
+                  "type": "number"
+                }
+              }
+            }
+          }
+        }
+      },
+      "ScrapeRequest": {
+        "type": "object",
+        "required": ["url"],
+        "properties": {
+          "url": {
+            "type": "string",
+            "format": "uri"
+          },
+          "options": {
+            "type": "object",
+            "properties": {
+              "maxPages": {
+                "type": "integer",
+                "default": 100
+              },
+              "followLinks": {
+                "type": "boolean",
+                "default": true
+              }
+            }
+          }
+        }
+      },
+      "ScrapeJobResponse": {
+        "type": "object",
+        "properties": {
+          "jobId": {
+            "type": "string"
+          },
+          "status": {
+            "type": "string",
+            "enum": ["queued", "processing", "completed", "failed"]
+          }
+        }
+      },
+      "JobStatusResponse": {
+        "type": "object",
+        "properties": {
+          "jobId": {
+            "type": "string"
+          },
+          "status": {
+            "type": "string"
+          },
+          "progress": {
+            "type": "object",
+            "properties": {
+              "pagesScraped": {
+                "type": "integer"
+              },
+              "totalPages": {
+                "type": "integer"
+              },
+              "percentComplete": {
+                "type": "number"
+              }
+            }
+          }
+        }
+      },
+      "TrainingRequest": {
+        "type": "object",
+        "required": ["type", "content", "domain"],
+        "properties": {
+          "type": {
+            "type": "string",
+            "enum": ["faq", "product", "policy", "guide", "custom"]
+          },
+          "domain": {
+            "type": "string"
+          },
+          "title": {
+            "type": "string"
+          },
+          "content": {
+            "type": "string"
+          },
+          "metadata": {
+            "type": "object"
+          }
+        }
+      },
+      "TrainingResponse": {
+        "type": "object",
+        "properties": {
+          "success": {
+            "type": "boolean"
+          },
+          "data": {
+            "type": "object",
+            "properties": {
+              "id": {
+                "type": "string"
+              },
+              "status": {
+                "type": "string"
+              }
+            }
+          }
+        }
+      },
+      "GDPRExportRequest": {
+        "type": "object",
+        "required": ["userId", "email"],
+        "properties": {
+          "userId": {
+            "type": "string"
+          },
+          "email": {
+            "type": "string",
+            "format": "email"
+          }
+        }
+      },
+      "GDPRExportResponse": {
+        "type": "object",
+        "properties": {
+          "requestId": {
+            "type": "string"
+          },
+          "status": {
+            "type": "string"
+          },
+          "downloadUrl": {
+            "type": "string",
+            "format": "uri",
+            "nullable": true
+          }
+        }
+      },
+      "ErrorResponse": {
+        "type": "object",
+        "properties": {
+          "error": {
+            "type": "string"
+          },
+          "code": {
+            "type": "string"
+          },
+          "details": {
+            "type": "object"
+          }
+        }
+      }
+    },
+    "responses": {
+      "BadRequest": {
+        "description": "Bad request",
+        "content": {
+          "application/json": {
+            "schema": {
+              "$ref": "#/components/schemas/ErrorResponse"
+            }
+          }
+        }
+      },
+      "Unauthorized": {
+        "description": "Unauthorized",
+        "content": {
+          "application/json": {
+            "schema": {
+              "$ref": "#/components/schemas/ErrorResponse"
+            }
+          }
+        }
+      },
+      "RateLimited": {
+        "description": "Rate limit exceeded",
+        "headers": {
+          "X-RateLimit-Limit": {
+            "schema": {
+              "type": "integer"
+            },
+            "description": "Request limit per minute"
+          },
+          "X-RateLimit-Remaining": {
+            "schema": {
+              "type": "integer"
+            },
+            "description": "Remaining requests"
+          },
+          "X-RateLimit-Reset": {
+            "schema": {
+              "type": "integer"
+            },
+            "description": "Unix timestamp when limit resets"
+          }
+        },
+        "content": {
+          "application/json": {
+            "schema": {
+              "$ref": "#/components/schemas/ErrorResponse"
+            }
+          }
+        }
+      }
+    }
+  }
+}
