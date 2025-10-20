@@ -204,6 +204,8 @@ export default function CustomersPage() {
                     ? "Try adjusting your search or filter settings"
                     : "Customer profiles will appear here once they start using your chat widget"
                 }
+                actionLabel={searchTerm || filterStatus !== "all" ? undefined : "View Setup Guide"}
+                actionHref={searchTerm || filterStatus !== "all" ? undefined : "/dashboard/settings"}
                 variant="default"
               />
             ) : (

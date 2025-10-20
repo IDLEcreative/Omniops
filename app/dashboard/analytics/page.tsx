@@ -257,6 +257,8 @@ export default function AnalyticsPage() {
                     icon={TrendingUp}
                     title="No sentiment data yet"
                     description="Sentiment analysis will appear as conversations are processed"
+                    actionLabel="Start Conversations"
+                    actionHref="/dashboard/settings"
                     variant="default"
                   />
                 )}
@@ -304,6 +306,8 @@ export default function AnalyticsPage() {
                     icon={MessageSquare}
                     title="No query patterns yet"
                     description="Popular customer queries will be identified as conversations accumulate"
+                    actionLabel="View Integration Guide"
+                    actionHref="/dashboard/settings"
                     variant="default"
                   />
                 )}
