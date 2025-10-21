@@ -84,9 +84,10 @@ export function EssentialsSection({ settings, onChange }: EssentialsSectionProps
                   <button
                     key={preset.name}
                     onClick={() => onChange({ primaryColor: preset.color })}
-                    className="w-10 h-10 rounded-md border-2 hover:scale-110 transition-transform shadow-sm"
+                    className="w-10 h-10 rounded-md border-2 hover:scale-110 transition-transform shadow-sm focus:outline-none focus:ring-2 focus:ring-primary focus:ring-offset-2"
                     style={{ backgroundColor: preset.color }}
                     title={preset.name}
+                    aria-label={`Select ${preset.name} color`}
                   />
                 ))}
               </div>

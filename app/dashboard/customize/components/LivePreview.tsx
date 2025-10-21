@@ -24,7 +24,7 @@ export function LivePreview({ config }: LivePreviewProps) {
   };
 
   return (
-    <Card className="sticky top-6">
+    <Card className="sticky top-6 max-w-md">
       <CardHeader>
         <CardTitle className="flex items-center">
           <Eye className="h-5 w-5 mr-2" />

@@ -105,7 +105,7 @@ export function IntelligenceSection({ settings, onChange }: IntelligenceSectionP
                 onClick={() => onChange({ responseStyle: 'short' })}
                 className={`
                   p-4 rounded-lg border-2 transition-all text-center
-                  hover:shadow-md
+                  hover:shadow-md focus:outline-none focus:ring-2 focus:ring-primary focus:ring-offset-2
                   ${settings.responseStyle === 'short'
                     ? 'border-primary bg-primary/5 shadow-md'
                     : 'border-gray-200 hover:border-gray-300'
@@ -122,7 +122,7 @@ export function IntelligenceSection({ settings, onChange }: IntelligenceSectionP
                 onClick={() => onChange({ responseStyle: 'balanced' })}
                 className={`
                   p-4 rounded-lg border-2 transition-all text-center
-                  hover:shadow-md
+                  hover:shadow-md focus:outline-none focus:ring-2 focus:ring-primary focus:ring-offset-2
                   ${settings.responseStyle === 'balanced'
                     ? 'border-primary bg-primary/5 shadow-md'
                     : 'border-gray-200 hover:border-gray-300'
@@ -139,7 +139,7 @@ export function IntelligenceSection({ settings, onChange }: IntelligenceSectionP
                 onClick={() => onChange({ responseStyle: 'detailed' })}
                 className={`
                   p-4 rounded-lg border-2 transition-all text-center
-                  hover:shadow-md
+                  hover:shadow-md focus:outline-none focus:ring-2 focus:ring-primary focus:ring-offset-2
                   ${settings.responseStyle === 'detailed'
                     ? 'border-primary bg-primary/5 shadow-md'
                     : 'border-gray-200 hover:border-gray-300'

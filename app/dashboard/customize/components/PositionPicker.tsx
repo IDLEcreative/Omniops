@@ -24,8 +24,10 @@ export function PositionPicker({ value, onChange }: PositionPickerProps) {
             className={`
               relative h-24 rounded-lg border-2 transition-all
               hover:border-primary/50 hover:shadow-md
+              focus:outline-none focus:ring-2 focus:ring-primary focus:ring-offset-2
               ${value === pos.value ? 'border-primary bg-primary/5 shadow-md' : 'border-gray-200'}
             `}
+            aria-label={`Position widget at ${pos.label}`}
           >
             {/* Mini preview of position */}
             <div className="absolute inset-0 p-2">
