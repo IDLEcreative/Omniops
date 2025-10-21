@@ -691,109 +691,23 @@ export default function SettingsPage() {
               <CardHeader>
                 <CardTitle className="flex items-center">
                   <ShoppingCart className="h-5 w-5 mr-2" />
-                  WooCommerce Integration
+                  E-commerce Integrations
                 </CardTitle>
                 <CardDescription>
-                  Connect your WooCommerce store for enhanced e-commerce support
+                  Manage WooCommerce and Shopify integrations
                 </CardDescription>
               </CardHeader>
               <CardContent className="space-y-4">
-                <div className="space-y-2">
-                  <Label htmlFor="woocommerceUrl">Store URL</Label>
-                  <Input
-                    id="woocommerceUrl"
-                    value={settings.woocommerceUrl}
-                    onChange={(e) => handleSettingChange('woocommerceUrl', e.target.value)}
-                    placeholder="https://your-store.com"
-                  />
-                  <p className="text-xs text-muted-foreground">
-                    The full URL of your WooCommerce store
+                <div className="text-center py-8">
+                  <ShoppingCart className="h-12 w-12 text-muted-foreground mx-auto mb-4" />
+                  <h3 className="font-semibold mb-2">Configure Integrations</h3>
+                  <p className="text-sm text-muted-foreground mb-4">
+                    WooCommerce and Shopify integrations are now managed in the dedicated Integrations section
                   </p>
+                  <Button onClick={() => window.location.href = '/dashboard/integrations'}>
+                    Go to Integrations
+                  </Button>
                 </div>
-                
-                <div className="space-y-2">
-                  <Label htmlFor="woocommerceConsumerKey">Consumer Key</Label>
-                  <Input
-                    id="woocommerceConsumerKey"
-                    type="password"
-                    value={settings.woocommerceConsumerKey}
-                    onChange={(e) => handleSettingChange('woocommerceConsumerKey', e.target.value)}
-                    placeholder="ck_..."
-                  />
-                  <p className="text-xs text-muted-foreground">
-                    Found in WooCommerce → Settings → Advanced → REST API
-                  </p>
-                </div>
-                
-                <div className="space-y-2">
-                  <Label htmlFor="woocommerceConsumerSecret">Consumer Secret</Label>
-                  <Input
-                    id="woocommerceConsumerSecret"
-                    type="password"
-                    value={settings.woocommerceConsumerSecret}
-                    onChange={(e) => handleSettingChange('woocommerceConsumerSecret', e.target.value)}
-                    placeholder="cs_..."
-                  />
-                  <p className="text-xs text-muted-foreground">
-                    Keep this secret safe - it provides full API access
-                  </p>
-                </div>
-
-                <Alert>
-                  <AlertTriangle className="h-4 w-4" />
-                  <AlertDescription className="text-xs">
-                    Ensure your WooCommerce REST API is enabled and using HTTPS for secure communication
-                  </AlertDescription>
-                </Alert>
-              </CardContent>
-            </Card>
-
-            <Card>
-              <CardHeader>
-                <CardTitle className="flex items-center">
-                  <Code className="h-5 w-5 mr-2" />
-                  WooCommerce Integration
-                </CardTitle>
-                <CardDescription>
-                  Connect your WooCommerce store for product and order data
-                </CardDescription>
-              </CardHeader>
-              <CardContent className="space-y-4">
-                <div className="space-y-2">
-                  <Label htmlFor="wooUrl">Store URL</Label>
-                  <Input
-                    id="wooUrl"
-                    value={settings.woocommerceUrl}
-                    onChange={(e) => handleSettingChange('woocommerceUrl', e.target.value)}
-                    placeholder="https://your-store.com"
-                  />
-                </div>
-                
-                <div className="space-y-2">
-                  <Label htmlFor="wooKey">Consumer Key</Label>
-                  <Input
-                    id="wooKey"
-                    type="password"
-                    value={settings.woocommerceConsumerKey}
-                    onChange={(e) => handleSettingChange('woocommerceConsumerKey', e.target.value)}
-                    placeholder="ck_..."
-                  />
-                </div>
-                
-                <div className="space-y-2">
-                  <Label htmlFor="wooSecret">Consumer Secret</Label>
-                  <Input
-                    id="wooSecret"
-                    type="password"
-                    value={settings.woocommerceConsumerSecret}
-                    onChange={(e) => handleSettingChange('woocommerceConsumerSecret', e.target.value)}
-                    placeholder="cs_..."
-                  />
-                </div>
-
-                <Button variant="outline" className="w-full">
-                  Test Connection
-                </Button>
               </CardContent>
             </Card>
 
