@@ -59,7 +59,7 @@ const integrations: Integration[] = [
     name: 'Shopify',
     description: 'Import products and handle customer inquiries about Shopify orders',
     icon: <Package className="h-5 w-5" />,
-    status: 'coming_soon',
+    status: 'disconnected',
     category: 'ecommerce',
   },
   {
@@ -170,7 +170,10 @@ export default function IntegrationsPage() {
       return;
     }
     if (integration.id === 'woocommerce') {
-      window.location.href = '/dashboard/integrations/woocommerce';
+      window.location.href = '/dashboard/integrations/woocommerce/configure';
+    }
+    if (integration.id === 'shopify') {
+      window.location.href = '/dashboard/integrations/shopify';
     }
   };
 

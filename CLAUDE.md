@@ -116,7 +116,7 @@ npm run check:all        # Run all checks (deps + lint + typecheck)
 - **AI**: OpenAI GPT-4 for chat, embeddings for semantic search
 - **Web Scraping**: Crawlee + Playwright, Mozilla Readability for extraction
 - **Job Queue**: Redis for background job management
-- **E-commerce**: WooCommerce REST API v3 integration
+- **E-commerce**: WooCommerce REST API v3 + Shopify Admin API integration
 
 ### Core Services Architecture
 
@@ -273,6 +273,13 @@ npx tsx profile-docker-quick.ts        # Profile Docker build performance
 - Cart Tracker: `lib/woocommerce-cart-tracker.ts`
 - Endpoints: `app/api/woocommerce/`
 - Abandoned Carts: `app/api/woocommerce/abandoned-carts/route.ts`
+
+### Shopify Integration
+- API Client: `lib/shopify-api.ts`
+- Dynamic Loader: `lib/shopify-dynamic.ts`
+- Provider: `lib/agents/providers/shopify-provider.ts`
+- Endpoints: `app/api/shopify/`
+- Test Route: `app/api/shopify/test/route.ts`
 
 ### Privacy Features
 - GDPR APIs: `app/api/gdpr/`

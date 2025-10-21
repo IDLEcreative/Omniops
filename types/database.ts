@@ -24,7 +24,7 @@ export interface CustomerConfig {
 
 export interface ScrapedPage {
   id: string;
-  customer_id: string;
+  domain_id: string;
   url: string;
   title: string;
   content: string;
@@ -47,7 +47,7 @@ export interface PageEmbedding {
 
 export interface Conversation {
   id: string;
-  customer_id: string;
+  domain_id: string;
   session_id: string;
   metadata?: Record<string, unknown>;
   created_at: string;
@@ -71,7 +71,7 @@ export interface Message {
 export interface SupportTicket {
   id: string;
   conversation_id: string;
-  customer_id: string;
+  domain_id: string;
   email: string;
   summary: string;
   status: 'open' | 'in_progress' | 'resolved' | 'closed';

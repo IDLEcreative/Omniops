@@ -14,45 +14,39 @@ export class CustomerConfigLoader {
         throw new Error('Database connection unavailable');
       }
 
-      // First, try to find the domain record
+      // Find the domain record (organization-only)
       const { data: domainRecord, error: domainError } = await supabase
         .from('domains')
-        .select('id, organization_id, customer_id')
+        .select('id, organization_id')
         .eq('domain', domain)
         .single();
 
       let configData = null;
 
-      if (!domainError && domainRecord) {
-        // If domain found, get config via organization_id or customer_id
-        const query = supabase
+      if (!domainError && domainRecord?.organization_id) {
+        // Get config via organization_id
+        const { data } = await supabase
           .from('customer_configs')
-          .select('*');
+          .select('*')
+          .eq('organization_id', domainRecord.organization_id)
+          .single();
 
-        if (domainRecord.organization_id) {
-          // New organization-based lookup
-          const { data } = await query.eq('organization_id', domainRecord.organization_id).single();
-          configData = data;
-        } else if (domainRecord.customer_id) {
-          // Fallback to old customer_id for backward compatibility
-          const { data } = await query.eq('customer_id', domainRecord.customer_id).single();
-          configData = data;
-        }
+        configData = data;
       }
 
-      // If no config found by domain, try authenticated user
+      // If no config found by domain, try authenticated user's organization
       if (!configData) {
         const { data: { user }, error: authError } = await supabase.auth.getUser();
 
         if (!authError && user) {
-          // Check if user is member of an organization
+          // Get user's organization membership
           const { data: membership } = await supabase
             .from('organization_members')
             .select('organization_id')
             .eq('user_id', user.id)
             .single();
 
-          if (membership) {
+          if (membership?.organization_id) {
             // Get config via organization
             const { data } = await supabase
               .from('customer_configs')

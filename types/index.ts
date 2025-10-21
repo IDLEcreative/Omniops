@@ -75,6 +75,12 @@ export interface WooCommerceSearchRequest {
   filters?: Record<string, string | number | boolean | string[] | number[]>;
 }
 
+export interface ShopifySearchRequest {
+  query?: string;
+  type: 'products' | 'orders' | 'customer';
+  filters?: Record<string, string | number | boolean | string[] | number[]>;
+}
+
 // Define proper types for WooCommerce results
 export type WooCommerceProduct = {
   id: number;
@@ -129,6 +135,20 @@ export type WooCommerceCustomer = {
 
 export interface WooCommerceSearchResponse {
   results: Array<WooCommerceProduct | WooCommerceOrder | WooCommerceCustomer>;
+  total: number;
+}
+
+// Shopify Types (imported from shopify-api.ts)
+export type {
+  ShopifyProduct,
+  ShopifyOrder,
+  ShopifyCustomer,
+  ShopifyProductVariant,
+  ShopifyInventoryLevel
+} from '@/lib/shopify-api';
+
+export interface ShopifySearchResponse {
+  results: Array<any>; // Use ShopifyProduct | ShopifyOrder | ShopifyCustomer when needed
   total: number;
 }
 

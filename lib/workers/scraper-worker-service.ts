@@ -116,7 +116,7 @@ export class ScraperWorkerService extends EventEmitter {
    */
   private async processJob(job: Job<ScrapeJobData, ScrapeJobResult>): Promise<ScrapeJobResult> {
     const startTime = Date.now();
-    const { url, maxPages, customerId } = job.data;
+    const { url, maxPages, organizationId } = job.data;
     
     try {
       logger.info(`Processing job ${job.id}: ${url}`);
@@ -160,7 +160,7 @@ export class ScraperWorkerService extends EventEmitter {
           excludePaths: job.data.excludePaths,
           turboMode: job.data.turboMode,
           ownSite: job.data.ownSite,
-          customerId,
+          organizationId,
           useNewConfig: job.data.useNewConfig,
           newConfigPreset: job.data.newConfigPreset as any,
           aiOptimization: typeof job.data.aiOptimization === 'boolean' 

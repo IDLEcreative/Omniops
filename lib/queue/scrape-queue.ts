@@ -12,7 +12,7 @@ import { logger } from '../logger';
  */
 export interface ScrapeJobData {
   url: string;
-  customerId: string;
+  organizationId: string;
   domainId?: string;
   maxPages?: number;
   includePaths?: string[];
