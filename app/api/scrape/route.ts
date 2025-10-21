@@ -128,24 +128,33 @@ export async function POST(request: NextRequest) {
       );
     }
     
-    // Get the authenticated user's customer ID
-    let customerId: string | undefined;
+    // Get the authenticated user's organization ID
+    let organizationId: string | undefined;
     try {
       const { data: { user }, error: authError } = await userSupabase.auth.getUser();
-      
+
       if (!authError && user) {
-        const { data: customer } = await userSupabase
-          .from('customers')
-          .select('id')
-          .eq('auth_user_id', user.id)
-          .single();
-          
-        if (customer) {
-          customerId = customer.id;
+        const { data: membership } = await userSupabase
+          .from('organization_members')
+          .select('organization_id, role')
+          .eq('user_id', user.id)
+          .limit(1)
+          .maybeSingle();
+
+        if (membership) {
+          // Only allow admins and owners to scrape
+          if (['owner', 'admin'].includes(membership.role)) {
+            organizationId = membership.organization_id;
+          } else {
+            return NextResponse.json(
+              { error: 'Insufficient permissions to scrape content' },
+              { status: 403 }
+            );
+          }
         }
       }
     } catch (error) {
-      console.log('Could not get customer ID, proceeding without owned domains');
+      console.log('Could not get organization ID, proceeding without owned domains');
     }
 
     if (!crawl) {
@@ -230,7 +239,7 @@ export async function POST(request: NextRequest) {
         maxPages: max_pages,
         excludePaths: ['/wp-admin', '/admin', '/login', '/cart', '/checkout'],
         turboMode: turbo,
-        customerId: customerId, // Pass customer ID for owned domain detection
+        organizationId: organizationId, // Pass organization ID for owned domain detection
       });
 
       // Start a background job to process the crawl results

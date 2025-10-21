@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { createServerClient } from '@/lib/supabase/server';
+import { createClient } from '@/lib/supabase/server';
 import { z } from 'zod';
 
 const createOrganizationSchema = z.object({
@@ -13,7 +13,14 @@ const createOrganizationSchema = z.object({
  */
 export async function GET() {
   try {
-    const supabase = createServerClient();
+    const supabase = await createClient();
+
+    if (!supabase) {
+      return NextResponse.json(
+        { error: 'Service unavailable' },
+        { status: 503 }
+      );
+    }
 
     // Get authenticated user
     const { data: { user }, error: authError } = await supabase.auth.getUser();
@@ -55,8 +62,13 @@ export async function GET() {
 
     // Get member counts for each organization
     const organizationsWithRole = await Promise.all(
-      (memberships || []).map(async (membership) => {
-        const org = membership.organization;
+      (memberships || []).map(async (membership: any) => {
+        // organization is returned as an array from nested select, get first element
+        const org = Array.isArray(membership.organization)
+          ? membership.organization[0]
+          : membership.organization;
+
+        if (!org) return null;
 
         // Count members
         const { count } = await supabase
@@ -70,7 +82,7 @@ export async function GET() {
           member_count: count || 0,
         };
       })
-    );
+    ).then(orgs => orgs.filter(Boolean)); // Filter out any nulls
 
     return NextResponse.json({
       organizations: organizationsWithRole,
@@ -90,7 +102,14 @@ export async function GET() {
  */
 export async function POST(request: NextRequest) {
   try {
-    const supabase = createServerClient();
+    const supabase = await createClient();
+
+    if (!supabase) {
+      return NextResponse.json(
+        { error: 'Service unavailable' },
+        { status: 503 }
+      );
+    }
 
     // Get authenticated user
     const { data: { user }, error: authError } = await supabase.auth.getUser();

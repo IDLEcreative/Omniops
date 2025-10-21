@@ -56,12 +56,54 @@ An AI-powered customer service chat system that integrates with WordPress/WooCom
   - [x] Complete API documentation in `docs/DASHBOARD_API.md`
   - [x] All endpoints with request/response examples
   - [x] Error handling and fallback strategies documented
+- [x] **Operational Runbooks & Blueprint**
+  - [x] Updated integration blueprint with analytics/GDPR implementation log
+  - [x] Nightly telemetry & GDPR runbooks with Slack alert setup and manual validation steps
+  - [x] GDPR audit runbook covering retention cron + CSV export workflow
 
 ## 🚀 Next Steps - Priority Order
 
 ### Phase 1: Production Readiness (Week 1-2)
 
-#### 1.1 WordPress Plugin Enhancement
+#### 1.1 CI/CD & Monitoring Infrastructure (COMPLETED - January 2025)
+- [x] **GitHub Actions Workflow Setup**
+  - [x] Created `.github/workflows/nightly-telemetry-gdpr.yml`
+  - [x] Nightly telemetry rollup validation
+  - [x] GDPR audit health monitoring
+  - [x] Playwright smoke tests for dashboard validation
+  - [x] Automatic Slack notifications on failure
+- [x] **TypeScript & Code Quality**
+  - [x] Fixed all TypeScript errors (`npx tsc --noEmit` passes)
+  - [x] Added missing `@types/pg` dependency
+  - [x] Fixed Supabase query compatibility issues
+  - [x] Resolved module export/import issues
+- [x] **Alerting & Notifications**
+  - [x] Slack webhook integration (`lib/alerts/notify.ts`)
+  - [x] Failure notification system (`scripts/notify-monitor-failure.ts`)
+  - [x] Context-aware alerts with GitHub run URLs
+- [x] **GDPR & Privacy Compliance**
+  - [x] Two-year automatic retention for audit logs
+  - [x] Privacy dashboard with filters and CSV export
+  - [x] Domain and actor-based audit filtering
+  - [x] Date range selection for compliance reports
+- [x] **Documentation & Validation**
+  - [x] Blueprint synced with telemetry/GDPR automation
+  - [x] Runbook instructions for GitHub secrets and manual workflow dry run
+- [ ] **GitHub Secrets Configuration (ACTION REQUIRED)**
+  - [ ] Add `DATABASE_URL` secret (get from Supabase Dashboard)
+  - [ ] Add `SUPABASE_URL` secret (from `.env.local` line 28)
+  - [ ] Add `SUPABASE_SERVICE_ROLE_KEY` secret (from `.env.local` line 4)
+  - [ ] Add `MONITOR_ALERT_WEBHOOK_URL` secret (create Slack webhook or use placeholder)
+  - [ ] Run manual workflow test to verify pipeline
+- [x] **Audit Detail UX Enhancement (COMPLETED - January 2025)**
+  - [x] Add per-entry modal for viewing full JSON payloads
+  - [x] Implement per-row download functionality
+  - [x] Add tabbed interface for summary/raw data/future payload
+  - [x] Clickable table rows with hover effects
+  - [x] Copy to clipboard functionality
+  - [x] Compliance notes with retention information
+
+#### 1.2 WordPress Plugin Enhancement
 - [ ] Update session ID generation to use UUIDs
   ```php
   'session_id' => wp_generate_uuid4()
@@ -70,13 +112,13 @@ An AI-powered customer service chat system that integrates with WordPress/WooCom
 - [ ] Implement webhook for order status updates
 - [ ] Add customer service agent notification system
 
-#### 1.2 Database Optimization
+#### 1.3 Database Optimization
 - [ ] Add proper indexes for performance
 - [ ] Implement conversation archiving (30-day retention)
 - [ ] Set up database backups
 - [ ] Create analytics views for reporting
 
-#### 1.3 Error Handling & Monitoring
+#### 1.4 Error Handling & Monitoring
 - [ ] Add Sentry or similar error tracking
 - [ ] Implement health check endpoint
 - [ ] Add response time monitoring
@@ -393,32 +435,53 @@ An AI-powered customer service chat system that integrates with WordPress/WooCom
 
 ## 🎯 Immediate Next Actions
 
-1. **COMPLETED**: Domain-Isolated Synonym Expansion System
+1. **URGENT - GitHub Secrets Setup** (Required for CI/CD)
+   - Add 4 secrets to GitHub repository settings
+   - Values available in `.env.local` (except DATABASE_URL)
+   - Run `./show-github-secrets.sh` for exact values
+   - Test with manual workflow run
+   - Expected completion: 30 minutes
+
+2. **COMPLETED**: CI/CD & Monitoring Infrastructure
+   - ✅ GitHub Actions workflow configured
+   - ✅ TypeScript errors resolved
+   - ✅ Slack alerting implemented
+   - ✅ GDPR compliance features added
+   - ✅ Nightly validation pipeline ready
+
+3. **COMPLETED**: Domain-Isolated Synonym Expansion System
    - ✅ Database-driven synonym system with domain isolation
    - ✅ Auto-learning from scraped content
    - ✅ Fixed critical domain_id mismatch bug
    - ✅ Result: 100% product finding success rate
 
-2. **COMPLETED**: Metadata Extraction & Storage
+4. **COMPLETED**: Metadata Extraction & Storage
    - ✅ 99.3% coverage on product metadata
    - ✅ Brand, price, SKU, category extraction working
    - ✅ Sale price tracking implemented
 
-3. **Next Priority**: Synonym System Optimization
+5. **Next Priority**: Synonym System Optimization
    - Implement connection pooling (<50ms query time)
    - Add click-through learning
    - Build admin UI for synonym management
    - Expected completion: 2 weeks
    - ROI: Further 20-30% search improvement
 
-4. **Future Priority**: Smart Periodic Scraper
+6. **COMPLETED**: Audit Detail UX Enhancement (January 2025)
+   - ✅ Modal for viewing full JSON payloads implemented
+   - ✅ Per-row download functionality working
+   - ✅ Tabbed interface for different data views
+   - ✅ Click-to-open with visual hover feedback
+   - ✅ Copy to clipboard and compliance notes added
+
+7. **Future Priority**: Smart Periodic Scraper
    - Run database migrations (5 tables)
    - Build incremental scraping engine
    - Add scheduling UI to training dashboard
    - Expected completion: 4 weeks
    - ROI: 93% reduction in scraping costs
 
-5. **Future Enhancement**: Metadata Vectorization
+8. **Future Enhancement**: Metadata Vectorization
    - Week 1: Quick win content enrichment
    - Week 2-3: Dual embedding implementation
    - Week 4: Intelligent query routing
@@ -434,6 +497,7 @@ An AI-powered customer service chat system that integrates with WordPress/WooCom
 
 ## 🔄 Last Updated
 - Date: January 22, 2025
-- Version: 1.2.0
+- Version: 1.3.0
 - Status: Development → Beta (in progress)
-- Latest Addition: Analytics Dashboard & Telemetry System (Phase 5 - Completed)
+- Latest Addition: CI/CD & Monitoring Infrastructure (Phase 1.1 - Completed)
+- Action Required: GitHub Secrets Configuration for workflow activation

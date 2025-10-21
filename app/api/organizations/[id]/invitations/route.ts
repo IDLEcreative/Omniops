@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { createServerClient } from '@/lib/supabase/server';
+import { createClient, createServiceRoleClient } from '@/lib/supabase/server';
 import { z } from 'zod';
 import { randomBytes } from 'crypto';
 
@@ -17,7 +17,15 @@ export async function GET(
   { params }: { params: { id: string } }
 ) {
   try {
-    const supabase = createServerClient();
+    const supabase = await createClient();
+
+    if (!supabase) {
+      return NextResponse.json(
+        { error: 'Service unavailable' },
+        { status: 503 }
+      );
+    }
+
     const organizationId = params.id;
 
     // Get authenticated user
@@ -93,31 +101,48 @@ export async function GET(
       );
     }
 
-    // Fetch inviter details
-    const invitationsWithDetails = await Promise.all(
-      (invitations || []).map(async (invitation) => {
-        const { data: inviterData } = await supabase
-          .from('customers')
-          .select('email, name')
-          .eq('auth_user_id', invitation.invited_by)
-          .maybeSingle();
+    // Fetch inviter details using service role to access auth.users
+    const serviceSupabase = await createServiceRoleClient();
 
-        return {
-          ...invitation,
-          invited_by_email: inviterData?.email || 'Unknown',
-          invited_by_name: inviterData?.name || null,
-        };
+    if (!serviceSupabase) {
+      return NextResponse.json(
+        { error: 'Service unavailable' },
+        { status: 503 }
+      );
+    }
+
+    // Batch fetch all inviters to avoid N+1 queries
+    const inviterIds = [...new Set((invitations || []).map((inv: any) => inv.invited_by))];
+    const usersMap = new Map();
+
+    await Promise.all(
+      inviterIds.map(async (userId) => {
+        const { data: { user } } = await serviceSupabase.auth.admin.getUserById(userId);
+        if (user) usersMap.set(userId, user);
       })
     );
+
+    // Map invitations with cached user data
+    const invitationsWithDetails = (invitations || []).map((invitation: any) => {
+      const inviterUser = usersMap.get(invitation.invited_by);
+      return {
+        ...invitation,
+        invited_by_email: inviterUser?.email || 'Unknown',
+        invited_by_name: inviterUser?.user_metadata?.name || inviterUser?.user_metadata?.full_name || null,
+      };
+    });
+
+    const totalUsed = (currentMemberCount ?? 0) + (pendingInvitationCount ?? 0);
+    const seatLimit = organization?.seat_limit ?? 5;
 
     return NextResponse.json({
       invitations: invitationsWithDetails,
       seat_usage: {
-        used: currentMemberCount || 0,
-        pending: pendingInvitationCount || 0,
-        total: currentMemberCount! + pendingInvitationCount!,
-        limit: organization?.seat_limit || 5,
-        available: Math.max(0, (organization?.seat_limit || 5) - (currentMemberCount! + pendingInvitationCount!)),
+        used: currentMemberCount ?? 0,
+        pending: pendingInvitationCount ?? 0,
+        total: totalUsed,
+        limit: seatLimit,
+        available: Math.max(0, seatLimit - totalUsed),
         plan_type: organization?.plan_type || 'free'
       }
     });
@@ -139,7 +164,15 @@ export async function POST(
   { params }: { params: { id: string } }
 ) {
   try {
-    const supabase = createServerClient();
+    const supabase = await createClient();
+
+    if (!supabase) {
+      return NextResponse.json(
+        { error: 'Service unavailable' },
+        { status: 503 }
+      );
+    }
+
     const organizationId = params.id;
 
     // Get authenticated user
@@ -237,19 +270,44 @@ export async function POST(
       );
     }
 
-    // Check if user is already a member
-    const { data: existingMember } = await supabase
-      .from('customers')
-      .select('auth_user_id')
-      .eq('email', email)
-      .maybeSingle();
+    // Check if user with this email already exists and is a member
+    const serviceSupabase = await createServiceRoleClient();
 
-    if (existingMember) {
+    if (!serviceSupabase) {
+      return NextResponse.json(
+        { error: 'Service unavailable' },
+        { status: 503 }
+      );
+    }
+
+    // Search for user by email with pagination support
+    let existingUser = null;
+    let page = 1;
+    let hasMore = true;
+
+    while (hasMore && !existingUser) {
+      const { data: { users }, error: listError } = await serviceSupabase.auth.admin.listUsers({
+        page,
+        perPage: 1000
+      });
+
+      if (listError || !users || users.length === 0) {
+        hasMore = false;
+      } else {
+        existingUser = users.find(u => u.email?.toLowerCase() === email.toLowerCase());
+        if (!existingUser && users.length < 1000) {
+          hasMore = false;
+        }
+        page++;
+      }
+    }
+
+    if (existingUser) {
       const { data: memberCheck } = await supabase
         .from('organization_members')
         .select('id')
         .eq('organization_id', organizationId)
-        .eq('user_id', existingMember.auth_user_id)
+        .eq('user_id', existingUser.id)
         .maybeSingle();
 
       if (memberCheck) {
@@ -323,8 +381,8 @@ export async function POST(
         // Return invitation link for now (until email is implemented)
         invitation_link: `${process.env.NEXT_PUBLIC_APP_URL || 'http://localhost:3000'}/invitations/accept?token=${token}`,
         seat_usage: {
-          used: currentMemberCount! + 1,
-          pending: pendingInvitationCount! + 1,
+          used: (currentMemberCount ?? 0) + 1,
+          pending: (pendingInvitationCount ?? 0) + 1,
           total: totalSeatsUsed + 1,
           limit: seatLimit,
           available: Math.max(0, seatLimit - (totalSeatsUsed + 1))

@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { createServerClient } from '@/lib/supabase/server';
+import { createClient } from '@/lib/supabase/server';
 
 /**
  * DELETE /api/organizations/[id]/invitations/[invitationId]
@@ -10,7 +10,14 @@ export async function DELETE(
   { params }: { params: { id: string; invitationId: string } }
 ) {
   try {
-    const supabase = createServerClient();
+    const supabase = await createClient();
+
+    if (!supabase) {
+      return NextResponse.json(
+        { error: 'Service unavailable' },
+        { status: 503 }
+      );
+    }
     const organizationId = params.id;
     const invitationId = params.invitationId;
 

@@ -3,11 +3,11 @@ export const runtime = 'nodejs'
 export const dynamic = 'force-dynamic'
 import { createClient, createServiceRoleClient } from '@/lib/supabase-server';
 import { z } from 'zod';
-import { 
-  encryptWooCommerceConfig, 
-  decryptWooCommerceConfig, 
-  encryptShopifyConfig, 
-  decryptShopifyConfig 
+import {
+  encryptWooCommerceConfig,
+  decryptWooCommerceConfig,
+  encryptShopifyConfig,
+  decryptShopifyConfig
 } from '@/lib/encryption';
 
 // Configuration schema
@@ -31,17 +31,17 @@ const ConfigSchema = z.object({
 export async function GET() {
   try {
     const supabase = await createClient();
-    
+
     if (!supabase) {
       return NextResponse.json(
         { error: 'Failed to initialize Supabase client' },
         { status: 500 }
       );
     }
-    
+
     // Get authenticated user
     const { data: { user }, error: authError } = await supabase.auth.getUser();
-    
+
     if (authError || !user) {
       return NextResponse.json(
         { error: 'Unauthorized' },
@@ -49,21 +49,21 @@ export async function GET() {
       );
     }
 
-    // Get customer data
-    const { data: customer, error: customerError } = await supabase
-      .from('customers')
-      .select('id, domain')
-      .eq('auth_user_id', user.id)
+    // Get user's organization membership
+    const { data: membership, error: membershipError } = await supabase
+      .from('organization_members')
+      .select('organization_id, organizations(id, name)')
+      .eq('user_id', user.id)
       .single();
 
-    if (customerError || !customer) {
+    if (membershipError || !membership) {
       return NextResponse.json({ config: null });
     }
-    
+
     const { data, error } = await supabase
       .from('customer_configs')
       .select('*')
-      .eq('customer_id', customer.id)
+      .eq('organization_id', membership.organization_id)
       .single();
 
     if (error && error.code !== 'PGRST116') { // Not found error
@@ -106,19 +106,19 @@ export async function POST(request: NextRequest) {
   try {
     const body = await request.json();
     const validatedData = ConfigSchema.parse(body);
-    
+
     const supabase = await createClient();
-    
+
     if (!supabase) {
       return NextResponse.json(
         { error: 'Failed to initialize Supabase client' },
         { status: 500 }
       );
     }
-    
+
     // Get authenticated user
     const { data: { user }, error: authError } = await supabase.auth.getUser();
-    
+
     if (authError || !user) {
       return NextResponse.json(
         { error: 'Unauthorized' },
@@ -126,37 +126,45 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    // Get customer data
-    const { data: customer, error: customerError } = await supabase
-      .from('customers')
-      .select('id')
-      .eq('auth_user_id', user.id)
+    // Get user's organization membership
+    const { data: membership, error: membershipError } = await supabase
+      .from('organization_members')
+      .select('organization_id, role')
+      .eq('user_id', user.id)
       .single();
 
-    if (customerError || !customer) {
+    if (membershipError || !membership) {
       return NextResponse.json(
-        { error: 'Customer not found' },
+        { error: 'Organization not found' },
         { status: 404 }
       );
     }
-    
+
+    // Check if user has permission to update config (owner or admin)
+    if (!['owner', 'admin'].includes(membership.role)) {
+      return NextResponse.json(
+        { error: 'Insufficient permissions. Only owners and admins can update configuration.' },
+        { status: 403 }
+      );
+    }
+
     // Use service role client for inserts
     const serviceSupabase = await createServiceRoleClient();
-    
+
     if (!serviceSupabase) {
       return NextResponse.json(
         { error: 'Failed to initialize service role client' },
         { status: 500 }
       );
     }
-    
+
     // Encrypt sensitive fields before storage
     const encryptedWooCommerce = encryptWooCommerceConfig(validatedData.woocommerce);
     const encryptedShopify = encryptShopifyConfig(validatedData.shopify);
-    
+
     // Prepare data for database
     const dbData = {
-      customer_id: customer.id,
+      organization_id: membership.organization_id,
       domain: validatedData.domain,
       owned_domains: validatedData.owned_domains,
       woocommerce_enabled: encryptedWooCommerce.enabled,
@@ -172,7 +180,7 @@ export async function POST(request: NextRequest) {
     const { data, error } = await serviceSupabase
       .from('customer_configs')
       .upsert(dbData, {
-        onConflict: 'customer_id',
+        onConflict: 'organization_id',
       })
       .select()
       .single();
@@ -184,7 +192,7 @@ export async function POST(request: NextRequest) {
     return NextResponse.json({ success: true, data });
   } catch (error) {
     console.error('Error saving config:', error);
-    
+
     if (error instanceof z.ZodError) {
       return NextResponse.json(
         { error: 'Invalid configuration data', details: error.errors },

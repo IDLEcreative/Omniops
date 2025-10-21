@@ -813,7 +813,7 @@ export async function crawlWebsite(
     config?: Partial<CrawlerConfig>;
     turboMode?: boolean;
     ownSite?: boolean; // Enable own-site optimizations
-    customerId?: string; // Customer ID to load owned domains
+    organizationId?: string; // Organization ID to load owned domains
     useNewConfig?: boolean; // Use new configuration system
     newConfigPreset?: keyof typeof ConfigPresets; // Preset for new config system
     aiOptimization?: AIOptimizationConfig; // AI optimization configuration
@@ -834,30 +834,30 @@ export async function crawlWebsite(
     configPreset: options?.configPreset,
     turboMode: options?.turboMode !== false,
     ownSite: options?.ownSite,
-    customerId: options?.customerId,
+    organizationId: options?.organizationId,
     useNewConfig: options?.useNewConfig,
     newConfigPreset: options?.newConfigPreset,
     aiOptimizationEnabled: options?.aiOptimization?.enabled
   });
   
-  // Load customer's owned domains if customerId provided
-  if (options?.customerId) {
-    console.log(`[CRAWLER] Loading customer configuration for ID: ${options.customerId}`);
+  // Load organization's owned domains if organizationId provided
+  if (options?.organizationId) {
+    console.log(`[CRAWLER] Loading organization configuration for ID: ${options.organizationId}`);
     try {
-      await CustomerConfigLoader.initializeForScraping(options.customerId);
-      console.log(`[CRAWLER] Customer owned domains loaded successfully`);
-    } catch (customerLoadError) {
-      console.error(`[CRAWLER] Failed to load customer configuration:`, customerLoadError);
+      await CustomerConfigLoader.initializeForScraping(options.organizationId);
+      console.log(`[CRAWLER] Organization owned domains loaded successfully`);
+    } catch (orgLoadError) {
+      console.error(`[CRAWLER] Failed to load organization configuration:`, orgLoadError);
     }
     
-    // Load customer-specific configuration from database if using new config
+    // Load organization-specific configuration from database if using new config
     if (options?.useNewConfig) {
-      console.log(`[CRAWLER] Loading customer-specific scraper configuration from database`);
+      console.log(`[CRAWLER] Loading organization-specific scraper configuration from database`);
       try {
-        await loadCustomerConfig(options.customerId);
-        console.log(`[CRAWLER] Customer scraper configuration loaded successfully`);
+        await loadCustomerConfig(options.organizationId);
+        console.log(`[CRAWLER] Organization scraper configuration loaded successfully`);
       } catch (configLoadError) {
-        console.error(`[CRAWLER] Failed to load customer scraper configuration:`, configLoadError);
+        console.error(`[CRAWLER] Failed to load organization scraper configuration:`, configLoadError);
       }
     }
   }

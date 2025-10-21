@@ -5,6 +5,7 @@ import { NextResponse } from 'next/server'
 export async function GET(request: Request) {
   const requestUrl = new URL(request.url)
   const code = requestUrl.searchParams.get('code')
+  const type = requestUrl.searchParams.get('type')
   const next = requestUrl.searchParams.get('next') || '/admin'
 
   if (code) {
@@ -31,10 +32,33 @@ export async function GET(request: Request) {
         },
       }
     )
-    
+
     const { error } = await supabase.auth.exchangeCodeForSession(code)
     if (error) {
       console.error('Error exchanging code for session:', error)
+      return NextResponse.redirect(new URL('/login?error=Invalid or expired link', requestUrl.origin))
+    }
+
+    // Handle password recovery specifically
+    if (type === 'recovery') {
+      return NextResponse.redirect(new URL('/update-password', requestUrl.origin))
+    }
+
+    // Check if user has an organization
+    const { data: { user } } = await supabase.auth.getUser()
+
+    if (user) {
+      const { data: membership } = await supabase
+        .from('organization_members')
+        .select('organization_id')
+        .eq('user_id', user.id)
+        .limit(1)
+        .maybeSingle()
+
+      // If no organization membership, redirect to onboarding
+      if (!membership) {
+        return NextResponse.redirect(new URL('/onboarding', requestUrl.origin))
+      }
     }
   }
 

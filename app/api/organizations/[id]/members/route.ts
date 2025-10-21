@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { createServerClient } from '@/lib/supabase/server';
+import { createClient, createServiceRoleClient } from '@/lib/supabase/server';
 
 /**
  * GET /api/organizations/[id]/members
@@ -10,7 +10,15 @@ export async function GET(
   { params }: { params: { id: string } }
 ) {
   try {
-    const supabase = createServerClient();
+    const supabase = await createClient();
+
+    if (!supabase) {
+      return NextResponse.json(
+        { error: 'Service unavailable' },
+        { status: 503 }
+      );
+    }
+
     const organizationId = params.id;
 
     // Get authenticated user
@@ -62,22 +70,36 @@ export async function GET(
       );
     }
 
-    // Fetch user details for each member
-    const membersWithDetails = await Promise.all(
-      (members || []).map(async (member) => {
-        const { data: userData } = await supabase
-          .from('customers')
-          .select('email, name')
-          .eq('auth_user_id', member.user_id)
-          .maybeSingle();
+    // Fetch user details for each member using service role to access auth.users
+    const serviceSupabase = await createServiceRoleClient();
 
-        return {
-          ...member,
-          email: userData?.email || 'Unknown',
-          name: userData?.name || null,
-        };
+    if (!serviceSupabase) {
+      return NextResponse.json(
+        { error: 'Service unavailable' },
+        { status: 503 }
+      );
+    }
+
+    // Batch fetch all users to avoid N+1 queries
+    const userIds = [...new Set((members || []).map((m: any) => m.user_id))];
+    const usersMap = new Map();
+
+    await Promise.all(
+      userIds.map(async (userId) => {
+        const { data: { user } } = await serviceSupabase.auth.admin.getUserById(userId);
+        if (user) usersMap.set(userId, user);
       })
     );
+
+    // Map members with cached user data
+    const membersWithDetails = (members || []).map((member: any) => {
+      const userData = usersMap.get(member.user_id);
+      return {
+        ...member,
+        email: userData?.email || 'Unknown',
+        name: userData?.user_metadata?.name || userData?.user_metadata?.full_name || null,
+      };
+    });
 
     return NextResponse.json({
       members: membersWithDetails,

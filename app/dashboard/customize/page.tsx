@@ -1,165 +1,369 @@
 "use client";
 
-import { useState } from "react";
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
+import { useState, useEffect, useCallback } from "react";
+import { Card } from "@/components/ui/card";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
-import { Input } from "@/components/ui/input";
-import { Label } from "@/components/ui/label";
-import { Textarea } from "@/components/ui/textarea";
-import { Switch } from "@/components/ui/switch";
 import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from "@/components/ui/select";
-import {
-  Palette,
-  Monitor,
-  MessageSquare,
   Save,
-  Eye,
   RotateCcw,
-  Copy,
-  Check,
-  Settings,
-  Smartphone,
-  X,
-  Send,
-  Bot,
+  Download,
+  Upload,
+  History,
+  AlertCircle,
 } from "lucide-react";
 import { Alert, AlertDescription } from "@/components/ui/alert";
+import { useToast } from "@/components/ui/use-toast";
 
-interface WidgetConfig {
+// Import section components
+import { ThemeSection } from "./sections/ThemeSection";
+import { PositionSection } from "./sections/PositionSection";
+import { ContentSection } from "./sections/ContentSection";
+import { BehaviorSection } from "./sections/BehaviorSection";
+import { AIBehaviorSection } from "./sections/AIBehaviorSection";
+import { IntegrationSection } from "./sections/IntegrationSection";
+import { AnalyticsSection } from "./sections/AnalyticsSection";
+import { AdvancedSection } from "./sections/AdvancedSection";
+import { LivePreview } from "./components/LivePreview";
+
+export interface WidgetConfig {
   // Theme settings
-  primaryColor: string;
-  backgroundColor: string;
-  textColor: string;
-  borderRadius: string;
-  fontSize: string;
-  
+  themeSettings: {
+    primaryColor: string;
+    backgroundColor: string;
+    textColor: string;
+    borderRadius: string;
+    fontSize: string;
+    fontFamily: string;
+    darkMode: boolean;
+    customCSS: string;
+  };
+
   // Position settings
-  position: 'bottom-right' | 'bottom-left' | 'top-right' | 'top-left';
-  offsetX: number;
-  offsetY: number;
-  
-  // Content settings
-  welcomeMessage: string;
-  placeholderText: string;
-  botName: string;
-  avatarUrl: string;
-  
+  positionSettings: {
+    position: 'bottom-right' | 'bottom-left' | 'top-right' | 'top-left';
+    offsetX: number;
+    offsetY: number;
+    width: number;
+    height: number;
+    mobileBreakpoint: number;
+  };
+
+  // AI settings
+  aiSettings: {
+    personality: 'professional' | 'friendly' | 'helpful' | 'concise' | 'technical';
+    responseLength: 'short' | 'balanced' | 'detailed';
+    confidenceThreshold: number;
+    fallbackBehavior: 'apologize_and_offer_help' | 'redirect_to_human' | 'suggest_alternatives';
+    language: string;
+    customSystemPrompt: string;
+    enableSmartSuggestions: boolean;
+    maxTokens: number;
+    temperature: number;
+  };
+
   // Behavior settings
-  showAvatar: boolean;
-  showTypingIndicator: boolean;
-  autoOpen: boolean;
-  openDelay: number;
-  minimizable: boolean;
-  
-  // Branding
-  showBranding: boolean;
-  companyLogo: string;
+  behaviorSettings: {
+    welcomeMessage: string;
+    placeholderText: string;
+    botName: string;
+    avatarUrl: string;
+    showAvatar: boolean;
+    showTypingIndicator: boolean;
+    autoOpen: boolean;
+    openDelay: number;
+    minimizable: boolean;
+    soundNotifications: boolean;
+    persistConversation: boolean;
+    messageDelay: number;
+  };
+
+  // Integration settings
+  integrationSettings: {
+    enableWooCommerce: boolean;
+    enableWebSearch: boolean;
+    enableKnowledgeBase: boolean;
+    apiRateLimit: number;
+    webhookUrl: string;
+    customHeaders: Record<string, string>;
+    allowedDomains: string[];
+    dataSourcePriority: string[];
+  };
+
+  // Analytics settings
+  analyticsSettings: {
+    trackConversations: boolean;
+    trackUserBehavior: boolean;
+    trackPerformance: boolean;
+    customEvents: string[];
+    dataRetentionDays: number;
+    anonymizeData: boolean;
+    shareAnalyticsWithCustomer: boolean;
+  };
+
+  // Advanced settings
+  advancedSettings: {
+    corsOrigins: string[];
+    cacheEnabled: boolean;
+    cacheTTL: number;
+    debugMode: boolean;
+    customJSHooks: Record<string, string>;
+    securityHeaders: Record<string, string>;
+    rateLimitOverride: number | null;
+    experimentalFeatures: string[];
+  };
+
+  // Branding settings
+  brandingSettings: {
+    showPoweredBy: boolean;
+    customBrandingText: string;
+    customLogoUrl: string;
+    customFaviconUrl: string;
+    brandColors: Record<string, string>;
+  };
 }
 
 const defaultConfig: WidgetConfig = {
-  primaryColor: "#3b82f6",
-  backgroundColor: "#ffffff",
-  textColor: "#1f2937",
-  borderRadius: "8",
-  fontSize: "14",
-  position: "bottom-right",
-  offsetX: 24,
-  offsetY: 24,
-  welcomeMessage: "Hi! How can I help you today?",
-  placeholderText: "Type your message...",
-  botName: "Assistant",
-  avatarUrl: "",
-  showAvatar: true,
-  showTypingIndicator: true,
-  autoOpen: false,
-  openDelay: 3000,
-  minimizable: true,
-  showBranding: true,
-  companyLogo: "",
+  themeSettings: {
+    primaryColor: "#3b82f6",
+    backgroundColor: "#ffffff",
+    textColor: "#1f2937",
+    borderRadius: "8",
+    fontSize: "14",
+    fontFamily: "system-ui",
+    darkMode: false,
+    customCSS: "",
+  },
+  positionSettings: {
+    position: "bottom-right",
+    offsetX: 24,
+    offsetY: 24,
+    width: 380,
+    height: 600,
+    mobileBreakpoint: 768,
+  },
+  aiSettings: {
+    personality: "professional",
+    responseLength: "balanced",
+    confidenceThreshold: 0.7,
+    fallbackBehavior: "apologize_and_offer_help",
+    language: "auto",
+    customSystemPrompt: "",
+    enableSmartSuggestions: true,
+    maxTokens: 500,
+    temperature: 0.7,
+  },
+  behaviorSettings: {
+    welcomeMessage: "Hi! How can I help you today?",
+    placeholderText: "Type your message...",
+    botName: "Assistant",
+    avatarUrl: "",
+    showAvatar: true,
+    showTypingIndicator: true,
+    autoOpen: false,
+    openDelay: 3000,
+    minimizable: true,
+    soundNotifications: false,
+    persistConversation: true,
+    messageDelay: 500,
+  },
+  integrationSettings: {
+    enableWooCommerce: false,
+    enableWebSearch: false,
+    enableKnowledgeBase: true,
+    apiRateLimit: 60,
+    webhookUrl: "",
+    customHeaders: {},
+    allowedDomains: [],
+    dataSourcePriority: ["knowledge_base", "web_search", "woocommerce"],
+  },
+  analyticsSettings: {
+    trackConversations: true,
+    trackUserBehavior: true,
+    trackPerformance: true,
+    customEvents: [],
+    dataRetentionDays: 30,
+    anonymizeData: false,
+    shareAnalyticsWithCustomer: true,
+  },
+  advancedSettings: {
+    corsOrigins: ["*"],
+    cacheEnabled: true,
+    cacheTTL: 3600,
+    debugMode: false,
+    customJSHooks: {},
+    securityHeaders: {},
+    rateLimitOverride: null,
+    experimentalFeatures: [],
+  },
+  brandingSettings: {
+    showPoweredBy: true,
+    customBrandingText: "",
+    customLogoUrl: "",
+    customFaviconUrl: "",
+    brandColors: {},
+  },
 };
 
-const colorPresets = [
-  { name: "Blue", color: "#3b82f6" },
-  { name: "Green", color: "#10b981" },
-  { name: "Purple", color: "#8b5cf6" },
-  { name: "Red", color: "#ef4444" },
-  { name: "Orange", color: "#f59e0b" },
-  { name: "Pink", color: "#ec4899" },
-  { name: "Indigo", color: "#6366f1" },
-  { name: "Teal", color: "#14b8a6" },
-];
-
-export default function CustomizePage() {
+export default function CustomizationPage() {
   const [config, setConfig] = useState<WidgetConfig>(defaultConfig);
   const [activeTab, setActiveTab] = useState("theme");
-  const [copied, setCopied] = useState(false);
   const [isDirty, setIsDirty] = useState(false);
+  const [isLoading, setIsLoading] = useState(false);
+  const [isSaving, setIsSaving] = useState(false);
+  const [customerConfigId, setCustomerConfigId] = useState<string | null>(null);
+  const [configId, setConfigId] = useState<string | null>(null);
+  const { toast } = useToast();
 
-  const updateConfig = (key: keyof WidgetConfig, value: any) => {
-    setConfig(prev => ({ ...prev, [key]: value }));
-    setIsDirty(true);
+  // Load existing configuration
+  useEffect(() => {
+    loadConfiguration();
+  }, []);
+
+  const loadConfiguration = async () => {
+    setIsLoading(true);
+    try {
+      // Get customer config ID from URL params or session
+      const params = new URLSearchParams(window.location.search);
+      const ccId = params.get('customerConfigId');
+
+      if (ccId) {
+        setCustomerConfigId(ccId);
+
+        const response = await fetch(`/api/widget-config?customerConfigId=${ccId}`);
+        const data = await response.json();
+
+        if (data.success && data.data.config) {
+          setConfig({
+            themeSettings: data.data.config.theme_settings,
+            positionSettings: data.data.config.position_settings,
+            aiSettings: data.data.config.ai_settings,
+            behaviorSettings: data.data.config.behavior_settings,
+            integrationSettings: data.data.config.integration_settings,
+            analyticsSettings: data.data.config.analytics_settings,
+            advancedSettings: data.data.config.advanced_settings,
+            brandingSettings: data.data.config.branding_settings,
+          });
+          setConfigId(data.data.config.id);
+        }
+      }
+    } catch (error) {
+      console.error('Error loading configuration:', error);
+      toast({
+        title: "Error",
+        description: "Failed to load configuration",
+        variant: "destructive",
+      });
+    } finally {
+      setIsLoading(false);
+    }
   };
+
+  const updateConfig = useCallback((
+    section: keyof WidgetConfig,
+    updates: Partial<WidgetConfig[keyof WidgetConfig]>
+  ) => {
+    setConfig(prev => ({
+      ...prev,
+      [section]: { ...prev[section], ...updates },
+    }));
+    setIsDirty(true);
+  }, []);
 
   const resetConfig = () => {
     setConfig(defaultConfig);
     setIsDirty(false);
   };
 
-  const saveConfig = () => {
-    // Here you would save to backend/localStorage
-    console.log("Saving config:", config);
-    setIsDirty(false);
-  };
-
-  const generateEmbedCode = () => {
-    const embedCode = `<script>
-  (function() {
-    const script = document.createElement('script');
-    script.src = 'https://your-domain.com/embed.js';
-    script.async = true;
-    script.onload = function() {
-      window.ChatWidget.init({
-        primaryColor: '${config.primaryColor}',
-        position: '${config.position}',
-        welcomeMessage: '${config.welcomeMessage}',
-        botName: '${config.botName}',
-        showAvatar: ${config.showAvatar},
-        autoOpen: ${config.autoOpen}
+  const saveConfiguration = async () => {
+    if (!customerConfigId) {
+      toast({
+        title: "Error",
+        description: "No customer configuration selected",
+        variant: "destructive",
       });
-    };
-    document.head.appendChild(script);
-  })();
-</script>`;
-    return embedCode;
+      return;
+    }
+
+    setIsSaving(true);
+    try {
+      const url = configId
+        ? `/api/widget-config?id=${configId}`
+        : '/api/widget-config';
+
+      const method = configId ? 'PUT' : 'POST';
+
+      const response = await fetch(url, {
+        method,
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          customerConfigId,
+          ...config,
+        }),
+      });
+
+      const data = await response.json();
+
+      if (data.success) {
+        setIsDirty(false);
+        if (!configId && data.data.id) {
+          setConfigId(data.data.id);
+        }
+        toast({
+          title: "Success",
+          description: "Configuration saved successfully",
+        });
+      } else {
+        throw new Error(data.error || 'Failed to save');
+      }
+    } catch (error) {
+      console.error('Error saving configuration:', error);
+      toast({
+        title: "Error",
+        description: "Failed to save configuration",
+        variant: "destructive",
+      });
+    } finally {
+      setIsSaving(false);
+    }
   };
 
-  const copyEmbedCode = () => {
-    navigator.clipboard.writeText(generateEmbedCode());
-    setCopied(true);
-    setTimeout(() => setCopied(false), 2000);
+
+  const exportConfiguration = () => {
+    const dataStr = JSON.stringify(config, null, 2);
+    const dataUri = 'data:application/json;charset=utf-8,' + encodeURIComponent(dataStr);
+
+    const exportFileDefaultName = `widget-config-${new Date().toISOString()}.json`;
+
+    const linkElement = document.createElement('a');
+    linkElement.setAttribute('href', dataUri);
+    linkElement.setAttribute('download', exportFileDefaultName);
+    linkElement.click();
   };
 
-  const getPositionClass = () => {
-    const base = "fixed z-50";
-    switch (config.position) {
-      case 'bottom-right':
-        return `${base} bottom-${Math.floor(config.offsetY/4)} right-${Math.floor(config.offsetX/4)}`;
-      case 'bottom-left':
-        return `${base} bottom-${Math.floor(config.offsetY/4)} left-${Math.floor(config.offsetX/4)}`;
-      case 'top-right':
-        return `${base} top-${Math.floor(config.offsetY/4)} right-${Math.floor(config.offsetX/4)}`;
-      case 'top-left':
-        return `${base} top-${Math.floor(config.offsetY/4)} left-${Math.floor(config.offsetX/4)}`;
-      default:
-        return `${base} bottom-6 right-6`;
+  const importConfiguration = (event: React.ChangeEvent<HTMLInputElement>) => {
+    const file = event.target.files?.[0];
+    if (file) {
+      const reader = new FileReader();
+      reader.onload = (e) => {
+        try {
+          const importedConfig = JSON.parse(e.target?.result as string);
+          setConfig(importedConfig);
+          setIsDirty(true);
+          toast({
+            title: "Success",
+            description: "Configuration imported successfully",
+          });
+        } catch (error) {
+          toast({
+            title: "Error",
+            description: "Invalid configuration file",
+            variant: "destructive",
+          });
+        }
+      };
+      reader.readAsText(file);
     }
   };
 
@@ -168,9 +372,11 @@ export default function CustomizePage() {
       {/* Header */}
       <div className="flex items-center justify-between">
         <div>
-          <h2 className="text-3xl font-bold tracking-tight">Chat Widget Customization</h2>
+          <h2 className="text-3xl font-bold tracking-tight">
+            Widget Customization
+          </h2>
           <p className="text-muted-foreground">
-            Customize the appearance and behavior of your chat widget
+            Customize appearance, behavior, AI settings, and integrations for your chat widget
           </p>
         </div>
         <div className="flex items-center space-x-3">
@@ -179,479 +385,125 @@ export default function CustomizePage() {
               Unsaved changes
             </Badge>
           )}
+
+          <Button variant="outline" size="icon" onClick={exportConfiguration}>
+            <Download className="h-4 w-4" />
+          </Button>
+
+          <label htmlFor="import-config">
+            <Button variant="outline" size="icon" asChild>
+              <span>
+                <Upload className="h-4 w-4" />
+              </span>
+            </Button>
+          </label>
+          <input
+            id="import-config"
+            type="file"
+            accept=".json"
+            onChange={importConfiguration}
+            className="hidden"
+          />
+
           <Button variant="outline" onClick={resetConfig}>
             <RotateCcw className="h-4 w-4 mr-2" />
             Reset
           </Button>
-          <Button onClick={saveConfig}>
+
+          <Button onClick={saveConfiguration} disabled={isSaving || !isDirty}>
             <Save className="h-4 w-4 mr-2" />
-            Save Changes
+            {isSaving ? "Saving..." : "Save Changes"}
           </Button>
         </div>
       </div>
+
+      {!customerConfigId && (
+        <Alert>
+          <AlertCircle className="h-4 w-4" />
+          <AlertDescription>
+            No customer configuration selected. Please select a customer from the customers page first.
+          </AlertDescription>
+        </Alert>
+      )}
 
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
         {/* Configuration Panel */}
         <div className="lg:col-span-2">
           <Tabs value={activeTab} onValueChange={setActiveTab} className="space-y-4">
-            <TabsList className="grid w-full grid-cols-4">
+            <TabsList className="grid w-full grid-cols-4 lg:grid-cols-8">
               <TabsTrigger value="theme">Theme</TabsTrigger>
               <TabsTrigger value="position">Position</TabsTrigger>
               <TabsTrigger value="content">Content</TabsTrigger>
               <TabsTrigger value="behavior">Behavior</TabsTrigger>
+              <TabsTrigger value="ai">AI</TabsTrigger>
+              <TabsTrigger value="integrations">Integrations</TabsTrigger>
+              <TabsTrigger value="analytics">Analytics</TabsTrigger>
+              <TabsTrigger value="advanced">Advanced</TabsTrigger>
             </TabsList>
 
-            {/* Theme Settings */}
-            <TabsContent value="theme" className="space-y-6">
-              <Card>
-                <CardHeader>
-                  <CardTitle className="flex items-center">
-                    <Palette className="h-5 w-5 mr-2" />
-                    Color Theme
-                  </CardTitle>
-                  <CardDescription>
-                    Customize the colors and appearance of your chat widget
-                  </CardDescription>
-                </CardHeader>
-                <CardContent className="space-y-4">
-                  <div className="space-y-2">
-                    <Label>Primary Color</Label>
-                    <div className="flex items-center space-x-2">
-                      <Input
-                        type="color"
-                        value={config.primaryColor}
-                        onChange={(e) => updateConfig('primaryColor', e.target.value)}
-                        className="w-16 h-10 p-1 border-2"
-                      />
-                      <Input
-                        value={config.primaryColor}
-                        onChange={(e) => updateConfig('primaryColor', e.target.value)}
-                        placeholder="#3b82f6"
-                        className="font-mono"
-                      />
-                    </div>
-                    <div className="flex flex-wrap gap-2 mt-2">
-                      {colorPresets.map((preset) => (
-                        <button
-                          key={preset.name}
-                          onClick={() => updateConfig('primaryColor', preset.color)}
-                          className="w-8 h-8 rounded-md border-2 hover:scale-110 transition-transform"
-                          style={{ backgroundColor: preset.color }}
-                          title={preset.name}
-                        />
-                      ))}
-                    </div>
-                  </div>
-                  
-                  <div className="grid grid-cols-2 gap-4">
-                    <div className="space-y-2">
-                      <Label>Background Color</Label>
-                      <div className="flex items-center space-x-2">
-                        <Input
-                          type="color"
-                          value={config.backgroundColor}
-                          onChange={(e) => updateConfig('backgroundColor', e.target.value)}
-                          className="w-12 h-8 p-1"
-                        />
-                        <Input
-                          value={config.backgroundColor}
-                          onChange={(e) => updateConfig('backgroundColor', e.target.value)}
-                          className="font-mono text-sm"
-                        />
-                      </div>
-                    </div>
-                    
-                    <div className="space-y-2">
-                      <Label>Text Color</Label>
-                      <div className="flex items-center space-x-2">
-                        <Input
-                          type="color"
-                          value={config.textColor}
-                          onChange={(e) => updateConfig('textColor', e.target.value)}
-                          className="w-12 h-8 p-1"
-                        />
-                        <Input
-                          value={config.textColor}
-                          onChange={(e) => updateConfig('textColor', e.target.value)}
-                          className="font-mono text-sm"
-                        />
-                      </div>
-                    </div>
-                  </div>
-                  
-                  <div className="grid grid-cols-2 gap-4">
-                    <div className="space-y-2">
-                      <Label>Border Radius (px)</Label>
-                      <Input
-                        type="number"
-                        value={config.borderRadius}
-                        onChange={(e) => updateConfig('borderRadius', e.target.value)}
-                        placeholder="8"
-                      />
-                    </div>
-                    
-                    <div className="space-y-2">
-                      <Label>Font Size (px)</Label>
-                      <Input
-                        type="number"
-                        value={config.fontSize}
-                        onChange={(e) => updateConfig('fontSize', e.target.value)}
-                        placeholder="14"
-                      />
-                    </div>
-                  </div>
-                </CardContent>
-              </Card>
+            <TabsContent value="theme">
+              <ThemeSection
+                settings={config.themeSettings}
+                onChange={(updates) => updateConfig('themeSettings', updates)}
+              />
             </TabsContent>
 
-            {/* Position Settings */}
-            <TabsContent value="position" className="space-y-6">
-              <Card>
-                <CardHeader>
-                  <CardTitle className="flex items-center">
-                    <Monitor className="h-5 w-5 mr-2" />
-                    Widget Position
-                  </CardTitle>
-                  <CardDescription>
-                    Configure where the chat widget appears on your website
-                  </CardDescription>
-                </CardHeader>
-                <CardContent className="space-y-4">
-                  <div className="space-y-2">
-                    <Label>Position</Label>
-                    <Select value={config.position} onValueChange={(value: any) => updateConfig('position', value)}>
-                      <SelectTrigger>
-                        <SelectValue />
-                      </SelectTrigger>
-                      <SelectContent>
-                        <SelectItem value="bottom-right">Bottom Right</SelectItem>
-                        <SelectItem value="bottom-left">Bottom Left</SelectItem>
-                        <SelectItem value="top-right">Top Right</SelectItem>
-                        <SelectItem value="top-left">Top Left</SelectItem>
-                      </SelectContent>
-                    </Select>
-                  </div>
-                  
-                  <div className="grid grid-cols-2 gap-4">
-                    <div className="space-y-2">
-                      <Label>Horizontal Offset (px)</Label>
-                      <Input
-                        type="number"
-                        value={config.offsetX}
-                        onChange={(e) => updateConfig('offsetX', parseInt(e.target.value) || 0)}
-                        placeholder="24"
-                      />
-                    </div>
-                    
-                    <div className="space-y-2">
-                      <Label>Vertical Offset (px)</Label>
-                      <Input
-                        type="number"
-                        value={config.offsetY}
-                        onChange={(e) => updateConfig('offsetY', parseInt(e.target.value) || 0)}
-                        placeholder="24"
-                      />
-                    </div>
-                  </div>
-                </CardContent>
-              </Card>
+            <TabsContent value="position">
+              <PositionSection
+                settings={config.positionSettings}
+                onChange={(updates) => updateConfig('positionSettings', updates)}
+              />
             </TabsContent>
 
-            {/* Content Settings */}
-            <TabsContent value="content" className="space-y-6">
-              <Card>
-                <CardHeader>
-                  <CardTitle className="flex items-center">
-                    <MessageSquare className="h-5 w-5 mr-2" />
-                    Content & Messages
-                  </CardTitle>
-                  <CardDescription>
-                    Customize the text and messaging in your chat widget
-                  </CardDescription>
-                </CardHeader>
-                <CardContent className="space-y-4">
-                  <div className="space-y-2">
-                    <Label htmlFor="welcomeMessage">Welcome Message</Label>
-                    <Textarea
-                      id="welcomeMessage"
-                      value={config.welcomeMessage}
-                      onChange={(e) => updateConfig('welcomeMessage', e.target.value)}
-                      placeholder="Hi! How can I help you today?"
-                      rows={2}
-                    />
-                  </div>
-                  
-                  <div className="space-y-2">
-                    <Label htmlFor="placeholderText">Input Placeholder</Label>
-                    <Input
-                      id="placeholderText"
-                      value={config.placeholderText}
-                      onChange={(e) => updateConfig('placeholderText', e.target.value)}
-                      placeholder="Type your message..."
-                    />
-                  </div>
-                  
-                  <div className="space-y-2">
-                    <Label htmlFor="botName">Bot Name</Label>
-                    <Input
-                      id="botName"
-                      value={config.botName}
-                      onChange={(e) => updateConfig('botName', e.target.value)}
-                      placeholder="Assistant"
-                    />
-                  </div>
-                  
-                  <div className="space-y-2">
-                    <Label htmlFor="avatarUrl">Avatar URL (optional)</Label>
-                    <Input
-                      id="avatarUrl"
-                      value={config.avatarUrl}
-                      onChange={(e) => updateConfig('avatarUrl', e.target.value)}
-                      placeholder="https://example.com/avatar.png"
-                    />
-                  </div>
-                </CardContent>
-              </Card>
+            <TabsContent value="content">
+              <ContentSection
+                settings={config.behaviorSettings}
+                onChange={(updates) => updateConfig('behaviorSettings', updates)}
+              />
             </TabsContent>
 
-            {/* Behavior Settings */}
-            <TabsContent value="behavior" className="space-y-6">
-              <Card>
-                <CardHeader>
-                  <CardTitle className="flex items-center">
-                    <Settings className="h-5 w-5 mr-2" />
-                    Widget Behavior
-                  </CardTitle>
-                  <CardDescription>
-                    Configure how your chat widget behaves
-                  </CardDescription>
-                </CardHeader>
-                <CardContent className="space-y-6">
-                  <div className="flex items-center justify-between">
-                    <div className="space-y-0.5">
-                      <Label>Show Avatar</Label>
-                      <p className="text-sm text-muted-foreground">
-                        Display bot avatar in messages
-                      </p>
-                    </div>
-                    <Switch
-                      checked={config.showAvatar}
-                      onCheckedChange={(checked) => updateConfig('showAvatar', checked)}
-                    />
-                  </div>
-                  
-                  <div className="flex items-center justify-between">
-                    <div className="space-y-0.5">
-                      <Label>Typing Indicator</Label>
-                      <p className="text-sm text-muted-foreground">
-                        Show typing animation when bot is responding
-                      </p>
-                    </div>
-                    <Switch
-                      checked={config.showTypingIndicator}
-                      onCheckedChange={(checked) => updateConfig('showTypingIndicator', checked)}
-                    />
-                  </div>
-                  
-                  <div className="flex items-center justify-between">
-                    <div className="space-y-0.5">
-                      <Label>Auto Open</Label>
-                      <p className="text-sm text-muted-foreground">
-                        Automatically open chat widget on page load
-                      </p>
-                    </div>
-                    <Switch
-                      checked={config.autoOpen}
-                      onCheckedChange={(checked) => updateConfig('autoOpen', checked)}
-                    />
-                  </div>
-                  
-                  {config.autoOpen && (
-                    <div className="space-y-2">
-                      <Label>Auto Open Delay (ms)</Label>
-                      <Input
-                        type="number"
-                        value={config.openDelay}
-                        onChange={(e) => updateConfig('openDelay', parseInt(e.target.value) || 0)}
-                        placeholder="3000"
-                      />
-                    </div>
-                  )}
-                  
-                  <div className="flex items-center justify-between">
-                    <div className="space-y-0.5">
-                      <Label>Show Branding</Label>
-                      <p className="text-sm text-muted-foreground">
-                        Display "Powered by Omniops" branding
-                      </p>
-                    </div>
-                    <Switch
-                      checked={config.showBranding}
-                      onCheckedChange={(checked) => updateConfig('showBranding', checked)}
-                    />
-                  </div>
-                </CardContent>
-              </Card>
+            <TabsContent value="behavior">
+              <BehaviorSection
+                settings={config.behaviorSettings}
+                onChange={(updates) => updateConfig('behaviorSettings', updates)}
+              />
+            </TabsContent>
+
+            <TabsContent value="ai">
+              <AIBehaviorSection
+                settings={config.aiSettings}
+                onChange={(updates) => updateConfig('aiSettings', updates)}
+              />
+            </TabsContent>
+
+            <TabsContent value="integrations">
+              <IntegrationSection
+                settings={config.integrationSettings}
+                onChange={(updates) => updateConfig('integrationSettings', updates)}
+              />
+            </TabsContent>
+
+            <TabsContent value="analytics">
+              <AnalyticsSection
+                settings={config.analyticsSettings}
+                onChange={(updates) => updateConfig('analyticsSettings', updates)}
+              />
+            </TabsContent>
+
+            <TabsContent value="advanced">
+              <AdvancedSection
+                settings={config.advancedSettings}
+                brandingSettings={config.brandingSettings}
+                onAdvancedChange={(updates) => updateConfig('advancedSettings', updates)}
+                onBrandingChange={(updates) => updateConfig('brandingSettings', updates)}
+              />
             </TabsContent>
           </Tabs>
         </div>
 
         {/* Live Preview */}
         <div className="lg:col-span-1">
-          <Card className="sticky top-6">
-            <CardHeader>
-              <CardTitle className="flex items-center">
-                <Eye className="h-5 w-5 mr-2" />
-                Live Preview
-              </CardTitle>
-              <CardDescription>
-                See how your widget will appear to users
-              </CardDescription>
-            </CardHeader>
-            <CardContent>
-              <div className="relative bg-gray-100 rounded-lg h-96 overflow-hidden">
-                {/* Mock browser */}
-                <div className="bg-gray-200 p-2 rounded-t-lg">
-                  <div className="flex space-x-1">
-                    <div className="w-2 h-2 bg-red-400 rounded-full"></div>
-                    <div className="w-2 h-2 bg-yellow-400 rounded-full"></div>
-                    <div className="w-2 h-2 bg-green-400 rounded-full"></div>
-                  </div>
-                </div>
-                
-                {/* Mock website content */}
-                <div className="p-4 space-y-2 h-full bg-white">
-                  <div className="h-4 bg-gray-200 rounded w-3/4"></div>
-                  <div className="h-4 bg-gray-200 rounded w-1/2"></div>
-                  <div className="h-4 bg-gray-200 rounded w-5/6"></div>
-                  
-                  {/* Widget Preview */}
-                  <div className={getPositionClass()}>
-                    <div className="flex flex-col space-y-2">
-                      {/* Chat Window */}
-                      <div
-                        className="w-80 h-96 rounded-lg shadow-lg flex flex-col"
-                        style={{
-                          backgroundColor: config.backgroundColor,
-                          borderRadius: `${config.borderRadius}px`,
-                          fontSize: `${config.fontSize}px`,
-                        }}
-                      >
-                        {/* Header */}
-                        <div
-                          className="p-3 rounded-t-lg flex items-center justify-between"
-                          style={{ backgroundColor: config.primaryColor }}
-                        >
-                          <div className="flex items-center space-x-2">
-                            {config.showAvatar && (
-                              <div className="w-8 h-8 bg-white/20 rounded-full flex items-center justify-center">
-                                <Bot className="h-4 w-4 text-white" />
-                              </div>
-                            )}
-                            <span className="text-white font-medium">{config.botName}</span>
-                          </div>
-                          <X className="h-4 w-4 text-white cursor-pointer" />
-                        </div>
-                        
-                        {/* Messages */}
-                        <div className="flex-1 p-3 space-y-3 overflow-y-auto">
-                          <div className="flex items-start space-x-2">
-                            {config.showAvatar && (
-                              <div className="w-6 h-6 bg-gray-200 rounded-full flex-shrink-0 flex items-center justify-center">
-                                <Bot className="h-3 w-3 text-gray-500" />
-                              </div>
-                            )}
-                            <div
-                              className="rounded-lg px-3 py-2 max-w-xs"
-                              style={{
-                                backgroundColor: `${config.primaryColor}10`,
-                                color: config.textColor,
-                              }}
-                            >
-                              {config.welcomeMessage}
-                            </div>
-                          </div>
-                        </div>
-                        
-                        {/* Input */}
-                        <div className="p-3 border-t border-gray-200">
-                          <div className="flex items-center space-x-2">
-                            <input
-                              type="text"
-                              placeholder={config.placeholderText}
-                              className="flex-1 px-3 py-2 border border-gray-300 rounded-md text-sm focus:outline-none focus:ring-1 focus:ring-primary"
-                              style={{
-                                borderRadius: `${Math.max(4, parseInt(config.borderRadius) - 2)}px`,
-                                fontSize: `${config.fontSize}px`,
-                              }}
-                            />
-                            <button
-                              className="p-2 rounded-md text-white"
-                              style={{ backgroundColor: config.primaryColor }}
-                            >
-                              <Send className="h-4 w-4" />
-                            </button>
-                          </div>
-                        </div>
-                        
-                        {/* Branding */}
-                        {config.showBranding && (
-                          <div className="px-3 pb-2">
-                            <p className="text-xs text-gray-500 text-center">
-                              Powered by Omniops
-                            </p>
-                          </div>
-                        )}
-                      </div>
-                      
-                      {/* Chat Button */}
-                      <button
-                        className="w-14 h-14 rounded-full shadow-lg flex items-center justify-center text-white"
-                        style={{ backgroundColor: config.primaryColor }}
-                      >
-                        <MessageSquare className="h-6 w-6" />
-                      </button>
-                    </div>
-                  </div>
-                </div>
-              </div>
-            </CardContent>
-          </Card>
-          
-          {/* Embed Code */}
-          <Card className="mt-6">
-            <CardHeader>
-              <CardTitle>Embed Code</CardTitle>
-              <CardDescription>
-                Copy this code to add the widget to your website
-              </CardDescription>
-            </CardHeader>
-            <CardContent>
-              <div className="relative">
-                <pre className="text-xs bg-gray-50 p-3 rounded-md overflow-x-auto">
-                  <code>{generateEmbedCode()}</code>
-                </pre>
-                <Button
-                  size="sm"
-                  variant="outline"
-                  className="absolute top-2 right-2"
-                  onClick={copyEmbedCode}
-                >
-                  {copied ? (
-                    <Check className="h-4 w-4" />
-                  ) : (
-                    <Copy className="h-4 w-4" />
-                  )}
-                </Button>
-              </div>
-              
-              <Alert className="mt-4">
-                <AlertDescription>
-                  Add this code to your website's HTML, preferably before the closing &lt;/body&gt; tag.
-                </AlertDescription>
-              </Alert>
-            </CardContent>
-          </Card>
+          <LivePreview config={config} />
         </div>
       </div>
     </div>

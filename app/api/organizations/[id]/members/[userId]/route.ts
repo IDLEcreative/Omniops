@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { createServerClient } from '@/lib/supabase/server';
+import { createClient } from '@/lib/supabase/server';
 import { z } from 'zod';
 import { OrganizationRole } from '@/types/organizations';
 
@@ -16,7 +16,14 @@ export async function PATCH(
   { params }: { params: { id: string; userId: string } }
 ) {
   try {
-    const supabase = createServerClient();
+    const supabase = await createClient();
+
+    if (!supabase) {
+      return NextResponse.json(
+        { error: 'Service unavailable' },
+        { status: 503 }
+      );
+    }
     const organizationId = params.id;
     const targetUserId = params.userId;
 
@@ -134,7 +141,14 @@ export async function DELETE(
   { params }: { params: { id: string; userId: string } }
 ) {
   try {
-    const supabase = createServerClient();
+    const supabase = await createClient();
+
+    if (!supabase) {
+      return NextResponse.json(
+        { error: 'Service unavailable' },
+        { status: 503 }
+      );
+    }
     const organizationId = params.id;
     const targetUserId = params.userId;
 

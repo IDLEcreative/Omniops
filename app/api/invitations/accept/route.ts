@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { createServerClient } from '@/lib/supabase/server';
+import { createClient, createServiceRoleClient } from '@/lib/supabase/server';
 import { z } from 'zod';
 
 const acceptInvitationSchema = z.object({
@@ -12,7 +12,14 @@ const acceptInvitationSchema = z.object({
  */
 export async function GET(request: NextRequest) {
   try {
-    const supabase = createServerClient();
+    const supabase = await createClient();
+
+    if (!supabase) {
+      return NextResponse.json(
+        { error: 'Service unavailable' },
+        { status: 503 }
+      );
+    }
     const { searchParams } = new URL(request.url);
     const token = searchParams.get('token');
 
@@ -26,19 +33,7 @@ export async function GET(request: NextRequest) {
     // Fetch invitation
     const { data: invitation, error: invitationError } = await supabase
       .from('organization_invitations')
-      .select(`
-        id,
-        organization_id,
-        email,
-        role,
-        expires_at,
-        accepted_at,
-        organization:organizations (
-          id,
-          name,
-          slug
-        )
-      `)
+      .select('id, organization_id, email, role, expires_at, accepted_at')
       .eq('token', token)
       .maybeSingle();
 
@@ -65,12 +60,19 @@ export async function GET(request: NextRequest) {
       );
     }
 
+    // Fetch organization details
+    const { data: organization } = await supabase
+      .from('organizations')
+      .select('id, name, slug')
+      .eq('id', invitation.organization_id)
+      .single();
+
     return NextResponse.json({
       invitation: {
         email: invitation.email,
         role: invitation.role,
-        organization_name: invitation.organization.name,
-        organization_slug: invitation.organization.slug,
+        organization_name: organization?.name || 'Unknown',
+        organization_slug: organization?.slug || '',
         expires_at: invitation.expires_at,
       },
     });
@@ -89,7 +91,14 @@ export async function GET(request: NextRequest) {
  */
 export async function POST(request: NextRequest) {
   try {
-    const supabase = createServerClient();
+    const supabase = await createClient();
+
+    if (!supabase) {
+      return NextResponse.json(
+        { error: 'Service unavailable' },
+        { status: 503 }
+      );
+    }
 
     // Get authenticated user
     const { data: { user }, error: authError } = await supabase.auth.getUser();
@@ -144,15 +153,11 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    // Get user's email
-    const { data: customer } = await supabase
-      .from('customers')
-      .select('email')
-      .eq('auth_user_id', user.id)
-      .maybeSingle();
-
     // Verify email matches (case-insensitive)
-    if (!customer || customer.email.toLowerCase() !== invitation.email.toLowerCase()) {
+    // Email is already available in the user object from auth.getUser()
+    const userEmail = user.email;
+
+    if (!userEmail || userEmail.toLowerCase() !== invitation.email.toLowerCase()) {
       return NextResponse.json(
         { error: 'This invitation was sent to a different email address' },
         { status: 403 }

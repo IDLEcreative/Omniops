@@ -37,6 +37,7 @@ import {
 import { Alert, AlertDescription } from "@/components/ui/alert";
 import { useGdprExport } from "@/hooks/use-gdpr-export";
 import { useGdprDelete } from "@/hooks/use-gdpr-delete";
+import { AuditDetailModal } from "@/components/ui/audit-detail-modal";
 
 type RequestField = 'domain' | 'sessionId' | 'email' | 'confirm';
 
@@ -105,6 +106,8 @@ type AuditEntry = {
 export default function PrivacyPage() {
   const [isDirty, setIsDirty] = useState(false);
   const [settings, setSettings] = useState({ ...DEFAULT_PRIVACY_SETTINGS });
+  const [selectedAuditEntry, setSelectedAuditEntry] = useState<AuditEntry | null>(null);
+  const [isModalOpen, setIsModalOpen] = useState(false);
 
   const initialRequestState = {
     domain: '',
@@ -1058,7 +1061,14 @@ export default function PrivacyPage() {
                 ) : (
                   <div className="space-y-4">
                     {auditEntries.map((entry) => (
-                      <div key={entry.id} className="flex items-start justify-between p-4 border rounded-lg">
+                      <div
+                        key={entry.id}
+                        className="flex items-start justify-between p-4 border rounded-lg hover:bg-muted/50 cursor-pointer transition-colors"
+                        onClick={() => {
+                          setSelectedAuditEntry(entry);
+                          setIsModalOpen(true);
+                        }}
+                      >
                         <div className="flex-1 space-y-1">
                           <div className="flex items-center gap-2">
                             <Badge variant={entry.request_type === 'export' ? 'secondary' : 'destructive'}>
@@ -1094,6 +1104,9 @@ export default function PrivacyPage() {
                             </p>
                           )}
                         </div>
+                        <Button variant="ghost" size="sm" className="ml-2">
+                          <Eye className="h-4 w-4" />
+                        </Button>
                       </div>
                     ))}
                   </div>
@@ -1182,6 +1195,16 @@ export default function PrivacyPage() {
           </div>
         </TabsContent>
       </Tabs>
+
+      {/* Audit Detail Modal */}
+      <AuditDetailModal
+        entry={selectedAuditEntry}
+        isOpen={isModalOpen}
+        onClose={() => {
+          setIsModalOpen(false);
+          setSelectedAuditEntry(null);
+        }}
+      />
     </div>
   );
 }
