@@ -103,7 +103,15 @@ export async function POST(req: NextRequest) {
         }).catch(() => {}); // Don't wait for enrichment
       }
     } catch (logError) {
-      console.error('Failed to log demo attempt:', logError); // Don't fail the request if logging fails
+      console.error('Failed to log demo attempt:', {
+        error: logError,
+        message: logError instanceof Error ? logError.message : 'Unknown error',
+        stack: logError instanceof Error ? logError.stack : undefined,
+        url,
+        domain,
+        supabaseUrl: process.env.NEXT_PUBLIC_SUPABASE_URL ? 'SET' : 'MISSING',
+        serviceRoleKey: process.env.SUPABASE_SERVICE_ROLE_KEY ? 'SET' : 'MISSING'
+      }); // Don't fail the request if logging fails
     }
 
     return NextResponse.json({
@@ -116,7 +124,12 @@ export async function POST(req: NextRequest) {
     });
 
   } catch (error) {
-    console.error('Demo scrape error:', error);
+    console.error('Demo scrape error:', {
+      error,
+      message: error instanceof Error ? error.message : 'Unknown error',
+      stack: error instanceof Error ? error.stack : undefined,
+      type: error?.constructor?.name
+    });
 
     if (error instanceof Error) {
       if (error.message.includes('rate limit')) {
@@ -134,7 +147,10 @@ export async function POST(req: NextRequest) {
     }
 
     return NextResponse.json(
-      { error: 'Failed to analyze website. Please try again.' },
+      {
+        error: 'Failed to analyze website. Please try again.',
+        details: error instanceof Error ? error.message : 'Unknown error'
+      },
       { status: 500 }
     );
   }
