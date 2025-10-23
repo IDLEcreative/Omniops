@@ -595,7 +595,7 @@ export async function POST(request: NextRequest) {
 
     // Initialize Supabase client
     const adminSupabase = await createServiceRoleClient();
-    
+
     if (!adminSupabase) {
       return NextResponse.json(
         { error: 'Database connection unavailable' },
@@ -616,17 +616,17 @@ export async function POST(request: NextRequest) {
 
     // Get or create conversation
     let conversationId = conversation_id;
-    
+
     if (!conversationId) {
       const { data: newConversation, error: convError } = await adminSupabase
         .from('conversations')
-        .insert({ 
+        .insert({
           session_id,
           domain_id: domainId
         })
         .select()
         .single();
-      
+
       if (convError) throw convError;
       conversationId = newConversation.id;
     } else {
@@ -1116,22 +1116,39 @@ Please let me know if you'd like to search for something else or need assistance
 
   } catch (error) {
     console.error('[Intelligent Chat API] Error:', error);
-    
+
+    // DEBUG: Enhanced error logging for tests
+    if (process.env.NODE_ENV === 'test') {
+      console.error('[TEST DEBUG] Full error details:', {
+        message: error instanceof Error ? error.message : String(error),
+        stack: error instanceof Error ? error.stack : undefined,
+        type: error?.constructor?.name,
+        error
+      });
+    }
+
     // Complete telemetry with error
     const errorMessage = error instanceof Error ? error.message : 'Unknown error';
     await telemetry?.complete(undefined, errorMessage);
-    
+
     if (error instanceof z.ZodError) {
       return NextResponse.json(
         { error: 'Invalid request format', details: error.errors },
         { status: 400 }
       );
     }
-    
+
     return NextResponse.json(
-      { 
+      {
         error: 'Failed to process chat message',
-        message: 'An unexpected error occurred. Please try again.'
+        message: 'An unexpected error occurred. Please try again.',
+        // Include error details in test environment
+        ...(process.env.NODE_ENV === 'test' && {
+          debug: {
+            message: error instanceof Error ? error.message : String(error),
+            stack: error instanceof Error ? error.stack?.split('\n').slice(0, 5) : undefined
+          }
+        })
       },
       { status: 500 }
     );

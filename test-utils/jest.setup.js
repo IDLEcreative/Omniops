@@ -18,6 +18,21 @@ process.env.WOOCOMMERCE_URL = 'https://test-store.com'
 process.env.WOOCOMMERCE_CONSUMER_KEY = 'test-consumer-key'
 process.env.WOOCOMMERCE_CONSUMER_SECRET = 'test-consumer-secret'
 
+// Mock ioredis FIRST to prevent real Redis connections during test imports
+jest.mock('ioredis', () => {
+  return jest.fn().mockImplementation(() => ({
+    get: jest.fn().mockResolvedValue(null),
+    set: jest.fn().mockResolvedValue('OK'),
+    setex: jest.fn().mockResolvedValue('OK'),
+    del: jest.fn().mockResolvedValue(1),
+    quit: jest.fn().mockResolvedValue('OK'),
+    disconnect: jest.fn().mockResolvedValue(undefined),
+    on: jest.fn(),
+    connect: jest.fn().mockResolvedValue(undefined),
+    status: 'ready',
+  }));
+});
+
 // Mock OpenAI to avoid browser detection issues in tests
 jest.mock('openai', () => {
   return jest.fn().mockImplementation(() => ({

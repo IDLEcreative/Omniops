@@ -17,6 +17,9 @@ const customJestConfig = {
     '^@supabase/supabase-js$': '<rootDir>/__mocks__/@supabase/supabase-js.js',
     '^@/lib/supabase-server$': '<rootDir>/__mocks__/@/lib/supabase-server.ts',
     '^@/lib/woocommerce-full$': '<rootDir>/__mocks__/@/lib/woocommerce-full.ts',
+    '^@/lib/embeddings$': '<rootDir>/__mocks__/@/lib/embeddings.ts',
+    // Removed rate-limit from moduleNameMapper - let jest.mock() handle it
+    // '^@/lib/rate-limit$': '<rootDir>/__mocks__/@/lib/rate-limit.ts',
     // Map cheerio to its CommonJS build to avoid ESM issues in Jest
     '^cheerio$': '<rootDir>/node_modules/cheerio/dist/commonjs/index.js',
     '^@/(.*)$': '<rootDir>/$1',

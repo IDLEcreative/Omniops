@@ -7,17 +7,6 @@
 import OpenAI from 'openai';
 import { createServiceRoleClient } from './supabase-server';
 
-// Dynamic import to avoid build issues
-let ContentEnricher: typeof import('./content-enricher').ContentEnricher | null = null;
-
-async function getContentEnricher() {
-  if (!ContentEnricher) {
-    const imported = await import('./content-enricher.js');
-    ContentEnricher = imported.ContentEnricher;
-  }
-  return ContentEnricher;
-}
-
 interface DualEmbeddingResult {
   textEmbedding: number[];
   metadataEmbedding: number[];
@@ -33,9 +22,40 @@ interface DualEmbeddingResult {
 
 export class DualEmbeddings {
   private openai: OpenAI;
-  
+
   constructor(apiKey: string) {
     this.openai = new OpenAI({ apiKey });
+  }
+
+  /**
+   * Create metadata-only content string for embedding
+   */
+  private createMetadataOnlyContent(metadata: any): string {
+    const parts: string[] = [];
+
+    // Extract product data
+    if (metadata.ecommerceData?.products?.length > 0) {
+      const product = metadata.ecommerceData.products[0];
+      if (product.sku) parts.push(`SKU: ${product.sku}`);
+      if (product.name) parts.push(`Product: ${product.name}`);
+      if (product.price) parts.push(`Price: ${product.price}`);
+      if (product.brand) parts.push(`Brand: ${product.brand}`);
+      if (product.availability?.inStock !== undefined) {
+        parts.push(`Stock: ${product.availability.inStock ? 'Available' : 'Out of Stock'}`);
+      }
+      if (product.categories?.length > 0) {
+        parts.push(`Categories: ${product.categories.join(', ')}`);
+      }
+    }
+
+    // Extract SKU if available at top level
+    if (metadata.productSku) parts.push(`SKU: ${metadata.productSku}`);
+    if (metadata.productPrice) parts.push(`Price: ${metadata.productPrice}`);
+    if (metadata.productInStock !== undefined) {
+      parts.push(`Stock: ${metadata.productInStock ? 'Available' : 'Out of Stock'}`);
+    }
+
+    return parts.join(' | ');
   }
   
   /**
@@ -44,22 +64,14 @@ export class DualEmbeddings {
    */
   async generateDualEmbeddings(
     text: string,
-    metadata: any,
-    url: string = '',
-    title: string = ''
+    metadata: any
   ): Promise<DualEmbeddingResult> {
-    const Enricher = await getContentEnricher();
-    
-    // Generate text embedding (with light enrichment for context)
-    const enrichedText = Enricher?.needsEnrichment?.(text) && metadata
-      ? Enricher?.enrichContent?.(text, metadata, url, title) || text
-      : text;
-    
+    // Generate text embedding (use text as-is)
+    const enrichedText = text;
+
     // Generate metadata-only content for specialized embedding
-    const metadataContent = metadata && Enricher?.createMetadataOnlyContent
-      ? Enricher.createMetadataOnlyContent(metadata)
-      : '';
-    
+    const metadataContent = metadata ? this.createMetadataOnlyContent(metadata) : '';
+
     // Check if we have meaningful metadata
     const hasStructuredData = metadataContent.length > 20;
     

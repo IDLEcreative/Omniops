@@ -67,7 +67,7 @@ async function loadCustomerConfig(domain: string): Promise<CustomerConfig | null
 
     const { data, error } = await supabase
       .from('customer_configs')
-      .select('woocommerce_enabled, woocommerce_url, shopify_enabled, shopify_shop')
+      .select('woocommerce_url, shopify_shop')
       .eq('domain', domain)
       .single();
 
@@ -86,10 +86,12 @@ async function loadCustomerConfig(domain: string): Promise<CustomerConfig | null
 }
 
 function hasWooCommerceSupport(config: CustomerConfig | null): boolean {
-  if (config?.woocommerce_enabled && config.woocommerce_url) {
+  // Check if database has WooCommerce configuration (presence of URL indicates it's configured)
+  if (config?.woocommerce_url) {
     return true;
   }
 
+  // Fallback to environment variables for backward compatibility
   return Boolean(
     process.env.WOOCOMMERCE_URL &&
       process.env.WOOCOMMERCE_CONSUMER_KEY &&
@@ -98,10 +100,12 @@ function hasWooCommerceSupport(config: CustomerConfig | null): boolean {
 }
 
 function hasShopifySupport(config: CustomerConfig | null): boolean {
-  if (config?.shopify_enabled && config.shopify_shop) {
+  // Check if database has Shopify configuration (presence of shop indicates it's configured)
+  if (config?.shopify_shop) {
     return true;
   }
 
+  // Fallback to environment variables for backward compatibility
   return Boolean(process.env.SHOPIFY_SHOP && process.env.SHOPIFY_ACCESS_TOKEN);
 }
 

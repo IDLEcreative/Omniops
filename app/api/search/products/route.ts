@@ -10,17 +10,6 @@ import { createServiceRoleClient } from '@/lib/supabase-server';
 import { DualEmbeddings } from '@/lib/dual-embeddings';
 import { generateQueryEmbedding } from '@/lib/embeddings';
 
-// Dynamic imports for Node.js modules
-const getQueryClassifier = async () => {
-  const imported = await import('@/lib/query-classifier.js');
-  return imported.QueryClassifier;
-};
-
-const getContentEnricher = async () => {
-  const imported = await import('@/lib/content-enricher.js');
-  return imported.ContentEnricher;
-};
-
 // Request schema
 const searchRequestSchema = z.object({
   query: z.string().min(1).max(500),
@@ -58,13 +47,10 @@ export async function POST(req: NextRequest) {
         { status: 500 }
       );
     }
-    
-    // Get query classifier
-    const QueryClassifier = await getQueryClassifier();
-    
-    // Classify the query for intelligent routing
-    const classification = await QueryClassifier.classifyQuery(query);
-    
+
+    // Simple classification based on query patterns
+    const classification = classifyQuery(query);
+
     console.log('[Product Search] Query classification:', {
       query,
       type: classification?.type,
@@ -527,6 +513,41 @@ function calculateImprovement(queryType: string, searchTime: number): string {
   const improvement = ((baseline - searchTime) / baseline) * 100;
   
   return `${improvement.toFixed(1)}% faster`;
+}
+
+/**
+ * Simple query classification based on patterns
+ */
+function classifyQuery(query: string) {
+  const lower = query.toLowerCase();
+  const skuPattern = /\b[A-Z0-9]{2,}[-\/][A-Z0-9]+\b/i;
+  const standaloneSkuPattern = /\b[A-Z]{1,3}\d{6,}\b/;
+
+  const hasSKU = skuPattern.test(query) || standaloneSkuPattern.test(query);
+  const hasPrice = /\b(price|cost|cheap|expensive|under|below|above|over|\$\d+)\b/i.test(lower);
+  const hasAvailability = /\b(in stock|available|availability)\b/i.test(lower);
+  const hasBrand = /\b(samsung|whirlpool|lg|ge|bosch)\b/i.test(lower);
+
+  let route = 'semantic_search';
+  let type = 'general_search';
+
+  if (hasSKU) {
+    route = 'sql_direct';
+    type = 'sku_lookup';
+  } else if (hasPrice || hasAvailability) {
+    route = 'hybrid_search';
+    type = hasPrice ? 'price_query' : 'availability_query';
+  }
+
+  return {
+    type,
+    route,
+    confidence: hasSKU ? 0.9 : 0.7,
+    sku: hasSKU ? (query.match(skuPattern) || query.match(standaloneSkuPattern))?.[0] : null,
+    priceIntent: hasPrice,
+    availabilityIntent: hasAvailability,
+    brand: hasBrand ? (query.match(/\b(samsung|whirlpool|lg|ge|bosch)\b/i))?.[0] : null
+  };
 }
 
 // GET endpoint for testing

@@ -39,6 +39,18 @@ class MockQueryBuilder {
   _getDefaultDataForTable(table) {
     // Return realistic mock data based on table name
     switch(table) {
+      case 'conversations':
+        return [{
+          id: 'mock-conv-id',
+          session_id: 'mock-session-id',
+          created_at: new Date().toISOString()
+        }];
+      case 'messages':
+        return [];
+      case 'domains':
+        return [{
+          id: 'mock-domain-id'
+        }];
       case 'organization_members':
         return [{
           role: 'owner',
