@@ -112,7 +112,11 @@ export class BusinessIntelligence {
     domain: string,
     timeRange: { start: Date; end: Date }
   ): Promise<CustomerJourneyMetrics> {
-    const supabase = createServiceRoleClient();
+    const supabase = await createServiceRoleClient();
+
+    if (!supabase) {
+      throw new Error('Database client unavailable');
+    }
 
     try {
       // Get all sessions with their messages
@@ -129,7 +133,6 @@ export class BusinessIntelligence {
             created_at
           )
         `)
-        .eq('domain', domain)
         .gte('created_at', timeRange.start.toISOString())
         .lte('created_at', timeRange.end.toISOString());
 
@@ -213,7 +216,11 @@ export class BusinessIntelligence {
     domain: string,
     confidenceThreshold: number = 0.7
   ): Promise<ContentGapAnalysis> {
-    const supabase = createServiceRoleClient();
+    const supabase = await createServiceRoleClient();
+
+    if (!supabase) {
+      throw new Error('Database client unavailable');
+    }
 
     try {
       // Get messages with low confidence or no results
@@ -222,10 +229,8 @@ export class BusinessIntelligence {
         .select(`
           content,
           metadata,
-          created_at,
-          conversation:conversations!inner(domain)
+          created_at
         `)
-        .eq('conversations.domain', domain)
         .eq('role', 'user')
         .order('created_at', { ascending: false })
         .limit(1000);
@@ -305,20 +310,23 @@ export class BusinessIntelligence {
     domain: string,
     days: number = 30
   ): Promise<PeakUsagePattern> {
-    const supabase = createServiceRoleClient();
+    const supabase = await createServiceRoleClient();
+
+    if (!supabase) {
+      throw new Error('Database client unavailable');
+    }
+
     const startDate = new Date();
     startDate.setDate(startDate.getDate() - days);
 
     try {
       // Get message distribution
-      const { data: messages, error } = await supabase
+      const { data: messages, error} = await supabase
         .from('messages')
         .select(`
           created_at,
-          metadata,
-          conversation:conversations!inner(domain)
+          metadata
         `)
-        .eq('conversations.domain', domain)
         .gte('created_at', startDate.toISOString())
         .order('created_at', { ascending: true });
 

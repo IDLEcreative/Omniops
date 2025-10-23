@@ -41,7 +41,7 @@ export async function GET(request: NextRequest) {
       );
     }
 
-    const bi = new BusinessIntelligence(supabase);
+    const bi = BusinessIntelligence.getInstance();
 
     // Calculate time range
     const endDate = params.endDate ? new Date(params.endDate) : new Date();
@@ -69,21 +69,21 @@ export async function GET(request: NextRequest) {
     if (params.metric === 'content-gaps' || params.metric === 'all') {
       results.contentGaps = await bi.analyzeContentGaps(
         params.domain || 'all',
-        timeRange
+        0.7 // confidence threshold
       );
     }
 
     if (params.metric === 'peak-usage' || params.metric === 'all') {
       results.peakUsage = await bi.analyzePeakUsage(
         params.domain || 'all',
-        timeRange
+        params.days // number of days
       );
     }
 
     if (params.metric === 'conversion-funnel' || params.metric === 'all') {
       results.conversionFunnel = await bi.analyzeConversionFunnel(
         params.domain || 'all',
-        timeRange
+        ['initial_contact', 'product_inquiry', 'price_check', 'order_lookup', 'purchase'] // funnel definition
       );
     }
 
@@ -128,8 +128,8 @@ function generateSummaryInsights(data: any): any {
   }
 
   // Content gap insights
-  if (data.contentGaps) {
-    const criticalGaps = data.contentGaps.filter((g: any) => g.frequency > 10);
+  if (data.contentGaps && data.contentGaps.unansweredQueries) {
+    const criticalGaps = data.contentGaps.unansweredQueries.filter((g: any) => g.frequency > 10);
     if (criticalGaps.length > 0) {
       insights.push({
         type: 'warning',
@@ -142,10 +142,11 @@ function generateSummaryInsights(data: any): any {
   }
 
   // Peak usage insights
-  if (data.peakUsage) {
+  if (data.peakUsage && data.peakUsage.hourlyDistribution) {
+    const avgMessages = data.peakUsage.hourlyDistribution
+      .reduce((acc: number, h: any) => acc + (h.avgMessages || 0), 0) / 24;
     const peakHours = data.peakUsage.hourlyDistribution
-      .filter((h: any) => h.avgRequests > data.peakUsage.hourlyDistribution
-        .reduce((acc: number, h: any) => acc + h.avgRequests, 0) / 24 * 1.5)
+      .filter((h: any) => (h.avgMessages || 0) > avgMessages * 1.5)
       .map((h: any) => h.hour);
 
     if (peakHours.length > 0) {
@@ -159,10 +160,10 @@ function generateSummaryInsights(data: any): any {
   }
 
   // Funnel insights
-  if (data.conversionFunnel) {
+  if (data.conversionFunnel && data.conversionFunnel.stages) {
     const biggestDrop = data.conversionFunnel.stages.reduce((max: any, stage: any, i: number, arr: any[]) => {
       if (i === 0) return max;
-      const dropRate = (arr[i-1].count - stage.count) / arr[i-1].count;
+      const dropRate = (arr[i-1].completedCount - stage.completedCount) / arr[i-1].completedCount;
       return dropRate > max.rate ? { stage: stage.name, rate: dropRate } : max;
     }, { stage: null, rate: 0 });
 
@@ -181,8 +182,8 @@ function generateSummaryInsights(data: any): any {
     criticalCount: insights.filter(i => i.priority === 'critical').length,
     highCount: insights.filter(i => i.priority === 'high').length,
     insights: insights.sort((a, b) => {
-      const priorityOrder = { critical: 0, high: 1, medium: 2, low: 3 };
-      return priorityOrder[a.priority] - priorityOrder[b.priority];
+      const priorityOrder: Record<string, number> = { critical: 0, high: 1, medium: 2, low: 3 };
+      return (priorityOrder[a.priority] ?? 99) - (priorityOrder[b.priority] ?? 99);
     })
   };
 }
