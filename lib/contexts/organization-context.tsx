@@ -167,14 +167,20 @@ export function OrganizationProvider({ children }: { children: React.ReactNode }
         return [];
       }
 
-      const orgs = memberships?.map(m => m.organization).filter(Boolean) as Organization[];
+      // Type assertion for Supabase query result
+      type MembershipWithOrg = { role: string; organization: Organization | null };
+      const typedMemberships = (memberships || []) as MembershipWithOrg[];
+
+      const orgs = typedMemberships
+        .map(m => m.organization)
+        .filter((org): org is Organization => org !== null && org !== undefined);
 
       // Cache the result
       cache.set(cacheKey, orgs, CACHE_CONFIG.ORGANIZATIONS_TTL);
       setUserOrganizations(orgs);
 
       // Set current organization if not set
-      if (!currentOrganization && orgs.length > 0) {
+      if (!currentOrganization && orgs.length > 0 && orgs[0]) {
         await switchOrganization(orgs[0].id);
       }
 
@@ -244,7 +250,9 @@ export function OrganizationProvider({ children }: { children: React.ReactNode }
             .eq('user_id', user.id)
             .single();
 
-          role = membership?.role || null;
+          // Type assertion for membership data
+          const typedMembership = membership as { role: string } | null;
+          role = typedMembership?.role || null;
           cache.set(cacheKey, role, CACHE_CONFIG.PERMISSIONS_TTL);
         }
 

@@ -8,7 +8,11 @@ interface RateLimitEntry {
 
 const rateLimitMap = new Map<string, RateLimitEntry>();
 
-// Cleanup interval to prevent memory leaks
+// Deterministic cleanup configuration
+const CLEANUP_THRESHOLD = 100; // Clean up every 100 checks
+let checkCount = 0;
+
+// Cleanup interval to prevent memory leaks (runs every 30s)
 let cleanupInterval: NodeJS.Timeout | null = null;
 
 // Start cleanup interval if not already started
@@ -43,12 +47,20 @@ export function checkRateLimit(
   const now = Date.now();
   const entry = rateLimitMap.get(identifier);
 
-  // Clean up old entries periodically
-  if (Math.random() < 0.01) {
+  // Deterministic cleanup every 100 checks (no more Math.random!)
+  checkCount++;
+  if (checkCount >= CLEANUP_THRESHOLD) {
+    let cleaned = 0;
     for (const [key, value] of rateLimitMap.entries()) {
       if (value.resetTime < now) {
         rateLimitMap.delete(key);
+        cleaned++;
       }
+    }
+    checkCount = 0;
+
+    if (process.env.NODE_ENV === 'development' && cleaned > 0) {
+      console.log(`[Rate Limit] Cleaned up ${cleaned} expired entries`);
     }
   }
 

@@ -5,12 +5,17 @@ export function sanitizeOutboundLinks(message: string, allowedDomain: string | n
     .replace(/^www\./, '')
     .toLowerCase();
 
+  const isAllowedHost = (host: string) => {
+    if (host === normalizedAllowed) return true;
+    return host.endsWith(`.${normalizedAllowed}`);
+  };
+
   // 1) Strip external markdown links: [text](url) -> text (if external)
   const markdownLinkRegex = /\[([^\]]+)\]\((https?:\/\/[^)]+)\)/g;
   message = message.replace(markdownLinkRegex, (match, text, url) => {
     try {
       const host = new URL(url).host.replace(/^www\./, '').toLowerCase();
-      return host.endsWith(normalizedAllowed) ? match : text; // keep link if same-domain, else drop URL
+      return isAllowedHost(host) ? match : text; // keep link if same-domain, else drop URL
     } catch {
       return text; // malformed URL: drop
     }
@@ -21,7 +26,7 @@ export function sanitizeOutboundLinks(message: string, allowedDomain: string | n
   message = message.replace(bareUrlRegex, (url) => {
     try {
       const host = new URL(url).host.replace(/^www\./, '').toLowerCase();
-      return host.endsWith(normalizedAllowed) ? url : '';
+      return isAllowedHost(host) ? url : '';
     } catch {
       return '';
     }
@@ -33,4 +38,3 @@ export function sanitizeOutboundLinks(message: string, allowedDomain: string | n
     .replace(/\n{3,}/g, '\n\n')     // Limit consecutive newlines to maximum 2
     .trim();
 }
-

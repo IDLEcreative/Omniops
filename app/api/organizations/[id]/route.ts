@@ -15,7 +15,7 @@ const updateOrganizationSchema = z.object({
  */
 export async function GET(
   request: NextRequest,
-  { params }: { params: { id: string } }
+  { params }: { params: Promise<{ id: string }> }
 ) {
   try {
     const supabase = await createClient();
@@ -26,7 +26,7 @@ export async function GET(
         { status: 503 }
       );
     }
-    const organizationId = params.id;
+    const { id: organizationId } = await params;
 
     // Get authenticated user
     const { data: { user }, error: authError } = await supabase.auth.getUser();
@@ -103,7 +103,7 @@ export async function GET(
  */
 export async function PATCH(
   request: NextRequest,
-  { params }: { params: { id: string } }
+  { params }: { params: Promise<{ id: string }> }
 ) {
   try {
     const supabase = await createClient();
@@ -114,7 +114,7 @@ export async function PATCH(
         { status: 503 }
       );
     }
-    const organizationId = params.id;
+    const { id: organizationId } = await params;
 
     // Get authenticated user
     const { data: { user }, error: authError } = await supabase.auth.getUser();
@@ -189,7 +189,7 @@ export async function PATCH(
  */
 export async function DELETE(
   request: NextRequest,
-  { params }: { params: { id: string } }
+  { params }: { params: Promise<{ id: string }> }
 ) {
   try {
     const supabase = await createClient();
@@ -200,7 +200,7 @@ export async function DELETE(
         { status: 503 }
       );
     }
-    const organizationId = params.id;
+    const { id: organizationId } = await params;
 
     // Get authenticated user
     const { data: { user }, error: authError } = await supabase.auth.getUser();

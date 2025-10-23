@@ -4,9 +4,20 @@
  */
 
 import { jest } from '@jest/globals'
+import { config } from 'dotenv'
+import { resolve } from 'path'
+
+// Load environment variables from .env.local
+// This overrides the mock env vars from test-utils/jest.setup.js
+config({ path: resolve(process.cwd(), '.env.local'), override: true })
 
 // Set longer timeout for integration tests
 jest.setTimeout(120000) // 2 minutes
+
+// Log that we're using real credentials (not mocks)
+console.log('[Integration Tests] Using REAL Supabase credentials from .env.local');
+console.log('[Integration Tests] URL:', process.env.NEXT_PUBLIC_SUPABASE_URL?.substring(0, 30) + '...');
+console.log('[Integration Tests] Has service key:', !!process.env.SUPABASE_SERVICE_ROLE_KEY);
 
 // Mock console methods to reduce noise during tests
 const originalConsoleError = console.error
@@ -27,12 +38,11 @@ afterEach(() => {
   console.log = originalConsoleLog
 })
 
-// Mock environment variables for consistent testing
+// Mock environment variables for consistent testing (but keep real Supabase credentials)
 process.env.NODE_ENV = 'test'
-process.env.NEXT_PUBLIC_SUPABASE_URL = 'https://test.supabase.co'
-process.env.SUPABASE_SERVICE_ROLE_KEY = 'test-service-role-key'
-process.env.REDIS_URL = 'redis://localhost:6379'
-process.env.OPENAI_API_KEY = 'test-openai-key'
+// Supabase credentials loaded from .env.local above
+process.env.REDIS_URL = process.env.REDIS_URL || 'redis://localhost:6379'
+process.env.OPENAI_API_KEY = process.env.OPENAI_API_KEY || 'test-openai-key'
 
 // Global test utilities
 global.testUtils = {
@@ -72,17 +82,8 @@ jest.mock('ioredis', () => {
   }))
 })
 
-// Mock Supabase client
-jest.mock('@supabase/supabase-js', () => ({
-  createClient: jest.fn(() => ({
-    from: jest.fn().mockReturnThis(),
-    select: jest.fn().mockReturnThis(),
-    insert: jest.fn().mockReturnThis(),
-    update: jest.fn().mockReturnThis(),
-    eq: jest.fn().mockReturnThis(),
-    single: jest.fn().mockResolvedValue({ data: null, error: null })
-  }))
-}))
+// DO NOT mock Supabase for integration tests - we need real DB calls for RLS testing
+// Supabase mocking is only for unit tests
 
 // Mock OpenAI client
 jest.mock('openai', () => {
@@ -101,6 +102,9 @@ jest.mock('openai', () => {
     }
   }))
 })
+
+// Supabase Auth API requests are now handled by the main MSW server in __tests__/mocks/server.ts
+// The handlers are configured to use passthrough() for RLS testing
 
 // Performance monitoring for integration tests
 let performanceStart = Date.now()

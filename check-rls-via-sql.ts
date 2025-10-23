@@ -170,22 +170,24 @@ async function testOrganizationIsolation() {
 
   // Check indirect relationships through domain_id
   if (domains && domains.length > 0) {
-    const domainId = domains[0].id;
+    const domainId = domains[0]?.id;
 
-    const { data: pages } = await supabase
-      .from('scraped_pages')
-      .select('id, url, domain_id')
-      .eq('domain_id', domainId)
-      .limit(5);
+    if (domainId) {
+      const { data: pages } = await supabase
+        .from('scraped_pages')
+        .select('id, url, domain_id')
+        .eq('domain_id', domainId)
+        .limit(5);
 
-    console.log(`\nScraped pages for domain ${domains[0].domain}: ${pages?.length || 0}`);
+      console.log(`\nScraped pages for domain ${domains[0]?.domain || 'unknown'}: ${pages?.length || 0}`);
 
-    // Verify domain relationship
-    const wrongDomain = pages?.filter(p => p.domain_id !== domainId) || [];
-    if (wrongDomain.length > 0) {
-      console.log(`❌ CRITICAL: Found ${wrongDomain.length} pages with wrong domain_id!`);
-    } else {
-      console.log('✅ All pages correctly associated with domain');
+      // Verify domain relationship
+      const wrongDomain = pages?.filter(p => p.domain_id !== domainId) || [];
+      if (wrongDomain.length > 0) {
+        console.log(`❌ CRITICAL: Found ${wrongDomain.length} pages with wrong domain_id!`);
+      } else {
+        console.log('✅ All pages correctly associated with domain');
+      }
     }
   }
 }

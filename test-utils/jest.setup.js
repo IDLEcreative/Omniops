@@ -61,13 +61,24 @@ jest.mock('next/navigation', () => ({
 }))
 
 // Mock Next.js headers and cookies
+// IMPORTANT: Next.js 15 made cookies() async, so the mock must return a Promise
 jest.mock('next/headers', () => ({
-  cookies: jest.fn(() => ({
-    get: jest.fn((name) => ({ name, value: 'mock-cookie-value' })),
-    getAll: jest.fn(() => []),
+  cookies: jest.fn(async () => ({
+    get: jest.fn((name) => {
+      // Return Supabase auth cookies for authenticated tests
+      if (name === 'sb-access-token' || name.startsWith('sb-')) {
+        return { name, value: 'mock-access-token' };
+      }
+      return { name, value: 'mock-cookie-value' };
+    }),
+    getAll: jest.fn(() => [
+      // Supabase SSR client expects these cookies for authentication
+      { name: 'sb-access-token', value: 'mock-access-token' },
+      { name: 'sb-refresh-token', value: 'mock-refresh-token' },
+    ]),
     set: jest.fn(),
     delete: jest.fn(),
-    has: jest.fn(() => false),
+    has: jest.fn((name) => name.startsWith('sb-')),
   })),
   headers: jest.fn(() => ({
     get: jest.fn(() => null),
@@ -81,7 +92,9 @@ jest.mock('next/headers', () => ({
 // Establish API mocking before all tests (guarded for Node/MSW compatibility)
 beforeAll(() => {
   try {
-    server.listen({ onUnhandledRequest: 'error' })
+    // Use 'bypass' to allow module-level mocks (OpenAI, Supabase) to work without MSW interception
+    // This prevents tests from hanging when unhandled requests occur
+    server.listen({ onUnhandledRequest: 'bypass' })
   } catch (e) {
     // eslint-disable-next-line no-console
     console.warn('[MSW] Disabled in test environment:', e?.message || e)

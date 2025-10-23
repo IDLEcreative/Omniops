@@ -22,6 +22,13 @@ export async function GET(request: NextRequest) {
 
     const supabase = await createServiceRoleClient();
 
+    if (!supabase) {
+      return NextResponse.json(
+        { success: false, error: 'Database connection failed' },
+        { status: 503 }
+      );
+    }
+
     const { data: config, error } = await supabase
       .from('customer_configs')
       .select('woocommerce_url')
@@ -113,6 +120,13 @@ export async function POST(request: NextRequest) {
 
     // Save to database
     const supabase = await createServiceRoleClient();
+
+    if (!supabase) {
+      return NextResponse.json(
+        { success: false, error: 'Database connection failed' },
+        { status: 503 }
+      );
+    }
 
     // Check if configuration exists
     const { data: existingConfig } = await supabase

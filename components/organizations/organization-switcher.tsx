@@ -16,13 +16,13 @@ import Link from 'next/link';
 
 export function OrganizationSwitcher() {
   const {
-    organizations,
+    userOrganizations,
     currentOrganization,
     setCurrentOrganization,
-    isLoading,
+    isLoadingOrganizations,
   } = useOrganization();
 
-  if (isLoading) {
+  if (isLoadingOrganizations) {
     return (
       <Button variant="outline" disabled className="w-[200px] justify-between">
         <Building2 className="mr-2 h-4 w-4" />
@@ -31,7 +31,7 @@ export function OrganizationSwitcher() {
     );
   }
 
-  if (organizations.length === 0) {
+  if (userOrganizations.length === 0) {
     return (
       <Link href="/organizations/new">
         <Button variant="outline" className="w-[200px] justify-between">
@@ -58,7 +58,7 @@ export function OrganizationSwitcher() {
       <DropdownMenuContent align="start" className="w-[200px]">
         <DropdownMenuLabel>Organizations</DropdownMenuLabel>
         <DropdownMenuSeparator />
-        {organizations.map((org) => (
+        {userOrganizations.map((org) => (
           <DropdownMenuItem
             key={org.id}
             onClick={() => setCurrentOrganization(org)}

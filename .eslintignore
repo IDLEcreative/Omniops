@@ -82,6 +82,7 @@ omniops-scraper/
 *.tmp
 *.temp
 *.log
+.tmp-ts/
 
 # Next.js telemetry
 .next-telemetry

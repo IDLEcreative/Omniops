@@ -199,7 +199,7 @@ export function UpgradeSeatsModal({
               {pricingPlans.map((plan) => {
                 const PlanIcon = plan.icon;
                 const isCurrentPlan = plan.id === currentPlan;
-                const isRecommended = plan.id === recommendedPlan.id && !isCurrentPlan;
+                const isRecommended = recommendedPlan && plan.id === recommendedPlan.id && !isCurrentPlan;
                 const canSelect = plan.seats === -1 || plan.seats > currentUsage;
 
                 return (

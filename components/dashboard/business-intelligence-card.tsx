@@ -93,14 +93,14 @@ export function BusinessIntelligenceCard({ domain, timeRange }: BusinessIntellig
   const COLORS = ['#0088FE', '#00C49F', '#FFBB28', '#FF8042', '#8884D8'];
 
   const renderInsightBadge = (insight: any) => {
-    const icons = {
+    const icons: Record<string, React.ReactNode> = {
       critical: <AlertCircle className="h-4 w-4" />,
       high: <TrendingDown className="h-4 w-4" />,
       medium: <Activity className="h-4 w-4" />,
       low: <CheckCircle className="h-4 w-4" />
     };
 
-    const colors = {
+    const colors: Record<string, string> = {
       critical: 'bg-red-100 text-red-800 border-red-200',
       high: 'bg-orange-100 text-orange-800 border-orange-200',
       medium: 'bg-yellow-100 text-yellow-800 border-yellow-200',
@@ -108,8 +108,8 @@ export function BusinessIntelligenceCard({ domain, timeRange }: BusinessIntellig
     };
 
     return (
-      <div className={`flex items-center gap-2 p-3 rounded-lg border ${colors[insight.priority]}`}>
-        {icons[insight.priority]}
+      <div className={`flex items-center gap-2 p-3 rounded-lg border ${colors[insight.priority] || colors.low}`}>
+        {icons[insight.priority] || icons.low}
         <div className="flex-1">
           <p className="text-sm font-medium">{insight.message}</p>
           {insight.details && (

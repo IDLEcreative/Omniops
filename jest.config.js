@@ -15,6 +15,10 @@ const customJestConfig = {
   moduleNameMapper: {
     '^@woocommerce/woocommerce-rest-api$': '<rootDir>/__mocks__/@woocommerce/woocommerce-rest-api.js',
     '^@supabase/supabase-js$': '<rootDir>/__mocks__/@supabase/supabase-js.js',
+    '^@/lib/supabase-server$': '<rootDir>/__mocks__/@/lib/supabase-server.ts',
+    '^@/lib/woocommerce-full$': '<rootDir>/__mocks__/@/lib/woocommerce-full.ts',
+    // Map cheerio to its CommonJS build to avoid ESM issues in Jest
+    '^cheerio$': '<rootDir>/node_modules/cheerio/dist/commonjs/index.js',
     '^@/(.*)$': '<rootDir>/$1',
   },
   testMatch: [
@@ -28,6 +32,11 @@ const customJestConfig = {
     '/__tests__/utils/',
     '/__tests__/mocks/',
     '/__tests__/fixtures/'
+  ],
+  // Transform ESM packages in node_modules
+  // Note: cheerio is mapped to CommonJS build above, but its dependencies may need transformation
+  transformIgnorePatterns: [
+    '/node_modules/(?!(parse5|dom-serializer|domhandler|domutils|entities|htmlparser2)/)',
   ],
   collectCoverageFrom: [
     'app/**/*.{js,jsx,ts,tsx}',

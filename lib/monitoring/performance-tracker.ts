@@ -27,7 +27,7 @@ export interface AggregatedMetrics {
   throughput: number; // requests per second
 }
 
-class PerformanceTracker {
+export class PerformanceTracker {
   private static instance: PerformanceTracker;
   private metrics: Map<string, PerformanceMetric[]> = new Map();
   private aggregationInterval: NodeJS.Timeout | null = null;
@@ -136,17 +136,19 @@ class PerformanceTracker {
       const totalCount = metrics.length;
 
       // Calculate time window for throughput
-      const oldestMetric = metrics[0].timestamp;
-      const newestMetric = metrics[metrics.length - 1].timestamp;
-      const timeWindowSeconds = (newestMetric.getTime() - oldestMetric.getTime()) / 1000;
+      const oldestMetric = metrics[0]?.timestamp;
+      const newestMetric = metrics[metrics.length - 1]?.timestamp;
+      const timeWindowSeconds = oldestMetric && newestMetric
+        ? (newestMetric.getTime() - oldestMetric.getTime()) / 1000
+        : 0;
 
       results.push({
         operation: op,
         count: totalCount,
         successRate: (successCount / totalCount) * 100,
         avgDuration: durations.reduce((a, b) => a + b, 0) / durations.length,
-        minDuration: durations[0],
-        maxDuration: durations[durations.length - 1],
+        minDuration: durations[0] || 0,
+        maxDuration: durations[durations.length - 1] || 0,
         p50: this.percentile(durations, 50),
         p95: this.percentile(durations, 95),
         p99: this.percentile(durations, 99),
@@ -225,7 +227,7 @@ class PerformanceTracker {
 
   private percentile(sortedArray: number[], percentile: number): number {
     const index = Math.ceil((percentile / 100) * sortedArray.length) - 1;
-    return sortedArray[Math.max(0, index)];
+    return sortedArray[Math.max(0, index)] || 0;
   }
 
   private startAggregation(): void {

@@ -7,7 +7,7 @@ This directory contains intelligent AI agents that handle customer service inter
 The agent system is designed with a clear separation of concerns:
 - **Interface Definition**: `ECommerceAgent` interface defines the contract
 - **Generic Implementation**: `CustomerServiceAgent` handles general queries
-- **Specialized Agents**: Provider-specific implementations (e.g., WooCommerce)
+- **Specialized Agents**: Provider-specific implementations (e.g., WooCommerce, Shopify)
 - **Domain Agnostic**: Universal agent for any business type
 
 ## Architecture
@@ -19,6 +19,7 @@ agents/
 ├── customer-service-agent-intelligent.ts  # Intelligent version
 ├── domain-agnostic-agent.ts        # Universal business agent
 ├── woocommerce-agent.ts            # WooCommerce specialization
+├── shopify-agent.ts                # Shopify specialization
 └── router.ts                       # Agent routing logic
 ```
 

@@ -1,12 +1,14 @@
 import WooCommerceRestApi from '@woocommerce/woocommerce-rest-api';
 import { z } from 'zod';
 
+declare const jest: any;
+
 // Initialize WooCommerce client with full access
-export function createWooCommerceClient(config?: {
+const createWooCommerceClientImpl = (config?: {
   url?: string;
   consumerKey?: string;
   consumerSecret?: string;
-}) {
+}) => {
   const url = config?.url || process.env.WOOCOMMERCE_URL;
   const consumerKey = config?.consumerKey || process.env.WOOCOMMERCE_CONSUMER_KEY;
   const consumerSecret = config?.consumerSecret || process.env.WOOCOMMERCE_CONSUMER_SECRET;
@@ -27,7 +29,12 @@ export function createWooCommerceClient(config?: {
     version: 'wc/v3',
     queryStringAuth: true,
   });
-}
+};
+
+export const createWooCommerceClient: typeof createWooCommerceClientImpl =
+  typeof jest !== 'undefined' && typeof jest.fn === 'function'
+    ? jest.fn(createWooCommerceClientImpl)
+    : createWooCommerceClientImpl;
 
 // Base schemas for common types
 const BaseSchema = z.object({

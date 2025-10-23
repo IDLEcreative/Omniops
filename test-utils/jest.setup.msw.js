@@ -1,3 +1,11 @@
+// Disable MSW internal debug logging for performance
+// MSW outputs verbose debug info when NODE_ENV=test, which creates massive overhead
+// Set to production to silence internal logging (safe - we're not testing MSW itself)
+if (process.env.MSW_DEBUG !== 'true') {
+  process.env.DEBUG = undefined;
+  process.env.NODE_DEBUG = undefined;
+}
+
 // Polyfill for TextEncoder/TextDecoder in Node environment
 import { TextEncoder as NodeTextEncoder, TextDecoder as NodeTextDecoder } from 'util';
 import { randomUUID as nodeRandomUUID } from 'crypto';
@@ -98,6 +106,13 @@ if (typeof Response === 'undefined') {
       this.redirected = false;
       this.type = 'basic';
       this.url = '';
+    }
+
+    // Static method for creating JSON responses (NextResponse.json uses this)
+    static json(data, init = {}) {
+      const body = JSON.stringify(data);
+      const headers = { 'Content-Type': 'application/json', ...(init.headers || {}) };
+      return new Response(body, { ...init, headers });
     }
 
     json() {

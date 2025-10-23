@@ -3,15 +3,54 @@ import { NextRequest } from 'next/server';
 import { createServiceRoleClient } from '@/lib/supabase-server';
 import { searchSimilarContent } from '@/lib/embeddings';
 import OpenAI from 'openai';
+import { mockCommerceProvider, mockOpenAIClient } from '@/test-utils/api-test-helpers';
 
 // Mock dependencies
 jest.mock('@/lib/supabase-server', () => ({
   createServiceRoleClient: jest.fn(),
+  createClient: jest.fn(),
+  requireClient: jest.fn(),
+  requireServiceRoleClient: jest.fn(),
+  validateSupabaseEnv: jest.fn().mockReturnValue(true),
 }));
 jest.mock('@/lib/embeddings');
 jest.mock('openai');
 jest.mock('@/lib/rate-limit', () => ({
-  checkDomainRateLimit: jest.fn(() => ({ allowed: true, resetTime: Date.now() + 3600000 }))
+  checkDomainRateLimit: jest.fn(() => ({ allowed: true, remaining: 99, resetTime: Date.now() + 3600000 }))
+}));
+jest.mock('@/lib/agents/commerce-provider', () => ({
+  getCommerceProvider: jest.fn(),
+}));
+jest.mock('@/lib/link-sanitizer', () => ({
+  sanitizeOutboundLinks: jest.fn((message) => message),
+}));
+jest.mock('@/lib/search-wrapper', () => ({
+  extractQueryKeywords: jest.fn((q) => [q]),
+  isPriceQuery: jest.fn(() => false),
+  extractPriceRange: jest.fn(() => null),
+}));
+jest.mock('@/lib/chat-telemetry', () => ({
+  ChatTelemetry: jest.fn(),
+  telemetryManager: {
+    createSession: jest.fn(() => ({
+      log: jest.fn(),
+      trackIteration: jest.fn(),
+      trackSearch: jest.fn(),
+      complete: jest.fn(),
+    })),
+  },
+}));
+jest.mock('@/lib/monitoring/performance-tracker', () => ({
+  trackAsync: jest.fn((fn) => fn()),
+}));
+jest.mock('@/lib/redis-fallback', () => ({
+  getRedisClientWithFallback: jest.fn(() => ({
+    get: jest.fn().mockResolvedValue(null),
+    set: jest.fn().mockResolvedValue('OK'),
+    setex: jest.fn().mockResolvedValue('OK'),
+    quit: jest.fn().mockResolvedValue(undefined),
+    disconnect: jest.fn().mockResolvedValue(undefined),
+  })),
 }));
 
 describe('Chat API Route - Async Performance', () => {
@@ -23,11 +62,11 @@ describe('Chat API Route - Async Performance', () => {
     jest.clearAllMocks();
     performanceMarkers = {};
 
-    // Setup mock Supabase client
+    // Setup mock Supabase client with performance tracking
     mockSupabase = {
       from: jest.fn((table: string) => {
         const startTime = Date.now();
-        
+
         if (table === 'conversations') {
           return {
             insert: jest.fn(() => ({
@@ -36,15 +75,23 @@ describe('Chat API Route - Async Performance', () => {
                   performanceMarkers['conversation_create'] = Date.now() - startTime;
                   await new Promise(resolve => setTimeout(resolve, 100)); // Simulate DB delay
                   return {
-                    data: { id: 'conv-123', session_id: 'session-123' },
+                    data: { id: 'conv-123', session_id: 'session-123', created_at: new Date().toISOString() },
                     error: null
                   };
                 })
               }))
+            })),
+            select: jest.fn(() => ({
+              eq: jest.fn(() => ({
+                single: jest.fn(() => Promise.resolve({
+                  data: { id: 'conv-123', session_id: 'session-123' },
+                  error: null
+                }))
+              }))
             }))
           };
         }
-        
+
         if (table === 'messages') {
           return {
             insert: jest.fn(() => {
@@ -91,6 +138,19 @@ describe('Chat API Route - Async Performance', () => {
           };
         }
 
+        if (table === 'domains') {
+          return {
+            select: jest.fn(() => ({
+              eq: jest.fn(() => ({
+                single: jest.fn(() => Promise.resolve({
+                  data: { id: 'domain-123' },
+                  error: null
+                }))
+              }))
+            }))
+          };
+        }
+
         return {
           select: jest.fn(() => ({
             eq: jest.fn(() => ({
@@ -99,12 +159,16 @@ describe('Chat API Route - Async Performance', () => {
           }))
         };
       }),
-      rpc: jest.fn()
-    };
+      rpc: jest.fn().mockResolvedValue({ data: [], error: null })
+    } as any;
 
-    (createServiceRoleClient as jest.Mock).mockReturnValue(mockSupabase);
+    const mockModule = jest.requireMock('@/lib/supabase-server');
+    mockModule.createServiceRoleClient.mockResolvedValue(mockSupabase);
+    mockModule.createClient.mockResolvedValue(mockSupabase);
+    mockModule.requireClient.mockResolvedValue(mockSupabase);
+    mockModule.requireServiceRoleClient.mockResolvedValue(mockSupabase);
 
-    // Mock search similar content
+    // Mock search similar content with performance tracking
     (searchSimilarContent as jest.Mock).mockImplementation(async () => {
       const startTime = Date.now();
       await new Promise(resolve => setTimeout(resolve, 80)); // Simulate embedding search delay
@@ -119,44 +183,48 @@ describe('Chat API Route - Async Performance', () => {
       ];
     });
 
-    // Mock OpenAI
-    mockOpenAI = {
-      chat: {
-        completions: {
-          create: jest.fn(async () => {
-            await new Promise(resolve => setTimeout(resolve, 200)); // Simulate AI delay
-            return {
-              choices: [{
-                message: { content: 'AI response' }
-              }]
-            };
-          })
-        }
-      },
-      embeddings: {
-        create: jest.fn().mockResolvedValue({
-          data: [{ embedding: new Array(1536).fill(0.1) }]
-        })
-      }
-    };
+    // Use standardized OpenAI mock with performance tracking
+    mockOpenAI = mockOpenAIClient() as any;
+    mockOpenAI.chat.completions.create = jest.fn(async () => {
+      await new Promise(resolve => setTimeout(resolve, 200)); // Simulate AI delay
+      return {
+        choices: [{
+          message: { content: 'AI response', role: 'assistant' }
+        }]
+      } as any;
+    });
 
     (OpenAI as jest.Mock).mockImplementation(() => mockOpenAI);
 
-    // Mock WooCommerce dynamic import
-    jest.doMock('@/lib/woocommerce-dynamic', () => ({
-      searchProductsDynamic: jest.fn(async () => {
+    // Use standardized commerce provider mock with performance tracking
+    const commerceModule = jest.requireMock('@/lib/agents/commerce-provider');
+    const provider = mockCommerceProvider({
+      platform: 'woocommerce',
+      products: [
+        {
+          id: 1,
+          name: 'Product 1',
+          price: '99.99',
+          sku: 'SKU-1',
+          permalink: 'https://example.com/product-1'
+        }
+      ],
+      searchProducts: jest.fn(async (_query: string, _limit: number) => {
         const startTime = Date.now();
-        await new Promise(resolve => setTimeout(resolve, 60)); // Simulate API delay
+        await new Promise(resolve => setTimeout(resolve, 60));
         performanceMarkers['woocommerce_search'] = Date.now() - startTime;
         return [
-          { 
-            name: 'Product 1', 
-            price: '99.99', 
-            stock_status: 'instock' 
+          {
+            id: 1,
+            name: 'Product 1',
+            price: '99.99',
+            sku: 'SKU-1',
+            permalink: 'https://example.com/product-1'
           }
         ];
-      })
-    }));
+      }),
+    });
+    commerceModule.getCommerceProvider.mockResolvedValue(provider);
   });
 
   it('should execute independent operations in parallel', async () => {
@@ -183,22 +251,22 @@ describe('Chat API Route - Async Performance', () => {
     const totalTime = Date.now() - startTime;
 
     expect(response.status).toBe(200);
-    
+
     // Verify parallel execution
     // If operations were sequential, total time would be sum of all delays (100 + 50 + 80 + 75 + 60 = 365ms)
     // With parallel execution, it should be roughly the max delay (200ms for AI) plus overhead
-    
+
     console.log('Performance Markers:', performanceMarkers);
     console.log('Total Time:', totalTime);
-    
+
     // Check that operations started nearly simultaneously
     expect(performanceMarkers['message_save_start']).toBeLessThan(20); // Started quickly
     expect(performanceMarkers['history_fetch']).toBeLessThan(20); // Started quickly
     expect(performanceMarkers['embedding_search']).toBeLessThan(100); // Started after minimal delay
-    
+
     // Total time should be significantly less than sequential execution
     expect(totalTime).toBeLessThan(350); // Should complete faster than sequential (365ms)
-    
+
     // Verify all operations completed
     expect(searchSimilarContent).toHaveBeenCalled();
     expect(mockSupabase.from).toHaveBeenCalledWith('messages');
@@ -234,7 +302,7 @@ describe('Chat API Route - Async Performance', () => {
     expect(response.status).toBe(200);
     expect(data.message).toBeDefined();
     expect(data.conversation_id).toBeDefined();
-    
+
     // Other operations should have completed successfully
     expect(mockSupabase.from).toHaveBeenCalledWith('messages');
   });
@@ -251,15 +319,23 @@ describe('Chat API Route - Async Performance', () => {
               single: jest.fn(async () => {
                 operationOrder.push('conversation_created');
                 return {
-                  data: { id: 'conv-123', session_id: 'session-123' },
+                  data: { id: 'conv-123', session_id: 'session-123', created_at: new Date().toISOString() },
                   error: null
                 };
               })
             }))
+          })),
+          select: jest.fn(() => ({
+            eq: jest.fn(() => ({
+              single: jest.fn(() => Promise.resolve({
+                data: { id: 'conv-123', session_id: 'session-123' },
+                error: null
+              }))
+            }))
           }))
         };
       }
-      
+
       if (table === 'messages') {
         return {
           insert: jest.fn(() => {
@@ -285,6 +361,19 @@ describe('Chat API Route - Async Performance', () => {
         };
       }
 
+      if (table === 'domains') {
+        return {
+          select: jest.fn(() => ({
+            eq: jest.fn(() => ({
+              single: jest.fn(() => Promise.resolve({
+                data: { id: 'domain-123' },
+                error: null
+              }))
+            }))
+          }))
+        };
+      }
+
       return {
         select: jest.fn(() => ({
           eq: jest.fn(() => ({
@@ -292,7 +381,7 @@ describe('Chat API Route - Async Performance', () => {
           }))
         }))
       };
-    });
+    }) as any;
 
     const request = new NextRequest('http://localhost:3000/api/chat', {
       method: 'POST',
@@ -310,7 +399,7 @@ describe('Chat API Route - Async Performance', () => {
     // Verify conversation is created before message saving
     const convIndex = operationOrder.indexOf('conversation_created');
     const msgIndex = operationOrder.indexOf('message_save_started');
-    
+
     expect(convIndex).toBeGreaterThanOrEqual(0);
     expect(msgIndex).toBeGreaterThanOrEqual(0);
     expect(convIndex).toBeLessThan(msgIndex);

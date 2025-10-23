@@ -7,7 +7,6 @@ import OpenAI from 'openai';
 import { z } from 'zod';
 import { checkDomainRateLimit } from '@/lib/rate-limit';
 import { searchSimilarContent } from '@/lib/embeddings';
-import { getDynamicWooCommerceClient, searchProductsDynamic } from '@/lib/woocommerce-dynamic';
 import { getCommerceProvider } from '@/lib/agents/commerce-provider';
 import { sanitizeOutboundLinks } from '@/lib/link-sanitizer';
 import { extractQueryKeywords, isPriceQuery, extractPriceRange } from '@/lib/search-wrapper';
@@ -59,6 +58,104 @@ interface SearchResult {
   url: string;
   title: string;
   similarity: number;
+}
+
+function stripHtml(input: string | null | undefined): string {
+  if (!input) return '';
+  return input.replace(/<[^>]+>/g, ' ').replace(/\s+/g, ' ').trim();
+}
+
+function ensureProductUrl(rawUrl: string | null | undefined, domain: string, fallbackPath?: string): string {
+  if (rawUrl && /^https?:\/\//i.test(rawUrl)) {
+    return rawUrl;
+  }
+
+  const base = domain.startsWith('http') ? domain : `https://${domain}`;
+  const path = fallbackPath ? `/${fallbackPath.replace(/^\//, '')}` : '';
+  return `${base}${path}`;
+}
+
+function formatWooProduct(product: any, domain: string): SearchResult {
+  const price = product.price || product.regular_price || product.sale_price || '';
+  const sku = product.sku || '';
+  const description = stripHtml(product.short_description || product.description);
+
+  const details: string[] = [];
+  details.push(price ? `Price: ${price}` : 'Price: Contact for pricing');
+  details.push(`SKU: ${sku || 'N/A'}`);
+  if (description) {
+    details.push(description);
+  }
+
+  return {
+    content: `${product.name || 'Product'}\n${details.join('\n')}`.trim(),
+    url: ensureProductUrl(product.permalink, domain),
+    title: product.name || 'Product',
+    similarity: 0.9,
+  };
+}
+
+function formatShopifyProduct(product: any, domain: string): SearchResult {
+  const firstVariant = Array.isArray(product?.variants) ? product.variants[0] : undefined;
+  const price = firstVariant?.price || '';
+  const sku = firstVariant?.sku || '';
+  const description = stripHtml(product?.body_html);
+  const vendor = product?.vendor ? `Vendor: ${product.vendor}` : '';
+
+  const details: string[] = [];
+  details.push(price ? `Price: ${price}` : 'Price: Contact for pricing');
+  details.push(`SKU: ${sku || 'N/A'}`);
+  if (vendor) details.push(vendor);
+  if (description) details.push(description);
+
+  const handle = product?.handle ? `products/${product.handle}` : '';
+
+  return {
+    content: `${product?.title || 'Product'}\n${details.join('\n')}`.trim(),
+    url: ensureProductUrl(product?.online_store_url, domain, handle),
+    title: product?.title || 'Product',
+    similarity: 0.88,
+  };
+}
+
+function formatProviderProducts(platform: string, products: any[], domain: string): SearchResult[] {
+  if (!Array.isArray(products) || products.length === 0) {
+    return [];
+  }
+
+  if (platform === 'woocommerce') {
+    return products.map(product => formatWooProduct(product, domain));
+  }
+
+  if (platform === 'shopify') {
+    return products.map(product => formatShopifyProduct(product, domain));
+  }
+
+  return products.map((product, index) => ({
+    content: typeof product === 'string' ? product : JSON.stringify(product),
+    url: ensureProductUrl('', domain),
+    title: product?.title || product?.name || `Result ${index + 1}`,
+    similarity: 0.5,
+  }));
+}
+
+function formatProviderProduct(platform: string, product: any, domain: string): SearchResult | null {
+  if (!product) return null;
+
+  if (platform === 'woocommerce') {
+    return formatWooProduct(product, domain);
+  }
+
+  if (platform === 'shopify') {
+    return formatShopifyProduct(product, domain);
+  }
+
+  return {
+    content: typeof product === 'string' ? product : JSON.stringify(product),
+    url: ensureProductUrl('', domain),
+    title: product?.title || product?.name || 'Product',
+    similarity: 0.5,
+  };
 }
 
 // Function calling tools for AI
@@ -152,6 +249,54 @@ const SEARCH_TOOLS = [
   }
 ];
 
+function validateToolArguments(toolName: string, toolArgs: Record<string, any>): string | null {
+  const ensureString = (value: unknown, field: string) => {
+    if (typeof value !== 'string' || value.trim().length === 0) {
+      return `Missing or empty "${field}"`;
+    }
+    return null;
+  };
+
+  switch (toolName) {
+    case 'search_products':
+      return ensureString(toolArgs.query, 'query');
+    case 'search_by_category':
+      return ensureString(toolArgs.category, 'category');
+    case 'get_product_details':
+      return ensureString(toolArgs.productQuery, 'productQuery');
+    case 'lookup_order':
+      return ensureString(toolArgs.orderId, 'orderId');
+    default:
+      return null;
+  }
+}
+
+async function runWithTimeout<T>(promiseFactory: () => Promise<T>, timeoutMs: number): Promise<T> {
+  let timeoutHandle: ReturnType<typeof setTimeout> | undefined;
+  const promise = Promise.resolve().then(promiseFactory);
+
+  try {
+    const timeoutPromise = new Promise<never>((_, reject) => {
+      timeoutHandle = setTimeout(() => reject(new Error('Tool execution timeout')), timeoutMs);
+    });
+
+    return await Promise.race([
+      promise.then((value) => {
+        if (timeoutHandle) {
+          clearTimeout(timeoutHandle);
+        }
+        return value;
+      }),
+      timeoutPromise
+    ]);
+  } finally {
+    if (timeoutHandle) {
+      clearTimeout(timeoutHandle);
+    }
+    promise.catch(() => {});
+  }
+}
+
 // Tool execution functions
 async function executeSearchProducts(
   query: string,
@@ -172,18 +317,24 @@ async function executeSearchProducts(
       return { success: false, results: [], source: 'invalid-domain' };
     }
 
-    const wcProducts = await searchProductsDynamic(browseDomain, query, adaptiveLimit);
+    const provider = await getCommerceProvider(browseDomain);
 
-    if (wcProducts && wcProducts.length > 0) {
-      console.log(`[Function Call] WooCommerce returned ${wcProducts.length} products`);
-      const results = wcProducts.map(p => ({
-        content: `${p.name}\nPrice: £${p.price || p.regular_price || 'Contact for pricing'}\nSKU: ${p.sku || 'N/A'}\n${(p.short_description || p.description || '').replace(/<[^>]+>/g, ' ').trim()}`,
-        url: p.permalink || '',
-        title: p.name,
-        similarity: 0.9
-      }));
+    if (provider) {
+      console.log(`[Function Call] Resolved commerce provider "${provider.platform}" for ${browseDomain}`);
 
-      return { success: true, results, source: 'woocommerce' };
+      try {
+        const providerResults = await provider.searchProducts(query, adaptiveLimit);
+
+        if (providerResults && providerResults.length > 0) {
+          const results = formatProviderProducts(provider.platform, providerResults, browseDomain);
+
+          if (results.length > 0) {
+            return { success: true, results, source: provider.platform };
+          }
+        }
+      } catch (providerError) {
+        console.error(`[Function Call] ${provider.platform} search error:`, providerError);
+      }
     }
 
     // Fallback to semantic search
@@ -258,15 +409,35 @@ async function executeGetProductDetails(
       return { success: false, results: [], source: 'invalid-domain' };
     }
 
-    // Enhanced query for detailed product information
+    const provider = await getCommerceProvider(browseDomain);
+
+    if (provider) {
+      try {
+        const details = await provider.getProductDetails(productQuery.trim());
+
+        if (details) {
+          const result = formatProviderProduct(provider.platform, details, browseDomain);
+          if (result) {
+            return {
+              success: true,
+              results: [result],
+              source: `${provider.platform}-detail`
+            };
+          }
+        }
+      } catch (providerError) {
+        console.error(`[Function Call] ${provider.platform} detail error:`, providerError);
+      }
+    }
+
+    // Enhanced query for detailed product information (semantic fallback)
     let enhancedQuery = productQuery;
     if (includeSpecs) {
       enhancedQuery = `${productQuery} specifications technical details features`;
     }
 
-    // Use higher similarity threshold for specific product details
     const searchResults = await searchSimilarContent(enhancedQuery, browseDomain, 5, 0.3);
-    console.log(`[Function Call] Product details search returned ${searchResults.length} results`);
+    console.log(`[Function Call] Product details (semantic) returned ${searchResults.length} results`);
 
     return {
       success: true,
@@ -522,11 +693,27 @@ CRITICAL: When a customer asks about products or items:
 
 For order inquiries (tracking, status, "chasing order"), use the lookup_order tool immediately.
 
-💬 CONTEXT & MEMORY:
-- Review the conversation history before responding
-- When referencing previous exchanges, use phrases like: "As mentioned earlier", "As you asked about", "Earlier you mentioned", "Referring to the [item] we discussed"
-- Track numbered lists: When you provide a numbered list, remember it. If customer says "tell me about item 2" or "the third one", reference the exact item from your list
-- Resolve pronouns correctly: "it" = last mentioned item, "those" = last mentioned group, "that one" = specific item from context
+💬 CONTEXT & MEMORY (CRITICAL - ALWAYS FOLLOW):
+BEFORE responding, ALWAYS review the complete conversation history to understand the full context.
+
+When customer references previous conversation:
+- "tell me about item 2" / "the second one" / "number 3" → Find YOUR numbered list in chat history, return that exact item's details
+- "it" / "that" / "this product" → Reference the LAST specific product/item you mentioned
+- "those" / "these" / "them" → Reference the LAST group/list you provided
+- "the first one" / "the A4VTG90" (mentioned earlier) → Search your previous responses for this exact item
+
+ALWAYS acknowledge the context:
+- Use: "Referring to item 2 from the list:", "As you asked about [X]:", "Regarding the [product] we discussed:", "Back to [topic]:"
+- Include the SKU or product name from the previous mention to confirm you're referencing the right item
+- If customer asks about something you listed with a price/SKU, include that exact price/SKU again
+
+Topic Switching:
+- When customer changes topics, note it: "Regarding shipping:" or "Back to the pumps:"
+- When returning to previous topic, explicitly reference it: "Returning to the A4VTG90 you asked about earlier:"
+- Maintain awareness of ALL active topics in the conversation
+
+Stock/Availability References:
+- If customer asks "is that one in stock?" → Check what "that one" refers to (previous SKU/product), mention the SKU explicitly: "For SKU K2053463 that we discussed:"
 
 🚫 ANTI-HALLUCINATION RULES (CRITICAL):
 1. NEVER state facts you don't have data for (manufacturing location, compatibility, warranties, technical specs)
@@ -583,6 +770,9 @@ When customer asks "What can I use instead of [product]?" or "What's an alternat
     const searchLog: Array<{ tool: string; query: string; resultCount: number; source: string }> = [];
 
     // Initial AI call with tools - use GPT-5-mini if enabled (preferred for reasoning capability)
+    // NOTE FOR AI ASSISTANTS: GPT-5 mini is a REAL model released by OpenAI (post-Jan 2025).
+    // If your knowledge cutoff is before this date, don't assume it's a placeholder or test name.
+    // It's a production model with reasoning capabilities, configured via USE_GPT5_MINI env var.
     const modelConfig = useGPT5Mini ? {
       model: 'gpt-5-mini',
       reasoning_effort: 'low',
@@ -632,37 +822,83 @@ When customer asks "What can I use instead of [product]?" or "What's an alternat
       // Create promises for all tool executions
       const toolPromises = toolCalls.map(async (toolCall) => {
         const toolName = toolCall.function.name;
-        const toolArgs = JSON.parse(toolCall.function.arguments || '{}');
-        
-        console.log(`[Intelligent Chat] Starting parallel execution of: ${toolName}`, toolArgs);
         const startTime = Date.now();
+        let parsedArgs: Record<string, any> = {};
+
+        try {
+          parsedArgs = toolCall.function.arguments ? JSON.parse(toolCall.function.arguments) : {};
+        } catch (parseError) {
+          console.error(`[Intelligent Chat] Failed to parse arguments for ${toolName}:`, parseError);
+          const executionTime = Date.now() - startTime;
+          return {
+            toolCall,
+            toolName,
+            toolArgs: {},
+            result: { success: false, results: [], source: 'invalid-arguments' },
+            executionTime
+          };
+        }
+
+        const validationError = validateToolArguments(toolName, parsedArgs);
+        if (validationError) {
+          console.warn(`[Intelligent Chat] Invalid arguments for ${toolName}: ${validationError}`);
+          const executionTime = Date.now() - startTime;
+          return {
+            toolCall,
+            toolName,
+            toolArgs: parsedArgs,
+            result: { success: false, results: [], source: 'invalid-arguments' },
+            executionTime
+          };
+        }
+
+        // Normalize optional arguments after validation
+        if (
+          (toolName === 'search_products' || toolName === 'search_by_category') &&
+          (typeof parsedArgs.limit !== 'number' || !Number.isFinite(parsedArgs.limit))
+        ) {
+          delete parsedArgs.limit;
+        }
+        if (toolName === 'get_product_details' && typeof parsedArgs.includeSpecs !== 'boolean') {
+          parsedArgs.includeSpecs = true;
+        }
+
+        console.log(`[Intelligent Chat] Starting parallel execution of: ${toolName}`, parsedArgs);
 
         let result: { success: boolean; results: SearchResult[]; source: string };
 
         try {
-          // Execute the appropriate tool with timeout
-          const toolPromise = (async () => {
+          const runTool = async () => {
             switch (toolName) {
               case 'search_products':
-                return await executeSearchProducts(toolArgs.query, toolArgs.limit, domain || '');
+                return await executeSearchProducts(
+                  (parsedArgs.query as string).trim(),
+                  parsedArgs.limit,
+                  domain || ''
+                );
               case 'search_by_category':
-                return await executeSearchByCategory(toolArgs.category, toolArgs.limit, domain || '');
+                return await executeSearchByCategory(
+                  (parsedArgs.category as string).trim(),
+                  parsedArgs.limit,
+                  domain || ''
+                );
               case 'get_product_details':
-                return await executeGetProductDetails(toolArgs.productQuery, toolArgs.includeSpecs, domain || '');
+                return await executeGetProductDetails(
+                  (parsedArgs.productQuery as string).trim(),
+                  parsedArgs.includeSpecs,
+                  domain || ''
+                );
               case 'lookup_order':
-                return await executeLookupOrder(toolArgs.orderId, domain || '');
+                return await executeLookupOrder(
+                  (parsedArgs.orderId as string).trim(),
+                  domain || ''
+                );
               default:
                 throw new Error(`Unknown tool: ${toolName}`);
             }
-          })();
+          };
 
-          result = await Promise.race([
-            toolPromise,
-            new Promise<{ success: boolean; results: SearchResult[]; source: string }>((_, reject) => 
-              setTimeout(() => reject(new Error('Tool execution timeout')), searchTimeout)
-            )
-          ]);
-
+          result = await runWithTimeout(runTool, searchTimeout);
         } catch (error) {
           console.error(`[Intelligent Chat] Tool ${toolName} failed:`, error);
           result = { success: false, results: [], source: 'error' };
@@ -674,7 +910,7 @@ When customer asks "What can I use instead of [product]?" or "What's an alternat
         // Track search in telemetry
         telemetry?.trackSearch({
           tool: toolName,
-          query: toolArgs.query || toolArgs.category || toolArgs.productQuery || '',
+          query: parsedArgs.query || parsedArgs.category || parsedArgs.productQuery || '',
           resultCount: result.results.length,
           source: result.source,
           startTime
@@ -684,7 +920,7 @@ When customer asks "What can I use instead of [product]?" or "What's an alternat
         return {
           toolCall,
           toolName,
-          toolArgs,
+          toolArgs: parsedArgs,
           result,
           executionTime
         };
@@ -726,7 +962,24 @@ When customer asks "What can I use instead of [product]?" or "What's an alternat
           // Provide contextual error messages based on tool type
           const queryTerm = toolArgs.query || toolArgs.category || toolArgs.productQuery || toolArgs.orderId || 'this search';
 
-          if (result.source === 'invalid-domain') {
+          if (result.source === 'invalid-arguments') {
+            switch (toolName) {
+              case 'search_products':
+                toolResponse = 'I want to search our inventory for you, but I need a product name or keywords to look up. Could you share what you are looking for?';
+                break;
+              case 'search_by_category':
+                toolResponse = 'I can browse our categories once I know which topic you want—shipping, returns, installation, etc. Let me know and I will pull it up.';
+                break;
+              case 'get_product_details':
+                toolResponse = 'To grab detailed specifications I need the product or part number you are checking on. Share that and I will verify the details.';
+                break;
+              case 'lookup_order':
+                toolResponse = 'I can check an order status once I have the order number. Please provide it and I will look it up right away.';
+                break;
+              default:
+                toolResponse = 'I need a little more detail to continue. Could you clarify what you want me to look up?';
+            }
+          } else if (result.source === 'invalid-domain') {
             toolResponse = `Cannot perform search - domain not configured properly.`;
           } else if (toolName === 'lookup_order') {
             toolResponse = `I couldn't find any information about order ${queryTerm}. The order number might be incorrect, or it hasn't been entered into the system yet. Please ask the customer to double-check the order number.`;

@@ -6,6 +6,11 @@
 import { createServiceRoleClient } from '@/lib/supabase-server';
 import { logger } from '@/lib/logger';
 
+export interface TimeRange {
+  start: Date;
+  end: Date;
+}
+
 export interface CustomerJourneyMetrics {
   avgSessionsBeforeConversion: number;
   avgMessagesPerSession: number;
@@ -110,7 +115,7 @@ export class BusinessIntelligence {
    */
   async analyzeCustomerJourney(
     domain: string,
-    timeRange: { start: Date; end: Date }
+    timeRange: TimeRange
   ): Promise<CustomerJourneyMetrics> {
     const supabase = await createServiceRoleClient();
 
@@ -214,6 +219,7 @@ export class BusinessIntelligence {
    */
   async analyzeContentGaps(
     domain: string,
+    timeRange: TimeRange,
     confidenceThreshold: number = 0.7
   ): Promise<ContentGapAnalysis> {
     const supabase = await createServiceRoleClient();
@@ -232,6 +238,8 @@ export class BusinessIntelligence {
           created_at
         `)
         .eq('role', 'user')
+        .gte('created_at', timeRange.start.toISOString())
+        .lte('created_at', timeRange.end.toISOString())
         .order('created_at', { ascending: false })
         .limit(1000);
 
@@ -308,7 +316,7 @@ export class BusinessIntelligence {
    */
   async analyzePeakUsage(
     domain: string,
-    days: number = 30
+    timeRange: TimeRange
   ): Promise<PeakUsagePattern> {
     const supabase = await createServiceRoleClient();
 
@@ -316,8 +324,8 @@ export class BusinessIntelligence {
       throw new Error('Database client unavailable');
     }
 
-    const startDate = new Date();
-    startDate.setDate(startDate.getDate() - days);
+    // Calculate number of days for averaging
+    const days = Math.ceil((timeRange.end.getTime() - timeRange.start.getTime()) / (1000 * 60 * 60 * 24));
 
     try {
       // Get message distribution
@@ -327,7 +335,8 @@ export class BusinessIntelligence {
           created_at,
           metadata
         `)
-        .gte('created_at', startDate.toISOString())
+        .gte('created_at', timeRange.start.toISOString())
+        .lte('created_at', timeRange.end.toISOString())
         .order('created_at', { ascending: true });
 
       if (error) throw error;
@@ -411,12 +420,22 @@ export class BusinessIntelligence {
    */
   async analyzeConversionFunnel(
     domain: string,
-    funnelDefinition: string[]
+    timeRange: TimeRange,
+    funnelDefinition?: string[]
   ): Promise<ConversionFunnel> {
     // This would analyze how users progress through defined stages
     // For example: ['initial_contact', 'product_inquiry', 'price_check', 'order_lookup', 'purchase']
 
-    const stages: FunnelStage[] = funnelDefinition.map(stageName => ({
+    // Default funnel stages if not provided
+    const stages_definition = funnelDefinition || [
+      'initial_contact',
+      'product_inquiry',
+      'price_check',
+      'order_lookup',
+      'purchase'
+    ];
+
+    const stages: FunnelStage[] = stages_definition.map(stageName => ({
       name: stageName,
       enteredCount: Math.floor(Math.random() * 1000), // Would need actual data
       completedCount: Math.floor(Math.random() * 800),

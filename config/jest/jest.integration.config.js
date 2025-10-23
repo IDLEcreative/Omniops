@@ -16,10 +16,13 @@ const customJestConfig = {
   
   // Test environment
   testEnvironment: 'jsdom',
-  
-  // Setup files
+
+  // Increase timeout for integration tests with MSW overhead
+  testTimeout: 30000, // 30 seconds
+
+  // Setup files - using separate setup WITHOUT MSW for real API calls
   setupFilesAfterEnv: [
-    '<rootDir>/test-utils/jest.setup.js',
+    '<rootDir>/test-utils/jest.setup.integration.js',
     '<rootDir>/__tests__/utils/integration-setup.js'
   ],
   
@@ -32,6 +35,8 @@ const customJestConfig = {
   moduleNameMapper: {
     '^msw/node$': '<rootDir>/node_modules/msw/lib/node/index.js',
     '^@mswjs/interceptors/ClientRequest$': '<rootDir>/node_modules/@mswjs/interceptors/lib/node/interceptors/ClientRequest/index.js',
+    // Map cheerio to its CommonJS build to avoid ESM issues in Jest
+    '^cheerio$': '<rootDir>/node_modules/cheerio/dist/commonjs/index.js',
     '^@/(.*)$': '<rootDir>/$1',
     '^@/components/(.*)$': '<rootDir>/components/$1',
     '^@/lib/(.*)$': '<rootDir>/lib/$1',
@@ -45,8 +50,10 @@ const customJestConfig = {
     '^.+\\.(js|jsx|ts|tsx)$': ['babel-jest', { presets: ['next/babel'] }],
   },
   // Transform ESM packages in node_modules used by tests
+  // Exclude @supabase from transformation to preserve admin API
+  // Note: cheerio is mapped to CommonJS build above, but its dependencies may need transformation
   transformIgnorePatterns: [
-    '/node_modules/(?!(msw|@mswjs/interceptors|cheerio)/)',
+    '/node_modules/(?!(msw|@mswjs/interceptors|@supabase|parse5|dom-serializer|domhandler|domutils|entities|htmlparser2)/)',
   ],
   
   // Files to ignore

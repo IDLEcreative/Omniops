@@ -69,6 +69,7 @@ export async function GET(request: NextRequest) {
     if (params.metric === 'content-gaps' || params.metric === 'all') {
       results.contentGaps = await bi.analyzeContentGaps(
         params.domain || 'all',
+        timeRange,
         0.7 // confidence threshold
       );
     }
@@ -76,13 +77,14 @@ export async function GET(request: NextRequest) {
     if (params.metric === 'peak-usage' || params.metric === 'all') {
       results.peakUsage = await bi.analyzePeakUsage(
         params.domain || 'all',
-        params.days // number of days
+        timeRange
       );
     }
 
     if (params.metric === 'conversion-funnel' || params.metric === 'all') {
       results.conversionFunnel = await bi.analyzeConversionFunnel(
         params.domain || 'all',
+        timeRange,
         ['initial_contact', 'product_inquiry', 'price_check', 'order_lookup', 'purchase'] // funnel definition
       );
     }

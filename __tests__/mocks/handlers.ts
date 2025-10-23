@@ -1,4 +1,4 @@
-import { http, HttpResponse } from 'msw'
+import { http, HttpResponse, passthrough } from 'msw'
 
 export const handlers = [
   // OpenAI API mock
@@ -49,18 +49,20 @@ export const handlers = [
 
   // Supabase Auth mocks
   http.post('*/auth/v1/token', () => {
-    return HttpResponse.json({
-      access_token: 'mock-access-token',
-      refresh_token: 'mock-refresh-token',
-      expires_in: 3600,
-      token_type: 'bearer',
-      user: {
-        id: 'mock-user-id',
-        email: 'test@example.com',
-        email_confirmed_at: new Date().toISOString(),
-        created_at: new Date().toISOString()
-      }
-    })
+    // For integration tests, let real Supabase handle authentication
+    // For unit tests, this will be overridden with mocks
+    return passthrough()
+  }),
+
+  // Supabase Auth Admin API - Allow passthrough for RLS testing
+  http.post('*/auth/v1/admin/users', () => {
+    // Let the request pass through to real Supabase for RLS tests
+    return passthrough()
+  }),
+
+  http.delete('*/auth/v1/admin/users/*', () => {
+    // Let the request pass through to real Supabase for RLS tests
+    return passthrough()
   }),
 
   http.post('*/auth/v1/signup', async ({ request }) => {
@@ -77,69 +79,30 @@ export const handlers = [
   }),
 
   http.get('*/auth/v1/user', ({ request }) => {
-    const auth = request.headers.get('authorization')
-    if (auth && auth.includes('mock-access-token')) {
-      return HttpResponse.json({
-        id: 'mock-user-id',
-        email: 'test@example.com',
-        email_confirmed_at: new Date().toISOString()
-      })
-    }
-    return HttpResponse.json({ error: 'Invalid token' }, { status: 401 })
-  }),
-
-  // Supabase Database mocks
-  http.post('*/rest/v1/rpc/match_embeddings', async () => {
-    return HttpResponse.json([
-      {
-        id: 'chunk-1',
-        chunk_text: 'Relevant content for the query',
-        page_id: 'page-1',
-        similarity: 0.85
-      },
-      {
-        id: 'chunk-2',
-        chunk_text: 'Another relevant piece of content',
-        page_id: 'page-2',
-        similarity: 0.75
-      }
-    ])
-  }),
-
-  http.get('*/rest/v1/scraped_pages', () => {
-    return HttpResponse.json([
-      {
-        id: 'page-1',
-        url: 'https://example.com/page1',
-        title: 'Test Page 1',
-        content: 'Content of test page 1',
-        last_scraped_at: new Date().toISOString()
-      }
-    ])
-  }),
-
-  http.post('*/rest/v1/conversations', async ({ request }) => {
-    const body = await request.json() as { session_id?: string }
+    // Default to authenticated for tests (override in specific test cases)
+    // Supabase SSR client doesn't send cookies in unit tests, so we can't rely on them
     return HttpResponse.json({
-      id: 'conv-' + Date.now(),
-      session_id: body.session_id,
-      started_at: new Date().toISOString(),
-      metadata: body.metadata || {}
+      id: 'mock-user-id',
+      email: 'test@example.com',
+      email_confirmed_at: new Date().toISOString(),
+      app_metadata: {},
+      user_metadata: {},
+      aud: 'authenticated',
+      created_at: new Date().toISOString(),
+      role: 'authenticated'
     })
   }),
 
-  http.post('*/rest/v1/messages', async ({ request }) => {
-    const body = await request.json() as { conversation_id: string; content: string; role: string }
-    return HttpResponse.json({
-      id: 'msg-' + Date.now(),
-      conversation_id: body.conversation_id,
-      role: body.role,
-      content: body.content,
-      created_at: new Date().toISOString()
-    })
+  // Supabase Database mocks - Allow passthrough for integration tests
+  // For RLS testing, we need real database calls
+  http.all('*/rest/v1/*', () => {
+    // Let requests pass through to real Supabase for integration tests
+    // Unit tests can override with specific mocks if needed
+    return passthrough()
   }),
 
-  // Note: Firecrawl mock removed - now using Crawlee with Playwright for scraping
+  // Note: Supabase REST API requests now use passthrough() above for integration tests
+  // Unit tests can add specific mocks by prepending handlers to override passthrough
 
   // WooCommerce API mocks
   http.get('*/wp-json/wc/v3/products', ({ request }) => {

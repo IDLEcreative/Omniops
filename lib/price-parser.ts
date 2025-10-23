@@ -116,18 +116,19 @@ export class PriceParser {
    * Detect currency from price string
    */
   private static detectCurrency(priceString: string): string {
+    // Check for currency codes first (more specific than symbols)
+    const currencyCodeMatch = priceString.match(/\b(GBP|USD|EUR|JPY|INR|ZAR|AUD|CAD)\b/i);
+    if (currencyCodeMatch && currencyCodeMatch[1]) {
+      return currencyCodeMatch[1].toUpperCase();
+    }
+
+    // Then check for currency symbols
     for (const [symbol, code] of Object.entries(this.currencySymbols)) {
       if (priceString.includes(symbol)) {
         return code;
       }
     }
-    
-    // Check for currency codes
-    const currencyCodeMatch = priceString.match(/\b(GBP|USD|EUR|JPY|INR|ZAR|AUD|CAD)\b/i);
-    if (currencyCodeMatch && currencyCodeMatch[1]) {
-      return currencyCodeMatch[1].toUpperCase();
-    }
-    
+
     return 'GBP'; // Default to GBP
   }
 

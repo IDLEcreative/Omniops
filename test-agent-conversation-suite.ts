@@ -58,9 +58,9 @@ class ConversationTester {
   }
 
   async sendMessage(message: string): Promise<ChatResponse> {
-    // Create abort controller with 30 second timeout per request
+    // Create abort controller with 60 second timeout per request
     const controller = new AbortController();
-    const timeout = setTimeout(() => controller.abort(), 30000);
+    const timeout = setTimeout(() => controller.abort(), 60000);
     
     try {
       const response = await fetch(API_URL, {

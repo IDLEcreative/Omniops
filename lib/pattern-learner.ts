@@ -222,57 +222,70 @@ export class PatternLearner {
    */
   static async applyPatterns(
     url: string,
-    $: any // CheerioAPI
+    selectorContext: any // CheerioAPI or wrapper
   ): Promise<Partial<NormalizedProduct> | null> {
     try {
       const patterns = await this.getPatterns(url);
       if (!patterns || patterns.patterns.length === 0) return null;
 
       const product: Partial<NormalizedProduct> = {};
-    
-    // Apply high-confidence patterns
-    for (const pattern of patterns.patterns) {
-      if (pattern.confidence < 0.7) continue; // Skip low-confidence patterns
+      const query =
+        typeof selectorContext === 'function'
+          ? selectorContext
+          : typeof selectorContext?.query === 'function'
+            ? selectorContext.query.bind(selectorContext)
+            : typeof selectorContext?.$ === 'function'
+              ? selectorContext.$.bind(selectorContext)
+              : null;
 
-      try {
-        const element = $(pattern.selector);
-        if (!element.length) continue;
-
-        const value = pattern.attribute ? 
-          element.attr(pattern.attribute) : 
-          element.text().trim();
-
-        if (!value) continue;
-
-        switch (pattern.fieldType) {
-          case 'name':
-            product.name = value;
-            break;
-          case 'price':
-            // Price will be normalized by ProductNormalizer
-            break;
-          case 'sku':
-            product.sku = value;
-            break;
-          case 'description':
-            product.description = value;
-            break;
-          case 'availability':
-            // Availability will be normalized
-            break;
-          case 'image':
-            product.images = [{
-              url: value,
-              isMain: true,
-              position: 0
-            }];
-            break;
-        }
-      } catch (error) {
-        // Pattern didn't work, reduce confidence
-        pattern.confidence *= 0.9;
+      if (typeof query !== 'function') {
+        console.warn('PatternLearner.applyPatterns received invalid selector context. Skipping learned patterns.');
+        return null;
       }
-    }
+    
+      // Apply high-confidence patterns
+      for (const pattern of patterns.patterns) {
+        if (pattern.confidence < 0.7) continue; // Skip low-confidence patterns
+
+        try {
+          const element = query(pattern.selector);
+          if (!element.length) continue;
+
+          const value = pattern.attribute ? 
+            element.attr(pattern.attribute) : 
+            element.text().trim();
+
+          if (!value) continue;
+
+          switch (pattern.fieldType) {
+            case 'name':
+              product.name = value;
+              break;
+            case 'price':
+              // Price will be normalized by ProductNormalizer
+              break;
+            case 'sku':
+              product.sku = value;
+              break;
+            case 'description':
+              product.description = value;
+              break;
+            case 'availability':
+              // Availability will be normalized
+              break;
+            case 'image':
+              product.images = [{
+                url: value,
+                isMain: true,
+                position: 0
+              }];
+              break;
+          }
+        } catch (error) {
+          // Pattern didn't work, reduce confidence
+          pattern.confidence *= 0.9;
+        }
+      }
 
       return Object.keys(product).length > 0 ? product : null;
     } catch (error) {

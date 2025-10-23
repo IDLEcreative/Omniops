@@ -90,3 +90,4 @@ supabase/.env.local
 # MCP configuration (contains sensitive credentials)
 mcp-supabase-config.json
 *-mcp-config.json
+.jest-cache/

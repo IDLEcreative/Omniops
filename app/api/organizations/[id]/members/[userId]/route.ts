@@ -13,7 +13,7 @@ const updateMemberSchema = z.object({
  */
 export async function PATCH(
   request: NextRequest,
-  { params }: { params: { id: string; userId: string } }
+  { params }: { params: Promise<{ id: string; userId: string }> }
 ) {
   try {
     const supabase = await createClient();
@@ -24,8 +24,7 @@ export async function PATCH(
         { status: 503 }
       );
     }
-    const organizationId = params.id;
-    const targetUserId = params.userId;
+    const { id: organizationId, userId: targetUserId } = await params;
 
     // Get authenticated user
     const { data: { user }, error: authError } = await supabase.auth.getUser();
@@ -138,7 +137,7 @@ export async function PATCH(
  */
 export async function DELETE(
   request: NextRequest,
-  { params }: { params: { id: string; userId: string } }
+  { params }: { params: Promise<{ id: string; userId: string }> }
 ) {
   try {
     const supabase = await createClient();
@@ -149,8 +148,7 @@ export async function DELETE(
         { status: 503 }
       );
     }
-    const organizationId = params.id;
-    const targetUserId = params.userId;
+    const { id: organizationId, userId: targetUserId } = await params;
 
     // Get authenticated user
     const { data: { user }, error: authError } = await supabase.auth.getUser();

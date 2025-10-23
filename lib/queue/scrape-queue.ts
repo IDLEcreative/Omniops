@@ -270,7 +270,7 @@ export class ScrapeQueueManager {
     const key = this.getDeduplicationKey(data);
     await this.redis.setex(key, this.deduplicationTTL, JSON.stringify({
       url: data.url,
-      customerId: data.customerId,
+      organizationId: data.organizationId,
       timestamp: Date.now(),
     }));
   }
@@ -279,7 +279,7 @@ export class ScrapeQueueManager {
    * Get deduplication key for a job
    */
   private getDeduplicationKey(data: ScrapeJobData): string {
-    return `dedup:${data.customerId}:${data.url}`;
+    return `dedup:${data.organizationId}:${data.url}`;
   }
 
   /**

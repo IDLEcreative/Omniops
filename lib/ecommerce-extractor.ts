@@ -231,7 +231,7 @@ export class EcommerceExtractor extends ContentExtractor {
     
     // Detect page type
     const pageType = this.detectPageType($, url);
-    
+
     // Extract e-commerce specific data
     let products: NormalizedProduct[] = [];
     let pagination;
@@ -250,6 +250,10 @@ export class EcommerceExtractor extends ContentExtractor {
     }
     
     breadcrumbs = this.extractBreadcrumbs($);
+
+    if ((pageType === 'category' || pageType === 'search') && typeof totalProducts === 'undefined' && products.length > 0) {
+      totalProducts = products.length;
+    }
     
     // Create consolidated metadata for backward compatibility and easier access
     const firstProduct = products?.[0];
@@ -278,6 +282,7 @@ export class EcommerceExtractor extends ContentExtractor {
       products,
       pagination,
       breadcrumbs,
+      totalProducts,
       // Merge consolidated metadata into the existing metadata
       metadata: {
         ...baseContent.metadata,
@@ -322,16 +327,31 @@ export class EcommerceExtractor extends ContentExtractor {
    */
   private static detectPageType($: cheerio.CheerioAPI, url: string): EcommerceExtractedContent['pageType'] {
     const urlLower = url.toLowerCase();
-    
-    // URL-based detection
-    if (urlLower.includes('/product/') || urlLower.includes('/p/')) {
-      return 'product';
+    let hasProductSlug = /\/(product|products|item|p)(?:\/|$|\?|\#)/.test(urlLower) || /[?&](sku|product)=/.test(urlLower);
+    const hasCategorySlug = /\/(category|categories|shop|collection|collections)(?:\/|$|\?|\#)/.test(urlLower) || /[?&](category|cat|collection)=/.test(urlLower);
+    const hasSearchSlug = /\/search(?:\/|$|\?|\#)/.test(urlLower) || /[?&](q|s|search|keyword)=/.test(urlLower);
+
+    if (hasProductSlug && hasCategorySlug) {
+      try {
+        const pathSegments = new URL(url).pathname.toLowerCase().split('/').filter(Boolean);
+        const categoryIndex = pathSegments.findIndex(segment => ['category', 'categories', 'collection', 'collections', 'shop'].includes(segment));
+        const productIndex = pathSegments.findIndex(segment => ['product', 'products', 'item', 'p'].includes(segment));
+        if (categoryIndex !== -1 && productIndex !== -1 && categoryIndex <= productIndex) {
+          hasProductSlug = false;
+        }
+      } catch {
+        // Ignore URL parsing issues and fall back to existing heuristics
+      }
     }
-    if (urlLower.includes('/category/') || urlLower.includes('/shop/') || urlLower.includes('/collection/')) {
+
+    if (hasSearchSlug) {
+      return 'search';
+    }
+    if (hasCategorySlug) {
       return 'category';
     }
-    if (urlLower.includes('/search') || urlLower.includes('?q=') || urlLower.includes('?s=')) {
-      return 'search';
+    if (hasProductSlug) {
+      return 'product';
     }
     if (urlLower.includes('/cart')) {
       return 'cart';
@@ -339,17 +359,27 @@ export class EcommerceExtractor extends ContentExtractor {
     if (urlLower.includes('/checkout')) {
       return 'checkout';
     }
-    
-    // Content-based detection
-    if ($('[itemtype*="schema.org/Product"]').length === 1 || 
-        $('.product-single, .single-product').length > 0) {
+
+    const productSchemaCount = $('[itemtype*="schema.org/Product"]').length;
+    const hasSingleProduct = productSchemaCount === 1 || $('.product-single, .single-product').length > 0;
+    if (hasSingleProduct) {
       return 'product';
     }
-    if ($('.product-list, .product-grid, .products').length > 0 &&
-        $('.product, .product-item').length > 1) {
+
+    const productCount = $('.product, .product-item, [data-product-id]').length;
+    const hasListingContainer = $('.product-list, .product-grid, .products, [data-listing]').length > 0;
+    const paginationSelectors = this.productSelectors.listing.pagination.join(', ');
+    const hasPagination = $(paginationSelectors).length > 0;
+    const hasSearchForm = $('form[action*="search"], input[name="s"], input[name="q"], input[name="search"]').length > 0;
+
+    if (hasSearchForm && (hasListingContainer || productCount > 0 || hasPagination)) {
+      return 'search';
+    }
+
+    if ((hasListingContainer && productCount > 0) || hasPagination) {
       return 'category';
     }
-    
+
     return 'other';
   }
 
@@ -363,6 +393,11 @@ export class EcommerceExtractor extends ContentExtractor {
     // Get configuration for extraction strategies
     const config = configManager.getConfig();
     const platform = this.detectPlatform($);
+    const patternContext = {
+      query: (selector: string) => $(selector),
+      $,
+      platform,
+    };
     
     // Get platform-specific configuration if available
     const platformConfig = platform ? config.extraction.platformOverrides[platform] : null;
@@ -375,8 +410,8 @@ export class EcommerceExtractor extends ContentExtractor {
       switch (method) {
         case 'learned-patterns':
           if (config.extraction.strategies.patternLearningEnabled) {
-            const learnedProduct = await getPatternLearner().applyPatterns(url, $);
-            if (learnedProduct && learnedProduct.name) {
+            const learnedProduct = await getPatternLearner().applyPatterns(url, patternContext);
+            if (learnedProduct && Object.keys(learnedProduct).length > 0) {
               rawProduct = learnedProduct;
               extractionMethod = 'learned-patterns';
             }
@@ -417,14 +452,18 @@ export class EcommerceExtractor extends ContentExtractor {
       rawProduct.variants = this.extractVariants($);
       
       // Normalize the product
-      const normalizedProduct = getProductNormalizer().normalizeProduct(rawProduct);
+      const normalizedProduct = this.normalizeProductSafely(rawProduct, url);
       
       // Learn from successful extraction
       if (normalizedProduct && normalizedProduct.name) {
-        await getPatternLearner().learnFromExtraction(url, [normalizedProduct], {
-          platform: this.detectPlatform($),
-          extractionMethod
-        });
+        try {
+          await getPatternLearner().learnFromExtraction(url, [normalizedProduct], {
+            platform,
+            extractionMethod
+          });
+        } catch (error) {
+          console.warn('[EcommerceExtractor] Failed to record learned patterns:', error);
+        }
       }
       
       return normalizedProduct;
@@ -449,14 +488,17 @@ export class EcommerceExtractor extends ContentExtractor {
         for (const item of products) {
           if (item['@type'] === 'Product' || item.type === 'Product') {
             const priceValue = item.offers?.price || item.price;
-            
+            const currency = item.offers?.priceCurrency || item.priceCurrency;
+            // Include currency in price string so PriceParser can detect it
+            const priceString = priceValue && currency ? `${priceValue} ${currency}` : priceValue ? `${priceValue}` : undefined;
+
             return {
               name: item.name,
               sku: item.sku,
               description: item.description,
               brand: item.brand?.name || item.brand,
               rawPrice: priceValue ? `${priceValue}` : undefined,
-              price: priceValue ? PriceParser.parse(`${priceValue}`) : undefined,
+              price: priceString ? PriceParser.parse(priceString) : undefined,
               availability: {
                 inStock: item.offers?.availability?.includes('InStock'),
                 availabilityText: item.offers?.availability,
@@ -487,16 +529,18 @@ export class EcommerceExtractor extends ContentExtractor {
     
     if (product.length === 0) return null;
     
-    const priceText = product.find('[itemprop="price"]').first().attr('content') || 
+    const priceText = product.find('[itemprop="price"]').first().attr('content') ||
                       product.find('[itemprop="price"]').first().text()?.trim();
-    
+    const currency = product.find('[itemprop="priceCurrency"]').first().attr('content');
+    const priceString = priceText && currency ? `${priceText} ${currency}` : priceText;
+
     return {
       name: product.find('[itemprop="name"]').first().text()?.trim(),
       sku: product.find('[itemprop="sku"]').first().text()?.trim(),
       description: product.find('[itemprop="description"]').first().text()?.trim(),
       brand: product.find('[itemprop="brand"]').first().text()?.trim(),
       rawPrice: priceText,
-      price: priceText ? PriceParser.parse(priceText) : undefined,
+      price: priceString ? PriceParser.parse(priceString) : undefined,
       availability: {
         availabilityText: product.find('[itemprop="availability"]').first().attr('content'),
         inStock: product.find('[itemprop="availability"]').first().attr('content')?.includes('InStock'),
@@ -583,6 +627,16 @@ export class EcommerceExtractor extends ContentExtractor {
     };
   }
 
+  private static normalizeProductSafely(product: ProductData, url: string): NormalizedProduct | null {
+    try {
+      const normalized = getProductNormalizer().normalizeProduct(product);
+      return normalized || null;
+    } catch (error) {
+      console.warn(`[EcommerceExtractor] Failed to normalize product for ${url}:`, error);
+      return null;
+    }
+  }
+
   /**
    * Extract product listing
    */
@@ -590,7 +644,20 @@ export class EcommerceExtractor extends ContentExtractor {
     const products: ProductData[] = [];
     
     // Find product containers
-    const productContainers = $(this.productSelectors.listing.products.join(', '));
+    const primarySelectors = this.productSelectors.listing.products.join(', ');
+    let productContainers = $(primarySelectors);
+    
+    if (productContainers.length === 0) {
+      const fallbackContainers = $('.product-grid, .products, .product-list, [data-product-list], [class*="product-list"]');
+      productContainers = fallbackContainers.find('div, article, li').filter((_, el) => {
+        const $el = $(el);
+        if ($el.find('.product-title, .product-name, h2, h3, h4').first().text()?.trim()) {
+          return true;
+        }
+        const className = $el.attr('class') || '';
+        return /product|item/i.test(className) || Boolean($el.attr('data-product-id'));
+      });
+    }
     
     productContainers.each((_, element) => {
       const $product = $(element);
@@ -618,15 +685,24 @@ export class EcommerceExtractor extends ContentExtractor {
     });
     
     // Normalize all products
-    const normalizer = getProductNormalizer();
-    const normalizedProducts = products.map(p => normalizer.normalizeProduct(p));
+    const normalizedProducts: NormalizedProduct[] = [];
+    for (const product of products) {
+      const normalized = this.normalizeProductSafely(product, url);
+      if (normalized) {
+        normalizedProducts.push(normalized);
+      }
+    }
     
     // Learn from successful extraction if we found products
     if (normalizedProducts.length > 0) {
-      await getPatternLearner().learnFromExtraction(url, normalizedProducts, {
-        platform,
-        extractionMethod: 'dom-listing'
-      });
+      try {
+        await getPatternLearner().learnFromExtraction(url, normalizedProducts, {
+          platform,
+          extractionMethod: 'dom-listing'
+        });
+      } catch (error) {
+        console.warn('[EcommerceExtractor] Failed to record listing patterns:', error);
+      }
     }
     
     return normalizedProducts;
@@ -636,32 +712,46 @@ export class EcommerceExtractor extends ContentExtractor {
    * Extract pagination info
    */
   private static extractPagination($: cheerio.CheerioAPI, currentUrl: string): EcommerceExtractedContent['pagination'] {
-    const pagination = $(this.productSelectors.listing.pagination.join(', ')).first();
+    const paginationSelectors = this.productSelectors.listing.pagination.join(', ');
+    const pagination = $(paginationSelectors).first();
     
     if (pagination.length === 0) return undefined;
     
     // Extract current page
-    const current = parseInt(
-      pagination.find('.current, .active, [aria-current="page"]').first().text() || '1'
-    );
+    const currentText = pagination.find('.current, .active, [aria-current="page"]').first().text()?.trim();
+    let current = parseInt(currentText || '', 10);
+    if (!Number.isFinite(current) || current <= 0) {
+      try {
+        const urlObj = new URL(currentUrl);
+        const pageParam = urlObj.searchParams.get('page') || urlObj.searchParams.get('paged');
+        const parsedPage = pageParam ? parseInt(pageParam, 10) : NaN;
+        current = Number.isFinite(parsedPage) && parsedPage > 0 ? parsedPage : 1;
+      } catch {
+        current = 1;
+      }
+    }
     
     // Extract total pages
     const pageNumbers = pagination.find('a').map((_, el) => {
       const text = $(el).text();
-      const num = parseInt(text);
-      return isNaN(num) ? 0 : num;
-    }).get();
-    const total = Math.max(...pageNumbers, current);
+      const num = parseInt((text || '').trim(), 10);
+      return Number.isFinite(num) && num > 0 ? num : undefined;
+    }).get().filter((num): num is number => typeof num === 'number');
+    const total = pageNumbers.length > 0 ? Math.max(current, ...pageNumbers) : undefined;
     
     // Extract next/prev URLs
-    const nextUrl = pagination.find(this.productSelectors.listing.nextPage.join(', ')).first().attr('href');
-    const prevUrl = pagination.find('.prev, .pagination-prev, a[rel="prev"]').first().attr('href');
+    const nextSelector = this.productSelectors.listing.nextPage.join(', ');
+    const nextHref = pagination.find(nextSelector).first().attr('href');
+    const prevHref = pagination.find('.prev, .pagination-prev, a[rel="prev"]').first().attr('href');
+    const nextUrl = nextHref ? new URL(nextHref, currentUrl).href : undefined;
+    const prevUrl = prevHref ? new URL(prevHref, currentUrl).href : undefined;
     
     return {
       current,
-      total: total > 0 ? total : undefined,
-      nextUrl: nextUrl ? new URL(nextUrl, currentUrl).href : undefined,
-      prevUrl: prevUrl ? new URL(prevUrl, currentUrl).href : undefined,
+      total,
+      nextUrl,
+      prevUrl,
+      hasMore: Boolean(nextUrl)
     };
   }
 
@@ -764,44 +854,65 @@ export class EcommerceExtractor extends ContentExtractor {
   /**
    * Extract product specifications
    */
-  private static extractSpecifications($: cheerio.CheerioAPI): any[] {
-    const specs: any[] = [];
+  private static extractSpecifications($: cheerio.CheerioAPI): Array<{ name: string; value: string }> {
+    const specs: Array<{ name: string; value: string }> = [];
+    const seen = new Set<string>();
+    const addSpec = (name?: string | null, value?: string | null) => {
+      const cleanName = name?.trim();
+      const cleanValue = value?.trim();
+      if (!cleanName || !cleanValue || cleanName === cleanValue) {
+        return;
+      }
+      const key = `${cleanName}::${cleanValue}`;
+      if (seen.has(key)) return;
+      seen.add(key);
+      specs.push({ name: cleanName, value: cleanValue });
+    };
     
-    // Look for specification tables
-    $('.specifications table, .product-specs table, #tab-additional_information table').each((_, table) => {
+    const tableSelectors = [
+      '.specifications table',
+      '.product-specs table',
+      '#tab-additional_information table',
+      'table.specifications',
+      'table.product-specs',
+      'table[data-specification]',
+      'table[class*="spec"]'
+    ].join(', ');
+    
+    $(tableSelectors).each((_, table) => {
       $(table).find('tr').each((_, row) => {
         const $row = $(row);
-        const name = $row.find('td:first, th:first').text()?.trim();
-        const value = $row.find('td:last').text()?.trim();
-        
-        if (name && value && name !== value) {
-          specs.push({ name, value });
-        }
+        const cells = $row.find('th, td');
+        if (cells.length === 0) return;
+        const name = cells.first().text();
+        const valueCell = cells.length > 1 ? cells.last().text() : $row.find('td').attr('data-value');
+        addSpec(name, valueCell);
       });
     });
     
     // Look for definition lists
-    $('dl.specs, dl.specifications').each((_, dl) => {
-      $(dl).find('dt').each((i, dt) => {
-        const name = $(dt).text()?.trim();
-        const value = $(dt).next('dd').text()?.trim();
-        
-        if (name && value) {
-          specs.push({ name, value });
-        }
+    $('dl.specs, dl.specifications, dl.product-specs').each((_, dl) => {
+      $(dl).find('dt').each((_, dt) => {
+        const name = $(dt).text();
+        const value = $(dt).next('dd').text();
+        addSpec(name, value);
       });
     });
     
+    // Attribute-driven specs
+    $('[data-spec-name]').each((_, el) => {
+      const name = $(el).attr('data-spec-name') || $(el).find('[data-spec-label]').attr('data-spec-label');
+      const value = $(el).attr('data-spec-value') || $(el).text();
+      addSpec(name, value);
+    });
+    
     // Look for list-based specs
-    $('.product-features li, .specifications li').each((_, li) => {
+    $('.product-features li, .specifications li, [class*="spec"] li').each((_, li) => {
       const text = $(li).text()?.trim();
+      if (!text) return;
       const colonIndex = text.indexOf(':');
-      
-      if (colonIndex > 0 && colonIndex < 50) {
-        specs.push({
-          name: text.substring(0, colonIndex).trim(),
-          value: text.substring(colonIndex + 1).trim(),
-        });
+      if (colonIndex > 0 && colonIndex < text.length - 1) {
+        addSpec(text.substring(0, colonIndex), text.substring(colonIndex + 1));
       }
     });
     

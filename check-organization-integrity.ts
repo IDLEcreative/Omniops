@@ -335,7 +335,7 @@ async function checkForeignKeyRelationships() {
 
     if (records && records.length > 0) {
       const sample = records[0];
-      const fkValue = sample[check.fk];
+      const fkValue = sample?.[check.fk as keyof typeof sample];
 
       if (fkValue) {
         const { data: referenced } = await supabase

@@ -2,9 +2,7 @@ import { describe, it, expect, jest, beforeEach } from '@jest/globals'
 import { EcommerceExtractor } from '@/lib/ecommerce-extractor'
 
 // Mock the dependencies
-const mockContentExtractor = {
-  extractWithReadability: jest.fn()
-}
+const mockExtractWithReadability = jest.fn();
 
 const mockPatternLearner = {
   applyPatterns: jest.fn(),
@@ -15,9 +13,11 @@ const mockProductNormalizer = {
   normalizeProduct: jest.fn()
 }
 
-// Mock the imports
+// Mock the imports - ContentExtractor must be a real class for inheritance to work
 jest.mock('@/lib/content-extractor', () => ({
-  ContentExtractor: mockContentExtractor
+  ContentExtractor: class ContentExtractor {
+    static extractWithReadability = mockExtractWithReadability
+  }
 }))
 
 jest.mock('@/lib/pattern-learner', () => ({
@@ -38,11 +38,12 @@ describe('EcommerceExtractor', () => {
     jest.clearAllMocks()
     
     // Setup default mock returns
-    mockContentExtractor.extractWithReadability.mockReturnValue({
+    mockExtractWithReadability.mockReturnValue({
       title: 'Test Page',
       content: 'Test content',
       url: 'https://example.com',
-      timestamp: new Date().toISOString()
+      timestamp: new Date().toISOString(),
+      metadata: {}
     })
 
     mockProductNormalizer.normalizeProduct.mockImplementation((product) => ({
@@ -252,7 +253,7 @@ describe('EcommerceExtractor', () => {
           description: 'An amazing widget for all your needs',
           brand: 'WidgetCorp',
           price: expect.objectContaining({
-            current: '29.99',
+            value: 29.99,
             currency: 'USD'
           }),
           availability: expect.objectContaining({
@@ -296,7 +297,7 @@ describe('EcommerceExtractor', () => {
         expect.objectContaining({
           name: 'Second Product',
           price: expect.objectContaining({
-            current: '15.99',
+            value: 15.99,
             currency: 'EUR'
           })
         })
@@ -350,7 +351,7 @@ describe('EcommerceExtractor', () => {
           description: 'A product with microdata',
           brand: 'MicroBrand',
           price: expect.objectContaining({
-            current: '39.99',
+            value: 39.99,
             currency: 'USD'
           })
         })
@@ -380,7 +381,8 @@ describe('EcommerceExtractor', () => {
           name: 'DOM Product',
           sku: 'DOM-456',
           price: expect.objectContaining({
-            current: '£45.99'
+            value: 45.99,
+            currency: 'GBP'
           }),
           availability: expect.objectContaining({
             availabilityText: 'In Stock',

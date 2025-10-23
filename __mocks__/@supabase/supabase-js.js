@@ -2,11 +2,12 @@
 
 // Create a chainable query builder mock
 class MockQueryBuilder {
-  constructor() {
+  constructor(table) {
+    this.table = table;
     // Store the chain state
     this._data = null;
     this._error = null;
-    
+
     // All methods return this for chaining
     const methods = [
       'select', 'insert', 'update', 'upsert', 'delete',
@@ -15,21 +16,49 @@ class MockQueryBuilder {
       'range', 'overlaps', 'match', 'not', 'or', 'filter',
       'order', 'limit', 'offset'
     ];
-    
+
     methods.forEach(method => {
       this[method] = jest.fn().mockReturnThis();
     });
-    
+
+    // Generate realistic default data based on table name
+    const defaultData = this._getDefaultDataForTable(table);
+
     // Terminal methods that resolve the chain
-    this.single = jest.fn().mockResolvedValue({ data: this._data, error: this._error });
-    this.maybeSingle = jest.fn().mockResolvedValue({ data: this._data, error: this._error });
+    this.single = jest.fn().mockResolvedValue({ data: this._data || defaultData[0] || null, error: this._error });
+    this.maybeSingle = jest.fn().mockResolvedValue({ data: this._data || defaultData[0] || null, error: this._error });
     this.csv = jest.fn().mockResolvedValue({ data: '', error: this._error });
-    this.count = jest.fn().mockResolvedValue({ data: { count: 0 }, error: this._error });
-    
+    this.count = jest.fn().mockResolvedValue({ data: { count: defaultData.length }, error: this._error });
+
     // Default resolution for when no terminal method is called
     this.then = (resolve) => {
-      return Promise.resolve({ data: this._data || [], error: this._error }).then(resolve);
+      return Promise.resolve({ data: this._data || defaultData, error: this._error }).then(resolve);
     };
+  }
+
+  _getDefaultDataForTable(table) {
+    // Return realistic mock data based on table name
+    switch(table) {
+      case 'organization_members':
+        return [{
+          role: 'owner',
+          joined_at: '2025-01-01T00:00:00Z',
+          organization: {
+            id: 'org-1',
+            name: 'Test Organization',
+            slug: 'test-org',
+            settings: {},
+            plan_type: 'free',
+            seat_limit: 5,
+            created_at: '2025-01-01T00:00:00Z',
+            updated_at: '2025-01-01T00:00:00Z'
+          }
+        }];
+      case 'organizations':
+        return [];  // Empty by default for existence checks
+      default:
+        return [];
+    }
   }
   
   // Allow tests to set mock data
@@ -63,9 +92,20 @@ const mockSupabaseClient = {
       data: { session: null }, 
       error: null 
     }),
-    getUser: jest.fn().mockResolvedValue({ 
-      data: { user: null }, 
-      error: null 
+    getUser: jest.fn().mockResolvedValue({
+      data: {
+        user: {
+          id: 'mock-user-id',
+          email: 'test@example.com',
+          email_confirmed_at: new Date().toISOString(),
+          app_metadata: {},
+          user_metadata: {},
+          aud: 'authenticated',
+          created_at: new Date().toISOString(),
+          role: 'authenticated'
+        }
+      },
+      error: null
     }),
     onAuthStateChange: jest.fn().mockReturnValue({
       data: { subscription: { unsubscribe: jest.fn() } },
@@ -87,7 +127,7 @@ const mockSupabaseClient = {
       error: null
     })
   },
-  from: jest.fn((table) => new MockQueryBuilder()),
+  from: jest.fn((table) => new MockQueryBuilder(table)),
   rpc: jest.fn().mockResolvedValue({ data: [], error: null }),
   storage: {
     from: jest.fn().mockReturnValue({

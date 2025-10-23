@@ -30,9 +30,15 @@ async function checkRLSStatus() {
 
   for (const table of tables) {
     // Check if table exists and RLS status
-    const { data, error } = await supabase
-      .rpc('check_table_rls', { table_name: table } as any)
-      .catch(() => ({ data: null, error: 'RPC not available' }));
+    let data = null;
+    let error: any = null;
+    try {
+      const result = await supabase.rpc('check_table_rls', { table_name: table } as any);
+      data = result.data;
+      error = result.error;
+    } catch (e) {
+      error = 'RPC not available';
+    }
 
     // Attempt to query - if service role can query, RLS exists but we bypass it
     const { data: testData, error: testError } = await supabase
@@ -50,9 +56,15 @@ async function checkPolicies() {
   console.log('\n=== QUERYING pg_policies ===\n');
 
   // Try to query the information schema
-  const { data, error } = await supabase
-    .rpc('get_table_policies' as any)
-    .catch(() => ({ data: null, error: 'RPC not available' }));
+  let data = null;
+  let error: any = null;
+  try {
+    const result = await supabase.rpc('get_table_policies' as any);
+    data = result.data;
+    error = result.error;
+  } catch (e) {
+    error = 'RPC not available';
+  }
 
   if (error) {
     console.log('Could not query via RPC, trying direct table access...\n');

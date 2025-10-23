@@ -23,9 +23,11 @@ import { UserPlus } from 'lucide-react';
 interface InviteMemberFormProps {
   organizationId: string;
   onInviteSent?: () => void;
+  onClose?: () => void;
+  onSuccess?: () => void;
 }
 
-export function InviteMemberForm({ organizationId, onInviteSent }: InviteMemberFormProps) {
+export function InviteMemberForm({ organizationId, onInviteSent, onClose, onSuccess }: InviteMemberFormProps) {
   const [email, setEmail] = useState('');
   const [role, setRole] = useState<'admin' | 'member' | 'viewer'>('member');
   const [isSubmitting, setIsSubmitting] = useState(false);
@@ -57,6 +59,10 @@ export function InviteMemberForm({ organizationId, onInviteSent }: InviteMemberF
 
       if (onInviteSent) {
         onInviteSent();
+      }
+
+      if (onSuccess) {
+        onSuccess();
       }
 
       // Show invitation link (temporary until email is implemented)
