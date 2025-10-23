@@ -151,9 +151,15 @@ export default function Home() {
   const [error, setError] = useState("");
 
   const handleStartDemo = async () => {
-    if (!demoUrl) {
+    if (!demoUrl.trim()) {
       setError("Please enter a website URL");
       return;
+    }
+
+    // Add https:// if no protocol specified
+    let urlToScrape = demoUrl.trim();
+    if (!urlToScrape.startsWith('http://') && !urlToScrape.startsWith('https://')) {
+      urlToScrape = 'https://' + urlToScrape;
     }
 
     setError("");
@@ -172,7 +178,7 @@ export default function Home() {
       const response = await fetch("/api/demo/scrape", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ url: demoUrl }),
+        body: JSON.stringify({ url: urlToScrape }),
       });
 
       clearInterval(progressInterval);

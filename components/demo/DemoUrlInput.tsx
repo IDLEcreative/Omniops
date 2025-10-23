@@ -23,14 +23,14 @@ export function DemoUrlInput({ url, onChange, onSubmit, isLoading }: DemoUrlInpu
 
       <div className="flex flex-col sm:flex-row gap-3">
         <Input
-          type="url"
-          placeholder="https://your-website.com"
+          type="text"
+          placeholder="example.com or https://example.com"
           value={url}
           onChange={(e) => onChange(e.target.value)}
           className="flex-1 h-12 text-base"
           disabled={isLoading}
           onKeyDown={(e) => {
-            if (e.key === 'Enter' && !isLoading && url) {
+            if (e.key === 'Enter' && !isLoading && url.trim()) {
               e.preventDefault()
               onSubmit()
             }
@@ -39,7 +39,7 @@ export function DemoUrlInput({ url, onChange, onSubmit, isLoading }: DemoUrlInpu
         <Button
           size="lg"
           onClick={onSubmit}
-          disabled={isLoading || !url}
+          disabled={isLoading || !url.trim()}
           className="h-12 px-8 whitespace-nowrap"
         >
           {isLoading ? (
