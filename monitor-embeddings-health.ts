@@ -135,7 +135,7 @@ class EmbeddingsHealthMonitor {
 
       // Calculate average age in days
       const now = Date.now();
-      const totalAgeMs = embeddingAges.reduce((sum, e) => {
+      const totalAgeMs = embeddingAges.reduce((sum: number, e: any) => {
         return sum + (now - new Date(e.created_at).getTime());
       }, 0);
       averageAge = totalAgeMs / embeddingAges.length / (1000 * 60 * 60 * 24);
