@@ -46,7 +46,7 @@ __tests__/api/chat/
 
 ### 2. Test Infrastructure Issues
 
-**Status**: ⚠️ Known Issue - Tests pass individually, fail in batch
+**Status**: ✅ RESOLVED (2025-10-24) - See [docs/MOCK_ISOLATION_FIX.md](docs/MOCK_ISOLATION_FIX.md)
 
 | Test | Individual | Batch | Issue |
 |------|-----------|-------|-------|
@@ -90,7 +90,13 @@ $ npm test -- __tests__/api/chat/route.test.ts
 - Use the new dependency injection pattern throughout
 - Pass all mocks explicitly via `deps` parameter
 
-**Effort**: 2-3 hours (Option A) or 4-6 hours (Option C)
+**Resolution**: Implemented singleton-aware mocking strategy. All tests now pass in both individual and batch modes.
+- Created `__tests__/setup/isolated-test-setup.ts` with mock factories
+- Changed to `beforeAll()` for mock instance creation (preserves singleton references)
+- Unified mock strategy using `mockImplementation()` consistently
+- Fixed route file syntax errors
+
+**Actual Effort**: 2.5 hours
 **Risk**: Low (doesn't affect production code)
 
 ---
@@ -161,7 +167,7 @@ expect(data.message).toBe('Here are the products from our catalog.')
 | Priority | Item | Effort | Status |
 |----------|------|--------|--------|
 | 🚨 Critical | File Length Violations | 4-6 hrs | ⚠️ Needs Action |
-| 🔶 High | Test Infrastructure | 2-6 hrs | ⚠️ Known Issue |
+| 🔶 High | Test Infrastructure | 2-6 hrs | ✅ Complete |
 | 📝 Medium | DI Documentation | 1-2 hrs | 🟡 Partial |
 | 📋 Low | Test Error Messages | 30 min | 🟢 Optional |
 | 🔄 Process | Pre-Commit Hooks | 1 hr | 🟢 Nice to Have |

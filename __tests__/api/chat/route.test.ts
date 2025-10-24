@@ -8,6 +8,15 @@ import {
   mockCommerceProvider,
   createMockProduct
 } from '@/test-utils/api-test-helpers'
+import {
+  resetTestEnvironment,
+  createFreshOpenAIMock,
+  configureDefaultOpenAIResponse,
+  createFreshSupabaseMock,
+  createFreshCommerceProviderMock,
+  createFreshEmbeddingsSearchMock,
+  createFreshRateLimitMock,
+} from '@/__tests__/setup/isolated-test-setup'
 
 // Mock dependencies - use manual mocks from __mocks__/
 jest.mock('@/lib/supabase-server')
@@ -58,58 +67,50 @@ process.env.SUPABASE_SERVICE_ROLE_KEY = 'service-role-key'
 describe('/api/chat', () => {
   let mockOpenAIInstance: jest.Mocked<OpenAI>
 
-  beforeEach(() => {
-    // CRITICAL: Clear ALL mocks to prevent test interference
-    jest.clearAllMocks()
+  // CRITICAL: Create mock instance ONCE at suite level to preserve singleton references
+  // This ensures the route's cached OpenAI instance always points to our mock
+  beforeAll(() => {
+    mockOpenAIInstance = createFreshOpenAIMock()
 
-    // Create a fresh OpenAI mock WITHOUT pre-configured responses
-    // Tests will configure their own responses as needed
-    mockOpenAIInstance = {
-      chat: {
-        completions: {
-          create: jest.fn().mockResolvedValue({
-            choices: [{
-              message: {
-                role: 'assistant',
-                content: 'This is a helpful response from the AI assistant.',
-              }
-            }]
-          })
-        }
-      }
-    } as any
-
-    // Mock the OpenAI constructor
+    // Configure the OpenAI constructor to always return our mock instance
     const MockedOpenAI = OpenAI as jest.MockedClass<typeof OpenAI>
-    MockedOpenAI.mockClear()
     MockedOpenAI.mockImplementation(() => mockOpenAIInstance)
+  })
 
-    // CRITICAL: Reset Supabase mock to default working state
+  beforeEach(() => {
+    // CRITICAL: Complete environment reset for true isolation
+    resetTestEnvironment()
+
+    // Clear the mock's call history but keep the same instance
+    mockOpenAIInstance.chat.completions.create.mockClear()
+
+    // Configure default response for tests that don't specify custom behavior
+    configureDefaultOpenAIResponse(mockOpenAIInstance)
+
+    // Reset Supabase mock to default working state with fresh instance
     const supabaseModule = jest.requireMock('@/lib/supabase-server')
-    const mockSupabase = mockChatSupabaseClient()
+    const mockSupabase = createFreshSupabaseMock()
     supabaseModule.createClient.mockResolvedValue(mockSupabase)
     supabaseModule.createServiceRoleClient.mockResolvedValue(mockSupabase)
     supabaseModule.requireClient.mockResolvedValue(mockSupabase)
     supabaseModule.requireServiceRoleClient.mockResolvedValue(mockSupabase)
     supabaseModule.validateSupabaseEnv.mockReturnValue(true)
 
-    // Configure commerce provider mock
+    // Reset commerce provider mock to null (no provider by default)
     const commerceModule = jest.requireMock('@/lib/agents/commerce-provider')
     commerceModule.getCommerceProvider.mockReset()
     commerceModule.getCommerceProvider.mockResolvedValue(null)
 
-    // CRITICAL: Reset embeddings mock to default empty state
+    // Reset embeddings mock to default empty state
     const embeddingsModule = jest.requireMock('@/lib/embeddings')
     embeddingsModule.searchSimilarContent.mockReset()
     embeddingsModule.searchSimilarContent.mockResolvedValue([])
 
-    // Mock rate limiting (allow by default)
+    // Reset rate limiting (allow by default)
     const rateLimitModule = jest.requireMock('@/lib/rate-limit')
-    rateLimitModule.checkDomainRateLimit.mockReturnValue({
-      allowed: true,
-      remaining: 99,
-      resetTime: Date.now() + 3600000,
-    })
+    const mockRateLimit = createFreshRateLimitMock(true)
+    rateLimitModule.checkDomainRateLimit.mockClear()
+    rateLimitModule.checkDomainRateLimit.mockImplementation(mockRateLimit)
   })
 
   describe('POST', () => {
@@ -186,25 +187,20 @@ describe('/api/chat', () => {
         domain: 'example.com',
       }
 
-      // Configure embeddings search to return mock results for this test
-      const embeddingsModule = jest.requireMock('@/lib/embeddings')
-      const mockSearchSimilarContent = embeddingsModule.searchSimilarContent as jest.Mock
-      mockSearchSimilarContent.mockClear()
-      mockSearchSimilarContent.mockImplementation(async () => {
-        console.log('[TEST MOCK] searchSimilarContent called, returning mocked result')
-        return [
-          {
-            content: 'Our business hours are Monday-Friday 9AM-5PM',
-            url: 'https://example.com/hours',
-            title: 'Business Hours',
-            similarity: 0.85,
-          },
-        ]
-      })
+      // CRITICAL: Create fresh embeddings search mock for this test
+      const mockSearchSimilarContent = createFreshEmbeddingsSearchMock([
+        {
+          content: 'Our business hours are Monday-Friday 9AM-5PM',
+          url: 'https://example.com/hours',
+          title: 'Business Hours',
+          similarity: 0.85,
+        },
+      ])
 
-      // Configure OpenAI to return tool calls first, then final response
+      // CRITICAL: Configure OpenAI to return tool calls first, then final response
+      // Don't reset - just reconfigure to avoid clearing the mock reference
       let callCount = 0
-      mockOpenAIInstance.chat.completions.create = jest.fn().mockImplementation(async () => {
+      mockOpenAIInstance.chat.completions.create.mockImplementation(async () => {
         callCount++
         if (callCount === 1) {
           // First call: AI decides to search products (which falls back to semantic search)
@@ -239,6 +235,7 @@ describe('/api/chat', () => {
         }
       }) as any
 
+      // Pass fresh mock via dependency injection for isolation
       const response = await POST(createRequest(requestBody), {
         deps: {
           searchSimilarContent: mockSearchSimilarContent,
@@ -258,37 +255,37 @@ describe('/api/chat', () => {
     })
 
     it('should recover gracefully when tool arguments are missing', async () => {
-      mockOpenAIInstance.chat.completions.create.mockReset()
-      mockOpenAIInstance.chat.completions.create
-        .mockResolvedValueOnce({
-          choices: [
-            {
+      // CRITICAL: Reconfigure OpenAI mock using mockImplementation for complete isolation
+      let callCount = 0
+      mockOpenAIInstance.chat.completions.create.mockImplementation(async () => {
+        callCount++
+        if (callCount === 1) {
+          return {
+            choices: [{
               message: {
                 role: 'assistant',
                 content: null,
-                tool_calls: [
-                  {
-                    id: 'call_1',
-                    type: 'function',
-                    function: {
-                      name: 'search_products',
-                      arguments: '{"limit": 5}', // Missing required 'query' parameter
-                    },
+                tool_calls: [{
+                  id: 'call_1',
+                  type: 'function',
+                  function: {
+                    name: 'search_products',
+                    arguments: '{"limit": 5}', // Missing required 'query' parameter
                   },
-                ],
+                }],
               },
-            },
-          ],
-        } as any)
-        .mockResolvedValueOnce({
-          choices: [
-            {
+            }]
+          } as any
+        } else {
+          return {
+            choices: [{
               message: {
                 content: 'I need a product name to start searching for you.',
               },
-            },
-          ],
-        } as any)
+            }]
+          } as any
+        }
+      })
 
       const requestBody = {
         message: 'Show me spare parts',
@@ -296,7 +293,7 @@ describe('/api/chat', () => {
         domain: 'example.com',
       }
 
-      // Create mock spies to verify these functions aren't called
+      // CRITICAL: Create fresh mock spies to verify these functions aren't called
       const mockGetCommerceProvider = jest.fn().mockResolvedValue(null)
       const mockSearchSimilarContent = jest.fn().mockResolvedValue([])
 
@@ -369,7 +366,9 @@ describe('/api/chat', () => {
     })
 
     it('should include WooCommerce products when provider is configured', async () => {
+      // CRITICAL: Reset commerce module for this specific test
       const commerceModule = jest.requireMock('@/lib/agents/commerce-provider')
+      commerceModule.getCommerceProvider.mockReset()
 
       const testProduct = createMockProduct({
         id: 1,
@@ -384,6 +383,7 @@ describe('/api/chat', () => {
         products: [testProduct],
       })
 
+      // Configure commerce provider for this test only
       commerceModule.getCommerceProvider.mockResolvedValue(provider)
 
       const requestBody = {
@@ -397,39 +397,39 @@ describe('/api/chat', () => {
         },
       }
 
-      // Mock OpenAI to trigger tool call
-      mockOpenAIInstance.chat.completions.create.mockReset()
-      mockOpenAIInstance.chat.completions.create
-        .mockResolvedValueOnce({
-          choices: [
-            {
+      // CRITICAL: Reconfigure OpenAI mock using mockImplementation for complete isolation
+      let callCount = 0
+      mockOpenAIInstance.chat.completions.create.mockImplementation(async () => {
+        callCount++
+        if (callCount === 1) {
+          return {
+            choices: [{
               message: {
                 role: 'assistant',
                 content: null,
-                tool_calls: [
-                  {
-                    id: 'call_1',
-                    type: 'function',
-                    function: {
-                      name: 'search_products',
-                      arguments: '{"query": "product", "limit": 100}',
-                    },
+                tool_calls: [{
+                  id: 'call_1',
+                  type: 'function',
+                  function: {
+                    name: 'search_products',
+                    arguments: '{"query": "product", "limit": 100}',
                   },
-                ],
+                }],
               },
-            },
-          ],
-        } as any)
-        .mockResolvedValueOnce({
-          choices: [
-            {
+            }]
+          } as any
+        } else {
+          return {
+            choices: [{
               message: {
                 content: 'Here are the products I found for you.',
               },
-            },
-          ],
-        } as any)
+            }]
+          } as any
+        }
+      })
 
+      // Pass commerce provider via dependency injection for isolation
       const response = await POST(createRequest(requestBody), {
         deps: {
           getCommerceProvider: commerceModule.getCommerceProvider,
@@ -443,7 +443,9 @@ describe('/api/chat', () => {
     })
 
     it('should include Shopify products when provider is configured', async () => {
+      // CRITICAL: Reset commerce module for this specific test
       const commerceModule = jest.requireMock('@/lib/agents/commerce-provider')
+      commerceModule.getCommerceProvider.mockReset()
 
       const shopifyProduct = {
         id: 7,
@@ -458,6 +460,7 @@ describe('/api/chat', () => {
         products: [shopifyProduct],
       })
 
+      // Configure commerce provider for this test only
       commerceModule.getCommerceProvider.mockResolvedValue(provider)
 
       const requestBody = {
@@ -471,39 +474,39 @@ describe('/api/chat', () => {
         },
       }
 
-      // Mock OpenAI to trigger tool call
-      mockOpenAIInstance.chat.completions.create.mockReset()
-      mockOpenAIInstance.chat.completions.create
-        .mockResolvedValueOnce({
-          choices: [
-            {
+      // CRITICAL: Reconfigure OpenAI mock using mockImplementation for complete isolation
+      let callCount = 0
+      mockOpenAIInstance.chat.completions.create.mockImplementation(async () => {
+        callCount++
+        if (callCount === 1) {
+          return {
+            choices: [{
               message: {
                 role: 'assistant',
                 content: null,
-                tool_calls: [
-                  {
-                    id: 'call_1',
-                    type: 'function',
-                    function: {
-                      name: 'search_products',
-                      arguments: '{"query": "widgets", "limit": 100}',
-                    },
+                tool_calls: [{
+                  id: 'call_1',
+                  type: 'function',
+                  function: {
+                    name: 'search_products',
+                    arguments: '{"query": "widgets", "limit": 100}',
                   },
-                ],
+                }],
               },
-            },
-          ],
-        } as any)
-        .mockResolvedValueOnce({
-          choices: [
-            {
+            }]
+          } as any
+        } else {
+          return {
+            choices: [{
               message: {
                 content: 'Here are the widgets available.',
               },
-            },
-          ],
-        } as any)
+            }]
+          } as any
+        }
+      })
 
+      // Pass commerce provider via dependency injection for isolation
       const response = await POST(createRequest(requestBody), {
         deps: {
           getCommerceProvider: commerceModule.getCommerceProvider,
@@ -516,9 +519,11 @@ describe('/api/chat', () => {
     })
 
     it('should handle commerce provider errors gracefully and fallback to semantic search', async () => {
+      // CRITICAL: Reset commerce and embeddings modules for this specific test
       const commerceModule = jest.requireMock('@/lib/agents/commerce-provider')
+      commerceModule.getCommerceProvider.mockReset()
 
-      // Create a mock for search similar content
+      // Create a fresh mock for search similar content
       const mockSearchSimilarContent = jest.fn().mockResolvedValue([
         {
           content: 'Fallback semantic search result',
@@ -528,11 +533,13 @@ describe('/api/chat', () => {
         },
       ])
 
+      // Create provider that will throw error
       const provider = mockCommerceProvider({
         platform: 'woocommerce',
         searchProducts: jest.fn().mockRejectedValue(new Error('Commerce API error')),
       })
 
+      // Configure commerce provider to return error-throwing provider
       commerceModule.getCommerceProvider.mockResolvedValue(provider)
 
       const requestBody = {
@@ -546,39 +553,39 @@ describe('/api/chat', () => {
         },
       }
 
-      // Mock OpenAI to trigger tool call
-      mockOpenAIInstance.chat.completions.create.mockReset()
-      mockOpenAIInstance.chat.completions.create
-        .mockResolvedValueOnce({
-          choices: [
-            {
+      // CRITICAL: Reconfigure OpenAI mock using mockImplementation for complete isolation
+      let callCount = 0
+      mockOpenAIInstance.chat.completions.create.mockImplementation(async () => {
+        callCount++
+        if (callCount === 1) {
+          return {
+            choices: [{
               message: {
                 role: 'assistant',
                 content: null,
-                tool_calls: [
-                  {
-                    id: 'call_1',
-                    type: 'function',
-                    function: {
-                      name: 'search_products',
-                      arguments: '{"query": "products", "limit": 100}',
-                    },
+                tool_calls: [{
+                  id: 'call_1',
+                  type: 'function',
+                  function: {
+                    name: 'search_products',
+                    arguments: '{"query": "products", "limit": 100}',
                   },
-                ],
+                }],
               },
-            },
-          ],
-        } as any)
-        .mockResolvedValueOnce({
-          choices: [
-            {
+            }]
+          } as any
+        } else {
+          return {
+            choices: [{
               message: {
                 content: 'Here are the products from our catalog.',
               },
-            },
-          ],
-        } as any)
+            }]
+          } as any
+        }
+      })
 
+      // Pass both commerce provider and semantic search via DI for isolation
       const response = await POST(createRequest(requestBody), {
         deps: {
           getCommerceProvider: commerceModule.getCommerceProvider,
@@ -594,6 +601,7 @@ describe('/api/chat', () => {
     })
 
     it('should handle Supabase errors gracefully', async () => {
+      // CRITICAL: Create isolated error-throwing Supabase client for this test
       // Supabase returns { data, error } objects, NOT rejected promises!
       const dbError = new Error('Database connection failed')
       const errorSupabase = {
@@ -622,7 +630,7 @@ describe('/api/chat', () => {
         rpc: jest.fn().mockResolvedValue({ data: [], error: null }),
       }
 
-      // Create a mock function that returns our error Supabase
+      // Create a fresh mock function that returns our error Supabase
       const mockCreateSupabaseClient = jest.fn().mockResolvedValue(errorSupabase)
 
       const requestBody = {
@@ -645,11 +653,10 @@ describe('/api/chat', () => {
     })
 
     it('should handle OpenAI API errors', async () => {
-      // Reset and configure OpenAI mock to throw error
-      mockOpenAIInstance.chat.completions.create.mockReset()
-      mockOpenAIInstance.chat.completions.create.mockRejectedValue(
-        new Error('OpenAI API error')
-      )
+      // CRITICAL: Reconfigure OpenAI mock to throw error using mockImplementation
+      mockOpenAIInstance.chat.completions.create.mockImplementation(async () => {
+        throw new Error('OpenAI API error')
+      })
 
       const requestBody = {
         message: 'Hello',
