@@ -1,0 +1,273 @@
+name: Documentation Link Validation
+
+on:
+  pull_request:
+    paths:
+      - 'docs/**/*.md'
+      - '*.md'
+      - 'components/**/*.md'
+      - 'app/**/*.md'
+      - 'scripts/validate-doc-links.ts'
+  push:
+    branches:
+      - main
+      - develop
+
+jobs:
+  validate-links:
+    name: Validate Documentation Links
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+          cache: 'npm'
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Run link validation
+        id: validate
+        run: |
+          npx tsx scripts/validate-doc-links.ts > validation-output.txt 2>&1 || true
+          cat validation-output.txt
+
+      - name: Parse validation results
+        id: results
+        run: |
+          VALID=$(grep "✅ Valid:" validation-output.txt | grep -oP '\d+' | head -1)
+          BROKEN=$(grep "❌ Broken:" validation-output.txt | grep -oP '\d+' | head -1)
+          EXTERNAL=$(grep "🌐 External:" validation-output.txt | grep -oP '\d+' | head -1)
+          WARNINGS=$(grep "⚠️ Warnings:" validation-output.txt | grep -oP '\d+' | head -1)
+
+          echo "valid=$VALID" >> $GITHUB_OUTPUT
+          echo "broken=$BROKEN" >> $GITHUB_OUTPUT
+          echo "external=$EXTERNAL" >> $GITHUB_OUTPUT
+          echo "warnings=$WARNINGS" >> $GITHUB_OUTPUT
+
+      - name: Upload validation report
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: link-validation-report
+          path: LINK_VALIDATION_REPORT.md
+          retention-days: 30
+
+      - name: Check for broken links
+        id: check
+        run: |
+          BROKEN="${{ steps.results.outputs.broken }}"
+          if [ "$BROKEN" -gt 0 ]; then
+            echo "status=failed" >> $GITHUB_OUTPUT
+            echo "::error::Found $BROKEN broken links in documentation"
+            exit 1
+          else
+            echo "status=passed" >> $GITHUB_OUTPUT
+            echo "✅ All documentation links are valid!"
+          fi
+
+      - name: Post PR comment with results
+        if: github.event_name == 'pull_request' && always()
+        uses: actions/github-script@v7
+        with:
+          script: |
+            const fs = require('fs');
+
+            const valid = '${{ steps.results.outputs.valid }}';
+            const broken = '${{ steps.results.outputs.broken }}';
+            const external = '${{ steps.results.outputs.external }}';
+            const warnings = '${{ steps.results.outputs.warnings }}';
+            const status = '${{ steps.check.outputs.status }}';
+
+            let emoji = '✅';
+            let statusText = 'All links valid';
+            if (status === 'failed') {
+              emoji = '❌';
+              statusText = `${broken} broken links found`;
+            } else if (warnings > 0) {
+              emoji = '⚠️';
+              statusText = `Valid with ${warnings} warnings`;
+            }
+
+            const total = parseInt(valid) + parseInt(broken) + parseInt(external) + parseInt(warnings);
+            const healthScore = ((parseInt(valid) + parseInt(external)) / total * 100).toFixed(1);
+
+            let body = `## ${emoji} Documentation Link Validation
+
+**Status:** ${statusText}
+
+### 📊 Results
+
+| Metric | Count | Percentage |
+|--------|-------|------------|
+| ✅ Valid Links | ${valid} | ${(parseInt(valid) / total * 100).toFixed(1)}% |
+| ❌ Broken Links | ${broken} | ${(parseInt(broken) / total * 100).toFixed(1)}% |
+| 🌐 External Links | ${external} | ${(parseInt(external) / total * 100).toFixed(1)}% |
+| ⚠️ Warnings | ${warnings} | ${(parseInt(warnings) / total * 100).toFixed(1)}% |
+| **Total** | **${total}** | **100%** |
+
+**Health Score:** ${healthScore}%
+
+`;
+
+            if (broken > 0) {
+              body += `
+### ⚠️ Action Required
+
+${broken} broken links detected. Please review the validation report:
+
+1. Download the \`link-validation-report\` artifact from this workflow run
+2. Review LINK_VALIDATION_REPORT.md for details
+3. Fix broken links before merging
+
+**Quick Fix:**
+\`\`\`bash
+# Preview fixes
+npx tsx scripts/fix-doc-links.ts --dry-run
+
+# Apply automated fixes
+npx tsx scripts/fix-doc-links.ts
+
+# Validate again
+npx tsx scripts/validate-doc-links.ts
+\`\`\`
+`;
+            } else {
+              body += `
+### ✅ All Clear
+
+All documentation links are working correctly. Great job! 🎉
+`;
+            }
+
+            body += `
+<details>
+<summary>View Validation Report</summary>
+
+Download the \`link-validation-report\` artifact from this workflow run for complete details.
+
+</details>
+`;
+
+            // Find existing comment
+            const { data: comments } = await github.rest.issues.listComments({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              issue_number: context.issue.number,
+            });
+
+            const botComment = comments.find(comment =>
+              comment.user.type === 'Bot' &&
+              comment.body.includes('Documentation Link Validation')
+            );
+
+            if (botComment) {
+              // Update existing comment
+              await github.rest.issues.updateComment({
+                owner: context.repo.owner,
+                repo: context.repo.repo,
+                comment_id: botComment.id,
+                body: body,
+              });
+            } else {
+              // Create new comment
+              await github.rest.issues.createComment({
+                owner: context.repo.owner,
+                repo: context.repo.repo,
+                issue_number: context.issue.number,
+                body: body,
+              });
+            }
+
+  # Optional: Auto-fix broken links
+  auto-fix-links:
+    name: Auto-fix Broken Links
+    runs-on: ubuntu-latest
+    # Only run on pushes to develop, not on PRs
+    if: github.event_name == 'push' && github.ref == 'refs/heads/develop'
+    needs: validate-links
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+        with:
+          token: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+          cache: 'npm'
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Run automated link fixer
+        run: |
+          npx tsx scripts/fix-doc-links.ts
+
+      - name: Check for changes
+        id: changes
+        run: |
+          if git diff --quiet; then
+            echo "has_changes=false" >> $GITHUB_OUTPUT
+          else
+            echo "has_changes=true" >> $GITHUB_OUTPUT
+          fi
+
+      - name: Commit and push changes
+        if: steps.changes.outputs.has_changes == 'true'
+        run: |
+          git config --local user.email "github-actions[bot]@users.noreply.github.com"
+          git config --local user.name "github-actions[bot]"
+          git add .
+          git commit -m "docs: auto-fix broken documentation links [skip ci]"
+          git push
+
+      - name: Create issue if fixes applied
+        if: steps.changes.outputs.has_changes == 'true'
+        uses: actions/github-script@v7
+        with:
+          script: |
+            await github.rest.issues.create({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              title: '🤖 Automated Documentation Link Fixes Applied',
+              body: `## Automated Link Fixes
+
+The link validation workflow detected and automatically fixed broken documentation links.
+
+**Branch:** \`develop\`
+**Commit:** ${context.sha}
+
+### What was fixed?
+- Updated file paths for moved files
+- Corrected relative path depths
+- Fixed anchor references
+
+### Next Steps
+1. Review the automated fixes in the latest commit
+2. Run \`npx tsx scripts/validate-doc-links.ts\` locally to verify
+3. Manually fix any remaining broken links if needed
+
+### Useful Commands
+\`\`\`bash
+# Validate links
+npx tsx scripts/validate-doc-links.ts
+
+# Preview more fixes
+npx tsx scripts/fix-doc-links.ts --dry-run
+
+# Apply manual fixes
+git commit -am "docs: fix remaining broken links"
+\`\`\`
+
+This issue was created automatically by the link validation workflow.
+              `,
+              labels: ['documentation', 'automated-fix', 'maintenance']
+            });
