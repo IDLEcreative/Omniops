@@ -33,10 +33,7 @@ import { RouteDependencies, defaultDependencies } from '@/lib/chat/route-types';
 
 export async function POST(
   request: NextRequest,
-  context: { params: Promise<{}>; deps?: Partial<RouteDependencies> } = {
-    params: Promise.resolve({}),
-    deps: defaultDependencies
-  }
+  context: { params: Promise<{}> } & { deps?: Partial<RouteDependencies> }
 ) {
   // Extract deps from context (defaults to defaultDependencies if not provided)
   const deps = context.deps || defaultDependencies;
