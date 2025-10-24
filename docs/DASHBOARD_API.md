@@ -413,5 +413,5 @@ function MyDashboard() {
 ## Related Documentation
 
 - [Dashboard UI Components](./DASHBOARD_UI.md)
-- [Database Schema](./SUPABASE_SCHEMA.md)
+- [Database Schema](./01-ARCHITECTURE/database-schema.md)
 - [Chat System API](./CHAT_API.md)

@@ -1,5 +1,10 @@
 # Testing Quick Start Guide
 
+**📚 For comprehensive testing documentation with real examples, see:**
+[docs/04-DEVELOPMENT/testing/README.md](04-DEVELOPMENT/testing/README.md)
+
+---
+
 ## 🚀 Getting Started in 5 Minutes
 
 ### 1. Run Your First Test

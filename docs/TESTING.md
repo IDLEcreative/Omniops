@@ -1,5 +1,22 @@
 # Testing Documentation
 
+**⚠️ MOVED: This document has been relocated**
+
+**New Location**: [docs/04-DEVELOPMENT/testing/README.md](04-DEVELOPMENT/testing/README.md)
+
+This file is kept for backward compatibility. Please use the new location for the most up-to-date testing documentation with real codebase examples.
+
+---
+
+## Quick Links
+
+- **New Testing Guide**: [docs/04-DEVELOPMENT/testing/README.md](04-DEVELOPMENT/testing/README.md)
+- **Quick Start**: [docs/TESTING_QUICKSTART.md](TESTING_QUICKSTART.md)
+
+---
+
+# Legacy Content Below (Outdated)
+
 This document provides comprehensive information about testing strategies, tools, and procedures for the Customer Service Agent project.
 
 ## Overview

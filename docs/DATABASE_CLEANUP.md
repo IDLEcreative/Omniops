@@ -501,7 +501,7 @@ jobs:
 
 ## Related Documentation
 
-- [Database Schema](./SUPABASE_SCHEMA.md)
+- [Database Schema](./01-ARCHITECTURE/database-schema.md)
 - [Scraping Guide](./SCRAPING.md)
 - [API Documentation](./API.md)
 - [Admin Panel Guide](./ADMIN.md)
