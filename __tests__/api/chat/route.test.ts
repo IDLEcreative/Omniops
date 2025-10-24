@@ -61,12 +61,23 @@ describe('/api/chat', () => {
   beforeEach(() => {
     // CRITICAL: Clear ALL mocks to prevent test interference
     jest.clearAllMocks()
-    jest.restoreAllMocks()
 
-    // Use standardized OpenAI mock
-    mockOpenAIInstance = mockOpenAIClient({
-      chatResponse: 'This is a helpful response from the AI assistant.',
-    }) as any
+    // Create a fresh OpenAI mock WITHOUT pre-configured responses
+    // Tests will configure their own responses as needed
+    mockOpenAIInstance = {
+      chat: {
+        completions: {
+          create: jest.fn().mockResolvedValue({
+            choices: [{
+              message: {
+                role: 'assistant',
+                content: 'This is a helpful response from the AI assistant.',
+              }
+            }]
+          })
+        }
+      }
+    } as any
 
     // Mock the OpenAI constructor
     const MockedOpenAI = OpenAI as jest.MockedClass<typeof OpenAI>
@@ -285,12 +296,22 @@ describe('/api/chat', () => {
         domain: 'example.com',
       }
 
-      const response = await POST(createRequest(requestBody), { deps: {} })
+      // Create mock spies to verify these functions aren't called
+      const mockGetCommerceProvider = jest.fn().mockResolvedValue(null)
+      const mockSearchSimilarContent = jest.fn().mockResolvedValue([])
+
+      const response = await POST(createRequest(requestBody), {
+        deps: {
+          getCommerceProvider: mockGetCommerceProvider,
+          searchSimilarContent: mockSearchSimilarContent,
+        },
+      })
       const data = await response.json()
 
       expect(response.status).toBe(200)
       expect(data.message).toContain('product name')
       expect(mockOpenAIInstance.chat.completions.create).toHaveBeenCalledTimes(2)
+      // When tool arguments are missing, functions should not be called
       expect(mockGetCommerceProvider).not.toHaveBeenCalled()
       expect(mockSearchSimilarContent).not.toHaveBeenCalled()
     })
@@ -573,38 +594,59 @@ describe('/api/chat', () => {
     })
 
     it('should handle Supabase errors gracefully', async () => {
-      const mockModule = jest.requireMock('@/lib/supabase-server')
-
-      // Create a mock that throws on insert
+      // Supabase returns { data, error } objects, NOT rejected promises!
+      const dbError = new Error('Database connection failed')
       const errorSupabase = {
-        from: jest.fn().mockReturnValue({
-          insert: jest.fn().mockRejectedValue(new Error('Database connection failed')),
-          select: jest.fn().mockReturnThis(),
-          eq: jest.fn().mockReturnThis(),
-          single: jest.fn().mockResolvedValue({
-            data: null,
-            error: new Error('Database connection failed'),
-          }),
+        from: jest.fn((table: string) => {
+          if (table === 'conversations') {
+            return {
+              insert: jest.fn().mockReturnValue({
+                select: jest.fn().mockReturnValue({
+                  // Supabase returns { data: null, error: Error }
+                  single: jest.fn().mockResolvedValue({
+                    data: null,
+                    error: dbError,
+                  }),
+                }),
+              }),
+            }
+          }
+          // Default for other tables
+          return {
+            select: jest.fn().mockReturnThis(),
+            insert: jest.fn().mockResolvedValue({ error: null }),
+            eq: jest.fn().mockReturnThis(),
+            single: jest.fn().mockResolvedValue({ data: null, error: null }),
+          }
         }),
         rpc: jest.fn().mockResolvedValue({ data: [], error: null }),
       }
 
-      mockModule.createServiceRoleClient.mockResolvedValue(errorSupabase)
-      mockModule.requireServiceRoleClient.mockResolvedValue(errorSupabase)
+      // Create a mock function that returns our error Supabase
+      const mockCreateSupabaseClient = jest.fn().mockResolvedValue(errorSupabase)
 
       const requestBody = {
         message: 'Hello',
         session_id: 'test-session-123',
+        domain: 'example.com',
       }
 
-      const response = await POST(createRequest(requestBody), { deps: {} })
+      // Inject the error-throwing Supabase client via dependency injection
+      const response = await POST(createRequest(requestBody), {
+        deps: {
+          createServiceRoleClient: mockCreateSupabaseClient,
+        },
+      })
       const data = await response.json()
 
       expect(response.status).toBe(500)
       expect(data.error).toBe('Failed to process chat message')
+      expect(mockCreateSupabaseClient).toHaveBeenCalled()
     })
 
     it('should handle OpenAI API errors', async () => {
+      // Reset and configure OpenAI mock to throw error
+      mockOpenAIInstance.chat.completions.create.mockReset()
       mockOpenAIInstance.chat.completions.create.mockRejectedValue(
         new Error('OpenAI API error')
       )
@@ -612,6 +654,7 @@ describe('/api/chat', () => {
       const requestBody = {
         message: 'Hello',
         session_id: 'test-session-123',
+        domain: 'example.com',
       }
 
       const response = await POST(createRequest(requestBody), { deps: {} })

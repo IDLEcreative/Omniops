@@ -22,6 +22,7 @@ export interface RouteDependencies {
   extractQueryKeywords: typeof extractQueryKeywords;
   isPriceQuery: typeof isPriceQuery;
   extractPriceRange: typeof extractPriceRange;
+  createServiceRoleClient: typeof createServiceRoleClient;
 }
 
 // Default dependencies (production)
@@ -33,6 +34,7 @@ const defaultDependencies: RouteDependencies = {
   extractQueryKeywords,
   isPriceQuery,
   extractPriceRange,
+  createServiceRoleClient,
 };
 
 // Lazy load OpenAI client to avoid build-time errors
@@ -571,6 +573,7 @@ export async function POST(
     extractQueryKeywords: extractKeywordsFn,
     isPriceQuery: isPriceQueryFn,
     extractPriceRange: extractPriceRangeFn,
+    createServiceRoleClient: createSupabaseClient,
   } = { ...defaultDependencies, ...deps };
 
   // Initialize telemetry at the very start
@@ -637,8 +640,8 @@ export async function POST(
       );
     }
 
-    // Initialize Supabase client
-    const adminSupabase = await createServiceRoleClient();
+    // Initialize Supabase client (uses injected dependency for testing)
+    const adminSupabase = await createSupabaseClient();
 
     if (!adminSupabase) {
       return NextResponse.json(

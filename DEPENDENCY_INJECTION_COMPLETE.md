@@ -10,7 +10,7 @@ Successfully implemented **dependency injection pattern** in the chat route API,
 
 ### 1. Created Dependency Injection Infrastructure
 
-**Interface** ([app/api/chat/route.ts:16-25](app/api/chat/route.ts#L16-L25)):
+**Interface** ([app/api/chat/route.ts:16-26](app/api/chat/route.ts#L16-L26)):
 ```typescript
 export interface RouteDependencies {
   checkDomainRateLimit: typeof checkDomainRateLimit;
@@ -20,6 +20,7 @@ export interface RouteDependencies {
   extractQueryKeywords: typeof extractQueryKeywords;
   isPriceQuery: typeof isPriceQuery;
   extractPriceRange: typeof extractPriceRange;
+  createServiceRoleClient: typeof createServiceRoleClient;  // ← ADDED: Critical for error testing
 }
 ```
 
