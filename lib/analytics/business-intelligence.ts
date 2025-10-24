@@ -5,6 +5,7 @@
 
 import { createServiceRoleClient } from '@/lib/supabase-server';
 import { logger } from '@/lib/logger';
+import type { SupabaseClient } from '@supabase/supabase-js';
 
 export interface TimeRange {
   start: Date;
@@ -103,6 +104,8 @@ export interface Bottleneck {
 export class BusinessIntelligence {
   private static instance: BusinessIntelligence;
 
+  constructor(private supabase?: SupabaseClient) {}
+
   static getInstance(): BusinessIntelligence {
     if (!BusinessIntelligence.instance) {
       BusinessIntelligence.instance = new BusinessIntelligence();
@@ -117,7 +120,20 @@ export class BusinessIntelligence {
     domain: string,
     timeRange: TimeRange
   ): Promise<CustomerJourneyMetrics> {
-    const supabase = await createServiceRoleClient();
+    // Validate date range
+    if (timeRange.start >= timeRange.end) {
+      logger.warn('Invalid date range provided', { domain, timeRange });
+      return {
+        conversionRate: 0,
+        avgSessionsBeforeConversion: 0,
+        avgMessagesPerSession: 0,
+        commonPaths: [],
+        dropOffPoints: [],
+        timeToConversion: 0
+      };
+    }
+
+    const supabase = this.supabase || await createServiceRoleClient();
 
     if (!supabase) {
       throw new Error('Database client unavailable');
@@ -125,12 +141,13 @@ export class BusinessIntelligence {
 
     try {
       // Get all sessions with their messages
-      const { data: sessions, error } = await supabase
+      let query = supabase
         .from('conversations')
         .select(`
           id,
           session_id,
           created_at,
+          metadata,
           messages (
             id,
             content,
@@ -141,7 +158,23 @@ export class BusinessIntelligence {
         .gte('created_at', timeRange.start.toISOString())
         .lte('created_at', timeRange.end.toISOString());
 
-      if (error) throw error;
+      if (domain !== 'all') {
+        query = query.eq('domain', domain);
+      }
+
+      const { data: sessions, error } = await query;
+
+      if (error) {
+        logger.error('Failed to analyze customer journey', error);
+        return {
+          conversionRate: 0,
+          avgSessionsBeforeConversion: 0,
+          avgMessagesPerSession: 0,
+          commonPaths: [],
+          dropOffPoints: [],
+          timeToConversion: 0
+        };
+      }
 
       // Analyze journey patterns
       const journeyPaths = new Map<string, number>();
@@ -164,10 +197,10 @@ export class BusinessIntelligence {
 
         journeyPaths.set(path, (journeyPaths.get(path) || 0) + 1);
 
-        // Check for conversion (e.g., order lookup, contact request)
-        const hasConversion = messages.some(m =>
-          this.isConversionMessage(m.content)
-        );
+        // Check for conversion (metadata flag OR conversion keywords in messages)
+        const hasConversion =
+          session.metadata?.converted === true ||
+          messages.some(m => this.isConversionMessage(m.content));
 
         if (hasConversion) {
           conversions++;
@@ -201,16 +234,23 @@ export class BusinessIntelligence {
         .sort((a, b) => b.dropOffRate - a.dropOffRate);
 
       return {
-        avgSessionsBeforeConversion: totalSessions / Math.max(conversions, 1),
-        avgMessagesPerSession: totalMessages / Math.max(totalSessions, 1),
+        avgSessionsBeforeConversion: conversions > 0 ? totalSessions / conversions : 0,
+        avgMessagesPerSession: totalSessions > 0 ? totalMessages / totalSessions : 0,
         commonPaths,
         dropOffPoints,
-        conversionRate: (conversions / Math.max(totalSessions, 1)) * 100,
-        timeToConversion: totalTimeToConversion / Math.max(conversions, 1)
+        conversionRate: totalSessions > 0 ? (conversions / totalSessions) * 100 : 0,
+        timeToConversion: conversions > 0 ? totalTimeToConversion / conversions : 0
       };
     } catch (error) {
       logger.error('Failed to analyze customer journey', error);
-      throw error;
+      return {
+        conversionRate: 0,
+        avgSessionsBeforeConversion: 0,
+        avgMessagesPerSession: 0,
+        commonPaths: [],
+        dropOffPoints: [],
+        timeToConversion: 0
+      };
     }
   }
 
@@ -222,7 +262,18 @@ export class BusinessIntelligence {
     timeRange: TimeRange,
     confidenceThreshold: number = 0.7
   ): Promise<ContentGapAnalysis> {
-    const supabase = await createServiceRoleClient();
+    // Validate date range
+    if (timeRange.start >= timeRange.end) {
+      logger.warn('Invalid date range provided', { domain, timeRange });
+      return {
+        unansweredQueries: [],
+        lowConfidenceTopics: [],
+        suggestedContent: [],
+        coverageScore: 0
+      };
+    }
+
+    const supabase = this.supabase || await createServiceRoleClient();
 
     if (!supabase) {
       throw new Error('Database client unavailable');
@@ -230,7 +281,7 @@ export class BusinessIntelligence {
 
     try {
       // Get messages with low confidence or no results
-      const { data: messages, error } = await supabase
+      let query = supabase
         .from('messages')
         .select(`
           content,
@@ -243,7 +294,21 @@ export class BusinessIntelligence {
         .order('created_at', { ascending: false })
         .limit(1000);
 
-      if (error) throw error;
+      if (domain !== 'all') {
+        query = query.eq('domain', domain);
+      }
+
+      const { data: messages, error } = await query;
+
+      if (error) {
+        logger.error('Failed to analyze content gaps', error);
+        return {
+          unansweredQueries: [],
+          lowConfidenceTopics: [],
+          suggestedContent: [],
+          coverageScore: 0
+        };
+      }
 
       // Analyze unanswered queries
       const queryFrequency = new Map<string, number>();
@@ -307,7 +372,12 @@ export class BusinessIntelligence {
       };
     } catch (error) {
       logger.error('Failed to analyze content gaps', error);
-      throw error;
+      return {
+        unansweredQueries: [],
+        lowConfidenceTopics: [],
+        suggestedContent: [],
+        coverageScore: 0
+      };
     }
   }
 
@@ -318,7 +388,20 @@ export class BusinessIntelligence {
     domain: string,
     timeRange: TimeRange
   ): Promise<PeakUsagePattern> {
-    const supabase = await createServiceRoleClient();
+    // Validate date range
+    if (timeRange.start >= timeRange.end) {
+      logger.warn('Invalid date range provided', { domain, timeRange });
+      return {
+        hourlyDistribution: [],
+        dailyDistribution: [],
+        peakHours: [],
+        quietHours: [],
+        predictedNextPeak: new Date(),
+        resourceRecommendation: 'Invalid date range provided'
+      };
+    }
+
+    const supabase = this.supabase || await createServiceRoleClient();
 
     if (!supabase) {
       throw new Error('Database client unavailable');
@@ -329,7 +412,7 @@ export class BusinessIntelligence {
 
     try {
       // Get message distribution
-      const { data: messages, error} = await supabase
+      let query = supabase
         .from('messages')
         .select(`
           created_at,
@@ -339,7 +422,23 @@ export class BusinessIntelligence {
         .lte('created_at', timeRange.end.toISOString())
         .order('created_at', { ascending: true });
 
-      if (error) throw error;
+      if (domain !== 'all') {
+        query = query.eq('domain', domain);
+      }
+
+      const { data: messages, error } = await query;
+
+      if (error) {
+        logger.error('Failed to analyze peak usage', error);
+        return {
+          hourlyDistribution: [],
+          dailyDistribution: [],
+          peakHours: [],
+          quietHours: [],
+          predictedNextPeak: new Date(),
+          resourceRecommendation: 'Error analyzing usage patterns'
+        };
+      }
 
       // Analyze hourly distribution
       const hourlyData = new Map<number, number[]>();
@@ -411,7 +510,14 @@ export class BusinessIntelligence {
       };
     } catch (error) {
       logger.error('Failed to analyze peak usage', error);
-      throw error;
+      return {
+        hourlyDistribution: [],
+        dailyDistribution: [],
+        peakHours: [],
+        quietHours: [],
+        predictedNextPeak: new Date(),
+        resourceRecommendation: 'Error analyzing usage patterns'
+      };
     }
   }
 
@@ -423,42 +529,173 @@ export class BusinessIntelligence {
     timeRange: TimeRange,
     funnelDefinition?: string[]
   ): Promise<ConversionFunnel> {
-    // This would analyze how users progress through defined stages
-    // For example: ['initial_contact', 'product_inquiry', 'price_check', 'order_lookup', 'purchase']
+    // Validate date range
+    if (timeRange.start >= timeRange.end) {
+      logger.warn('Invalid date range provided', { domain, timeRange });
+      return {
+        stages: [],
+        overallConversionRate: 0,
+        avgTimeInFunnel: 0,
+        bottlenecks: []
+      };
+    }
 
-    // Default funnel stages if not provided
-    const stages_definition = funnelDefinition || [
-      'initial_contact',
-      'product_inquiry',
-      'price_check',
-      'order_lookup',
-      'purchase'
-    ];
+    const supabase = this.supabase || await createServiceRoleClient();
 
-    const stages: FunnelStage[] = stages_definition.map(stageName => ({
-      name: stageName,
-      enteredCount: Math.floor(Math.random() * 1000), // Would need actual data
-      completedCount: Math.floor(Math.random() * 800),
-      conversionRate: Math.random() * 100,
-      avgDuration: Math.random() * 300,
-      dropOffReasons: ['unclear_response', 'price_concern', 'technical_issue']
-    }));
+    if (!supabase) {
+      throw new Error('Database client unavailable');
+    }
 
-    const bottlenecks: Bottleneck[] = stages
-      .filter(s => s.conversionRate < 50)
-      .map(s => ({
-        stage: s.name,
-        severity: s.conversionRate < 30 ? 'high' : 'medium',
-        impact: (100 - s.conversionRate) / 2,
-        recommendation: `Improve ${s.name} stage messaging and reduce friction`
-      }));
+    try {
+      // Get all conversations and messages
+      let query = supabase
+        .from('conversations')
+        .select(`
+          id,
+          session_id,
+          created_at,
+          metadata,
+          messages (
+            id,
+            content,
+            role,
+            created_at
+          )
+        `)
+        .gte('created_at', timeRange.start.toISOString())
+        .lte('created_at', timeRange.end.toISOString());
 
-    return {
-      stages,
-      overallConversionRate: stages[stages.length - 1]?.conversionRate || 0,
-      avgTimeInFunnel: stages.reduce((sum, s) => sum + s.avgDuration, 0),
-      bottlenecks
-    };
+      if (domain !== 'all') {
+        query = query.eq('domain', domain);
+      }
+
+      const { data: conversations, error } = await query;
+
+      if (error) {
+        logger.error('Failed to analyze conversion funnel', error);
+        return {
+          stages: [],
+          overallConversionRate: 0,
+          avgTimeInFunnel: 0,
+          bottlenecks: []
+        };
+      }
+
+      // Default funnel stages based on common user actions
+      const stages_definition = funnelDefinition || [
+        'Visit',
+        'Product Inquiry',
+        'Add to Cart',
+        'Checkout',
+        'Purchase'
+      ];
+
+      // Track progression through stages
+      const stageCounts = new Map<string, number>();
+      const stageCompletions = new Map<string, number>();
+      const stageDurations = new Map<string, number[]>();
+      const totalSessions = conversations?.length || 0;
+
+      // Initialize stage tracking
+      for (const stageName of stages_definition) {
+        stageCounts.set(stageName, 0);
+        stageCompletions.set(stageName, 0);
+        stageDurations.set(stageName, []);
+      }
+
+      // Analyze each conversation
+      for (const conversation of conversations || []) {
+        const messages = conversation.messages || [];
+        if (messages.length === 0) continue;
+
+        // Every session starts with 'Visit'
+        stageCounts.set('Visit', (stageCounts.get('Visit') || 0) + 1);
+
+        const userMessages = messages.filter(m => m.role === 'user');
+        let currentStageIndex = 0;
+        let stageStartTime = new Date(messages[0]!.created_at);
+
+        // Categorize messages to determine stage progression
+        for (const message of userMessages) {
+          const category = this.categorizeMessageForFunnel(message.content);
+          const stageIndex = this.getStageIndexForCategory(category, stages_definition);
+
+          // Track stage entry
+          if (stageIndex >= 0 && stageIndex < stages_definition.length) {
+            const stageName = stages_definition[stageIndex]!;
+            stageCounts.set(stageName, (stageCounts.get(stageName) || 0) + 1);
+
+            // Calculate duration in previous stage
+            if (currentStageIndex < stageIndex) {
+              const prevStageName = stages_definition[currentStageIndex]!;
+              const duration = (new Date(message.created_at).getTime() - stageStartTime.getTime()) / 1000; // seconds
+              const durations = stageDurations.get(prevStageName) || [];
+              durations.push(duration);
+              stageDurations.set(prevStageName, durations);
+
+              // Mark previous stage as completed
+              stageCompletions.set(prevStageName, (stageCompletions.get(prevStageName) || 0) + 1);
+
+              currentStageIndex = stageIndex;
+              stageStartTime = new Date(message.created_at);
+            }
+          }
+        }
+      }
+
+      // Build stage metrics
+      const stages: FunnelStage[] = stages_definition.map((stageName, index) => {
+        const entered = stageCounts.get(stageName) || 0;
+        const completed = stageCompletions.get(stageName) || 0;
+        const durations = stageDurations.get(stageName) || [];
+        const avgDuration = durations.length > 0
+          ? durations.reduce((sum, d) => sum + d, 0) / durations.length
+          : 0;
+
+        return {
+          name: stageName,
+          enteredCount: entered,
+          completedCount: completed,
+          conversionRate: entered > 0 ? (completed / entered) : 0,
+          avgDuration,
+          dropOffReasons: this.analyzeDropOffReasons(stageName, conversations || [])
+        };
+      });
+
+      // Identify bottlenecks
+      const bottlenecks: Bottleneck[] = stages
+        .filter(s => s.conversionRate < 0.5 && s.enteredCount > 0)
+        .map(s => ({
+          stage: s.name,
+          severity: (s.conversionRate < 0.3 ? 'high' : s.conversionRate < 0.5 ? 'medium' : 'low') as 'high' | 'medium' | 'low',
+          impact: (1 - s.conversionRate) * s.enteredCount,
+          recommendation: `Improve ${s.name} stage - ${Math.round((1 - s.conversionRate) * 100)}% drop-off rate detected`
+        }))
+        .sort((a, b) => b.impact - a.impact);
+
+      // Calculate overall metrics
+      const finalStage = stages[stages.length - 1];
+      const overallConversionRate = totalSessions > 0
+        ? (finalStage?.completedCount || 0) / totalSessions
+        : 0;
+
+      const avgTimeInFunnel = stages.reduce((sum, s) => sum + s.avgDuration, 0);
+
+      return {
+        stages,
+        overallConversionRate,
+        avgTimeInFunnel,
+        bottlenecks
+      };
+    } catch (error) {
+      logger.error('Failed to analyze conversion funnel', error);
+      return {
+        stages: [],
+        overallConversionRate: 0,
+        avgTimeInFunnel: 0,
+        bottlenecks: []
+      };
+    }
   }
 
   // Helper methods
@@ -577,6 +814,47 @@ export class BusinessIntelligence {
     }
 
     return 'Load is relatively consistent. Current resource allocation appears optimal.';
+  }
+
+  private categorizeMessageForFunnel(content: string): string {
+    const lower = content.toLowerCase();
+    if (lower.includes('checkout') || lower.includes('purchase') || lower.includes('buy')) {
+      return 'checkout';
+    }
+    if (lower.includes('cart') || lower.includes('add to cart')) {
+      return 'cart';
+    }
+    if (lower.includes('product') || lower.includes('show') || lower.includes('browse')) {
+      return 'product';
+    }
+    return 'visit';
+  }
+
+  private getStageIndexForCategory(category: string, stages: string[]): number {
+    const categoryToStage: { [key: string]: string } = {
+      'visit': 'Visit',
+      'product': 'Product Inquiry',
+      'cart': 'Add to Cart',
+      'checkout': 'Checkout'
+    };
+
+    const stageName = categoryToStage[category];
+    if (!stageName) return 0;
+
+    return stages.indexOf(stageName);
+  }
+
+  private analyzeDropOffReasons(stageName: string, conversations: any[]): string[] {
+    // Simple drop-off reason analysis based on stage
+    const reasons: { [key: string]: string[] } = {
+      'Visit': ['No engagement', 'Quick exit'],
+      'Product Inquiry': ['No relevant products', 'Unclear response'],
+      'Add to Cart': ['Price concerns', 'Out of stock'],
+      'Checkout': ['Payment issues', 'Shipping concerns'],
+      'Purchase': ['Technical error', 'Changed mind']
+    };
+
+    return reasons[stageName] || ['Unknown'];
   }
 }
 

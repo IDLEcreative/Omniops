@@ -26,14 +26,14 @@ import type {
 } from '@/lib/woocommerce-types';
 import { getWooCommerceModule } from './woo-module';
 
-const parseCoupon = (data: unknown) => getWooCommerceModule().parseCoupon(data);
-const parseTaxRate = (data: unknown) => getWooCommerceModule().parseTaxRate(data);
-const parseTaxClass = (data: unknown) => getWooCommerceModule().parseTaxClass(data);
-const parseShippingZone = (data: unknown) => getWooCommerceModule().parseShippingZone(data);
-const parseShippingMethod = (data: unknown) => getWooCommerceModule().parseShippingMethod(data);
-const parsePaymentGateway = (data: unknown) => getWooCommerceModule().parsePaymentGateway(data);
-const parseWebhook = (data: unknown) => getWooCommerceModule().parseWebhook(data);
-const parseSystemStatus = (data: unknown) => getWooCommerceModule().parseSystemStatus(data);
+const parseCoupon = (data: unknown) => getWooCommerceModule().CouponSchema.parse(data);
+const parseTaxRate = (data: unknown) => getWooCommerceModule().TaxRateSchema.parse(data);
+const parseTaxClass = (data: unknown) => getWooCommerceModule().TaxClassSchema.parse(data);
+const parseShippingZone = (data: unknown) => getWooCommerceModule().ShippingZoneSchema.parse(data);
+const parseShippingMethod = (data: unknown) => getWooCommerceModule().ShippingMethodSchema.parse(data);
+const parsePaymentGateway = (data: unknown) => getWooCommerceModule().PaymentGatewaySchema.parse(data);
+const parseWebhook = (data: unknown) => getWooCommerceModule().WebhookSchema.parse(data);
+const parseSystemStatus = (data: unknown) => getWooCommerceModule().SystemStatusSchema.parse(data);
 
 export class SettingsAPI {
   constructor(private getClient: () => WooCommerceClient) {}

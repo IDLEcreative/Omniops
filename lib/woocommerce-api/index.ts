@@ -52,7 +52,7 @@ export class WooCommerceAPI {
       }
       this.wc = client;
     }
-    return this.wc;
+    return this.wc!;
   }
 
   // Initialize modules lazily
