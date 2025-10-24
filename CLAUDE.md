@@ -88,11 +88,12 @@ npx tsc --noEmit        # Run TypeScript type checking
 # Database Migration
 npm run migrate:encrypt-credentials  # Migrate credentials to encrypted format
 
-# Database Cleanup
-npx tsx test-database-cleanup.ts stats              # View scraping statistics
-npx tsx test-database-cleanup.ts clean              # Clean all scraped data
-npx tsx test-database-cleanup.ts clean --domain=X   # Clean specific domain
-npx tsx test-database-cleanup.ts clean --dry-run    # Preview cleanup
+# Database Cleanup (Planned)
+# 🔜 Planned: Database cleanup utilities
+# npx tsx test-database-cleanup.ts stats            # View scraping statistics
+# npx tsx test-database-cleanup.ts clean            # Clean all scraped data
+# npx tsx test-database-cleanup.ts clean --domain=X # Clean specific domain
+# npx tsx test-database-cleanup.ts clean --dry-run  # Preview cleanup
 
 # Performance Monitoring & Optimization (Planned Features)
 # ⚠️ NOTE: The following NPX tools are planned features, not yet implemented.
@@ -222,8 +223,8 @@ DOCKER_BUILDKIT=1 docker-compose up -d --build     # Rebuild and restart (uses c
 # Access running container
 docker exec -it omniops-app sh         # Shell into app container
 
-# Performance monitoring
-npx tsx profile-docker-quick.ts        # Profile Docker build performance
+# Performance monitoring (Planned)
+# 🔜 npx tsx profile-docker-quick.ts  # Profile Docker build performance
 ```
 
 #### Docker Files Structure
@@ -314,17 +315,16 @@ npx tsx profile-docker-quick.ts        # Profile Docker build performance
 3. Job monitoring: Check Redis or use job status endpoint
 
 ### Database Cleanup & Maintenance
-When you need to clean scraped data for fresh re-scraping:
+Database cleanup utilities are planned for future implementation.
 
-1. **Check Current Data**: `npx tsx test-database-cleanup.ts stats`
-2. **Clean Specific Domain**: `npx tsx test-database-cleanup.ts clean --domain=example.com`
-3. **Clean Everything**: `npx tsx test-database-cleanup.ts clean`
+**Planned functionality:**
+- View scraping statistics by domain
+- Clean scraped data for specific domains or all domains
+- Preview cleanup operations with dry-run mode
+- Safe deletion using CASCADE foreign keys
+- Preserves customer configs, credentials, and user accounts
 
-The cleanup system uses CASCADE foreign keys for safe deletion:
-- Removes: scraped pages, embeddings, extractions, cache
-- Preserves: customer configs, credentials, user accounts
-- See `lib/database-cleaner.ts` for implementation
-- Full docs: `docs/DATABASE_CLEANUP.md`
+**Implementation status:** 🔜 See `docs/NPX_SCRIPTS_ROADMAP.md` for priority and timeline
 
 ## Critical Development Guidelines
 
@@ -335,7 +335,7 @@ The cleanup system uses CASCADE foreign keys for safe deletion:
 - **CRITICAL**: The chat system has strict anti-hallucination measures in place
 - See `docs/HALLUCINATION_PREVENTION.md` for comprehensive documentation
 - Key principle: Always admit uncertainty rather than making false claims
-- Run `npx tsx test-hallucination-prevention.ts` after any chat prompt changes
+- Testing: 🔜 Planned - `npx tsx test-hallucination-prevention.ts` (not yet implemented)
 
 ## Optimization Philosophy
 

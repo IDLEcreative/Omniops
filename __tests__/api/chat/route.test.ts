@@ -136,7 +136,7 @@ describe('/api/chat', () => {
         },
       }
 
-      const response = await POST(createRequest(requestBody), { deps: {} })
+      const response = await POST(createRequest(requestBody), { params: Promise.resolve({}), deps: {} })
       const data = await response.json()
 
       expect(response.status).toBe(200)
@@ -173,7 +173,7 @@ describe('/api/chat', () => {
       mockModule.createServiceRoleClient.mockResolvedValue(mockSupabase)
       mockModule.requireServiceRoleClient.mockResolvedValue(mockSupabase)
 
-      const response = await POST(createRequest(requestBody), { deps: {} })
+      const response = await POST(createRequest(requestBody), { params: Promise.resolve({}), deps: {} })
       const data = await response.json()
 
       expect(response.status).toBe(200)
@@ -358,7 +358,7 @@ describe('/api/chat', () => {
         session_id: 'test-session-123',
       }
 
-      const response = await POST(createRequest(requestBody), { deps: {} })
+      const response = await POST(createRequest(requestBody), { params: Promise.resolve({}), deps: {} })
       const data = await response.json()
 
       expect(response.status).toBe(400)
@@ -664,7 +664,7 @@ describe('/api/chat', () => {
         domain: 'example.com',
       }
 
-      const response = await POST(createRequest(requestBody), { deps: {} })
+      const response = await POST(createRequest(requestBody), { params: Promise.resolve({}), deps: {} })
       const data = await response.json()
 
       expect(response.status).toBe(500)

@@ -1,5 +1,13 @@
 # Database Cleanup Guide
 
+> **⚠️ IMPLEMENTATION STATUS: PLANNED FEATURE**
+>
+> The `test-database-cleanup.ts` script documented here is not yet implemented. This documentation describes the planned functionality and design.
+>
+> **Current Status:** 🔜 Not Implemented
+> **Priority:** High
+> **See:** [NPX_SCRIPTS_ROADMAP.md](NPX_SCRIPTS_ROADMAP.md) for implementation timeline
+
 ## Overview
 
 The Database Cleanup system provides multiple methods to completely remove scraped data, embeddings, and related content from your Supabase database. This is essential for:
