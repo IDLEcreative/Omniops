@@ -33,8 +33,14 @@ import { RouteDependencies, defaultDependencies } from '@/lib/chat/route-types';
 
 export async function POST(
   request: NextRequest,
-  { deps = defaultDependencies }: { deps?: Partial<RouteDependencies> } = {}
+  context: { params: Promise<{}>; deps?: Partial<RouteDependencies> } = {
+    params: Promise.resolve({}),
+    deps: defaultDependencies
+  }
 ) {
+  // Extract deps from context (defaults to defaultDependencies if not provided)
+  const deps = context.deps || defaultDependencies;
+
   // Merge with defaults for any missing dependencies
   const {
     checkDomainRateLimit: rateLimitFn,
