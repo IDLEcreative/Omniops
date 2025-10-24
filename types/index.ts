@@ -56,6 +56,14 @@ export interface ChatResponse {
   }[];
 }
 
+export interface SearchResult {
+  content: string;
+  url: string;
+  title: string;
+  similarity: number;
+  metadata?: any;
+}
+
 export interface ScrapeRequest {
   url: string;
   crawl?: boolean;
