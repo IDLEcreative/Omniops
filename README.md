@@ -148,14 +148,14 @@ Enterprise-grade scalability with domain-based isolation.
 
 ### Getting Started
 - [Installation & Setup](docs/GETTING_STARTED.md)
-- [Configuration Guide](docs/CONFIGURATION.md)
-- [Environment Variables](docs/ENVIRONMENT.md)
+- [Developer Guide](docs/00-GETTING-STARTED/for-developers.md)
+- [DevOps Guide](docs/00-GETTING-STARTED/for-devops.md)
 
 ### Architecture & Design
 - [System Architecture](docs/ARCHITECTURE.md)
-- [Database Schema](docs/SUPABASE_SCHEMA.md)
-- [Search Architecture](docs/SEARCH_ARCHITECTURE.md)
-- [Performance Optimization](docs/PERFORMANCE_OPTIMIZATION.md)
+- [Database Schema](docs/01-ARCHITECTURE/database-schema.md)
+- [Search Architecture](docs/01-ARCHITECTURE/search-architecture.md)
+- [Performance Optimization](docs/01-ARCHITECTURE/performance-optimization.md)
 
 ### API Reference
 - [Chat API](docs/api/CHAT_API.md)
@@ -164,13 +164,14 @@ Enterprise-grade scalability with domain-based isolation.
 - [Privacy APIs](docs/api/PRIVACY_API.md)
 
 ### Development
-- [Developer Guide](docs/DEVELOPMENT.md)
-- [Component Library](components/README.md)
 - [Testing Guide](docs/TESTING.md)
+- [Code Patterns](docs/04-DEVELOPMENT/code-patterns/)
+- [Component Library](components/README.md)
 - [Database Cleanup](docs/DATABASE_CLEANUP.md)
 
 ### Deployment
 - [Production Deployment](docs/PRODUCTION-DEPLOYMENT.md)
+- [Production Checklist](docs/05-DEPLOYMENT/production-checklist.md)
 - [Docker Guide](docs/setup/DOCKER_README.md)
 - [Monitoring & Telemetry](docs/MONITORING_SETUP_GUIDE.md)
 
@@ -225,7 +226,7 @@ npx tsx optimize-chunk-sizes.ts analyze     # Analyze chunks
 5. Check types: `npm run type-check`
 6. Commit with conventional commits
 
-**→ Complete development guide:** [docs/DEVELOPMENT.md](docs/DEVELOPMENT.md)
+**→ Complete development guide:** [docs/00-GETTING-STARTED/for-developers.md](docs/00-GETTING-STARTED/for-developers.md)
 
 ---
 
@@ -249,7 +250,7 @@ npx tsx optimize-chunk-sizes.ts analyze     # Analyze chunks
 - Complete control
 - Custom infrastructure
 - Manual scaling
-- **→ Guide:** [docs/SELF_HOSTING.md](docs/SELF_HOSTING.md)
+- **→ Guide:** [docs/05-DEPLOYMENT/runbooks.md](docs/05-DEPLOYMENT/runbooks.md)
 
 ### Quick Docker Deployment
 
@@ -289,7 +290,7 @@ We welcome contributions! Here's how to get started:
 - Use conventional commits
 - Document new features
 
-**→ Contributing guide:** [CONTRIBUTING.md](CONTRIBUTING.md)
+**→ Contributing guide:** [docs/04-DEVELOPMENT/code-patterns/](docs/04-DEVELOPMENT/code-patterns/)
 
 ---
 
@@ -302,7 +303,7 @@ We welcome contributions! Here's how to get started:
 - 📧 **Email:** support@omniops.com
 
 ### Troubleshooting
-- Check [docs/TROUBLESHOOTING.md](docs/TROUBLESHOOTING.md)
+- Check [docs/06-TROUBLESHOOTING/README.md](docs/06-TROUBLESHOOTING/README.md)
 - Search existing issues
 - Review error logs in Docker
 - Verify environment variables

@@ -88,29 +88,24 @@ npx tsc --noEmit        # Run TypeScript type checking
 # Database Migration
 npm run migrate:encrypt-credentials  # Migrate credentials to encrypted format
 
-# Database Cleanup (Planned)
-# 🔜 Planned: Database cleanup utilities
-# npx tsx test-database-cleanup.ts stats            # View scraping statistics
-# npx tsx test-database-cleanup.ts clean            # Clean all scraped data
-# npx tsx test-database-cleanup.ts clean --domain=X # Clean specific domain
-# npx tsx test-database-cleanup.ts clean --dry-run  # Preview cleanup
+# Database Cleanup & Health Monitoring
+npx tsx test-database-cleanup.ts stats              # View scraping statistics
+npx tsx test-database-cleanup.ts clean              # Clean all scraped data
+npx tsx test-database-cleanup.ts clean --domain=X   # Clean specific domain
+npx tsx test-database-cleanup.ts clean --dry-run    # Preview cleanup
 
-# Performance Monitoring & Optimization (Planned Features)
-# ⚠️ NOTE: The following NPX tools are planned features, not yet implemented.
-# See docs/NPX_SCRIPTS_ROADMAP.md for implementation status and priority.
+# Embeddings Health Monitoring
+npx tsx monitor-embeddings-health.ts check          # Run health check
+npx tsx monitor-embeddings-health.ts auto           # Run auto-maintenance
+npx tsx monitor-embeddings-health.ts watch          # Start continuous monitoring
 
-# 🔜 Planned: Embeddings health monitoring
-# npx tsx monitor-embeddings-health.ts check        # Health check for embeddings
-# npx tsx monitor-embeddings-health.ts auto         # Auto-maintenance tasks
-# npx tsx monitor-embeddings-health.ts watch        # Continuous monitoring
+# Quality Assurance (requires dev server running)
+npx tsx test-hallucination-prevention.ts            # Test anti-hallucination safeguards
+npx tsx test-hallucination-prevention.ts --verbose  # Detailed test output
 
-# 🔜 Planned: Chunk size optimization
-# npx tsx optimize-chunk-sizes.ts analyze           # Analyze chunk distribution
-# npx tsx optimize-chunk-sizes.ts optimize          # Fix oversized chunks
-
-# 🔜 Planned: Batch rechunking operations
-# npx tsx batch-rechunk-embeddings.ts --force       # Batch process all chunks
-# npx tsx simple-rechunk.ts                         # Sequential rechunking
+# Performance Monitoring & Optimization (Additional Tools)
+# ⚠️ NOTE: Additional NPX tools are available but not documented here.
+# See docs/NPX_TOOLS_GUIDE.md and NPX_SCRIPTS_IMPLEMENTATION.md for complete list.
 
 # Dependencies
 npm run check:deps       # Check for dependency issues
@@ -315,16 +310,17 @@ docker exec -it omniops-app sh         # Shell into app container
 3. Job monitoring: Check Redis or use job status endpoint
 
 ### Database Cleanup & Maintenance
-Database cleanup utilities are planned for future implementation.
+When you need to clean scraped data for fresh re-scraping:
 
-**Planned functionality:**
-- View scraping statistics by domain
-- Clean scraped data for specific domains or all domains
-- Preview cleanup operations with dry-run mode
-- Safe deletion using CASCADE foreign keys
-- Preserves customer configs, credentials, and user accounts
+1. **Check Current Data**: `npx tsx test-database-cleanup.ts stats`
+2. **Clean Specific Domain**: `npx tsx test-database-cleanup.ts clean --domain=example.com`
+3. **Clean Everything**: `npx tsx test-database-cleanup.ts clean`
 
-**Implementation status:** 🔜 See `docs/NPX_SCRIPTS_ROADMAP.md` for priority and timeline
+The cleanup system uses CASCADE foreign keys for safe deletion:
+- Removes: scraped pages, embeddings, extractions, cache
+- Preserves: customer configs, credentials, user accounts
+- See `test-database-cleanup.ts` for implementation
+- Full docs: `NPX_SCRIPTS_IMPLEMENTATION.md`
 
 ## Critical Development Guidelines
 
@@ -335,7 +331,7 @@ Database cleanup utilities are planned for future implementation.
 - **CRITICAL**: The chat system has strict anti-hallucination measures in place
 - See `docs/HALLUCINATION_PREVENTION.md` for comprehensive documentation
 - Key principle: Always admit uncertainty rather than making false claims
-- Testing: 🔜 Planned - `npx tsx test-hallucination-prevention.ts` (not yet implemented)
+- Run `npx tsx test-hallucination-prevention.ts` after any chat prompt changes
 
 ## Optimization Philosophy
 
