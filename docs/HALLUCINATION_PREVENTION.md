@@ -10,7 +10,7 @@ This documentation has been moved to a dedicated guide:
 
 - **Hallucination Prevention Guide**: [Full Documentation](./02-FEATURES/chat-system/hallucination-prevention.md)
 - **Main Chat System Docs**: [Chat System README](./02-FEATURES/chat-system/README.md)
-- **Testing**: See test suite in `test-hallucination-prevention.ts`
+- **Testing**: 🔜 Planned - Test suite `test-hallucination-prevention.ts` (not yet implemented, see [NPX_SCRIPTS_ROADMAP.md](NPX_SCRIPTS_ROADMAP.md))
 
 ## What Changed
 
