@@ -13,6 +13,28 @@ import { extractQueryKeywords, isPriceQuery, extractPriceRange } from '@/lib/sea
 import { ChatTelemetry, telemetryManager } from '@/lib/chat-telemetry';
 import { trackAsync } from '@/lib/monitoring/performance-tracker';
 
+// Dependencies interface for testing
+export interface RouteDependencies {
+  checkDomainRateLimit: typeof checkDomainRateLimit;
+  searchSimilarContent: typeof searchSimilarContent;
+  getCommerceProvider: typeof getCommerceProvider;
+  sanitizeOutboundLinks: typeof sanitizeOutboundLinks;
+  extractQueryKeywords: typeof extractQueryKeywords;
+  isPriceQuery: typeof isPriceQuery;
+  extractPriceRange: typeof extractPriceRange;
+}
+
+// Default dependencies (production)
+const defaultDependencies: RouteDependencies = {
+  checkDomainRateLimit,
+  searchSimilarContent,
+  getCommerceProvider,
+  sanitizeOutboundLinks,
+  extractQueryKeywords,
+  isPriceQuery,
+  extractPriceRange,
+};
+
 // Lazy load OpenAI client to avoid build-time errors
 let openai: OpenAI | null = null;
 
@@ -301,8 +323,10 @@ async function runWithTimeout<T>(promiseFactory: () => Promise<T>, timeoutMs: nu
 async function executeSearchProducts(
   query: string,
   limit: number = 100,
-  domain: string
+  domain: string,
+  deps: Pick<RouteDependencies, 'getCommerceProvider' | 'searchSimilarContent'>
 ): Promise<{ success: boolean; results: SearchResult[]; source: string }> {
+  const { getCommerceProvider: getProviderFn, searchSimilarContent: searchFn } = deps;
   // Adaptive limit: reduce for targeted queries to improve speed
   const queryWords = query.trim().split(/\s+/).length;
   const adaptiveLimit = queryWords > 3 ? Math.min(50, limit) : limit;
@@ -317,7 +341,7 @@ async function executeSearchProducts(
       return { success: false, results: [], source: 'invalid-domain' };
     }
 
-    const provider = await getCommerceProvider(browseDomain);
+    const provider = await getProviderFn(browseDomain);
 
     if (provider) {
       console.log(`[Function Call] Resolved commerce provider "${provider.platform}" for ${browseDomain}`);
@@ -338,7 +362,7 @@ async function executeSearchProducts(
     }
 
     // Fallback to semantic search
-    const searchResults = await searchSimilarContent(query, browseDomain, adaptiveLimit, 0.2);
+    const searchResults = await searchFn(query, browseDomain, adaptiveLimit, 0.2);
     console.log(`[Function Call] Semantic search returned ${searchResults.length} results`);
     
     return { 
@@ -360,8 +384,10 @@ async function executeSearchProducts(
 async function executeSearchByCategory(
   category: string,
   limit: number = 100,
-  domain: string
+  domain: string,
+  deps: Pick<RouteDependencies, 'searchSimilarContent'>
 ): Promise<{ success: boolean; results: SearchResult[]; source: string }> {
+  const { searchSimilarContent: searchFn } = deps;
   console.log(`[Function Call] search_by_category: "${category}" (limit: ${limit})`);
 
   try {
@@ -374,7 +400,7 @@ async function executeSearchByCategory(
     }
 
     // Use semantic search for category-based queries
-    const searchResults = await searchSimilarContent(category, browseDomain, limit, 0.15);
+    const searchResults = await searchFn(category, browseDomain, limit, 0.15);
     console.log(`[Function Call] Category search returned ${searchResults.length} results`);
     
     return { 
@@ -396,8 +422,10 @@ async function executeSearchByCategory(
 async function executeGetProductDetails(
   productQuery: string,
   includeSpecs: boolean = true,
-  domain: string
+  domain: string,
+  deps: Pick<RouteDependencies, 'getCommerceProvider' | 'searchSimilarContent'>
 ): Promise<{ success: boolean; results: SearchResult[]; source: string }> {
+  const { getCommerceProvider: getProviderFn, searchSimilarContent: searchFn } = deps;
   console.log(`[Function Call] get_product_details: "${productQuery}" (includeSpecs: ${includeSpecs})`);
 
   try {
@@ -409,7 +437,7 @@ async function executeGetProductDetails(
       return { success: false, results: [], source: 'invalid-domain' };
     }
 
-    const provider = await getCommerceProvider(browseDomain);
+    const provider = await getProviderFn(browseDomain);
 
     if (provider) {
       try {
@@ -436,7 +464,7 @@ async function executeGetProductDetails(
       enhancedQuery = `${productQuery} specifications technical details features`;
     }
 
-    const searchResults = await searchSimilarContent(enhancedQuery, browseDomain, 5, 0.3);
+    const searchResults = await searchFn(enhancedQuery, browseDomain, 5, 0.3);
     console.log(`[Function Call] Product details (semantic) returned ${searchResults.length} results`);
 
     return {
@@ -457,8 +485,10 @@ async function executeGetProductDetails(
 
 async function executeLookupOrder(
   orderId: string,
-  domain: string
+  domain: string,
+  deps: Pick<RouteDependencies, 'getCommerceProvider'>
 ): Promise<{ success: boolean; results: SearchResult[]; source: string }> {
+  const { getCommerceProvider: getProviderFn } = deps;
   console.log(`[Function Call] lookup_order: "${orderId}"`);
 
   try {
@@ -471,7 +501,7 @@ async function executeLookupOrder(
     }
 
     // Use commerce provider abstraction for multi-platform support
-    const provider = await getCommerceProvider(browseDomain);
+    const provider = await getProviderFn(browseDomain);
 
     if (!provider) {
       console.log('[Function Call] No commerce provider available for domain');
@@ -528,16 +558,30 @@ ${order.trackingNumber ? `Tracking: ${order.trackingNumber}` : ''}`;
   }
 }
 
-export async function POST(request: NextRequest) {
+export async function POST(
+  request: NextRequest,
+  { deps = defaultDependencies }: { deps?: Partial<RouteDependencies> } = {}
+) {
+  // Merge with defaults for any missing dependencies
+  const {
+    checkDomainRateLimit: rateLimitFn,
+    searchSimilarContent: searchFn,
+    getCommerceProvider: getProviderFn,
+    sanitizeOutboundLinks: sanitizeFn,
+    extractQueryKeywords: extractKeywordsFn,
+    isPriceQuery: isPriceQueryFn,
+    extractPriceRange: extractPriceRangeFn,
+  } = { ...defaultDependencies, ...deps };
+
   // Initialize telemetry at the very start
   let telemetry: ChatTelemetry | null = null;
-  
+
   try {
     // Check critical environment variables
     if (!validateSupabaseEnv() || !process.env.OPENAI_API_KEY) {
       console.error('[Chat API] Service configuration incomplete');
       return NextResponse.json(
-        { 
+        {
           error: 'Service temporarily unavailable',
           message: 'The chat service is currently undergoing maintenance. Please try again later.'
         },
@@ -563,7 +607,7 @@ export async function POST(request: NextRequest) {
           persistToDatabase: true
         }
       );
-      
+
       // Log initial request data
       telemetry.log('info', 'performance', 'Chat request started', {
         message: message.substring(0, 100),
@@ -577,7 +621,7 @@ export async function POST(request: NextRequest) {
 
     // Check rate limit
     const rateLimitDomain = domain || request.headers.get('host') || 'unknown';
-    const { allowed, resetTime } = checkDomainRateLimit(rateLimitDomain);
+    const { allowed, resetTime } = rateLimitFn(rateLimitDomain);
     
     if (!allowed) {
       return NextResponse.json(
@@ -874,24 +918,28 @@ When customer asks "What can I use instead of [product]?" or "What's an alternat
                 return await executeSearchProducts(
                   (parsedArgs.query as string).trim(),
                   parsedArgs.limit,
-                  domain || ''
+                  domain || '',
+                  { getCommerceProvider: getProviderFn, searchSimilarContent: searchFn }
                 );
               case 'search_by_category':
                 return await executeSearchByCategory(
                   (parsedArgs.category as string).trim(),
                   parsedArgs.limit,
-                  domain || ''
+                  domain || '',
+                  { searchSimilarContent: searchFn }
                 );
               case 'get_product_details':
                 return await executeGetProductDetails(
                   (parsedArgs.productQuery as string).trim(),
                   parsedArgs.includeSpecs,
-                  domain || ''
+                  domain || '',
+                  { getCommerceProvider: getProviderFn, searchSimilarContent: searchFn }
                 );
               case 'lookup_order':
                 return await executeLookupOrder(
                   (parsedArgs.orderId as string).trim(),
-                  domain || ''
+                  domain || '',
+                  { getCommerceProvider: getProviderFn }
                 );
               default:
                 throw new Error(`Unknown tool: ${toolName}`);
@@ -1070,7 +1118,7 @@ Please let me know if you'd like to search for something else or need assistance
 
     // Sanitize outbound links - only if we have a valid domain
     if (domain && !/localhost|127\.0\.0\.1|vercel/i.test(domain)) {
-      finalResponse = sanitizeOutboundLinks(finalResponse, domain);
+      finalResponse = sanitizeFn(finalResponse, domain);
     }
 
     // Log search activity
