@@ -9,9 +9,7 @@ import { checkDomainRateLimit } from '@/lib/rate-limit';
 import { searchSimilarContent } from '@/lib/embeddings';
 import { getCommerceProvider } from '@/lib/agents/commerce-provider';
 import { sanitizeOutboundLinks } from '@/lib/link-sanitizer';
-import { extractQueryKeywords, isPriceQuery, extractPriceRange } from '@/lib/search-wrapper';
 import { ChatTelemetry, telemetryManager } from '@/lib/chat-telemetry';
-import { trackAsync } from '@/lib/monitoring/performance-tracker';
 
 // Extracted modules for cleaner code organization
 import { SEARCH_TOOLS, validateToolArguments, runWithTimeout } from '@/lib/chat/tool-definitions';
@@ -21,16 +19,81 @@ import {
   executeGetProductDetails,
   executeLookupOrder
 } from '@/lib/chat/tool-handlers';
+import {
+  lookupDomain,
+  getOrCreateConversation,
+  saveUserMessage,
+  saveAssistantMessage,
+  getConversationHistory
+} from '@/lib/chat/conversation-manager';
 
-// Dependencies interface for testing
+/**
+ * Dependencies interface for the chat route.
+ * Enables dependency injection for testability without complex mocking.
+ *
+ * @example
+ * // Production usage (uses defaults automatically):
+ * POST(request)
+ *
+ * @example
+ * // Test usage (inject mocks):
+ * POST(request, {
+ *   deps: {
+ *     searchSimilarContent: mockSearchFn,
+ *     getCommerceProvider: mockProviderFn
+ *   }
+ * })
+ *
+ * @see {@link https://github.com/IDLEcreative/Omniops/blob/main/docs/DEPENDENCY_INJECTION.md}
+ */
 export interface RouteDependencies {
+  /**
+   * Rate limiting function - checks if domain has exceeded request limits.
+   * Called at the start of every chat request to prevent abuse.
+   *
+   * @param domain - The domain to check rate limits for
+   * @returns Object with allowed status, remaining requests, and reset time
+   */
   checkDomainRateLimit: typeof checkDomainRateLimit;
+
+  /**
+   * Semantic search function - finds similar content using vector embeddings.
+   * Called when the AI needs context from scraped website data.
+   *
+   * @param query - Search query string
+   * @param domain - Domain to search within
+   * @param limit - Maximum results to return (default: 100)
+   * @param minSimilarity - Minimum similarity threshold (default: 0.7)
+   * @returns Array of similar content chunks with similarity scores
+   */
   searchSimilarContent: typeof searchSimilarContent;
+
+  /**
+   * Commerce provider factory - returns platform-specific commerce client.
+   * Called when searching products or fetching product details.
+   * Supports WooCommerce and Shopify platforms.
+   *
+   * @param domain - Domain to get commerce provider for
+   * @returns Commerce provider instance or null if not configured
+   */
   getCommerceProvider: typeof getCommerceProvider;
+
+  /**
+   * Link sanitizer - ensures outbound links are safe and properly formatted.
+   * Called before returning AI responses to the user.
+   *
+   * @param message - Message text containing potential links
+   * @returns Sanitized message with safe links
+   */
   sanitizeOutboundLinks: typeof sanitizeOutboundLinks;
-  extractQueryKeywords: typeof extractQueryKeywords;
-  isPriceQuery: typeof isPriceQuery;
-  extractPriceRange: typeof extractPriceRange;
+
+  /**
+   * Supabase client factory - creates authenticated database client.
+   * Called for all database operations (conversations, messages, embeddings).
+   * Uses service role key for elevated permissions.
+   *
+   * @returns Authenticated Supabase client instance
+   */
   createServiceRoleClient: typeof createServiceRoleClient;
 }
 
@@ -40,9 +103,6 @@ const defaultDependencies: RouteDependencies = {
   searchSimilarContent,
   getCommerceProvider,
   sanitizeOutboundLinks,
-  extractQueryKeywords,
-  isPriceQuery,
-  extractPriceRange,
   createServiceRoleClient,
 };
 
@@ -96,9 +156,6 @@ export async function POST(
     searchSimilarContent: searchFn,
     getCommerceProvider: getProviderFn,
     sanitizeOutboundLinks: sanitizeFn,
-    extractQueryKeywords: extractKeywordsFn,
-    isPriceQuery: isPriceQueryFn,
-    extractPriceRange: extractPriceRangeFn,
     createServiceRoleClient: createSupabaseClient,
   } = { ...defaultDependencies, ...deps };
 
@@ -177,77 +234,21 @@ export async function POST(
     }
 
     // Look up domain_id if we have a domain
-    let domainId: string | null = null;
-    if (domain) {
-      const { data: domainData } = await adminSupabase
-        .from('domains')
-        .select('id')
-        .eq('domain', domain.replace(/^https?:\/\//, '').replace('www.', ''))
-        .single();
-      domainId = domainData?.id || null;
-    }
+    const domainId = await lookupDomain(domain, adminSupabase);
 
     // Get or create conversation
-    let conversationId = conversation_id;
-
-    if (!conversationId) {
-      const { data: newConversation, error: convError } = await adminSupabase
-        .from('conversations')
-        .insert({
-          session_id,
-          domain_id: domainId
-        })
-        .select()
-        .single();
-
-      if (convError) throw convError;
-      conversationId = newConversation.id;
-    } else {
-      const { data: existingConv } = await adminSupabase
-        .from('conversations')
-        .select('id')
-        .eq('id', conversationId)
-        .single();
-      
-      if (!existingConv) {
-        const { error: createError } = await adminSupabase
-          .from('conversations')
-          .insert({ 
-            id: conversationId,
-            session_id,
-            domain_id: domainId
-          });
-        
-        if (createError) {
-          console.error('[Chat] Failed to create conversation:', createError);
-        }
-      }
-    }
+    const conversationId = await getOrCreateConversation(
+      conversation_id,
+      session_id,
+      domainId,
+      adminSupabase
+    );
 
     // Save user message
-    const { error: userSaveError } = await adminSupabase
-      .from('messages')
-      .insert({
-        conversation_id: conversationId,
-        role: 'user',
-        content: message,
-      });
-    
-    if (userSaveError) {
-      console.error('[Chat] Failed to save user message:', userSaveError);
-    }
+    await saveUserMessage(conversationId, message, adminSupabase);
 
     // Get conversation history (increased limit for better context retention)
-    const { data: historyData, error: historyError } = await adminSupabase
-      .from('messages')
-      .select('role, content')
-      .eq('conversation_id', conversationId)
-      .order('created_at', { ascending: true })
-      .limit(20);
-    
-    if (historyError) {
-      console.error('[Chat] Failed to fetch history:', historyError);
-    }
+    const historyData = await getConversationHistory(conversationId, 20, adminSupabase);
 
     // Build conversation messages for OpenAI
     const conversationMessages = [
@@ -316,8 +317,8 @@ When customer asks "What can I use instead of [product]?" or "What's an alternat
 - Offer next steps when you can't directly answer
 - Use the customer's terminology when possible`
       },
-      ...(historyData || []).map((msg: any) => ({
-        role: msg.role as 'user' | 'assistant',
+      ...historyData.map((msg) => ({
+        role: msg.role,
         content: msg.content
       })),
       {
@@ -660,17 +661,7 @@ Please let me know if you'd like to search for something else or need assistance
     });
 
     // Save assistant response
-    const { error: assistantSaveError } = await adminSupabase
-      .from('messages')
-      .insert({
-        conversation_id: conversationId,
-        role: 'assistant',
-        content: finalResponse,
-      });
-    
-    if (assistantSaveError) {
-      console.error('[Chat] Failed to save assistant message:', assistantSaveError);
-    }
+    await saveAssistantMessage(conversationId, finalResponse, adminSupabase);
 
     // Complete telemetry with success
     await telemetry?.complete(finalResponse);

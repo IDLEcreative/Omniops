@@ -1,0 +1,39 @@
+#!/usr/bin/env sh
+. "$(dirname -- "$0")/_/husky.sh"
+
+echo "🔍 Running pre-commit checks..."
+
+# 1. File length validation
+echo "\n📏 Checking file lengths (300 LOC limit)..."
+npx tsx scripts/check-file-length.ts --strict
+if [ $? -ne 0 ]; then
+  echo "❌ File length check failed. Please refactor files exceeding 300 LOC."
+  echo "   Run 'npx tsx scripts/check-file-length.ts --fix' for suggestions."
+  exit 1
+fi
+
+# 2. Type checking
+echo "\n🔎 Running TypeScript type check..."
+npx tsc --noEmit
+if [ $? -ne 0 ]; then
+  echo "❌ Type check failed. Please fix TypeScript errors."
+  exit 1
+fi
+
+# 3. Linting
+echo "\n🧹 Running ESLint..."
+npm run lint
+if [ $? -ne 0 ]; then
+  echo "❌ Linting failed. Please fix ESLint errors."
+  exit 1
+fi
+
+# 4. Run critical tests
+echo "\n🧪 Running tests..."
+npm test -- --bail --passWithNoTests
+if [ $? -ne 0 ]; then
+  echo "❌ Tests failed. Please fix failing tests before committing."
+  exit 1
+fi
+
+echo "\n✅ All pre-commit checks passed!"

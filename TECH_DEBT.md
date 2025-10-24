@@ -4,12 +4,20 @@
 
 ### 1. File Length Violations (CLAUDE.md Rule: 300 LOC Max)
 
-**Status**: ⚠️ Needs Refactoring
+**Status**: ⚠️ Needs Refactoring - **94 files exceed limit**
 
-| File | Current LOC | Violation | Target |
-|------|-------------|-----------|--------|
-| `app/api/chat/route.ts` | 1204 LOC | **402% over limit** | Split into 6 files (~200 LOC each) |
-| `__tests__/api/chat/route.test.ts` | 612 LOC | **204% over limit** | Split into 4 files (~150 LOC each) |
+**Automated Checking**: Run `npx tsx scripts/check-file-length.ts` to scan all files
+
+**Top Violations:**
+
+| File | Current LOC | Violation | Priority |
+|------|-------------|-----------|----------|
+| `lib/content-deduplicator.ts` | 1220 LOC | **407% over** | 🚨 Critical |
+| `lib/scraper-config.ts` | 1182 LOC | **394% over** | 🚨 Critical |
+| `lib/scraper-api.ts` | 1156 LOC | **385% over** | 🚨 Critical |
+| `app/dashboard/privacy/page.tsx` | 1131 LOC | **377% over** | 🚨 Critical |
+| `app/api/chat/route.ts` | 519 LOC | **173% over** | 🔶 High |
+| `__tests__/api/chat/route.test.ts` | 555 LOC | **185% over** | 🔶 High |
 
 **Impact**:
 - Harder to review, maintain, and test
@@ -103,28 +111,27 @@ $ npm test -- __tests__/api/chat/route.test.ts
 
 ## 📝 Medium Priority
 
-### 3. Dependency Injection Migration
+### 3. Dependency Injection Documentation
 
-**Status**: ✅ Partially Complete
+**Status**: ✅ COMPLETE (2025-10-24)
 
 **What's Done**:
 - ✅ Created `RouteDependencies` interface
 - ✅ Implemented dependency injection in `POST` function
 - ✅ Updated helper functions to accept deps
 - ✅ Zero breaking changes
+- ✅ Comprehensive documentation created ([docs/DEPENDENCY_INJECTION.md](docs/DEPENDENCY_INJECTION.md))
+- ✅ Migration guide for other routes
+- ✅ JSDoc comments added to interfaces
+- ✅ Testing best practices documented
 
-**What's Remaining**:
-- [ ] Document the DI pattern for other developers
-- [ ] Create migration guide for other routes
-- [ ] Consider removing `jest.mock()` calls in favor of DI
-- [ ] Add JSDoc comments to interfaces
-
-**Benefits**:
-- Makes code testable without complex mocking
+**Benefits Realized**:
+- Code is testable without complex mocking
 - Explicit dependencies (better code clarity)
 - Easier to maintain and extend
+- Clear patterns for other developers to follow
 
-**Effort**: 1-2 hours for documentation
+**Actual Effort**: 1 hour
 **Risk**: None (additive changes only)
 
 ---
@@ -152,12 +159,31 @@ expect(data.message).toBe('Here are the products from our catalog.')
 
 ### 5. Pre-Commit Hooks
 
-**Recommendation**: Add pre-commit checks for:
-- File length validation (enforce 300 LOC limit)
-- Test execution (run critical tests before commit)
-- Type checking (npx tsc --noEmit)
+**Status**: ✅ COMPLETE (2025-10-24)
 
-**Effort**: 1 hour
+**What's Implemented**:
+- ✅ Husky installed and configured
+- ✅ File length validation (enforces 300 LOC limit with `--strict` mode)
+- ✅ TypeScript type checking
+- ✅ ESLint validation
+- ✅ Test execution before commits
+- ✅ Automated file length checker script ([scripts/check-file-length.ts](scripts/check-file-length.ts))
+
+**Pre-Commit Checks**:
+1. **File Length**: `npx tsx scripts/check-file-length.ts --strict`
+2. **Type Check**: `npx tsc --noEmit`
+3. **Linting**: `npm run lint`
+4. **Tests**: `npm test -- --bail --passWithNoTests`
+
+**Usage**:
+```bash
+# Test file lengths manually
+npx tsx scripts/check-file-length.ts           # Report violations
+npx tsx scripts/check-file-length.ts --fix     # Show refactoring suggestions
+npx tsx scripts/check-file-length.ts --strict  # Exit 1 on violations
+```
+
+**Actual Effort**: 1 hour
 **Risk**: None
 
 ---
@@ -166,13 +192,14 @@ expect(data.message).toBe('Here are the products from our catalog.')
 
 | Priority | Item | Effort | Status |
 |----------|------|--------|--------|
-| 🚨 Critical | File Length Violations | 4-6 hrs | ⚠️ Needs Action |
-| 🔶 High | Test Infrastructure | 2-6 hrs | ✅ Complete |
-| 📝 Medium | DI Documentation | 1-2 hrs | 🟡 Partial |
+| 🚨 Critical | File Length Violations | 4-6 hrs | ⚠️ Needs Action (94 files) |
+| 🔶 High | Test Infrastructure | 2.5 hrs | ✅ Complete |
+| 📝 Medium | DI Documentation | 1 hr | ✅ Complete |
 | 📋 Low | Test Error Messages | 30 min | 🟢 Optional |
-| 🔄 Process | Pre-Commit Hooks | 1 hr | 🟢 Nice to Have |
+| 🔄 Process | Pre-Commit Hooks | 1 hr | ✅ Complete |
 
-**Total Estimated Effort**: 8.5 - 15.5 hours
+**Completed Effort**: 4.5 hours
+**Remaining Effort**: 4-6 hours (file refactoring)
 
 ---
 
