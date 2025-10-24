@@ -1,0 +1,157 @@
+/**
+ * OpenAI Tool/Function Definitions
+ *
+ * Defines the tools available to the AI for function calling, including schemas,
+ * validation logic, and timeout utilities.
+ */
+
+/**
+ * OpenAI function calling tool definitions
+ */
+export const SEARCH_TOOLS = [
+  {
+    type: "function" as const,
+    function: {
+      name: "search_products",
+      description: "Search for products or items with a general query. Use this for broad searches, brand names, or when the user asks about specific items.",
+      parameters: {
+        type: "object",
+        properties: {
+          query: {
+            type: "string",
+            description: "The search query for products. Should match what the user is looking for."
+          },
+          limit: {
+            type: "number",
+            description: "Maximum number of products to return (default: 100, max: 1000)",
+            default: 100,
+            minimum: 1,
+            maximum: 1000
+          }
+        },
+        required: ["query"]
+      }
+    }
+  },
+  {
+    type: "function" as const,
+    function: {
+      name: "search_by_category",
+      description: "Search for content by category or topic area. Use this when the user asks about general topics or wants to browse categories.",
+      parameters: {
+        type: "object",
+        properties: {
+          category: {
+            type: "string",
+            description: "The category to search (e.g., 'contact information', 'shipping policy', 'installation guides')"
+          },
+          limit: {
+            type: "number",
+            description: "Maximum number of results to return (default: 100, max: 1000)",
+            default: 100,
+            minimum: 1,
+            maximum: 1000
+          }
+        },
+        required: ["category"]
+      }
+    }
+  },
+  {
+    type: "function" as const,
+    function: {
+      name: "get_product_details",
+      description: "Get detailed information about specific products when you need more comprehensive data than the general search provides.",
+      parameters: {
+        type: "object",
+        properties: {
+          productQuery: {
+            type: "string",
+            description: "Specific product query to get detailed information"
+          },
+          includeSpecs: {
+            type: "boolean",
+            description: "Whether to include technical specifications in the search",
+            default: true
+          }
+        },
+        required: ["productQuery"]
+      }
+    }
+  },
+  {
+    type: "function" as const,
+    function: {
+      name: "lookup_order",
+      description: "Look up an order by order number or ID. Use this when a customer asks about order status, tracking, or order details.",
+      parameters: {
+        type: "object",
+        properties: {
+          orderId: {
+            type: "string",
+            description: "The order number or ID to look up"
+          }
+        },
+        required: ["orderId"]
+      }
+    }
+  }
+];
+
+/**
+ * Validate tool arguments based on tool name
+ * @returns Error message if invalid, null if valid
+ */
+export function validateToolArguments(toolName: string, toolArgs: Record<string, any>): string | null {
+  const ensureString = (value: unknown, field: string) => {
+    if (typeof value !== 'string' || value.trim().length === 0) {
+      return `Missing or empty "${field}"`;
+    }
+    return null;
+  };
+
+  switch (toolName) {
+    case 'search_products':
+      return ensureString(toolArgs.query, 'query');
+    case 'search_by_category':
+      return ensureString(toolArgs.category, 'category');
+    case 'get_product_details':
+      return ensureString(toolArgs.productQuery, 'productQuery');
+    case 'lookup_order':
+      return ensureString(toolArgs.orderId, 'orderId');
+    default:
+      return null;
+  }
+}
+
+/**
+ * Execute a promise with a timeout
+ * @param promiseFactory Function that returns the promise to execute
+ * @param timeoutMs Timeout in milliseconds
+ * @throws Error if the operation times out
+ */
+export async function runWithTimeout<T>(promiseFactory: () => Promise<T>, timeoutMs: number): Promise<T> {
+  let timeoutHandle: ReturnType<typeof setTimeout> | undefined;
+  const promise = Promise.resolve().then(promiseFactory);
+
+  try {
+    const timeoutPromise = new Promise<never>((_, reject) => {
+      timeoutHandle = setTimeout(() => reject(new Error('Tool execution timeout')), timeoutMs);
+    });
+
+    return await Promise.race([
+      promise.then((value) => {
+        if (timeoutHandle) {
+          clearTimeout(timeoutHandle);
+        }
+        return value;
+      }),
+      timeoutPromise
+    ]);
+  } finally {
+    if (timeoutHandle) {
+      clearTimeout(timeoutHandle);
+    }
+    promise.catch(() => {});
+  }
+}
