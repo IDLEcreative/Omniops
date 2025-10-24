@@ -1,3 +1,6 @@
+**Last Updated:** 2025-10-24
+**Verified Accurate For:** v0.1.0
+
 # CLAUDE.md
 
 ## 🚨 CRITICAL: BRAND-AGNOSTIC APPLICATION 🚨
@@ -34,11 +37,11 @@ This is a General purpose AI-powered customer service chat widget built with Nex
 
 ## Key Documentation
 
-- **[Search Architecture](docs/SEARCH_ARCHITECTURE.md)** - CRITICAL: Explains actual search result limits (100-200, NOT 20!), hybrid search behavior, and token usage
-- **[Performance Optimization](docs/PERFORMANCE_OPTIMIZATION.md)** - Response time analysis, bottlenecks, and optimization recommendations
-- **[Supabase Schema](SUPABASE_SCHEMA.md)** - Complete database schema reference
+- **[Search Architecture](docs/01-ARCHITECTURE/search-architecture.md)** - CRITICAL: Explains actual search result limits (100-200, NOT 20!), hybrid search behavior, and token usage
+- **[Performance Optimization](docs/01-ARCHITECTURE/performance-optimization.md)** - Comprehensive optimization guide covering database, API, AI, and frontend performance
+- **[Database Schema](docs/01-ARCHITECTURE/database-schema.md)** - Complete database schema reference with 31 tables, 214 indexes, verified 2025-10-24
 - **[Hallucination Prevention](docs/HALLUCINATION_PREVENTION.md)** - Anti-hallucination safeguards and testing
-- **[Docker Setup](DOCKER_README.md)** - Complete Docker configuration and commands
+- **[Docker Setup](docs/setup/DOCKER_README.md)** - Complete Docker configuration and commands
 
 
 ### FILE LENGTH
@@ -91,16 +94,22 @@ npx tsx test-database-cleanup.ts clean              # Clean all scraped data
 npx tsx test-database-cleanup.ts clean --domain=X   # Clean specific domain
 npx tsx test-database-cleanup.ts clean --dry-run    # Preview cleanup
 
-# Performance Monitoring & Optimization
-# See docs/NPX_TOOLS_GUIDE.md for monitoring tools
-# See docs/ALL_NPX_TOOLS_REFERENCE.md for COMPLETE list of 100+ NPX tools
-npx tsx monitor-embeddings-health.ts check          # Run health check
-npx tsx monitor-embeddings-health.ts auto           # Run auto-maintenance
-npx tsx monitor-embeddings-health.ts watch          # Start continuous monitoring
-npx tsx optimize-chunk-sizes.ts analyze             # Analyze chunk sizes
-npx tsx optimize-chunk-sizes.ts optimize            # Optimize oversized chunks
-npx tsx batch-rechunk-embeddings.ts --force         # Batch process oversized chunks
-npx tsx simple-rechunk.ts                           # Simple sequential rechunking
+# Performance Monitoring & Optimization (Planned Features)
+# ⚠️ NOTE: The following NPX tools are planned features, not yet implemented.
+# See docs/NPX_SCRIPTS_ROADMAP.md for implementation status and priority.
+
+# 🔜 Planned: Embeddings health monitoring
+# npx tsx monitor-embeddings-health.ts check        # Health check for embeddings
+# npx tsx monitor-embeddings-health.ts auto         # Auto-maintenance tasks
+# npx tsx monitor-embeddings-health.ts watch        # Continuous monitoring
+
+# 🔜 Planned: Chunk size optimization
+# npx tsx optimize-chunk-sizes.ts analyze           # Analyze chunk distribution
+# npx tsx optimize-chunk-sizes.ts optimize          # Fix oversized chunks
+
+# 🔜 Planned: Batch rechunking operations
+# npx tsx batch-rechunk-embeddings.ts --force       # Batch process all chunks
+# npx tsx simple-rechunk.ts                         # Sequential rechunking
 
 # Dependencies
 npm run check:deps       # Check for dependency issues
@@ -137,7 +146,7 @@ The application follows a service-oriented architecture with clear separation of
 
 ## Database Structure
 
-**📚 Complete Schema Reference: See [SUPABASE_SCHEMA.md](SUPABASE_SCHEMA.md) for authoritative database documentation**
+**📚 Complete Schema Reference: See [SUPABASE_SCHEMA.md](docs/SUPABASE_SCHEMA.md) for authoritative database documentation**
 
 Main tables:
 - `customer_configs`: Customer settings and encrypted credentials
@@ -188,7 +197,7 @@ Required environment variables (copy `.env.example` to `.env.local`):
 
 ### Docker Setup
 - **Docker Desktop**: Version 28.3.2 installed and configured
-- **Full Docker Documentation**: See [DOCKER_README.md](DOCKER_README.md) for complete setup guide
+- **Full Docker Documentation**: See [DOCKER_README.md](docs/setup/DOCKER_README.md) for complete setup guide
 
 #### Quick Docker Commands
 ```bash
