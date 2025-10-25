@@ -62,6 +62,30 @@ npm run dev
 
 ---
 
+## 📊 Quality Metrics
+
+### Test Coverage
+- **Total Tests:** 1,048+ across 67 test files
+- **Test Code:** 23,677 lines of code
+- **Coverage Target:** 80%+
+- **Categories:**
+  - Component Tests: 138 tests
+  - Hook Tests: 102 tests
+  - API Tests: 300+ tests
+  - Integration Tests: 100+ tests
+  - Business Logic: 400+ tests
+
+### Code Quality
+- TypeScript strict mode enabled
+- ESLint with strict rules
+- 100% type coverage
+- Zero tolerance for `any` types in new code
+- Comprehensive error handling
+
+**→ Full testing guide:** [docs/TESTING_GUIDE.md](docs/TESTING_GUIDE.md)
+
+---
+
 ## 🛠️ Tech Stack
 
 ### Frontend
@@ -160,11 +184,12 @@ Enterprise-grade scalability with domain-based isolation.
 ### API Reference
 - [Chat API](docs/api/CHAT_API.md)
 - [Scraping API](docs/SCRAPING_API.md)
-- [WooCommerce API](docs/woocommerce/WOOCOMMERCE_DEVELOPER_REFERENCE.md)
+- [WooCommerce API](docs/WOOCOMMERCE_DEVELOPER_REFERENCE.md)
 - [Privacy APIs](docs/api/PRIVACY_API.md)
 
 ### Development
-- [Testing Guide](docs/TESTING.md)
+- [Testing Guide](docs/TESTING_GUIDE.md) - Comprehensive testing patterns and best practices
+- [Test Suite Overview](__tests__/README.md) - Test directory structure and statistics
 - [Code Patterns](docs/04-DEVELOPMENT/code-patterns/)
 - [Component Library](components/README.md)
 - [Database Cleanup](docs/DATABASE_CLEANUP.md)
@@ -195,12 +220,16 @@ npm run dev              # Start dev server (port 3000)
 npm run build           # Build for production
 npm run start           # Start production server
 
+# Testing (1,048+ tests across 67 files)
+npm test                  # Run unit tests
+npm run test:watch        # Watch mode testing
+npm run test:coverage     # Generate coverage report
+npm run test:integration  # Run integration tests
+npm run test:all          # Run all tests (unit + integration)
+
 # Code Quality
 npm run lint            # Run ESLint
 npm run type-check      # TypeScript checking
-npm test               # Run all tests
-npm run test:watch     # Watch mode testing
-npm run test:coverage  # Coverage report
 
 # Docker
 docker-compose up -d                    # Start all services

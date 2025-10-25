@@ -181,6 +181,7 @@ describe('BusinessIntelligence', () => {
         end: new Date('2024-01-31')
       });
 
+      // Fixed: Access unansweredQueries property from ContentGapAnalysis object
       expect(result.unansweredQueries).toBeInstanceOf(Array);
       expect(result.unansweredQueries[0].query).toBe('return policy?');
       expect(result.unansweredQueries[0].frequency).toBe(2);
@@ -291,6 +292,7 @@ describe('BusinessIntelligence', () => {
       const hour9 = result.hourlyDistribution.find((h: any) => h.hour === 9);
       const hour14 = result.hourlyDistribution.find((h: any) => h.hour === 14);
 
+      // Fixed: Changed avgRequests to avgMessages (correct property name from HourlyUsage interface)
       expect(hour9?.avgMessages).toBeGreaterThan(0);
       expect(hour14?.avgMessages).toBeGreaterThan(0);
     });
@@ -361,8 +363,9 @@ describe('BusinessIntelligence', () => {
         end: new Date('2024-01-31')
       });
 
-      expect(result.peakHours.map(p => p.hour)).toContain(14);
-      expect(result.peakHours.map(p => p.hour)).toContain(15);
+      // Fixed: Extract hour from peakHours objects (they contain {hour, load}, not just numbers)
+      expect(result.peakHours.map((p: any) => p.hour)).toContain(14);
+      expect(result.peakHours.map((p: any) => p.hour)).toContain(15);
     });
   });
 

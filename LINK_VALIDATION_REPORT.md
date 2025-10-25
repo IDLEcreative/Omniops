@@ -1,18 +1,18 @@
 # Documentation Link Validation Report
 
-**Generated:** 2025-10-24T21:49:31.236Z
+**Generated:** 2025-10-25T09:24:06.061Z
 
 ## Summary
 
 | Category | Count |
 |----------|-------|
-| ✅ Valid Links | 825 |
-| ❌ Broken Links | 513 |
-| 🌐 External Links | 93 |
+| ✅ Valid Links | 864 |
+| ❌ Broken Links | 509 |
+| 🌐 External Links | 100 |
 | ⚠️ Warnings | 2 |
-| **Total** | **1433** |
+| **Total** | **1475** |
 
-## ❌ Broken Links (513)
+## ❌ Broken Links (509)
 
 ### /app/api/jobs/[jobId]/README.md
 
@@ -1236,11 +1236,17 @@
 
 ### /docs/DATABASE_CLEANUP.md
 
-- **Line 505:** `./SCRAPING.md`
+- **Line 513:** `./SCRAPING.md`
   - Reason: File not found
   - Link text: "File not found"
 
-- **Line 507:** `./ADMIN.md`
+- **Line 515:** `./ADMIN.md`
+  - Reason: File not found
+  - Link text: "File not found"
+
+### /docs/DEPENDENCY_INJECTION.md
+
+- **Line 586:** `../__tests__/api/chat/route.test.ts`
   - Reason: File not found
   - Link text: "File not found"
 
@@ -1380,6 +1386,24 @@
   - Reason: File not found
   - Link text: "File not found"
 
+### /docs/GETTING_STARTED.md
+
+- **Line 164:** `01-ARCHITECTURE/`
+  - Reason: Directory link without README.md
+  - Link text: "Directory link without README.md"
+
+- **Line 165:** `02-FEATURES/`
+  - Reason: Directory link without README.md
+  - Link text: "Directory link without README.md"
+
+- **Line 166:** `03-API/`
+  - Reason: Directory link without README.md
+  - Link text: "Directory link without README.md"
+
+- **Line 167:** `04-DEVELOPMENT/`
+  - Reason: Directory link without README.md
+  - Link text: "Directory link without README.md"
+
 ### /docs/IMPLEMENTATION_SUMMARY_TOKEN_TRACKING.md
 
 - **Line 271:** `../OBSERVABILITY_GUIDE.md`
@@ -1417,6 +1441,12 @@
 - **Line 402:** `../01-ARCHITECTURE/database-schema.md`
   - Reason: File not found
   - Link text: "File not found"
+
+### /docs/PRIVACY_COMPLIANCE.md
+
+- **Line 248:** `03-API/`
+  - Reason: Directory link without README.md
+  - Link text: "Directory link without README.md"
 
 ### /docs/PRIVACY_GUIDE.md
 
@@ -2156,6 +2186,16 @@
   - Reason: File not found
   - Link text: "File not found"
 
+### /LINK_FIX_EXECUTION_REPORT.md
+
+- **Line 86:** `/Users/jamesguy/Omniops/docs/ANALYTICS.md`
+  - Reason: File not found
+  - Link text: "File not found"
+
+- **Line 91:** `../02-FEATURES/analytics/README.md`
+  - Reason: File not found
+  - Link text: "File not found"
+
 ### /LINK_VALIDATION_QUICKSTART.md
 
 - **Line 103:** `/docs/SUPABASE_SCHEMA.md`
@@ -2198,67 +2238,19 @@
 
 ### /README.md
 
-- **Line 61:** `docs/GETTING_STARTED.md`
-  - Reason: File not found
-  - Link text: "File not found"
-
 - **Line 92:** `docs/01-ARCHITECTURE/`
   - Reason: Directory link without README.md
   - Link text: "Directory link without README.md"
 
-- **Line 135:** `docs/PRIVACY_COMPLIANCE.md`
-  - Reason: File not found
-  - Link text: "File not found"
+- **Line 168:** `docs/04-DEVELOPMENT/code-patterns/`
+  - Reason: Directory link without README.md
+  - Link text: "Directory link without README.md"
 
-- **Line 150:** `docs/GETTING_STARTED.md`
-  - Reason: File not found
-  - Link text: "File not found"
+- **Line 293:** `docs/04-DEVELOPMENT/code-patterns/`
+  - Reason: Directory link without README.md
+  - Link text: "Directory link without README.md"
 
-- **Line 151:** `docs/CONFIGURATION.md`
-  - Reason: File not found
-  - Link text: "File not found"
-
-- **Line 152:** `docs/ENVIRONMENT.md`
-  - Reason: File not found
-  - Link text: "File not found"
-
-- **Line 161:** `docs/api/CHAT_API.md`
-  - Reason: File not found
-  - Link text: "File not found"
-
-- **Line 163:** `docs/woocommerce/WOOCOMMERCE_DEVELOPER_REFERENCE.md`
-  - Reason: File not found
-  - Link text: "File not found"
-
-- **Line 164:** `docs/api/PRIVACY_API.md`
-  - Reason: File not found
-  - Link text: "File not found"
-
-- **Line 167:** `docs/DEVELOPMENT.md`
-  - Reason: File not found
-  - Link text: "File not found"
-
-- **Line 181:** `docs/PRIVACY_COMPLIANCE.md`
-  - Reason: File not found
-  - Link text: "File not found"
-
-- **Line 228:** `docs/DEVELOPMENT.md`
-  - Reason: File not found
-  - Link text: "File not found"
-
-- **Line 252:** `docs/SELF_HOSTING.md`
-  - Reason: File not found
-  - Link text: "File not found"
-
-- **Line 292:** `CONTRIBUTING.md`
-  - Reason: File not found
-  - Link text: "File not found"
-
-- **Line 305:** `docs/TROUBLESHOOTING.md`
-  - Reason: File not found
-  - Link text: "File not found"
-
-- **Line 314:** `LICENSE`
+- **Line 315:** `LICENSE`
   - Reason: File not found
   - Link text: "File not found"
 
@@ -2293,7 +2285,7 @@ Links that work but may need attention:
 - `/docs/ARCHIVE/old-docs/scraping/README.md:12` → `../../../02-FEATURES/scraping/README.md`
 - `/docs/ARCHIVE/old-docs/scraping/README.md:71` → `../../../02-FEATURES/scraping/README.md`
 
-## 🌐 External Links (93)
+## 🌐 External Links (100)
 
 <details>
 <summary>Click to expand external links catalog</summary>
@@ -2323,8 +2315,9 @@ Links that work but may need attention:
 - /docs/ENABLING_BOT_LINKS.md:151
 - /docs/ENABLING_BOT_LINKS.md:151
 
-### gdpr.eu (1)
+### gdpr.eu (2)
 
+- /docs/PRIVACY_COMPLIANCE.md:252
 - /docs/PRIVACY_GUIDE.md:214
 
 ### github.com (6)
@@ -2333,8 +2326,8 @@ Links that work but may need attention:
 - /docs/NEWSLETTER_AI_PRODUCTIVITY.md:295
 - /docs/NEWSLETTER_AI_PRODUCTIVITY.md:295
 - /MCP_SETUP_GUIDE.md:317
-- /README.md:300
 - /README.md:301
+- /README.md:302
 
 ### google.com (2)
 
@@ -2387,10 +2380,15 @@ Links that work but may need attention:
 
 - /docs/README.md:433
 - /docs/TESTING_SUPABASE_ROUTES.md:405
-- /README.md:321
+- /README.md:322
 
-### oag.ca.gov (1)
+### nodejs.org (1)
 
+- /docs/GETTING_STARTED.md:7
+
+### oag.ca.gov (2)
+
+- /docs/PRIVACY_COMPLIANCE.md:253
 - /docs/PRIVACY_GUIDE.md:215
 
 ### omniops.ai (1)
@@ -2399,14 +2397,15 @@ Links that work but may need attention:
 
 ### openai.com (1)
 
-- /README.md:324
+- /README.md:325
 
 ### owasp.org (1)
 
 - /docs/SECURITY_HARDENING_SUMMARY.md:248
 
-### platform.openai.com (4)
+### platform.openai.com (5)
 
+- /docs/GETTING_STARTED.md:9
 - /docs/README.md:436
 - /docs/SECURITY_HARDENING_SUMMARY.md:250
 - /docs/SETUP_GUIDE.md:41
@@ -2431,7 +2430,7 @@ Links that work but may need attention:
 
 ### redis.io (1)
 
-- /README.md:325
+- /README.md:326
 
 ### sdk.vercel.ai (1)
 
@@ -2450,7 +2449,7 @@ Links that work but may need attention:
 
 - /docs/SHOPIFY_CONFIGURATION_GUIDE.md:261
 
-### supabase.com (15)
+### supabase.com (16)
 
 - /components/auth/README.md:599
 - /docs/05-DEPLOYMENT/production-checklist.md:97
@@ -2459,10 +2458,10 @@ Links that work but may need attention:
 - /docs/ARCHIVE/analysis/SECURITY_AUDIT_REPORT.md:115
 - /docs/DASHBOARD.md:2004
 - /docs/DATABASE_OPTIMIZATION.md:223
+- /docs/GETTING_STARTED.md:10
 - /docs/README.md:434
 - /docs/RLS_TESTING_INFRASTRUCTURE.md:450
-- /docs/RLS_TESTING_INFRASTRUCTURE.md:452
-- ... and 5 more
+- ... and 6 more
 
 ### tailwindcss.com (1)
 
@@ -2486,13 +2485,18 @@ Links that work but may need attention:
 
 - /docs/DATABASE_OPTIMIZATION.md:221
 
-### www.docker.com (1)
+### www.docker.com (2)
 
-- /README.md:326
+- /docs/GETTING_STARTED.md:8
+- /README.md:327
 
 ### www.firecrawl.dev (1)
 
 - /docs/SETUP_GUIDE.md:50
+
+### www.nist.gov (1)
+
+- /docs/PRIVACY_COMPLIANCE.md:254
 
 ### www.postman.com (1)
 
@@ -2507,7 +2511,7 @@ Links that work but may need attention:
 
 ### www.typescriptlang.org (1)
 
-- /README.md:322
+- /README.md:323
 
 ### www.writethedocs.org (1)
 

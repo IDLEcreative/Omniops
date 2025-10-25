@@ -228,3 +228,27 @@ export interface GdprAuditLogResponse {
   limit: number;
   offset: number;
 }
+
+export interface ConversationMessage {
+  id: string;
+  role: 'user' | 'assistant' | 'system';
+  content: string;
+  metadata?: {
+    sources?: string[];
+    products?: number[];
+    orders?: number[];
+    [key: string]: string[] | number[] | string | number | boolean | null | undefined;
+  };
+  created_at: string;
+}
+
+export interface ConversationTranscript {
+  conversationId: string;
+  messages: ConversationMessage[];
+  metadata?: {
+    customerName?: string | null;
+    status?: DashboardConversationStatus;
+    language?: string;
+    [key: string]: unknown;
+  };
+}

@@ -20,6 +20,7 @@ import {
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Bot, Calendar, Clock, Filter, Globe, MessageCircle, RefreshCw, Search } from "lucide-react";
 import { useDashboardConversations } from "@/hooks/use-dashboard-conversations";
+import { ConversationTranscript } from "@/components/dashboard/conversation-transcript";
 
 type DateRangeValue = "24h" | "7d" | "30d" | "90d";
 
@@ -330,22 +331,10 @@ export default function ConversationsPage() {
                     </div>
                   </div>
 
-                  <ScrollArea className="flex-1 p-4">
-                    <div className="space-y-4">
-                      <div className="rounded-lg border bg-muted/40 p-4">
-                        <p className="text-sm text-muted-foreground">
-                          Transcript not available in this snapshot. Use the conversation view to
-                          drill into full history.
-                        </p>
-                      </div>
-                      <div>
-                        <h4 className="text-sm font-semibold mb-2">Latest Message</h4>
-                        <p className="rounded-lg border bg-card p-4 text-sm leading-relaxed">
-                          {selectedConversation.message}
-                        </p>
-                      </div>
-                    </div>
-                  </ScrollArea>
+                  <ConversationTranscript
+                    conversationId={selectedConversationId}
+                    className="flex-1"
+                  />
 
                   <div className="border-t p-4">
                     <div className="flex items-center space-x-3">

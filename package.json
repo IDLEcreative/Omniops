@@ -49,6 +49,9 @@
     "backfill:gdpr": "tsx scripts/backfill-gdpr-audit.ts",
     "test:telemetry-smoke": "playwright test __tests__/playwright/telemetry-smoke.spec.ts --project=chromium",
     "test:gdpr-smoke": "playwright test __tests__/playwright/gdpr-privacy.spec.ts --project=chromium",
+    "docs:audit": "tsx scripts/audit-doc-versions.ts",
+    "docs:audit:report": "tsx scripts/audit-doc-versions.ts --report",
+    "docs:check-reviews": "tsx scripts/schedule-doc-reviews.ts --check",
     "prepare": "husky"
   },
   "dependencies": {

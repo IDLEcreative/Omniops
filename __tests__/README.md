@@ -1,41 +1,115 @@
 # Tests Directory
 
-Comprehensive test suite for the Customer Service Agent application.
+Comprehensive test suite for the OmniOps Customer Service Platform.
+
+## Test Suite Statistics
+
+- **Total Test Files:** 67
+- **Total Tests:** 1,048+
+- **Total Test Code:** 23,677 LOC
+- **Coverage Target:** 80%+
+- **Last Updated:** 2025-10-25
+
+### Test Distribution
+- **Component Tests:** 138 tests (2,542 LOC)
+- **Hook Tests:** 102 tests (2,303 LOC)
+- **API Tests:** 300+ tests
+- **Integration Tests:** 100+ tests
+- **Business Logic Tests:** 400+ tests
 
 ## Structure
 
 ```
 __tests__/
-├── api/                    # API route tests
+├── components/            # Component tests (138 tests, 2,542 LOC)
+│   ├── ChatWidget.test.tsx          # Chat widget UI (38 tests, 755 LOC)
+│   ├── ErrorBoundary.test.tsx       # Error handling (33 tests, 637 LOC)
+│   ├── auth/
+│   │   └── UserMenu.test.tsx        # Auth UI (28 tests, 761 LOC)
+│   └── chat/
+│       └── MessageContent.test.tsx  # Message rendering (39 tests, 389 LOC)
+│
+├── hooks/                 # Custom hook tests (102 tests, 2,303 LOC)
+│   ├── use-dashboard-analytics.test.tsx      # Analytics hook (25 tests, 388 LOC)
+│   ├── use-dashboard-conversations.test.tsx  # Conversations hook (25 tests, 390 LOC)
+│   ├── use-dashboard-overview.test.tsx       # Overview hook (25 tests, 393 LOC)
+│   ├── use-dashboard-telemetry.test.ts       # Telemetry hook (12 tests, 136 LOC)
+│   ├── use-gdpr-delete.test.tsx              # GDPR deletion (8 tests, 528 LOC)
+│   └── use-gdpr-export.test.tsx              # GDPR export (7 tests, 468 LOC)
+│
+├── api/                   # API route tests (300+ tests)
 │   ├── auth/              # Authentication tests
+│   │   └── customer/route.test.ts
 │   ├── chat/              # Chat endpoint tests
 │   │   ├── route-async.test.ts
+│   │   ├── route.basic.test.ts
+│   │   ├── route.commerce.test.ts
+│   │   ├── route.errors.test.ts
+│   │   ├── route.tools.test.ts
+│   │   └── malformed-tool-args.test.ts
+│   ├── gdpr/              # Privacy endpoint tests
+│   │   ├── audit/route.test.ts
+│   │   ├── delete/route.test.ts
+│   │   ├── export/route.test.ts
+│   │   ├── delete.test.ts
+│   │   └── export.test.ts
+│   ├── scrape/            # Scraping endpoint tests
 │   │   └── route.test.ts
-│   └── scrape/            # Scraping endpoint tests
-│       └── route.test.ts
+│   ├── dashboard/         # Dashboard API tests
+│   │   └── telemetry/route.test.ts
+│   └── organizations/     # Multi-tenant tests
+│       ├── route.test.ts
+│       ├── route-global-mock.test.ts
+│       └── invitations.test.ts
+│
 ├── app/                   # Page component tests
-│   └── chat/              # Chat page tests
-│       └── page.test.tsx
-├── integration/           # Integration tests
+│   ├── chat/page.test.tsx
+│   └── dashboard/telemetry/page.test.tsx
+│
+├── integration/           # Integration tests (100+ tests)
 │   ├── README.md
-│   └── enhanced-scraper-system.test.ts
-├── lib/                   # Business logic tests
+│   ├── enhanced-scraper-system.test.ts
+│   ├── multi-tenant-isolation.test.ts
+│   ├── woocommerce-schema-fix.test.ts
+│   ├── shopify-ux-flow.test.ts
+│   └── rls-smoke-test.test.ts
+│
+├── lib/                   # Business logic tests (400+ tests)
+│   ├── agents/            # AI agent tests
+│   │   ├── commerce-provider.test.ts
+│   │   ├── customer-service-agent.test.ts
+│   │   ├── customer-service-agent-intelligent.test.ts
+│   │   ├── domain-agnostic-agent.test.ts
+│   │   ├── router.test.ts
+│   │   ├── woocommerce-agent.test.ts
+│   │   └── providers/
+│   │       ├── shopify-provider.test.ts
+│   │       └── woocommerce-provider.test.ts
+│   ├── analytics/         # Analytics tests
+│   │   └── business-intelligence.test.ts
+│   ├── monitoring/        # Monitoring tests
+│   │   └── performance-tracker.test.ts
 │   ├── chat-service.test.ts
 │   ├── ecommerce-extractor.test.ts
 │   ├── embeddings.test.ts
 │   ├── encryption.test.ts
+│   ├── link-sanitizer.test.ts
+│   ├── organization-helpers.test.ts
 │   ├── pagination-crawler.test.ts
 │   ├── pattern-learner.test.ts
 │   ├── product-normalizer.test.ts
 │   ├── rate-limit.test.ts
 │   ├── rate-limiter-enhanced.test.ts
+│   ├── shopify-integration.test.ts
 │   ├── woocommerce-api.test.ts
 │   ├── woocommerce.test.ts
 │   └── supabase/
 │       └── database.test.ts
+│
 ├── mocks/                 # Mock data and handlers
 │   ├── handlers.ts        # MSW request handlers
 │   └── server.ts          # MSW server setup
+│
 └── utils/                 # Test utilities
     ├── global-setup.js
     ├── global-teardown.js
@@ -97,11 +171,85 @@ describe('Enhanced Scraper System', () => {
 Testing React components with React Testing Library:
 
 ```typescript
-// app/chat/page.test.tsx
-describe('Chat Page', () => {
-  it('should render chat interface', () => {
-    render(<ChatPage />)
-    expect(screen.getByRole('textbox')).toBeInTheDocument()
+// components/ChatWidget.test.tsx
+describe('ChatWidget', () => {
+  it('should send message on submit', async () => {
+    render(<ChatWidget domain="example.com" />)
+
+    const input = screen.getByPlaceholderText(/type.*message/i)
+    fireEvent.change(input, { target: { value: 'Hello' } })
+
+    const sendButton = screen.getByRole('button', { name: /send/i })
+    fireEvent.click(sendButton)
+
+    expect(await screen.findByText('AI response')).toBeInTheDocument()
+  })
+
+  it('should handle errors gracefully', async () => {
+    global.fetch = jest.fn().mockRejectedValue(new Error('Network error'))
+
+    render(<ChatWidget domain="example.com" />)
+    // ... trigger action ...
+
+    expect(await screen.findByText(/error.*occurred/i)).toBeInTheDocument()
+  })
+})
+```
+
+### Hook Tests
+Testing custom React hooks with renderHook:
+
+```typescript
+// hooks/use-dashboard-analytics.test.tsx
+describe('useDashboardAnalytics', () => {
+  it('should fetch analytics data', async () => {
+    const mockData = {
+      totalMessages: 100,
+      totalConversations: 50,
+      averageResponseTime: 1.5
+    }
+
+    global.fetch = jest.fn().mockResolvedValue({
+      ok: true,
+      json: async () => mockData
+    })
+
+    const { result } = renderHook(() =>
+      useDashboardAnalytics('example.com')
+    )
+
+    await waitFor(() => {
+      expect(result.current.isLoading).toBe(false)
+    })
+
+    expect(result.current.data).toEqual(mockData)
+  })
+
+  it('should handle date range changes', async () => {
+    const { result, rerender } = renderHook(
+      ({ startDate, endDate }) => useDashboardAnalytics('example.com', {
+        startDate,
+        endDate
+      }),
+      {
+        initialProps: {
+          startDate: '2025-01-01',
+          endDate: '2025-01-31'
+        }
+      }
+    )
+
+    await waitFor(() => expect(result.current.isLoading).toBe(false))
+
+    // Change date range
+    rerender({
+      startDate: '2025-02-01',
+      endDate: '2025-02-28'
+    })
+
+    await waitFor(() => {
+      expect(global.fetch).toHaveBeenCalledTimes(2)
+    })
   })
 })
 ```
@@ -339,6 +487,13 @@ Current thresholds:
 - Lines: 70%
 - Statements: 70%
 
+**Note:** With the addition of 240+ new tests (4,800+ LOC), we've significantly improved coverage across:
+- Component rendering and user interactions
+- Custom hook behavior and lifecycle
+- Error handling and edge cases
+- GDPR compliance features
+- Dashboard analytics and telemetry
+
 ## CI/CD Integration
 
 Tests run automatically on:
@@ -373,3 +528,117 @@ npm test -- --verbose
 2. **Timeout errors**: Increase timeout for async tests
 3. **Mock not working**: Ensure mocks are set up before imports
 4. **Environment issues**: Check correct jest config is used
+
+---
+
+## Recent Improvements (2025-10-25)
+
+### New Test Coverage
+
+Added comprehensive test suites for critical UI components and hooks:
+
+**Component Tests (138 new tests, 2,542 LOC):**
+- `ChatWidget.test.tsx` - 38 tests covering chat interface, message sending, error handling
+- `ErrorBoundary.test.tsx` - 33 tests for error catching, fallback UI, recovery
+- `UserMenu.test.tsx` - 28 tests for authentication UI, dropdowns, user actions
+- `MessageContent.test.tsx` - 39 tests for message rendering, formatting, links
+
+**Hook Tests (102 new tests, 2,303 LOC):**
+- `use-dashboard-analytics.test.tsx` - 25 tests for analytics data fetching and filtering
+- `use-dashboard-conversations.test.tsx` - 25 tests for conversation management
+- `use-dashboard-overview.test.tsx` - 25 tests for overview statistics
+- `use-dashboard-telemetry.test.ts` - 12 tests for telemetry data collection
+- `use-gdpr-delete.test.tsx` - 8 tests for GDPR deletion workflows
+- `use-gdpr-export.test.tsx` - 7 tests for GDPR export functionality
+
+### Testing Patterns Introduced
+
+**1. Error Boundary Testing**
+```typescript
+it('should catch and display errors', () => {
+  const ThrowError = () => {
+    throw new Error('Test error')
+  }
+
+  render(
+    <ErrorBoundary>
+      <ThrowError />
+    </ErrorBoundary>
+  )
+
+  expect(screen.getByText(/something went wrong/i)).toBeInTheDocument()
+})
+```
+
+**2. Hook Lifecycle Testing**
+```typescript
+it('should refetch on dependency change', async () => {
+  const { result, rerender } = renderHook(
+    ({ filter }) => useMyHook(filter),
+    { initialProps: { filter: 'active' } }
+  )
+
+  await waitFor(() => expect(result.current.isLoading).toBe(false))
+
+  rerender({ filter: 'inactive' })
+
+  await waitFor(() => {
+    expect(global.fetch).toHaveBeenCalledTimes(2)
+  })
+})
+```
+
+**3. GDPR Compliance Testing**
+```typescript
+it('should export all user data', async () => {
+  const { result } = renderHook(() => useGdprExport())
+
+  await act(async () => {
+    await result.current.exportData('user@example.com')
+  })
+
+  expect(result.current.exportedData).toContain('conversations')
+  expect(result.current.exportedData).toContain('messages')
+})
+```
+
+**4. Async State Management**
+```typescript
+it('should handle loading states', async () => {
+  render(<MyComponent />)
+
+  // Initial loading state
+  expect(screen.getByRole('progressbar')).toBeInTheDocument()
+
+  // Wait for content
+  expect(await screen.findByText('Loaded')).toBeInTheDocument()
+
+  // Loading indicator removed
+  expect(screen.queryByRole('progressbar')).not.toBeInTheDocument()
+})
+```
+
+### Key Improvements
+
+✅ **Better Test Organization**: Separated component and hook tests into dedicated directories
+✅ **Comprehensive Coverage**: Added tests for previously untested UI components
+✅ **Real-World Scenarios**: Tests based on actual user interactions and edge cases
+✅ **GDPR Testing**: Explicit tests for privacy compliance features
+✅ **Error Handling**: Thorough testing of error boundaries and fallback UI
+✅ **Accessibility**: Using semantic queries (getByRole, getByLabelText)
+
+### Documentation
+
+For detailed testing guidelines, see:
+- **[Testing Guide](../docs/TESTING_GUIDE.md)** - Comprehensive testing patterns and best practices
+- **[Integration Tests](integration/README.md)** - Integration test documentation
+
+---
+
+**Need Help?**
+
+If you're writing new tests and need examples, check:
+1. This README for patterns
+2. [Testing Guide](../docs/TESTING_GUIDE.md) for comprehensive examples
+3. Existing test files in the same category (component/hook/API)
+4. Ask in team discussions

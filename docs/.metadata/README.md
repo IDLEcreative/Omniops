@@ -33,6 +33,30 @@ The `.metadata` directory maintains version tracking, audit history, and structu
 
 ---
 
+### `DOCUMENTATION_MAINTENANCE_SCHEDULE.md`
+
+**Comprehensive documentation maintenance procedures and schedules.**
+
+**Contains:**
+- Monthly review procedures (first Monday)
+- Quarterly review procedures (first of quarter)
+- Annual audit procedures (December 15-17)
+- Review checklists and templates
+- Scheduled dates for 2025-2026
+- Automated reminder systems
+- Responsibility assignments
+- Success metrics and KPIs
+
+**Updated:**
+- **Annually:** Review and update schedules
+- **As-needed:** When procedures change
+
+**Review Schedule:** Annually
+
+**Last Updated:** 2025-10-25
+
+---
+
 ### `doc-structure.json` (Future)
 
 **Automated documentation structure metadata.**
@@ -70,13 +94,13 @@ The `.metadata` directory maintains version tracking, audit history, and structu
 **Usage:**
 ```bash
 # Full audit
-npx tsx scripts/audit-doc-versions.ts
+npm run docs:audit
+
+# Generate report
+npm run docs:audit:report
 
 # Check specific file
 npx tsx scripts/audit-doc-versions.ts --doc=README.md
-
-# Generate report
-npx tsx scripts/audit-doc-versions.ts --report
 
 # Auto-fix issues
 npx tsx scripts/audit-doc-versions.ts --fix
@@ -89,6 +113,31 @@ npx tsx scripts/audit-doc-versions.ts --fix
 - Identifies broken version references
 - Ensures CHANGELOG has current version
 - Generates detailed audit reports
+
+---
+
+### Review Scheduler
+
+**Location:** `/scripts/schedule-doc-reviews.ts`
+
+**Usage:**
+```bash
+# Check if reviews are due
+npm run docs:check-reviews
+
+# Force notifications (testing)
+npx tsx scripts/schedule-doc-reviews.ts --force
+
+# Check without notifications
+npx tsx scripts/schedule-doc-reviews.ts --check
+```
+
+**What it does:**
+- Checks if monthly/quarterly/annual reviews are due
+- Displays upcoming review schedule
+- Creates GitHub issues for due reviews
+- Sends Slack notifications (if configured)
+- Logs review schedule to file
 
 ---
 
@@ -130,16 +179,27 @@ npx tsx scripts/check-doc-versions.ts --quick
 
 ## Maintenance Schedule
 
-### Monthly (First Week)
+**Full details:** See `DOCUMENTATION_MAINTENANCE_SCHEDULE.md` in this directory
+
+### Quick Reference
+
+| Type | Frequency | Next Review | Time |
+|------|-----------|-------------|------|
+| **Monthly** | First Monday | Nov 3, 2025 | 2-4 hours |
+| **Quarterly** | First of quarter | Jan 1, 2026 | 1-2 days |
+| **Annual** | December 15-17 | Dec 15-17, 2025 | 3 days |
+
+### Monthly (First Monday)
 
 **Tasks:**
-- [ ] Run full audit: `npx tsx scripts/audit-doc-versions.ts --report`
+- [ ] Run: `npm run docs:audit:report`
 - [ ] Review audit report: `docs/reports/doc-version-audit.md`
-- [ ] Update outdated critical docs
+- [ ] Update outdated critical docs (10 docs)
 - [ ] Update version-matrix.md with review date
 - [ ] Fix any warnings or failures
 
-**Responsible:** Development Team
+**Time:** 2-4 hours
+**Responsible:** Primary Documentation Maintainer
 
 ---
 
@@ -417,6 +477,17 @@ git commit -m "..."
 
 ---
 
-**Last Updated:** 2025-10-24
+**Last Updated:** 2025-10-25
 **Maintained By:** Development Team
 **Review Schedule:** Quarterly
+
+---
+
+## NPM Scripts
+
+```bash
+# Documentation maintenance
+npm run docs:audit              # Run version audit
+npm run docs:audit:report       # Generate detailed report
+npm run docs:check-reviews      # Check review schedule
+```
