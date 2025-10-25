@@ -1,6 +1,6 @@
 'use client';
 
-import { useEffect, useRef } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import { Avatar, AvatarFallback } from '@/components/ui/avatar';
 import { Badge } from '@/components/ui/badge';
 import { ScrollArea } from '@/components/ui/scroll-area';
@@ -27,9 +27,12 @@ export function ConversationTranscript({
     if (data?.messages && scrollRef.current) {
       const scrollElement = scrollRef.current.querySelector('[data-radix-scroll-area-viewport]');
       if (scrollElement) {
-        setTimeout(() => {
+        const timeoutId = setTimeout(() => {
           scrollElement.scrollTop = scrollElement.scrollHeight;
         }, 100);
+
+        // Cleanup function to prevent memory leaks
+        return () => clearTimeout(timeoutId);
       }
     }
   }, [data?.messages]);
@@ -74,8 +77,10 @@ export function ConversationTranscript({
             Failed to load transcript: {error.message}
             <br />
             <button
+              type="button"
               onClick={() => window.location.reload()}
-              className="underline text-sm mt-2"
+              className="underline text-sm mt-2 focus:outline-none focus:ring-2 focus:ring-red-500 focus:ring-offset-2 rounded"
+              aria-label="Refresh page to retry loading transcript"
             >
               Try refreshing the page
             </button>
@@ -99,11 +104,29 @@ export function ConversationTranscript({
   }
 
   return (
-    <ScrollArea ref={scrollRef} className={`h-full ${className}`}>
-      <div className="space-y-4 p-4">
-        {data.messages.map((message) => (
-          <Message key={message.id} message={message} />
-        ))}
+    <ScrollArea
+      ref={scrollRef}
+      className={`h-full ${className}`}
+      role="region"
+      aria-label="Conversation transcript"
+    >
+      <div className="space-y-4 p-4" aria-live="polite" aria-atomic="false">
+        {data.messages.map((message) => {
+          try {
+            return <Message key={message.id} message={message} />;
+          } catch (err) {
+            // Handle individual message render errors gracefully
+            const error = err instanceof Error ? err : new Error('Unknown error');
+            return (
+              <div key={message.id} className="p-3 border border-red-200 rounded-lg bg-red-50">
+                <div className="flex items-center gap-2 text-red-600 text-sm">
+                  <AlertCircle className="h-4 w-4" />
+                  <span>Failed to render message: {error.message}</span>
+                </div>
+              </div>
+            );
+          }
+        })}
       </div>
     </ScrollArea>
   );

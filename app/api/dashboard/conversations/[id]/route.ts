@@ -1,9 +1,20 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { createServiceRoleClient } from '@/lib/supabase-server';
+import { createClient, createServiceRoleClient } from '@/lib/supabase-server';
 import type { ConversationTranscript, ConversationMessage } from '@/types/dashboard';
+import { z } from 'zod';
 
 interface RouteParams {
   params: Promise<{ id: string }>;
+}
+
+// Zod schema for conversation ID validation
+const ConversationIdSchema = z.object({
+  id: z.string().uuid({ message: 'Invalid conversation ID format. Must be a valid UUID.' })
+});
+
+// Type guard for message role validation
+function isValidMessageRole(role: unknown): role is 'user' | 'assistant' | 'system' {
+  return typeof role === 'string' && ['user', 'assistant', 'system'].includes(role);
 }
 
 export async function GET(
@@ -13,14 +24,37 @@ export async function GET(
   try {
     const { id: conversationId } = await params;
 
-    if (!conversationId) {
+    // Validate conversation ID format using Zod
+    const validationResult = ConversationIdSchema.safeParse({ id: conversationId });
+    if (!validationResult.success) {
       return NextResponse.json(
-        { error: 'Conversation ID is required' },
+        {
+          error: 'Invalid conversation ID format',
+          details: validationResult.error.errors[0]?.message || 'Conversation ID must be a valid UUID'
+        },
         { status: 400 }
       );
     }
 
-    // Create Supabase client
+    // AUTHENTICATION: Create user-context Supabase client
+    const userSupabase = await createClient();
+    if (!userSupabase) {
+      return NextResponse.json(
+        { error: 'Authentication service unavailable' },
+        { status: 500 }
+      );
+    }
+
+    // Check if user is authenticated
+    const { data: { user }, error: authError } = await userSupabase.auth.getUser();
+    if (authError || !user) {
+      return NextResponse.json(
+        { error: 'Unauthorized. Please log in to access conversation transcripts.' },
+        { status: 401 }
+      );
+    }
+
+    // Create service role client for data access
     const supabase = await createServiceRoleClient();
     if (!supabase) {
       console.error('[Transcript] Failed to create Supabase client');
@@ -45,6 +79,39 @@ export async function GET(
       );
     }
 
+    // AUTHORIZATION: Verify user has access to this conversation's domain
+    if (conversation.domain_id) {
+      // Get user's organization membership
+      const { data: membership, error: membershipError } = await userSupabase
+        .from('organization_members')
+        .select('organization_id')
+        .eq('user_id', user.id)
+        .single();
+
+      if (membershipError || !membership) {
+        return NextResponse.json(
+          { error: 'Forbidden. You do not have access to this conversation.' },
+          { status: 403 }
+        );
+      }
+
+      // Get the organization's customer config to verify domain access
+      const { data: customerConfig, error: configError } = await supabase
+        .from('customer_configs')
+        .select('id, domain')
+        .eq('organization_id', membership.organization_id)
+        .eq('id', conversation.domain_id)
+        .single();
+
+      if (configError || !customerConfig) {
+        console.error('[Transcript] Domain access check failed:', configError?.message);
+        return NextResponse.json(
+          { error: 'Forbidden. You do not have access to this conversation.' },
+          { status: 403 }
+        );
+      }
+    }
+
     // Fetch all messages for this conversation
     const { data: messages, error: msgError } = await supabase
       .from('messages')
@@ -60,14 +127,30 @@ export async function GET(
       );
     }
 
-    // Format messages
-    const formattedMessages: ConversationMessage[] = (messages || []).map((msg) => ({
-      id: msg.id,
-      role: msg.role as 'user' | 'assistant' | 'system',
-      content: msg.content,
-      metadata: msg.metadata || undefined,
-      created_at: msg.created_at,
-    }));
+    // Format messages with runtime validation for role field
+    const formattedMessages: ConversationMessage[] = (messages || []).map((msg) => {
+      // Validate role using type guard
+      let validatedRole: 'user' | 'assistant' | 'system' = 'system';
+
+      if (isValidMessageRole(msg.role)) {
+        validatedRole = msg.role;
+      } else {
+        // Log warning when invalid role is detected
+        console.warn('[Transcript] Invalid message role detected:', {
+          messageId: msg.id,
+          invalidRole: msg.role,
+          defaultingTo: 'system'
+        });
+      }
+
+      return {
+        id: msg.id,
+        role: validatedRole,
+        content: msg.content,
+        metadata: msg.metadata || undefined,
+        created_at: msg.created_at,
+      };
+    });
 
     // Build transcript response
     const transcript: ConversationTranscript = {

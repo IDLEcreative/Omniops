@@ -122,12 +122,12 @@ export const MessageContent = React.memo(({ content, className = '' }: MessageCo
 
   // Memoize the rendered content - first format markdown, then process links
   const renderedContent = useMemo(() => {
-    // Debug: Check if content has line breaks
-    if (content.includes('•')) {
+    // Debug: Check if content has line breaks (development only)
+    if (process.env.NODE_ENV === 'development' && content.includes('•')) {
       console.log('[MessageContent] Raw content preview:', content.substring(0, 500));
       console.log('[MessageContent] Has newlines after bullets:', content.includes('•\n'));
     }
-    
+
     const formattedContent = formatMarkdown(content);
     return renderContentWithLinks(formattedContent);
   }, [content, formatMarkdown, renderContentWithLinks]);
