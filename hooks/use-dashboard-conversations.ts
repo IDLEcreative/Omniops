@@ -1,5 +1,5 @@
 import { useCallback, useEffect, useRef, useState } from 'react';
-import type { DashboardConversationsData } from '@/types/dashboard';
+import type { DashboardConversationsData, DashboardConversation } from '@/types/dashboard';
 
 export type { DashboardConversation, DashboardConversationsData } from '@/types/dashboard';
 
@@ -13,6 +13,9 @@ interface UseDashboardConversationsResult {
   loading: boolean;
   error: Error | null;
   refresh: () => Promise<void>;
+  loadMore: () => Promise<void>;
+  loadingMore: boolean;
+  hasMore: boolean;
 }
 
 export function useDashboardConversations(
@@ -21,21 +24,38 @@ export function useDashboardConversations(
   const { days = 7, disabled = false } = options;
   const [data, setData] = useState<DashboardConversationsData | null>(null);
   const [loading, setLoading] = useState<boolean>(false);
+  const [loadingMore, setLoadingMore] = useState<boolean>(false);
   const [error, setError] = useState<Error | null>(null);
+  const [allConversations, setAllConversations] = useState<DashboardConversation[]>([]);
+  const [nextCursor, setNextCursor] = useState<string | null>(null);
+  const [hasMore, setHasMore] = useState<boolean>(false);
   const abortRef = useRef<AbortController | null>(null);
 
-  const fetchData = useCallback(async () => {
+  const fetchData = useCallback(async (cursor?: string | null) => {
     if (disabled) return;
 
     abortRef.current?.abort();
     const controller = new AbortController();
     abortRef.current = controller;
 
-    setLoading(true);
+    const isLoadingMore = !!cursor;
+    if (isLoadingMore) {
+      setLoadingMore(true);
+    } else {
+      setLoading(true);
+    }
     setError(null);
 
     try {
-      const params = new URLSearchParams({ days: days.toString() });
+      const params = new URLSearchParams({
+        days: days.toString(),
+        limit: '20'
+      });
+
+      if (cursor) {
+        params.set('cursor', cursor);
+      }
+
       const response = await fetch(`/api/dashboard/conversations?${params.toString()}`, {
         signal: controller.signal,
       });
@@ -45,24 +65,61 @@ export function useDashboardConversations(
       }
 
       const payload = (await response.json()) as DashboardConversationsData;
-      setData(payload);
+
+      if (isLoadingMore) {
+        // Append new conversations to existing list
+        setAllConversations(prev => [...prev, ...payload.recent]);
+        setData(prevData => prevData ? {
+          ...prevData,
+          recent: [...allConversations, ...payload.recent]
+        } : payload);
+      } else {
+        // Initial load - replace everything
+        setAllConversations(payload.recent);
+        setData(payload);
+      }
+
+      // Update pagination state
+      setNextCursor(payload.pagination?.nextCursor || null);
+      setHasMore(payload.pagination?.hasMore || false);
+
     } catch (err) {
       if ((err as Error).name === 'AbortError') return;
       setError(err as Error);
-      setData(null);
+      if (!isLoadingMore) {
+        setData(null);
+        setAllConversations([]);
+      }
     } finally {
-      setLoading(false);
+      if (isLoadingMore) {
+        setLoadingMore(false);
+      } else {
+        setLoading(false);
+      }
     }
-  }, [days, disabled]);
+  }, [days, disabled, allConversations]);
 
   useEffect(() => {
+    // Reset state when days change
+    setAllConversations([]);
+    setNextCursor(null);
+    setHasMore(false);
     fetchData();
     return () => abortRef.current?.abort();
-  }, [fetchData]);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [days, disabled]);
 
   const refresh = useCallback(async () => {
+    setAllConversations([]);
+    setNextCursor(null);
+    setHasMore(false);
     await fetchData();
   }, [fetchData]);
 
-  return { data, loading, error, refresh };
+  const loadMore = useCallback(async () => {
+    if (!hasMore || loadingMore || !nextCursor) return;
+    await fetchData(nextCursor);
+  }, [hasMore, loadingMore, nextCursor, fetchData]);
+
+  return { data, loading, error, refresh, loadMore, loadingMore, hasMore };
 }

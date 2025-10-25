@@ -1,0 +1,503 @@
+/**
+ * Business Classifier Rules
+ * Classification rules and patterns for detecting business types
+ */
+
+import { BusinessClassification, BusinessType } from './business-classifier-types';
+
+export class BusinessClassifierRules {
+  static checkEcommerce(content: string, metadata?: any): BusinessClassification {
+    const indicators = [];
+    let score = 0;
+
+    // Strong indicators
+    if (content.includes('add to cart')) { indicators.push('add to cart'); score += 0.3; }
+    if (content.includes('checkout')) { indicators.push('checkout'); score += 0.2; }
+    if (content.includes('shopping cart')) { indicators.push('shopping cart'); score += 0.2; }
+    if (/\$\d+\.\d{2}/.test(content)) { indicators.push('price format'); score += 0.1; }
+    if (content.includes('sku:')) { indicators.push('SKU'); score += 0.2; }
+    if (content.includes('in stock')) { indicators.push('stock status'); score += 0.2; }
+    if (content.includes('product')) { indicators.push('product mentions'); score += 0.1; }
+
+    return {
+      primaryType: BusinessType.ECOMMERCE,
+      confidence: Math.min(score, 1),
+      indicators,
+      suggestedSchema: {
+        primaryEntity: 'product',
+        identifierField: 'sku',
+        availabilityField: 'in_stock',
+        priceField: 'price',
+        customFields: {
+          brand: 'brand',
+          category: 'category',
+          shipping: 'shipping_info'
+        }
+      },
+      extractionStrategy: {
+        priorityFields: ['name', 'price', 'sku', 'availability', 'description'],
+        patterns: {
+          price: /\$[\d,]+\.?\d*/,
+          sku: /SKU[:\s]*([A-Z0-9-]+)/i,
+          stock: /(in stock|out of stock|available|unavailable)/i
+        },
+        specialProcessing: ['variants', 'reviews', 'specifications']
+      },
+      terminology: {
+        entityName: 'product',
+        entityNamePlural: 'products',
+        availableText: 'in stock',
+        unavailableText: 'out of stock',
+        priceLabel: 'price',
+        searchPrompt: 'Search products'
+      }
+    };
+  }
+
+  static checkRealEstate(content: string, metadata?: any): BusinessClassification {
+    const indicators = [];
+    let score = 0;
+
+    // Strong indicators
+    if (content.includes('bedroom')) { indicators.push('bedrooms'); score += 0.25; }
+    if (content.includes('bathroom')) { indicators.push('bathrooms'); score += 0.25; }
+    if (content.includes('sqft') || content.includes('square feet')) {
+      indicators.push('square footage'); score += 0.2;
+    }
+    if (content.includes('mls')) { indicators.push('MLS'); score += 0.3; }
+    if (content.includes('listing')) { indicators.push('listings'); score += 0.2; }
+    if (content.includes('for sale') || content.includes('for rent')) {
+      indicators.push('sale/rent'); score += 0.2;
+    }
+    if (content.includes('realtor') || content.includes('agent')) {
+      indicators.push('realtor/agent'); score += 0.15;
+    }
+
+    return {
+      primaryType: BusinessType.REAL_ESTATE,
+      confidence: Math.min(score, 1),
+      indicators,
+      suggestedSchema: {
+        primaryEntity: 'property',
+        identifierField: 'mls_number',
+        availabilityField: 'status',
+        priceField: 'price',
+        customFields: {
+          bedrooms: 'bedrooms',
+          bathrooms: 'bathrooms',
+          sqft: 'square_feet',
+          address: 'address',
+          type: 'property_type'
+        }
+      },
+      extractionStrategy: {
+        priorityFields: ['address', 'price', 'bedrooms', 'bathrooms', 'sqft'],
+        patterns: {
+          price: /\$[\d,]+/,
+          bedrooms: /(\d+)\s*(?:bed|br|bedroom)/i,
+          bathrooms: /(\d+\.?\d*)\s*(?:bath|ba|bathroom)/i,
+          sqft: /(\d+,?\d*)\s*(?:sqft|sq\.?\s*ft)/i
+        },
+        specialProcessing: ['virtual_tour', 'neighborhood', 'schools']
+      },
+      terminology: {
+        entityName: 'property',
+        entityNamePlural: 'properties',
+        availableText: 'available',
+        unavailableText: 'sold',
+        priceLabel: 'price',
+        searchPrompt: 'Search properties'
+      }
+    };
+  }
+
+  static checkHealthcare(content: string, metadata?: any): BusinessClassification {
+    const indicators = [];
+    let score = 0;
+
+    if (content.includes('doctor') || content.includes('physician')) {
+      indicators.push('doctors'); score += 0.25;
+    }
+    if (content.includes('patient')) { indicators.push('patients'); score += 0.2; }
+    if (content.includes('appointment')) { indicators.push('appointments'); score += 0.25; }
+    if (content.includes('medical') || content.includes('health')) {
+      indicators.push('medical/health'); score += 0.15;
+    }
+    if (content.includes('insurance')) { indicators.push('insurance'); score += 0.15; }
+    if (content.includes('treatment') || content.includes('procedure')) {
+      indicators.push('treatments'); score += 0.2;
+    }
+
+    return {
+      primaryType: BusinessType.HEALTHCARE,
+      confidence: Math.min(score, 1),
+      indicators,
+      suggestedSchema: {
+        primaryEntity: 'service',
+        identifierField: 'service_code',
+        availabilityField: 'available',
+        priceField: 'fee',
+        customFields: {
+          provider: 'provider_name',
+          specialty: 'specialty',
+          insurance: 'insurance_accepted',
+          duration: 'appointment_duration'
+        }
+      },
+      extractionStrategy: {
+        priorityFields: ['service_name', 'provider', 'specialty', 'insurance'],
+        patterns: {
+          phone: /\(?\d{3}\)?[-.\s]?\d{3}[-.\s]?\d{4}/,
+          hours: /\d{1,2}:\d{2}\s*(am|pm)/i
+        },
+        specialProcessing: ['insurance_plans', 'locations', 'emergency_services']
+      },
+      terminology: {
+        entityName: 'service',
+        entityNamePlural: 'services',
+        availableText: 'available',
+        unavailableText: 'unavailable',
+        priceLabel: 'fee',
+        searchPrompt: 'Find services'
+      }
+    };
+  }
+
+  static checkLegal(content: string, metadata?: any): BusinessClassification {
+    const indicators = [];
+    let score = 0;
+
+    if (content.includes('attorney') || content.includes('lawyer')) {
+      indicators.push('attorneys'); score += 0.3;
+    }
+    if (content.includes('law firm')) { indicators.push('law firm'); score += 0.3; }
+    if (content.includes('legal')) { indicators.push('legal'); score += 0.2; }
+    if (content.includes('case') || content.includes('litigation')) {
+      indicators.push('cases'); score += 0.15;
+    }
+    if (content.includes('consultation')) { indicators.push('consultation'); score += 0.15; }
+
+    return {
+      primaryType: BusinessType.LEGAL,
+      confidence: Math.min(score, 1),
+      indicators,
+      suggestedSchema: {
+        primaryEntity: 'service',
+        identifierField: 'service_id',
+        availabilityField: 'accepting_clients',
+        priceField: 'consultation_fee',
+        customFields: {
+          practice_area: 'practice_area',
+          attorney: 'attorney_name',
+          experience: 'years_experience'
+        }
+      },
+      extractionStrategy: {
+        priorityFields: ['practice_area', 'attorney_name', 'consultation_fee'],
+        patterns: {
+          phone: /\(?\d{3}\)?[-.\s]?\d{3}[-.\s]?\d{4}/,
+          email: /[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}/
+        },
+        specialProcessing: ['case_results', 'testimonials', 'bar_admissions']
+      },
+      terminology: {
+        entityName: 'service',
+        entityNamePlural: 'services',
+        availableText: 'accepting clients',
+        unavailableText: 'not accepting clients',
+        priceLabel: 'consultation fee',
+        searchPrompt: 'Find legal services'
+      }
+    };
+  }
+
+  static checkEducation(content: string, metadata?: any): BusinessClassification {
+    const indicators = [];
+    let score = 0;
+
+    if (content.includes('course') || content.includes('class')) {
+      indicators.push('courses'); score += 0.25;
+    }
+    if (content.includes('student')) { indicators.push('students'); score += 0.2; }
+    if (content.includes('tuition')) { indicators.push('tuition'); score += 0.25; }
+    if (content.includes('enrollment') || content.includes('enroll')) {
+      indicators.push('enrollment'); score += 0.2;
+    }
+    if (content.includes('degree') || content.includes('certificate')) {
+      indicators.push('degrees'); score += 0.2;
+    }
+
+    return {
+      primaryType: BusinessType.EDUCATION,
+      confidence: Math.min(score, 1),
+      indicators,
+      suggestedSchema: {
+        primaryEntity: 'course',
+        identifierField: 'course_code',
+        availabilityField: 'enrollment_open',
+        priceField: 'tuition',
+        customFields: {
+          instructor: 'instructor',
+          credits: 'credit_hours',
+          schedule: 'schedule',
+          prerequisites: 'prerequisites'
+        }
+      },
+      extractionStrategy: {
+        priorityFields: ['course_name', 'instructor', 'schedule', 'tuition'],
+        patterns: {
+          courseCode: /[A-Z]{2,4}\s*\d{3,4}/,
+          credits: /(\d+)\s*credit/i
+        },
+        specialProcessing: ['prerequisites', 'syllabus', 'registration']
+      },
+      terminology: {
+        entityName: 'course',
+        entityNamePlural: 'courses',
+        availableText: 'open for enrollment',
+        unavailableText: 'closed',
+        priceLabel: 'tuition',
+        searchPrompt: 'Search courses'
+      }
+    };
+  }
+
+  static checkRestaurant(content: string, metadata?: any): BusinessClassification {
+    const indicators = [];
+    let score = 0;
+
+    if (content.includes('menu')) { indicators.push('menu'); score += 0.3; }
+    if (content.includes('reservation')) { indicators.push('reservations'); score += 0.2; }
+    if (content.includes('cuisine') || content.includes('food')) {
+      indicators.push('cuisine/food'); score += 0.2;
+    }
+    if (content.includes('takeout') || content.includes('delivery')) {
+      indicators.push('takeout/delivery'); score += 0.15;
+    }
+    if (content.includes('hours') && content.includes('open')) {
+      indicators.push('hours'); score += 0.1;
+    }
+
+    return {
+      primaryType: BusinessType.RESTAURANT,
+      confidence: Math.min(score, 1),
+      indicators,
+      suggestedSchema: {
+        primaryEntity: 'menu_item',
+        identifierField: 'item_code',
+        availabilityField: 'available',
+        priceField: 'price',
+        customFields: {
+          category: 'category',
+          description: 'description',
+          dietary: 'dietary_info',
+          ingredients: 'ingredients'
+        }
+      },
+      extractionStrategy: {
+        priorityFields: ['item_name', 'price', 'description', 'category'],
+        patterns: {
+          price: /\$[\d,]+\.?\d*/,
+          dietary: /(vegan|vegetarian|gluten-free|dairy-free)/i
+        },
+        specialProcessing: ['specials', 'hours', 'delivery_info']
+      },
+      terminology: {
+        entityName: 'menu item',
+        entityNamePlural: 'menu items',
+        availableText: 'available',
+        unavailableText: 'not available',
+        priceLabel: 'price',
+        searchPrompt: 'Browse menu'
+      }
+    };
+  }
+
+  static checkAutomotive(content: string, metadata?: any): BusinessClassification {
+    const indicators = [];
+    let score = 0;
+
+    if (content.includes('vehicle') || content.includes('car')) {
+      indicators.push('vehicles'); score += 0.25;
+    }
+    if (content.includes('vin')) { indicators.push('VIN'); score += 0.3; }
+    if (content.includes('mileage') || content.includes('miles')) {
+      indicators.push('mileage'); score += 0.2;
+    }
+    if (content.includes('model') && content.includes('make')) {
+      indicators.push('make/model'); score += 0.2;
+    }
+
+    return {
+      primaryType: BusinessType.AUTOMOTIVE,
+      confidence: Math.min(score, 1),
+      indicators,
+      suggestedSchema: {
+        primaryEntity: 'vehicle',
+        identifierField: 'vin',
+        availabilityField: 'status',
+        priceField: 'price',
+        customFields: {
+          make: 'make',
+          model: 'model',
+          year: 'year',
+          mileage: 'mileage',
+          condition: 'condition'
+        }
+      },
+      extractionStrategy: {
+        priorityFields: ['make', 'model', 'year', 'price', 'mileage'],
+        patterns: {
+          vin: /[A-HJ-NPR-Z0-9]{17}/,
+          year: /(19|20)\d{2}/,
+          mileage: /(\d+,?\d*)\s*miles/i
+        },
+        specialProcessing: ['features', 'history', 'warranty']
+      },
+      terminology: {
+        entityName: 'vehicle',
+        entityNamePlural: 'vehicles',
+        availableText: 'available',
+        unavailableText: 'sold',
+        priceLabel: 'price',
+        searchPrompt: 'Search vehicles'
+      }
+    };
+  }
+
+  static checkFinancial(content: string, metadata?: any): BusinessClassification {
+    const indicators = [];
+    let score = 0;
+
+    if (content.includes('account')) { indicators.push('accounts'); score += 0.2; }
+    if (content.includes('loan') || content.includes('mortgage')) {
+      indicators.push('loans'); score += 0.25;
+    }
+    if (content.includes('rate') || content.includes('apr')) {
+      indicators.push('rates'); score += 0.2;
+    }
+    if (content.includes('investment') || content.includes('banking')) {
+      indicators.push('financial services'); score += 0.2;
+    }
+
+    return {
+      primaryType: BusinessType.FINANCIAL,
+      confidence: Math.min(score, 1),
+      indicators,
+      suggestedSchema: {
+        primaryEntity: 'service',
+        identifierField: 'service_code',
+        availabilityField: 'available',
+        priceField: 'fee',
+        customFields: {
+          type: 'service_type',
+          rate: 'interest_rate',
+          term: 'term_length',
+          requirements: 'requirements'
+        }
+      },
+      extractionStrategy: {
+        priorityFields: ['service_name', 'rate', 'fees', 'requirements'],
+        patterns: {
+          rate: /\d+\.?\d*%/,
+          fee: /\$[\d,]+/
+        },
+        specialProcessing: ['calculators', 'eligibility', 'disclosures']
+      },
+      terminology: {
+        entityName: 'service',
+        entityNamePlural: 'services',
+        availableText: 'available',
+        unavailableText: 'unavailable',
+        priceLabel: 'fee',
+        searchPrompt: 'Find services'
+      }
+    };
+  }
+
+  static checkHospitality(content: string, metadata?: any): BusinessClassification {
+    const indicators = [];
+    let score = 0;
+
+    if (content.includes('room') || content.includes('suite')) {
+      indicators.push('rooms'); score += 0.25;
+    }
+    if (content.includes('booking') || content.includes('reservation')) {
+      indicators.push('bookings'); score += 0.25;
+    }
+    if (content.includes('check-in') || content.includes('checkout')) {
+      indicators.push('check-in/out'); score += 0.2;
+    }
+    if (content.includes('amenities')) { indicators.push('amenities'); score += 0.15; }
+
+    return {
+      primaryType: BusinessType.HOSPITALITY,
+      confidence: Math.min(score, 1),
+      indicators,
+      suggestedSchema: {
+        primaryEntity: 'room',
+        identifierField: 'room_number',
+        availabilityField: 'availability',
+        priceField: 'rate',
+        customFields: {
+          type: 'room_type',
+          capacity: 'max_occupancy',
+          amenities: 'amenities',
+          view: 'view_type'
+        }
+      },
+      extractionStrategy: {
+        priorityFields: ['room_type', 'rate', 'availability', 'amenities'],
+        patterns: {
+          rate: /\$[\d,]+/,
+          dates: /\d{1,2}\/\d{1,2}\/\d{2,4}/
+        },
+        specialProcessing: ['availability_calendar', 'packages', 'policies']
+      },
+      terminology: {
+        entityName: 'room',
+        entityNamePlural: 'rooms',
+        availableText: 'available',
+        unavailableText: 'booked',
+        priceLabel: 'rate',
+        searchPrompt: 'Search rooms'
+      }
+    };
+  }
+
+  static getProfessionalServicesClassification(content: string): BusinessClassification {
+    return {
+      primaryType: BusinessType.PROFESSIONAL_SERVICES,
+      confidence: 0.5,
+      indicators: ['generic business content'],
+      suggestedSchema: {
+        primaryEntity: 'service',
+        identifierField: 'service_id',
+        availabilityField: 'available',
+        priceField: 'price',
+        customFields: {
+          description: 'description',
+          duration: 'duration',
+          category: 'category'
+        }
+      },
+      extractionStrategy: {
+        priorityFields: ['service_name', 'description', 'price', 'contact'],
+        patterns: {
+          price: /\$[\d,]+\.?\d*/,
+          phone: /\(?\d{3}\)?[-.\s]?\d{3}[-.\s]?\d{4}/,
+          email: /[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}/
+        },
+        specialProcessing: ['team', 'portfolio', 'testimonials']
+      },
+      terminology: {
+        entityName: 'service',
+        entityNamePlural: 'services',
+        availableText: 'available',
+        unavailableText: 'unavailable',
+        priceLabel: 'price',
+        searchPrompt: 'Find services'
+      }
+    };
+  }
+}

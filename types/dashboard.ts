@@ -105,6 +105,10 @@ export interface DashboardConversation {
   timestamp: string;
   status: DashboardConversationStatus;
   customerName: string | null;
+  metadata?: {
+    language?: string;
+    [key: string]: unknown;
+  };
 }
 
 export interface DashboardConversationsData {
@@ -114,6 +118,11 @@ export interface DashboardConversationsData {
   languages: Array<{ language: string; count: number; percentage: number }>;
   peakHours: Array<{ hour: number; label: string; level: string; count: number }>;
   recent: DashboardConversation[];
+  pagination?: {
+    nextCursor: string | null;
+    hasMore: boolean;
+    limit: number;
+  };
 }
 
 export interface DashboardTelemetryOverview {

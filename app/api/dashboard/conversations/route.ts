@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { createServiceRoleClient } from '@/lib/supabase-server';
+import type { DashboardConversation } from '@/types/dashboard';
 
 export async function GET(request: NextRequest) {
   try {
@@ -8,7 +9,11 @@ export async function GET(request: NextRequest) {
     const days = parseInt(searchParams.get('days') || '7');
     const startDate = new Date();
     startDate.setDate(startDate.getDate() - days);
-    
+
+    // Get pagination params
+    const limit = parseInt(searchParams.get('limit') || '20');
+    const cursor = searchParams.get('cursor'); // ISO timestamp for cursor-based pagination
+
     // Create previous period date for comparison
     const previousStartDate = new Date();
     previousStartDate.setDate(previousStartDate.getDate() - (days * 2));
@@ -74,13 +79,7 @@ export async function GET(request: NextRequest) {
       : 0;
     
     // Fetch recent conversations and status/language data
-    const recent: Array<{
-      id: string;
-      message: string;
-      timestamp: string;
-      status: 'active' | 'waiting' | 'resolved';
-      customerName: string | null;
-    }> = [];
+    const recent: DashboardConversation[] = [];
 
     const statusCounts: Record<'active' | 'waiting' | 'resolved', number> = {
       active: 0,
@@ -92,7 +91,8 @@ export async function GET(request: NextRequest) {
     const peakHourCounts: Record<number, number> = {};
 
     try {
-      const { data: recentConversations, error } = await supabase
+      // Build query for recent conversations with pagination
+      let conversationsQuery = supabase
         .from('conversations')
         .select(`
           id,
@@ -101,15 +101,30 @@ export async function GET(request: NextRequest) {
           metadata
         `)
         .order('created_at', { ascending: false })
-        .gte('created_at', startDate.toISOString())
-        .limit(100);
+        .gte('created_at', startDate.toISOString());
+
+      // Apply cursor if provided (for pagination)
+      if (cursor) {
+        conversationsQuery = conversationsQuery.lt('created_at', cursor);
+      }
+
+      // Fetch one extra to determine if there are more results
+      conversationsQuery = conversationsQuery.limit(limit + 1);
+
+      const { data: recentConversations, error } = await conversationsQuery;
       
       if (!error && recentConversations) {
+        // Determine if there are more results
+        const hasMore = recentConversations.length > limit;
+        const conversationsToProcess = hasMore
+          ? recentConversations.slice(0, limit)
+          : recentConversations;
+
         // Try to get messages for each conversation
-        for (const conv of recentConversations) {
+        for (const conv of conversationsToProcess) {
           const metadata = conv.metadata || {};
 
-          // Determine status
+          // Determine status (only count for stats, not for paginated results)
           let status: 'active' | 'waiting' | 'resolved' = 'active';
           const metadataStatus = typeof metadata.status === 'string' ? metadata.status.toLowerCase() : '';
           if (metadataStatus.includes('wait') || metadataStatus.includes('pending')) {
@@ -117,17 +132,21 @@ export async function GET(request: NextRequest) {
           } else if (metadataStatus.includes('resolve') || conv.ended_at) {
             status = 'resolved';
           }
-          statusCounts[status] += 1;
 
-          // Determine language
-          const metadataLanguage =
-            typeof metadata.language === 'string'
-              ? metadata.language
-              : metadata.customer?.language || metadata.customerLanguage;
-          const language = metadataLanguage
-            ? String(metadataLanguage).trim()
-            : 'Unknown';
-          languageCounts[language] = (languageCounts[language] || 0) + 1;
+          // Only count stats if this is the first page (no cursor)
+          if (!cursor) {
+            statusCounts[status] += 1;
+
+            // Determine language
+            const metadataLanguage =
+              typeof metadata.language === 'string'
+                ? metadata.language
+                : metadata.customer?.language || metadata.customerLanguage;
+            const language = metadataLanguage
+              ? String(metadataLanguage).trim()
+              : 'Unknown';
+            languageCounts[language] = (languageCounts[language] || 0) + 1;
+          }
 
           try {
             const { data: messages } = await supabase
@@ -137,8 +156,18 @@ export async function GET(request: NextRequest) {
               .eq('role', 'user')
               .order('created_at', { ascending: false })
               .limit(1);
-            
+
             const firstUserMessage = messages?.[0];
+
+            // Determine language for this conversation
+            const metadataLanguage =
+              typeof metadata.language === 'string'
+                ? metadata.language
+                : metadata.customer?.language || metadata.customerLanguage;
+            const language = metadataLanguage
+              ? String(metadataLanguage).trim()
+              : 'Unknown';
+
             recent.push({
               id: conv.id,
               message: firstUserMessage?.content?.substring(0, 100) || 'No message',
@@ -147,11 +176,22 @@ export async function GET(request: NextRequest) {
               customerName:
                 (metadata.customer && typeof metadata.customer.name === 'string'
                   ? metadata.customer.name
-                  : metadata.customer_name) || null
+                  : metadata.customer_name) || null,
+              metadata: {
+                language
+              }
             });
           } catch (msgError) {
             console.warn('[Dashboard] Failed to load last message preview', msgError);
             // If we can't get messages, use conversation metadata
+            const metadataLanguage =
+              typeof metadata.language === 'string'
+                ? metadata.language
+                : metadata.customer?.language || metadata.customerLanguage;
+            const language = metadataLanguage
+              ? String(metadataLanguage).trim()
+              : 'Unknown';
+
             recent.push({
               id: conv.id,
               message: 'Conversation started',
@@ -160,7 +200,10 @@ export async function GET(request: NextRequest) {
               customerName:
                 (metadata.customer && typeof metadata.customer.name === 'string'
                   ? metadata.customer.name
-                  : metadata.customer_name) || null
+                  : metadata.customer_name) || null,
+              metadata: {
+                language
+              }
             });
           }
         }
@@ -218,7 +261,13 @@ export async function GET(request: NextRequest) {
           count
         };
       });
-    
+
+    // Calculate pagination metadata
+    const nextCursor = recent.length >= limit && recent.length > 0
+      ? recent[recent.length - 1]?.timestamp || null
+      : null;
+    const hasMore = nextCursor !== null;
+
     // Return the response with whatever data we managed to collect
     return NextResponse.json({
       total: currentCount,
@@ -226,7 +275,12 @@ export async function GET(request: NextRequest) {
       statusCounts,
       languages,
       peakHours,
-      recent: recent.slice(0, 15)
+      recent,
+      pagination: {
+        nextCursor,
+        hasMore,
+        limit
+      }
     });
     
   } catch (error) {
