@@ -1,5 +1,6 @@
 import { z } from 'zod';
 import type { AIOptimizationConfig } from './scraper-api';
+import type { MemoryStats } from './scraper-api-types';
 
 // AI Optimization configuration schema
 export const AIOptimizationConfigSchema = z.object({
@@ -523,14 +524,6 @@ export class MemoryMonitor {
     const stats = this.getMemoryStats();
     return stats.percentUsed > this.gcThreshold;
   }
-}
-
-export interface MemoryStats {
-  heapUsed: number;
-  heapTotal: number;
-  external: number;
-  rss: number;
-  percentUsed: number;
 }
 
 // AI Optimization Performance Metrics

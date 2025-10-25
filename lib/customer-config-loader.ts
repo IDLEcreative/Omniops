@@ -1,6 +1,7 @@
 import { createClient } from '@/lib/supabase-server';
 import { OwnSiteDetector } from './own-site-detector';
 import { decrypt } from './encryption';
+import { logger } from './logger';
 
 export class CustomerConfigLoader {
   /**
@@ -73,7 +74,7 @@ export class CustomerConfigLoader {
 
       return configData;
     } catch (error) {
-      console.error('Failed to load customer config:', error);
+      logger.error('Failed to load customer config', error, { domain });
       return null;
     }
   }
@@ -98,7 +99,7 @@ export class CustomerConfigLoader {
           domains.forEach((d: { domain: string }) => {
             OwnSiteDetector.addOwnedDomain(d.domain);
           });
-          console.log(`Loaded ${domains.length} owned domains for organization`);
+          logger.info('Loaded owned domains for organization', { count: domains.length, organizationId });
         }
         return;
       }
@@ -128,12 +129,15 @@ export class CustomerConfigLoader {
             domains.forEach((d: { domain: string }) => {
               OwnSiteDetector.addOwnedDomain(d.domain);
             });
-            console.log(`Loaded ${domains.length} owned domains for authenticated user's organization`);
+            logger.info('Loaded owned domains for authenticated user organization', {
+              count: domains.length,
+              organizationId: membership.organization_id
+            });
           }
         }
       }
     } catch (error) {
-      console.error('Failed to load owned domains from database:', error);
+      logger.error('Failed to load owned domains from database', error);
     }
   }
 

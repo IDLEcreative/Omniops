@@ -79,9 +79,8 @@ export const validateSupabaseEnv = jest.fn().mockReturnValue(true);
 
 // These must return promises to match the real async functions
 // IMPORTANT: Return a fresh client instance each time to avoid stale mock data
-export const createServiceRoleClient = jest.fn(async () => {
-  return createMockSupabaseClient();
-});
+// Using mockResolvedValue makes these mocks chainable/reconfigurable in tests
+export const createServiceRoleClient = jest.fn().mockResolvedValue(createMockSupabaseClient());
 
 export const createClient = jest.fn().mockResolvedValue(mockClient);
 

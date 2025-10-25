@@ -1,13 +1,13 @@
 import { describe, it, expect, jest, beforeEach } from '@jest/globals'
 import { ChatService } from '@/lib/chat-service'
-import { createServiceRoleClient } from '@/lib/supabase-server'
+import { __setMockSupabaseClient } from '@/lib/supabase-server'
 
 // Mock dependencies
 jest.mock('@/lib/supabase-server')
 
 describe('ChatService', () => {
   let chatService: ChatService
-  let mockSupabaseClient: ReturnType<typeof createServiceRoleClient>
+  let mockSupabaseClient: any
 
   beforeEach(() => {
     jest.clearAllMocks()
@@ -16,14 +16,15 @@ describe('ChatService', () => {
     mockSupabaseClient = {
       from: jest.fn(),
       auth: {
-        getUser: jest.fn().mockResolvedValue({ 
-          data: { user: { id: 'user-123' } }, 
-          error: null 
+        getUser: jest.fn().mockResolvedValue({
+          data: { user: { id: 'user-123' } },
+          error: null
         })
       }
     }
 
-    ;(createServiceRoleClient as jest.Mock).mockResolvedValue(mockSupabaseClient)
+    // Use the helper function from the mock to set the custom client
+    __setMockSupabaseClient(mockSupabaseClient)
 
     chatService = new ChatService()
   })

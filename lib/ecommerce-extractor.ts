@@ -3,6 +3,7 @@ import * as cheerio from 'cheerio';
 import type { NormalizedProduct } from '@/lib/product-normalizer';
 import { configManager } from '@/lib/scraper-config';
 import { PriceParser, ParsedPrice } from '@/lib/price-parser';
+import { logger } from '@/lib/logger';
 
 type ProductNormalizerClass = typeof import('@/lib/product-normalizer').ProductNormalizer;
 type PatternLearnerClass = typeof import('@/lib/pattern-learner').PatternLearner;
@@ -462,7 +463,7 @@ export class EcommerceExtractor extends ContentExtractor {
             extractionMethod
           });
         } catch (error) {
-          console.warn('[EcommerceExtractor] Failed to record learned patterns:', error);
+          logger.warn('EcommerceExtractor: Failed to record learned patterns', { url, platform, extractionMethod, error });
         }
       }
       
@@ -632,7 +633,7 @@ export class EcommerceExtractor extends ContentExtractor {
       const normalized = getProductNormalizer().normalizeProduct(product);
       return normalized || null;
     } catch (error) {
-      console.warn(`[EcommerceExtractor] Failed to normalize product for ${url}:`, error);
+      logger.warn('EcommerceExtractor: Failed to normalize product', { url, error });
       return null;
     }
   }
@@ -701,7 +702,7 @@ export class EcommerceExtractor extends ContentExtractor {
           extractionMethod: 'dom-listing'
         });
       } catch (error) {
-        console.warn('[EcommerceExtractor] Failed to record listing patterns:', error);
+        logger.warn('EcommerceExtractor: Failed to record listing patterns', { url, platform, error });
       }
     }
     
