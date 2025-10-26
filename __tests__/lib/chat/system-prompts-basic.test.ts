@@ -81,7 +81,7 @@ describe('System Prompts - Basic Features', () => {
 
       const enhanced = getEnhancedCustomerServicePrompt(manager);
 
-      expect(enhanced).toContain('CRITICAL: Conversation Context Awareness');
+      expect(enhanced).toContain('Conversation Context');
       expect(enhanced).toContain('Important Corrections');
       expect(enhanced).toContain('ZF5');
       expect(enhanced).toContain('ZF4');
@@ -135,10 +135,10 @@ describe('System Prompts - Basic Features', () => {
 
       const enhanced = getEnhancedCustomerServicePrompt(manager);
 
-      expect(enhanced).toContain('Reference Resolution Rules');
-      expect(enhanced).toContain('When user says "it", "that", "this"');
-      expect(enhanced).toContain('Check the "Recently Mentioned" section');
-      expect(enhanced).toContain('Check the "Active Numbered List" section');
+      expect(enhanced).toContain('Key Rules');
+      expect(enhanced).toContain('Pronouns');
+      expect(enhanced).toContain('Use natural language');
+      expect(enhanced).toContain('clear context');
     });
 
     test('should include correction acknowledgment rules', () => {
@@ -147,9 +147,9 @@ describe('System Prompts - Basic Features', () => {
 
       const enhanced = getEnhancedCustomerServicePrompt(manager);
 
-      expect(enhanced).toContain('When user provides a correction');
-      expect(enhanced).toContain('IMMEDIATELY acknowledge');
-      expect(enhanced).toContain('Got it, so we\'re looking at');
+      expect(enhanced).toContain('Corrections');
+      expect(enhanced).toContain('When user corrects themselves');
+      expect(enhanced).toContain('Got it - X, not Y');
     });
 
     test('should include numbered item reference rules', () => {
@@ -161,9 +161,9 @@ describe('System Prompts - Basic Features', () => {
 
       const enhanced = getEnhancedCustomerServicePrompt(manager);
 
-      expect(enhanced).toContain('tell me about item 2');
-      expect(enhanced).toContain('Look at "Active Numbered List"');
-      expect(enhanced).toContain('For item 2');
+      expect(enhanced).toContain('Numbered Lists');
+      expect(enhanced).toContain('item 2');
+      expect(enhanced).toContain('For item 2 (Product Name)');
     });
 
     test('should include topic management rules when metadata exists', () => {
@@ -173,9 +173,9 @@ describe('System Prompts - Basic Features', () => {
 
       const enhanced = getEnhancedCustomerServicePrompt(manager);
 
-      expect(enhanced).toContain('Topic Management');
-      expect(enhanced).toContain('When switching topics');
-      expect(enhanced).toContain('Maintain separate mental context');
+      expect(enhanced).toContain('Topic Switching');
+      expect(enhanced).toContain('When user changes topics');
+      expect(enhanced).toContain('Focus on new topic');
     });
 
     test('should include conversation quality standards', () => {
@@ -184,10 +184,10 @@ describe('System Prompts - Basic Features', () => {
 
       const enhanced = getEnhancedCustomerServicePrompt(manager);
 
-      expect(enhanced).toContain('Conversation Quality Standards');
-      expect(enhanced).toContain('Always acknowledge corrections explicitly');
-      expect(enhanced).toContain('Reference specific items by number');
-      expect(enhanced).toContain('regarding [specific thing]');
+      expect(enhanced).toContain('Key Rules');
+      expect(enhanced).toContain('Corrections');
+      expect(enhanced).toContain('acknowledge explicitly');
+      expect(enhanced).toContain('Multi-Item References');
     });
   });
 

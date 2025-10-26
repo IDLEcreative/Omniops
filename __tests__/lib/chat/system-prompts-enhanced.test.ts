@@ -158,7 +158,7 @@ describe('System Prompts - Enhanced Features', () => {
       expect(enhanced).toContain('ZF5');
       expect(enhanced).toContain('ZF4');
       expect(enhanced).toContain('corrected');
-      expect(enhanced).toContain('IMMEDIATELY acknowledge');
+      expect(enhanced).toContain('acknowledge explicitly');
     });
 
     test('should provide context for list navigation scenario', () => {
