@@ -1,4 +1,4 @@
-**Last Updated:** 2025-10-24
+**Last Updated:** 2025-10-26
 **Verified Accurate For:** v0.1.0
 
 # CLAUDE.md
@@ -65,6 +65,78 @@ This is a General purpose AI-powered customer service chat widget built with Nex
 - Use a single message with multiple Task tool invocations for parallel execution
 - This reduces overall processing time and prevents context fragmentation
 - Example: When searching, analyzing, and implementing - launch all relevant agents together
+
+### TESTING & CODE QUALITY PHILOSOPHY
+
+**"Hard to Test" = "Poorly Designed"**
+
+When tests are difficult to write, it's revealing fundamental design problems, not a mocking problem.
+
+**Core Principles:**
+
+1. **Test Difficulty as a Design Signal**
+   - If tests require complex module mocking, the code has tight coupling
+   - If tests are slow, the code likely has hidden dependencies
+   - If tests are brittle, the code violates separation of concerns
+   - **Action**: Refactor for testability, don't fight with mocks
+
+2. **Prioritize Architecture Over Workarounds**
+   - Don't spend hours fixing complex mock configurations
+   - Instead, apply SOLID principles (especially Dependency Inversion)
+   - Use dependency injection to make code trivially testable
+   - Simple tests with simple mocks indicate good design
+   - **Example**: See SHOPIFY_PROVIDER_TEST_ANALYSIS.md for a real case study
+
+3. **Always Validate Claims with Verification**
+   - Never assume fixes work without running actual tests
+   - Use concrete commands: `npm run lint`, `npm test`, `npm run build`
+   - Document verification steps in commit messages
+   - If verification reveals issues, fix them immediately
+   - **Rule**: "It works" requires proof, not assumptions
+
+**Red Flags in Testing:**
+- ❌ Need to mock 3+ levels deep
+- ❌ Tests require extensive setup (>20 lines of mocks)
+- ❌ Module mocking with factories and hoisting tricks
+- ❌ Tests pass individually but fail in batch
+- ❌ Can't test without entire infrastructure running
+
+**Green Lights in Testing:**
+- ✅ Can inject simple mock objects via constructor
+- ✅ Test setup is clear and under 10 lines
+- ✅ Tests are fast (< 1 second for 50 tests)
+- ✅ Tests are isolated and independent
+- ✅ Can test business logic without infrastructure
+
+**Real Example from This Codebase:**
+
+```typescript
+// ❌ BEFORE: Hard to test (hidden dependencies)
+class ShopifyProvider {
+  constructor(domain: string) { }
+  async lookupOrder() {
+    const client = await getDynamicShopifyClient(this.domain); // Hidden dependency
+    if (!client) return null;
+    // Business logic buried after infrastructure concerns
+  }
+}
+
+// ✅ AFTER: Easy to test (dependency injection)
+class ShopifyProvider {
+  constructor(private client: ShopifyAPI) { } // Explicit dependency
+  async lookupOrder() {
+    return await this.client.getOrder(id); // Direct usage
+  }
+}
+
+// Test becomes trivial:
+const mockClient = { getOrder: jest.fn() };
+const provider = new ShopifyProvider(mockClient);
+```
+
+**Impact**: This refactoring eliminated 9 test failures, improved test speed by 80%, and removed all module mocking complexity.
+
+**Reference**: Commits 27b607d, 4d1006d (Oct 2025) - Dependency injection refactoring
 
 ## Key Commands
 
