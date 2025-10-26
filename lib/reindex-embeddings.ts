@@ -144,7 +144,7 @@ export class EmbeddingReindexer {
    */
   private async clearExistingEmbeddings(
     domainId?: string,
-    onProgress?: Function
+    onProgress?: (progress: ReindexProgress) => void
   ): Promise<void> {
     this.progress = updateProgress(
       'clearing',
@@ -178,7 +178,7 @@ export class EmbeddingReindexer {
     pages: PageData[],
     chunkSize: number,
     dryRun: boolean,
-    onProgress?: Function
+    onProgress?: (progress: ReindexProgress) => void
   ): Promise<{
     totalChunks: number;
     totalEmbeddings: number;
@@ -239,7 +239,7 @@ export class EmbeddingReindexer {
    */
   private async validateResults(
     targetChunkSize: number,
-    onProgress?: Function
+    onProgress?: (progress: ReindexProgress) => void
   ): Promise<boolean> {
     this.progress = updateProgress(
       'validating',
