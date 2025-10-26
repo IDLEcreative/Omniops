@@ -9,7 +9,7 @@ async function findRealCustomerAndTest() {
   try {
     // First, use test-woocommerce endpoint to get recent orders
     console.log('📦 Fetching recent orders from WooCommerce...');
-    const testResponse = await fetch(`${API_BASE}/api/test-woocommerce`, {
+    const testResponse = await fetch(`${API_BASE}/api/test-woocommerce?domain=${DOMAIN}`, {
       method: 'GET',
       headers: { 'Content-Type': 'application/json' }
     });

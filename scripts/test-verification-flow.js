@@ -75,7 +75,7 @@ async function testVerificationFlow() {
   console.log('\n\n3️⃣ STEP 3: Verify WooCommerce API Access');
   console.log('─'.repeat(60));
   
-  const testResponse = await fetch(`${API_BASE}/api/test-woocommerce`);
+  const testResponse = await fetch(`${API_BASE}/api/test-woocommerce?domain=${DOMAIN}`);
   const testData = await testResponse.json();
   
   if (testData.summary?.status === 'ALL PASSED') {

@@ -9,7 +9,7 @@ async function runTests() {
     {
       name: '1. Direct WooCommerce API Test',
       run: async () => {
-        const response = await fetch(`${API_URL}/api/test-woocommerce`);
+        const response = await fetch(`${API_URL}/api/test-woocommerce?domain=${DOMAIN}`);
         const data = await response.json();
         
         console.log('✅ WooCommerce API Connection:');

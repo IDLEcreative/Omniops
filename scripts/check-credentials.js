@@ -1,11 +1,13 @@
 
+const DOMAIN = 'thompsonseparts.co.uk';
+
 async function checkCredentials() {
   console.log('🔍 Checking WooCommerce Credentials Format');
   console.log('═'.repeat(60));
-  
+
   try {
     // Use the test endpoint which should show us the credential format
-    const response = await fetch('http://localhost:3001/api/test-woocommerce');
+    const response = await fetch(`http://localhost:3001/api/test-woocommerce?domain=${DOMAIN}`);
     const data = await response.json();
     
     if (data.configuration) {

@@ -9,12 +9,14 @@
  *   npx tsx scripts/check-file-length.ts           # Check all files
  *   npx tsx scripts/check-file-length.ts --fix     # Show refactoring suggestions
  *   npx tsx scripts/check-file-length.ts --strict  # Exit 1 on any violation
+ *   npx tsx scripts/check-file-length.ts --staged  # Check only staged files (for pre-commit)
  *
  * Configuration is loaded from CLAUDE.md
  */
 
 import * as fs from 'fs';
 import * as path from 'path';
+import { execSync } from 'child_process';
 
 // Configuration
 const MAX_LOC = 300;
@@ -105,29 +107,63 @@ function findSourceFiles(dir: string, files: string[] = []): string[] {
 }
 
 /**
+ * Gets list of staged files from git.
+ */
+function getStagedFiles(): string[] {
+  try {
+    const output = execSync('git diff --cached --name-only --diff-filter=ACM', {
+      encoding: 'utf-8',
+    });
+
+    return output
+      .split('\n')
+      .filter(file => file.trim().length > 0)
+      .filter(file => /\.(ts|tsx|js|jsx)$/.test(file))
+      .filter(file => fs.existsSync(file)); // Only existing files
+  } catch (error) {
+    // Not in a git repo or no staged files
+    return [];
+  }
+}
+
+/**
  * Scans the codebase for file length violations.
  */
-function checkFileLengths(): FileViolation[] {
+function checkFileLengths(stagedOnly: boolean = false): FileViolation[] {
   const violations: FileViolation[] = [];
+  let filesToCheck: string[] = [];
 
-  // Directories to scan
-  const directories = ['app', 'lib', '__tests__', 'components', 'pages'];
+  if (stagedOnly) {
+    // Check only staged files
+    filesToCheck = getStagedFiles();
 
-  for (const dir of directories) {
-    const files = findSourceFiles(dir);
+    if (filesToCheck.length === 0) {
+      console.log('✅ No staged TypeScript/JavaScript files to check\n');
+      return [];
+    }
 
-    for (const file of files) {
-      const loc = countLinesOfCode(file);
+    console.log(`📝 Checking ${filesToCheck.length} staged file(s)...\n`);
+  } else {
+    // Check all files in directories
+    const directories = ['app', 'lib', '__tests__', 'components', 'pages'];
 
-      if (loc > MAX_LOC) {
-        const percentage = Math.round((loc / MAX_LOC) * 100);
-        violations.push({
-          file,
-          lines: loc,
-          violation: `${percentage}% over limit`,
-          percentage,
-        });
-      }
+    for (const dir of directories) {
+      const files = findSourceFiles(dir);
+      filesToCheck.push(...files);
+    }
+  }
+
+  for (const file of filesToCheck) {
+    const loc = countLinesOfCode(file);
+
+    if (loc > MAX_LOC) {
+      const percentage = Math.round((loc / MAX_LOC) * 100);
+      violations.push({
+        file,
+        lines: loc,
+        violation: `${percentage}% over limit`,
+        percentage,
+      });
     }
   }
 
@@ -174,11 +210,12 @@ function main() {
   const args = process.argv.slice(2);
   const showSuggestions = args.includes('--fix');
   const strictMode = args.includes('--strict');
+  const stagedOnly = args.includes('--staged');
 
   console.log('🔍 Checking file lengths...\n');
   console.log(`📏 Maximum allowed: ${MAX_LOC} LOC per file\n`);
 
-  const violations = checkFileLengths();
+  const violations = checkFileLengths(stagedOnly);
 
   if (violations.length === 0) {
     console.log('✅ All files are within the 300 LOC limit!\n');

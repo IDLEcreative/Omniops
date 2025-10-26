@@ -9,7 +9,7 @@ async function testWithRealOrder() {
   try {
     // First get the test data to see what orders exist
     console.log('📦 Fetching WooCommerce data...\n');
-    const testResponse = await fetch(`${API_BASE}/api/test-woocommerce`);
+    const testResponse = await fetch(`${API_BASE}/api/test-woocommerce?domain=${DOMAIN}`);
     const testData = await testResponse.json();
     
     if (!testData.test_results) {
