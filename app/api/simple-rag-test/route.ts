@@ -48,7 +48,7 @@ export async function GET(request: NextRequest) {
         fallbackSearchResults = relevantChunks.map((chunk: any) => ({
           content: chunk.content || chunk.chunk_text,
           url: chunk.url || chunk.metadata?.url || '',
-          title: chunk.title || 'Thompson eParts',
+          title: chunk.title || 'Unknown',
           similarity: chunk.similarity || 0.7
         }));
       }
@@ -63,14 +63,22 @@ export async function GET(request: NextRequest) {
       return keywords.some(keyword => text.includes(keyword));
     });
     
-    // Step 5: Test the actual chat API
+    // Step 5: Test the actual chat API (requires domain parameter)
+    const testDomain = searchParams.get('domain');
+    if (!testDomain) {
+      return NextResponse.json({
+        error: 'domain parameter is required for testing',
+        usage: 'GET /api/simple-rag-test?domain=example.com&query=your-query'
+      }, { status: 400 });
+    }
+
     const chatResponse = await fetch('http://localhost:3000/api/chat', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({
         message: query,
         session_id: 'rag-test-' + Date.now(),
-        domain: 'thompsonseparts.co.uk',
+        domain: testDomain,
         config: {
           features: {
             websiteScraping: { enabled: true }
@@ -91,11 +99,11 @@ export async function GET(request: NextRequest) {
         messages: [
           {
             role: 'system',
-            content: `You are a helpful customer service assistant for Thompson eParts. 
+            content: `You are a helpful customer service assistant.
             Use the following context from the website to answer the question:
-            
+
             ${context}
-            
+
             Be specific and reference the actual products and services mentioned.`
           },
           {

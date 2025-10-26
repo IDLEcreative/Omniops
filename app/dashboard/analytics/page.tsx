@@ -2,7 +2,7 @@
 
 import { useMemo, useState } from "react";
 import { Alert, AlertDescription } from "@/components/ui/alert";
-import { MessageSquare, TrendingUp, Users } from "lucide-react";
+import { MessageSquare, TrendingUp, Users, Clock } from "lucide-react";
 import { useDashboardAnalytics } from "@/hooks/use-dashboard-analytics";
 import { DateRangePicker, DateRangeValue } from "@/components/dashboard/analytics/DateRangePicker";
 import { MetricsOverview, MetricCard } from "@/components/dashboard/analytics/MetricsOverview";
@@ -53,7 +53,7 @@ export default function AnalyticsPage() {
       },
       {
         title: "Avg Response Time",
-        icon: ClockIcon,
+        icon: Clock,
         value: formatSeconds(analytics?.responseTime),
         descriptor: "Median turnaround per message",
       },
@@ -172,26 +172,18 @@ export default function AnalyticsPage() {
         failedSearches={analytics?.failedSearches ?? []}
         sentimentSummary={sentimentSummary}
         insights={insights}
-        metrics={analytics}
+        metrics={analytics ? {
+          responseTime: analytics.responseTime,
+          satisfactionScore: analytics.satisfactionScore,
+          resolutionRate: analytics.resolutionRate,
+          totalMessages: analytics.metrics.totalMessages,
+          userMessages: analytics.metrics.userMessages,
+          positiveMessages: analytics.metrics.positiveMessages,
+          negativeMessages: analytics.metrics.negativeMessages,
+          avgMessagesPerDay: analytics.metrics.avgMessagesPerDay,
+        } : undefined}
         isLoading={loading && !analytics}
       />
     </div>
-  );
-}
-
-function ClockIcon(props: React.SVGProps<SVGSVGElement>) {
-  return (
-    <svg
-      {...props}
-      viewBox="0 0 24 24"
-      fill="none"
-      stroke="currentColor"
-      strokeWidth={2}
-      strokeLinecap="round"
-      strokeLinejoin="round"
-    >
-      <circle cx="12" cy="12" r="10" />
-      <polyline points="12 6 12 12 16 14" />
-    </svg>
   );
 }

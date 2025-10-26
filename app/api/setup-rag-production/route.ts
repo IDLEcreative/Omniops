@@ -1,44 +1,55 @@
 import { NextResponse } from 'next/server';
 import { createClient } from '@supabase/supabase-js';
 
-export async function POST() {
+export async function POST(request: Request) {
   // Use YOUR production database credentials
   const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL!;
   const supabaseServiceRoleKey = process.env.SUPABASE_SERVICE_ROLE_KEY!;
-  
+
   // This should be birugqyuqhiahxvxeyqg.supabase.co
   console.log('Connecting to:', supabaseUrl);
-  
+
   const supabase = createClient(supabaseUrl, supabaseServiceRoleKey);
-  
+
+  // Get domain and business details from request body
+  const body = await request.json();
+  const { domain, business_name, woocommerce_url } = body;
+
+  if (!domain || !business_name) {
+    return NextResponse.json({
+      error: 'domain and business_name are required',
+      usage: 'POST /api/setup-rag-production with body: { domain: "example.com", business_name: "Business Name", woocommerce_url: "https://example.com" (optional) }'
+    }, { status: 400 });
+  }
+
   const results: any = {
     database_url: supabaseUrl,
     customer_config: null,
     test_embeddings: null,
     test_chat: null
   };
-  
+
   try {
     // Step 1: Create customer config in YOUR database
     console.log('Setting up customer config in production...');
-    
+
     const { data: existingConfig } = await supabase
       .from('customer_configs')
       .select('*')
-      .eq('domain', 'thompsonseparts.co.uk')
+      .eq('domain', domain)
       .single();
     
     if (!existingConfig) {
       const { data: newConfig, error: configError } = await supabase
         .from('customer_configs')
         .insert({
-          domain: 'thompsonseparts.co.uk',
-          business_name: 'Thompson eParts',
-          greeting_message: 'Welcome to Thompson eParts! How can I help you find the right parts for your tipper today?',
+          domain: domain,
+          business_name: business_name,
+          greeting_message: `Welcome to ${business_name}! How can I help you today?`,
           primary_color: '#0066cc',
           chat_enabled: true,
-          woocommerce_enabled: true,
-          woocommerce_url: 'https://www.thompsonseparts.co.uk',
+          woocommerce_enabled: !!woocommerce_url,
+          woocommerce_url: woocommerce_url || null,
           created_at: new Date().toISOString(),
           updated_at: new Date().toISOString()
         })
@@ -80,9 +91,9 @@ export async function POST() {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({
-        message: 'What tipper sheet systems do you offer?',
+        message: 'What products or services do you offer?',
         session_id: 'setup-test-' + Date.now(),
-        domain: 'thompsonseparts.co.uk',
+        domain: domain,
         config: {
           features: {
             websiteScraping: { enabled: true }

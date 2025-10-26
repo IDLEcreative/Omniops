@@ -200,14 +200,14 @@ Don't force any specific category structure - adapt to what you see.`;
     for (const result of searchResults) {
       // Use existing product categories if available
       if (result.productData?.categories) {
-        result.productData.categories.forEach(cat => {
+        result.productData.categories.forEach((cat: string) => {
           allCategories.set(cat, (allCategories.get(cat) || 0) + 1);
         });
       }
-      
+
       // Also check breadcrumbs
       if (result.productData?.breadcrumbs) {
-        result.productData.breadcrumbs.forEach(crumb => {
+        result.productData.breadcrumbs.forEach((crumb: { name: string; url?: string }) => {
           if (!crumb.name.toLowerCase().includes('home')) {
             allCategories.set(crumb.name, (allCategories.get(crumb.name) || 0) + 1);
           }

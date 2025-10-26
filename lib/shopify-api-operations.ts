@@ -33,6 +33,7 @@ export interface GetProductsParams {
   published_status?: 'published' | 'unpublished' | 'any';
   fields?: string;
   status?: 'active' | 'archived' | 'draft';
+  [key: string]: unknown;
 }
 
 export interface GetOrdersParams {
@@ -49,6 +50,7 @@ export interface GetOrdersParams {
   financial_status?: 'authorized' | 'pending' | 'paid' | 'partially_paid' | 'refunded' | 'voided' | 'partially_refunded' | 'any';
   fulfillment_status?: 'shipped' | 'partial' | 'unshipped' | 'any';
   fields?: string;
+  [key: string]: unknown;
 }
 
 export interface GetCustomersParams {
@@ -60,11 +62,13 @@ export interface GetCustomersParams {
   updated_at_min?: string;
   updated_at_max?: string;
   fields?: string;
+  [key: string]: unknown;
 }
 
 export interface GetInventoryLevelParams {
   inventory_item_ids: string;
   location_ids?: string;
+  [key: string]: unknown;
 }
 
 /**

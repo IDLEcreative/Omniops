@@ -4,8 +4,15 @@ import { searchSimilarContent } from '@/lib/embeddings';
 
 export async function GET(request: Request) {
   const { searchParams } = new URL(request.url);
-  const domain = searchParams.get('domain') || 'thompsonseparts.co.uk';
+  const domain = searchParams.get('domain');
   const query = searchParams.get('query') || 'what do you sell';
+
+  if (!domain) {
+    return NextResponse.json({
+      error: 'domain parameter is required for security and multi-tenant isolation',
+      usage: 'GET /api/check-domain-content?domain=example.com&query=your-query'
+    }, { status: 400 });
+  }
   
   const supabase = await createServiceRoleClient();
   

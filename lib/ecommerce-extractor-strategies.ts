@@ -288,7 +288,24 @@ export async function extractProductListing($: CheerioAPI, url: string, platform
  */
 function normalizeProductSafely(product: ProductData, url: string): NormalizedProduct | null {
   try {
-    const normalized = getProductNormalizer().normalizeProduct(product);
+    // Convert ProductData to RawProduct for normalization
+    const rawProduct: any = {
+      name: product.name,
+      sku: product.sku,
+      url: url,
+      price: product.price?.value ?? product.rawPrice, // Use price value if available, else rawPrice
+      currency: product.price?.currency,
+      description: product.description,
+      images: product.images,
+      specifications: product.specifications,
+      categories: product.categories,
+      brand: product.brand,
+      rating: product.rating,
+      availability: product.availability?.availabilityText, // RawProduct expects string
+      inStock: product.availability?.inStock,
+    };
+
+    const normalized = getProductNormalizer().normalizeProduct(rawProduct);
     return normalized || null;
   } catch (error) {
     logger.warn('EcommerceExtractor: Failed to normalize product', { url, error });

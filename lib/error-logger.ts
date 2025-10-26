@@ -13,7 +13,8 @@ import {
 } from './error-logger-formatters';
 
 // Re-export types for backward compatibility
-export { ErrorSeverity, ErrorCategory, ErrorContext, ErrorLog } from './error-logger-types';
+export type { ErrorContext, ErrorLog } from './error-logger-types';
+export { ErrorSeverity, ErrorCategory } from './error-logger-types';
 
 class ErrorLogger {
   private static instance: ErrorLogger;

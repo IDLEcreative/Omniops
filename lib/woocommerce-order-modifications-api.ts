@@ -11,6 +11,7 @@ import {
   ModificationStatusCheck,
   ModificationType,
   ModificationStatus,
+  OrderStatus,
   MODIFICATION_ALLOWED_STATUSES,
   MODIFICATION_ERRORS,
 } from './woocommerce-order-modifications-types';
@@ -38,11 +39,16 @@ export async function checkModificationAllowed(
     const currentStatus = order.status;
     const allowedStatuses = MODIFICATION_ALLOWED_STATUSES[modificationType];
 
-    if (allowedStatuses.includes('any')) {
+    // Special case: 'any' means all statuses are allowed
+    // We check the first element since 'any' is only used in single-element arrays
+    if (allowedStatuses[0] === 'any') {
       return { allowed: true, currentStatus };
     }
 
-    if (!allowedStatuses.includes(currentStatus)) {
+    // Type-safe check for specific order statuses
+    // Cast to string array for includes check since we know it's not 'any' at this point
+    const statusArray = allowedStatuses as readonly string[];
+    if (!statusArray.includes(currentStatus)) {
       return {
         allowed: false,
         currentStatus,

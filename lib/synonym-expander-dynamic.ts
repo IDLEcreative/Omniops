@@ -287,8 +287,8 @@ export class DynamicSynonymExpander {
    * Domain-specific synonyms should be loaded from the database via the
    * customer_configs table, not hardcoded in application code.
    *
-   * Previously contained Thompson's eParts-specific synonyms for equipment,
-   * brands, and technical terms.
+   * Previously contained business-specific synonyms for industry terminology,
+   * product categories, and technical terms.
    *
    * TODO: Implement database-driven synonym loading:
    * 1. Create domain_synonym_mappings table (already exists)

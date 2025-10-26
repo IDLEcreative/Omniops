@@ -203,11 +203,7 @@ export default function TrainingPage() {
         <ChatWidget
           demoId="training-test"
           demoConfig={{
-            brandName: 'Training Test Bot',
-            brandColor: '#4F46E5',
             headerTitle: 'Test Your Assistant',
-            welcomeMessage: 'Hi! I\'m your AI assistant. Ask me anything to test the training data!',
-            url: 'https://training.test'
           }}
           initialOpen={false}
         />

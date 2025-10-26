@@ -6,12 +6,13 @@
  * All implementation has been modularized in lib/product-content-extractor/
  */
 
+// Re-export types
+export type { ProductData, ExtractedContent, Breadcrumb } from './product-content-extractor/index';
+
+// Re-export functions
 export {
-  ProductData,
-  ExtractedContent,
-  Breadcrumb,
   extractProductData,
   extractContentWithProducts,
   formatProductContent,
   extractBreadcrumbs
-} from './product-content-extractor';
+} from './product-content-extractor/index';

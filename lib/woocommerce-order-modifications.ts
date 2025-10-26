@@ -26,7 +26,7 @@ import {
 } from './woocommerce-order-modifications-api';
 
 // Re-export types and validators for backward compatibility
-export {
+export type {
   OrderModificationRequest,
   ModificationResult,
   ModificationIntent,
@@ -34,6 +34,9 @@ export {
   ModificationStatusCheck,
   ModificationType,
   ModificationStatus,
+} from './woocommerce-order-modifications-types';
+
+export {
   MODIFICATION_ALLOWED_STATUSES,
   MODIFICATION_ERRORS,
 } from './woocommerce-order-modifications-types';

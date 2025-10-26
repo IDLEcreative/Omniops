@@ -127,6 +127,6 @@ export function extractContentWithProducts(html: string, url: string): Extracted
 }
 
 // Re-export types and utilities
-export { ProductData, ExtractedContent, Breadcrumb } from './types';
+export type { ProductData, ExtractedContent, Breadcrumb } from './types';
 export { formatProductContent } from './formatter';
 export { extractBreadcrumbs } from './breadcrumb-extractor';

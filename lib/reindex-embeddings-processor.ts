@@ -160,22 +160,28 @@ export async function generateAndSaveEmbeddings(
       });
 
       // Prepare batch insert
-      const embeddings: EmbeddingRecord[] = response.data.map((item: any, idx: number) => ({
-        page_id: pageId,
-        domain_id: domainId,
-        chunk_text: batch[idx],
-        embedding: item.embedding,
-        metadata: {
-          chunk_index: i + idx,
-          total_chunks: chunks.length,
-          chunk_size: batch[idx]?.length || 0,
-          url: pageUrl,
-          title: pageTitle,
-          reindexed: true,
-          reindex_date: new Date().toISOString(),
-          version: 2
+      const embeddings: EmbeddingRecord[] = response.data.map((item: any, idx: number) => {
+        const chunkText = batch[idx];
+        if (!chunkText) {
+          throw new Error(`Missing chunk text at index ${idx}`);
         }
-      }));
+        return {
+          page_id: pageId,
+          domain_id: domainId,
+          chunk_text: chunkText,
+          embedding: item.embedding,
+          metadata: {
+            chunk_index: i + idx,
+            total_chunks: chunks.length,
+            chunk_size: chunkText.length,
+            url: pageUrl,
+            title: pageTitle,
+            reindexed: true,
+            reindex_date: new Date().toISOString(),
+            version: 2
+          }
+        };
+      });
 
       // Batch insert - much more efficient
       const { error } = await supabase

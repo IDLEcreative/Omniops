@@ -244,9 +244,12 @@ class TelemetryManager {
       if (!acc[s.model]) {
         acc[s.model] = { count: 0, cost: 0, tokens: 0 };
       }
-      acc[s.model].count++;
-      acc[s.model].cost += s.tokenUsage?.costUSD || 0;
-      acc[s.model].tokens += s.tokenUsage?.total || 0;
+      const modelStats = acc[s.model];
+      if (modelStats) {
+        modelStats.count++;
+        modelStats.cost += s.tokenUsage?.costUSD || 0;
+        modelStats.tokens += s.tokenUsage?.total || 0;
+      }
       return acc;
     }, {} as Record<string, { count: number; cost: number; tokens: number }>);
 

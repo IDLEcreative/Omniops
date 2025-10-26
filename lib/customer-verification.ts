@@ -272,7 +272,7 @@ export class CustomerVerification {
 }
 
 // Re-export types, validators, and storage for backward compatibility
-export {
+export type {
   VerificationRequest,
   VerificationResult,
   VerifyCodeResult,
@@ -280,8 +280,9 @@ export {
   DataType,
   CacheOptions,
   AccessLogOptions,
-  VERIFICATION_CONFIG,
 } from './customer-verification-types';
+
+export { VERIFICATION_CONFIG } from './customer-verification-types';
 
 export { DataMasker } from './customer-verification-validators';
 export { VerificationStorage } from './customer-verification-storage';

@@ -127,16 +127,33 @@ export async function checkCrawlStatus(
 
   const resultCount = await jobManager.getResultCount(jobId);
 
-  if (job.status === 'completed' && options?.includeResults) {
+  // Ensure job object has all required CrawlJob fields
+  const fullJob: CrawlJob = {
+    jobId: job.jobId,
+    status: job.status,
+    progress: job.progress,
+    total: job.total,
+    completed: job.completed,
+    failed: job.failed ?? 0,
+    skipped: job.skipped ?? 0,
+    startedAt: job.startedAt,
+    completedAt: job.completedAt,
+    pausedAt: job.pausedAt,
+    errors: job.errors,
+    memoryStats: job.memoryStats,
+    config: job.config,
+  };
+
+  if (fullJob.status === 'completed' && options?.includeResults) {
     const results = await jobManager.getJobResults(
       jobId,
       options.offset || 0,
       options.limit || 100
     );
-    return { ...job, data: results, resultCount };
+    return { ...fullJob, data: results, resultCount };
   }
 
-  return { ...job, resultCount };
+  return { ...fullJob, resultCount };
 }
 
 // Stream results for very large crawls

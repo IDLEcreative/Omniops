@@ -106,7 +106,7 @@ export class ResponsePostProcessor {
   private static generateNaturalAppendix(products: ContextChunk[]): string {
     let appendix = '\n\nBased on what you mentioned, these products might be particularly relevant:\n\n';
 
-    // Get brand suffix from environment (e.g., "Thompson's eParts")
+    // Get brand suffix from environment (e.g., "Acme Inc")
     const brandSuffix = process.env.NEXT_PUBLIC_COMPANY_NAME || '';
     const brandPattern = brandSuffix ? new RegExp(` - ${brandSuffix.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')}.*$`, 'i') : null;
 
@@ -142,7 +142,7 @@ export class ResponsePostProcessor {
   private static generateListAppendix(products: ContextChunk[]): string {
     let appendix = '\n\nRelevant products for your needs:\n\n';
 
-    // Get brand suffix from environment (e.g., "Thompson's eParts")
+    // Get brand suffix from environment (e.g., "Acme Inc")
     const brandSuffix = process.env.NEXT_PUBLIC_COMPANY_NAME || '';
     const brandPattern = brandSuffix ? new RegExp(` - ${brandSuffix.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')}.*$`, 'i') : null;
 
@@ -164,7 +164,7 @@ export class ResponsePostProcessor {
     const product = products[0]; // Just mention the top one
     if (!product) return '';
 
-    // Get brand suffix from environment (e.g., "Thompson's eParts")
+    // Get brand suffix from environment (e.g., "Acme Inc")
     const brandSuffix = process.env.NEXT_PUBLIC_COMPANY_NAME || '';
     const brandPattern = brandSuffix ? new RegExp(` - ${brandSuffix.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')}.*$`, 'i') : null;
 

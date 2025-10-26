@@ -47,14 +47,18 @@ export interface ModificationStatusCheck {
 export type ModificationType = keyof typeof MODIFICATION_ALLOWED_STATUSES;
 export type ModificationStatus = 'attempted' | 'completed' | 'failed';
 
+// Valid order statuses from WooCommerce
+export type OrderStatus = 'pending' | 'processing' | 'on-hold' | 'completed' | 'cancelled' | 'refunded' | 'failed' | 'trash';
+
 /**
  * Allowed order statuses for each modification type
+ * Use 'any' as a special marker to indicate all statuses are allowed
  */
 export const MODIFICATION_ALLOWED_STATUSES = {
-  cancel: ['pending', 'processing', 'on-hold'],
-  update_address: ['pending', 'processing', 'on-hold'],
-  add_note: ['any'], // Notes can be added to any order
-  request_refund: ['processing', 'completed', 'on-hold'],
+  cancel: ['pending', 'processing', 'on-hold'] as const,
+  update_address: ['pending', 'processing', 'on-hold'] as const,
+  add_note: ['any'] as const, // Notes can be added to any order
+  request_refund: ['processing', 'completed', 'on-hold'] as const,
 } as const;
 
 /**

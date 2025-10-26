@@ -211,26 +211,8 @@ export default function EnhancedEmbedPage() {
       // Track user activity
       localStorage.setItem('chat_last_activity', Date.now().toString());
     },
-    // Store additional context in demo config
     demoConfig: {
-      customGreeting,
-      userContext: userData ? {
-        isAuthenticated: userData.isLoggedIn,
-        email: userData.email,
-        name: userData.displayName,
-        metadata: {
-          customerId: userData.userId,
-          customerGroup: userData.customerGroup,
-          totalOrders: userData.totalOrders,
-          totalSpent: userData.totalSpent,
-          lastOrderId: userData.lastOrderId,
-        }
-      } : undefined,
-      initialContext: buildInitialContext(),
-      additionalContext: {
-        cart: cartData,
-        page: pageContext,
-      }
+      headerTitle: customGreeting || 'Chat Support',
     }
   };
 

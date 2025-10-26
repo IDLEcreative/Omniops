@@ -97,7 +97,7 @@ export function lzCompress(
         }
         delete context_dictionaryToCreate[context_w];
       } else {
-        value = context_dictionary[context_w];
+        value = context_dictionary[context_w] ?? 0;
         for (i = 0; i < context_numBits; i++) {
           context_data_val = (context_data_val << 1) | ((value || 0) & 1);
           if (context_data_position == bitsPerChar - 1) {
@@ -178,7 +178,7 @@ export function lzCompress(
       }
       delete context_dictionaryToCreate[context_w];
     } else {
-      value = context_dictionary[context_w];
+      value = context_dictionary[context_w] ?? 0;
       for (i = 0; i < context_numBits; i++) {
         context_data_val = (context_data_val << 1) | ((value || 0) & 1);
         if (context_data_position == bitsPerChar - 1) {

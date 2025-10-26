@@ -220,13 +220,12 @@ export class SynonymAutoLearner {
    * Domain-specific synonyms should be loaded from the database via the
    * customer_configs table, not hardcoded in application code.
    *
-   * Previously contained Thompson's eParts-specific synonyms including:
-   * - Equipment categories (forest, agricultural, construction)
-   * - Hydraulic systems components
-   * - Chainsaw parts
-   * - Equipment types
+   * Previously contained business-specific synonyms including:
+   * - Product/service categories
+   * - Industry-specific terminology
+   * - Technical components and parts
+   * - Product types
    * - Brand variations
-   * - Parts and components
    * - Measurements and specifications
    *
    * TODO: Implement database-driven synonym loading:
