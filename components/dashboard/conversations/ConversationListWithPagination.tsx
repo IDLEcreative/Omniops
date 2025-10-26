@@ -1,3 +1,4 @@
+import { useCallback } from "react";
 import { Button } from "@/components/ui/button";
 import { Checkbox } from "@/components/ui/checkbox";
 import { EmptyState } from "@/components/ui/empty-state";
@@ -57,13 +58,19 @@ export function ConversationListWithPagination({
   const allSelected = conversations.length > 0 && conversations.every(c => selectedIds.has(c.id));
   const someSelected = conversations.some(c => selectedIds.has(c.id)) && !allSelected;
 
+  // Performance: Memoized to prevent recreation on every render
+  // and maintain stable reference for Checkbox child component
+  const handleSelectAll = useCallback((checked: boolean) => {
+    onSelectAll?.(checked);
+  }, [onSelectAll]);
+
   return (
     <div className="h-full flex flex-col">
       {isSelectionMode && onSelectAll && conversations.length > 0 && !loading && (
         <div className="border-b px-4 py-2 bg-muted/50 flex items-center gap-2">
           <Checkbox
             checked={someSelected ? "indeterminate" : allSelected}
-            onCheckedChange={(checked) => onSelectAll(!!checked)}
+            onCheckedChange={handleSelectAll}
             aria-label="Select all conversations"
           />
           <span className="text-sm text-muted-foreground">

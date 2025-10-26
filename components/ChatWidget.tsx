@@ -1,5 +1,6 @@
 'use client';
 
+import { useCallback } from 'react';
 import { MessageCircle } from 'lucide-react';
 import { Message } from '@/types';
 import { useChatState, ChatWidgetConfig, PrivacySettings } from './ChatWidget/hooks/useChatState';
@@ -61,7 +62,9 @@ export default function ChatWidget({
     onMessage: onMessageCallback,
   });
 
-  const sendMessage = async () => {
+  // Performance: Memoized to prevent recreation on every render
+  // and maintain stable reference for InputArea child component
+  const sendMessage = useCallback(async () => {
     if (!input.trim() || loading) return;
 
     if (privacySettings.requireConsent && !privacySettings.consentGiven) {
@@ -176,13 +179,15 @@ export default function ChatWidget({
     } finally {
       setLoading(false);
     }
-  };
+  }, [input, loading, privacySettings.requireConsent, privacySettings.consentGiven, conversationId, setInput, setLoading, setMessages, onMessageFromHook, sessionId, storeDomain, demoId, demoConfig, woocommerceEnabled, setConversationId]);
 
-  const handleFontSizeChange = () => {
+  // Performance: Memoized to prevent recreation on every render
+  // and maintain stable reference for InputArea child component
+  const handleFontSizeChange = useCallback(() => {
     const sizes: Array<'normal' | 'large' | 'xlarge'> = ['normal', 'large', 'xlarge'];
     const currentIndex = sizes.indexOf(fontSize);
     setFontSize(sizes[(currentIndex + 1) % sizes.length] || 'normal');
-  };
+  }, [fontSize, setFontSize]);
 
   if (!mounted) {
     return null;

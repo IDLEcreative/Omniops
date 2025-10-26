@@ -1,6 +1,6 @@
 "use client"
 
-import { useState, useEffect, useRef } from "react"
+import { useState, useEffect, useRef, useCallback } from "react"
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card"
 import { Input } from "@/components/ui/input"
 import { Button } from "@/components/ui/button"
@@ -65,7 +65,9 @@ export function DemoChatInterface({ session, onSendMessage }: DemoChatInterfaceP
     }
   }, [messages])
 
-  const handleSubmit = async (messageText: string) => {
+  // Performance: Memoized to prevent recreation on every render
+  // and maintain stable reference for form submission and button clicks
+  const handleSubmit = useCallback(async (messageText: string) => {
     if (!messageText.trim() || isLoading || messages.length >= session.max_messages) {
       return
     }
@@ -103,7 +105,7 @@ export function DemoChatInterface({ session, onSendMessage }: DemoChatInterfaceP
     } finally {
       setIsLoading(false)
     }
-  }
+  }, [isLoading, messages.length, session.max_messages, onSendMessage])
 
   return (
     <Card className="mt-8 animate-in slide-in-from-bottom-8 fade-in duration-700">

@@ -1,6 +1,6 @@
 'use client';
 
-import { useEffect, useRef, useState } from 'react';
+import { useEffect, useRef, memo } from 'react';
 import { Avatar, AvatarFallback } from '@/components/ui/avatar';
 import { Badge } from '@/components/ui/badge';
 import { ScrollArea } from '@/components/ui/scroll-area';
@@ -113,7 +113,7 @@ export function ConversationTranscript({
       <div className="space-y-4 p-4" aria-live="polite" aria-atomic="false">
         {data.messages.map((message) => {
           try {
-            return <Message key={message.id} message={message} />;
+            return <MemoizedMessage key={message.id} message={message} />;
           } catch (err) {
             // Handle individual message render errors gracefully
             const error = err instanceof Error ? err : new Error('Unknown error');
@@ -132,7 +132,32 @@ export function ConversationTranscript({
   );
 }
 
-function Message({ message }: { message: ConversationMessage }) {
+/**
+ * Message component props interface
+ * Explicitly defines the shape of props for better type safety and memoization
+ */
+interface MessageProps {
+  message: ConversationMessage;
+}
+
+/**
+ * Message component - renders individual conversation messages
+ *
+ * PERFORMANCE: This component is memoized to prevent unnecessary re-renders.
+ * When the conversation updates (e.g., new message arrives), only the new message
+ * will render - existing messages remain untouched if their data hasn't changed.
+ *
+ * The custom comparison function checks:
+ * - message.id (message identity)
+ * - message.content (displayed text)
+ * - message.role (affects styling/layout)
+ * - message.created_at (timestamp display)
+ * - message.metadata.sources (optional source links)
+ *
+ * This optimization is critical for conversations with 50+ messages where
+ * adding a single message would otherwise trigger 50+ re-renders.
+ */
+const Message = ({ message }: MessageProps) => {
   const isUser = message.role === 'user';
   const isSystem = message.role === 'system';
 
@@ -189,7 +214,62 @@ function Message({ message }: { message: ConversationMessage }) {
       </div>
     </div>
   );
-}
+};
+
+/**
+ * Memoized Message component with custom comparison function
+ *
+ * PERFORMANCE OPTIMIZATION:
+ * - Prevents re-renders when message data hasn't changed
+ * - Custom areEqual function checks only render-relevant properties
+ * - Handles nested metadata.sources array with shallow comparison
+ *
+ * Expected impact: In a 50-message conversation, adding 1 new message will
+ * trigger only 1 render instead of 51 renders (98% reduction in re-renders)
+ */
+const MemoizedMessage = memo(Message, (prevProps, nextProps) => {
+  const prev = prevProps.message;
+  const next = nextProps.message;
+
+  // Check primitive fields
+  if (
+    prev.id !== next.id ||
+    prev.content !== next.content ||
+    prev.role !== next.role ||
+    prev.created_at !== next.created_at
+  ) {
+    return false; // Props changed, re-render needed
+  }
+
+  // Check metadata.sources array (shallow comparison)
+  const prevSources = prev.metadata?.sources;
+  const nextSources = next.metadata?.sources;
+
+  // Both undefined/null - no change
+  if (!prevSources && !nextSources) {
+    return true;
+  }
+
+  // One is defined, other isn't - changed
+  if (!prevSources || !nextSources) {
+    return false;
+  }
+
+  // Different lengths - changed
+  if (prevSources.length !== nextSources.length) {
+    return false;
+  }
+
+  // Compare array contents (shallow)
+  for (let i = 0; i < prevSources.length; i++) {
+    if (prevSources[i] !== nextSources[i]) {
+      return false;
+    }
+  }
+
+  // All checks passed - props are equal, skip re-render
+  return true;
+});
 
 function formatTimestamp(timestamp: string): string {
   const date = new Date(timestamp);

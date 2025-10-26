@@ -1,5 +1,5 @@
 import type { ComponentProps } from "react";
-import { useState } from "react";
+import React, { useState, useCallback } from "react";
 import { Avatar, AvatarFallback } from "@/components/ui/avatar";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
@@ -47,11 +47,14 @@ interface ConversationHeaderProps {
   onActionComplete?: () => void;
 }
 
-export function ConversationHeader({ conversation, onActionComplete }: ConversationHeaderProps) {
+// Performance: Memoized to prevent re-renders when parent updates
+// but props remain unchanged. Event handlers use useCallback to
+// maintain stable references and prevent cascade re-renders.
+function ConversationHeaderComponent({ conversation, onActionComplete }: ConversationHeaderProps) {
   const [isAssigning, setIsAssigning] = useState(false);
   const [isClosing, setIsClosing] = useState(false);
 
-  const handleAssign = async () => {
+  const handleAssign = useCallback(async () => {
     setIsAssigning(true);
     try {
       const res = await fetch(`/api/dashboard/conversations/${conversation.id}/actions`, {
@@ -74,9 +77,9 @@ export function ConversationHeader({ conversation, onActionComplete }: Conversat
     } finally {
       setIsAssigning(false);
     }
-  };
+  }, [conversation.id, onActionComplete]);
 
-  const handleClose = async () => {
+  const handleClose = useCallback(async () => {
     if (!confirm('Are you sure you want to close this conversation? This action will mark it as resolved.')) {
       return;
     }
@@ -103,7 +106,7 @@ export function ConversationHeader({ conversation, onActionComplete }: Conversat
     } finally {
       setIsClosing(false);
     }
-  };
+  }, [conversation.id, onActionComplete]);
 
   return (
     <div className="border-b p-4">
@@ -157,3 +160,5 @@ export function ConversationHeader({ conversation, onActionComplete }: Conversat
     </div>
   );
 }
+
+export const ConversationHeader = React.memo(ConversationHeaderComponent);
