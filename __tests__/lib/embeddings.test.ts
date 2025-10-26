@@ -1,17 +1,24 @@
 import { describe, it, expect, jest, beforeEach } from '@jest/globals'
-import { 
-  splitIntoChunks, 
-  generateEmbeddingVectors, 
-  generateEmbedding,
-  storeEmbeddings,
-  searchSimilar
-} from '@/lib/embeddings'
 import OpenAI from 'openai'
-import { createServiceRoleClient } from '@/lib/supabase-server'
 
 // Mock dependencies
 jest.mock('openai')
-jest.mock('@/lib/supabase-server')
+
+// Import mock and helpers - moduleNameMapper handles the mock
+const mockModule = require('@/lib/supabase-server')
+const createServiceRoleClient = mockModule.createServiceRoleClient
+const __setMockSupabaseClient = mockModule.__setMockSupabaseClient
+
+// Get the ACTUAL embeddings implementation (not the mock)
+// Use relative path to bypass moduleNameMapper
+const actualEmbeddings = jest.requireActual('../../lib/embeddings')
+const {
+  splitIntoChunks,
+  generateEmbeddingVectors,
+  generateEmbedding,
+  storeEmbeddings,
+  searchSimilar
+} = actualEmbeddings
 
 // Mock environment variables
 process.env.OPENAI_API_KEY = 'test-api-key'
@@ -50,7 +57,7 @@ describe('Embeddings Service', () => {
         update: jest.fn().mockReturnThis(),
         delete: jest.fn().mockResolvedValue({ error: null })
       })),
-      rpc: jest.fn().mockResolvedValue({ 
+      rpc: jest.fn().mockResolvedValue({
         data: [
           {
             id: 'chunk-1',
@@ -58,12 +65,12 @@ describe('Embeddings Service', () => {
             page_id: 'page-1',
             similarity: 0.85
           }
-        ], 
-        error: null 
+        ],
+        error: null
       })
     }
 
-    ;(createServiceRoleClient as jest.Mock).mockResolvedValue(mockSupabaseClient)
+    __setMockSupabaseClient(mockSupabaseClient)
   })
 
   describe('splitIntoChunks', () => {

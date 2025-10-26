@@ -58,10 +58,15 @@ if (typeof global.MessagePort === 'undefined') {
   }
 }
 
-// Polyfill fetch for Node.js environment using node-fetch
-import fetch from 'node-fetch'
+// Polyfill fetch for jsdom environment
+// jsdom doesn't include fetch, but Node.js 18+ has it
 if (!globalThis.fetch) {
-  globalThis.fetch = fetch
+  // Use undici's fetch (which is what Node uses internally)
+  const { fetch, Headers, Request, Response } = require('undici');
+  globalThis.fetch = fetch;
+  globalThis.Headers = Headers;
+  globalThis.Request = Request;
+  globalThis.Response = Response;
 }
 
 // Learn more: https://github.com/testing-library/jest-dom

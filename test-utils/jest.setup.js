@@ -59,21 +59,42 @@ jest.mock('openai', () => {
   }));
 });
 
-// Mock Next.js router
+// Mock Next.js router with shared mock functions
+const mockPush = jest.fn();
+const mockReplace = jest.fn();
+const mockRefresh = jest.fn();
+const mockBack = jest.fn();
+const mockForward = jest.fn();
+const mockPrefetch = jest.fn();
+
 jest.mock('next/navigation', () => ({
   useRouter: () => ({
-    push: jest.fn(),
-    replace: jest.fn(),
-    refresh: jest.fn(),
-    back: jest.fn(),
-    forward: jest.fn(),
-    prefetch: jest.fn(),
+    push: mockPush,
+    replace: mockReplace,
+    refresh: mockRefresh,
+    back: mockBack,
+    forward: mockForward,
+    prefetch: mockPrefetch,
   }),
   useSearchParams: () => ({
     get: jest.fn(),
   }),
   usePathname: () => '',
+  // Export mocks for test access
+  __mocks: {
+    push: mockPush,
+    replace: mockReplace,
+    refresh: mockRefresh,
+    back: mockBack,
+    forward: mockForward,
+    prefetch: mockPrefetch,
+  },
 }))
+
+// Export for global access in tests
+global.mockRouterPush = mockPush;
+global.mockRouterReplace = mockReplace;
+global.mockRouterRefresh = mockRefresh;
 
 // Mock Next.js headers and cookies
 // IMPORTANT: Next.js 15 made cookies() async, so the mock must return a Promise

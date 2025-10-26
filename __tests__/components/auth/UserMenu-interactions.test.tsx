@@ -1,7 +1,11 @@
 import { describe, it, expect, jest, beforeEach } from '@jest/globals';
-import { render, screen, waitFor } from '@/__tests__/utils/test-utils';
+import { render, screen, waitFor, fireEvent } from '@/__tests__/utils/test-utils';
 import { UserMenu } from '@/components/auth/user-menu';
 import { createBrowserClient } from '@supabase/ssr';
+
+// Access global router mocks from jest.setup.js
+const mockPush = (global as any).mockRouterPush;
+const mockRefresh = (global as any).mockRouterRefresh;
 
 // Mock Supabase client
 const mockCreateBrowserClient = jest.fn();
@@ -10,30 +14,13 @@ jest.mock('@supabase/ssr', () => ({
   createBrowserClient: mockCreateBrowserClient,
 }));
 
-// Mock Next.js navigation
-const mockPush = jest.fn();
-const mockRefresh = jest.fn();
-
-jest.mock('next/navigation', () => ({
-  useRouter: () => ({
-    push: mockPush,
-    refresh: mockRefresh,
-    replace: jest.fn(),
-    back: jest.fn(),
-    forward: jest.fn(),
-    prefetch: jest.fn(),
-  }),
-  useSearchParams: () => ({
-    get: jest.fn(),
-  }),
-  usePathname: () => '',
-}));
-
 describe('UserMenu Component - Interactions', () => {
   let mockSupabaseClient: any;
 
   beforeEach(() => {
-    jest.clearAllMocks();
+    // Clear mock call history
+    mockPush.mockClear();
+    mockRefresh.mockClear();
 
     mockSupabaseClient = {
       auth: {
@@ -93,10 +80,18 @@ describe('UserMenu Component - Interactions', () => {
 
       await user.click(screen.getByRole('button'));
 
-      const profileItem = screen.getByText('Profile');
-      await user.click(profileItem);
+      // Wait for dropdown menu to appear
+      await waitFor(() => {
+        expect(screen.getByText('Profile')).toBeInTheDocument();
+      });
 
-      expect(mockPush).toHaveBeenCalledWith('/profile');
+      // Use fireEvent for menu item click (Radix UI dropdowns work better with this)
+      const profileItem = screen.getByText('Profile');
+      fireEvent.click(profileItem);
+
+      await waitFor(() => {
+        expect(mockPush).toHaveBeenCalledWith('/profile');
+      }, { timeout: 3000 });
     });
 
     it('should navigate to settings when Settings is clicked', async () => {
@@ -120,19 +115,23 @@ describe('UserMenu Component - Interactions', () => {
 
       await user.click(screen.getByRole('button'));
 
-      const settingsItem = screen.getByText('Settings');
-      await user.click(settingsItem);
+      // Wait for dropdown menu to appear
+      await waitFor(() => {
+        expect(screen.getByText('Settings')).toBeInTheDocument();
+      });
 
-      expect(mockPush).toHaveBeenCalledWith('/settings');
+      // Use fireEvent for menu item click
+      const settingsItem = screen.getByText('Settings');
+      fireEvent.click(settingsItem);
+
+      await waitFor(() => {
+        expect(mockPush).toHaveBeenCalledWith('/settings');
+      }, { timeout: 3000 });
     });
   });
 
   describe('Sign Out Actions', () => {
     it('should call signOut when Sign out is clicked', async () => {
-      mockSupabaseClient.auth.signOut.mockResolvedValue({
-        error: null,
-      });
-
       mockSupabaseClient.auth.getUser.mockResolvedValue({
         data: {
           user: {
@@ -141,6 +140,10 @@ describe('UserMenu Component - Interactions', () => {
             user_metadata: {},
           },
         },
+        error: null,
+      });
+
+      mockSupabaseClient.auth.signOut.mockResolvedValue({
         error: null,
       });
 
@@ -153,12 +156,20 @@ describe('UserMenu Component - Interactions', () => {
 
       await user.click(screen.getByRole('button'));
 
-      const signOutItem = screen.getByText('Sign out');
-      await user.click(signOutItem);
+      // Wait for dropdown menu to appear
+      await waitFor(() => {
+        expect(screen.getByText('Sign out')).toBeInTheDocument();
+      });
 
+      // Use fireEvent for menu item click
+      const signOutItem = screen.getByText('Sign out');
+      fireEvent.click(signOutItem);
+
+      // Verify all related calls happened (sign out triggers navigation too)
       await waitFor(() => {
         expect(mockSupabaseClient.auth.signOut).toHaveBeenCalled();
-      });
+        expect(mockPush).toHaveBeenCalledWith('/login');
+      }, { timeout: 3000 });
     });
 
     it('should navigate to login page after sign out', async () => {
@@ -186,12 +197,18 @@ describe('UserMenu Component - Interactions', () => {
 
       await user.click(screen.getByRole('button'));
 
+      // Wait for dropdown menu to appear
+      await waitFor(() => {
+        expect(screen.getByText('Sign out')).toBeInTheDocument();
+      });
+
+      // Use fireEvent for menu item click
       const signOutItem = screen.getByText('Sign out');
-      await user.click(signOutItem);
+      fireEvent.click(signOutItem);
 
       await waitFor(() => {
         expect(mockPush).toHaveBeenCalledWith('/login');
-      });
+      }, { timeout: 3000 });
     });
 
     it('should refresh router after sign out', async () => {
@@ -219,12 +236,18 @@ describe('UserMenu Component - Interactions', () => {
 
       await user.click(screen.getByRole('button'));
 
+      // Wait for dropdown menu to appear
+      await waitFor(() => {
+        expect(screen.getByText('Sign out')).toBeInTheDocument();
+      });
+
+      // Use fireEvent for menu item click
       const signOutItem = screen.getByText('Sign out');
-      await user.click(signOutItem);
+      fireEvent.click(signOutItem);
 
       await waitFor(() => {
         expect(mockRefresh).toHaveBeenCalled();
-      });
+      }, { timeout: 3000 });
     });
   });
 });
