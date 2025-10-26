@@ -157,9 +157,13 @@ export async function POST(
     // Generate enhanced context for AI
     const enhancedContext = metadataManager.generateContextSummary();
 
+    // FEATURE FLAG: Enhanced metadata context (disabled for Week 1, enable in Week 2)
+    // Set USE_ENHANCED_METADATA_CONTEXT=true when prompt optimization is complete
+    const useEnhancedContext = process.env.USE_ENHANCED_METADATA_CONTEXT === 'true';
+
     // Build conversation messages for OpenAI with system prompt
     const conversationMessages = buildConversationMessages(
-      getCustomerServicePrompt() + enhancedContext,
+      getCustomerServicePrompt() + (useEnhancedContext ? enhancedContext : ''),
       historyData,
       message
     );

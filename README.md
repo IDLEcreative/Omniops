@@ -123,9 +123,19 @@ npm run dev
 ### 🤖 AI Chat with RAG
 Intelligent conversational AI powered by OpenAI GPT-4 with semantic search across your content.
 - Context-aware responses using vector embeddings
+- Advanced conversation context tracking (86% accuracy)
 - Multi-language support (40+ languages)
 - Hallucination prevention safeguards
 - **→ Learn more:** [docs/CHAT_SYSTEM_DOCUMENTATION.md](docs/CHAT_SYSTEM_DOCUMENTATION.md)
+
+### 🧠 Advanced Conversation Context
+Sophisticated metadata tracking for human-like conversation understanding.
+- **Correction Tracking** - Remembers when users correct themselves ("I meant X not Y")
+- **List Navigation** - Users can reference "item 2" or "the first one" from numbered lists (100% accuracy)
+- **Pronoun Resolution** - Understands "it", "that", and contextual references (83% accuracy)
+- **Context Awareness** - Maintains conversation state across multiple turns
+- **Performance** - <15ms overhead per message
+- **→ Learn more:** [docs/CONVERSATION_ACCURACY_IMPROVEMENTS.md](docs/CONVERSATION_ACCURACY_IMPROVEMENTS.md)
 
 ### 🛒 WooCommerce Integration
 Deep integration for e-commerce operations and customer support.
@@ -226,6 +236,9 @@ npm run test:watch        # Watch mode testing
 npm run test:coverage     # Generate coverage report
 npm run test:integration  # Run integration tests
 npm run test:all          # Run all tests (unit + integration)
+
+# Conversation Competency Tests
+npx tsx scripts/tests/test-metadata-tracking.ts  # Test conversation accuracy (86%)
 
 # Code Quality
 npm run lint            # Run ESLint

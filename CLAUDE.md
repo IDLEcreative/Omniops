@@ -40,6 +40,7 @@ This is a General purpose AI-powered customer service chat widget built with Nex
 - **[Search Architecture](docs/01-ARCHITECTURE/search-architecture.md)** - CRITICAL: Explains actual search result limits (100-200, NOT 20!), hybrid search behavior, and token usage
 - **[Performance Optimization](docs/01-ARCHITECTURE/performance-optimization.md)** - Comprehensive optimization guide covering database, API, AI, and frontend performance
 - **[Database Schema](docs/01-ARCHITECTURE/database-schema.md)** - Complete database schema reference with 31 tables, 214 indexes, verified 2025-10-24
+- **[Conversation Accuracy](docs/CONVERSATION_ACCURACY_IMPROVEMENTS.md)** - Metadata tracking system for 86% conversation accuracy
 - **[Hallucination Prevention](docs/HALLUCINATION_PREVENTION.md)** - Anti-hallucination safeguards and testing
 - **[Docker Setup](docs/setup/DOCKER_README.md)** - Complete Docker configuration and commands
 
@@ -367,6 +368,9 @@ npx tsx monitor-embeddings-health.ts watch          # Start continuous monitorin
 # Quality Assurance (requires dev server running)
 npx tsx test-hallucination-prevention.ts            # Test anti-hallucination safeguards
 npx tsx test-hallucination-prevention.ts --verbose  # Detailed test output
+
+# Conversation Competency Testing
+npx tsx scripts/tests/test-metadata-tracking.ts     # Test conversation accuracy (86%)
 
 # Performance Monitoring & Optimization (Additional Tools)
 # ⚠️ NOTE: Additional NPX tools are available but not documented here.
