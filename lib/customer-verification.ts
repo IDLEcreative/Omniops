@@ -1,30 +1,20 @@
 import { createServiceRoleClient } from '@/lib/supabase-server';
-import crypto from 'crypto';
-
-export interface VerificationRequest {
-  conversationId: string;
-  email: string;
-  method?: 'email' | 'order' | 'phone';
-}
-
-export interface VerificationResult {
-  success: boolean;
-  message: string;
-  verificationId?: string;
-  code?: string;
-  expiresAt?: Date;
-}
-
-export interface VerifyCodeResult {
-  verified: boolean;
-  message: string;
-  customerEmail?: string;
-}
+import {
+  VerificationRequest,
+  VerificationResult,
+  VerifyCodeResult,
+  VerificationStatusResult,
+  DataType,
+  CacheOptions,
+  AccessLogOptions,
+  VERIFICATION_CONFIG,
+} from './customer-verification-types';
+import { VerificationStorage } from './customer-verification-storage';
 
 export class CustomerVerification {
-  private static readonly MAX_ATTEMPTS = 3;
-  private static readonly EXPIRY_MINUTES = 15;
-  private static readonly RATE_LIMIT_MINUTES = 15;
+  private static readonly MAX_ATTEMPTS = VERIFICATION_CONFIG.MAX_ATTEMPTS;
+  private static readonly EXPIRY_MINUTES = VERIFICATION_CONFIG.EXPIRY_MINUTES;
+  private static readonly RATE_LIMIT_MINUTES = VERIFICATION_CONFIG.RATE_LIMIT_MINUTES;
 
   /**
    * Create a new verification request
@@ -154,11 +144,7 @@ export class CustomerVerification {
   /**
    * Check if a conversation has a verified customer
    */
-  static async checkVerificationStatus(conversationId: string): Promise<{
-    isVerified: boolean;
-    customerEmail?: string;
-    verifiedAt?: Date;
-  }> {
+  static async checkVerificationStatus(conversationId: string): Promise<VerificationStatusResult> {
     const supabase = await createServiceRoleClient();
     
     if (!supabase) {
@@ -225,6 +211,7 @@ export class CustomerVerification {
 
   /**
    * Log customer data access for audit
+   * @deprecated Use VerificationStorage.logAccess instead
    */
   static async logAccess(
     conversationId: string,
@@ -234,188 +221,67 @@ export class CustomerVerification {
     reason: string,
     verifiedVia: string
   ): Promise<void> {
-    const supabase = await createServiceRoleClient();
-    
-    if (!supabase) {
-      console.error('Database connection unavailable for logging access');
-      return;
-    }
-    
-    try {
-      await supabase.rpc('log_customer_access', {
-        p_conversation_id: conversationId,
-        p_customer_email: customerEmail,
-        p_woo_customer_id: wooCustomerId,
-        p_accessed_data: accessedData,
-        p_reason: reason,
-        p_verified_via: verifiedVia
-      });
-    } catch (error) {
-      console.error('Error logging access:', error);
-    }
+    return VerificationStorage.logAccess(
+      conversationId,
+      customerEmail,
+      wooCustomerId,
+      accessedData,
+      reason,
+      verifiedVia
+    );
   }
 
   /**
    * Cache customer data for quick retrieval
+   * @deprecated Use VerificationStorage.cacheCustomerData instead
    */
   static async cacheCustomerData(
     conversationId: string,
     customerEmail: string,
     wooCustomerId: number,
     data: any,
-    dataType: 'profile' | 'orders' | 'recent_purchases' | 'order_detail'
+    dataType: DataType
   ): Promise<void> {
-    const supabase = await createServiceRoleClient();
-    
-    if (!supabase) {
-      console.error('Database connection unavailable for caching data');
-      return;
-    }
-    
-    try {
-      await supabase
-        .from('customer_data_cache')
-        .upsert({
-          conversation_id: conversationId,
-          customer_email: customerEmail,
-          woo_customer_id: wooCustomerId,
-          cached_data: data,
-          data_type: dataType,
-          expires_at: new Date(Date.now() + this.EXPIRY_MINUTES * 60 * 1000).toISOString()
-        });
-    } catch (error) {
-      console.error('Error caching customer data:', error);
-    }
+    return VerificationStorage.cacheCustomerData(
+      conversationId,
+      customerEmail,
+      wooCustomerId,
+      data,
+      dataType
+    );
   }
 
   /**
    * Get cached customer data
+   * @deprecated Use VerificationStorage.getCachedData instead
    */
   static async getCachedData(
     conversationId: string,
     dataType?: string
   ): Promise<any | null> {
-    const supabase = await createServiceRoleClient();
-    
-    if (!supabase) {
-      return null;
-    }
-    
-    try {
-      let query = supabase
-        .from('customer_data_cache')
-        .select('cached_data, data_type')
-        .eq('conversation_id', conversationId)
-        .gte('expires_at', new Date().toISOString());
-
-      if (dataType) {
-        query = query.eq('data_type', dataType);
-      }
-
-      const { data } = await query.order('created_at', { ascending: false }).limit(1);
-
-      if (data && data.length > 0) {
-        const firstItem = data[0];
-        if (firstItem) {
-          return firstItem.cached_data;
-        }
-      }
-
-      return null;
-    } catch (error) {
-      console.error('Error getting cached data:', error);
-      return null;
-    }
+    return VerificationStorage.getCachedData(conversationId, dataType);
   }
 
   /**
    * Clean expired verification data
+   * @deprecated Use VerificationStorage.cleanExpiredData instead
    */
   static async cleanExpiredData(): Promise<void> {
-    const supabase = await createServiceRoleClient();
-    
-    if (!supabase) {
-      console.error('Database connection unavailable for cleaning expired data');
-      return;
-    }
-    
-    try {
-      await supabase.rpc('clean_expired_customer_data');
-    } catch (error) {
-      console.error('Error cleaning expired data:', error);
-    }
+    return VerificationStorage.cleanExpiredData();
   }
 }
 
-// Data masking utilities
-export class DataMasker {
-  /**
-   * Mask email address (show first 2 and last 2 characters before @)
-   */
-  static maskEmail(email: string): string {
-    const [local, domain] = email.split('@');
-    if (!local || !domain) {
-      return email; // Return original if not a valid email format
-    }
-    if (local.length <= 4) {
-      return `${local[0]}***@${domain}`;
-    }
-    return `${local.slice(0, 2)}***${local.slice(-2)}@${domain}`;
-  }
+// Re-export types, validators, and storage for backward compatibility
+export {
+  VerificationRequest,
+  VerificationResult,
+  VerifyCodeResult,
+  VerificationStatusResult,
+  DataType,
+  CacheOptions,
+  AccessLogOptions,
+  VERIFICATION_CONFIG,
+} from './customer-verification-types';
 
-  /**
-   * Mask phone number (show last 4 digits)
-   */
-  static maskPhone(phone: string): string {
-    const cleaned = phone.replace(/\D/g, '');
-    if (cleaned.length <= 4) {
-      return '***';
-    }
-    return `***-***-${cleaned.slice(-4)}`;
-  }
-
-  /**
-   * Mask address (show city and state/country only)
-   */
-  static maskAddress(address: any): string {
-    return `${address.city || '***'}, ${address.state || address.country || '***'}`;
-  }
-
-  /**
-   * Mask credit card (show last 4 digits)
-   */
-  static maskCard(cardNumber: string): string {
-    const cleaned = cardNumber.replace(/\D/g, '');
-    if (cleaned.length <= 4) {
-      return '****';
-    }
-    return `****-****-****-${cleaned.slice(-4)}`;
-  }
-
-  /**
-   * Mask sensitive customer data
-   */
-  static maskCustomerData(customer: any): any {
-    return {
-      id: customer.id,
-      email: this.maskEmail(customer.email),
-      first_name: customer.first_name,
-      last_name: customer.last_name ? `${customer.last_name[0]}***` : undefined,
-      billing: customer.billing ? {
-        city: customer.billing.city,
-        state: customer.billing.state,
-        country: customer.billing.country,
-        postcode: customer.billing.postcode ? `***${customer.billing.postcode.slice(-2)}` : undefined
-      } : undefined,
-      shipping: customer.shipping ? {
-        city: customer.shipping.city,
-        state: customer.shipping.state,
-        country: customer.shipping.country,
-        postcode: customer.shipping.postcode ? `***${customer.shipping.postcode.slice(-2)}` : undefined
-      } : undefined,
-      date_created: customer.date_created,
-      orders_count: customer.orders_count,
-      total_spent: customer.total_spent
-    };
-  }
-}
+export { DataMasker } from './customer-verification-validators';
+export { VerificationStorage } from './customer-verification-storage';

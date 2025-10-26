@@ -1,6 +1,9 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { z } from 'zod';
-import { WooCommerceCustomerActions } from '@/lib/woocommerce-customer-actions';
+import {
+  WooCommerceCustomerActions,
+  WooCommerceOrderActions
+} from '@/lib/woocommerce-customer-actions';
 import { CustomerVerification } from '@/lib/customer-verification';
 
 // Request validation
@@ -63,7 +66,7 @@ export async function POST(request: NextRequest) {
             message: 'Order number is required'
           }, { status: 400 });
         }
-        result = await WooCommerceCustomerActions.getOrderStatus(
+        result = await WooCommerceOrderActions.getOrderStatus(
           data.orderNumber,
           email,
           domain
@@ -71,7 +74,7 @@ export async function POST(request: NextRequest) {
         break;
 
       case 'get-recent-orders':
-        result = await WooCommerceCustomerActions.getRecentOrders(email, domain);
+        result = await WooCommerceOrderActions.getRecentOrders(email, domain);
         break;
 
       case 'get-tracking':
@@ -81,7 +84,7 @@ export async function POST(request: NextRequest) {
             message: 'Order number is required'
           }, { status: 400 });
         }
-        result = await WooCommerceCustomerActions.getOrderTracking(
+        result = await WooCommerceOrderActions.getOrderTracking(
           data.orderNumber,
           email,
           domain
@@ -109,7 +112,7 @@ export async function POST(request: NextRequest) {
             message: 'Order number is required'
           }, { status: 400 });
         }
-        result = await WooCommerceCustomerActions.cancelOrder(
+        result = await WooCommerceOrderActions.cancelOrder(
           data.orderNumber,
           email,
           domain,

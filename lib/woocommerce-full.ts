@@ -97,4 +97,4 @@ export {
   // Batch operation types
   type BatchOperation,
   type BatchResponse,
-} from './woocommerce-full-types';
+} from './woocommerce-full-types/index';

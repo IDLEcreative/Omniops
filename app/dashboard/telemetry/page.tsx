@@ -1,6 +1,6 @@
 "use client";
 
-import { useMemo, useState, type ReactNode } from "react";
+import { useMemo, useState } from "react";
 import { Alert, AlertDescription } from "@/components/ui/alert";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
@@ -13,13 +13,12 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
-import { Clock, RefreshCw, Server, TrendingUp, Zap } from "lucide-react";
-import {
-  DashboardTelemetryData,
-  DashboardTelemetryHourlyPoint,
-  DashboardTelemetryModelUsage,
-  useDashboardTelemetry,
-} from "@/hooks/use-dashboard-telemetry";
+import { RefreshCw } from "lucide-react";
+import { useDashboardTelemetry } from "@/hooks/use-dashboard-telemetry";
+import { LiveMetrics } from "@/components/dashboard/telemetry/LiveMetrics";
+import { PerformanceCharts } from "@/components/dashboard/telemetry/PerformanceCharts";
+import { ModelUsagePanel } from "@/components/dashboard/telemetry/ModelUsagePanel";
+import { TenantStats } from "@/components/dashboard/telemetry/TenantStats";
 
 type RangeKey = "24h" | "7d" | "30d" | "90d";
 
@@ -28,18 +27,6 @@ const RANGE_TO_DAYS: Record<RangeKey, number> = {
   "7d": 7,
   "30d": 30,
   "90d": 90,
-};
-
-const TREND_LABELS: Record<DashboardTelemetryData["cost"]["trend"], string> = {
-  increasing: "Rising spend",
-  decreasing: "Lower spend",
-  stable: "Stable spend",
-};
-
-const TREND_BADGES: Record<DashboardTelemetryData["cost"]["trend"], "default" | "outline" | "secondary"> = {
-  increasing: "default",
-  decreasing: "secondary",
-  stable: "outline",
 };
 
 export default function TelemetryPage() {
@@ -56,23 +43,6 @@ export default function TelemetryPage() {
   const modelUsage = useMemo(() => data?.modelUsage ?? [], [data]);
   const domainBreakdown = useMemo(() => data?.domainBreakdown ?? [], [data]);
   const liveSessions = useMemo(() => data?.live.sessionsData ?? [], [data]);
-
-  const maxRequests = useMemo(() => {
-    if (hourlyTrend.length === 0) return 0;
-    return Math.max(...hourlyTrend.map((point) => point.requests));
-  }, [hourlyTrend]);
-
-  const maxCost = useMemo(() => {
-    if (hourlyTrend.length === 0) return 0;
-    return Math.max(...hourlyTrend.map((point) => point.cost));
-  }, [hourlyTrend]);
-
-  const trendPoints = useMemo(() => {
-    return hourlyTrend.map((point) => ({
-      ...point,
-      hourLabel: formatHour(point.hour),
-    }));
-  }, [hourlyTrend]);
 
   const overview = data?.overview;
   const cost = data?.cost;
@@ -155,209 +125,33 @@ export default function TelemetryPage() {
         </CardContent>
       </Card>
 
-      <div className="grid gap-4 md:grid-cols-2 xl:grid-cols-4">
-        <MetricCard
-          title="Total Requests"
-          icon={Zap}
-          value={overview ? formatNumber(overview.totalRequests) : undefined}
-          hint={overview ? `${overview.successRate}% success` : undefined}
-          loading={isInitialLoading}
-        />
-        <MetricCard
-          title="Active Sessions"
-          icon={Server}
-          value={overview ? formatNumber(overview.activeSessions) : undefined}
-          hint={overview ? overview.timeRange : undefined}
-          loading={isInitialLoading}
-        />
-        <MetricCard
-          title="Average Response Time"
-          icon={Clock}
-          value={performance ? formatDuration(performance.avgResponseTime) : undefined}
-          hint={performance ? `${formatNumber(performance.totalSearches)} searches` : undefined}
-          loading={isInitialLoading}
-        />
-        <MetricCard
-          title="Cost Trend"
-          icon={TrendingUp}
-          value={cost ? formatCurrency(cost.total) : undefined}
-          hint={
-            cost ? (
-              <Badge variant={TREND_BADGES[cost.trend]}>
-                {TREND_LABELS[cost.trend]}
-              </Badge>
-            ) : undefined
-          }
-          loading={isInitialLoading}
-        />
-      </div>
+      <LiveMetrics
+        overview={overview}
+        cost={cost}
+        performance={performance}
+        loading={isInitialLoading}
+      />
 
-      <div className="grid gap-4 lg:grid-cols-7">
-        <Card className="lg:col-span-4">
-          <CardHeader>
-            <CardTitle>Hourly Trend</CardTitle>
-            <CardDescription>Request volume with cost intensity for the selected range</CardDescription>
-          </CardHeader>
-          <CardContent>
-            {isInitialLoading ? (
-              <SkeletonPlaceholder heightClass="h-40" />
-            ) : trendPoints.length === 0 ? (
-              <EmptyState message="No telemetry records for the selected range." />
-            ) : (
-              <TelemetrySparkline points={trendPoints} maxRequests={maxRequests} maxCost={maxCost} />
-            )}
-          </CardContent>
-        </Card>
+      <PerformanceCharts
+        hourlyTrend={hourlyTrend}
+        cost={cost}
+        loading={isInitialLoading}
+      />
 
-        <Card className="lg:col-span-3">
-          <CardHeader>
-            <CardTitle>Cost Breakdown</CardTitle>
-            <CardDescription>Spend projections based on historical usage</CardDescription>
-          </CardHeader>
-          <CardContent className="space-y-4">
-            {isInitialLoading ? (
-              <SkeletonList count={4} />
-            ) : cost ? (
-              <>
-                <BreakdownRow label="Total Cost" value={formatCurrency(cost.total)} />
-                <BreakdownRow label="Average per Request" value={formatCurrency(cost.average)} />
-                <BreakdownRow label="Estimated Daily" value={formatCurrency(cost.projectedDaily)} />
-                <BreakdownRow label="Estimated Monthly" value={formatCurrency(cost.projectedMonthly)} />
-                <BreakdownRow label="Spend per Hour" value={formatCurrency(cost.perHour)} />
-              </>
-            ) : (
-              <EmptyState message="No cost data available." />
-            )}
-          </CardContent>
-        </Card>
-      </div>
+      <ModelUsagePanel
+        modelUsage={modelUsage}
+        liveSessions={liveSessions}
+        loading={isInitialLoading}
+      />
 
-      <div className="grid gap-4 lg:grid-cols-7">
-        <Card className="lg:col-span-4">
-          <CardHeader>
-            <CardTitle>Model Usage</CardTitle>
-            <CardDescription>Distribution of requests, tokens, and spend by model</CardDescription>
-          </CardHeader>
-          <CardContent>
-            {isInitialLoading ? (
-              <SkeletonList count={5} />
-            ) : modelUsage.length === 0 ? (
-              <EmptyState message="No model usage data captured yet." />
-            ) : (
-              <div className="space-y-3">
-                {modelUsage.map((item) => (
-                  <ModelUsageRow key={item.model} item={item} />
-                ))}
-              </div>
-            )}
-          </CardContent>
-        </Card>
-
-        <Card className="lg:col-span-3">
-          <CardHeader>
-            <CardTitle>Live Sessions</CardTitle>
-            <CardDescription>Longest-running conversations and their estimated cost</CardDescription>
-          </CardHeader>
-          <CardContent>
-            {isInitialLoading ? (
-              <SkeletonList count={4} />
-            ) : liveSessions.length === 0 ? (
-              <EmptyState message="No active sessions right now." />
-            ) : (
-              <div className="space-y-3">
-                {liveSessions.map((session) => (
-                  <div
-                    key={session.id}
-                    className="flex items-center justify-between rounded-lg border p-3"
-                  >
-                    <div>
-                      <p className="text-sm font-medium">Session {session.id.slice(0, 8)}</p>
-                      <p className="text-xs text-muted-foreground">
-                        {formatDuration(session.uptime * 1000)} · {session.model || "Unknown model"}
-                      </p>
-                    </div>
-                    <Badge variant="outline">${session.cost}</Badge>
-                  </div>
-                ))}
-              </div>
-            )}
-          </CardContent>
-        </Card>
-      </div>
-
-      <div className="grid gap-4 lg:grid-cols-7">
-        <Card className="lg:col-span-4">
-          <CardHeader>
-            <CardTitle>Tenant Breakdown</CardTitle>
-            <CardDescription>Requests and spend split by customer domain</CardDescription>
-          </CardHeader>
-          <CardContent>
-            {isInitialLoading ? (
-              <SkeletonList count={4} />
-            ) : domainBreakdown.length === 0 ? (
-              <EmptyState message="No tenant data recorded for this range." />
-            ) : (
-              <div className="space-y-3">
-                {domainBreakdown.map((entry) => (
-                  <div key={entry.domain} className="flex items-center justify-between rounded-md border px-3 py-2">
-                    <div>
-                      <p className="text-sm font-medium">{entry.domain}</p>
-                      <p className="text-xs text-muted-foreground">
-                        {formatNumber(entry.requests)} requests
-                      </p>
-                    </div>
-                    <span className="text-sm font-semibold">{formatCurrency(entry.cost)}</span>
-                  </div>
-                ))}
-              </div>
-            )}
-          </CardContent>
-        </Card>
-
-        <Card className="lg:col-span-3">
-          <CardHeader>
-            <CardTitle>Token & Search Stats</CardTitle>
-            <CardDescription>Aggregate usage across the selected period</CardDescription>
-          </CardHeader>
-          <CardContent className="space-y-3">
-            {isInitialLoading ? (
-              <SkeletonList count={4} />
-            ) : tokens && performance ? (
-              <>
-                <BreakdownRow label="Total Tokens" value={formatNumber(tokens.total)} />
-                <BreakdownRow label="Input Tokens" value={formatNumber(tokens.totalInput)} />
-                <BreakdownRow label="Output Tokens" value={formatNumber(tokens.totalOutput)} />
-                <BreakdownRow label="Average Tokens per Request" value={formatNumber(tokens.avgPerRequest)} />
-                <BreakdownRow label="Average Searches per Request" value={performance.avgSearchesPerRequest} />
-                <BreakdownRow label="Average Iterations" value={performance.avgIterations} />
-              </>
-            ) : (
-              <EmptyState message="Token metrics unavailable for this selection." />
-            )}
-          </CardContent>
-        </Card>
-      </div>
+      <TenantStats
+        domainBreakdown={domainBreakdown}
+        tokens={tokens}
+        performance={performance}
+        loading={isInitialLoading}
+      />
     </div>
   );
-}
-
-function formatHour(value: string) {
-  const date = new Date(value);
-  return date.toLocaleTimeString([], { hour: "numeric", minute: "2-digit" });
-}
-
-function formatNumber(value: number) {
-  return Number.isFinite(value) ? value.toLocaleString() : "0";
-}
-
-function toCurrencyNumber(value: string | number) {
-  const numeric = typeof value === "string" ? Number.parseFloat(value) : value;
-  return Number.isFinite(numeric) ? numeric : 0;
-}
-
-function formatCurrency(value: string | number) {
-  const numeric = toCurrencyNumber(value);
-  return `$${numeric.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`;
 }
 
 function formatFreshness(minutes: number | null): string {
@@ -371,134 +165,6 @@ function formatFreshness(minutes: number | null): string {
   return `${roundedDays} day${roundedDays === 1 ? "" : "s"} ago`;
 }
 
-function formatDuration(milliseconds: number) {
-  if (!Number.isFinite(milliseconds)) return "—";
-  if (milliseconds < 1000) {
-    return `${Math.round(milliseconds)} ms`;
-  }
-  const seconds = milliseconds / 1000;
-  if (seconds < 60) {
-    return `${seconds.toFixed(1)} s`;
-  }
-  const minutes = seconds / 60;
-  return `${minutes.toFixed(1)} min`;
-}
-
-function MetricCard({
-  title,
-  value,
-  icon: Icon,
-  hint,
-  loading,
-}: {
-  title: string;
-  value?: string;
-  icon: typeof Zap;
-  hint?: ReactNode;
-  loading?: boolean;
-}) {
-  return (
-    <Card>
-      <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-        <CardTitle className="text-sm font-medium">{title}</CardTitle>
-        <div className="rounded-full bg-muted/50 p-2">
-          <Icon className="h-4 w-4 text-muted-foreground" />
-        </div>
-      </CardHeader>
-      <CardContent>
-        <div className="text-2xl font-bold">
-          {loading ? <SkeletonLine widthClass="w-24" /> : value ?? "—"}
-        </div>
-        <div className="pt-1 text-xs text-muted-foreground">
-          {loading ? <SkeletonLine widthClass="w-16" /> : hint ?? "\u00A0"}
-        </div>
-      </CardContent>
-    </Card>
-  );
-}
-
-function BreakdownRow({ label, value }: { label: string; value: string | number }) {
-  return (
-    <div className="flex items-center justify-between text-sm">
-      <span className="text-muted-foreground">{label}</span>
-      <span className="font-medium">{value}</span>
-    </div>
-  );
-}
-
-function ModelUsageRow({ item }: { item: DashboardTelemetryModelUsage }) {
-  const cost = formatCurrency(item.cost);
-  const tokenLabel = `${formatNumber(item.tokens)} tokens`;
-  const requestLabel = `${formatNumber(item.count)} requests`;
-  return (
-    <div className="flex items-start justify-between rounded-md border px-3 py-2">
-      <div>
-        <p className="text-sm font-semibold">{item.model}</p>
-        <p className="text-xs text-muted-foreground">
-          {requestLabel} · {tokenLabel}
-        </p>
-      </div>
-      <div className="text-right">
-        <p className="text-sm font-semibold">{cost}</p>
-        <p className="text-xs text-muted-foreground">{item.percentage}% share</p>
-      </div>
-    </div>
-  );
-}
-
-function TelemetrySparkline({
-  points,
-  maxRequests,
-  maxCost,
-}: {
-  points: (DashboardTelemetryHourlyPoint & { hourLabel: string })[];
-  maxRequests: number;
-  maxCost: number;
-}) {
-  return (
-    <div className="flex h-48 items-end gap-2">
-      {points.map((point) => {
-        const requestHeight = maxRequests > 0 ? Math.round((point.requests / maxRequests) * 100) : 0;
-        const costRatio = maxCost > 0 ? point.cost / maxCost : 0;
-        const background = `rgba(59,130,246,${0.3 + costRatio * 0.4})`;
-        return (
-          <div key={point.hour} className="flex w-full flex-col items-center gap-2">
-            <div className="flex h-full w-full items-end rounded-t-lg bg-muted/30">
-              <div
-                className="w-full rounded-t-lg border border-primary/40"
-                style={{ height: `${requestHeight}%`, backgroundColor: background }}
-              />
-            </div>
-            <div className="text-[11px] font-semibold text-muted-foreground">
-              {formatNumber(point.requests)} req
-            </div>
-            <div className="text-[11px] text-muted-foreground">{point.hourLabel}</div>
-            <div className="text-[11px] text-muted-foreground">{formatCurrency(point.cost)}</div>
-          </div>
-        );
-      })}
-    </div>
-  );
-}
-
-function EmptyState({ message }: { message: string }) {
-  return <p className="text-sm text-muted-foreground">{message}</p>;
-}
-
 function SkeletonLine({ widthClass }: { widthClass: string }) {
   return <div className={`h-4 rounded bg-muted animate-pulse ${widthClass}`} />;
-}
-
-function SkeletonList({ count }: { count: number }) {
-  return (
-    <div className="space-y-2">
-      {Array.from({ length: count }).map((_, index) => (
-        <div key={index} className="h-10 w-full rounded bg-muted animate-pulse" />
-      ))}
-    </div>
-  );
-}
-
-function SkeletonPlaceholder({ heightClass }: { heightClass: string }) {
-  return <div className={`w-full rounded-lg bg-muted animate-pulse ${heightClass}`} />;
 }

@@ -2,42 +2,16 @@
 
 import { useEffect, useMemo, useState, useRef, useCallback } from "react";
 import { Alert, AlertDescription } from "@/components/ui/alert";
-import { EmptyState } from "@/components/ui/empty-state";
-import { Button } from "@/components/ui/button";
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
-import { Input } from "@/components/ui/input";
-import { ScrollArea } from "@/components/ui/scroll-area";
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from "@/components/ui/select";
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { Calendar, Globe, MessageCircle, RefreshCw, Search, CheckSquare, BarChart3 } from "lucide-react";
 import { useRealtimeConversations } from "@/hooks/use-realtime-conversations";
-import { ConversationTranscript } from "@/components/dashboard/conversation-transcript";
-import { ConversationListWithPagination } from "@/components/dashboard/conversations/ConversationListWithPagination";
 import { ConversationMetricsCards } from "@/components/dashboard/conversations/ConversationMetricsCards";
-import { ConversationHeader } from "@/components/dashboard/conversations/ConversationHeader";
-import { KeyboardShortcutsModal } from "@/components/dashboard/conversations/KeyboardShortcutsModal";
-import { ExportDialog } from "@/components/dashboard/conversations/ExportDialog";
-import { AdvancedFilters, type AdvancedFilterState } from "@/components/dashboard/conversations/AdvancedFilters";
-import { LiveStatusIndicator } from "@/components/dashboard/conversations/LiveStatusIndicator";
-import { useKeyboardShortcuts, formatShortcut, type KeyboardShortcut } from "@/hooks/use-keyboard-shortcuts";
+import { ConversationsPageHeader } from "@/components/dashboard/conversations/ConversationsPageHeader";
+import { LanguageDistributionCard } from "@/components/dashboard/conversations/LanguageDistributionCard";
+import { ConversationMainContainer } from "@/components/dashboard/conversations/ConversationMainContainer";
 import { BulkActionBar } from "@/components/dashboard/conversations/BulkActionBar";
 import { ConversationAnalytics } from "@/components/dashboard/conversations/ConversationAnalytics";
-
-type DateRangeValue = "24h" | "7d" | "30d" | "90d";
-
-const RANGE_TO_DAYS: Record<DateRangeValue, number> = {
-  "24h": 1,
-  "7d": 7,
-  "30d": 30,
-  "90d": 90,
-};
-
+import { type AdvancedFilterState } from "@/components/dashboard/conversations/AdvancedFilters";
+import { useKeyboardShortcuts, formatShortcut, type KeyboardShortcut } from "@/hooks/use-keyboard-shortcuts";
+import { RANGE_TO_DAYS, type DateRangeValue } from "@/lib/conversations/constants";
 
 export default function ConversationsPage() {
   const [selectedRange, setSelectedRange] = useState<DateRangeValue>("7d");
@@ -72,7 +46,6 @@ export default function ConversationsPage() {
     acknowledgeNew
   } = useRealtimeConversations({ days, enabled: true });
 
-  // Calculate date range for export filters
   const dateRangeForExport = useMemo(() => {
     const now = new Date();
     const start = new Date(now);
@@ -126,7 +99,6 @@ export default function ConversationsPage() {
 
   const handleAcknowledgeNew = useCallback(() => {
     acknowledgeNew();
-    // Scroll to top of conversation list if there are new conversations
     if (data?.recent?.[0]) {
       setSelectedConversationId(data.recent[0].id);
       window.scrollTo({ top: 0, behavior: 'smooth' });
@@ -137,12 +109,10 @@ export default function ConversationsPage() {
     if (!data) return [];
     let filtered = data.recent;
 
-    // Filter by tab
     if (activeTab !== 'all') {
       filtered = filtered.filter(conv => conv.status === activeTab);
     }
 
-    // Filter by search term
     if (searchTerm.trim()) {
       const term = searchTerm.toLowerCase();
       filtered = filtered.filter((conversation) => {
@@ -152,7 +122,6 @@ export default function ConversationsPage() {
       });
     }
 
-    // Filter by language (advanced filters)
     if (advancedFilters.languages.length > 0) {
       filtered = filtered.filter(conv =>
         advancedFilters.languages.includes(conv.metadata?.language || 'Unknown')
@@ -162,16 +131,13 @@ export default function ConversationsPage() {
     return filtered;
   }, [data, searchTerm, activeTab, advancedFilters]);
 
-  // Keyboard navigation functions
   const selectNextConversation = useCallback(() => {
     if (!filteredConversations.length) return;
-
     if (!selectedConversationId) {
       const firstConv = filteredConversations[0];
       if (firstConv) setSelectedConversationId(firstConv.id);
       return;
     }
-
     const currentIndex = filteredConversations.findIndex(c => c.id === selectedConversationId);
     const nextIndex = (currentIndex + 1) % filteredConversations.length;
     const nextConv = filteredConversations[nextIndex];
@@ -180,13 +146,11 @@ export default function ConversationsPage() {
 
   const selectPreviousConversation = useCallback(() => {
     if (!filteredConversations.length) return;
-
     if (!selectedConversationId) {
       const firstConv = filteredConversations[0];
       if (firstConv) setSelectedConversationId(firstConv.id);
       return;
     }
-
     const currentIndex = filteredConversations.findIndex(c => c.id === selectedConversationId);
     const previousIndex = currentIndex === 0
       ? filteredConversations.length - 1
@@ -204,7 +168,6 @@ export default function ConversationsPage() {
     searchInputRef.current?.focus();
   }, []);
 
-  // Selection mode handlers
   const toggleSelectionMode = useCallback(() => {
     setSelectionMode(prev => !prev);
     if (selectionMode) {
@@ -241,7 +204,6 @@ export default function ConversationsPage() {
     setSelectedIds(new Set());
   }, [refresh]);
 
-  // Define keyboard shortcuts
   const shortcuts: KeyboardShortcut[] = useMemo(() => [
     { key: 'j', callback: selectNextConversation, description: 'Next conversation' },
     { key: 'ArrowDown', callback: selectNextConversation, description: 'Next conversation' },
@@ -256,10 +218,8 @@ export default function ConversationsPage() {
     { key: '4', callback: () => setActiveTab('resolved'), description: 'Resolved conversations' },
   ], [selectNextConversation, selectPreviousConversation, clearConversationSelection, focusSearch, handleRefresh]);
 
-  // Enable keyboard shortcuts
   useKeyboardShortcuts(shortcuts);
 
-  // Format shortcuts for display in modal
   const displayShortcuts = useMemo(() =>
     shortcuts.map(s => ({
       keys: formatShortcut(s),
@@ -269,80 +229,32 @@ export default function ConversationsPage() {
 
   return (
     <div className="flex-1 space-y-6 p-6">
-      <div className="flex flex-wrap items-center justify-between gap-4">
-        <div>
-          <h1 className="text-3xl font-bold">Conversations</h1>
-          <p className="text-muted-foreground">
-            Monitor live conversations, recent sentiment, and language coverage.
-          </p>
-        </div>
-        <div className="flex items-center space-x-3">
-          <Tabs value={mainView} onValueChange={(val) => setMainView(val as typeof mainView)}>
-            <TabsList>
-              <TabsTrigger value="conversations">
-                <MessageCircle className="h-4 w-4 mr-2" />
-                Conversations
-              </TabsTrigger>
-              <TabsTrigger value="analytics">
-                <BarChart3 className="h-4 w-4 mr-2" />
-                Analytics
-              </TabsTrigger>
-            </TabsList>
-          </Tabs>
-          <Select value={selectedRange} onValueChange={(value) => setSelectedRange(value as DateRangeValue)}>
-            <SelectTrigger className="w-34">
-              <Calendar className="h-4 w-4 mr-2" />
-              <SelectValue placeholder="Select range" />
-            </SelectTrigger>
-            <SelectContent>
-              <SelectItem value="24h">Last 24 hours</SelectItem>
-              <SelectItem value="7d">Last 7 days</SelectItem>
-              <SelectItem value="30d">Last 30 days</SelectItem>
-              <SelectItem value="90d">Last 90 days</SelectItem>
-            </SelectContent>
-          </Select>
-          <LiveStatusIndicator
-            isLive={isLive}
-            onToggle={toggleLive}
-            lastFetchTime={lastFetch}
-            newCount={newConversationsCount}
-            onAcknowledge={handleAcknowledgeNew}
-          />
-          <Button
-            variant="outline"
-            size="icon"
-            onClick={handleRefresh}
-            disabled={loading || refreshing}
-            aria-label="Refresh conversations"
-            aria-busy={refreshing}
-          >
-            <RefreshCw className={`h-4 w-4 ${refreshing ? "animate-spin" : ""}`} />
-          </Button>
-          <Button
-            variant={selectionMode ? "default" : "outline"}
-            size="icon"
-            onClick={toggleSelectionMode}
-            aria-label={selectionMode ? "Exit selection mode" : "Enter selection mode"}
-            title={selectionMode ? "Exit selection mode" : "Select multiple conversations"}
-          >
-            <CheckSquare className="h-4 w-4" />
-          </Button>
-          <ExportDialog
-            selectedIds={selectedIds.size > 0 ? Array.from(selectedIds) : undefined}
-            currentFilters={{
-              status: activeTab,
-              dateRange: dateRangeForExport,
-              searchTerm: searchTerm.trim() || undefined,
-            }}
-          />
-          <KeyboardShortcutsModal shortcuts={displayShortcuts} />
-        </div>
-      </div>
+      <ConversationsPageHeader
+        mainView={mainView}
+        onMainViewChange={setMainView}
+        selectedRange={selectedRange}
+        onRangeChange={setSelectedRange}
+        isLive={isLive}
+        onToggleLive={toggleLive}
+        lastFetch={lastFetch}
+        newCount={newConversationsCount}
+        onAcknowledgeNew={handleAcknowledgeNew}
+        onRefresh={handleRefresh}
+        loading={loading}
+        refreshing={refreshing}
+        selectionMode={selectionMode}
+        onToggleSelectionMode={toggleSelectionMode}
+        selectedIds={selectedIds}
+        activeTab={activeTab}
+        dateRangeForExport={dateRangeForExport}
+        searchTerm={searchTerm}
+        displayShortcuts={displayShortcuts}
+      />
 
       {error && (
         <Alert variant="destructive">
           <AlertDescription>
-            We couldn’t load conversation stats. Try refreshing or adjust the date range.
+            We couldn't load conversation stats. Try refreshing or adjust the date range.
           </AlertDescription>
         </Alert>
       )}
@@ -355,163 +267,36 @@ export default function ConversationsPage() {
         <ConversationAnalytics days={days} />
       ) : (
         <div className="grid grid-cols-1 lg:grid-cols-12 gap-4">
-        <Card className="lg:col-span-4">
-          <CardHeader>
-            <CardTitle>Language Distribution</CardTitle>
-            <CardDescription>Share of conversations by language</CardDescription>
-          </CardHeader>
-          <CardContent className="space-y-3">
-            {loading && !data ? (
-              <SkeletonList count={4} />
-            ) : data && data.languages.length > 0 ? (
-              data.languages.map((entry) => (
-                <div key={entry.language} className="flex items-center justify-between text-sm">
-                  <span>{entry.language}</span>
-                  <span className="font-medium">{entry.percentage}%</span>
-                </div>
-              ))
-            ) : (
-              <EmptyState
-                icon={Globe}
-                title="No language data"
-                description="Language diversity metrics will appear as international customers engage"
-                variant="compact"
-              />
-            )}
-          </CardContent>
-        </Card>
+          <LanguageDistributionCard
+            languages={data?.languages ?? []}
+            loading={loading && !data}
+          />
 
-        <div className="lg:col-span-8 flex flex-col border rounded-lg">
-          <div className="p-4 border-b flex items-center gap-2">
-            <div className="relative flex-1">
-              <Search className="absolute left-2.5 top-2.5 h-4 w-4 text-muted-foreground" aria-hidden="true" />
-              <Input
-                ref={searchInputRef}
-                className="pl-8"
-                placeholder="Search conversations… (Press / to focus)"
-                value={searchTerm}
-                onChange={(event) => setSearchTerm(event.target.value)}
-                aria-label="Search conversations by message content or customer name"
-              />
-            </div>
-            <AdvancedFilters
-              availableLanguages={availableLanguages}
-              currentFilters={advancedFilters}
-              onFiltersChange={setAdvancedFilters}
-              activeFilterCount={activeFilterCount}
-            />
-          </div>
-
-          <div className="flex h-[600px]">
-            <div className="w-80 border-r">
-              <Tabs value={activeTab} onValueChange={(val) => setActiveTab(val as typeof activeTab)} defaultValue="all" className="flex h-full flex-col">
-                <TabsList className="grid grid-cols-4 px-4" role="tablist" aria-label="Filter conversations by status">
-                  <TabsTrigger value="all">All</TabsTrigger>
-                  <TabsTrigger value="active">Active</TabsTrigger>
-                  <TabsTrigger value="waiting">Waiting</TabsTrigger>
-                  <TabsTrigger value="resolved">Resolved</TabsTrigger>
-                </TabsList>
-                <TabsContent value="all" className="flex-1 mt-0">
-                  <ConversationListWithPagination
-                    conversations={filteredConversations}
-                    loading={loading && !data}
-                    searchTerm={searchTerm}
-                    selectedId={selectedConversationId}
-                    onSelect={setSelectedConversationId}
-                    hasMore={hasMore}
-                    loadingMore={loadingMore}
-                    onLoadMore={loadMore}
-                    emptyTitle="No conversations yet"
-                    emptyDescription="Conversations will appear here once customers start chatting"
-                    isSelectionMode={selectionMode}
-                    selectedIds={selectedIds}
-                    onToggleSelect={toggleSelectConversation}
-                    onSelectAll={selectAllConversations}
-                  />
-                </TabsContent>
-                <TabsContent value="active" className="flex-1 mt-0">
-                  <ConversationListWithPagination
-                    conversations={filteredConversations}
-                    loading={loading && !data}
-                    searchTerm={searchTerm}
-                    selectedId={selectedConversationId}
-                    onSelect={setSelectedConversationId}
-                    hasMore={hasMore}
-                    loadingMore={loadingMore}
-                    onLoadMore={loadMore}
-                    emptyTitle="No active conversations"
-                    emptyDescription="Active conversations will appear here"
-                    isSelectionMode={selectionMode}
-                    selectedIds={selectedIds}
-                    onToggleSelect={toggleSelectConversation}
-                    onSelectAll={selectAllConversations}
-                  />
-                </TabsContent>
-                <TabsContent value="waiting" className="flex-1 mt-0">
-                  <ConversationListWithPagination
-                    conversations={filteredConversations}
-                    loading={loading && !data}
-                    searchTerm={searchTerm}
-                    selectedId={selectedConversationId}
-                    onSelect={setSelectedConversationId}
-                    hasMore={hasMore}
-                    loadingMore={loadingMore}
-                    onLoadMore={loadMore}
-                    emptyTitle="No waiting conversations"
-                    emptyDescription="Conversations awaiting response will appear here"
-                    isSelectionMode={selectionMode}
-                    selectedIds={selectedIds}
-                    onToggleSelect={toggleSelectConversation}
-                    onSelectAll={selectAllConversations}
-                  />
-                </TabsContent>
-                <TabsContent value="resolved" className="flex-1 mt-0">
-                  <ConversationListWithPagination
-                    conversations={filteredConversations}
-                    loading={loading && !data}
-                    searchTerm={searchTerm}
-                    selectedId={selectedConversationId}
-                    onSelect={setSelectedConversationId}
-                    hasMore={hasMore}
-                    loadingMore={loadingMore}
-                    onLoadMore={loadMore}
-                    emptyTitle="No resolved conversations"
-                    emptyDescription="Resolved conversations will appear here"
-                    isSelectionMode={selectionMode}
-                    selectedIds={selectedIds}
-                    onToggleSelect={toggleSelectConversation}
-                    onSelectAll={selectAllConversations}
-                  />
-                </TabsContent>
-              </Tabs>
-            </div>
-
-            <div className="flex-1 flex flex-col">
-              {selectedConversation ? (
-                <>
-                  <ConversationHeader
-                    conversation={selectedConversation}
-                    onActionComplete={refresh}
-                  />
-
-                  <ConversationTranscript
-                    conversationId={selectedConversationId}
-                    className="flex-1"
-                  />
-                </>
-              ) : (
-                <EmptyState
-                  icon={MessageCircle}
-                  title="Select a conversation"
-                  description="Choose a conversation from the list to view details"
-                  variant="default"
-                  className="flex-1"
-                />
-              )}
-            </div>
-          </div>
+          <ConversationMainContainer
+            searchTerm={searchTerm}
+            onSearchChange={setSearchTerm}
+            searchInputRef={searchInputRef}
+            availableLanguages={availableLanguages}
+            advancedFilters={advancedFilters}
+            onFiltersChange={setAdvancedFilters}
+            activeFilterCount={activeFilterCount}
+            activeTab={activeTab}
+            onTabChange={setActiveTab}
+            filteredConversations={filteredConversations}
+            loading={loading && !data}
+            selectedConversationId={selectedConversationId}
+            onSelectConversation={setSelectedConversationId}
+            hasMore={hasMore}
+            loadingMore={loadingMore}
+            onLoadMore={loadMore}
+            selectedConversation={selectedConversation}
+            onActionComplete={refresh}
+            isSelectionMode={selectionMode}
+            selectedIds={selectedIds}
+            onToggleSelect={toggleSelectConversation}
+            onSelectAll={selectAllConversations}
+          />
         </div>
-      </div>
       )}
 
       {mainView === 'conversations' && selectedIds.size > 0 && (
@@ -525,14 +310,3 @@ export default function ConversationsPage() {
     </div>
   );
 }
-
-function SkeletonList({ count }: { count: number }) {
-  return (
-    <div className="space-y-2">
-      {Array.from({ length: count }).map((_, index) => (
-        <div key={index} className="h-8 w-full rounded bg-muted animate-pulse" />
-      ))}
-    </div>
-  );
-}
-

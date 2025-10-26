@@ -3,34 +3,16 @@
 import { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
-import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
-import { Label } from "@/components/ui/label";
-import { Alert, AlertDescription } from "@/components/ui/alert";
-import { Badge } from "@/components/ui/badge";
-import {
-  ArrowLeft,
-  ShoppingCart,
-  CheckCircle,
-  XCircle,
-  Loader2,
-  Eye,
-  EyeOff,
-  Lock,
-  ExternalLink,
-  Search,
-  Package,
-  Users,
-  TrendingUp
-} from "lucide-react";
+import { ExternalLink, Search, Package, Users, TrendingUp } from "lucide-react";
+import { ConfigureHeader } from "@/components/dashboard/integrations/woocommerce/configure/ConfigureHeader";
+import { CredentialsForm } from "@/components/dashboard/integrations/woocommerce/configure/CredentialsForm";
+import { TestConnection } from "@/components/dashboard/integrations/woocommerce/configure/TestConnection";
 
 export default function WooCommerceConfigurePage() {
   const router = useRouter();
   const [storeUrl, setStoreUrl] = useState("");
   const [consumerKey, setConsumerKey] = useState("");
   const [consumerSecret, setConsumerSecret] = useState("");
-  const [showKey, setShowKey] = useState(false);
-  const [showSecret, setShowSecret] = useState(false);
   const [testResult, setTestResult] = useState<{
     success: boolean;
     message: string;
@@ -54,20 +36,6 @@ export default function WooCommerceConfigurePage() {
     } catch (error) {
       console.error("Failed to load configuration:", error);
     }
-  };
-
-  const formatStoreUrl = (value: string) => {
-    let formatted = value.trim();
-
-    // Add https:// if no protocol
-    if (formatted && !formatted.match(/^https?:\/\//i)) {
-      formatted = `https://${formatted}`;
-    }
-
-    // Remove trailing slash
-    formatted = formatted.replace(/\/$/, "");
-
-    return formatted;
   };
 
   const handleTestConnection = async () => {
@@ -186,27 +154,7 @@ export default function WooCommerceConfigurePage() {
   return (
     <div className="flex-1 space-y-8 p-8 pt-6 max-w-4xl mx-auto">
       {/* Header */}
-      <div className="flex items-center gap-3">
-        <Button
-          variant="ghost"
-          size="icon"
-          onClick={() => router.push("/dashboard/integrations")}
-          className="h-8 w-8"
-        >
-          <ArrowLeft className="h-4 w-4" />
-        </Button>
-        <div className="flex items-center gap-3">
-          <div className="h-10 w-10 rounded-lg bg-purple-100 dark:bg-purple-900/20 flex items-center justify-center">
-            <ShoppingCart className="h-5 w-5 text-purple-600 dark:text-purple-400" />
-          </div>
-          <div>
-            <h1 className="text-2xl font-bold">WooCommerce Integration</h1>
-            <p className="text-sm text-muted-foreground">
-              Connect your WooCommerce store for product and order support
-            </p>
-          </div>
-        </div>
-      </div>
+      <ConfigureHeader />
 
       {/* Setup Instructions */}
       <Card className="border-blue-200 bg-blue-50/50 dark:bg-blue-950/20 dark:border-blue-900">
@@ -260,142 +208,30 @@ export default function WooCommerceConfigurePage() {
       </Card>
 
       {/* Configuration Form */}
-      <Card>
-        <CardHeader>
-          <CardTitle>Store Configuration</CardTitle>
-          <CardDescription>Enter your WooCommerce store details</CardDescription>
-        </CardHeader>
-        <CardContent className="space-y-6">
-          {/* Store URL */}
-          <div className="space-y-2">
-            <Label htmlFor="storeUrl">Store URL *</Label>
-            <Input
-              id="storeUrl"
-              type="url"
-              value={storeUrl}
-              onChange={(e) => setStoreUrl(formatStoreUrl(e.target.value))}
-              placeholder="https://your-store.com"
-              className="font-mono text-sm"
-              required
+      <div className="space-y-6">
+        <CredentialsForm
+          storeUrl={storeUrl}
+          consumerKey={consumerKey}
+          consumerSecret={consumerSecret}
+          onStoreUrlChange={setStoreUrl}
+          onConsumerKeyChange={setConsumerKey}
+          onConsumerSecretChange={setConsumerSecret}
+        />
+
+        <Card>
+          <CardContent className="pt-6">
+            <TestConnection
+              storeUrl={storeUrl}
+              consumerKey={consumerKey}
+              consumerSecret={consumerSecret}
+              testResult={testResult}
+              loading={loading}
+              onTestConnection={handleTestConnection}
+              onSave={handleSave}
             />
-            <p className="text-xs text-muted-foreground">
-              The full URL of your WooCommerce store (e.g., https://example.com)
-            </p>
-          </div>
-
-          {/* Consumer Key */}
-          <div className="space-y-2">
-            <Label htmlFor="consumerKey">Consumer Key *</Label>
-            <div className="relative">
-              <Input
-                id="consumerKey"
-                type={showKey ? "text" : "password"}
-                value={consumerKey}
-                onChange={(e) => setConsumerKey(e.target.value)}
-                placeholder="ck_..."
-                className="font-mono text-sm pr-10"
-                required
-              />
-              <Button
-                type="button"
-                variant="ghost"
-                size="icon"
-                className="absolute right-0 top-0 h-full"
-                onClick={() => setShowKey(!showKey)}
-              >
-                {showKey ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
-              </Button>
-            </div>
-            <div className="flex items-center gap-1.5 text-xs text-muted-foreground">
-              <Lock className="h-3 w-3" />
-              <span>Encrypted with AES-256-GCM before storage</span>
-            </div>
-          </div>
-
-          {/* Consumer Secret */}
-          <div className="space-y-2">
-            <Label htmlFor="consumerSecret">Consumer Secret *</Label>
-            <div className="relative">
-              <Input
-                id="consumerSecret"
-                type={showSecret ? "text" : "password"}
-                value={consumerSecret}
-                onChange={(e) => setConsumerSecret(e.target.value)}
-                placeholder="cs_..."
-                className="font-mono text-sm pr-10"
-                required
-              />
-              <Button
-                type="button"
-                variant="ghost"
-                size="icon"
-                className="absolute right-0 top-0 h-full"
-                onClick={() => setShowSecret(!showSecret)}
-              >
-                {showSecret ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
-              </Button>
-            </div>
-            <div className="flex items-center gap-1.5 text-xs text-muted-foreground">
-              <Lock className="h-3 w-3" />
-              <span>Encrypted with AES-256-GCM before storage</span>
-            </div>
-          </div>
-
-          {/* Test Result Alert */}
-          {testResult && (
-            <Alert className={testResult.success ? "border-green-200 bg-green-50 dark:bg-green-950/20" : "border-red-200 bg-red-50 dark:bg-red-950/20"}>
-              {testResult.success ? (
-                <CheckCircle className="h-4 w-4 text-green-600" />
-              ) : (
-                <XCircle className="h-4 w-4 text-red-600" />
-              )}
-              <AlertDescription className="text-sm">
-                {testResult.message}
-                {testResult.success && testResult.details?.testProduct && (
-                  <div className="mt-2 pt-2 border-t border-green-200">
-                    <p className="text-xs text-muted-foreground">
-                      Test product: {testResult.details.testProduct.name}
-                    </p>
-                  </div>
-                )}
-              </AlertDescription>
-            </Alert>
-          )}
-
-          {/* Action Buttons */}
-          <div className="flex gap-3 pt-4">
-            <Button
-              onClick={handleTestConnection}
-              variant="outline"
-              disabled={loading || !storeUrl || !consumerKey || !consumerSecret}
-              className="flex-1"
-            >
-              {loading ? (
-                <>
-                  <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-                  Testing...
-                </>
-              ) : (
-                <>Test Connection</>
-              )}
-            </Button>
-            <Button
-              onClick={handleSave}
-              disabled={loading || !storeUrl || !consumerKey || !consumerSecret}
-              className="flex-1"
-            >
-              {loading ? (
-                <>
-                  <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-                  Saving...
-                </>
-              ) : (
-                <>Save Configuration</>
-              )}
-            </Button>
-          </div>
-        </CardContent>
-      </Card>
+          </CardContent>
+        </Card>
+      </div>
 
       {/* Features Showcase */}
       <Card>

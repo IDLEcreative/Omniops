@@ -1,6 +1,6 @@
 /**
- * Customer Configuration API
- * 
+ * Customer Configuration API Routes
+ *
  * Handles customer website configuration including:
  * - Adding/updating website URLs
  * - Validating domains
@@ -8,637 +8,83 @@
  * - Managing customer scraping settings
  */
 
-import { NextRequest, NextResponse } from 'next/server'
+import { NextRequest } from 'next/server'
+import { handleGet } from './get-handler'
+import { handlePost } from './create-handler'
+import { handlePut } from './update-handler'
+import { handleDelete } from './delete-handler'
+
 export const runtime = 'nodejs'
 export const dynamic = 'force-dynamic'
-import { createClient, validateSupabaseEnv } from '@/lib/supabase-server'
-import { logger } from '@/lib/logger'
-import { domainValidator, type DomainValidationResult } from '@/lib/utils/domain-validator'
-import { customerScrapingIntegration, type CustomerScrapingConfig, JobPriority } from '@/lib/integrations/customer-scraping-integration'
-import { z } from 'zod'
-
-interface CreateConfigRequest {
-  domain: string
-  customerId?: string
-  settings?: {
-    autoScrape?: boolean
-    scrapingFrequency?: 'daily' | 'weekly' | 'monthly'
-    priority?: 'high' | 'normal' | 'low'
-    maxPages?: number
-    includeSubdomains?: boolean
-  }
-  metadata?: Record<string, any>
-}
-
-interface UpdateConfigRequest {
-  domain?: string
-  settings?: {
-    autoScrape?: boolean
-    scrapingFrequency?: 'daily' | 'weekly' | 'monthly'
-    priority?: 'high' | 'normal' | 'low'
-    maxPages?: number
-    includeSubdomains?: boolean
-  }
-  metadata?: Record<string, any>
-}
-
-interface CustomerConfig {
-  id: string
-  customer_id: string | null
-  domain: string
-  settings: Record<string, any>
-  metadata: Record<string, any>
-  created_at: string
-  updated_at: string
-}
-
-// Schemas for request validation and sane defaults
-const SettingsSchema = z.object({
-  autoScrape: z.boolean().default(true),
-  scrapingFrequency: z.enum(['daily', 'weekly', 'monthly']).default('weekly'),
-  priority: z.enum(['high', 'normal', 'low']).default('normal'),
-  maxPages: z.number().int().positive().max(100000).default(50),
-  includeSubdomains: z.boolean().default(false),
-})
-
-const CreateConfigSchema = z.object({
-  domain: z.string().trim().min(1, 'Domain is required'),
-  customerId: z.string().trim().optional(),
-  settings: SettingsSchema.partial().default({}),
-  metadata: z.record(z.any()).optional().default({}),
-})
-
-const UpdateConfigSchema = z.object({
-  domain: z.string().trim().optional(),
-  settings: SettingsSchema.partial().optional(),
-  metadata: z.record(z.any()).optional(),
-})
 
 /**
  * GET /api/customer/config
  * Get customer configurations (optionally filtered by customer ID or domain)
+ *
+ * Query Parameters:
+ * - customerId: Filter by customer ID
+ * - domain: Filter by domain
+ * - includeStatus: Include scraping status (default: false)
+ * - limit: Number of results per page (default: 50, max: 100)
+ * - offset: Pagination offset (default: 0)
  */
 export async function GET(request: NextRequest) {
-  try {
-    // Validate Supabase configuration
-    if (!validateSupabaseEnv()) {
-      return NextResponse.json(
-        { 
-          error: 'Service temporarily unavailable',
-          message: 'The service is currently undergoing maintenance. Please try again later.'
-        },
-        { status: 503 }
-      )
-    }
-
-    const { searchParams } = new URL(request.url)
-    const customerId = searchParams.get('customerId')
-    const domain = searchParams.get('domain')
-    const includeStatus = (searchParams.get('includeStatus') ?? '').toLowerCase() === 'true'
-    const rawLimit = Number(searchParams.get('limit'))
-    const rawOffset = Number(searchParams.get('offset'))
-    const limit = Number.isFinite(rawLimit) ? Math.max(1, Math.min(100, Math.floor(rawLimit))) : 50
-    const offset = Number.isFinite(rawOffset) ? Math.max(0, Math.floor(rawOffset)) : 0
-
-    const supabase = await createClient()
-    if (!supabase) {
-      return NextResponse.json(
-        { error: 'Database connection failed' },
-        { status: 503 }
-      )
-    }
-
-    let query = supabase
-      .from('customer_configs')
-      .select('*', { count: 'exact' })
-      .range(offset, offset + limit - 1)
-      .order('created_at', { ascending: false })
-
-    // Apply filters
-    if (customerId) {
-      query = query.eq('customer_id', customerId)
-    }
-    if (domain) {
-      query = query.eq('domain', domain)
-    }
-
-    const { data: configs, error, count } = await query
-
-    if (error) {
-      logger.error('Error fetching customer configs', { error, customerId, domain })
-      return NextResponse.json(
-        { error: 'Failed to fetch configurations' }, 
-        { status: 500 }
-      )
-    }
-
-    // Optionally include scraping status to avoid slowing list responses
-    const configsWithStatus = includeStatus
-      ? await Promise.all(
-          configs?.map(async (config: CustomerConfig) => {
-            try {
-              const scrapingStatus = await customerScrapingIntegration.getIntegrationStatus(config.id)
-              return { ...config, scrapingStatus }
-            } catch (error) {
-              logger.warn('Failed to get scraping status', { configId: config.id, error })
-              return {
-                ...config,
-                scrapingStatus: {
-                  hasActiveJobs: false,
-                  totalJobs: 0,
-                  successfulJobs: 0,
-                  failedJobs: 0,
-                },
-              }
-            }
-          }) || []
-        )
-      : configs
-
-    return NextResponse.json({
-      success: true,
-      data: configsWithStatus,
-      pagination: {
-        total: count || 0,
-        limit,
-        offset,
-        hasMore: (count || 0) > offset + limit
-      }
-    })
-
-  } catch (error) {
-    logger.error('GET /api/customer/config error', { error })
-    return NextResponse.json(
-      { error: 'Internal server error' }, 
-      { status: 500 }
-    )
-  }
+  return handleGet(request)
 }
 
 /**
  * POST /api/customer/config
  * Create a new customer configuration and trigger automatic scraping
+ *
+ * Request Body:
+ * {
+ *   domain: string (required)
+ *   customerId?: string
+ *   settings?: {
+ *     autoScrape?: boolean (default: true)
+ *     scrapingFrequency?: 'daily' | 'weekly' | 'monthly' (default: 'weekly')
+ *     priority?: 'high' | 'normal' | 'low' (default: 'normal')
+ *     maxPages?: number (default: 50, max: 100000)
+ *     includeSubdomains?: boolean (default: false)
+ *   }
+ *   metadata?: Record<string, any>
+ * }
  */
 export async function POST(request: NextRequest) {
-  try {
-    // Validate Supabase configuration
-    if (!validateSupabaseEnv()) {
-      return NextResponse.json(
-        { 
-          error: 'Service temporarily unavailable',
-          message: 'The service is currently undergoing maintenance. Please try again later.'
-        },
-        { status: 503 }
-      )
-    }
-    
-    const json = await request.json()
-    const parsed = CreateConfigSchema.safeParse(json)
-    if (!parsed.success) {
-      return NextResponse.json(
-        { error: 'Invalid request body', details: parsed.error.flatten() },
-        { status: 400 }
-      )
-    }
-    const body = parsed.data
-
-    // Validate domain format
-    const domainValidation = domainValidator.validateUrl(body.domain)
-    if (!domainValidation.isValid) {
-      return NextResponse.json({
-        error: 'Invalid domain',
-        details: domainValidation.error,
-        warnings: domainValidation.warnings
-      }, { status: 400 })
-    }
-
-    const normalizedDomain = domainValidation.domain!
-    const supabase = await createClient()
-    if (!supabase) {
-      return NextResponse.json(
-        { error: 'Database connection failed' },
-        { status: 503 }
-      )
-    }
-
-    // Check if domain already exists
-    const domainStatus = await domainValidator.checkDomainStatus(normalizedDomain)
-    if (domainStatus.exists && domainStatus.customerConfigId) {
-      return NextResponse.json({
-        error: 'Domain already configured',
-        existingConfigId: domainStatus.customerConfigId
-      }, { status: 409 })
-    }
-
-    // Prepare configuration data
-    const settings = SettingsSchema.parse(body.settings ?? {})
-    const configData = {
-      customer_id: body.customerId || null,
-      domain: normalizedDomain,
-      settings,
-      metadata: {
-        originalUrl: body.domain,
-        domainValidation,
-        createdViaApi: true,
-        ...body.metadata
-      }
-    }
-
-    // Create customer configuration
-    const { data: config, error: configError } = await supabase
-      .from('customer_configs')
-      .insert(configData)
-      .select()
-      .single()
-
-    if (configError) {
-      logger.error('Error creating customer config', { error: configError, configData })
-      return NextResponse.json(
-        { error: 'Failed to create configuration' }, 
-        { status: 500 }
-      )
-    }
-
-    logger.info('Customer configuration created', {
-      configId: config.id,
-      customerId: config.customer_id,
-      domain: normalizedDomain
-    })
-
-    // Automatically trigger scraping if enabled
-    let scrapingResult = null
-    if (configData.settings.autoScrape) {
-      const priority = mapPriorityToJobPriority(configData.settings.priority)
-      
-      scrapingResult = await customerScrapingIntegration.handleNewCustomerConfig({
-        customerId: config.customer_id,
-        customerConfigId: config.id,
-        domain: normalizedDomain,
-        priority,
-        scrapeType: 'initial',
-        config: {
-          maxPages: configData.settings.maxPages,
-          includeSubdomains: configData.settings.includeSubdomains
-        },
-        metadata: {
-          triggeredBy: 'customer-config-api',
-          autoTriggered: true
-        }
-      })
-
-      if (scrapingResult.success) {
-        logger.info('Automatic scraping triggered', {
-          configId: config.id,
-          domain: normalizedDomain,
-          jobId: scrapingResult.jobId
-        })
-      } else {
-        logger.warn('Failed to trigger automatic scraping', {
-          configId: config.id,
-          domain: normalizedDomain,
-          error: scrapingResult.error
-        })
-      }
-    }
-
-    return NextResponse.json({
-      success: true,
-      data: {
-        config,
-        domainValidation,
-        scraping: scrapingResult
-      }
-    }, { status: 201 })
-
-  } catch (error) {
-    logger.error('POST /api/customer/config error', { error })
-    return NextResponse.json(
-      { error: 'Internal server error' }, 
-      { status: 500 }
-    )
-  }
+  return handlePost(request)
 }
 
 /**
- * PUT /api/customer/config/[id]
+ * PUT /api/customer/config?id={configId}
  * Update an existing customer configuration
+ *
+ * Query Parameters:
+ * - id: Configuration ID (required)
+ *
+ * Request Body:
+ * {
+ *   domain?: string
+ *   settings?: {
+ *     autoScrape?: boolean
+ *     scrapingFrequency?: 'daily' | 'weekly' | 'monthly'
+ *     priority?: 'high' | 'normal' | 'low'
+ *     maxPages?: number
+ *     includeSubdomains?: boolean
+ *   }
+ *   metadata?: Record<string, any>
+ * }
  */
 export async function PUT(request: NextRequest) {
-  try {
-    // Validate Supabase configuration
-    if (!validateSupabaseEnv()) {
-      return NextResponse.json(
-        { 
-          error: 'Service temporarily unavailable',
-          message: 'The service is currently undergoing maintenance. Please try again later.'
-        },
-        { status: 503 }
-      )
-    }
-    const { searchParams } = new URL(request.url)
-    const configId = searchParams.get('id')
-    
-    if (!configId) {
-      return NextResponse.json(
-        { error: 'Configuration ID is required' }, 
-        { status: 400 }
-      )
-    }
-
-    const json = await request.json()
-    const parsed = UpdateConfigSchema.safeParse(json)
-    if (!parsed.success) {
-      return NextResponse.json(
-        { error: 'Invalid request body', details: parsed.error.flatten() },
-        { status: 400 }
-      )
-    }
-    const body = parsed.data
-    const supabase = await createClient()
-    if (!supabase) {
-      return NextResponse.json(
-        { error: 'Database connection failed' },
-        { status: 503 }
-      )
-    }
-
-    // Get existing configuration
-    const { data: existingConfig, error: fetchError } = await supabase
-      .from('customer_configs')
-      .select('*')
-      .eq('id', configId)
-      .single()
-
-    if (fetchError || !existingConfig) {
-      return NextResponse.json(
-        { error: 'Configuration not found' }, 
-        { status: 404 }
-      )
-    }
-
-    let domainValidation: DomainValidationResult | null = null
-    let normalizedDomain = existingConfig.domain
-
-    // Validate new domain if provided
-    if (body.domain && body.domain !== existingConfig.domain) {
-      domainValidation = domainValidator.validateUrl(body.domain)
-      if (!domainValidation.isValid) {
-        return NextResponse.json({
-          error: 'Invalid domain',
-          details: domainValidation.error,
-          warnings: domainValidation.warnings
-        }, { status: 400 })
-      }
-      normalizedDomain = domainValidation.domain!
-    }
-
-    // Prepare update data
-    const updateData: any = {
-      updated_at: new Date().toISOString()
-    }
-
-    if (body.domain) {
-      updateData.domain = normalizedDomain
-    }
-
-    if (body.settings) {
-      const newSettings = SettingsSchema.partial().parse(body.settings)
-      updateData.settings = {
-        ...existingConfig.settings,
-        ...newSettings
-      }
-    }
-
-    if (body.metadata) {
-      updateData.metadata = {
-        ...existingConfig.metadata,
-        ...body.metadata,
-        lastUpdatedViaApi: true,
-        updatedAt: new Date().toISOString()
-      }
-    }
-
-    // Update configuration
-    const { data: updatedConfig, error: updateError } = await supabase
-      .from('customer_configs')
-      .update(updateData)
-      .eq('id', configId)
-      .select()
-      .single()
-
-    if (updateError) {
-      logger.error('Error updating customer config', { error: updateError, configId, updateData })
-      return NextResponse.json(
-        { error: 'Failed to update configuration' }, 
-        { status: 500 }
-      )
-    }
-
-    logger.info('Customer configuration updated', {
-      configId,
-      domainChanged: body.domain && body.domain !== existingConfig.domain,
-      oldDomain: existingConfig.domain,
-      newDomain: normalizedDomain
-    })
-
-    // Handle domain change - trigger new scraping
-    let scrapingResult = null
-    if (body.domain && body.domain !== existingConfig.domain) {
-      scrapingResult = await customerScrapingIntegration.handleCustomerConfigUpdate(
-        { domain: existingConfig.domain, customerConfigId: configId },
-        {
-          customerId: existingConfig.customer_id,
-          customerConfigId: configId,
-          domain: normalizedDomain,
-          priority: mapPriorityToJobPriority(updatedConfig.settings.priority ?? 'normal'),
-          scrapeType: 'refresh',
-          config: {
-            maxPages: updatedConfig.settings.maxPages,
-            includeSubdomains: updatedConfig.settings.includeSubdomains
-          },
-          metadata: {
-            triggeredBy: 'customer-config-update-api',
-            domainChanged: true
-          }
-        }
-      )
-    }
-
-    return NextResponse.json({
-      success: true,
-      data: {
-        config: updatedConfig,
-        domainValidation,
-        scraping: scrapingResult
-      }
-    })
-
-  } catch (error) {
-    logger.error('PUT /api/customer/config error', { error })
-    return NextResponse.json(
-      { error: 'Internal server error' }, 
-      { status: 500 }
-    )
-  }
+  return handlePut(request)
 }
 
 /**
- * DELETE /api/customer/config/[id]
+ * DELETE /api/customer/config?id={configId}
  * Delete a customer configuration and cancel any pending scraping
+ *
+ * Query Parameters:
+ * - id: Configuration ID (required)
  */
 export async function DELETE(request: NextRequest) {
-  try {
-    // Validate Supabase configuration
-    if (!validateSupabaseEnv()) {
-      return NextResponse.json(
-        { 
-          error: 'Service temporarily unavailable',
-          message: 'The service is currently undergoing maintenance. Please try again later.'
-        },
-        { status: 503 }
-      )
-    }
-    const { searchParams } = new URL(request.url)
-    const configId = searchParams.get('id')
-    
-    if (!configId) {
-      return NextResponse.json(
-        { error: 'Configuration ID is required' }, 
-        { status: 400 }
-      )
-    }
-
-    const supabase = await createClient()
-    if (!supabase) {
-      return NextResponse.json(
-        { error: 'Database connection failed' },
-        { status: 503 }
-      )
-    }
-
-    // Get configuration to be deleted
-    const { data: config, error: fetchError } = await supabase
-      .from('customer_configs')
-      .select('*')
-      .eq('id', configId)
-      .single()
-
-    if (fetchError || !config) {
-      return NextResponse.json(
-        { error: 'Configuration not found' }, 
-        { status: 404 }
-      )
-    }
-
-    // Cancel any pending scraping jobs
-    const { data: pendingJobs, error: jobsError } = await supabase
-      .from('scrape_jobs')
-      .update({ 
-        status: 'cancelled',
-        error_message: 'Customer configuration deleted',
-        completed_at: new Date().toISOString()
-      })
-      .eq('customer_config_id', configId)
-      .in('status', ['pending', 'running'])
-      .select('id')
-
-    if (jobsError) {
-      logger.warn('Error cancelling jobs during config deletion', { configId, error: jobsError })
-    } else {
-      logger.info('Cancelled pending jobs for deleted config', {
-        configId,
-        cancelledJobs: pendingJobs?.length || 0
-      })
-    }
-
-    // Delete the configuration
-    const { error: deleteError } = await supabase
-      .from('customer_configs')
-      .delete()
-      .eq('id', configId)
-
-    if (deleteError) {
-      logger.error('Error deleting customer config', { error: deleteError, configId })
-      return NextResponse.json(
-        { error: 'Failed to delete configuration' }, 
-        { status: 500 }
-      )
-    }
-
-    logger.info('Customer configuration deleted', {
-      configId,
-      customerId: config.customer_id,
-      domain: config.domain
-    })
-
-    return NextResponse.json({
-      success: true,
-      message: 'Configuration deleted successfully',
-      cancelledJobs: pendingJobs?.length || 0
-    })
-
-  } catch (error) {
-    logger.error('DELETE /api/customer/config error', { error })
-    return NextResponse.json(
-      { error: 'Internal server error' }, 
-      { status: 500 }
-    )
-  }
-}
-
-// Helper functions
-
-function mapPriorityToJobPriority(priority: string): JobPriority {
-  switch (priority.toLowerCase()) {
-    case 'high':
-      return JobPriority.HIGH
-    case 'low':
-      return JobPriority.LOW
-    case 'normal':
-    default:
-      return JobPriority.NORMAL
-  }
-}
-
-/**
- * Validate domain accessibility endpoint
- * GET /api/customer/config/validate?domain=example.com
- */
-async function validateDomain(domain: string) {
-  try {
-    const validation = domainValidator.validateUrl(domain)
-    
-    if (!validation.isValid) {
-      return {
-        valid: false,
-        error: validation.error,
-        warnings: validation.warnings
-      }
-    }
-
-    // Check domain status
-    const [domainStatus, accessibility] = await Promise.all([
-      domainValidator.checkDomainStatus(validation.domain!),
-      domainValidator.checkDomainAccessibility(validation.domain!, 10000)
-    ])
-
-    return {
-      valid: true,
-      domain: validation.domain,
-      normalizedUrl: validation.normalizedUrl,
-      warnings: validation.warnings,
-      exists: domainStatus.exists,
-      isBeingScrapped: domainStatus.isBeingScrapped,
-      accessible: accessibility.accessible,
-      statusCode: accessibility.statusCode,
-      responseTime: accessibility.responseTime
-    }
-
-  } catch (error) {
-    logger.error('Domain validation error', { domain, error })
-    return {
-      valid: false,
-      error: 'Validation failed'
-    }
-  }
+  return handleDelete(request)
 }

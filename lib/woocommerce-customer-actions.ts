@@ -1,19 +1,28 @@
+/**
+ * WooCommerce customer actions main module
+ *
+ * Coordinates customer information and address management operations.
+ * Exports all action classes for unified access.
+ */
+
 import { WooCommerceCustomer } from './woocommerce-customer';
 import { getDynamicWooCommerceClient } from './woocommerce-dynamic';
-import { createServiceRoleClient } from '@/lib/supabase-server';
+import {
+  CustomerActionResult,
+  ShippingAddressUpdate
+} from './woocommerce-customer-actions-types';
 
-export interface CustomerActionResult {
-  success: boolean;
-  message: string;
-  data?: any;
-  requiresVerification?: boolean;
-}
+// Re-export types
+export type { CustomerActionResult, ShippingAddressUpdate } from './woocommerce-customer-actions-types';
+
+// Re-export action classes
+export { WooCommerceOrderActions } from './woocommerce-customer-actions-orders';
+export { WooCommerceCartActions } from './woocommerce-customer-actions-cart';
 
 /**
- * Customer actions that can be performed after verification
+ * Main customer actions class for account and profile management
  */
 export class WooCommerceCustomerActions {
-  
   /**
    * Get full customer information including addresses
    */
@@ -61,139 +70,12 @@ export class WooCommerceCustomerActions {
   }
 
   /**
-   * Get order status and tracking information
-   */
-  static async getOrderStatus(
-    orderNumber: string,
-    email: string,
-    domain: string
-  ): Promise<CustomerActionResult> {
-    try {
-      const wcCustomer = await WooCommerceCustomer.forDomain(domain);
-      if (!wcCustomer) {
-        return {
-          success: false,
-          message: 'WooCommerce not configured for this domain'
-        };
-      }
-
-      const order = await wcCustomer.searchOrderByNumberAndEmail(orderNumber, email);
-      if (!order) {
-        return {
-          success: false,
-          message: `Order #${orderNumber} not found for this email`
-        };
-      }
-
-      const orderDetails = await wcCustomer.getOrderDetails(order.id);
-      
-      if (!orderDetails) {
-        return {
-          success: false,
-          message: `Could not retrieve details for order #${orderNumber}`
-        };
-      }
-      
-      // Format tracking information
-      let trackingInfo = '';
-      if (orderDetails.tracking) {
-        trackingInfo = `\nTracking: ${orderDetails.tracking.carrier} - ${orderDetails.tracking.number}`;
-      }
-
-      return {
-        success: true,
-        message: `Order #${orderNumber} Status`,
-        data: {
-          order_number: orderDetails.number,
-          status: orderDetails.status,
-          date: orderDetails.date_created,
-          total: `${orderDetails.currency} ${orderDetails.total}`,
-          payment_method: orderDetails.payment_method_title,
-          shipping_address: orderDetails.shipping,
-          items: orderDetails.line_items.map((item: any) => ({
-            name: item.name,
-            quantity: item.quantity,
-            price: item.price
-          })),
-          tracking: orderDetails.tracking,
-          customer_note: orderDetails.customer_note
-        }
-      };
-    } catch (error: any) {
-      console.error('Error fetching order status:', error);
-      return {
-        success: false,
-        message: 'Failed to retrieve order status'
-      };
-    }
-  }
-
-  /**
-   * Get recent orders for a customer
-   */
-  static async getRecentOrders(
-    email: string,
-    domain: string,
-    limit: number = 5
-  ): Promise<CustomerActionResult> {
-    try {
-      const wcCustomer = await WooCommerceCustomer.forDomain(domain);
-      if (!wcCustomer) {
-        return {
-          success: false,
-          message: 'WooCommerce not configured for this domain'
-        };
-      }
-
-      const customer = await wcCustomer.searchCustomerByEmail(email);
-      if (!customer) {
-        return {
-          success: false,
-          message: 'Customer not found'
-        };
-      }
-
-      const orders = await wcCustomer.getCustomerOrders(customer.id, limit);
-      
-      return {
-        success: true,
-        message: `Found ${orders.length} recent orders`,
-        data: {
-          orders: orders.map(order => ({
-            number: order.number,
-            date: order.date_created,
-            status: order.status,
-            total: `${order.currency} ${order.total}`,
-            items_count: order.line_items_count
-          }))
-        }
-      };
-    } catch (error: any) {
-      console.error('Error fetching recent orders:', error);
-      return {
-        success: false,
-        message: 'Failed to retrieve recent orders'
-      };
-    }
-  }
-
-  /**
    * Update customer shipping address
    */
   static async updateShippingAddress(
     email: string,
     domain: string,
-    newAddress: {
-      first_name?: string;
-      last_name?: string;
-      address_1?: string;
-      address_2?: string;
-      city?: string;
-      state?: string;
-      postcode?: string;
-      country?: string;
-      phone?: string;
-    }
+    newAddress: ShippingAddressUpdate
   ): Promise<CustomerActionResult> {
     try {
       const wc = await getDynamicWooCommerceClient(domain);
@@ -238,97 +120,12 @@ export class WooCommerceCustomerActions {
   }
 
   /**
-   * Get order tracking information
+   * Update customer billing address
    */
-  static async getOrderTracking(
-    orderNumber: string,
-    email: string,
-    domain: string
-  ): Promise<CustomerActionResult> {
-    try {
-      const wcCustomer = await WooCommerceCustomer.forDomain(domain);
-      if (!wcCustomer) {
-        return {
-          success: false,
-          message: 'WooCommerce not configured for this domain'
-        };
-      }
-
-      const order = await wcCustomer.searchOrderByNumberAndEmail(orderNumber, email);
-      if (!order) {
-        return {
-          success: false,
-          message: `Order #${orderNumber} not found`
-        };
-      }
-
-      const orderDetails = await wcCustomer.getOrderDetails(order.id);
-      
-      if (!orderDetails) {
-        return {
-          success: false,
-          message: `Could not retrieve details for order #${orderNumber}`
-        };
-      }
-      
-      // Check for tracking information
-      const trackingData = {
-        status: orderDetails.status,
-        date_shipped: null as string | null,
-        carrier: null as string | null,
-        tracking_number: null as string | null,
-        tracking_url: null as string | null,
-        estimated_delivery: null as string | null
-      };
-
-      // Check if order has shipment tracking (this depends on your tracking plugin)
-      if ((orderDetails as any).meta_data) {
-        (orderDetails as any).meta_data.forEach((meta: any) => {
-          if (meta.key === '_tracking_number') {
-            trackingData.tracking_number = meta.value;
-          }
-          if (meta.key === '_tracking_carrier') {
-            trackingData.carrier = meta.value;
-          }
-          if (meta.key === '_date_shipped') {
-            trackingData.date_shipped = meta.value;
-          }
-        });
-      }
-
-      // Generate tracking URL based on carrier
-      if (trackingData.tracking_number && trackingData.carrier) {
-        trackingData.tracking_url = generateTrackingUrl(trackingData.carrier, trackingData.tracking_number);
-      }
-
-      return {
-        success: true,
-        message: 'Order tracking information',
-        data: {
-          order_number: orderNumber,
-          order_status: orderDetails.status,
-          tracking: trackingData,
-          shipping_method: orderDetails.shipping_lines[0]?.method_title || 'Standard',
-          shipping_address: `${orderDetails.shipping.address_1}, ${orderDetails.shipping.city}, ${orderDetails.shipping.postcode}`
-        }
-      };
-    } catch (error: any) {
-      console.error('Error fetching tracking info:', error);
-      return {
-        success: false,
-        message: 'Failed to retrieve tracking information'
-      };
-    }
-  }
-
-  /**
-   * Cancel an order (if allowed)
-   */
-  static async cancelOrder(
-    orderNumber: string,
+  static async updateBillingAddress(
     email: string,
     domain: string,
-    reason?: string
+    newAddress: ShippingAddressUpdate
   ): Promise<CustomerActionResult> {
     try {
       const wc = await getDynamicWooCommerceClient(domain);
@@ -339,67 +136,87 @@ export class WooCommerceCustomerActions {
         };
       }
 
-      // Find the order by searching
-      const orders = await wc.getOrders({ search: orderNumber });
-      const order = Array.isArray(orders) ? orders.find((o: any) => 
-        o.number === orderNumber && o.billing.email === email
-      ) : undefined;
-
-      if (!order) {
+      // First, find the customer
+      const customer = await wc.getCustomerByEmail(email);
+      if (!customer) {
         return {
           success: false,
-          message: `Order #${orderNumber} not found`
+          message: 'Customer not found'
         };
       }
 
-      // Check if order can be cancelled
-      const cancellableStatuses = ['pending', 'on-hold', 'processing'];
-      if (!cancellableStatuses.includes(order.status)) {
-        return {
-          success: false,
-          message: `Order cannot be cancelled. Current status: ${order.status}`
-        };
-      }
-
-      // Cancel the order
-      const updatedOrder = await wc.updateOrder(order.id, {
-        status: 'cancelled',
-        customer_note: reason || 'Cancelled by customer request'
+      // Update billing address
+      const updatedCustomer = await wc.updateCustomer(customer.id, {
+        billing: {
+          ...customer.billing,
+          ...newAddress
+        }
       });
 
       return {
         success: true,
-        message: `Order #${orderNumber} has been cancelled`,
+        message: 'Billing address updated successfully',
         data: {
-          order_number: orderNumber,
-          new_status: updatedOrder.status,
-          refund_info: 'A refund will be processed within 3-5 business days'
+          new_address: updatedCustomer.billing
         }
       };
     } catch (error: any) {
-      console.error('Error cancelling order:', error);
+      console.error('Error updating billing address:', error);
       return {
         success: false,
-        message: 'Failed to cancel order'
+        message: 'Failed to update billing address'
       };
     }
   }
-}
 
-/**
- * Generate tracking URL based on carrier
- */
-function generateTrackingUrl(carrier: string, trackingNumber: string): string {
-  const carriers: Record<string, string> = {
-    'ups': `https://www.ups.com/track?tracknum=${trackingNumber}`,
-    'fedex': `https://www.fedex.com/fedextrack/?trknbr=${trackingNumber}`,
-    'usps': `https://tools.usps.com/go/TrackConfirmAction?tLabels=${trackingNumber}`,
-    'dhl': `https://www.dhl.com/en/express/tracking.html?AWB=${trackingNumber}`,
-    'royal-mail': `https://www.royalmail.com/track-your-item#/tracking-results/${trackingNumber}`,
-    'dpd': `https://www.dpd.co.uk/tracking/?parcel=${trackingNumber}`,
-    'hermes': `https://www.evri.com/track-parcel/${trackingNumber}`
-  };
+  /**
+   * Update customer profile information
+   */
+  static async updateProfile(
+    email: string,
+    domain: string,
+    updates: {
+      first_name?: string;
+      last_name?: string;
+      phone?: string;
+    }
+  ): Promise<CustomerActionResult> {
+    try {
+      const wc = await getDynamicWooCommerceClient(domain);
+      if (!wc) {
+        return {
+          success: false,
+          message: 'WooCommerce not configured for this domain'
+        };
+      }
 
-  const carrierLower = carrier.toLowerCase().replace(/\s+/g, '-');
-  return carriers[carrierLower] || `#tracking-${trackingNumber}`;
+      // First, find the customer
+      const customer = await wc.getCustomerByEmail(email);
+      if (!customer) {
+        return {
+          success: false,
+          message: 'Customer not found'
+        };
+      }
+
+      // Update customer profile
+      const updatedCustomer = await wc.updateCustomer(customer.id, updates);
+
+      return {
+        success: true,
+        message: 'Profile updated successfully',
+        data: {
+          first_name: updatedCustomer.first_name,
+          last_name: updatedCustomer.last_name,
+          email: updatedCustomer.email
+        }
+      };
+    } catch (error: any) {
+      console.error('Error updating profile:', error);
+      return {
+        success: false,
+        message: 'Failed to update profile'
+      };
+    }
+  }
 }

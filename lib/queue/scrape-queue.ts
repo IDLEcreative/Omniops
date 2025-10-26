@@ -3,57 +3,24 @@
  * Handles job creation, deduplication, and queue management for web scraping operations
  */
 
-import { Queue, Worker, Job, QueueEvents } from 'bullmq';
+import { Queue, Job, QueueEvents } from 'bullmq';
 import Redis from 'ioredis';
 import { logger } from '../logger';
-
-/**
- * Job data structure for scraping operations
- */
-export interface ScrapeJobData {
-  url: string;
-  organizationId: string;
-  domainId?: string;
-  maxPages?: number;
-  includePaths?: string[];
-  excludePaths?: string[];
-  turboMode?: boolean;
-  ownSite?: boolean;
-  useNewConfig?: boolean;
-  newConfigPreset?: string;
-  aiOptimization?: boolean;
-  priority?: number;
-  metadata?: Record<string, any>;
-}
-
-/**
- * Job result structure
- */
-export interface ScrapeJobResult {
-  jobId: string;
-  status: 'completed' | 'failed' | 'partial';
-  pagesScraped: number;
-  totalPages: number;
-  errors: string[];
-  startedAt: string;
-  completedAt: string;
-  duration: number;
-  data?: any[];
-  metadata?: Record<string, any>;
-}
-
-/**
- * Queue statistics
- */
-export interface QueueStats {
-  waiting: number;
-  active: number;
-  completed: number;
-  failed: number;
-  delayed: number;
-  paused: boolean;
-  totalJobs: number;
-}
+import {
+  createRedisClient,
+  createRedisConfig,
+  setupEventListeners,
+  getDefaultJobOptions,
+} from './scrape-queue-workers';
+import type {
+  ScrapeJobData,
+  ScrapeJobResult,
+  QueueStats,
+  AddJobOptions,
+  CleanupOptions,
+  DeduplicationStats,
+  QueueMetrics,
+} from './scrape-queue-types';
 
 /**
  * Scrape Queue Manager - Singleton class for managing the scraping queue
@@ -66,7 +33,7 @@ export class ScrapeQueueManager {
   private isInitialized = false;
   private readonly queueName: string;
   private readonly deduplicationTTL = 3600; // 1 hour
-  
+
   private constructor(queueName = 'scrape-queue') {
     this.queueName = queueName;
   }
@@ -91,38 +58,25 @@ export class ScrapeQueueManager {
 
     try {
       // Create Redis connection
-      this.redis = this.createRedisClient();
-      
+      this.redis = createRedisClient();
+
       // Create queue
       this.queue = new Queue<ScrapeJobData, ScrapeJobResult>(this.queueName, {
-        connection: this.createRedisConfig(),
-        defaultJobOptions: {
-          attempts: 3,
-          backoff: {
-            type: 'exponential',
-            delay: 2000,
-          },
-          removeOnComplete: {
-            age: 24 * 3600, // Keep completed jobs for 24 hours
-            count: 100, // Keep last 100 completed jobs
-          },
-          removeOnFail: {
-            age: 7 * 24 * 3600, // Keep failed jobs for 7 days
-          },
-        },
+        connection: createRedisConfig(),
+        defaultJobOptions: getDefaultJobOptions(),
       });
 
       // Create queue events listener
       this.queueEvents = new QueueEvents(this.queueName, {
-        connection: this.createRedisConfig(),
+        connection: createRedisConfig(),
       });
 
       // Setup event listeners
-      this.setupEventListeners();
+      setupEventListeners(this.queueEvents);
 
       // Wait for queue to be ready
       await this.queue.waitUntilReady();
-      
+
       this.isInitialized = true;
       logger.info(`Queue manager initialized for queue: ${this.queueName}`);
     } catch (error) {
@@ -132,90 +86,11 @@ export class ScrapeQueueManager {
   }
 
   /**
-   * Create Redis client
-   */
-  private createRedisClient(): Redis {
-    const redisUrl = process.env.REDIS_URL || 'redis://localhost:6379';
-    const redis = new Redis(redisUrl, {
-      maxRetriesPerRequest: 3,
-      retryStrategy: (times) => Math.min(times * 100, 10000),
-      enableReadyCheck: true,
-      lazyConnect: false,
-    });
-
-    redis.on('error', (error) => {
-      logger.error('Redis client error:', error);
-    });
-
-    redis.on('connect', () => {
-      logger.info('Redis client connected');
-    });
-
-    return redis;
-  }
-
-  /**
-   * Create Redis configuration for BullMQ
-   */
-  private createRedisConfig() {
-    const redisUrl = process.env.REDIS_URL || 'redis://localhost:6379';
-    const url = new URL(redisUrl);
-    
-    return {
-      host: url.hostname,
-      port: parseInt(url.port) || 6379,
-      password: url.password || undefined,
-      db: 0,
-      retryStrategy: (times: number) => Math.min(times * 100, 10000),
-      enableReadyCheck: true,
-      maxRetriesPerRequest: 3,
-      connectTimeout: 10000,
-      lazyConnect: false,
-    };
-  }
-
-  /**
-   * Setup event listeners for the queue
-   */
-  private setupEventListeners(): void {
-    if (!this.queueEvents) return;
-
-    this.queueEvents.on('waiting', ({ jobId }) => {
-      logger.debug(`Job ${jobId} is waiting`);
-    });
-
-    this.queueEvents.on('active', ({ jobId, prev }) => {
-      logger.info(`Job ${jobId} is active (prev: ${prev})`);
-    });
-
-    this.queueEvents.on('completed', ({ jobId, returnvalue }) => {
-      logger.info(`Job ${jobId} completed`);
-    });
-
-    this.queueEvents.on('failed', ({ jobId, failedReason }) => {
-      logger.error(`Job ${jobId} failed: ${failedReason}`);
-    });
-
-    this.queueEvents.on('progress', ({ jobId, data }) => {
-      logger.debug(`Job ${jobId} progress: ${data}`);
-    });
-
-    this.queueEvents.on('stalled', ({ jobId }) => {
-      logger.warn(`Job ${jobId} stalled`);
-    });
-  }
-
-  /**
    * Add a job to the queue with deduplication
    */
   async addJob(
     data: ScrapeJobData,
-    options?: {
-      priority?: number;
-      delay?: number;
-      jobId?: string;
-      deduplicate?: boolean;
-    }
+    options?: AddJobOptions
   ): Promise<Job<ScrapeJobData, ScrapeJobResult>> {
     if (!this.queue) {
       throw new Error('Queue not initialized');
@@ -231,15 +106,11 @@ export class ScrapeQueueManager {
     }
 
     // Add job to queue
-    const job = await this.queue.add(
-      `scrape-${Date.now()}`,
-      data,
-      {
-        priority: options?.priority || data.priority || 0,
-        delay: options?.delay || 0,
-        jobId: options?.jobId,
-      }
-    );
+    const job = await this.queue.add(`scrape-${Date.now()}`, data, {
+      priority: options?.priority || data.priority || 0,
+      delay: options?.delay || 0,
+      jobId: options?.jobId,
+    });
 
     // Store job for deduplication
     if (options?.deduplicate !== false) {
@@ -268,11 +139,15 @@ export class ScrapeQueueManager {
     if (!this.redis) return;
 
     const key = this.getDeduplicationKey(data);
-    await this.redis.setex(key, this.deduplicationTTL, JSON.stringify({
-      url: data.url,
-      organizationId: data.organizationId,
-      timestamp: Date.now(),
-    }));
+    await this.redis.setex(
+      key,
+      this.deduplicationTTL,
+      JSON.stringify({
+        url: data.url,
+        organizationId: data.organizationId,
+        timestamp: Date.now(),
+      })
+    );
   }
 
   /**
@@ -318,7 +193,7 @@ export class ScrapeQueueManager {
       throw new Error('Queue not initialized');
     }
 
-    return await this.queue.getJob(jobId) || null;
+    return (await this.queue.getJob(jobId)) || null;
   }
 
   /**
@@ -359,11 +234,7 @@ export class ScrapeQueueManager {
   /**
    * Clean up old jobs
    */
-  async cleanup(options?: {
-    grace?: number;
-    status?: 'completed' | 'failed';
-    limit?: number;
-  }): Promise<string[]> {
+  async cleanup(options?: CleanupOptions): Promise<string[]> {
     if (!this.queue) {
       throw new Error('Queue not initialized');
     }
@@ -381,10 +252,7 @@ export class ScrapeQueueManager {
   /**
    * Get deduplication statistics
    */
-  async getDeduplicationStats(): Promise<{
-    totalKeys: number;
-    memoryUsage: string;
-  }> {
+  async getDeduplicationStats(): Promise<DeduplicationStats> {
     if (!this.redis) {
       throw new Error('Redis not initialized');
     }
@@ -392,7 +260,7 @@ export class ScrapeQueueManager {
     const keys = await this.redis.keys('dedup:*');
     const info = await this.redis.info('memory');
     const memoryMatch = info.match(/used_memory_human:(.+)/);
-    
+
     return {
       totalKeys: keys.length,
       memoryUsage: memoryMatch && memoryMatch[1] ? memoryMatch[1].trim() : 'unknown',
@@ -458,17 +326,10 @@ export class ScrapeQueueManager {
   /**
    * Get queue metrics for monitoring
    */
-  async getQueueMetrics(): Promise<{
-    queue: QueueStats;
-    deduplication: any;
-    redis: {
-      connected: boolean;
-      memory: string;
-    };
-  }> {
+  async getQueueMetrics(): Promise<QueueMetrics> {
     const queueStats = await this.getQueueStats();
     const dedupStats = await this.getDeduplicationStats();
-    
+
     return {
       queue: queueStats,
       deduplication: dedupStats,
@@ -491,3 +352,14 @@ export function getQueueManager(queueName?: string): ScrapeQueueManager {
  * Export default instance
  */
 export default ScrapeQueueManager;
+
+// Re-export types for convenience
+export type {
+  ScrapeJobData,
+  ScrapeJobResult,
+  QueueStats,
+  AddJobOptions,
+  CleanupOptions,
+  DeduplicationStats,
+  QueueMetrics,
+} from './scrape-queue-types';

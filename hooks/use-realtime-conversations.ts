@@ -14,7 +14,7 @@ export function useRealtimeConversations({
   enabled = true
 }: UseRealtimeConversationsOptions = {}) {
   const { data, loading, error, refresh, loadMore, loadingMore, hasMore } = useDashboardConversations({ days });
-  const [lastFetch, setLastFetch] = useState(Date.now());
+  const [lastFetch, setLastFetch] = useState<Date | null>(new Date());
   const [isLive, setIsLive] = useState(enabled);
   const [newConversationsCount, setNewConversationsCount] = useState(0);
   const [previousData, setPreviousData] = useState<DashboardConversationsData | null>(null);
@@ -34,7 +34,7 @@ export function useRealtimeConversations({
       if (!document.hidden) {
         const oldCount = data?.recent.length || 0;
         await refresh();
-        setLastFetch(Date.now());
+        setLastFetch(new Date());
 
         // Check for new conversations after refresh completes
         const newCount = data?.recent.length || 0;

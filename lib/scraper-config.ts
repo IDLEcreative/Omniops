@@ -54,14 +54,14 @@ export function applyConfigPreset(presetName: keyof typeof ConfigPresets): void 
  * Load configuration for a specific customer
  */
 export async function loadCustomerConfig(customerId: string): Promise<void> {
-  await ScraperConfigManager.getInstance().loadFromDatabase(customerId);
+  await ScraperConfigManager.getInstance().loadCustomerConfig(customerId);
 }
 
 /**
  * Save configuration for a specific customer
  */
 export async function saveCustomerConfig(customerId: string): Promise<void> {
-  await ScraperConfigManager.getInstance().saveToDatabase(customerId);
+  await ScraperConfigManager.getInstance().saveConfig(customerId);
 }
 
 /**
