@@ -3,23 +3,14 @@
  */
 
 import { CommerceProvider, OrderInfo } from '../commerce-provider';
-import { getDynamicWooCommerceClient } from '@/lib/woocommerce-dynamic';
+import type { WooCommerceAPI } from '@/lib/woocommerce-api';
 
 export class WooCommerceProvider implements CommerceProvider {
   readonly platform = 'woocommerce';
-  private domain: string;
 
-  constructor(domain: string) {
-    this.domain = domain;
-  }
+  constructor(private client: WooCommerceAPI) {}
 
   async lookupOrder(orderId: string, email?: string): Promise<OrderInfo | null> {
-    const wc = await getDynamicWooCommerceClient(this.domain);
-
-    if (!wc) {
-      return null;
-    }
-
     try {
       let order = null;
 
@@ -27,7 +18,7 @@ export class WooCommerceProvider implements CommerceProvider {
       const numericId = parseInt(orderId, 10);
       if (!isNaN(numericId)) {
         try {
-          order = await wc.getOrder(numericId);
+          order = await this.client.getOrder(numericId);
         } catch (error) {
           console.log(`[WooCommerce Provider] Order ID ${numericId} not found`);
         }
@@ -36,7 +27,7 @@ export class WooCommerceProvider implements CommerceProvider {
       // If not found by ID, try searching by order number or email
       if (!order && (orderId || email)) {
         const searchTerm = email || orderId;
-        const orders = await wc.getOrders({
+        const orders = await this.client.getOrders({
           search: searchTerm,
           per_page: 1,
         });
@@ -79,14 +70,8 @@ export class WooCommerceProvider implements CommerceProvider {
   }
 
   async searchProducts(query: string, limit: number = 10): Promise<any[]> {
-    const wc = await getDynamicWooCommerceClient(this.domain);
-
-    if (!wc) {
-      return [];
-    }
-
     try {
-      return await wc.getProducts({
+      return await this.client.getProducts({
         search: query,
         per_page: limit,
         status: 'publish',
@@ -98,14 +83,8 @@ export class WooCommerceProvider implements CommerceProvider {
   }
 
   async checkStock(productId: string): Promise<any> {
-    const wc = await getDynamicWooCommerceClient(this.domain);
-
-    if (!wc) {
-      return null;
-    }
-
     try {
-      const products = await wc.getProducts({
+      const products = await this.client.getProducts({
         sku: productId,
         per_page: 1
       });
@@ -132,14 +111,8 @@ export class WooCommerceProvider implements CommerceProvider {
   }
 
   async getProductDetails(productId: string): Promise<any> {
-    const wc = await getDynamicWooCommerceClient(this.domain);
-
-    if (!wc) {
-      return null;
-    }
-
     try {
-      const products = await wc.getProducts({
+      const products = await this.client.getProducts({
         sku: productId,
         per_page: 1
       });

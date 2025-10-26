@@ -1,6 +1,9 @@
 // Utility functions and testing for content deduplication
 import { ContentDeduplicator } from './content-deduplicator';
 import type { Pattern } from './content-deduplicator-types';
+import * as crypto from 'crypto';
+import { isVariable } from './content-deduplicator-similarity';
+import type { SupabaseClient } from '@supabase/supabase-js';
 
 // Pattern detection utilities
 export function detectTemplatePattern(contents: string[]): Pattern | null {
@@ -9,7 +12,6 @@ export function detectTemplatePattern(contents: string[]): Pattern | null {
   const commonPattern = extractCommonPattern(contents);
   if (commonPattern.similarity < 0.7) return null;
 
-  const crypto = require('crypto');
   const patternId = crypto.createHash('sha256').update(commonPattern.template).digest('hex');
 
   return {
@@ -83,7 +85,6 @@ export function findCommonStructure(text1: string, text2: string): { common: str
 }
 
 function isVariableWord(word1: string, word2: string): boolean {
-  const { isVariable } = require('./content-deduplicator-similarity');
   return isVariable(word1, word2);
 }
 
@@ -229,7 +230,7 @@ export class ContentDeduplicatorTester {
 
 // Example usage
 export const ContentDeduplicatorUtils = {
-  async createSupabaseSchema(supabase: any): Promise<void> {
+  async createSupabaseSchema(supabase: SupabaseClient): Promise<void> {
     await supabase.from('content_hashes').select('*').limit(1);
   },
 
@@ -250,11 +251,11 @@ export const ContentDeduplicatorUtils = {
       { content: "Footer content", url: "https://example.com/page2" }
     ];
 
-    const result = await deduplicator.batchProcess(contents);
+    await deduplicator.batchProcess(contents);
     const metrics = await deduplicator.generateMetrics();
     console.log('Deduplication saved:', metrics.storageReduction + '%');
 
-    const retrievedContent = await deduplicator.getContent(hash);
+    await deduplicator.getContent(hash);
     await deduplicator.cleanup();
   }
 };

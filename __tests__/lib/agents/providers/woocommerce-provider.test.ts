@@ -5,36 +5,31 @@
 
 import { describe, it, expect, beforeEach, jest } from '@jest/globals';
 import { WooCommerceProvider } from '@/lib/agents/providers/woocommerce-provider';
-import { getDynamicWooCommerceClient } from '@/lib/woocommerce-dynamic';
-
-jest.mock('@/lib/woocommerce-dynamic', () => ({
-  getDynamicWooCommerceClient: jest.fn(),
-}));
+import type { WooCommerceAPI } from '@/lib/woocommerce-api';
 
 describe('WooCommerceProvider', () => {
   let provider: WooCommerceProvider;
-  const testDomain = 'test-shop.com';
+  let mockClient: jest.Mocked<Partial<WooCommerceAPI>>;
 
   beforeEach(() => {
-    provider = new WooCommerceProvider(testDomain);
+    mockClient = {
+      getOrder: jest.fn(),
+      getOrders: jest.fn(),
+      getProducts: jest.fn(),
+      getProduct: jest.fn(),
+    } as jest.Mocked<Partial<WooCommerceAPI>>;
+
+    provider = new WooCommerceProvider(mockClient as WooCommerceAPI);
     jest.clearAllMocks();
   });
 
   describe('constructor', () => {
-    it('should initialize with platform and domain', () => {
+    it('should initialize with platform', () => {
       expect(provider.platform).toBe('woocommerce');
     });
   });
 
   describe('lookupOrder', () => {
-    it('should return null if WooCommerce client is unavailable', async () => {
-      (getDynamicWooCommerceClient as jest.Mock).mockResolvedValue(null);
-
-      const result = await provider.lookupOrder('123');
-
-      expect(result).toBeNull();
-    });
-
     it('should lookup order by numeric ID', async () => {
       const mockOrder = {
         id: 123,
@@ -60,11 +55,7 @@ describe('WooCommerceProvider', () => {
         }
       };
 
-      const mockClient = {
-        getOrder: jest.fn().mockResolvedValue(mockOrder),
-      };
-
-      (getDynamicWooCommerceClient as jest.Mock).mockResolvedValue(mockClient);
+      (mockClient.getOrder as jest.Mock).mockResolvedValue(mockOrder);
 
       const result = await provider.lookupOrder('123');
 
@@ -111,12 +102,8 @@ describe('WooCommerceProvider', () => {
         }
       };
 
-      const mockClient = {
-        getOrder: jest.fn().mockRejectedValue(new Error('Not found')),
-        getOrders: jest.fn().mockResolvedValue([mockOrder]),
-      };
-
-      (getDynamicWooCommerceClient as jest.Mock).mockResolvedValue(mockClient);
+      (mockClient.getOrder as jest.Mock).mockRejectedValue(new Error('Not found'));
+      (mockClient.getOrders as jest.Mock).mockResolvedValue([mockOrder]);
 
       const result = await provider.lookupOrder('999', 'jane@example.com');
 
@@ -138,11 +125,7 @@ describe('WooCommerceProvider', () => {
         line_items: []
       };
 
-      const mockClient = {
-        getOrders: jest.fn().mockResolvedValue([mockOrder]),
-      };
-
-      (getDynamicWooCommerceClient as jest.Mock).mockResolvedValue(mockClient);
+      (mockClient.getOrders as jest.Mock).mockResolvedValue([mockOrder]);
 
       const result = await provider.lookupOrder('ORD-789');
 
@@ -154,12 +137,8 @@ describe('WooCommerceProvider', () => {
     });
 
     it('should return null if order not found', async () => {
-      const mockClient = {
-        getOrder: jest.fn().mockRejectedValue(new Error('Not found')),
-        getOrders: jest.fn().mockResolvedValue([]),
-      };
-
-      (getDynamicWooCommerceClient as jest.Mock).mockResolvedValue(mockClient);
+      (mockClient.getOrder as jest.Mock).mockRejectedValue(new Error('Not found'));
+      (mockClient.getOrders as jest.Mock).mockResolvedValue([]);
 
       const result = await provider.lookupOrder('999');
 
@@ -167,12 +146,8 @@ describe('WooCommerceProvider', () => {
     });
 
     it('should handle errors gracefully', async () => {
-      const mockClient = {
-        getOrder: jest.fn().mockRejectedValue(new Error('API Error')),
-        getOrders: jest.fn().mockRejectedValue(new Error('API Error')),
-      };
-
-      (getDynamicWooCommerceClient as jest.Mock).mockResolvedValue(mockClient);
+      (mockClient.getOrder as jest.Mock).mockRejectedValue(new Error('API Error'));
+      (mockClient.getOrders as jest.Mock).mockRejectedValue(new Error('API Error'));
 
       const result = await provider.lookupOrder('123');
 
@@ -193,11 +168,7 @@ describe('WooCommerceProvider', () => {
         }
       };
 
-      const mockClient = {
-        getOrder: jest.fn().mockResolvedValue(mockOrder),
-      };
-
-      (getDynamicWooCommerceClient as jest.Mock).mockResolvedValue(mockClient);
+      (mockClient.getOrder as jest.Mock).mockResolvedValue(mockOrder);
 
       const result = await provider.lookupOrder('111');
 
@@ -206,14 +177,6 @@ describe('WooCommerceProvider', () => {
   });
 
   describe('searchProducts', () => {
-    it('should return empty array if WooCommerce client is unavailable', async () => {
-      (getDynamicWooCommerceClient as jest.Mock).mockResolvedValue(null);
-
-      const result = await provider.searchProducts('test');
-
-      expect(result).toEqual([]);
-    });
-
     it('should search products by query', async () => {
       const mockProducts = [
         {
@@ -230,11 +193,7 @@ describe('WooCommerceProvider', () => {
         }
       ];
 
-      const mockClient = {
-        getProducts: jest.fn().mockResolvedValue(mockProducts),
-      };
-
-      (getDynamicWooCommerceClient as jest.Mock).mockResolvedValue(mockClient);
+      (mockClient.getProducts as jest.Mock).mockResolvedValue(mockProducts);
 
       const result = await provider.searchProducts('test', 10);
 
@@ -247,11 +206,7 @@ describe('WooCommerceProvider', () => {
     });
 
     it('should use default limit of 10', async () => {
-      const mockClient = {
-        getProducts: jest.fn().mockResolvedValue([]),
-      };
-
-      (getDynamicWooCommerceClient as jest.Mock).mockResolvedValue(mockClient);
+      (mockClient.getProducts as jest.Mock).mockResolvedValue([]);
 
       await provider.searchProducts('query');
 
@@ -263,11 +218,7 @@ describe('WooCommerceProvider', () => {
     });
 
     it('should respect custom limit', async () => {
-      const mockClient = {
-        getProducts: jest.fn().mockResolvedValue([]),
-      };
-
-      (getDynamicWooCommerceClient as jest.Mock).mockResolvedValue(mockClient);
+      (mockClient.getProducts as jest.Mock).mockResolvedValue([]);
 
       await provider.searchProducts('query', 25);
 
@@ -279,11 +230,7 @@ describe('WooCommerceProvider', () => {
     });
 
     it('should handle search errors gracefully', async () => {
-      const mockClient = {
-        getProducts: jest.fn().mockRejectedValue(new Error('API Error')),
-      };
-
-      (getDynamicWooCommerceClient as jest.Mock).mockResolvedValue(mockClient);
+      (mockClient.getProducts as jest.Mock).mockRejectedValue(new Error('API Error'));
 
       const result = await provider.searchProducts('test');
 
@@ -291,11 +238,7 @@ describe('WooCommerceProvider', () => {
     });
 
     it('should only search published products', async () => {
-      const mockClient = {
-        getProducts: jest.fn().mockResolvedValue([]),
-      };
-
-      (getDynamicWooCommerceClient as jest.Mock).mockResolvedValue(mockClient);
+      (mockClient.getProducts as jest.Mock).mockResolvedValue([]);
 
       await provider.searchProducts('test');
 
@@ -308,30 +251,85 @@ describe('WooCommerceProvider', () => {
   });
 
   describe('checkStock', () => {
-    it('should retrieve product stock information', async () => {
+    it('should retrieve product stock information by SKU', async () => {
       const mockProduct = {
         id: 123,
         name: 'Test Product',
+        sku: 'SKU123',
         stock_status: 'instock',
         stock_quantity: 50,
-        manage_stock: true
+        manage_stock: true,
+        backorders: 'no'
       };
 
-      const mockClient = {
-        getProduct: jest.fn().mockResolvedValue(mockProduct),
+      (mockClient.getProducts as jest.Mock).mockResolvedValue([mockProduct]);
+
+      const result = await provider.checkStock('SKU123');
+
+      expect(mockClient.getProducts).toHaveBeenCalledWith({
+        sku: 'SKU123',
+        per_page: 1
+      });
+      expect(result).toEqual({
+        productName: 'Test Product',
+        sku: 'SKU123',
+        stockStatus: 'instock',
+        stockQuantity: 50,
+        manageStock: true,
+        backorders: 'no'
+      });
+    });
+
+    it('should return null if product not found', async () => {
+      (mockClient.getProducts as jest.Mock).mockResolvedValue([]);
+
+      const result = await provider.checkStock('NONEXISTENT');
+
+      expect(result).toBeNull();
+    });
+
+    it('should handle errors gracefully', async () => {
+      (mockClient.getProducts as jest.Mock).mockRejectedValue(new Error('API Error'));
+
+      const result = await provider.checkStock('SKU123');
+
+      expect(result).toBeNull();
+    });
+  });
+
+  describe('getProductDetails', () => {
+    it('should retrieve product details by SKU', async () => {
+      const mockProduct = {
+        id: 456,
+        name: 'Detailed Product',
+        sku: 'DETAIL-SKU',
+        price: '99.99',
+        description: 'Product description'
       };
 
-      (getDynamicWooCommerceClient as jest.Mock).mockResolvedValue(mockClient);
+      (mockClient.getProducts as jest.Mock).mockResolvedValue([mockProduct]);
 
-      const result = await provider.checkStock('123');
+      const result = await provider.getProductDetails('DETAIL-SKU');
 
+      expect(mockClient.getProducts).toHaveBeenCalledWith({
+        sku: 'DETAIL-SKU',
+        per_page: 1
+      });
       expect(result).toEqual(mockProduct);
     });
 
-    it('should return null if client unavailable', async () => {
-      (getDynamicWooCommerceClient as jest.Mock).mockResolvedValue(null);
+    it('should return null if product not found', async () => {
+      (mockClient.getProducts as jest.Mock).mockResolvedValue([]);
 
-      const result = await provider.checkStock('123');
+      const result = await provider.getProductDetails('NONEXISTENT');
+
+      expect(result).toBeNull();
+    });
+
+    it('should handle errors gracefully', async () => {
+      (mockClient.getProducts as jest.Mock).mockRejectedValue(new Error('API Error'));
+
+      const result = await provider.getProductDetails('DETAIL-SKU');
 
       expect(result).toBeNull();
     });

@@ -55,7 +55,10 @@ const eslintConfig = [
       
       // Compiled JavaScript files in lib directory (TypeScript sources exist)
       "lib/*.js",
-      
+
+      // Temporary TypeScript compilation output
+      ".tmp-ts/**/*",
+
       // Browser automation scripts (not part of main app)
       "browser-automation/**/*",
       

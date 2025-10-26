@@ -116,12 +116,12 @@ export async function handleGetTelemetry(searchParams: URLSearchParams): Promise
     : '0';
 
   // Model usage breakdown (prefer rollups, fallback to raw telemetry)
-  let modelUsageMap = modelRollups.length > 0
+  const modelUsageMap = modelRollups.length > 0
     ? summarizeModelRollups(modelRollups)
     : summarizeModelUsageFromRaw(telemetryRows);
 
   // Domain breakdown (prefer rollups, fallback to raw telemetry)
-  let domainBreakdownMap = domainRollups.length > 0
+  const domainBreakdownMap = domainRollups.length > 0
     ? summarizeDomainRollups(domainRollups)
     : summarizeDomainBreakdownFromRaw(telemetryRows, domain);
 

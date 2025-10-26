@@ -6,30 +6,34 @@
 import { describe, it, expect, jest, beforeEach } from '@jest/globals';
 import { ShopifyProvider } from '@/lib/agents/providers/shopify-provider';
 
-// Mock the Shopify dynamic client
-const mockGetDynamicShopifyClient = jest.fn();
-
-jest.mock('@/lib/shopify-dynamic', () => ({
-  getDynamicShopifyClient: mockGetDynamicShopifyClient
-}));
-
 describe('ShopifyProvider - Error Handling', () => {
   let provider: ShopifyProvider;
-  const mockDomain = 'test-shop.myshopify.com';
+  let mockClient: {
+    getOrder: jest.Mock;
+    getOrders: jest.Mock;
+    getProduct: jest.Mock;
+    getProducts: jest.Mock;
+    searchProducts: jest.Mock;
+  };
 
   beforeEach(() => {
-    provider = new ShopifyProvider(mockDomain);
+    // Create simple mock client object
+    mockClient = {
+      getOrder: jest.fn(),
+      getOrders: jest.fn(),
+      getProduct: jest.fn(),
+      getProducts: jest.fn(),
+      searchProducts: jest.fn()
+    };
+
+    provider = new ShopifyProvider(mockClient as any);
     jest.clearAllMocks();
   });
 
   describe('lookupOrder errors', () => {
     it('should return null if order not found', async () => {
-      const mockClient = {
-        getOrder: jest.fn().mockRejectedValue(new Error('Not found')),
-        getOrders: jest.fn().mockResolvedValue([])
-      };
-
-      mockGetDynamicShopifyClient.mockResolvedValue(mockClient);
+      mockClient.getOrder.mockRejectedValue(new Error('Not found'));
+      mockClient.getOrders.mockResolvedValue([]);
 
       const result = await provider.lookupOrder('nonexistent');
 
@@ -37,11 +41,8 @@ describe('ShopifyProvider - Error Handling', () => {
     });
 
     it('should handle errors gracefully', async () => {
-      const mockClient = {
-        getOrder: jest.fn().mockRejectedValue(new Error('API Error'))
-      };
-
-      mockGetDynamicShopifyClient.mockResolvedValue(mockClient);
+      mockClient.getOrder.mockRejectedValue(new Error('API Error'));
+      mockClient.getOrders.mockResolvedValue([]);
 
       const result = await provider.lookupOrder('error');
 
@@ -62,11 +63,7 @@ describe('ShopifyProvider - Error Handling', () => {
         shipping_address: undefined
       };
 
-      const mockClient = {
-        getOrder: jest.fn().mockResolvedValue(mockOrder)
-      };
-
-      mockGetDynamicShopifyClient.mockResolvedValue(mockClient);
+      mockClient.getOrder.mockResolvedValue(mockOrder);
 
       const result = await provider.lookupOrder('200');
 
@@ -77,11 +74,7 @@ describe('ShopifyProvider - Error Handling', () => {
 
   describe('searchProducts errors', () => {
     it('should handle search errors gracefully', async () => {
-      const mockClient = {
-        searchProducts: jest.fn().mockRejectedValue(new Error('Search failed'))
-      };
-
-      mockGetDynamicShopifyClient.mockResolvedValue(mockClient);
+      mockClient.searchProducts.mockRejectedValue(new Error('Search failed'));
 
       const result = await provider.searchProducts('error');
 
@@ -89,11 +82,7 @@ describe('ShopifyProvider - Error Handling', () => {
     });
 
     it('should return empty array on failure', async () => {
-      const mockClient = {
-        searchProducts: jest.fn().mockRejectedValue(new Error('Network error'))
-      };
-
-      mockGetDynamicShopifyClient.mockResolvedValue(mockClient);
+      mockClient.searchProducts.mockRejectedValue(new Error('Network error'));
 
       const result = await provider.searchProducts('test');
 
@@ -104,12 +93,8 @@ describe('ShopifyProvider - Error Handling', () => {
 
   describe('checkStock errors', () => {
     it('should return null if product not found', async () => {
-      const mockClient = {
-        getProduct: jest.fn().mockRejectedValue(new Error('Not found')),
-        getProducts: jest.fn().mockResolvedValue([])
-      };
-
-      mockGetDynamicShopifyClient.mockResolvedValue(mockClient);
+      mockClient.getProduct.mockRejectedValue(new Error('Not found'));
+      mockClient.getProducts.mockResolvedValue([]);
 
       const result = await provider.checkStock('NOTFOUND');
 
@@ -117,11 +102,8 @@ describe('ShopifyProvider - Error Handling', () => {
     });
 
     it('should handle errors gracefully', async () => {
-      const mockClient = {
-        getProduct: jest.fn().mockRejectedValue(new Error('API Error'))
-      };
-
-      mockGetDynamicShopifyClient.mockResolvedValue(mockClient);
+      mockClient.getProduct.mockRejectedValue(new Error('API Error'));
+      mockClient.getProducts.mockResolvedValue([]);
 
       const result = await provider.checkStock('error');
 
@@ -129,12 +111,8 @@ describe('ShopifyProvider - Error Handling', () => {
     });
 
     it('should handle network failures', async () => {
-      const mockClient = {
-        getProduct: jest.fn().mockRejectedValue(new Error('Network timeout')),
-        getProducts: jest.fn().mockRejectedValue(new Error('Network timeout'))
-      };
-
-      mockGetDynamicShopifyClient.mockResolvedValue(mockClient);
+      mockClient.getProduct.mockRejectedValue(new Error('Network timeout'));
+      mockClient.getProducts.mockRejectedValue(new Error('Network timeout'));
 
       const result = await provider.checkStock('SKU123');
 
@@ -144,11 +122,7 @@ describe('ShopifyProvider - Error Handling', () => {
 
   describe('getProductDetails errors', () => {
     it('should return null if product not found', async () => {
-      const mockClient = {
-        getProducts: jest.fn().mockResolvedValue([])
-      };
-
-      mockGetDynamicShopifyClient.mockResolvedValue(mockClient);
+      mockClient.getProducts.mockResolvedValue([]);
 
       const result = await provider.getProductDetails('NOTFOUND');
 
@@ -156,11 +130,8 @@ describe('ShopifyProvider - Error Handling', () => {
     });
 
     it('should handle errors gracefully', async () => {
-      const mockClient = {
-        getProduct: jest.fn().mockRejectedValue(new Error('Failed'))
-      };
-
-      mockGetDynamicShopifyClient.mockResolvedValue(mockClient);
+      mockClient.getProduct.mockRejectedValue(new Error('Failed'));
+      mockClient.getProducts.mockResolvedValue([]);
 
       const result = await provider.getProductDetails('error');
 
@@ -168,11 +139,8 @@ describe('ShopifyProvider - Error Handling', () => {
     });
 
     it('should handle API failures', async () => {
-      const mockClient = {
-        getProduct: jest.fn().mockRejectedValue(new Error('API rate limit'))
-      };
-
-      mockGetDynamicShopifyClient.mockResolvedValue(mockClient);
+      mockClient.getProduct.mockRejectedValue(new Error('API rate limit'));
+      mockClient.getProducts.mockResolvedValue([]);
 
       const result = await provider.getProductDetails('123');
 
@@ -180,11 +148,7 @@ describe('ShopifyProvider - Error Handling', () => {
     });
 
     it('should handle malformed responses', async () => {
-      const mockClient = {
-        getProducts: jest.fn().mockResolvedValue(null)
-      };
-
-      mockGetDynamicShopifyClient.mockResolvedValue(mockClient);
+      mockClient.getProducts.mockResolvedValue(null);
 
       const result = await provider.getProductDetails('MALFORMED');
 
@@ -194,12 +158,8 @@ describe('ShopifyProvider - Error Handling', () => {
 
   describe('edge cases', () => {
     it('should handle empty string identifiers', async () => {
-      const mockClient = {
-        getOrder: jest.fn().mockRejectedValue(new Error('Invalid')),
-        getOrders: jest.fn().mockResolvedValue([])
-      };
-
-      mockGetDynamicShopifyClient.mockResolvedValue(mockClient);
+      mockClient.getOrder.mockRejectedValue(new Error('Invalid'));
+      mockClient.getOrders.mockResolvedValue([]);
 
       const result = await provider.lookupOrder('');
 
@@ -207,12 +167,8 @@ describe('ShopifyProvider - Error Handling', () => {
     });
 
     it('should handle whitespace-only identifiers', async () => {
-      const mockClient = {
-        getProduct: jest.fn().mockRejectedValue(new Error('Invalid')),
-        getProducts: jest.fn().mockResolvedValue([])
-      };
-
-      mockGetDynamicShopifyClient.mockResolvedValue(mockClient);
+      mockClient.getProduct.mockRejectedValue(new Error('Invalid'));
+      mockClient.getProducts.mockResolvedValue([]);
 
       const result = await provider.checkStock('   ');
 
@@ -221,11 +177,7 @@ describe('ShopifyProvider - Error Handling', () => {
 
     it('should handle very long identifiers', async () => {
       const longId = 'X'.repeat(1000);
-      const mockClient = {
-        getProducts: jest.fn().mockResolvedValue([])
-      };
-
-      mockGetDynamicShopifyClient.mockResolvedValue(mockClient);
+      mockClient.getProducts.mockResolvedValue([]);
 
       const result = await provider.getProductDetails(longId);
 

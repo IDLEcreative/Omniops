@@ -14,6 +14,7 @@ import { describe, it, expect } from '@jest/globals';
 import { GET, POST } from '@/app/api/organizations/route';
 import { server } from '@/__tests__/mocks/server';
 import { http, HttpResponse } from 'msw';
+import { _mockSupabaseClient } from '@supabase/supabase-js';
 
 describe('Organizations API (Global Mock)', () => {
   describe('GET /api/organizations', () => {
@@ -29,7 +30,6 @@ describe('Organizations API (Global Mock)', () => {
     it('should return 401 for unauthenticated users', async () => {
       // Note: MSW doesn't work with the global Supabase module mock
       // Instead, directly manipulate the mock's return value
-      const { _mockSupabaseClient } = require('@supabase/supabase-js');
       const originalGetUser = _mockSupabaseClient.auth.getUser;
 
       // Temporarily make getUser return null user
@@ -184,8 +184,6 @@ describe('Organizations API (Global Mock)', () => {
     });
 
     it('should return 401 for unauthenticated users', async () => {
-      const { _mockSupabaseClient } = require('@supabase/supabase-js');
-
       // Temporarily make getUser return null user
       _mockSupabaseClient.auth.getUser.mockResolvedValueOnce({
         data: { user: null },

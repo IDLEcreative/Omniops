@@ -6,19 +6,27 @@
 import { describe, it, expect, jest, beforeEach } from '@jest/globals';
 import { ShopifyProvider } from '@/lib/agents/providers/shopify-provider';
 
-// Mock the Shopify dynamic client
-const mockGetDynamicShopifyClient = jest.fn();
-
-jest.mock('@/lib/shopify-dynamic', () => ({
-  getDynamicShopifyClient: mockGetDynamicShopifyClient
-}));
-
 describe('ShopifyProvider - Setup', () => {
   let provider: ShopifyProvider;
-  const mockDomain = 'test-shop.myshopify.com';
+  let mockClient: {
+    getOrder: jest.Mock;
+    getOrders: jest.Mock;
+    getProduct: jest.Mock;
+    getProducts: jest.Mock;
+    searchProducts: jest.Mock;
+  };
 
   beforeEach(() => {
-    provider = new ShopifyProvider(mockDomain);
+    // Create simple mock client object
+    mockClient = {
+      getOrder: jest.fn(),
+      getOrders: jest.fn(),
+      getProduct: jest.fn(),
+      getProducts: jest.fn(),
+      searchProducts: jest.fn()
+    };
+
+    provider = new ShopifyProvider(mockClient as any);
     jest.clearAllMocks();
   });
 
@@ -27,8 +35,15 @@ describe('ShopifyProvider - Setup', () => {
       expect(provider.platform).toBe('shopify');
     });
 
-    it('should store domain', () => {
-      const customProvider = new ShopifyProvider('custom-domain.com');
+    it('should accept client via constructor', () => {
+      const customClient = {
+        getOrder: jest.fn(),
+        getOrders: jest.fn(),
+        getProduct: jest.fn(),
+        getProducts: jest.fn(),
+        searchProducts: jest.fn()
+      };
+      const customProvider = new ShopifyProvider(customClient as any);
       expect(customProvider.platform).toBe('shopify');
     });
   });
@@ -46,33 +61,36 @@ describe('ShopifyProvider - Setup', () => {
     });
   });
 
-  describe('client availability handling', () => {
-    it('should return null from lookupOrder if client not available', async () => {
-      mockGetDynamicShopifyClient.mockResolvedValue(null);
+  describe('error handling with failing client', () => {
+    it('should handle errors from lookupOrder gracefully', async () => {
+      mockClient.getOrder.mockRejectedValue(new Error('API Error'));
+      mockClient.getOrders.mockResolvedValue([]);
 
       const result = await provider.lookupOrder('123');
 
       expect(result).toBeNull();
     });
 
-    it('should return empty array from searchProducts if client not available', async () => {
-      mockGetDynamicShopifyClient.mockResolvedValue(null);
+    it('should handle errors from searchProducts gracefully', async () => {
+      mockClient.searchProducts.mockRejectedValue(new Error('API Error'));
 
       const result = await provider.searchProducts('test');
 
       expect(result).toEqual([]);
     });
 
-    it('should return null from checkStock if client not available', async () => {
-      mockGetDynamicShopifyClient.mockResolvedValue(null);
+    it('should handle errors from checkStock gracefully', async () => {
+      mockClient.getProduct.mockRejectedValue(new Error('API Error'));
+      mockClient.getProducts.mockResolvedValue([]);
 
       const result = await provider.checkStock('SKU123');
 
       expect(result).toBeNull();
     });
 
-    it('should return null from getProductDetails if client not available', async () => {
-      mockGetDynamicShopifyClient.mockResolvedValue(null);
+    it('should handle errors from getProductDetails gracefully', async () => {
+      mockClient.getProduct.mockRejectedValue(new Error('API Error'));
+      mockClient.getProducts.mockResolvedValue([]);
 
       const result = await provider.getProductDetails('123');
 

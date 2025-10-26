@@ -17,13 +17,13 @@ class WooCommerceRestApi {
       return Promise.resolve({ data: data || {} });
     });
     
-    this.delete = jest.fn().mockImplementation((endpoint) => {
+    this.delete = jest.fn().mockImplementation((_endpoint) => {
       return Promise.resolve({ data: { deleted: true } });
     });
   }
   
   // Helper method to provide sensible mock data based on endpoint
-  getMockData(endpoint, params) {
+  getMockData(endpoint, _params) {
     if (endpoint.startsWith('products/') && !endpoint.includes('categories')) {
       // Single product
       const productId = parseInt(endpoint.split('/')[1]);

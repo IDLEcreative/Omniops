@@ -1,27 +1,36 @@
 /**
  * Shopify Provider Operations Tests
  * Tests CRUD operations for orders and products
+ *
+ * Uses simple mock objects (no module mocking) for fast, maintainable tests
  */
 
 import { describe, it, expect, jest, beforeEach } from '@jest/globals';
-
-// Create mock function BEFORE imports (Jest hoisting)
-const mockGetDynamicShopifyClient = jest.fn();
-
-// Mock the shopify-dynamic module
-jest.mock('@/lib/shopify-dynamic', () => ({
-  getDynamicShopifyClient: (...args: any[]) => mockGetDynamicShopifyClient(...args),
-  searchProductsDynamic: jest.fn().mockResolvedValue([])
-}));
-
 import { ShopifyProvider } from '@/lib/agents/providers/shopify-provider';
 
 describe('ShopifyProvider - Operations', () => {
   let provider: ShopifyProvider;
-  const mockDomain = 'test-shop.myshopify.com';
+  let mockClient: {
+    getOrder: jest.Mock;
+    getOrders: jest.Mock;
+    getProduct: jest.Mock;
+    getProducts: jest.Mock;
+    searchProducts: jest.Mock;
+  };
 
   beforeEach(() => {
-    provider = new ShopifyProvider(mockDomain);
+    // Create simple mock client object
+    mockClient = {
+      getOrder: jest.fn(),
+      getOrders: jest.fn(),
+      getProduct: jest.fn(),
+      getProducts: jest.fn(),
+      searchProducts: jest.fn()
+    };
+
+    // Instantiate provider directly with mock client - no module mocking needed!
+    provider = new ShopifyProvider(mockClient as any);
+
     jest.clearAllMocks();
   });
 
@@ -45,11 +54,7 @@ describe('ShopifyProvider - Operations', () => {
         shipping_address: { address1: '123 Main St' }
       };
 
-      const mockClient = {
-        getOrder: jest.fn().mockResolvedValue(mockOrder)
-      };
-
-      mockGetDynamicShopifyClient.mockResolvedValue(mockClient);
+      mockClient.getOrder.mockResolvedValue(mockOrder);
 
       const result = await provider.lookupOrder('123');
 
@@ -88,12 +93,8 @@ describe('ShopifyProvider - Operations', () => {
         }
       ];
 
-      const mockClient = {
-        getOrder: jest.fn().mockRejectedValue(new Error('Not found')),
-        getOrders: jest.fn().mockResolvedValue(mockOrders)
-      };
-
-      mockGetDynamicShopifyClient.mockResolvedValue(mockClient);
+      mockClient.getOrder.mockRejectedValue(new Error('Not found'));
+      mockClient.getOrders.mockResolvedValue(mockOrders);
 
       const result = await provider.lookupOrder('999', 'search@example.com');
 
@@ -117,12 +118,8 @@ describe('ShopifyProvider - Operations', () => {
         }
       ];
 
-      const mockClient = {
-        getOrder: jest.fn().mockRejectedValue(new Error('Not found')),
-        getOrders: jest.fn().mockResolvedValue(mockOrders)
-      };
-
-      mockGetDynamicShopifyClient.mockResolvedValue(mockClient);
+      mockClient.getOrder.mockRejectedValue(new Error('Not found'));
+      mockClient.getOrders.mockResolvedValue(mockOrders);
 
       const result = await provider.lookupOrder('1003');
 
@@ -145,11 +142,7 @@ describe('ShopifyProvider - Operations', () => {
         shipping_address: null
       };
 
-      const mockClient = {
-        getOrder: jest.fn().mockResolvedValue(mockOrder)
-      };
-
-      mockGetDynamicShopifyClient.mockResolvedValue(mockClient);
+      mockClient.getOrder.mockResolvedValue(mockOrder);
 
       const result = await provider.lookupOrder('200');
 
@@ -165,11 +158,7 @@ describe('ShopifyProvider - Operations', () => {
         { id: 2, title: 'Product 2', variants: [] }
       ];
 
-      const mockClient = {
-        searchProducts: jest.fn().mockResolvedValue(mockProducts)
-      };
-
-      mockGetDynamicShopifyClient.mockResolvedValue(mockClient);
+      mockClient.searchProducts.mockResolvedValue(mockProducts);
 
       const result = await provider.searchProducts('test query', 10);
 
@@ -195,11 +184,7 @@ describe('ShopifyProvider - Operations', () => {
         ]
       };
 
-      const mockClient = {
-        getProduct: jest.fn().mockResolvedValue(mockProduct)
-      };
-
-      mockGetDynamicShopifyClient.mockResolvedValue(mockClient);
+      mockClient.getProduct.mockResolvedValue(mockProduct);
 
       const result = await provider.checkStock('100');
 
@@ -230,12 +215,8 @@ describe('ShopifyProvider - Operations', () => {
         }
       ];
 
-      const mockClient = {
-        getProduct: jest.fn().mockRejectedValue(new Error('Not found')),
-        getProducts: jest.fn().mockResolvedValue(mockProducts)
-      };
-
-      mockGetDynamicShopifyClient.mockResolvedValue(mockClient);
+      mockClient.getProduct.mockRejectedValue(new Error('Not found'));
+      mockClient.getProducts.mockResolvedValue(mockProducts);
 
       const result = await provider.checkStock('CUSTOM-SKU');
 
@@ -259,11 +240,7 @@ describe('ShopifyProvider - Operations', () => {
         variants: []
       };
 
-      const mockClient = {
-        getProduct: jest.fn().mockResolvedValue(mockProduct)
-      };
-
-      mockGetDynamicShopifyClient.mockResolvedValue(mockClient);
+      mockClient.getProduct.mockResolvedValue(mockProduct);
 
       const result = await provider.getProductDetails('300');
 
@@ -280,11 +257,7 @@ describe('ShopifyProvider - Operations', () => {
         }
       ];
 
-      const mockClient = {
-        getProducts: jest.fn().mockResolvedValue(mockProducts)
-      };
-
-      mockGetDynamicShopifyClient.mockResolvedValue(mockClient);
+      mockClient.getProducts.mockResolvedValue(mockProducts);
 
       const result = await provider.getProductDetails('DETAIL-SKU');
 

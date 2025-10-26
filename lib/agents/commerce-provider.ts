@@ -115,8 +115,15 @@ const detectShopify: ProviderDetector = async ({ domain, config }) => {
   }
 
   try {
+    const { getDynamicShopifyClient } = await import('@/lib/shopify-dynamic');
+    const client = await getDynamicShopifyClient(domain);
+
+    if (!client) {
+      return null;
+    }
+
     const { ShopifyProvider } = await import('./providers/shopify-provider');
-    return new ShopifyProvider(domain);
+    return new ShopifyProvider(client);
   } catch (error) {
     console.error('[Commerce Provider] Failed to initialize Shopify provider:', error);
     return null;
@@ -129,8 +136,15 @@ const detectWooCommerce: ProviderDetector = async ({ domain, config }) => {
   }
 
   try {
+    const { getDynamicWooCommerceClient } = await import('@/lib/woocommerce-dynamic');
+    const client = await getDynamicWooCommerceClient(domain);
+
+    if (!client) {
+      return null;
+    }
+
     const { WooCommerceProvider } = await import('./providers/woocommerce-provider');
-    return new WooCommerceProvider(domain);
+    return new WooCommerceProvider(client);
   } catch (error) {
     console.error('[Commerce Provider] Failed to initialize WooCommerce provider:', error);
     return null;

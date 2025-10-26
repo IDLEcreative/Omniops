@@ -94,7 +94,7 @@ export function updateProgress(
   total: number,
   message: string,
   errors: string[],
-  onProgress?: Function
+  onProgress?: (progress: ReindexProgress) => void
 ): ReindexProgress {
   const progress: ReindexProgress = {
     phase,

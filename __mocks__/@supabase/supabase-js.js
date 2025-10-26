@@ -192,9 +192,11 @@ export { MockQueryBuilder };
 globalThis.__SUPABASE_MOCK__ = mockSupabaseClient;
 
 // Default export
-export default {
+const supabaseMock = {
   createClient,
   SupabaseClient,
   _mockSupabaseClient,
   MockQueryBuilder
 };
+
+export default supabaseMock;

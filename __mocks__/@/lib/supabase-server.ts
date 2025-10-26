@@ -106,10 +106,12 @@ export const __resetMockSupabaseClient = () => {
   (requireServiceRoleClient as jest.Mock).mockResolvedValue(mockClient);
 };
 
-export default {
+const mockSupabaseServer = {
   validateSupabaseEnv,
   createServiceRoleClient,
   createClient,
   __setMockSupabaseClient,
   __resetMockSupabaseClient
 };
+
+export default mockSupabaseServer;

@@ -3,22 +3,15 @@
  */
 
 import { CommerceProvider, OrderInfo } from '../commerce-provider';
-import { getDynamicShopifyClient } from '@/lib/shopify-dynamic';
+import type { ShopifyAPI } from '@/lib/shopify-api';
 
 export class ShopifyProvider implements CommerceProvider {
   readonly platform = 'shopify';
-  private domain: string;
 
-  constructor(domain: string) {
-    this.domain = domain;
-  }
+  constructor(private client: ShopifyAPI) {}
 
   async lookupOrder(orderId: string, email?: string): Promise<OrderInfo | null> {
-    const shopify = await getDynamicShopifyClient(this.domain);
-
-    if (!shopify) {
-      return null;
-    }
+    const shopify = this.client;
 
     try {
       let order = null;
@@ -92,11 +85,7 @@ export class ShopifyProvider implements CommerceProvider {
   }
 
   async searchProducts(query: string, limit: number = 10): Promise<any[]> {
-    const shopify = await getDynamicShopifyClient(this.domain);
-
-    if (!shopify) {
-      return [];
-    }
+    const shopify = this.client;
 
     try {
       return await shopify.searchProducts(query, limit);
@@ -107,11 +96,7 @@ export class ShopifyProvider implements CommerceProvider {
   }
 
   async checkStock(productId: string): Promise<any> {
-    const shopify = await getDynamicShopifyClient(this.domain);
-
-    if (!shopify) {
-      return null;
-    }
+    const shopify = this.client;
 
     try {
       // Search by SKU or ID
@@ -161,11 +146,7 @@ export class ShopifyProvider implements CommerceProvider {
   }
 
   async getProductDetails(productId: string): Promise<any> {
-    const shopify = await getDynamicShopifyClient(this.domain);
-
-    if (!shopify) {
-      return null;
-    }
+    const shopify = this.client;
 
     try {
       const numericId = parseInt(productId, 10);

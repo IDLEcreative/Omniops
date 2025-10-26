@@ -93,11 +93,18 @@ describe('Shopify Encryption', () => {
 });
 
 describe('ShopifyProvider', () => {
-  const testDomain = 'test.example.com';
   let provider: ShopifyProvider;
+  let mockClient: any;
 
   beforeEach(() => {
-    provider = new ShopifyProvider(testDomain);
+    mockClient = {
+      getOrder: jest.fn(),
+      getOrders: jest.fn(),
+      getProduct: jest.fn(),
+      getProducts: jest.fn(),
+      searchProducts: jest.fn()
+    };
+    provider = new ShopifyProvider(mockClient);
   });
 
   it('should initialize with correct platform', () => {
@@ -115,7 +122,14 @@ describe('ShopifyProvider', () => {
 describe('Integration Scenarios', () => {
   describe('Multi-platform Support', () => {
     it('should work alongside WooCommerce provider', async () => {
-      const shopifyProvider = new ShopifyProvider('shopify-store.com');
+      const mockClient = {
+        getOrder: jest.fn(),
+        getOrders: jest.fn(),
+        getProduct: jest.fn(),
+        getProducts: jest.fn(),
+        searchProducts: jest.fn()
+      };
+      const shopifyProvider = new ShopifyProvider(mockClient as any);
 
       // Both providers should have same interface
       expect(shopifyProvider.platform).toBe('shopify');
@@ -124,16 +138,30 @@ describe('Integration Scenarios', () => {
   });
 
   describe('Error Handling', () => {
-    it('should return null when client not configured', async () => {
-      const provider = new ShopifyProvider('unconfigured-domain.com');
+    it('should handle API errors gracefully', async () => {
+      const mockClient = {
+        getOrder: jest.fn().mockRejectedValue(new Error('API Error')),
+        getOrders: jest.fn().mockResolvedValue([]),
+        getProduct: jest.fn(),
+        getProducts: jest.fn(),
+        searchProducts: jest.fn()
+      };
+      const provider = new ShopifyProvider(mockClient as any);
 
       // Should handle gracefully without throwing
       const order = await provider.lookupOrder('12345');
       expect(order).toBeNull();
     });
 
-    it('should return empty array for product search when not configured', async () => {
-      const provider = new ShopifyProvider('unconfigured-domain.com');
+    it('should return empty array for product search when API fails', async () => {
+      const mockClient = {
+        getOrder: jest.fn(),
+        getOrders: jest.fn(),
+        getProduct: jest.fn(),
+        getProducts: jest.fn(),
+        searchProducts: jest.fn().mockRejectedValue(new Error('API Error'))
+      };
+      const provider = new ShopifyProvider(mockClient as any);
 
       const products = await provider.searchProducts('test');
       expect(products).toEqual([]);
