@@ -13,16 +13,21 @@ const customJestConfig = {
     customExportConditions: [''],
   },
   moduleNameMapper: {
+    // External dependencies
     '^@woocommerce/woocommerce-rest-api$': '<rootDir>/__mocks__/@woocommerce/woocommerce-rest-api.js',
     '^@supabase/supabase-js$': '<rootDir>/__mocks__/@supabase/supabase-js.js',
+    // Map cheerio to its CommonJS build to avoid ESM issues in Jest
+    '^cheerio$': '<rootDir>/node_modules/cheerio/dist/commonjs/index.js',
+    // Internal module mocks - MUST come before the catch-all '^@/(.*)$' pattern
     '^@/lib/supabase-server$': '<rootDir>/__mocks__/@/lib/supabase-server.ts',
     '^@/lib/supabase/server$': '<rootDir>/__mocks__/@/lib/supabase/server.ts',
     '^@/lib/woocommerce-full$': '<rootDir>/__mocks__/@/lib/woocommerce-full.ts',
+    '^@/lib/woocommerce-dynamic$': '<rootDir>/__mocks__/@/lib/woocommerce-dynamic.ts',
+    '^@/lib/shopify-dynamic$': '<rootDir>/__mocks__/@/lib/shopify-dynamic.ts',
     '^@/lib/embeddings$': '<rootDir>/__mocks__/@/lib/embeddings.ts',
     // Removed rate-limit from moduleNameMapper - let jest.mock() handle it
     // '^@/lib/rate-limit$': '<rootDir>/__mocks__/@/lib/rate-limit.ts',
-    // Map cheerio to its CommonJS build to avoid ESM issues in Jest
-    '^cheerio$': '<rootDir>/node_modules/cheerio/dist/commonjs/index.js',
+    // Catch-all pattern - MUST be last
     '^@/(.*)$': '<rootDir>/$1',
   },
   testMatch: [

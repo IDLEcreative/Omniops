@@ -4,14 +4,17 @@
  */
 
 import { describe, it, expect, jest, beforeEach } from '@jest/globals';
-import { ShopifyProvider } from '@/lib/agents/providers/shopify-provider';
 
-// Mock the Shopify dynamic client
+// Create mock function BEFORE imports (Jest hoisting)
 const mockGetDynamicShopifyClient = jest.fn();
 
+// Mock the shopify-dynamic module
 jest.mock('@/lib/shopify-dynamic', () => ({
-  getDynamicShopifyClient: mockGetDynamicShopifyClient
+  getDynamicShopifyClient: (...args: any[]) => mockGetDynamicShopifyClient(...args),
+  searchProductsDynamic: jest.fn().mockResolvedValue([])
 }));
+
+import { ShopifyProvider } from '@/lib/agents/providers/shopify-provider';
 
 describe('ShopifyProvider - Operations', () => {
   let provider: ShopifyProvider;

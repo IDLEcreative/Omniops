@@ -1,3 +1,4 @@
-import { jest } from '@jest/globals'
+import { jest } from '@jest/globals';
 
-export const searchProductsDynamic = jest.fn()
+export const getDynamicWooCommerceClient = jest.fn();
+export const searchProductsDynamic = jest.fn();
