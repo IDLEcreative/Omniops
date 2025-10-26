@@ -1,0 +1,201 @@
+DATABASE SCHEMA, QUERY, AND DATA INTEGRITY ANALYSIS
+Complete Report: /home/user/Omniops/DATABASE_ANALYSIS_REPORT.md
+====================================================================
+
+CRITICAL FINDINGS: 5 Issues Requiring Immediate Attention
+
+1. FOREIGN KEY CASCADE HAZARD
+   Location: page_embeddings.domain_id FK (ON DELETE NO ACTION)
+   Risk: Orphaned embeddings; domain isolation broken
+   Fix Time: 30 minutes
+
+2. RACE CONDITIONS IN JOB PROCESSING
+   Location: scrape_jobs, embedding_queue tables
+   Risk: Duplicate job execution; duplicate embeddings
+   Fix Time: 2-3 hours (requires transaction implementation)
+
+3. OVERLY PERMISSIVE RLS POLICIES
+   Location: global_synonym_mappings (allows any user read)
+   Risk: Multi-tenant isolation bypass
+   Fix Time: 1 hour
+
+4. MISSING TRANSACTION SAFETY
+   Location: Chat API (conversation + message + telemetry)
+   Risk: Orphaned messages without telemetry data
+   Fix Time: 3-4 hours
+
+5. CASCADE DELETE UNCONTROLLED
+   Location: Organizations → Domains → Pages → Embeddings (20K+ rows)
+   Risk: Long-running transactions, table locks, no audit trail
+   Fix Time: 4-6 hours
+
+====================================================================
+
+HIGH PRIORITY ISSUES: 8 Items
+
+1. Missing NOT NULL constraints (3 tables)
+   - embedding_queue.status
+   - chat_telemetry.domain
+   - conversations.domain_id
+
+2. Duplicate/Redundant indexes
+   - Vector indexes (IVFFlat + HNSW both on same column)
+   - Overlapping partial indexes
+
+3. RLS Policy Inefficiency
+   - Nested subqueries re-execute on every row (10K+ rows = 30K subqueries)
+
+4. Missing Unique Constraints
+   - widget_config_variants (no variant_name uniqueness)
+   - scrape_jobs race condition in insert
+
+5. Data Type Precision Issues
+   - cost_usd NUMERIC(10,6) limits to $9999 max
+   - Insufficient for large customers
+
+6. Missing Rollback Procedures
+   - Complex migrations have no recovery documented
+
+7. Schema Version Conflicts
+   - Duplicate migration dates (20250909)
+   - Two "complete_schema" files
+
+8. Missing Composite Indexes
+   - page_id + status queries (embedding_queue)
+
+====================================================================
+
+MEDIUM PRIORITY ISSUES: 12 Items
+
+INDEX GAPS:
+- Missing indexes on several foreign keys
+- Partial indexes with NULL coverage issues
+- No page+status composite
+
+QUERY ISSUES:
+- Domain parameter validation missing
+- Input length limits not enforced
+- Deadlock prevention order inconsistent
+
+MIGRATION ISSUES:
+- Data migration verification gaps
+- Constraint addition safety concerns
+
+RLS ISSUES:
+- training_data missing organization isolation
+- chat_cost_alerts missing write protection
+- search_cache missing organization scope
+
+DATA INTEGRITY:
+- Orphaned embedding chunks possible
+- Insufficient audit trail coverage
+
+PERFORMANCE:
+- Stale column statistics
+- Auto-vacuum settings suboptimal
+
+====================================================================
+
+SCHEMA SUMMARY (31 tables, 214 indexes, 53 RLS policies)
+
+TABLES BY CATEGORY:
+- Core Business (2): customer_configs, domains
+- Multi-Tenant (3): organizations, members, invitations
+- Content/Scraping (6): scraped_pages, website_content, embeddings, queues
+- AI/Search (4): page_embeddings, entity_catalog, product_catalog, training_data
+- Chat (2): conversations, messages
+- Analytics (4): chat_telemetry, rollups (3 types)
+- Privacy (2): gdpr_audit_log, demo_attempts
+- Configuration (3): widget configs, variants, history
+- Synonyms (2): global, domain-specific
+- Other (3): business_classifications, query_cache, search_cache
+
+FOREIGN KEY COVERAGE:
+- Total FKs: 24 relationships
+- Cascade Deletes: 23
+- No Action: 1 (page_embeddings.domain_id - PROBLEMATIC)
+
+INDEX STATISTICS:
+- Unique Indexes: 45
+- Partial Indexes: 15
+- GIN Indexes: 29 (JSONB, arrays, full-text)
+- HNSW Indexes: 1 (vector search)
+- B-tree: 144 (standard lookups)
+
+RLS POLICIES:
+- Tables with RLS: 24/31
+- Total Policies: 53
+- Service Role Only: Several
+- Organization-Based: Most appropriate
+- Overly Permissive: 2 (synonym mappings, training data)
+
+====================================================================
+
+REMEDIATION ROADMAP
+
+IMMEDIATE (Day 1):
+1. Fix page_embeddings.domain_id FK: 30 min
+2. Clean up duplicate vector indexes: 20 min
+3. Add NOT NULL constraints: 20 min
+4. Total: ~1.5 hours
+
+THIS SPRINT:
+1. Implement transaction safety in chat API: 3-4 hours
+2. Add race condition prevention (scrape_jobs): 2-3 hours
+3. Fix RLS policies (5 fixes): 2-3 hours
+4. Add rollback procedures: 2 hours
+5. Add missing indexes: 1 hour
+6. Total: ~12-15 hours (2-3 days)
+
+NEXT SPRINT:
+1. Soft-delete implementation: 3-4 hours
+2. Audit logging system: 2-3 hours
+3. RLS performance optimization: 2-3 hours
+4. Input validation framework: 1-2 hours
+5. Total: ~8-12 hours (1-2 days)
+
+====================================================================
+
+KEY FILES REVIEWED
+
+Schema Documentation:
+- /home/user/Omniops/docs/01-ARCHITECTURE/database-schema.md (2.0)
+- /home/user/Omniops/docs/SUPABASE_SCHEMA.md (redirect)
+
+Migrations (27 files):
+- 000_complete_schema.sql (base)
+- 001_initial_migration.sql (infrastructure)
+- 20251020_add_multi_seat_organizations.sql (latest)
+- 20251022_add_shopify_support.sql (latest)
+
+Application Code:
+- /home/user/Omniops/lib/embeddings.ts (query patterns)
+- /home/user/Omniops/app/api/chat/route.ts (API patterns)
+- /home/user/Omniops/lib/safe-database.ts (safety utilities)
+
+====================================================================
+
+CONFIDENCE LEVEL: HIGH
+
+This analysis is based on:
+- Direct SQL schema inspection (31 tables)
+- Complete migration file review (27 files, 16K+ lines)
+- API endpoint code analysis
+- RLS policy examination
+- Foreign key relationship mapping
+- Index strategy evaluation
+
+The findings represent actual implementation issues, not hypothetical concerns.
+
+====================================================================
+
+NEXT STEPS
+
+1. Review full report: DATABASE_ANALYSIS_REPORT.md (965 lines)
+2. Prioritize critical fixes (5 items)
+3. Schedule sprint for high-priority items (8 items)
+4. Plan medium-priority backlog (12 items)
+5. Create detailed remediation tickets with SQL scripts
+6. Implement automated testing for each fix
+
+====================================================================
