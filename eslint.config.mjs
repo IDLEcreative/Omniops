@@ -69,8 +69,11 @@ const eslintConfig = [
       "omniops-scraper/**/*",
       ".git/**/*",
       
-      // Scripts directory 
+      // Scripts directory
       "scripts/**/*",
+
+      // Test samples directory (not part of production code)
+      "test-samples/**/*",
       
       // Generated/temporary files
       "*.tmp",

@@ -23,12 +23,12 @@ describe('Shopify API Client', () => {
   describe('Configuration', () => {
     it('should initialize with correct configuration', () => {
       expect(shopifyClient).toBeDefined();
-      // @ts-ignore - accessing private property for testing
+      // @ts-expect-error - accessing private property for testing
       expect(shopifyClient.shop).toBe('test-store.myshopify.com');
     });
 
     it('should use 2025-01 API version by default', () => {
-      // @ts-ignore - accessing private property for testing
+      // @ts-expect-error - accessing private property for testing
       expect(shopifyClient.apiVersion).toBe('2025-01');
     });
 
@@ -37,14 +37,14 @@ describe('Shopify API Client', () => {
         ...mockConfig,
         apiVersion: '2024-10',
       });
-      // @ts-ignore
+      // @ts-expect-error - accessing private property apiVersion for testing
       expect(client.apiVersion).toBe('2024-10');
     });
   });
 
   describe('URL Construction', () => {
     it('should build correct base URL', () => {
-      // @ts-ignore
+      // @ts-expect-error - accessing private property baseUrl for testing
       const baseUrl = shopifyClient.baseUrl;
       expect(baseUrl).toBe('https://test-store.myshopify.com/admin/api/2025-01');
     });
@@ -192,7 +192,7 @@ describe('API Endpoint Mapping', () => {
       accessToken: 'token',
     });
 
-    // @ts-ignore
+    // @ts-expect-error - accessing private property baseUrl for testing
     const baseUrl = client.baseUrl;
 
     expect(baseUrl).toContain('/admin/api/');
