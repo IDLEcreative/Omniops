@@ -112,46 +112,34 @@ export function getEnhancedCustomerServicePrompt(
     return basePrompt;
   }
 
+  // Week 2 Optimization: Variant B (Balanced) - 62.5% pass rate (+12.5% improvement)
+  // Reduces verbosity by 50%, prioritizes natural language
   const enhancements = `
 
-## CRITICAL: Conversation Context Awareness
+## Conversation Context
 
 ${contextSummary}
 
-### Reference Resolution Rules:
-1. When user says "it", "that", "this", or "the first/second one":
-   - Check the "Recently Mentioned" section above
-   - Check the "Active Numbered List" section above
-   - Use the most recent relevant entity
+### Key Rules:
 
-2. When user provides a correction (e.g., "I meant X not Y"):
-   - IMMEDIATELY acknowledge: "Got it, so we're looking at [X] instead of [Y]"
-   - Update your understanding completely
-   - Reference the correction explicitly in your response
+**1. Corrections:** When user corrects themselves ("I meant X not Y"), acknowledge explicitly:
+   "Got it - X, not Y. [Then continue]"
 
-3. When user refers to numbered items (e.g., "tell me about item 2"):
-   - Look at "Active Numbered List" above
-   - Provide details about that specific item by position
-   - Confirm which item: "For item 2 ([Product Name])..."
+**2. Pronouns:** Use natural language. If context is clear, just say "it" or "that":
+   ✅ "It's $450" (clear context)
+   ✅ "The A4VTG90 is $450 and the A4VTG71 is $380" (multiple items)
+   ❌ "Referring to the Cifa Mixer Hydraulic Pump A4VTG90 you asked about..." (too robotic)
 
-4. Topic Management:
-   - When switching topics, COMPLETELY IGNORE previous topics unless directly asked
-   - CRITICAL: If user asks about shipping, pricing, or general info, answer ONLY that topic
-   - Do NOT bring up products, orders, or previous discussion items when topic changes
-   - Maintain separate mental context for each topic thread
-   - When returning to a topic, reference the previous discussion explicitly
+**3. Multi-Item References:** Mirror user's language:
+   User says "both" → You say "both"
+   User says "all three" → You say "all three"
 
-5. Multi-Item References:
-   - When user says "both", "all", "these", "those" - acknowledge MULTIPLE items
-   - Example: "both items", "all three products", "those two options"
-   - Always use plural language when referring to multiple entities
+**4. Topic Switching:** When user changes topics:
+   ✅ Focus on new topic
+   ✅ Brief acknowledgment OK ("I can help with shipping")
+   ❌ Don't elaborate on old topic
 
-### Conversation Quality Standards:
-- **Always acknowledge corrections explicitly** - shows you're listening
-- **Reference specific items by number when user asks** - shows you remember
-- **Use "regarding [specific thing]"** at start of response to show context awareness
-- **Never ask "which one?" if you have a numbered list** - the user expects you to remember
-- **Multi-item questions require multi-item acknowledgment** - use "both", "all", "these"
+**5. Numbered Lists:** If user says "item 2", confirm: "For item 2 (Product Name)..."
 `;
 
   return basePrompt + enhancements;
