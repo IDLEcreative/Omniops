@@ -1,40 +1,91 @@
 import { NextResponse } from 'next/server';
 import { createClient } from '@supabase/supabase-js';
 
-export async function POST() {
+/**
+ * DEBUG/SETUP ENDPOINT - Development use only
+ *
+ * Initializes RAG system for a customer domain
+ *
+ * Usage:
+ *   GET /api/setup-rag?domain=example.com
+ *   POST /api/setup-rag (body: {domain: "example.com"})
+ */
+
+export async function GET(request: Request) {
+  return handleSetup(request);
+}
+
+export async function POST(request: Request) {
+  return handleSetup(request);
+}
+
+async function handleSetup(request: Request) {
+  // Prevent use in production without explicit flag
+  if (process.env.NODE_ENV === 'production' && !process.env.ENABLE_DEBUG_ENDPOINTS) {
+    return NextResponse.json(
+      { error: 'Debug endpoints disabled in production' },
+      { status: 403 }
+    );
+  }
+
   const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL!;
   const supabaseServiceRoleKey = process.env.SUPABASE_SERVICE_ROLE_KEY!;
   const supabase = createClient(supabaseUrl, supabaseServiceRoleKey);
-  
+
+  // Extract domain from query params or request body
+  const { searchParams } = new URL(request.url);
+  let domain = searchParams.get('domain');
+
+  // For POST requests, also check body
+  if (!domain && request.method === 'POST') {
+    try {
+      const body = await request.json();
+      domain = body.domain;
+    } catch {
+      // Body parsing failed, domain will remain null
+    }
+  }
+
+  if (!domain) {
+    return NextResponse.json(
+      {
+        error: 'domain parameter required',
+        usage: {
+          GET: '/api/setup-rag?domain=example.com',
+          POST: '/api/setup-rag with body: {domain: "example.com"}'
+        },
+        note: 'This is a development/testing endpoint'
+      },
+      { status: 400 }
+    );
+  }
+
   const results: any = {
     customer_config: null,
     embedding_test: null,
     function_sql: null
   };
-  
+
   try {
     // Step 1: Add or update customer config
-    console.log('Setting up customer config...');
-    
+    console.log(`Setting up customer config for ${domain}...`);
+
     const { data: existingConfig } = await supabase
       .from('customer_configs')
       .select('*')
-      .eq('domain', 'thompsonseparts.co.uk')
+      .eq('domain', domain)
       .single();
     
     if (!existingConfig) {
       const { data: newConfig, error: configError } = await supabase
         .from('customer_configs')
         .insert({
-          domain: 'thompsonseparts.co.uk',
-          company_name: 'Thompson eParts',
-          business_name: 'Thompson eParts Ltd',
-          woocommerce_enabled: true,
-          woocommerce_url: 'https://www.thompsonseparts.co.uk',
-          woocommerce_consumer_key: process.env.WOOCOMMERCE_CONSUMER_KEY || '',
-          woocommerce_consumer_secret: process.env.WOOCOMMERCE_CONSUMER_SECRET || '',
-          admin_email: 'admin@thompsonseparts.co.uk',
-          welcome_message: 'Welcome to Thompson eParts! How can I help you today?',
+          domain: domain,
+          company_name: `Customer ${domain}`,
+          business_name: `Business ${domain}`,
+          woocommerce_enabled: false,
+          admin_email: `admin@${domain}`,
+          welcome_message: `Welcome! How can I help you today?`,
           primary_color: '#0066cc',
           chat_enabled: true,
           created_at: new Date().toISOString(),
@@ -42,15 +93,15 @@ export async function POST() {
         })
         .select()
         .single();
-      
+
       if (configError) {
-        // Try without WooCommerce credentials
+        // Try without optional fields
         const { data: simpleConfig, error: simpleError } = await supabase
           .from('customer_configs')
           .insert({
-            domain: 'thompsonseparts.co.uk',
-            company_name: 'Thompson eParts',
-            admin_email: 'admin@thompsonseparts.co.uk',
+            domain: domain,
+            company_name: `Customer ${domain}`,
+            admin_email: `admin@${domain}`,
             chat_enabled: true
           })
           .select()
@@ -140,9 +191,10 @@ WHERE routine_schema = 'public' AND routine_name = 'search_embeddings';
     
     return NextResponse.json({
       success: true,
+      domain,
       results,
       instructions: [
-        '✅ Customer config has been set up for thompsonseparts.co.uk',
+        `✅ Customer config has been set up for ${domain}`,
         `✅ Found ${results.embedding_test.total_embeddings} embeddings ready to use`,
         '⚠️  IMPORTANT: You need to manually create the search function:',
         '1. Go to your Supabase dashboard',

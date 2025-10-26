@@ -1,17 +1,56 @@
 import { NextResponse } from 'next/server';
 import { createClient } from '@supabase/supabase-js';
 
-export async function POST() {
+/**
+ * DEBUG/SETUP ENDPOINT - Development use only
+ *
+ * Fixes RAG configuration for a customer domain
+ *
+ * Usage:
+ *   POST /api/fix-rag (body: {domain: "example.com"})
+ */
+
+export async function POST(request: Request) {
+  // Prevent use in production without explicit flag
+  if (process.env.NODE_ENV === 'production' && !process.env.ENABLE_DEBUG_ENDPOINTS) {
+    return NextResponse.json(
+      { error: 'Debug endpoints disabled in production' },
+      { status: 403 }
+    );
+  }
+
   const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL!;
   const supabaseServiceRoleKey = process.env.SUPABASE_SERVICE_ROLE_KEY!;
   const supabase = createClient(supabaseUrl, supabaseServiceRoleKey);
-  
+
+  // Extract domain from request body
+  let domain: string | null = null;
+  try {
+    const body = await request.json();
+    domain = body.domain;
+  } catch {
+    // Body parsing failed
+  }
+
+  if (!domain) {
+    return NextResponse.json(
+      {
+        error: 'domain parameter required',
+        usage: {
+          POST: '/api/fix-rag with body: {domain: "example.com"}'
+        },
+        note: 'This is a development/testing endpoint'
+      },
+      { status: 400 }
+    );
+  }
+
   const results: any = {
     function_creation: null,
     customer_config: null,
     test_search: null
   };
-  
+
   try {
     // Step 1: Create the search_embeddings RPC function
     console.log('Creating search_embeddings function...');
@@ -68,26 +107,25 @@ export async function POST() {
       results.function_creation = { status: 'success' };
     }
     
-    // Step 2: Add customer_configs entry for thompsonseparts.co.uk
-    console.log('Adding customer config...');
-    
+    // Step 2: Add customer_configs entry for the domain
+    console.log(`Adding customer config for ${domain}...`);
+
     // First check if it already exists
     const { data: existingConfig } = await supabase
       .from('customer_configs')
       .select('id, domain')
-      .eq('domain', 'thompsonseparts.co.uk')
+      .eq('domain', domain)
       .single();
-    
+
     if (!existingConfig) {
       const { data: newConfig, error: configError } = await supabase
         .from('customer_configs')
         .insert({
-          domain: 'thompsonseparts.co.uk',
-          company_name: 'Thompson eParts',
-          business_name: 'Thompson eParts Ltd',
-          woocommerce_enabled: true,
-          woocommerce_url: 'https://www.thompsonseparts.co.uk',
-          admin_email: 'admin@thompsonseparts.co.uk',
+          domain: domain,
+          company_name: `Customer ${domain}`,
+          business_name: `Business ${domain}`,
+          woocommerce_enabled: false,
+          admin_email: `admin@${domain}`,
           created_at: new Date().toISOString()
         })
         .select()
@@ -130,10 +168,11 @@ export async function POST() {
     
     return NextResponse.json({
       success: true,
+      domain,
       results,
       next_steps: [
         'The search_embeddings function may need to be created via SQL migration',
-        'Customer config has been set up for thompsonseparts.co.uk',
+        `Customer config has been set up for ${domain}`,
         'The chat API should now be able to find and use the training data'
       ]
     });

@@ -68,25 +68,25 @@ export class CustomerServiceAgent implements ECommerceAgent {
     - For "its for [category]" - ALWAYS show specific products if available
     - Don't just link to categories if you have actual product data
     - Present products first, THEN mention the category for more options
-    - Example: "its for agriculture" → Show Agri Flip if in context, THEN link to category
+    - Example: "its for [category]" → Show relevant products if in context, THEN link to category
     
     Formatting Requirements:
     - Use COMPACT markdown links: [Product Name](url) - never show raw URLs
     - CRITICAL: Each bullet point MUST be on a separate line with DOUBLE line breaks between
-    - Remove redundant text from product names (e.g., "- Thompsons E Parts")
+    - Remove redundant text from product names (e.g., "- [COMPANY_NAME]")
     - Keep responses concise and scannable (aim for 2–4 short sentences or up to 8 brief bullets)
     - Avoid long paragraphs - break information into readable chunks
-    
+
     Example product listing (MUST follow this format):
     Here are the available options:
-    
-    • [Cifa Mixer Chute Pump](url)
-    
-    • [Hydraulic Pump A4VTG71](url)
-    
-    • [Water Pump Cover](url)
-    
-    NOT: "• [Pump1](url) • [Pump2](url) • [Pump3](url)" (all on one line)`;
+
+    • [Product Name](url)
+
+    • [Another Product](url)
+
+    • [Third Product](url)
+
+    NOT: "• [Product1](url) • [Product2](url) • [Product3](url)" (all on one line)`;
     
     if (verificationLevel === 'full') {
       return `${basePrompt}

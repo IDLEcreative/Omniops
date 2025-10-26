@@ -241,20 +241,22 @@ let domainCacheInstance: DomainCacheService | null = null;
 export function getDomainCache(): DomainCacheService {
   if (!domainCacheInstance) {
     domainCacheInstance = new DomainCacheService();
-    
-    // Preload common domains on initialization
-    const commonDomains = [
-      'thompsonseparts.co.uk',
-      'localhost',
-      '127.0.0.1'
-    ];
-    
-    // Non-blocking preload
-    domainCacheInstance.preloadDomains(commonDomains).catch(err => {
-      console.error('[DomainCache] Preload failed:', err);
-    });
+
+    // Preload domains from environment variable (configurable per deployment)
+    // Set CACHE_PRELOAD_DOMAINS='example.com,localhost' to enable preloading
+    // This prevents hardcoding specific domains and maintains multi-tenant architecture
+    const commonDomains = process.env.CACHE_PRELOAD_DOMAINS
+      ? process.env.CACHE_PRELOAD_DOMAINS.split(',').map(d => d.trim()).filter(Boolean)
+      : [];
+
+    // Non-blocking preload (only if domains are configured)
+    if (commonDomains.length > 0) {
+      domainCacheInstance.preloadDomains(commonDomains).catch(err => {
+        console.error('[DomainCache] Preload failed:', err);
+      });
+    }
   }
-  
+
   return domainCacheInstance;
 }
 

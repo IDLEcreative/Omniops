@@ -5,20 +5,16 @@
 
 import { searchSimilarContent } from './embeddings';
 
-// Define common queries that should be pre-cached for each domain
-const COMMON_QUERIES_BY_DOMAIN: Record<string, string[]> = {
-  'thompsonseparts.co.uk': [
-    'Cifa',
-    'hydraulic pump',
-    'tipper',
-    'valve',
-    'cylinder',
-    'Cifa products',
-    'all Cifa',
-    'pump',
-    'parts'
-  ]
-};
+// REMOVED: Hardcoded Thompson's domain violated multi-tenant architecture
+// Common queries should be loaded from database per domain configuration
+// See customer_configs table for domain-specific settings or consider implementing
+// a cache warming strategy that learns from actual user query patterns
+//
+// Future implementation options:
+// 1. Store common queries in customer_configs JSON field
+// 2. Analyze query logs to identify frequently searched terms per domain
+// 3. Use category/product taxonomy from scraped content
+const COMMON_QUERIES_BY_DOMAIN: Record<string, string[]> = {};
 
 /**
  * Warm the cache with common queries

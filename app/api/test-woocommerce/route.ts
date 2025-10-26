@@ -1,18 +1,52 @@
 import { NextResponse } from 'next/server';
 import { createClient } from '@supabase/supabase-js';
 
-export async function GET() {
+/**
+ * DEBUG/TESTING ENDPOINT - Development use only
+ *
+ * Tests WooCommerce API connectivity and data sync
+ *
+ * Usage:
+ *   GET /api/test-woocommerce?domain=example.com
+ */
+
+export async function GET(request: Request) {
+  // Prevent use in production without explicit flag
+  if (process.env.NODE_ENV === 'production' && !process.env.ENABLE_DEBUG_ENDPOINTS) {
+    return NextResponse.json(
+      { error: 'Debug endpoints disabled in production' },
+      { status: 403 }
+    );
+  }
+
   try {
+    // Extract domain from query params
+    const { searchParams } = new URL(request.url);
+    const domain = searchParams.get('domain');
+
+    if (!domain) {
+      return NextResponse.json(
+        {
+          error: 'domain parameter required',
+          usage: {
+            GET: '/api/test-woocommerce?domain=example.com'
+          },
+          note: 'This is a development/testing endpoint'
+        },
+        { status: 400 }
+      );
+    }
+
     // Initialize Supabase client
     const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL!;
     const supabaseServiceKey = process.env.SUPABASE_SERVICE_ROLE_KEY!;
     const supabase = createClient(supabaseUrl, supabaseServiceKey);
 
-    // Fetch Thompson's E-Parts configuration
+    // Fetch customer configuration
     const { data: config, error: configError } = await supabase
       .from('customer_configs')
       .select('*')
-      .eq('domain', 'thompsonseparts.co.uk')
+      .eq('domain', domain)
       .single();
 
     if (configError) {
@@ -23,8 +57,9 @@ export async function GET() {
     }
 
     if (!config) {
-      return NextResponse.json({ 
-        error: 'Thompson\'s E-Parts not configured' 
+      return NextResponse.json({
+        error: `Domain '${domain}' not configured`,
+        hint: 'Run /api/setup-rag first to create customer configuration'
       }, { status: 404 });
     }
 

@@ -283,28 +283,19 @@ export class DynamicSynonymExpander {
   }
 
   /**
-   * Initialize Thompson's eParts specific synonyms (one-time setup)
+   * @deprecated This method was removed to enforce multi-tenant architecture.
+   * Domain-specific synonyms should be loaded from the database via the
+   * customer_configs table, not hardcoded in application code.
+   *
+   * Previously contained Thompson's eParts-specific synonyms for equipment,
+   * brands, and technical terms.
+   *
+   * TODO: Implement database-driven synonym loading:
+   * 1. Create domain_synonym_mappings table (already exists)
+   * 2. Load synonyms at runtime based on domain (already implemented via loadSynonymsForTerm)
+   * 3. Support per-tenant synonym customization via admin UI
+   * 4. Provide migration tool for legacy hardcoded synonyms
    */
-  public async initializeThompsonsSynonyms(domainId: string): Promise<void> {
-    const thompsonsSynonyms = [
-      { term: 'forest equipment', synonyms: ['forest loader', 'forestry', 'logging equipment'] },
-      { term: 'hydraulic', synonyms: ['hyd', 'fluid power'] },
-      { term: 'chainsaw', synonyms: ['chain saw', 'cutting tool'] },
-      { term: 'tough', synonyms: ['extreme', 'harsh', 'severe'] },
-      { term: 'weather', synonyms: ['climatic conditions', 'climate'] },
-      { term: 'tank', synonyms: ['reservoir', 'container'] },
-      { term: 'cat', synonyms: ['caterpillar'] },
-      { term: 'jd', synonyms: ['john deere'] },
-      { term: 'excavator', synonyms: ['digger', 'earthmover'] },
-      { term: 'pump', synonyms: ['hydraulic pump', 'fluid pump'] }
-    ];
-
-    for (const { term, synonyms } of thompsonsSynonyms) {
-      await this.addDomainSynonym(domainId, term, synonyms);
-    }
-
-    console.log('[SynonymExpander] Thompson\'s eParts synonyms initialized');
-  }
 }
 
 // Export singleton instance

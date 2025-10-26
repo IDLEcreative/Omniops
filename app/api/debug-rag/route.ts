@@ -2,28 +2,62 @@ import { NextResponse } from 'next/server';
 import { createClient } from '@supabase/supabase-js';
 import OpenAI from 'openai';
 
-export async function GET() {
+/**
+ * DEBUG ENDPOINT - Development use only
+ *
+ * Debugs RAG system for a specific domain
+ *
+ * Usage:
+ *   GET /api/debug-rag?domain=example.com
+ */
+
+export async function GET(request: Request) {
+  // Prevent use in production without explicit flag
+  if (process.env.NODE_ENV === 'production' && !process.env.ENABLE_DEBUG_ENDPOINTS) {
+    return NextResponse.json(
+      { error: 'Debug endpoints disabled in production' },
+      { status: 403 }
+    );
+  }
+
   const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL;
   const supabaseServiceRoleKey = process.env.SUPABASE_SERVICE_ROLE_KEY;
-  
+
   if (!supabaseUrl || !supabaseServiceRoleKey) {
     return NextResponse.json({ error: 'Missing environment variables' }, { status: 500 });
   }
-  
+
+  // Extract domain from query params
+  const { searchParams } = new URL(request.url);
+  const domain = searchParams.get('domain');
+
+  if (!domain) {
+    return NextResponse.json(
+      {
+        error: 'domain parameter required',
+        usage: {
+          GET: '/api/debug-rag?domain=example.com'
+        },
+        note: 'This is a development/testing endpoint'
+      },
+      { status: 400 }
+    );
+  }
+
   const supabase = createClient(supabaseUrl, supabaseServiceRoleKey);
-  
+
   const openai = new OpenAI({
     apiKey: process.env.OPENAI_API_KEY,
   });
-  
+
   const debug: any = {};
-  
+
   try {
     // 1. Check if customer_configs has the domain
     const { data: config, error: configError } = await supabase
       .from('customer_configs')
       .select('*')
-      .eq('domain', 'thompsonseparts.co.uk')
+      .eq('domain', domain)
       .single();
     
     debug.customer_config = {
@@ -94,7 +128,7 @@ export async function GET() {
     try {
       libSearchResults = await searchSimilarContent(
         testQuery,
-        'thompsonseparts.co.uk',
+        domain,
         3,
         0.5
       );
@@ -121,15 +155,16 @@ export async function GET() {
     };
     
     return NextResponse.json({
+      domain,
       debug,
       analysis: {
         has_customer_config: !!config,
-        has_search_function: !searchError || !searchError.includes('Could not find'),
+        has_search_function: !searchError || (typeof searchError === 'string' && !searchError.includes('Could not find')) || (typeof searchError === 'object' && searchError.message && !searchError.message.includes('Could not find')),
         search_returning_results: (searchResults?.length || 0) > 0,
         lib_search_working: (libSearchResults?.length || 0) > 0,
         raw_data_exists: (sampleEmbeddings?.length || 0) > 0
       },
-      likely_issue: determineIssue(debug)
+      likely_issue: determineIssue(debug, domain)
     });
     
   } catch (err: any) {
@@ -140,9 +175,9 @@ export async function GET() {
   }
 }
 
-function determineIssue(debug: any): string {
+function determineIssue(debug: any, domain: string): string {
   if (!debug.customer_config?.found) {
-    return "Customer config not found - need to create entry for thompsonseparts.co.uk";
+    return `Customer config not found - need to create entry for ${domain}`;
   }
   if (debug.search_function?.error?.includes('Could not find')) {
     return "search_embeddings function doesn't exist - run the SQL in Supabase dashboard";

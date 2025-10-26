@@ -108,19 +108,7 @@ export async function searchSimilarContentEnhanced(
     ]);
     
     console.log(`[Enhanced Search] Parallel results - Keywords: ${keywordResults.length}, Title/URL: ${metadataResults.length}`);
-    
-    // Log if Agri Flip is in any of the results
-    const agriFlipInKeywords = keywordResults.some((r: SearchResult) => r.url?.includes('agri-flip'));
-    const agriFlipInMetadata = metadataResults.some((r: SearchResult) => r.url?.includes('agri-flip'));
-    const agriFlipInSemantic = mapped.some((r: SearchResult) => r.url?.includes('agri-flip'));
-    
-    if (query.toLowerCase().includes('agri')) {
-      console.log('[Enhanced Search] 🔍 Agri Flip tracking:');
-      console.log(`  - In semantic results: ${agriFlipInSemantic ? '✅ YES' : '❌ NO'}`);
-      console.log(`  - In keyword results: ${agriFlipInKeywords ? '✅ YES' : '❌ NO'}`);
-      console.log(`  - In title/URL results: ${agriFlipInMetadata ? '✅ YES' : '❌ NO'}`);
-    }
-    
+
     // Merge results, deduplicating by URL
     const allResults = new Map<string, any>();
     
@@ -150,9 +138,6 @@ export async function searchSimilarContentEnhanced(
     metadataResults.forEach((r: SearchResult) => {
       if (!allResults.has(r.url)) {
         allResults.set(r.url, { ...r, source: 'title/url' });
-        if (r.url?.includes('agri-flip')) {
-          console.log(`[Enhanced Search] 🎯 Adding Agri Flip from title/URL search!`);
-        }
       } else {
         // Boost existing result
         const existing = allResults.get(r.url);
@@ -178,39 +163,9 @@ export async function searchSimilarContentEnhanced(
     
     console.log(`[Enhanced Search] After sorting, have ${mapped.length} results (will slice to ${limit})`);
 
-    // Check if Agri Flip is in the sorted results before slicing
-    const agriFlipIndex = mapped.findIndex((r: SearchResult) => r.url?.includes('agri-flip'));
-    if (agriFlipIndex >= 0) {
-      console.log(`[Enhanced Search] 📍 Agri Flip is at position ${agriFlipIndex + 1} before slicing`);
-      if (agriFlipIndex >= limit) {
-        console.log(`[Enhanced Search] ⚠️ WARNING: Agri Flip will be cut off by limit=${limit}!`);
-      }
-    }
-    
-    // Special case: If we're searching for agricultural products and Agri Flip is just outside the limit,
-    // make sure to include it by boosting its position
-    if (query.toLowerCase().includes('agri')) {
-      const agriFlipIndex = mapped.findIndex((r: SearchResult) => r.url?.includes('agri-flip'));
-      if (agriFlipIndex >= limit && agriFlipIndex < limit + 5) {
-        console.log(`[Enhanced Search] Boosting Agri Flip from position ${agriFlipIndex + 1} into top results`);
-        // Move Agri Flip to position 5 (high enough to be visible but not overwhelming)
-        const agriFlipItem = mapped[agriFlipIndex];
-        mapped.splice(agriFlipIndex, 1); // Remove from current position
-        if (agriFlipItem) {
-          mapped.splice(4, 0, agriFlipItem); // Insert at position 5
-        }
-      }
-    }
-    
     mapped = mapped.slice(0, limit);
     
     console.log(`[Enhanced Search] Final merged results: ${mapped.length} items`);
-    
-    // Final check for Agri Flip
-    const agriFlipInFinal = mapped.some((r: SearchResult) => r.url?.includes('agri-flip'));
-    if (query.toLowerCase().includes('agri')) {
-      console.log(`[Enhanced Search] 🎯 Agri Flip in FINAL results: ${agriFlipInFinal ? '✅ YES' : '❌ NO'}`);
-    }
 
     // Log top results for debugging
     if (mapped.length > 0) {
@@ -218,11 +173,6 @@ export async function searchSimilarContentEnhanced(
       mapped.slice(0, 5).forEach((r: SearchResult, i: number) => {
         const source = (r as any).source || 'semantic';
         console.log(`  ${i + 1}. [${source}] ${r.title} (${(r.similarity * 100).toFixed(0)}%)`);
-        if (r.url?.includes('agri-flip')) {
-          console.log('     🎯 THIS IS AGRI FLIP!');
-        } else if (r.url?.includes('agri')) {
-          console.log('     ✓ Contains "agri" in URL');
-        }
       });
     }
   }

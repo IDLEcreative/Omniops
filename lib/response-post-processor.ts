@@ -105,10 +105,17 @@ export class ResponsePostProcessor {
    */
   private static generateNaturalAppendix(products: ContextChunk[]): string {
     let appendix = '\n\nBased on what you mentioned, these products might be particularly relevant:\n\n';
-    
+
+    // Get brand suffix from environment (e.g., "Thompson's eParts")
+    const brandSuffix = process.env.NEXT_PUBLIC_COMPANY_NAME || '';
+    const brandPattern = brandSuffix ? new RegExp(` - ${brandSuffix.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')}.*$`, 'i') : null;
+
     products.forEach((product, index) => {
       // Extract key info from product
-      const title = product.title.replace(/ - Thompsons.*$/, '').trim();
+      let title = product.title.trim();
+      if (brandPattern) {
+        title = title.replace(brandPattern, '').trim();
+      }
       
       // Try to extract a brief description
       let description = '';
@@ -134,12 +141,19 @@ export class ResponsePostProcessor {
    */
   private static generateListAppendix(products: ContextChunk[]): string {
     let appendix = '\n\nRelevant products for your needs:\n\n';
-    
+
+    // Get brand suffix from environment (e.g., "Thompson's eParts")
+    const brandSuffix = process.env.NEXT_PUBLIC_COMPANY_NAME || '';
+    const brandPattern = brandSuffix ? new RegExp(` - ${brandSuffix.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')}.*$`, 'i') : null;
+
     products.forEach(product => {
-      const title = product.title.replace(/ - Thompsons.*$/, '').trim();
+      let title = product.title.trim();
+      if (brandPattern) {
+        title = title.replace(brandPattern, '').trim();
+      }
       appendix += `• [${title}](${product.url})\n`;
     });
-    
+
     return appendix + '\n';
   }
 
@@ -149,9 +163,16 @@ export class ResponsePostProcessor {
   private static generateSubtleAppendix(products: ContextChunk[]): string {
     const product = products[0]; // Just mention the top one
     if (!product) return '';
-    
-    const title = product.title.replace(/ - Thompsons.*$/, '').trim();
-    
+
+    // Get brand suffix from environment (e.g., "Thompson's eParts")
+    const brandSuffix = process.env.NEXT_PUBLIC_COMPANY_NAME || '';
+    const brandPattern = brandSuffix ? new RegExp(` - ${brandSuffix.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')}.*$`, 'i') : null;
+
+    let title = product.title.trim();
+    if (brandPattern) {
+      title = title.replace(brandPattern, '').trim();
+    }
+
     return `\n\nYou might also want to check out our [${title}](${product.url}) which could be suitable for your needs.\n`;
   }
 

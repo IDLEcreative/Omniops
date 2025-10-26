@@ -52,6 +52,13 @@
     "docs:audit": "tsx scripts/audit-doc-versions.ts",
     "docs:audit:report": "tsx scripts/audit-doc-versions.ts --report",
     "docs:check-reviews": "tsx scripts/schedule-doc-reviews.ts --check",
+    "audit:brands": "tsx scripts/audit-brand-references.ts",
+    "monitor:logs": "bash scripts/monitor-brand-references.sh",
+    "debug:setup-rag": "curl \"http://localhost:3000/api/setup-rag?domain=",
+    "debug:fix-rag": "curl -X POST \"http://localhost:3000/api/fix-rag\" -H \"Content-Type: application/json\" -d '{\"domain\":\"",
+    "debug:test-woo": "curl \"http://localhost:3000/api/test-woocommerce?domain=",
+    "debug:rag": "curl \"http://localhost:3000/api/debug-rag?domain=",
+    "debug:fix-config": "curl -X POST \"http://localhost:3000/api/fix-customer-config\" -H \"Content-Type: application/json\" -d '{\"domain\":\"",
     "prepare": "husky"
   },
   "dependencies": {

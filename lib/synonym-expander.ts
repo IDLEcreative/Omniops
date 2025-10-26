@@ -4,7 +4,9 @@
  */
 
 export class SynonymExpander {
-  // Comprehensive synonym mappings for Thompson's eParts domain
+  // Comprehensive synonym mappings for product search enhancement
+  // Note: This static map should eventually be replaced with database-driven
+  // domain-specific synonyms loaded from the customer_configs table
   private static synonymMap: Record<string, string[]> = {
     // Weather and environmental terms
     "tough": ["extreme", "harsh", "severe", "difficult", "challenging", "rugged"],

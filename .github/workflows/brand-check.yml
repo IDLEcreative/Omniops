@@ -1,0 +1,32 @@
+name: Brand Reference Check
+
+on:
+  pull_request:
+    branches: [main, develop]
+  push:
+    branches: [main, develop]
+
+jobs:
+  brand-audit:
+    runs-on: ubuntu-latest
+
+    steps:
+      - uses: actions/checkout@v3
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v3
+        with:
+          node-version: '18'
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Run brand reference audit
+        run: npx tsx scripts/audit-brand-references.ts
+
+      - name: Check for violations
+        if: failure()
+        run: |
+          echo "::error::Brand references detected in code"
+          echo "::error::Please review audit output above"
+          exit 1

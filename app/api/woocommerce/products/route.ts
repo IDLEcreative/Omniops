@@ -117,15 +117,23 @@ export async function POST(request: NextRequest) {
 // GET endpoint for simple product listing
 export async function GET(request: NextRequest) {
   const searchParams = request.nextUrl.searchParams;
-  const domain = searchParams.get('domain') || 'thompsonseparts.co.uk';
+  const domain = searchParams.get('domain');
+
+  if (!domain) {
+    return NextResponse.json(
+      { error: 'domain parameter is required for security and multi-tenant isolation' },
+      { status: 400 }
+    );
+  }
+
   const per_page = parseInt(searchParams.get('per_page') || '10');
   const stock_status = searchParams.get('stock_status') as any;
-  
+
   // For the test page, fetch in-stock products by default
   return POST(new NextRequest(request.url, {
     method: 'POST',
-    body: JSON.stringify({ 
-      domain, 
+    body: JSON.stringify({
+      domain,
       per_page,
       stock_status: stock_status || 'instock',
     }),
