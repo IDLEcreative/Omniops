@@ -112,7 +112,7 @@ export async function GET(request: NextRequest) {
       conversationsQuery = conversationsQuery.limit(limit + 1);
 
       const { data: recentConversations, error } = await conversationsQuery;
-      
+
       if (!error && recentConversations) {
         // Determine if there are more results
         const hasMore = recentConversations.length > limit;
@@ -120,7 +120,33 @@ export async function GET(request: NextRequest) {
           ? recentConversations.slice(0, limit)
           : recentConversations;
 
-        // Try to get messages for each conversation
+        // OPTIMIZATION: Batch fetch all messages in a single query instead of N queries
+        const conversationIds = conversationsToProcess.map(c => c.id);
+
+        // Fetch all messages for all conversations in one query
+        const { data: allMessages } = await supabase
+          .from('messages')
+          .select('conversation_id, content, role, created_at')
+          .in('conversation_id', conversationIds)
+          .eq('role', 'user')
+          .order('created_at', { ascending: false });
+
+        // Group messages by conversation_id for O(1) lookups
+        const messagesByConversation = new Map<string, Array<{
+          conversation_id: string;
+          content: string;
+          role: string;
+          created_at: string;
+        }>>();
+
+        allMessages?.forEach(msg => {
+          if (!messagesByConversation.has(msg.conversation_id)) {
+            messagesByConversation.set(msg.conversation_id, []);
+          }
+          messagesByConversation.get(msg.conversation_id)!.push(msg);
+        });
+
+        // Process each conversation with O(1) message lookup
         for (const conv of conversationsToProcess) {
           const metadata = conv.metadata || {};
 
@@ -148,64 +174,32 @@ export async function GET(request: NextRequest) {
             languageCounts[language] = (languageCounts[language] || 0) + 1;
           }
 
-          try {
-            const { data: messages } = await supabase
-              .from('messages')
-              .select('content, role, created_at')
-              .eq('conversation_id', conv.id)
-              .eq('role', 'user')
-              .order('created_at', { ascending: false })
-              .limit(1);
+          // Get messages from the batched Map
+          const messages = messagesByConversation.get(conv.id) || [];
+          const firstUserMessage = messages[0]; // Already sorted by created_at DESC
 
-            const firstUserMessage = messages?.[0];
+          // Determine language for this conversation
+          const metadataLanguage =
+            typeof metadata.language === 'string'
+              ? metadata.language
+              : metadata.customer?.language || metadata.customerLanguage;
+          const language = metadataLanguage
+            ? String(metadataLanguage).trim()
+            : 'Unknown';
 
-            // Determine language for this conversation
-            const metadataLanguage =
-              typeof metadata.language === 'string'
-                ? metadata.language
-                : metadata.customer?.language || metadata.customerLanguage;
-            const language = metadataLanguage
-              ? String(metadataLanguage).trim()
-              : 'Unknown';
-
-            recent.push({
-              id: conv.id,
-              message: firstUserMessage?.content?.substring(0, 100) || 'No message',
-              timestamp: firstUserMessage?.created_at || conv.created_at,
-              status,
-              customerName:
-                (metadata.customer && typeof metadata.customer.name === 'string'
-                  ? metadata.customer.name
-                  : metadata.customer_name) || null,
-              metadata: {
-                language
-              }
-            });
-          } catch (msgError) {
-            console.warn('[Dashboard] Failed to load last message preview', msgError);
-            // If we can't get messages, use conversation metadata
-            const metadataLanguage =
-              typeof metadata.language === 'string'
-                ? metadata.language
-                : metadata.customer?.language || metadata.customerLanguage;
-            const language = metadataLanguage
-              ? String(metadataLanguage).trim()
-              : 'Unknown';
-
-            recent.push({
-              id: conv.id,
-              message: 'Conversation started',
-              timestamp: conv.created_at,
-              status,
-              customerName:
-                (metadata.customer && typeof metadata.customer.name === 'string'
-                  ? metadata.customer.name
-                  : metadata.customer_name) || null,
-              metadata: {
-                language
-              }
-            });
-          }
+          recent.push({
+            id: conv.id,
+            message: firstUserMessage?.content?.substring(0, 100) || 'No message',
+            timestamp: firstUserMessage?.created_at || conv.created_at,
+            status,
+            customerName:
+              (metadata.customer && typeof metadata.customer.name === 'string'
+                ? metadata.customer.name
+                : metadata.customer_name) || null,
+            metadata: {
+              language
+            }
+          });
         }
       }
     } catch (error) {

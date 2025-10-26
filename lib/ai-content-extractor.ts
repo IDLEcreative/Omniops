@@ -159,14 +159,32 @@ export class AIContentExtractor extends ContentExtractor {
     });
 
     // Remove elements with minimal text content (likely navigation/ads)
+    // PERFORMANCE OPTIMIZATION: Build a link count map first to avoid O(n²) DOM queries
+    // Instead of querying all links for each element (10,000 elements = 10,000 queries),
+    // we query once and build a map (1 query + O(n) map building)
     const allElements = document.querySelectorAll('div, section, article, span');
+
+    // Single query for all links in the document
+    const allLinks = document.querySelectorAll('a');
+
+    // Build a map of link counts per element (single pass through links)
+    const linkCountMap = new Map<Element, number>();
+    allLinks.forEach(link => {
+      let parent = link.parentElement;
+      while (parent) {
+        linkCountMap.set(parent, (linkCountMap.get(parent) || 0) + 1);
+        parent = parent.parentElement;
+      }
+    });
+
+    // Now filter elements using O(1) map lookups instead of O(n) querySelectorAll
     allElements.forEach(element => {
       const text = element.textContent?.trim() || '';
       const childCount = element.children.length;
 
       // Remove elements that are likely navigation/ads
       if (text.length < 50 && childCount > 5) {
-        const linkCount = element.querySelectorAll('a').length;
+        const linkCount = linkCountMap.get(element) || 0; // O(1) lookup
         if (linkCount / childCount > 0.8) { // High link density
           element.remove();
           removedCount++;

@@ -60,29 +60,45 @@ export async function GET() {
       );
     }
 
-    // Get member counts for each organization
-    const organizationsWithRole = await Promise.all(
-      (memberships || []).map(async (membership: any) => {
-        // organization is returned as an array from nested select, get first element
+    // Extract organization IDs for batch member count query
+    const orgIds = (memberships || [])
+      .map(membership => {
+        const org = Array.isArray(membership.organization)
+          ? membership.organization[0]
+          : membership.organization;
+        return org?.id;
+      })
+      .filter(Boolean);
+
+    // Single batch query to get member counts for all organizations
+    const { data: memberData } = await supabase
+      .from('organization_members')
+      .select('organization_id')
+      .in('organization_id', orgIds);
+
+    // Build count map: organization_id -> member count
+    const countsByOrg = new Map<string, number>();
+    memberData?.forEach(member => {
+      const currentCount = countsByOrg.get(member.organization_id) || 0;
+      countsByOrg.set(member.organization_id, currentCount + 1);
+    });
+
+    // Apply member counts to organizations without additional queries
+    const organizationsWithRole = (memberships || [])
+      .map(membership => {
         const org = Array.isArray(membership.organization)
           ? membership.organization[0]
           : membership.organization;
 
         if (!org) return null;
 
-        // Count members
-        const { count } = await supabase
-          .from('organization_members')
-          .select('*', { count: 'exact', head: true })
-          .eq('organization_id', org.id);
-
         return {
           ...org,
           user_role: membership.role,
-          member_count: count || 0,
+          member_count: countsByOrg.get(org.id) || 0,
         };
       })
-    ).then(orgs => orgs.filter(Boolean)); // Filter out any nulls
+      .filter(Boolean); // Filter out any nulls
 
     return NextResponse.json({
       organizations: organizationsWithRole,

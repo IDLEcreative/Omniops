@@ -53,100 +53,180 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    // Process each conversation
+    // BATCHED VALIDATION: Fetch all conversations in a single query instead of N queries
+    // This eliminates the N+1 pattern for conversation verification
+    const { data: conversations, error: fetchError } = await supabase
+      .from('conversations')
+      .select('id, domain_id, metadata')
+      .in('id', conversationIds);
+
+    if (fetchError) {
+      return NextResponse.json(
+        {
+          error: 'Failed to fetch conversations',
+          message: fetchError.message
+        },
+        { status: 500 }
+      );
+    }
+
     const results: ActionResult[] = [];
+    const foundConversations = new Map(conversations?.map(c => [c.id, c]) || []);
 
-    for (const conversationId of conversationIds) {
-      try {
-        // Verify conversation exists
-        const { data: conv, error: convError } = await supabase
-          .from('conversations')
-          .select('id, domain_id, metadata')
-          .eq('id', conversationId)
-          .single();
+    // Track which conversations don't exist
+    const validConversationIds: string[] = [];
+    for (const id of conversationIds) {
+      if (!foundConversations.has(id)) {
+        results.push({
+          id,
+          success: false,
+          error: 'Conversation not found'
+        });
+      } else {
+        validConversationIds.push(id);
+      }
+    }
 
-        if (convError || !conv) {
-          results.push({
-            id: conversationId,
-            success: false,
-            error: 'Conversation not found'
-          });
-          continue;
-        }
+    // BATCHED OPERATIONS: Execute actions in bulk instead of individual queries
+    if (validConversationIds.length === 0) {
+      // All conversations not found, return early
+      return NextResponse.json({
+        success: true,
+        successCount: 0,
+        failureCount: results.length,
+        results
+      });
+    }
 
-        // Perform action based on type
-        if (action === 'assign_human') {
+    try {
+      if (action === 'assign_human') {
+        // Use Promise.allSettled to handle individual conversation metadata updates
+        // This is necessary because metadata structure varies per conversation
+        const assignmentTimestamp = new Date().toISOString();
+
+        const updatePromises = validConversationIds.map(async (id) => {
+          const conv = foundConversations.get(id)!;
           const updatedMetadata = {
-            ...(conv.metadata || {}),
+            ...(conv.metadata as Record<string, unknown> || {}),
             assigned_to_human: true,
-            assigned_at: new Date().toISOString(),
+            assigned_at: assignmentTimestamp,
             status: 'waiting'
           };
 
           const { error } = await supabase
             .from('conversations')
             .update({ metadata: updatedMetadata })
-            .eq('id', conversationId);
+            .eq('id', id);
 
-          results.push({
-            id: conversationId,
-            success: !error,
-            error: error?.message
-          });
-        } else if (action === 'close' || action === 'mark_resolved') {
+          return { id, error };
+        });
+
+        const updateResults = await Promise.allSettled(updatePromises);
+
+        updateResults.forEach((result) => {
+          if (result.status === 'fulfilled') {
+            results.push({
+              id: result.value.id,
+              success: !result.value.error,
+              error: result.value.error?.message
+            });
+          } else {
+            results.push({
+              id: 'unknown',
+              success: false,
+              error: result.reason
+            });
+          }
+        });
+      } else if (action === 'close' || action === 'mark_resolved') {
+        // Batch update all conversations to resolved status
+        const timestamp = new Date().toISOString();
+
+        // Use Promise.allSettled to handle individual conversation metadata updates
+        // This is necessary because metadata structure varies per conversation
+        const updatePromises = validConversationIds.map(async (id) => {
+          const conv = foundConversations.get(id)!;
           const updatedMetadata = {
-            ...(conv.metadata || {}),
+            ...(conv.metadata as Record<string, unknown> || {}),
             status: 'resolved'
           };
 
           const { error } = await supabase
             .from('conversations')
             .update({
-              ended_at: new Date().toISOString(),
+              ended_at: timestamp,
               metadata: updatedMetadata
             })
-            .eq('id', conversationId);
+            .eq('id', id);
 
-          results.push({
-            id: conversationId,
-            success: !error,
-            error: error?.message
-          });
-        } else if (action === 'delete') {
-          // Delete messages first (foreign key should cascade, but be explicit)
-          const { error: messagesError } = await supabase
-            .from('messages')
-            .delete()
-            .eq('conversation_id', conversationId);
+          return { id, error };
+        });
 
-          if (messagesError) {
+        const updateResults = await Promise.allSettled(updatePromises);
+
+        updateResults.forEach((result) => {
+          if (result.status === 'fulfilled') {
             results.push({
-              id: conversationId,
+              id: result.value.id,
+              success: !result.value.error,
+              error: result.value.error?.message
+            });
+          } else {
+            results.push({
+              id: 'unknown',
+              success: false,
+              error: result.reason
+            });
+          }
+        });
+      } else if (action === 'delete') {
+        // BATCHED DELETE: Delete all messages in a single query
+        const { error: messagesError } = await supabase
+          .from('messages')
+          .delete()
+          .in('conversation_id', validConversationIds);
+
+        if (messagesError) {
+          // If message deletion fails, mark all as failed
+          validConversationIds.forEach(id => {
+            results.push({
+              id,
               success: false,
               error: `Failed to delete messages: ${messagesError.message}`
             });
-            continue;
-          }
-
-          // Delete conversation
-          const { error } = await supabase
+          });
+        } else {
+          // BATCHED DELETE: Delete all conversations in a single query
+          const { error: conversationsError } = await supabase
             .from('conversations')
             .delete()
-            .eq('id', conversationId);
+            .in('id', validConversationIds);
 
-          results.push({
-            id: conversationId,
-            success: !error,
-            error: error?.message
-          });
+          if (conversationsError) {
+            validConversationIds.forEach(id => {
+              results.push({
+                id,
+                success: false,
+                error: conversationsError.message
+              });
+            });
+          } else {
+            // Mark all as successful
+            validConversationIds.forEach(id => {
+              results.push({ id, success: true });
+            });
+          }
         }
-      } catch (error) {
+      }
+    } catch (error) {
+      // Handle unexpected errors
+      validConversationIds.forEach(id => {
         results.push({
-          id: conversationId,
+          id,
           success: false,
           error: error instanceof Error ? error.message : 'Unknown error'
         });
-      }
+      });
     }
 
     const successCount = results.filter(r => r.success).length;
