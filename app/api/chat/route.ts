@@ -27,6 +27,8 @@ import { getCustomerServicePrompt, buildConversationMessages } from '@/lib/chat/
 import { getOpenAIClient } from '@/lib/chat/openai-client';
 import { ChatRequestSchema } from '@/lib/chat/request-validator';
 import { RouteDependencies, defaultDependencies } from '@/lib/chat/route-types';
+import { ConversationMetadataManager } from '@/lib/chat/conversation-metadata';
+import { parseAndTrackEntities } from '@/lib/chat/response-parser';
 
 // Dependencies interface and defaults imported from route-types module
 
@@ -138,9 +140,26 @@ export async function POST(
     // Get conversation history (increased limit for better context retention)
     const historyData = await getConversationHistory(conversationId, 20, adminSupabase);
 
+    // Load or create metadata manager
+    const { data: convMetadata } = await adminSupabase
+      .from('conversations')
+      .select('metadata')
+      .eq('id', conversationId)
+      .single();
+
+    const metadataManager = convMetadata?.metadata
+      ? ConversationMetadataManager.deserialize(JSON.stringify(convMetadata.metadata))
+      : new ConversationMetadataManager();
+
+    // Increment turn counter
+    metadataManager.incrementTurn();
+
+    // Generate enhanced context for AI
+    const enhancedContext = metadataManager.generateContextSummary();
+
     // Build conversation messages for OpenAI with system prompt
     const conversationMessages = buildConversationMessages(
-      getCustomerServicePrompt(),
+      getCustomerServicePrompt() + enhancedContext,
       historyData,
       message
     );
@@ -168,6 +187,15 @@ export async function POST(
 
     // Save assistant response
     await saveAssistantMessage(conversationId, finalResponse, adminSupabase);
+
+    // Parse and track entities from this conversation turn
+    await parseAndTrackEntities(finalResponse, message, metadataManager);
+
+    // Save metadata back to database
+    await adminSupabase
+      .from('conversations')
+      .update({ metadata: JSON.parse(metadataManager.serialize()) })
+      .eq('id', conversationId);
 
     // Complete telemetry with success
     await telemetry?.complete(finalResponse);
