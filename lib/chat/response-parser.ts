@@ -61,11 +61,20 @@ export class ResponseParser {
     userMessage: string
   ): Array<{ original: string; corrected: string }> {
     const correctionPatterns = [
+      // "Sorry/Actually, I meant X not Y"
       /(?:sorry|actually|no|wait)[,\s]+(?:i\s+meant|it'?s|i\s+said)\s+([^\s,]+)\s+(?:not|instead\s+of)\s+([^\s,]+)/i,
+      // "I meant X not Y" (without trigger word)
+      /i\s+meant\s+([^\s,]+)\s+(?:not|instead\s+of)\s+([^\s,]+)/i,
+      // "not Y but X"
       /not\s+([^\s,]+)[,\s]*(?:but|it'?s)\s+([^\s,]+)/i,
+      // "X → Y" or "X -> Y"
       /([^\s,]+)\s*(?:→|->)\s*([^\s,]+)/,
+      // "I said X not Y"
       /i\s+said\s+([^\s,]+)[,\s]+not\s+([^\s,]+)/i,
-      /it'?s\s+([^\s,]+)\s+not\s+([^\s,]+)/i
+      // "it's X not Y"
+      /it'?s\s+([^\s,]+)\s+not\s+([^\s,]+)/i,
+      // "Actually X not Y" (without "I meant")
+      /(?:actually|sorry)[,\s]+([^\s,]+)\s+not\s+([^\s,]+)/i
     ];
 
     for (const pattern of correctionPatterns) {
@@ -75,7 +84,13 @@ export class ResponseParser {
         let original = match[2].trim();
 
         // For "not Y but X" pattern, swap them (Y is original, X is corrected)
-        if (pattern === correctionPatterns[1]) { // /not\s+([^\s,]+)[,\s]*(?:but|it'?s)\s+([^\s,]+)/i
+        if (pattern === correctionPatterns[2]) { // /not\s+([^\s,]+)[,\s]*(?:but|it'?s)\s+([^\s,]+)/i
+          [original, corrected] = [corrected, original];
+        }
+
+        // For arrow notation "X → Y", the arrow points from original to corrected
+        // So X is original, Y is corrected (need to swap current assignment)
+        if (pattern === correctionPatterns[3]) { // /([^\s,]+)\s*(?:→|->)\s*([^\s,]+)/
           [original, corrected] = [corrected, original];
         }
 

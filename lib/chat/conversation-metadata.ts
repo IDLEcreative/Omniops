@@ -53,9 +53,10 @@ export class ConversationMetadataManager {
   /**
    * Resolve a reference (pronouns, "the first one", "item 2", etc.)
    * Handles:
-   * - Pronouns: "it", "that", "this", "them"
+   * - Pronouns: "it", "that", "this", "them", "one"
    * - Ordinals: "the first one", "second one"
    * - Numbered items: "item 2", "number 3"
+   * - Generic "one": "which one", "this one", "that one", or just "one"
    */
   resolveReference(reference: string): ConversationEntity | null {
     const normalized = reference.toLowerCase().trim();
@@ -88,6 +89,14 @@ export class ConversationMetadataManager {
     const recentEntities = Array.from(this.entities.values())
       .filter(e => this.currentTurn - e.turnNumber <= 3)
       .sort((a, b) => b.turnNumber - a.turnNumber);
+
+    // Handle generic "one" pronoun (which one, this one, that one, or just "one")
+    if (normalized === 'one' || normalized.includes('which one') ||
+        normalized.includes('this one') || normalized.includes('that one')) {
+      if (recentEntities.length > 0) {
+        return recentEntities[0] ?? null; // Return most recent entity or null
+      }
+    }
 
     // Try to match against aliases (pronouns)
     for (const entity of recentEntities) {

@@ -26,7 +26,8 @@
 | 🔶 High | [Dynamic Imports](#5-dynamic-imports-break-testing) | 📌 BACKLOG | 3-4 days | Medium |
 | 🔶 High | [Legacy customer_id](#6-legacy-customer_id-architecture) | 📌 BACKLOG | 3-4 days | Medium |
 | 📝 Medium | [Code Quality](#7-code-quality-issues) | ⚠️ IN PROGRESS | 1.5h done | Low |
-| 🔴 Critical | [Conversation Accuracy](#8-conversation-accuracy-improvements) | ✅ COMPLETE | 6h | Critical |
+| 🔴 Critical | [Conversation Accuracy - Week 1](#8-conversation-accuracy-improvements) | ✅ COMPLETE | 6h | Critical |
+| 🔴 Critical | [Conversation Accuracy - Week 2](#82-week-2-prompt-optimization--rollout---planned) | 📌 BACKLOG | 2-3 days | Critical |
 | 📝 Medium | [DI Documentation](#9-dependency-injection-documentation) | ✅ COMPLETE | 1h | Medium |
 | 📋 Low | [Dependencies](#10-outdated-dependencies) | ✅ COMPLETE | 15min | Low |
 | 📋 Low | [Test Error Messages](#11-test-error-message-improvements) | 📌 BACKLOG | 30min | Low |
@@ -379,35 +380,109 @@ CREATE TABLE customer_configs (
 
 ### 8. Conversation Accuracy Improvements
 
-**Status**: ✅ **COMPLETE**
+**Status**: ⚠️ **WEEK 1 COMPLETE, WEEK 2 PENDING**
 **Priority**: 🔴 **CRITICAL** (User Experience)
-**Completed**: 2025-10-26
+**Week 1 Completed**: 2025-10-26
+**Week 2 Target**: 2025-11-02
 
-#### 8.1 Metadata Tracking System
+#### 8.1 Week 1: Metadata Tracking Infrastructure - ✅ COMPLETE
 
 **Implemented**:
-- ✅ ConversationMetadataManager for entity/correction/list tracking
-- ✅ ResponseParser for automatic entity detection
-- ✅ Enhanced system prompts with context awareness
-- ✅ Full integration into chat API route
-- ✅ Comprehensive test suite (188 tests, 99% pass rate)
+- ✅ ConversationMetadataManager for entity/correction/list tracking (279 LOC)
+- ✅ ResponseParser for automatic entity detection (235 LOC)
+- ✅ Enhanced system prompts with context awareness (+47 LOC)
+- ✅ Full integration into chat API route (+55 LOC)
+- ✅ Feature flag system (`USE_ENHANCED_METADATA_CONTEXT`)
+- ✅ Comprehensive test suite (31 component tests, 100% passing)
 
-**Results**:
-- Overall accuracy: 71.4% → 86% (+14.6%)
-- List references: 33% → 100% (+67%) - TARGET EXCEEDED
-- Pronoun resolution: 50% → 83% (+33%)
-- Correction tracking: 33% → 75% (+42%)
-- Performance: <15ms overhead (target: <50ms) - EXCEEDED
+**Component Testing Results**:
+- ConversationMetadataManager: 9/9 tests passing (100%)
+- ResponseParser: 7/7 tests passing (100%)
+- Integration tests: 2/2 tests passing (100%)
+- Enhanced prompts: 7/7 tests passing (100%)
+- Database integration: 6/6 tests passing (100%)
+
+**E2E Competency Testing (Flag ON vs Flag OFF)**:
+- With metadata context (Flag ON): 4/8 passing (50%)
+- Baseline behavior (Flag OFF): 5/8 passing (62.5%) - maintained
+- **Decision**: Deploy with flag OFF to preserve baseline, enable in Week 2
+
+**Current Deployment Status**:
+- ✅ Infrastructure deployed (metadata tracking active)
+- ✅ Feature flag OFF (no behavioral changes)
+- ✅ Zero production regressions (baseline maintained)
+- ✅ Performance: <15ms overhead (target: <50ms) - EXCEEDED
+- ✅ Data collection active for Week 2 optimization
 
 **Files Added**:
-- `lib/chat/conversation-metadata.ts` (267 LOC)
-- `lib/chat/response-parser.ts` (208 LOC)
+- `lib/chat/conversation-metadata.ts` (279 LOC)
+- `lib/chat/response-parser.ts` (235 LOC)
+- `WEEK_1_COMPLETION_SUMMARY.md` (comprehensive report)
+- `CONSERVATIVE_DEPLOYMENT_STRATEGY.md` (deployment guide)
 - Comprehensive test suite (14 test files)
 
-**Path to 90%**: Fix 2 edge cases for 100% accuracy
-
 **Effort**: 6 hours using parallel agent orchestration (vs 2-3 weeks sequential)
-**Risk**: Low (comprehensive testing, no regression)
+**Risk**: Low (infrastructure tested, flag prevents behavioral changes)
+
+---
+
+#### 8.2 Week 2: Prompt Optimization & Rollout - 📌 PLANNED
+
+**Status**: 📌 **BACKLOG** (Starting week of 2025-10-27)
+**Priority**: 🔴 **CRITICAL**
+
+**Goals**:
+1. Optimize prompt engineering for 75-80% competency pass rate
+2. A/B test different context strategies (50%, 75%, 100% context size)
+3. Refine topic isolation instructions
+4. Improve pronoun resolution accuracy
+5. Gradual production rollout (10% → 50% → 100%)
+
+**Current Gaps (Why Flag Is OFF)**:
+- Topic isolation weakened with full context (1,793 chars)
+- Natural pronoun resolution degraded
+- Context affects AI behavior unpredictably
+- Needs empirical prompt engineering iteration
+
+**Week 2 Tasks**:
+1. **Prompt Engineering** (2-4h)
+   - Test reduced context sizes
+   - Refine instructions for topic separation
+   - Optimize pronoun resolution rules
+   - Test different context placement strategies
+
+2. **Validation** (1-2h)
+   - Run competency test suite
+   - Identify remaining regressions
+   - Fine-tune based on results
+   - Document behavioral changes
+
+3. **Gradual Rollout** (3-5 days)
+   - Day 1-2: Enable for 10% traffic, monitor
+   - Day 3-4: Increase to 50% if stable
+   - Day 5: Increase to 100% if stable
+
+**Success Criteria**:
+- ✅ Competency tests: 75-80% pass rate (vs 50% current with flag ON)
+- ✅ No critical regressions below baseline (62.5%)
+- ✅ Performance: <100ms total overhead
+- ✅ User satisfaction maintained or improved
+
+**Rollback Plan**:
+```bash
+# Instant rollback via environment variable
+export USE_ENHANCED_METADATA_CONTEXT=false
+# Recovery time: <1 minute
+```
+
+**Documentation**:
+- [WEEK_1_COMPLETION_SUMMARY.md](WEEK_1_COMPLETION_SUMMARY.md) - Week 1 achievements
+- [CONSERVATIVE_DEPLOYMENT_STRATEGY.md](CONSERVATIVE_DEPLOYMENT_STRATEGY.md) - Deployment approach
+- [docs/EXPERT_LEVEL_IMPROVEMENT_PLAN.md](docs/EXPERT_LEVEL_IMPROVEMENT_PLAN.md) - Complete roadmap
+- [docs/CONVERSATION_ACCURACY_IMPROVEMENTS.md](docs/CONVERSATION_ACCURACY_IMPROVEMENTS.md) - User-facing improvements
+
+**Effort**: 2-3 days (prompt optimization + gradual rollout)
+**Risk**: Medium (behavioral changes require monitoring, but feature flag enables instant rollback)
 
 ---
 
@@ -623,11 +698,12 @@ Use this template when adding new items:
 
 | Priority | Category | Count | Total Effort |
 |----------|----------|-------|--------------|
-| ✅ Complete | Items 1, 2, 3, 8, 9, 10, 12 | 7 | 19h (done) |
+| ✅ Complete | Items 1, 2, 3, 8.1, 9, 10, 12 | 7 | 19h (done) |
 | ⚠️ In Progress | Item 7 (ESLint errors) | 1 | 1.5h (done) |
 | 🔶 High | Items 4, 5, 6 | 3 | 4-5 weeks |
+| 🔴 Critical | Item 8.2 (Week 2) | 1 | 2-3 days |
 | 📝 Medium | Item 7 (warnings), 11 | 2 | 500h+ or accept |
-| **TOTAL** | **All Items** | **12** | **~5 weeks** |
+| **TOTAL** | **All Items** | **13** | **~5 weeks + 2-3 days** |
 
 ---
 
