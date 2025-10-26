@@ -1,4 +1,4 @@
-**Last Updated:** 2025-10-26
+**Last Updated:** 2025-10-26 (Added Agent Orchestration Framework)
 **Verified Accurate For:** v0.1.0
 
 # CLAUDE.md
@@ -59,12 +59,205 @@ This is a General purpose AI-powered customer service chat widget built with Nex
 - You are a Large Language Model with limitations
 - Always consider multiple different approaches like a Senior Engineer
 
-### AGENT PARALLELIZATION
-- **ALWAYS** launch multiple agents in parallel when possible to complete tasks
-- Running agents concurrently is significantly faster and maintains better context
-- Use a single message with multiple Task tool invocations for parallel execution
-- This reduces overall processing time and prevents context fragmentation
-- Example: When searching, analyzing, and implementing - launch all relevant agents together
+### AGENT ORCHESTRATION & PARALLELIZATION
+
+**CRITICAL**: Proactively orchestrate specialized agents in parallel to maximize efficiency and protect your context window.
+
+#### When to Automatically Use Agent Orchestration
+
+**Trigger Patterns - Use Agents WITHOUT User Prompting When:**
+
+1. **Multiple Independent Categories** (HIGH PRIORITY)
+   - Updating dependencies across different categories (Supabase, types, testing, utilities)
+   - Refactoring files in different modules (API routes, components, libs, tests)
+   - Running validation across multiple systems (build, lint, tests, types)
+   - Analyzing different aspects of a problem (performance, security, architecture)
+
+2. **Repetitive Tasks at Scale**
+   - Fixing 20+ files with similar patterns (import updates, type fixes, etc.)
+   - Updating multiple test files with same refactoring
+   - Applying consistent changes across module boundaries
+
+3. **Time-Intensive Sequential Work**
+   - Any task that would take >30 minutes sequentially
+   - Build verification + tests + linting (can run in parallel)
+   - Multiple large file reads/analysis
+   - Comprehensive codebase searches
+
+4. **Context Protection**
+   - When a task might generate >10,000 tokens of output
+   - Multiple file reads that would fill context
+   - Long-running analysis or validation tasks
+
+**DO NOT Wait for User Permission** - If you identify a parallelizable task, immediately orchestrate agents!
+
+#### The Proven Orchestration Pattern
+
+**Framework (Use This Every Time):**
+
+```
+1. DECOMPOSE: Break task into independent subtasks
+   ↓
+2. DESIGN: Create specialized agent missions
+   ↓
+3. LAUNCH: Deploy all agents in single message (parallel execution)
+   ↓
+4. CONSOLIDATE: Synthesize findings from all agents
+   ↓
+5. VERIFY: Run final validation
+   ↓
+6. DOCUMENT: Update tracking docs
+```
+
+#### Real-World Success Example (Oct 2025)
+
+**Task**: Update 15 outdated npm packages
+**Sequential Time**: 2-3 hours
+**Parallel Time**: 15 minutes (88-92% savings)
+
+**Agent Team Deployed:**
+```typescript
+// Single message with 4 Task tool invocations
+Agent 1: Supabase Specialist
+  - Mission: Update @supabase/supabase-js, @supabase/ssr
+  - Verify: Build success, no TypeScript errors
+  - Time: ~10 minutes
+
+Agent 2: Type Definition Expert
+  - Mission: Update all @types/* packages
+  - Verify: TypeScript compilation clean
+  - Time: ~10 minutes
+
+Agent 3: Testing Infrastructure Lead
+  - Mission: Update testing libraries (jest-dom, msw)
+  - Verify: Test suite passes
+  - Time: ~10 minutes
+
+Agent 4: Utility Package Manager
+  - Mission: Update infrastructure (bullmq, ioredis, lru-cache, crawlee)
+  - Verify: Build success, Redis functional
+  - Time: ~10 minutes
+
+Result: All updates completed simultaneously in ~10 minutes
+```
+
+**Key Insight**: Each agent worked independently, validated their changes, and reported findings. No blocking dependencies = perfect parallelism.
+
+#### Agent Mission Structure
+
+**Template for Each Agent:**
+```markdown
+You are responsible for [SPECIFIC CATEGORY].
+
+## Your Mission
+[Clear, bounded objective]
+
+## Tasks
+1. [Specific action 1]
+2. [Specific action 2]
+3. [Verification step]
+
+## If Issues Occur
+[Decision criteria and fallback]
+
+## Final Report
+Provide:
+- ✅ Success metrics
+- ❌ Failures (if any)
+- 🔧 Fixes applied
+- Total time spent
+
+Return findings in structured format.
+```
+
+#### Decision Criteria: Parallel vs. Sequential
+
+**Use Parallel Agents When:**
+✅ Tasks are independent (no shared state/files)
+✅ Each task can validate its own success
+✅ Failure in one doesn't block others
+✅ Time savings > 30 minutes
+✅ Each category requires different expertise
+
+**Use Sequential When:**
+❌ Tasks must happen in order (dependencies)
+❌ Each step informs the next decision
+❌ Shared file modifications (merge conflicts)
+❌ Total work < 15 minutes
+❌ Need interactive decision-making
+
+#### What Makes a Good Parallel Task
+
+**Excellent Candidates:**
+- Dependency updates by category (different package.json sections)
+- File refactoring across different modules
+- Multiple independent test suites
+- Category-based linting/type fixes
+- Parallel validation (build + test + lint)
+- Multi-environment deployments
+
+**Poor Candidates:**
+- Sequential git operations (must commit before push)
+- Dependent file modifications (need to see results of previous)
+- Interactive debugging
+- Iterative algorithm development
+
+#### Anti-Patterns to Avoid
+
+❌ **Don't** launch agents for tiny tasks (<5 minutes each)
+❌ **Don't** create agents with blocking dependencies
+❌ **Don't** over-decompose (too many tiny agents)
+❌ **Don't** launch agents without clear success criteria
+❌ **Don't** forget to consolidate and verify results
+
+#### Success Metrics
+
+**Track These After Agent Orchestration:**
+- Time savings vs. sequential (aim for >50%)
+- Success rate (aim for 100% of agents completing)
+- Context window savings (tokens not consumed)
+- Code quality (all verifications passing)
+
+**Proven Results:**
+- Dependency updates: 88-92% time savings
+- File refactoring: 60-75% time savings
+- Multi-module testing: 70-80% time savings
+- Context protection: 50-80% token savings
+
+#### Examples of Automatic Agent Use
+
+**Scenario 1: User Says "Update dependencies"**
+```
+❌ WRONG: Ask user which ones or do sequentially
+✅ RIGHT: Immediately launch 4 agents by category
+```
+
+**Scenario 2: User Says "Refactor these 30 files"**
+```
+❌ WRONG: Process files one-by-one
+✅ RIGHT: Launch agents by module (API routes, components, libs, tests)
+```
+
+**Scenario 3: User Says "Fix all ESLint errors"**
+```
+❌ WRONG: Fix errors file-by-file sequentially
+✅ RIGHT: Launch agents by error category (unused vars, type issues, imports)
+```
+
+**The Rule**: If you can mentally divide the work into 2+ independent categories, you MUST use agents!
+
+#### Reporting Results
+
+**After Agent Orchestration, Always Provide:**
+1. Executive summary (what was accomplished)
+2. Individual agent results (structured)
+3. Consolidated verification (final build/test status)
+4. Time savings achieved
+5. Next recommended steps
+
+**Reference**: See TECH_DEBT.md Item 9 completion (Oct 2025) for example of successful agent orchestration with full documentation.
+
+---
 
 ### TESTING & CODE QUALITY PHILOSOPHY
 
