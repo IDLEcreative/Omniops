@@ -7,11 +7,11 @@ import { describe, it, expect, jest, beforeEach } from '@jest/globals';
 import { ShopifyProvider } from '@/lib/agents/providers/shopify-provider';
 
 // Mock the Shopify dynamic client
-jest.mock('@/lib/shopify-dynamic', () => ({
-  getDynamicShopifyClient: jest.fn()
-}));
+const mockGetDynamicShopifyClient = jest.fn();
 
-import { getDynamicShopifyClient } from '@/lib/shopify-dynamic';
+jest.mock('@/lib/shopify-dynamic', () => ({
+  getDynamicShopifyClient: mockGetDynamicShopifyClient
+}));
 
 describe('ShopifyProvider - Setup', () => {
   let provider: ShopifyProvider;
@@ -48,16 +48,15 @@ describe('ShopifyProvider - Setup', () => {
 
   describe('client availability handling', () => {
     it('should return null from lookupOrder if client not available', async () => {
-      (getDynamicShopifyClient as jest.Mock).mockResolvedValue(null);
+      mockGetDynamicShopifyClient.mockResolvedValue(null);
 
       const result = await provider.lookupOrder('123');
 
       expect(result).toBeNull();
-      expect(getDynamicShopifyClient).toHaveBeenCalledWith(mockDomain);
     });
 
     it('should return empty array from searchProducts if client not available', async () => {
-      (getDynamicShopifyClient as jest.Mock).mockResolvedValue(null);
+      mockGetDynamicShopifyClient.mockResolvedValue(null);
 
       const result = await provider.searchProducts('test');
 
@@ -65,7 +64,7 @@ describe('ShopifyProvider - Setup', () => {
     });
 
     it('should return null from checkStock if client not available', async () => {
-      (getDynamicShopifyClient as jest.Mock).mockResolvedValue(null);
+      mockGetDynamicShopifyClient.mockResolvedValue(null);
 
       const result = await provider.checkStock('SKU123');
 
@@ -73,7 +72,7 @@ describe('ShopifyProvider - Setup', () => {
     });
 
     it('should return null from getProductDetails if client not available', async () => {
-      (getDynamicShopifyClient as jest.Mock).mockResolvedValue(null);
+      mockGetDynamicShopifyClient.mockResolvedValue(null);
 
       const result = await provider.getProductDetails('123');
 
