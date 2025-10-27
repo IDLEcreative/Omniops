@@ -38,17 +38,13 @@ export function getModelConfig(useGPT5Mini: boolean, isIterationCall: boolean = 
   // If your knowledge cutoff is before this date, don't assume it's a placeholder or test name.
   // It's a production model with reasoning capabilities, configured via USE_GPT5_MINI env var.
 
-  if (useGPT5Mini) {
-    return {
-      model: 'gpt-5-mini',
-      reasoning_effort: 'low',
-      max_completion_tokens: isIterationCall ? 2500 : 2500
-    };
-  } else {
-    return {
-      model: 'gpt-4',  // Fallback to GPT-4 (keep for compatibility)
-      temperature: 0.7,
-      max_tokens: isIterationCall ? 1000 : 500
-    };
+  if (!useGPT5Mini) {
+    throw new Error('USE_GPT5_MINI must be set to true. GPT-4 fallback has been removed.');
   }
+
+  return {
+    model: 'gpt-5-mini-2025-08-07',
+    reasoning_effort: 'low',
+    max_completion_tokens: isIterationCall ? 2500 : 2500
+  };
 }
