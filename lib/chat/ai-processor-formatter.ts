@@ -43,7 +43,7 @@ export function getModelConfig(useGPT5Mini: boolean, isIterationCall: boolean = 
   }
 
   return {
-    model: 'gpt-5-mini-2025-08-07',
+    model: 'gpt-5-mini',
     reasoning_effort: 'low',
     max_completion_tokens: isIterationCall ? 2500 : 2500
   };
