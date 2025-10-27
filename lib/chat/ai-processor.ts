@@ -131,19 +131,18 @@ export async function processAIConversation(params: AIProcessorParams): Promise<
       } as any);
     } catch (error) {
       // Enhanced error logging to capture OpenAI API errors
-      const errorDetails = {
-        message: error instanceof Error ? error.message : String(error),
-        code: (error as any)?.code,
-        type: (error as any)?.type,
-        status: (error as any)?.status,
-        param: (error as any)?.param,
-        // Include context for debugging
+      console.error('[Intelligent Chat] Error in follow-up completion:', {
+        errorMessage: error instanceof Error ? error.message : String(error),
+        errorCode: (error as any)?.code,
+        errorType: (error as any)?.type,
+        errorStatus: (error as any)?.status,
+        errorParam: (error as any)?.param,
         iteration,
         messageCount: conversationMessages.length,
         hasTools: !!SEARCH_TOOLS,
-        modelConfig: iterationConfig
-      };
-      console.error('[Intelligent Chat] Error in follow-up completion:', JSON.stringify(errorDetails, null, 2));
+        model: (iterationConfig as any)?.model,
+        maxTokens: (iterationConfig as any)?.max_completion_tokens || (iterationConfig as any)?.max_tokens
+      });
       finalResponse = 'I found some information but encountered an error processing it. Please try again.';
       break;
     }
