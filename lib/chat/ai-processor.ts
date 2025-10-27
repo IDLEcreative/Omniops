@@ -49,7 +49,7 @@ export async function processAIConversation(params: AIProcessorParams): Promise<
     ...modelConfig,
     messages: conversationMessages,
     tools: SEARCH_TOOLS,
-    tool_choice: 'auto'
+    tool_choice: 'required'  // Force AI to search instead of hallucinating from training data
   } as any);
 
   let finalResponse = '';
