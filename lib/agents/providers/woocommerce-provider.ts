@@ -112,13 +112,26 @@ export class WooCommerceProvider implements CommerceProvider {
 
   async getProductDetails(productId: string): Promise<any> {
     try {
-      const products = await this.client.getProducts({
+      // First try exact SKU match (fast and precise if user provides SKU)
+      const skuResults = await this.client.getProducts({
         sku: productId,
         per_page: 1
       });
 
-      if (products && products.length > 0) {
-        return products[0];
+      if (skuResults && skuResults.length > 0) {
+        return skuResults[0];
+      }
+
+      // Fallback: Search by product name/description if SKU search fails
+      // This handles cases where user asks about "10mtr extension cables" (name) not SKU
+      const searchResults = await this.client.getProducts({
+        search: productId,
+        per_page: 1,
+        status: 'publish'
+      });
+
+      if (searchResults && searchResults.length > 0) {
+        return searchResults[0];
       }
 
       return null;

@@ -7,6 +7,7 @@
 
 import { SearchResult } from '@/types';
 import { formatProviderProducts, formatProviderProduct } from './product-formatters';
+import { searchAndReturnFullPage } from '@/lib/full-page-retrieval';
 
 // Type for dependencies injection
 export type ToolDependencies = {
@@ -168,7 +169,9 @@ export async function executeGetProductDetails(
       enhancedQuery = `${productQuery} specifications technical details features`;
     }
 
-    const searchResults = await searchFn(enhancedQuery, browseDomain, 5, 0.3);
+    // Return more chunks (15 instead of 5) to ensure AI gets complete information
+    // even if some chunks are lower quality. AI can synthesize from multiple chunks.
+    const searchResults = await searchFn(enhancedQuery, browseDomain, 15, 0.3);
     console.log(`[Function Call] Product details (semantic) returned ${searchResults.length} results`);
 
     return {
@@ -257,6 +260,63 @@ ${order.trackingNumber ? `Tracking: ${order.trackingNumber}` : ''}`;
 
   } catch (error) {
     console.error('[Function Call] lookup_order error:', error);
+    return {
+      success: false,
+      results: [],
+      source: 'error'
+    };
+  }
+}
+
+/**
+ * Get complete page details for a specific URL or query
+ *
+ * USE THIS when you've found something relevant in scattered chunks and need
+ * COMPLETE information from that specific page (all chunks from one source).
+ *
+ * Perfect for:
+ * - Getting full product details after finding it in search results
+ * - Reading complete documentation page
+ * - Getting all FAQ content from a specific page
+ */
+export async function executeGetCompletePageDetails(
+  pageQuery: string,
+  domain: string
+): Promise<{ success: boolean; results: SearchResult[]; source: string; pageInfo?: any }> {
+  console.log(`[Function Call] get_complete_page_details: "${pageQuery}"`);
+
+  try {
+    // Normalize domain
+    const browseDomain = domain.replace(/^https?:\/\//, '').replace('www.', '');
+
+    if (!browseDomain || /localhost|127\.0\.0\.1/i.test(browseDomain)) {
+      console.log('[Search] Invalid or localhost domain');
+      return { success: false, results: [], source: 'invalid-domain' };
+    }
+
+    // Use full page retrieval to get ALL chunks from best-matching page
+    const fullPageResult = await searchAndReturnFullPage(pageQuery, browseDomain, 15, 0.3);
+
+    if (fullPageResult.success && fullPageResult.source === 'full_page') {
+      console.log(`[Function Call] Complete page details - ${fullPageResult.results.length} chunks from: ${fullPageResult.pageInfo?.title}`);
+      return {
+        success: true,
+        results: fullPageResult.results,
+        source: 'full-page',
+        pageInfo: fullPageResult.pageInfo
+      };
+    }
+
+    // If full page retrieval fails, return error (don't fall back)
+    console.log('[Function Call] Could not retrieve complete page details');
+    return {
+      success: false,
+      results: [],
+      source: 'failed'
+    };
+
+  } catch (error) {
+    console.error('[Function Call] get_complete_page_details error:', error);
     return {
       success: false,
       results: [],

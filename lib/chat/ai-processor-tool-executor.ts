@@ -15,6 +15,7 @@ import {
   executeSearchProducts,
   executeSearchByCategory,
   executeGetProductDetails,
+  executeGetCompletePageDetails,
   executeLookupOrder
 } from './tool-handlers';
 import type { ToolExecutionResult, AIProcessorDependencies } from './ai-processor-types';
@@ -106,6 +107,11 @@ export async function executeToolCallsParallel(
               domain || '',
               { getCommerceProvider: getProviderFn, searchSimilarContent: searchFn }
             );
+          case 'get_complete_page_details':
+            return await executeGetCompletePageDetails(
+              (parsedArgs.pageQuery as string).trim(),
+              domain || ''
+            );
           case 'lookup_order':
             return await executeLookupOrder(
               (parsedArgs.orderId as string).trim(),
@@ -189,6 +195,9 @@ export function formatToolResultsForAI(
             break;
           case 'get_product_details':
             toolResponse = 'To grab detailed specifications I need the product or part number you are checking on. Share that and I will verify the details.';
+            break;
+          case 'get_complete_page_details':
+            toolResponse = 'I need to know which specific page or item you want complete details for. Let me know what you are interested in and I will retrieve all available information about it.';
             break;
           case 'lookup_order':
             toolResponse = 'I can check an order status once I have the order number. Please provide it and I will look it up right away.';

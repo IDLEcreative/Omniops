@@ -95,6 +95,23 @@ export const SEARCH_TOOLS = [
         required: ["orderId"]
       }
     }
+  },
+  {
+    type: "function" as const,
+    function: {
+      name: "get_complete_page_details",
+      description: "Get ALL content from a complete page when you've found something relevant and need comprehensive details. Use this AFTER search_products or get_product_details when you need the FULL page. Perfect for getting complete product specs, full documentation, or entire FAQ sections. Returns all chunks from one coherent source.",
+      parameters: {
+        type: "object",
+        properties: {
+          pageQuery: {
+            type: "string",
+            description: "The specific page or item to get complete details for (e.g., product name, doc title, FAQ topic)"
+          }
+        },
+        required: ["pageQuery"]
+      }
+    }
   }
 ];
 
@@ -117,6 +134,8 @@ export function validateToolArguments(toolName: string, toolArgs: Record<string,
       return ensureString(toolArgs.category, 'category');
     case 'get_product_details':
       return ensureString(toolArgs.productQuery, 'productQuery');
+    case 'get_complete_page_details':
+      return ensureString(toolArgs.pageQuery, 'pageQuery');
     case 'lookup_order':
       return ensureString(toolArgs.orderId, 'orderId');
     default:

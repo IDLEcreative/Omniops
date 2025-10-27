@@ -298,7 +298,7 @@ describe('WooCommerceProvider', () => {
   });
 
   describe('getProductDetails', () => {
-    it('should retrieve product details by SKU', async () => {
+    it('should retrieve product details by SKU when SKU match found', async () => {
       const mockProduct = {
         id: 456,
         name: 'Detailed Product',
@@ -311,18 +311,54 @@ describe('WooCommerceProvider', () => {
 
       const result = await provider.getProductDetails('DETAIL-SKU');
 
+      // Should try SKU search first
       expect(mockClient.getProducts).toHaveBeenCalledWith({
         sku: 'DETAIL-SKU',
         per_page: 1
       });
+      // Should not fall back to name search if SKU found
+      expect(mockClient.getProducts).toHaveBeenCalledTimes(1);
       expect(result).toEqual(mockProduct);
     });
 
-    it('should return null if product not found', async () => {
+    it('should fallback to name search when SKU search returns no results', async () => {
+      const mockProduct = {
+        id: 789,
+        name: '10mtr extension cables for all TS Camera systems',
+        sku: 'CABLE-10M',
+        price: '45.00',
+        description: 'Extension cable'
+      };
+
+      // First call (SKU search) returns empty, second call (name search) returns product
+      (mockClient.getProducts as jest.Mock)
+        .mockResolvedValueOnce([])  // SKU search fails
+        .mockResolvedValueOnce([mockProduct]);  // Name search succeeds
+
+      const result = await provider.getProductDetails('10mtr extension cables for all TS Camera systems');
+
+      // Should try SKU search first
+      expect(mockClient.getProducts).toHaveBeenNthCalledWith(1, {
+        sku: '10mtr extension cables for all TS Camera systems',
+        per_page: 1
+      });
+      // Should fallback to name search
+      expect(mockClient.getProducts).toHaveBeenNthCalledWith(2, {
+        search: '10mtr extension cables for all TS Camera systems',
+        per_page: 1,
+        status: 'publish'
+      });
+      expect(mockClient.getProducts).toHaveBeenCalledTimes(2);
+      expect(result).toEqual(mockProduct);
+    });
+
+    it('should return null if both SKU and name search fail', async () => {
       (mockClient.getProducts as jest.Mock).mockResolvedValue([]);
 
       const result = await provider.getProductDetails('NONEXISTENT');
 
+      // Should try both searches
+      expect(mockClient.getProducts).toHaveBeenCalledTimes(2);
       expect(result).toBeNull();
     });
 
@@ -332,6 +368,27 @@ describe('WooCommerceProvider', () => {
       const result = await provider.getProductDetails('DETAIL-SKU');
 
       expect(result).toBeNull();
+    });
+
+    it('should prioritize SKU match over name match for ambiguous queries', async () => {
+      const skuProduct = {
+        id: 111,
+        name: 'Different Product',
+        sku: 'PUMP-123',
+        price: '100.00'
+      };
+
+      (mockClient.getProducts as jest.Mock).mockResolvedValue([skuProduct]);
+
+      const result = await provider.getProductDetails('PUMP-123');
+
+      // Should find by SKU and NOT fallback to name search
+      expect(mockClient.getProducts).toHaveBeenCalledTimes(1);
+      expect(mockClient.getProducts).toHaveBeenCalledWith({
+        sku: 'PUMP-123',
+        per_page: 1
+      });
+      expect(result).toEqual(skuProduct);
     });
   });
 });
