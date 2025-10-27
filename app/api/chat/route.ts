@@ -70,6 +70,10 @@ export async function POST(
     const { message, conversation_id, session_id, domain, config } = validatedData;
 
     // Check if GPT-5 mini is enabled
+    // DEBUG: Log environment variable for troubleshooting
+    console.log('[DIAGNOSTIC] USE_GPT5_MINI raw value:', JSON.stringify(process.env.USE_GPT5_MINI));
+    console.log('[DIAGNOSTIC] USE_GPT5_MINI length:', process.env.USE_GPT5_MINI?.length);
+    console.log('[DIAGNOSTIC] USE_GPT5_MINI === "true":', process.env.USE_GPT5_MINI === 'true');
     const useGPT5Mini = process.env.USE_GPT5_MINI === 'true';
 
     // Initialize telemetry with session data
