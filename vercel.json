@@ -1,15 +1,10 @@
 {
-  "buildCommand": "npm run build",
-  "outputDirectory": ".next",
   "framework": "nextjs",
-  "installCommand": "npm ci --force",
+  "buildCommand": "npm run build",
+  "installCommand": "npm ci",
   "build": {
     "env": {
-      "VERCEL_FORCE_NO_BUILD_CACHE": "1",
-      "FORCE_RUNTIME_TAG": "no-cache-2"
+      "NODE_ENV": "production"
     }
-  },
-  "env": {
-    "VERCEL_FORCE_NO_BUILD_CACHE": "1"
   }
 }
