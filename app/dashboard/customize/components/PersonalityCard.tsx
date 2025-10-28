@@ -1,5 +1,5 @@
 import { Card, CardContent } from "@/components/ui/card";
-import { Check } from "lucide-react";
+import { Check, Briefcase, Users, Zap } from "lucide-react";
 
 interface PersonalityCardProps {
   value: 'professional' | 'friendly' | 'concise';
@@ -9,19 +9,19 @@ interface PersonalityCardProps {
 
 const personalityData = {
   professional: {
-    emoji: "🎩",
+    icon: Briefcase,
     title: "Professional",
     description: "Formal and business-oriented",
     example: "Thank you for your inquiry. I'd be happy to provide detailed information about our offerings.",
   },
   friendly: {
-    emoji: "😊",
+    icon: Users,
     title: "Friendly",
     description: "Warm and conversational",
-    example: "Hey there! Great question! I'd love to help you find exactly what you're looking for. 😊",
+    example: "Hey there! Great question! I'd love to help you find exactly what you're looking for.",
   },
   concise: {
-    emoji: "⚡",
+    icon: Zap,
     title: "Concise",
     description: "Quick and to-the-point",
     example: "I can help with that. What specific information do you need?",
@@ -30,20 +30,23 @@ const personalityData = {
 
 export function PersonalityCard({ value, selected, onClick }: PersonalityCardProps) {
   const data = personalityData[value];
+  const Icon = data.icon;
 
   return (
     <Card
       className={`
         cursor-pointer transition-all duration-200
-        hover:shadow-lg hover:scale-[1.02]
+        hover:shadow-md
         ${selected ? 'border-primary border-2 shadow-md' : 'border-gray-200'}
       `}
       onClick={onClick}
     >
       <CardContent className="p-4 space-y-3">
         <div className="flex items-center justify-between">
-          <div className="flex items-center space-x-2">
-            <span className="text-2xl">{data.emoji}</span>
+          <div className="flex items-center space-x-3">
+            <div className={`p-2 rounded-lg ${selected ? 'bg-primary/10' : 'bg-gray-100'}`}>
+              <Icon className={`h-5 w-5 ${selected ? 'text-primary' : 'text-gray-600'}`} />
+            </div>
             <h3 className="font-semibold text-lg">{data.title}</h3>
           </div>
           {selected && (

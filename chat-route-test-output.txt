@@ -1,0 +1,1360 @@
+
+> customer-service-agent@0.1.0 test
+> jest --testPathPattern=api/chat --passWithNoTests
+
+(node:92727) [DEP0040] DeprecationWarning: The `punycode` module is deprecated. Please use a userland alternative instead.
+(Use `node --trace-deprecation ...` to show where the warning was created)
+PASS __tests__/api/chat/metadata-integration.test.ts
+(node:92730) [DEP0040] DeprecationWarning: The `punycode` module is deprecated. Please use a userland alternative instead.
+(Use `node --trace-deprecation ...` to show where the warning was created)
+FAIL __tests__/api/chat/route-async-integration.test.ts
+  ● Chat API Route - Integration Tests › should validate conversation and message saving happen in correct order
+
+    TypeError: _embeddings.searchSimilarContent.mockResolvedValue is not a function
+
+      148 |
+      149 |     // Mock search similar content
+    > 150 |     (searchSimilarContent as jest.Mock).mockResolvedValue([
+          |                                         ^
+      151 |       {
+      152 |         content: 'Relevant content',
+      153 |         url: 'https://example.com/page',
+
+      at Object.mockResolvedValue (__tests__/api/chat/route-async-integration.test.ts:150:41)
+
+(node:92729) [DEP0040] DeprecationWarning: The `punycode` module is deprecated. Please use a userland alternative instead.
+(Use `node --trace-deprecation ...` to show where the warning was created)
+FAIL __tests__/api/chat/route-async-streaming.test.ts
+  ● Chat API Route - Streaming Performance › should execute independent operations in parallel
+
+    TypeError: _embeddings.searchSimilarContent.mockImplementation is not a function
+
+      170 |
+      171 |     // Mock search similar content
+    > 172 |     (searchSimilarContent as jest.Mock).mockImplementation(async () => {
+          |                                         ^
+      173 |       const startTime = Date.now();
+      174 |       await new Promise(resolve => setTimeout(resolve, 80));
+      175 |       performanceMarkers['embedding_search'] = Date.now() - startTime;
+
+      at Object.mockImplementation (__tests__/api/chat/route-async-streaming.test.ts:172:41)
+
+(node:92732) [DEP0040] DeprecationWarning: The `punycode` module is deprecated. Please use a userland alternative instead.
+(Use `node --trace-deprecation ...` to show where the warning was created)
+FAIL __tests__/api/chat/route-async-errors.test.ts
+  ● Chat API Route - Error Handling › should handle partial failures gracefully with Promise.allSettled
+
+    TypeError: _embeddings.searchSimilarContent.mockResolvedValue is not a function
+
+      148 |
+      149 |     // Mock search similar content
+    > 150 |     (searchSimilarContent as jest.Mock).mockResolvedValue([
+          |                                         ^
+      151 |       {
+      152 |         content: 'Relevant content',
+      153 |         url: 'https://example.com/page',
+
+      at Object.mockResolvedValue (__tests__/api/chat/route-async-errors.test.ts:150:41)
+
+(node:92734) [DEP0040] DeprecationWarning: The `punycode` module is deprecated. Please use a userland alternative instead.
+(Use `node --trace-deprecation ...` to show where the warning was created)
+PASS __tests__/api/chat/route.errors.test.ts
+  ● Console
+
+    console.warn
+      [2025-10-28T12:14:41.378Z] [WARN] [Redis] Failed to connect, using in-memory fallback: {}
+
+      44 |     const entry: LogEntry = { level: 'warn', message, timestamp: new Date().toISOString(), context };
+      45 |     this.addToHistory(entry);
+    > 46 |     console.warn(this.formatMessage('warn', message, context));
+         |             ^
+      47 |   }
+      48 |
+      49 |   error(message: string, error?: Error | unknown, context?: Record<string, any>) {
+
+      at Logger.warn (lib/logger.ts:46:13)
+      at RedisClientWithFallback.warn [as initializeClient] (lib/redis-fallback.ts:60:14)
+      at new initializeClient (lib/redis-fallback.ts:24:10)
+      at getRedisClientWithFallback (lib/redis-fallback.ts:209:27)
+      at Object.getRedisClientWithFallback (lib/redis-fallback.ts:214:22)
+      at Object.<anonymous> (lib/redis.ts:26:24)
+      at Object.<anonymous> (lib/search-cache.ts:23:16)
+      at Object.<anonymous> (lib/embeddings.ts:34:22)
+      at Object.<anonymous> (lib/chat/route-types.ts:17:21)
+      at Object.<anonymous> (app/api/chat/route.ts:31:21)
+      at Object.<anonymous> (__tests__/api/chat/route.errors.test.ts:7:16)
+
+    console.log
+      [TelemetryManager] Created session test-session-123 with model gpt-4
+
+      at TelemetryManager.log [as createSession] (lib/chat-telemetry.ts:179:13)
+
+    console.log
+      [TelemetryManager] Created session test-session-123 with model gpt-4
+
+      at TelemetryManager.log [as createSession] (lib/chat-telemetry.ts:179:13)
+
+    console.error
+      [Intelligent Chat API] Error: Error: Database connection failed
+          at Object.<anonymous> (/Users/jamesguy/Omniops/__tests__/api/chat/route.errors.test.ts:131:23)
+          at Promise.then.completed (/Users/jamesguy/Omniops/node_modules/jest-circus/build/utils.js:298:28)
+          at new Promise (<anonymous>)
+          at callAsyncCircusFn (/Users/jamesguy/Omniops/node_modules/jest-circus/build/utils.js:231:10)
+          at _callCircusTest (/Users/jamesguy/Omniops/node_modules/jest-circus/build/run.js:316:40)
+          at processTicksAndRejections (node:internal/process/task_queues:105:5)
+          at _runTest (/Users/jamesguy/Omniops/node_modules/jest-circus/build/run.js:252:3)
+          at _runTestsForDescribeBlock (/Users/jamesguy/Omniops/node_modules/jest-circus/build/run.js:126:9)
+          at _runTestsForDescribeBlock (/Users/jamesguy/Omniops/node_modules/jest-circus/build/run.js:121:9)
+          at _runTestsForDescribeBlock (/Users/jamesguy/Omniops/node_modules/jest-circus/build/run.js:121:9)
+          at run (/Users/jamesguy/Omniops/node_modules/jest-circus/build/run.js:71:3)
+          at runAndTransformResultsToJestFormat (/Users/jamesguy/Omniops/node_modules/jest-circus/build/legacy-code-todo-rewrite/jestAdapterInit.js:122:21)
+          at jestAdapter (/Users/jamesguy/Omniops/node_modules/jest-circus/build/legacy-code-todo-rewrite/jestAdapter.js:79:19)
+          at runTestInternal (/Users/jamesguy/Omniops/node_modules/jest-runner/build/runTest.js:367:16)
+          at runTest (/Users/jamesguy/Omniops/node_modules/jest-runner/build/runTest.js:444:34)
+          at Object.worker (/Users/jamesguy/Omniops/node_modules/jest-runner/build/testWorker.js:106:12)
+
+      219 |
+      220 |   } catch (error) {
+    > 221 |     console.error('[Intelligent Chat API] Error:', error);
+          |             ^
+      222 |
+      223 |     // DEBUG: Enhanced error logging for tests
+      224 |     if (process.env.NODE_ENV === 'test') {
+
+      at error (app/api/chat/route.ts:221:13)
+      at Object.<anonymous> (__tests__/api/chat/route.errors.test.ts:164:24)
+
+    console.error
+      [TEST DEBUG] Full error details: {
+        message: 'Database connection failed',
+        stack: 'Error: Database connection failed\n' +
+          '    at Object.<anonymous> (/Users/jamesguy/Omniops/__tests__/api/chat/route.errors.test.ts:131:23)\n' +
+          '    at Promise.then.completed (/Users/jamesguy/Omniops/node_modules/jest-circus/build/utils.js:298:28)\n' +
+          '    at new Promise (<anonymous>)\n' +
+          '    at callAsyncCircusFn (/Users/jamesguy/Omniops/node_modules/jest-circus/build/utils.js:231:10)\n' +
+          '    at _callCircusTest (/Users/jamesguy/Omniops/node_modules/jest-circus/build/run.js:316:40)\n' +
+          '    at processTicksAndRejections (node:internal/process/task_queues:105:5)\n' +
+          '    at _runTest (/Users/jamesguy/Omniops/node_modules/jest-circus/build/run.js:252:3)\n' +
+          '    at _runTestsForDescribeBlock (/Users/jamesguy/Omniops/node_modules/jest-circus/build/run.js:126:9)\n' +
+          '    at _runTestsForDescribeBlock (/Users/jamesguy/Omniops/node_modules/jest-circus/build/run.js:121:9)\n' +
+          '    at _runTestsForDescribeBlock (/Users/jamesguy/Omniops/node_modules/jest-circus/build/run.js:121:9)\n' +
+          '    at run (/Users/jamesguy/Omniops/node_modules/jest-circus/build/run.js:71:3)\n' +
+          '    at runAndTransformResultsToJestFormat (/Users/jamesguy/Omniops/node_modules/jest-circus/build/legacy-code-todo-rewrite/jestAdapterInit.js:122:21)\n' +
+          '    at jestAdapter (/Users/jamesguy/Omniops/node_modules/jest-circus/build/legacy-code-todo-rewrite/jestAdapter.js:79:19)\n' +
+          '    at runTestInternal (/Users/jamesguy/Omniops/node_modules/jest-runner/build/runTest.js:367:16)\n' +
+          '    at runTest (/Users/jamesguy/Omniops/node_modules/jest-runner/build/runTest.js:444:34)\n' +
+          '    at Object.worker (/Users/jamesguy/Omniops/node_modules/jest-runner/build/testWorker.js:106:12)',
+        type: 'Error',
+        error: Error: Database connection failed
+            at Object.<anonymous> (/Users/jamesguy/Omniops/__tests__/api/chat/route.errors.test.ts:131:23)
+            at Promise.then.completed (/Users/jamesguy/Omniops/node_modules/jest-circus/build/utils.js:298:28)
+            at new Promise (<anonymous>)
+            at callAsyncCircusFn (/Users/jamesguy/Omniops/node_modules/jest-circus/build/utils.js:231:10)
+            at _callCircusTest (/Users/jamesguy/Omniops/node_modules/jest-circus/build/run.js:316:40)
+            at processTicksAndRejections (node:internal/process/task_queues:105:5)
+            at _runTest (/Users/jamesguy/Omniops/node_modules/jest-circus/build/run.js:252:3)
+            at _runTestsForDescribeBlock (/Users/jamesguy/Omniops/node_modules/jest-circus/build/run.js:126:9)
+            at _runTestsForDescribeBlock (/Users/jamesguy/Omniops/node_modules/jest-circus/build/run.js:121:9)
+            at _runTestsForDescribeBlock (/Users/jamesguy/Omniops/node_modules/jest-circus/build/run.js:121:9)
+            at run (/Users/jamesguy/Omniops/node_modules/jest-circus/build/run.js:71:3)
+            at runAndTransformResultsToJestFormat (/Users/jamesguy/Omniops/node_modules/jest-circus/build/legacy-code-todo-rewrite/jestAdapterInit.js:122:21)
+            at jestAdapter (/Users/jamesguy/Omniops/node_modules/jest-circus/build/legacy-code-todo-rewrite/jestAdapter.js:79:19)
+            at runTestInternal (/Users/jamesguy/Omniops/node_modules/jest-runner/build/runTest.js:367:16)
+            at runTest (/Users/jamesguy/Omniops/node_modules/jest-runner/build/runTest.js:444:34)
+            at Object.worker (/Users/jamesguy/Omniops/node_modules/jest-runner/build/testWorker.js:106:12)
+      }
+
+      223 |     // DEBUG: Enhanced error logging for tests
+      224 |     if (process.env.NODE_ENV === 'test') {
+    > 225 |       console.error('[TEST DEBUG] Full error details:', {
+          |               ^
+      226 |         message: error instanceof Error ? error.message : String(error),
+      227 |         stack: error instanceof Error ? error.stack : undefined,
+      228 |         type: error?.constructor?.name,
+
+      at error (app/api/chat/route.ts:225:15)
+      at Object.<anonymous> (__tests__/api/chat/route.errors.test.ts:164:24)
+
+    console.log
+      
+      📊 CHAT SESSION SUMMARY {
+        sessionId: 'test-session-123',
+        model: 'gpt-4',
+        totalDuration: '1ms',
+        iterations: 0,
+        searches: { total: 0, totalResults: 0, avgTime: '0ms', breakdown: {} },
+        tokens: undefined,
+        success: false,
+        error: 'Database connection failed',
+        domain: undefined
+      }
+
+      at ChatTelemetry.log [as complete] (lib/chat-telemetry.ts:117:13)
+
+    console.log
+      [TelemetryManager] Created session test-session-123 with model gpt-4
+
+      at TelemetryManager.log [as createSession] (lib/chat-telemetry.ts:179:13)
+
+    console.log
+      [Intelligent Chat] Starting conversation with 2 messages
+
+      at log (lib/chat/ai-processor.ts:35:11)
+
+    console.error
+      [Intelligent Chat API] Error: Error: USE_GPT5_MINI must be set to true. GPT-4 fallback has been removed.
+          at getModelConfig (/Users/jamesguy/Omniops/lib/chat/ai-processor-formatter.ts:42:11)
+          at processAIConversation (/Users/jamesguy/Omniops/lib/chat/ai-processor.ts:46:37)
+          at POST (/Users/jamesguy/Omniops/app/api/chat/route.ts:175:98)
+          at processTicksAndRejections (node:internal/process/task_queues:105:5)
+          at Object.<anonymous> (/Users/jamesguy/Omniops/__tests__/api/chat/route.errors.test.ts:187:24)
+
+      219 |
+      220 |   } catch (error) {
+    > 221 |     console.error('[Intelligent Chat API] Error:', error);
+          |             ^
+      222 |
+      223 |     // DEBUG: Enhanced error logging for tests
+      224 |     if (process.env.NODE_ENV === 'test') {
+
+      at error (app/api/chat/route.ts:221:13)
+      at Object.<anonymous> (__tests__/api/chat/route.errors.test.ts:187:24)
+
+    console.error
+      [TEST DEBUG] Full error details: {
+        message: 'USE_GPT5_MINI must be set to true. GPT-4 fallback has been removed.',
+        stack: 'Error: USE_GPT5_MINI must be set to true. GPT-4 fallback has been removed.\n' +
+          '    at getModelConfig (/Users/jamesguy/Omniops/lib/chat/ai-processor-formatter.ts:42:11)\n' +
+          '    at processAIConversation (/Users/jamesguy/Omniops/lib/chat/ai-processor.ts:46:37)\n' +
+          '    at POST (/Users/jamesguy/Omniops/app/api/chat/route.ts:175:98)\n' +
+          '    at processTicksAndRejections (node:internal/process/task_queues:105:5)\n' +
+          '    at Object.<anonymous> (/Users/jamesguy/Omniops/__tests__/api/chat/route.errors.test.ts:187:24)',
+        type: 'Error',
+        error: Error: USE_GPT5_MINI must be set to true. GPT-4 fallback has been removed.
+            at getModelConfig (/Users/jamesguy/Omniops/lib/chat/ai-processor-formatter.ts:42:11)
+            at processAIConversation (/Users/jamesguy/Omniops/lib/chat/ai-processor.ts:46:37)
+            at POST (/Users/jamesguy/Omniops/app/api/chat/route.ts:175:98)
+            at processTicksAndRejections (node:internal/process/task_queues:105:5)
+            at Object.<anonymous> (/Users/jamesguy/Omniops/__tests__/api/chat/route.errors.test.ts:187:24)
+      }
+
+      223 |     // DEBUG: Enhanced error logging for tests
+      224 |     if (process.env.NODE_ENV === 'test') {
+    > 225 |       console.error('[TEST DEBUG] Full error details:', {
+          |               ^
+      226 |         message: error instanceof Error ? error.message : String(error),
+      227 |         stack: error instanceof Error ? error.stack : undefined,
+      228 |         type: error?.constructor?.name,
+
+      at error (app/api/chat/route.ts:225:15)
+      at Object.<anonymous> (__tests__/api/chat/route.errors.test.ts:187:24)
+
+    console.log
+      
+      📊 CHAT SESSION SUMMARY {
+        sessionId: 'test-session-123',
+        model: 'gpt-4',
+        totalDuration: '4ms',
+        iterations: 0,
+        searches: { total: 0, totalResults: 0, avgTime: '0ms', breakdown: {} },
+        tokens: undefined,
+        success: false,
+        error: 'USE_GPT5_MINI must be set to true. GPT-4 fallback has been removed.',
+        domain: undefined
+      }
+
+      at ChatTelemetry.log [as complete] (lib/chat-telemetry.ts:117:13)
+
+(node:92728) [DEP0040] DeprecationWarning: The `punycode` module is deprecated. Please use a userland alternative instead.
+(Use `node --trace-deprecation ...` to show where the warning was created)
+(node:92733) [DEP0040] DeprecationWarning: The `punycode` module is deprecated. Please use a userland alternative instead.
+(Use `node --trace-deprecation ...` to show where the warning was created)
+FAIL __tests__/api/chat/route.basic.test.ts
+  ● Console
+
+    console.warn
+      [2025-10-28T12:14:41.374Z] [WARN] [Redis] Failed to connect, using in-memory fallback: {}
+
+      44 |     const entry: LogEntry = { level: 'warn', message, timestamp: new Date().toISOString(), context };
+      45 |     this.addToHistory(entry);
+    > 46 |     console.warn(this.formatMessage('warn', message, context));
+         |             ^
+      47 |   }
+      48 |
+      49 |   error(message: string, error?: Error | unknown, context?: Record<string, any>) {
+
+      at Logger.warn (lib/logger.ts:46:13)
+      at RedisClientWithFallback.warn [as initializeClient] (lib/redis-fallback.ts:60:14)
+      at new initializeClient (lib/redis-fallback.ts:24:10)
+      at getRedisClientWithFallback (lib/redis-fallback.ts:209:27)
+      at Object.getRedisClientWithFallback (lib/redis-fallback.ts:214:22)
+      at Object.<anonymous> (lib/redis.ts:26:24)
+      at Object.<anonymous> (lib/search-cache.ts:23:16)
+      at Object.<anonymous> (lib/embeddings.ts:34:22)
+      at Object.<anonymous> (lib/chat/route-types.ts:17:21)
+      at Object.<anonymous> (app/api/chat/route.ts:31:21)
+      at Object.<anonymous> (__tests__/api/chat/route.basic.test.ts:7:16)
+
+    console.log
+      [TelemetryManager] Created session test-session-123 with model gpt-4
+
+      at TelemetryManager.log [as createSession] (lib/chat-telemetry.ts:179:13)
+
+    console.log
+      [Intelligent Chat] Starting conversation with 2 messages
+
+      at log (lib/chat/ai-processor.ts:35:11)
+
+    console.error
+      [Intelligent Chat API] Error: Error: USE_GPT5_MINI must be set to true. GPT-4 fallback has been removed.
+          at getModelConfig (/Users/jamesguy/Omniops/lib/chat/ai-processor-formatter.ts:42:11)
+          at processAIConversation (/Users/jamesguy/Omniops/lib/chat/ai-processor.ts:46:37)
+          at POST (/Users/jamesguy/Omniops/app/api/chat/route.ts:175:98)
+          at processTicksAndRejections (node:internal/process/task_queues:105:5)
+          at Object.<anonymous> (/Users/jamesguy/Omniops/__tests__/api/chat/route.basic.test.ts:119:24)
+
+      219 |
+      220 |   } catch (error) {
+    > 221 |     console.error('[Intelligent Chat API] Error:', error);
+          |             ^
+      222 |
+      223 |     // DEBUG: Enhanced error logging for tests
+      224 |     if (process.env.NODE_ENV === 'test') {
+
+      at error (app/api/chat/route.ts:221:13)
+      at Object.<anonymous> (__tests__/api/chat/route.basic.test.ts:119:24)
+
+    console.error
+      [TEST DEBUG] Full error details: {
+        message: 'USE_GPT5_MINI must be set to true. GPT-4 fallback has been removed.',
+        stack: 'Error: USE_GPT5_MINI must be set to true. GPT-4 fallback has been removed.\n' +
+          '    at getModelConfig (/Users/jamesguy/Omniops/lib/chat/ai-processor-formatter.ts:42:11)\n' +
+          '    at processAIConversation (/Users/jamesguy/Omniops/lib/chat/ai-processor.ts:46:37)\n' +
+          '    at POST (/Users/jamesguy/Omniops/app/api/chat/route.ts:175:98)\n' +
+          '    at processTicksAndRejections (node:internal/process/task_queues:105:5)\n' +
+          '    at Object.<anonymous> (/Users/jamesguy/Omniops/__tests__/api/chat/route.basic.test.ts:119:24)',
+        type: 'Error',
+        error: Error: USE_GPT5_MINI must be set to true. GPT-4 fallback has been removed.
+            at getModelConfig (/Users/jamesguy/Omniops/lib/chat/ai-processor-formatter.ts:42:11)
+            at processAIConversation (/Users/jamesguy/Omniops/lib/chat/ai-processor.ts:46:37)
+            at POST (/Users/jamesguy/Omniops/app/api/chat/route.ts:175:98)
+            at processTicksAndRejections (node:internal/process/task_queues:105:5)
+            at Object.<anonymous> (/Users/jamesguy/Omniops/__tests__/api/chat/route.basic.test.ts:119:24)
+      }
+
+      223 |     // DEBUG: Enhanced error logging for tests
+      224 |     if (process.env.NODE_ENV === 'test') {
+    > 225 |       console.error('[TEST DEBUG] Full error details:', {
+          |               ^
+      226 |         message: error instanceof Error ? error.message : String(error),
+      227 |         stack: error instanceof Error ? error.stack : undefined,
+      228 |         type: error?.constructor?.name,
+
+      at error (app/api/chat/route.ts:225:15)
+      at Object.<anonymous> (__tests__/api/chat/route.basic.test.ts:119:24)
+
+    console.log
+      
+      📊 CHAT SESSION SUMMARY {
+        sessionId: 'test-session-123',
+        model: 'gpt-4',
+        totalDuration: '4ms',
+        iterations: 0,
+        searches: { total: 0, totalResults: 0, avgTime: '0ms', breakdown: {} },
+        tokens: undefined,
+        success: false,
+        error: 'USE_GPT5_MINI must be set to true. GPT-4 fallback has been removed.',
+        domain: undefined
+      }
+
+      at ChatTelemetry.log [as complete] (lib/chat-telemetry.ts:117:13)
+
+    console.log
+      [TelemetryManager] Created session test-session-123 with model gpt-4
+
+      at TelemetryManager.log [as createSession] (lib/chat-telemetry.ts:179:13)
+
+    console.log
+      [Intelligent Chat] Starting conversation with 2 messages
+
+      at log (lib/chat/ai-processor.ts:35:11)
+
+    console.error
+      [Intelligent Chat API] Error: Error: USE_GPT5_MINI must be set to true. GPT-4 fallback has been removed.
+          at getModelConfig (/Users/jamesguy/Omniops/lib/chat/ai-processor-formatter.ts:42:11)
+          at processAIConversation (/Users/jamesguy/Omniops/lib/chat/ai-processor.ts:46:37)
+          at POST (/Users/jamesguy/Omniops/app/api/chat/route.ts:175:98)
+          at processTicksAndRejections (node:internal/process/task_queues:105:5)
+          at Object.<anonymous> (/Users/jamesguy/Omniops/__tests__/api/chat/route.basic.test.ts:155:24)
+
+      219 |
+      220 |   } catch (error) {
+    > 221 |     console.error('[Intelligent Chat API] Error:', error);
+          |             ^
+      222 |
+      223 |     // DEBUG: Enhanced error logging for tests
+      224 |     if (process.env.NODE_ENV === 'test') {
+
+      at error (app/api/chat/route.ts:221:13)
+      at Object.<anonymous> (__tests__/api/chat/route.basic.test.ts:155:24)
+
+    console.error
+      [TEST DEBUG] Full error details: {
+        message: 'USE_GPT5_MINI must be set to true. GPT-4 fallback has been removed.',
+        stack: 'Error: USE_GPT5_MINI must be set to true. GPT-4 fallback has been removed.\n' +
+          '    at getModelConfig (/Users/jamesguy/Omniops/lib/chat/ai-processor-formatter.ts:42:11)\n' +
+          '    at processAIConversation (/Users/jamesguy/Omniops/lib/chat/ai-processor.ts:46:37)\n' +
+          '    at POST (/Users/jamesguy/Omniops/app/api/chat/route.ts:175:98)\n' +
+          '    at processTicksAndRejections (node:internal/process/task_queues:105:5)\n' +
+          '    at Object.<anonymous> (/Users/jamesguy/Omniops/__tests__/api/chat/route.basic.test.ts:155:24)',
+        type: 'Error',
+        error: Error: USE_GPT5_MINI must be set to true. GPT-4 fallback has been removed.
+            at getModelConfig (/Users/jamesguy/Omniops/lib/chat/ai-processor-formatter.ts:42:11)
+            at processAIConversation (/Users/jamesguy/Omniops/lib/chat/ai-processor.ts:46:37)
+            at POST (/Users/jamesguy/Omniops/app/api/chat/route.ts:175:98)
+            at processTicksAndRejections (node:internal/process/task_queues:105:5)
+            at Object.<anonymous> (/Users/jamesguy/Omniops/__tests__/api/chat/route.basic.test.ts:155:24)
+      }
+
+      223 |     // DEBUG: Enhanced error logging for tests
+      224 |     if (process.env.NODE_ENV === 'test') {
+    > 225 |       console.error('[TEST DEBUG] Full error details:', {
+          |               ^
+      226 |         message: error instanceof Error ? error.message : String(error),
+      227 |         stack: error instanceof Error ? error.stack : undefined,
+      228 |         type: error?.constructor?.name,
+
+      at error (app/api/chat/route.ts:225:15)
+      at Object.<anonymous> (__tests__/api/chat/route.basic.test.ts:155:24)
+
+    console.log
+      
+      📊 CHAT SESSION SUMMARY {
+        sessionId: 'test-session-123',
+        model: 'gpt-4',
+        totalDuration: '1ms',
+        iterations: 0,
+        searches: { total: 0, totalResults: 0, avgTime: '0ms', breakdown: {} },
+        tokens: undefined,
+        success: false,
+        error: 'USE_GPT5_MINI must be set to true. GPT-4 fallback has been removed.',
+        domain: undefined
+      }
+
+      at ChatTelemetry.log [as complete] (lib/chat-telemetry.ts:117:13)
+
+    console.error
+      [Intelligent Chat API] Error: ZodError: [
+        {
+          "code": "too_small",
+          "minimum": 1,
+          "type": "string",
+          "inclusive": true,
+          "exact": false,
+          "message": "String must contain at least 1 character(s)",
+          "path": [
+            "message"
+          ]
+        },
+        {
+          "code": "invalid_type",
+          "expected": "string",
+          "received": "undefined",
+          "path": [
+            "session_id"
+          ],
+          "message": "Required"
+        }
+      ]
+          at Object.get error [as error] (/Users/jamesguy/Omniops/node_modules/zod/v3/types.cjs:45:31)
+          at ZodObject.parse (/Users/jamesguy/Omniops/node_modules/zod/v3/types.cjs:120:22)
+          at parse (/Users/jamesguy/Omniops/app/api/chat/route.ts:69:45)
+          at processTicksAndRejections (node:internal/process/task_queues:105:5)
+          at Object.<anonymous> (/Users/jamesguy/Omniops/__tests__/api/chat/route.basic.test.ts:167:24) {
+        issues: [
+          {
+            code: 'too_small',
+            minimum: 1,
+            type: 'string',
+            inclusive: true,
+            exact: false,
+            message: 'String must contain at least 1 character(s)',
+            path: [Array]
+          },
+          {
+            code: 'invalid_type',
+            expected: 'string',
+            received: 'undefined',
+            path: [Array],
+            message: 'Required'
+          }
+        ],
+        addIssue: [Function (anonymous)],
+        addIssues: [Function (anonymous)],
+        errors: [
+          {
+            code: 'too_small',
+            minimum: 1,
+            type: 'string',
+            inclusive: true,
+            exact: false,
+            message: 'String must contain at least 1 character(s)',
+            path: [Array]
+          },
+          {
+            code: 'invalid_type',
+            expected: 'string',
+            received: 'undefined',
+            path: [Array],
+            message: 'Required'
+          }
+        ]
+      }
+
+      219 |
+      220 |   } catch (error) {
+    > 221 |     console.error('[Intelligent Chat API] Error:', error);
+          |             ^
+      222 |
+      223 |     // DEBUG: Enhanced error logging for tests
+      224 |     if (process.env.NODE_ENV === 'test') {
+
+      at error (app/api/chat/route.ts:221:13)
+      at Object.<anonymous> (__tests__/api/chat/route.basic.test.ts:167:24)
+
+    console.error
+      [TEST DEBUG] Full error details: {
+        message: '[\n' +
+          '  {\n' +
+          '    "code": "too_small",\n' +
+          '    "minimum": 1,\n' +
+          '    "type": "string",\n' +
+          '    "inclusive": true,\n' +
+          '    "exact": false,\n' +
+          '    "message": "String must contain at least 1 character(s)",\n' +
+          '    "path": [\n' +
+          '      "message"\n' +
+          '    ]\n' +
+          '  },\n' +
+          '  {\n' +
+          '    "code": "invalid_type",\n' +
+          '    "expected": "string",\n' +
+          '    "received": "undefined",\n' +
+          '    "path": [\n' +
+          '      "session_id"\n' +
+          '    ],\n' +
+          '    "message": "Required"\n' +
+          '  }\n' +
+          ']',
+        stack: 'ZodError: [\n' +
+          '  {\n' +
+          '    "code": "too_small",\n' +
+          '    "minimum": 1,\n' +
+          '    "type": "string",\n' +
+          '    "inclusive": true,\n' +
+          '    "exact": false,\n' +
+          '    "message": "String must contain at least 1 character(s)",\n' +
+          '    "path": [\n' +
+          '      "message"\n' +
+          '    ]\n' +
+          '  },\n' +
+          '  {\n' +
+          '    "code": "invalid_type",\n' +
+          '    "expected": "string",\n' +
+          '    "received": "undefined",\n' +
+          '    "path": [\n' +
+          '      "session_id"\n' +
+          '    ],\n' +
+          '    "message": "Required"\n' +
+          '  }\n' +
+          ']\n' +
+          '    at Object.get error [as error] (/Users/jamesguy/Omniops/node_modules/zod/v3/types.cjs:45:31)\n' +
+          '    at ZodObject.parse (/Users/jamesguy/Omniops/node_modules/zod/v3/types.cjs:120:22)\n' +
+          '    at parse (/Users/jamesguy/Omniops/app/api/chat/route.ts:69:45)\n' +
+          '    at processTicksAndRejections (node:internal/process/task_queues:105:5)\n' +
+          '    at Object.<anonymous> (/Users/jamesguy/Omniops/__tests__/api/chat/route.basic.test.ts:167:24)',
+        type: 'ZodError',
+        error: ZodError: [
+          {
+            "code": "too_small",
+            "minimum": 1,
+            "type": "string",
+            "inclusive": true,
+            "exact": false,
+            "message": "String must contain at least 1 character(s)",
+            "path": [
+              "message"
+            ]
+          },
+          {
+            "code": "invalid_type",
+            "expected": "string",
+            "received": "undefined",
+            "path": [
+              "session_id"
+            ],
+            "message": "Required"
+          }
+        ]
+            at Object.get error [as error] (/Users/jamesguy/Omniops/node_modules/zod/v3/types.cjs:45:31)
+            at ZodObject.parse (/Users/jamesguy/Omniops/node_modules/zod/v3/types.cjs:120:22)
+            at parse (/Users/jamesguy/Omniops/app/api/chat/route.ts:69:45)
+            at processTicksAndRejections (node:internal/process/task_queues:105:5)
+            at Object.<anonymous> (/Users/jamesguy/Omniops/__tests__/api/chat/route.basic.test.ts:167:24) {
+          issues: [ [Object], [Object] ],
+          addIssue: [Function (anonymous)],
+          addIssues: [Function (anonymous)],
+          errors: [ [Object], [Object] ]
+        }
+      }
+
+      223 |     // DEBUG: Enhanced error logging for tests
+      224 |     if (process.env.NODE_ENV === 'test') {
+    > 225 |       console.error('[TEST DEBUG] Full error details:', {
+          |               ^
+      226 |         message: error instanceof Error ? error.message : String(error),
+      227 |         stack: error instanceof Error ? error.stack : undefined,
+      228 |         type: error?.constructor?.name,
+
+      at error (app/api/chat/route.ts:225:15)
+      at Object.<anonymous> (__tests__/api/chat/route.basic.test.ts:167:24)
+
+    console.error
+      [Intelligent Chat API] Error: ZodError: [
+        {
+          "code": "too_big",
+          "maximum": 5000,
+          "type": "string",
+          "inclusive": true,
+          "exact": false,
+          "message": "String must contain at most 5000 character(s)",
+          "path": [
+            "message"
+          ]
+        }
+      ]
+          at Object.get error [as error] (/Users/jamesguy/Omniops/node_modules/zod/v3/types.cjs:45:31)
+          at ZodObject.parse (/Users/jamesguy/Omniops/node_modules/zod/v3/types.cjs:120:22)
+          at parse (/Users/jamesguy/Omniops/app/api/chat/route.ts:69:45)
+          at processTicksAndRejections (node:internal/process/task_queues:105:5)
+          at Object.<anonymous> (/Users/jamesguy/Omniops/__tests__/api/chat/route.basic.test.ts:181:24) {
+        issues: [
+          {
+            code: 'too_big',
+            maximum: 5000,
+            type: 'string',
+            inclusive: true,
+            exact: false,
+            message: 'String must contain at most 5000 character(s)',
+            path: [Array]
+          }
+        ],
+        addIssue: [Function (anonymous)],
+        addIssues: [Function (anonymous)],
+        errors: [
+          {
+            code: 'too_big',
+            maximum: 5000,
+            type: 'string',
+            inclusive: true,
+            exact: false,
+            message: 'String must contain at most 5000 character(s)',
+            path: [Array]
+          }
+        ]
+      }
+
+      219 |
+      220 |   } catch (error) {
+    > 221 |     console.error('[Intelligent Chat API] Error:', error);
+          |             ^
+      222 |
+      223 |     // DEBUG: Enhanced error logging for tests
+      224 |     if (process.env.NODE_ENV === 'test') {
+
+      at error (app/api/chat/route.ts:221:13)
+      at Object.<anonymous> (__tests__/api/chat/route.basic.test.ts:181:24)
+
+    console.error
+      [TEST DEBUG] Full error details: {
+        message: '[\n' +
+          '  {\n' +
+          '    "code": "too_big",\n' +
+          '    "maximum": 5000,\n' +
+          '    "type": "string",\n' +
+          '    "inclusive": true,\n' +
+          '    "exact": false,\n' +
+          '    "message": "String must contain at most 5000 character(s)",\n' +
+          '    "path": [\n' +
+          '      "message"\n' +
+          '    ]\n' +
+          '  }\n' +
+          ']',
+        stack: 'ZodError: [\n' +
+          '  {\n' +
+          '    "code": "too_big",\n' +
+          '    "maximum": 5000,\n' +
+          '    "type": "string",\n' +
+          '    "inclusive": true,\n' +
+          '    "exact": false,\n' +
+          '    "message": "String must contain at most 5000 character(s)",\n' +
+          '    "path": [\n' +
+          '      "message"\n' +
+          '    ]\n' +
+          '  }\n' +
+          ']\n' +
+          '    at Object.get error [as error] (/Users/jamesguy/Omniops/node_modules/zod/v3/types.cjs:45:31)\n' +
+          '    at ZodObject.parse (/Users/jamesguy/Omniops/node_modules/zod/v3/types.cjs:120:22)\n' +
+          '    at parse (/Users/jamesguy/Omniops/app/api/chat/route.ts:69:45)\n' +
+          '    at processTicksAndRejections (node:internal/process/task_queues:105:5)\n' +
+          '    at Object.<anonymous> (/Users/jamesguy/Omniops/__tests__/api/chat/route.basic.test.ts:181:24)',
+        type: 'ZodError',
+        error: ZodError: [
+          {
+            "code": "too_big",
+            "maximum": 5000,
+            "type": "string",
+            "inclusive": true,
+            "exact": false,
+            "message": "String must contain at most 5000 character(s)",
+            "path": [
+              "message"
+            ]
+          }
+        ]
+            at Object.get error [as error] (/Users/jamesguy/Omniops/node_modules/zod/v3/types.cjs:45:31)
+            at ZodObject.parse (/Users/jamesguy/Omniops/node_modules/zod/v3/types.cjs:120:22)
+            at parse (/Users/jamesguy/Omniops/app/api/chat/route.ts:69:45)
+            at processTicksAndRejections (node:internal/process/task_queues:105:5)
+            at Object.<anonymous> (/Users/jamesguy/Omniops/__tests__/api/chat/route.basic.test.ts:181:24) {
+          issues: [ [Object] ],
+          addIssue: [Function (anonymous)],
+          addIssues: [Function (anonymous)],
+          errors: [ [Object] ]
+        }
+      }
+
+      223 |     // DEBUG: Enhanced error logging for tests
+      224 |     if (process.env.NODE_ENV === 'test') {
+    > 225 |       console.error('[TEST DEBUG] Full error details:', {
+          |               ^
+      226 |         message: error instanceof Error ? error.message : String(error),
+      227 |         stack: error instanceof Error ? error.stack : undefined,
+      228 |         type: error?.constructor?.name,
+
+      at error (app/api/chat/route.ts:225:15)
+      at Object.<anonymous> (__tests__/api/chat/route.basic.test.ts:181:24)
+
+  ● /api/chat - Basic Functionality › POST › should handle a basic chat request
+
+    expect(received).toBe(expected) // Object.is equality
+
+    Expected: 200
+    Received: 500
+
+      120 |       const data = await response.json()
+      121 |
+    > 122 |       expect(response.status).toBe(200)
+          |                               ^
+      123 |       expect(data).toHaveProperty('message')
+      124 |       expect(data).toHaveProperty('conversation_id')
+      125 |       expect(data.message).toBe('This is a helpful response from the AI assistant.')
+
+      at Object.toBe (__tests__/api/chat/route.basic.test.ts:122:31)
+
+  ● /api/chat - Basic Functionality › POST › should handle existing conversation
+
+    expect(received).toBe(expected) // Object.is equality
+
+    Expected: 200
+    Received: 500
+
+      156 |       const data = await response.json()
+      157 |
+    > 158 |       expect(response.status).toBe(200)
+          |                               ^
+      159 |       expect(data.conversation_id).toBe('550e8400-e29b-41d4-a716-446655440000')
+      160 |     })
+      161 |
+
+      at Object.toBe (__tests__/api/chat/route.basic.test.ts:158:31)
+
+(node:92735) [DEP0040] DeprecationWarning: The `punycode` module is deprecated. Please use a userland alternative instead.
+(Use `node --trace-deprecation ...` to show where the warning was created)
+FAIL __tests__/api/chat/malformed-tool-args.test.ts
+  ● Console
+
+    console.warn
+      [2025-10-28T12:14:41.458Z] [WARN] [Redis] Failed to connect, using in-memory fallback: {}
+
+      44 |     const entry: LogEntry = { level: 'warn', message, timestamp: new Date().toISOString(), context };
+      45 |     this.addToHistory(entry);
+    > 46 |     console.warn(this.formatMessage('warn', message, context));
+         |             ^
+      47 |   }
+      48 |
+      49 |   error(message: string, error?: Error | unknown, context?: Record<string, any>) {
+
+      at Logger.warn (lib/logger.ts:46:13)
+      at RedisClientWithFallback.warn [as initializeClient] (lib/redis-fallback.ts:60:14)
+      at new initializeClient (lib/redis-fallback.ts:24:10)
+      at getRedisClientWithFallback (lib/redis-fallback.ts:209:27)
+      at Object.getRedisClientWithFallback (lib/redis-fallback.ts:214:22)
+      at Object.<anonymous> (lib/redis.ts:26:24)
+      at Object.<anonymous> (lib/search-cache.ts:23:16)
+      at Object.<anonymous> (lib/embeddings.ts:34:22)
+      at Object.<anonymous> (lib/chat/route-types.ts:17:21)
+      at Object.<anonymous> (app/api/chat/route.ts:31:21)
+      at Object.<anonymous> (__tests__/api/chat/malformed-tool-args.test.ts:7:16)
+
+    console.warn
+      [2025-10-28T12:14:41.511Z] [WARN] [Redis] Failed to connect, using in-memory fallback: {}
+
+      44 |     const entry: LogEntry = { level: 'warn', message, timestamp: new Date().toISOString(), context };
+      45 |     this.addToHistory(entry);
+    > 46 |     console.warn(this.formatMessage('warn', message, context));
+         |             ^
+      47 |   }
+      48 |
+      49 |   error(message: string, error?: Error | unknown, context?: Record<string, any>) {
+
+      at Logger.warn (lib/logger.ts:46:13)
+      at RedisClientWithFallback.warn [as initializeClient] (lib/redis-fallback.ts:60:14)
+      at new initializeClient (lib/redis-fallback.ts:24:10)
+      at getRedisClientWithFallback (lib/redis-fallback.ts:209:27)
+      at Object.getRedisClientWithFallback (lib/redis-fallback.ts:214:22)
+      at Object.<anonymous> (lib/redis.ts:26:24)
+      at Object.<anonymous> (lib/search-cache.ts:23:16)
+      at Object.<anonymous> (lib/embeddings.ts:34:22)
+      at Object.<anonymous> (lib/search-wrapper.ts:28:21)
+      at Object.requireMock (__tests__/api/chat/malformed-tool-args.test.ts:100:38)
+
+  ● Chat API - Malformed Tool Arguments › should gracefully handle missing required tool arguments
+
+    TypeError: Cannot read properties of undefined (reading 'deps')
+
+      39 | ) {
+      40 |   // Extract deps from context (defaults to defaultDependencies if not provided)
+    > 41 |   const deps = context.deps || defaultDependencies;
+         |                        ^
+      42 |
+      43 |   // Merge with defaults for any missing dependencies
+      44 |   const {
+
+      at deps (app/api/chat/route.ts:41:24)
+      at Object.<anonymous> (__tests__/api/chat/malformed-tool-args.test.ts:132:32)
+
+FAIL __tests__/api/chat/route.commerce.test.ts
+  ● Console
+
+    console.warn
+      [2025-10-28T12:14:41.360Z] [WARN] [Redis] Failed to connect, using in-memory fallback: {}
+
+      44 |     const entry: LogEntry = { level: 'warn', message, timestamp: new Date().toISOString(), context };
+      45 |     this.addToHistory(entry);
+    > 46 |     console.warn(this.formatMessage('warn', message, context));
+         |             ^
+      47 |   }
+      48 |
+      49 |   error(message: string, error?: Error | unknown, context?: Record<string, any>) {
+
+      at Logger.warn (lib/logger.ts:46:13)
+      at RedisClientWithFallback.warn [as initializeClient] (lib/redis-fallback.ts:60:14)
+      at new initializeClient (lib/redis-fallback.ts:24:10)
+      at getRedisClientWithFallback (lib/redis-fallback.ts:209:27)
+      at Object.getRedisClientWithFallback (lib/redis-fallback.ts:214:22)
+      at Object.<anonymous> (lib/redis.ts:26:24)
+      at Object.<anonymous> (lib/search-cache.ts:23:16)
+      at Object.<anonymous> (lib/embeddings.ts:34:22)
+      at Object.<anonymous> (lib/chat/route-types.ts:17:21)
+      at Object.<anonymous> (app/api/chat/route.ts:31:21)
+      at Object.<anonymous> (__tests__/api/chat/route.commerce.test.ts:7:16)
+
+    console.log
+      [TelemetryManager] Created session test-session-123 with model gpt-4
+
+      at TelemetryManager.log [as createSession] (lib/chat-telemetry.ts:179:13)
+
+    console.log
+      [Intelligent Chat] Starting conversation with 2 messages
+
+      at log (lib/chat/ai-processor.ts:35:11)
+
+    console.error
+      [Intelligent Chat API] Error: Error: USE_GPT5_MINI must be set to true. GPT-4 fallback has been removed.
+          at getModelConfig (/Users/jamesguy/Omniops/lib/chat/ai-processor-formatter.ts:42:11)
+          at processAIConversation (/Users/jamesguy/Omniops/lib/chat/ai-processor.ts:46:37)
+          at POST (/Users/jamesguy/Omniops/app/api/chat/route.ts:175:98)
+          at processTicksAndRejections (node:internal/process/task_queues:105:5)
+          at Object.<anonymous> (/Users/jamesguy/Omniops/__tests__/api/chat/route.commerce.test.ts:168:24)
+
+      219 |
+      220 |   } catch (error) {
+    > 221 |     console.error('[Intelligent Chat API] Error:', error);
+          |             ^
+      222 |
+      223 |     // DEBUG: Enhanced error logging for tests
+      224 |     if (process.env.NODE_ENV === 'test') {
+
+      at error (app/api/chat/route.ts:221:13)
+      at Object.<anonymous> (__tests__/api/chat/route.commerce.test.ts:168:24)
+
+    console.error
+      [TEST DEBUG] Full error details: {
+        message: 'USE_GPT5_MINI must be set to true. GPT-4 fallback has been removed.',
+        stack: 'Error: USE_GPT5_MINI must be set to true. GPT-4 fallback has been removed.\n' +
+          '    at getModelConfig (/Users/jamesguy/Omniops/lib/chat/ai-processor-formatter.ts:42:11)\n' +
+          '    at processAIConversation (/Users/jamesguy/Omniops/lib/chat/ai-processor.ts:46:37)\n' +
+          '    at POST (/Users/jamesguy/Omniops/app/api/chat/route.ts:175:98)\n' +
+          '    at processTicksAndRejections (node:internal/process/task_queues:105:5)\n' +
+          '    at Object.<anonymous> (/Users/jamesguy/Omniops/__tests__/api/chat/route.commerce.test.ts:168:24)',
+        type: 'Error',
+        error: Error: USE_GPT5_MINI must be set to true. GPT-4 fallback has been removed.
+            at getModelConfig (/Users/jamesguy/Omniops/lib/chat/ai-processor-formatter.ts:42:11)
+            at processAIConversation (/Users/jamesguy/Omniops/lib/chat/ai-processor.ts:46:37)
+            at POST (/Users/jamesguy/Omniops/app/api/chat/route.ts:175:98)
+            at processTicksAndRejections (node:internal/process/task_queues:105:5)
+            at Object.<anonymous> (/Users/jamesguy/Omniops/__tests__/api/chat/route.commerce.test.ts:168:24)
+      }
+
+      223 |     // DEBUG: Enhanced error logging for tests
+      224 |     if (process.env.NODE_ENV === 'test') {
+    > 225 |       console.error('[TEST DEBUG] Full error details:', {
+          |               ^
+      226 |         message: error instanceof Error ? error.message : String(error),
+      227 |         stack: error instanceof Error ? error.stack : undefined,
+      228 |         type: error?.constructor?.name,
+
+      at error (app/api/chat/route.ts:225:15)
+      at Object.<anonymous> (__tests__/api/chat/route.commerce.test.ts:168:24)
+
+    console.log
+      
+      📊 CHAT SESSION SUMMARY {
+        sessionId: 'test-session-123',
+        model: 'gpt-4',
+        totalDuration: '103ms',
+        iterations: 0,
+        searches: { total: 0, totalResults: 0, avgTime: '0ms', breakdown: {} },
+        tokens: undefined,
+        success: false,
+        error: 'USE_GPT5_MINI must be set to true. GPT-4 fallback has been removed.',
+        domain: undefined
+      }
+
+      at ChatTelemetry.log [as complete] (lib/chat-telemetry.ts:117:13)
+
+    console.log
+      [TelemetryManager] Created session test-session-123 with model gpt-4
+
+      at TelemetryManager.log [as createSession] (lib/chat-telemetry.ts:179:13)
+
+    console.log
+      [Intelligent Chat] Starting conversation with 2 messages
+
+      at log (lib/chat/ai-processor.ts:35:11)
+
+    console.error
+      [Intelligent Chat API] Error: Error: USE_GPT5_MINI must be set to true. GPT-4 fallback has been removed.
+          at getModelConfig (/Users/jamesguy/Omniops/lib/chat/ai-processor-formatter.ts:42:11)
+          at processAIConversation (/Users/jamesguy/Omniops/lib/chat/ai-processor.ts:46:37)
+          at POST (/Users/jamesguy/Omniops/app/api/chat/route.ts:175:98)
+          at processTicksAndRejections (node:internal/process/task_queues:105:5)
+          at Object.<anonymous> (/Users/jamesguy/Omniops/__tests__/api/chat/route.commerce.test.ts:241:24)
+
+      219 |
+      220 |   } catch (error) {
+    > 221 |     console.error('[Intelligent Chat API] Error:', error);
+          |             ^
+      222 |
+      223 |     // DEBUG: Enhanced error logging for tests
+      224 |     if (process.env.NODE_ENV === 'test') {
+
+      at error (app/api/chat/route.ts:221:13)
+      at Object.<anonymous> (__tests__/api/chat/route.commerce.test.ts:241:24)
+
+    console.error
+      [TEST DEBUG] Full error details: {
+        message: 'USE_GPT5_MINI must be set to true. GPT-4 fallback has been removed.',
+        stack: 'Error: USE_GPT5_MINI must be set to true. GPT-4 fallback has been removed.\n' +
+          '    at getModelConfig (/Users/jamesguy/Omniops/lib/chat/ai-processor-formatter.ts:42:11)\n' +
+          '    at processAIConversation (/Users/jamesguy/Omniops/lib/chat/ai-processor.ts:46:37)\n' +
+          '    at POST (/Users/jamesguy/Omniops/app/api/chat/route.ts:175:98)\n' +
+          '    at processTicksAndRejections (node:internal/process/task_queues:105:5)\n' +
+          '    at Object.<anonymous> (/Users/jamesguy/Omniops/__tests__/api/chat/route.commerce.test.ts:241:24)',
+        type: 'Error',
+        error: Error: USE_GPT5_MINI must be set to true. GPT-4 fallback has been removed.
+            at getModelConfig (/Users/jamesguy/Omniops/lib/chat/ai-processor-formatter.ts:42:11)
+            at processAIConversation (/Users/jamesguy/Omniops/lib/chat/ai-processor.ts:46:37)
+            at POST (/Users/jamesguy/Omniops/app/api/chat/route.ts:175:98)
+            at processTicksAndRejections (node:internal/process/task_queues:105:5)
+            at Object.<anonymous> (/Users/jamesguy/Omniops/__tests__/api/chat/route.commerce.test.ts:241:24)
+      }
+
+      223 |     // DEBUG: Enhanced error logging for tests
+      224 |     if (process.env.NODE_ENV === 'test') {
+    > 225 |       console.error('[TEST DEBUG] Full error details:', {
+          |               ^
+      226 |         message: error instanceof Error ? error.message : String(error),
+      227 |         stack: error instanceof Error ? error.stack : undefined,
+      228 |         type: error?.constructor?.name,
+
+      at error (app/api/chat/route.ts:225:15)
+      at Object.<anonymous> (__tests__/api/chat/route.commerce.test.ts:241:24)
+
+    console.log
+      
+      📊 CHAT SESSION SUMMARY {
+        sessionId: 'test-session-123',
+        model: 'gpt-4',
+        totalDuration: '1ms',
+        iterations: 0,
+        searches: { total: 0, totalResults: 0, avgTime: '0ms', breakdown: {} },
+        tokens: undefined,
+        success: false,
+        error: 'USE_GPT5_MINI must be set to true. GPT-4 fallback has been removed.',
+        domain: undefined
+      }
+
+      at ChatTelemetry.log [as complete] (lib/chat-telemetry.ts:117:13)
+
+    console.log
+      [TelemetryManager] Created session test-session-123 with model gpt-4
+
+      at TelemetryManager.log [as createSession] (lib/chat-telemetry.ts:179:13)
+
+    console.log
+      [Intelligent Chat] Starting conversation with 2 messages
+
+      at log (lib/chat/ai-processor.ts:35:11)
+
+    console.error
+      [Intelligent Chat API] Error: Error: USE_GPT5_MINI must be set to true. GPT-4 fallback has been removed.
+          at getModelConfig (/Users/jamesguy/Omniops/lib/chat/ai-processor-formatter.ts:42:11)
+          at processAIConversation (/Users/jamesguy/Omniops/lib/chat/ai-processor.ts:46:37)
+          at POST (/Users/jamesguy/Omniops/app/api/chat/route.ts:175:98)
+          at processTicksAndRejections (node:internal/process/task_queues:105:5)
+          at Object.<anonymous> (/Users/jamesguy/Omniops/__tests__/api/chat/route.commerce.test.ts:314:24)
+
+      219 |
+      220 |   } catch (error) {
+    > 221 |     console.error('[Intelligent Chat API] Error:', error);
+          |             ^
+      222 |
+      223 |     // DEBUG: Enhanced error logging for tests
+      224 |     if (process.env.NODE_ENV === 'test') {
+
+      at error (app/api/chat/route.ts:221:13)
+      at Object.<anonymous> (__tests__/api/chat/route.commerce.test.ts:314:24)
+
+    console.error
+      [TEST DEBUG] Full error details: {
+        message: 'USE_GPT5_MINI must be set to true. GPT-4 fallback has been removed.',
+        stack: 'Error: USE_GPT5_MINI must be set to true. GPT-4 fallback has been removed.\n' +
+          '    at getModelConfig (/Users/jamesguy/Omniops/lib/chat/ai-processor-formatter.ts:42:11)\n' +
+          '    at processAIConversation (/Users/jamesguy/Omniops/lib/chat/ai-processor.ts:46:37)\n' +
+          '    at POST (/Users/jamesguy/Omniops/app/api/chat/route.ts:175:98)\n' +
+          '    at processTicksAndRejections (node:internal/process/task_queues:105:5)\n' +
+          '    at Object.<anonymous> (/Users/jamesguy/Omniops/__tests__/api/chat/route.commerce.test.ts:314:24)',
+        type: 'Error',
+        error: Error: USE_GPT5_MINI must be set to true. GPT-4 fallback has been removed.
+            at getModelConfig (/Users/jamesguy/Omniops/lib/chat/ai-processor-formatter.ts:42:11)
+            at processAIConversation (/Users/jamesguy/Omniops/lib/chat/ai-processor.ts:46:37)
+            at POST (/Users/jamesguy/Omniops/app/api/chat/route.ts:175:98)
+            at processTicksAndRejections (node:internal/process/task_queues:105:5)
+            at Object.<anonymous> (/Users/jamesguy/Omniops/__tests__/api/chat/route.commerce.test.ts:314:24)
+      }
+
+      223 |     // DEBUG: Enhanced error logging for tests
+      224 |     if (process.env.NODE_ENV === 'test') {
+    > 225 |       console.error('[TEST DEBUG] Full error details:', {
+          |               ^
+      226 |         message: error instanceof Error ? error.message : String(error),
+      227 |         stack: error instanceof Error ? error.stack : undefined,
+      228 |         type: error?.constructor?.name,
+
+      at error (app/api/chat/route.ts:225:15)
+      at Object.<anonymous> (__tests__/api/chat/route.commerce.test.ts:314:24)
+
+    console.log
+      
+      📊 CHAT SESSION SUMMARY {
+        sessionId: 'test-session-123',
+        model: 'gpt-4',
+        totalDuration: '1ms',
+        iterations: 0,
+        searches: { total: 0, totalResults: 0, avgTime: '0ms', breakdown: {} },
+        tokens: undefined,
+        success: false,
+        error: 'USE_GPT5_MINI must be set to true. GPT-4 fallback has been removed.',
+        domain: undefined
+      }
+
+      at ChatTelemetry.log [as complete] (lib/chat-telemetry.ts:117:13)
+
+  ● /api/chat - Commerce Integration › POST › should include WooCommerce products when provider is configured
+
+    expect(received).toBe(expected) // Object.is equality
+
+    Expected: 200
+    Received: 500
+
+      173 |       const data = await response.json()
+      174 |
+    > 175 |       expect(response.status).toBe(200)
+          |                               ^
+      176 |       expect(provider.searchProducts).toHaveBeenCalled()
+      177 |       expect(data.message).toBe('Here are the products I found for you.')
+      178 |     })
+
+      at Object.toBe (__tests__/api/chat/route.commerce.test.ts:175:31)
+
+  ● /api/chat - Commerce Integration › POST › should include Shopify products when provider is configured
+
+    expect(received).toBe(expected) // Object.is equality
+
+    Expected: 200
+    Received: 500
+
+      246 |       const data = await response.json()
+      247 |
+    > 248 |       expect(response.status).toBe(200)
+          |                               ^
+      249 |       expect(provider.searchProducts).toHaveBeenCalled()
+      250 |     })
+      251 |
+
+      at Object.toBe (__tests__/api/chat/route.commerce.test.ts:248:31)
+
+  ● /api/chat - Commerce Integration › POST › should handle commerce provider errors gracefully and fallback to semantic search
+
+    expect(received).toBe(expected) // Object.is equality
+
+    Expected: 200
+    Received: 500
+
+      320 |       const data = await response.json()
+      321 |
+    > 322 |       expect(response.status).toBe(200)
+          |                               ^
+      323 |       expect(data.message).toBe('Here are the products from our catalog.')
+      324 |       expect(provider.searchProducts).toHaveBeenCalled()
+      325 |       expect(mockSearchSimilarContent).toHaveBeenCalled()
+
+      at Object.toBe (__tests__/api/chat/route.commerce.test.ts:322:31)
+
+(node:92731) [DEP0040] DeprecationWarning: The `punycode` module is deprecated. Please use a userland alternative instead.
+(Use `node --trace-deprecation ...` to show where the warning was created)
+FAIL __tests__/api/chat/route.tools.test.ts
+  ● Console
+
+    console.warn
+      [2025-10-28T12:14:41.450Z] [WARN] [Redis] Failed to connect, using in-memory fallback: {}
+
+      44 |     const entry: LogEntry = { level: 'warn', message, timestamp: new Date().toISOString(), context };
+      45 |     this.addToHistory(entry);
+    > 46 |     console.warn(this.formatMessage('warn', message, context));
+         |             ^
+      47 |   }
+      48 |
+      49 |   error(message: string, error?: Error | unknown, context?: Record<string, any>) {
+
+      at Logger.warn (lib/logger.ts:46:13)
+      at RedisClientWithFallback.warn [as initializeClient] (lib/redis-fallback.ts:60:14)
+      at new initializeClient (lib/redis-fallback.ts:24:10)
+      at getRedisClientWithFallback (lib/redis-fallback.ts:209:27)
+      at Object.getRedisClientWithFallback (lib/redis-fallback.ts:214:22)
+      at Object.<anonymous> (lib/redis.ts:26:24)
+      at Object.<anonymous> (lib/search-cache.ts:23:16)
+      at Object.<anonymous> (lib/embeddings.ts:34:22)
+      at Object.<anonymous> (lib/chat/route-types.ts:17:21)
+      at Object.<anonymous> (app/api/chat/route.ts:31:21)
+      at Object.<anonymous> (__tests__/api/chat/route.tools.test.ts:7:16)
+
+    console.log
+      [TelemetryManager] Created session test-session-123 with model gpt-4
+
+      at TelemetryManager.log [as createSession] (lib/chat-telemetry.ts:179:13)
+
+    console.log
+      [Intelligent Chat] Starting conversation with 2 messages
+
+      at log (lib/chat/ai-processor.ts:35:11)
+
+    console.error
+      [Intelligent Chat API] Error: Error: USE_GPT5_MINI must be set to true. GPT-4 fallback has been removed.
+          at getModelConfig (/Users/jamesguy/Omniops/lib/chat/ai-processor-formatter.ts:42:11)
+          at processAIConversation (/Users/jamesguy/Omniops/lib/chat/ai-processor.ts:46:37)
+          at POST (/Users/jamesguy/Omniops/app/api/chat/route.ts:175:98)
+          at processTicksAndRejections (node:internal/process/task_queues:105:5)
+          at Object.<anonymous> (/Users/jamesguy/Omniops/__tests__/api/chat/route.tools.test.ts:157:24)
+
+      219 |
+      220 |   } catch (error) {
+    > 221 |     console.error('[Intelligent Chat API] Error:', error);
+          |             ^
+      222 |
+      223 |     // DEBUG: Enhanced error logging for tests
+      224 |     if (process.env.NODE_ENV === 'test') {
+
+      at error (app/api/chat/route.ts:221:13)
+      at Object.<anonymous> (__tests__/api/chat/route.tools.test.ts:157:24)
+
+    console.error
+      [TEST DEBUG] Full error details: {
+        message: 'USE_GPT5_MINI must be set to true. GPT-4 fallback has been removed.',
+        stack: 'Error: USE_GPT5_MINI must be set to true. GPT-4 fallback has been removed.\n' +
+          '    at getModelConfig (/Users/jamesguy/Omniops/lib/chat/ai-processor-formatter.ts:42:11)\n' +
+          '    at processAIConversation (/Users/jamesguy/Omniops/lib/chat/ai-processor.ts:46:37)\n' +
+          '    at POST (/Users/jamesguy/Omniops/app/api/chat/route.ts:175:98)\n' +
+          '    at processTicksAndRejections (node:internal/process/task_queues:105:5)\n' +
+          '    at Object.<anonymous> (/Users/jamesguy/Omniops/__tests__/api/chat/route.tools.test.ts:157:24)',
+        type: 'Error',
+        error: Error: USE_GPT5_MINI must be set to true. GPT-4 fallback has been removed.
+            at getModelConfig (/Users/jamesguy/Omniops/lib/chat/ai-processor-formatter.ts:42:11)
+            at processAIConversation (/Users/jamesguy/Omniops/lib/chat/ai-processor.ts:46:37)
+            at POST (/Users/jamesguy/Omniops/app/api/chat/route.ts:175:98)
+            at processTicksAndRejections (node:internal/process/task_queues:105:5)
+            at Object.<anonymous> (/Users/jamesguy/Omniops/__tests__/api/chat/route.tools.test.ts:157:24)
+      }
+
+      223 |     // DEBUG: Enhanced error logging for tests
+      224 |     if (process.env.NODE_ENV === 'test') {
+    > 225 |       console.error('[TEST DEBUG] Full error details:', {
+          |               ^
+      226 |         message: error instanceof Error ? error.message : String(error),
+      227 |         stack: error instanceof Error ? error.stack : undefined,
+      228 |         type: error?.constructor?.name,
+
+      at error (app/api/chat/route.ts:225:15)
+      at Object.<anonymous> (__tests__/api/chat/route.tools.test.ts:157:24)
+
+    console.log
+      
+      📊 CHAT SESSION SUMMARY {
+        sessionId: 'test-session-123',
+        model: 'gpt-4',
+        totalDuration: '17ms',
+        iterations: 0,
+        searches: { total: 0, totalResults: 0, avgTime: '0ms', breakdown: {} },
+        tokens: undefined,
+        success: false,
+        error: 'USE_GPT5_MINI must be set to true. GPT-4 fallback has been removed.',
+        domain: undefined
+      }
+
+      at ChatTelemetry.log [as complete] (lib/chat-telemetry.ts:117:13)
+
+    console.log
+      [TelemetryManager] Created session test-session-123 with model gpt-4
+
+      at TelemetryManager.log [as createSession] (lib/chat-telemetry.ts:179:13)
+
+    console.log
+      [Intelligent Chat] Starting conversation with 2 messages
+
+      at log (lib/chat/ai-processor.ts:35:11)
+
+    console.error
+      [Intelligent Chat API] Error: Error: USE_GPT5_MINI must be set to true. GPT-4 fallback has been removed.
+          at getModelConfig (/Users/jamesguy/Omniops/lib/chat/ai-processor-formatter.ts:42:11)
+          at processAIConversation (/Users/jamesguy/Omniops/lib/chat/ai-processor.ts:46:37)
+          at POST (/Users/jamesguy/Omniops/app/api/chat/route.ts:175:98)
+          at processTicksAndRejections (node:internal/process/task_queues:105:5)
+          at Object.<anonymous> (/Users/jamesguy/Omniops/__tests__/api/chat/route.tools.test.ts:216:24)
+
+      219 |
+      220 |   } catch (error) {
+    > 221 |     console.error('[Intelligent Chat API] Error:', error);
+          |             ^
+      222 |
+      223 |     // DEBUG: Enhanced error logging for tests
+      224 |     if (process.env.NODE_ENV === 'test') {
+
+      at error (app/api/chat/route.ts:221:13)
+      at Object.<anonymous> (__tests__/api/chat/route.tools.test.ts:216:24)
+
+    console.error
+      [TEST DEBUG] Full error details: {
+        message: 'USE_GPT5_MINI must be set to true. GPT-4 fallback has been removed.',
+        stack: 'Error: USE_GPT5_MINI must be set to true. GPT-4 fallback has been removed.\n' +
+          '    at getModelConfig (/Users/jamesguy/Omniops/lib/chat/ai-processor-formatter.ts:42:11)\n' +
+          '    at processAIConversation (/Users/jamesguy/Omniops/lib/chat/ai-processor.ts:46:37)\n' +
+          '    at POST (/Users/jamesguy/Omniops/app/api/chat/route.ts:175:98)\n' +
+          '    at processTicksAndRejections (node:internal/process/task_queues:105:5)\n' +
+          '    at Object.<anonymous> (/Users/jamesguy/Omniops/__tests__/api/chat/route.tools.test.ts:216:24)',
+        type: 'Error',
+        error: Error: USE_GPT5_MINI must be set to true. GPT-4 fallback has been removed.
+            at getModelConfig (/Users/jamesguy/Omniops/lib/chat/ai-processor-formatter.ts:42:11)
+            at processAIConversation (/Users/jamesguy/Omniops/lib/chat/ai-processor.ts:46:37)
+            at POST (/Users/jamesguy/Omniops/app/api/chat/route.ts:175:98)
+            at processTicksAndRejections (node:internal/process/task_queues:105:5)
+            at Object.<anonymous> (/Users/jamesguy/Omniops/__tests__/api/chat/route.tools.test.ts:216:24)
+      }
+
+      223 |     // DEBUG: Enhanced error logging for tests
+      224 |     if (process.env.NODE_ENV === 'test') {
+    > 225 |       console.error('[TEST DEBUG] Full error details:', {
+          |               ^
+      226 |         message: error instanceof Error ? error.message : String(error),
+      227 |         stack: error instanceof Error ? error.stack : undefined,
+      228 |         type: error?.constructor?.name,
+
+      at error (app/api/chat/route.ts:225:15)
+      at Object.<anonymous> (__tests__/api/chat/route.tools.test.ts:216:24)
+
+    console.log
+      
+      📊 CHAT SESSION SUMMARY {
+        sessionId: 'test-session-123',
+        model: 'gpt-4',
+        totalDuration: '1ms',
+        iterations: 0,
+        searches: { total: 0, totalResults: 0, avgTime: '0ms', breakdown: {} },
+        tokens: undefined,
+        success: false,
+        error: 'USE_GPT5_MINI must be set to true. GPT-4 fallback has been removed.',
+        domain: undefined
+      }
+
+      at ChatTelemetry.log [as complete] (lib/chat-telemetry.ts:117:13)
+
+  ● /api/chat - Tool Execution › POST › should include relevant content from embeddings search
+
+    expect(received).toBe(expected) // Object.is equality
+
+    Expected: 200
+    Received: 500
+
+      162 |       const data = await response.json()
+      163 |
+    > 164 |       expect(response.status).toBe(200)
+          |                               ^
+      165 |       expect(data.sources).toBeDefined()
+      166 |       expect(data.sources.length).toBeGreaterThan(0)
+      167 |       expect(mockSearchSimilarContent).toHaveBeenCalledWith(
+
+      at Object.toBe (__tests__/api/chat/route.tools.test.ts:164:31)
+
+  ● /api/chat - Tool Execution › POST › should recover gracefully when tool arguments are missing
+
+    expect(received).toBe(expected) // Object.is equality
+
+    Expected: 200
+    Received: 500
+
+      222 |       const data = await response.json()
+      223 |
+    > 224 |       expect(response.status).toBe(200)
+          |                               ^
+      225 |       expect(data.message).toContain('product name')
+      226 |       expect(mockOpenAIInstance.chat.completions.create).toHaveBeenCalledTimes(2)
+      227 |       expect(mockGetCommerceProvider).not.toHaveBeenCalled()
+
+      at Object.toBe (__tests__/api/chat/route.tools.test.ts:224:31)
+
+Test Suites: 7 failed, 2 passed, 9 total
+Tests:       11 failed, 26 passed, 37 total
+Snapshots:   0 total
+Time:        2.683 s
+Ran all test suites matching /api\/chat/i.

@@ -5,7 +5,7 @@ import { Card } from "@/components/ui/card";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
-import { Save, RotateCcw, Sparkles } from "lucide-react";
+import { Save, RotateCcw, Palette, Brain, Plug2 } from "lucide-react";
 import { useToast } from "@/components/ui/use-toast";
 
 // Import section components
@@ -261,30 +261,25 @@ export default function CustomizeV2Page() {
   };
 
   return (
-    <div className="flex-1 space-y-4 p-4 md:p-8 pt-6">
+    <div className="p-8 space-y-8">
       {/* Header */}
-      <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
+      <div className="flex items-center justify-between">
         <div>
-          <h2 className="text-2xl sm:text-3xl font-bold tracking-tight flex items-center gap-2">
-            <Sparkles className="h-6 w-6 sm:h-8 sm:w-8 text-primary" />
-            Customize Your Chatbot
-          </h2>
-          <p className="text-muted-foreground mt-1 text-sm sm:text-base">
+          <h1 className="text-3xl font-bold tracking-tight">Customize Your Chatbot</h1>
+          <p className="text-muted-foreground mt-2">
             Simple, clean, and easy to use
           </p>
         </div>
-        <div className="flex items-center gap-2 sm:gap-3 flex-wrap sm:flex-nowrap">
+        <div className="flex items-center space-x-3">
           {isDirty && (
             <Badge variant="secondary" className="animate-pulse">
               Unsaved changes
             </Badge>
           )}
-
-          <Button variant="outline" onClick={resetConfig}>
+          <Button variant="outline" onClick={resetConfig} disabled={isSaving}>
             <RotateCcw className="h-4 w-4 mr-2" />
             Reset
           </Button>
-
           <Button onClick={saveConfiguration} disabled={isSaving || !isDirty}>
             <Save className="h-4 w-4 mr-2" />
             {isSaving ? "Saving..." : "Save Changes"}
@@ -297,9 +292,18 @@ export default function CustomizeV2Page() {
         <div className="lg:col-span-2">
           <Tabs value={activeTab} onValueChange={setActiveTab} className="space-y-4">
             <TabsList className="grid w-full grid-cols-3">
-              <TabsTrigger value="essentials">🎨 Essentials</TabsTrigger>
-              <TabsTrigger value="intelligence">🧠 Intelligence</TabsTrigger>
-              <TabsTrigger value="connect">🔌 Connect</TabsTrigger>
+              <TabsTrigger value="essentials">
+                <Palette />
+                Essentials
+              </TabsTrigger>
+              <TabsTrigger value="intelligence">
+                <Brain />
+                Intelligence
+              </TabsTrigger>
+              <TabsTrigger value="connect">
+                <Plug2 />
+                Connect
+              </TabsTrigger>
             </TabsList>
 
             <TabsContent value="essentials">

@@ -5,7 +5,6 @@ import { Textarea } from "@/components/ui/textarea";
 import { Switch } from "@/components/ui/switch";
 import { Palette, MessageSquare, Settings2, Upload } from "lucide-react";
 import { PositionPicker } from "../components/PositionPicker";
-import { useState } from "react";
 
 interface EssentialsSettings {
   primaryColor: string;
@@ -35,33 +34,20 @@ const colorPresets = [
 ];
 
 export function EssentialsSection({ settings, onChange }: EssentialsSectionProps) {
-  const [appearanceExpanded, setAppearanceExpanded] = useState(true);
-  const [messagesExpanded, setMessagesExpanded] = useState(true);
-  const [behaviorExpanded, setBehaviorExpanded] = useState(true);
-
   return (
-    <div className="space-y-4">
+    <div className="space-y-6">
       {/* Appearance */}
       <Card>
-        <CardHeader
-          className="cursor-pointer hover:bg-gray-50/50 transition-colors"
-          onClick={() => setAppearanceExpanded(!appearanceExpanded)}
-        >
-          <CardTitle className="flex items-center justify-between">
-            <div className="flex items-center">
-              <Palette className="h-5 w-5 mr-2" />
-              Appearance
-            </div>
-            <span className="text-sm text-muted-foreground">
-              {appearanceExpanded ? '▼' : '▶'}
-            </span>
+        <CardHeader>
+          <CardTitle className="flex items-center">
+            <Palette className="h-5 w-5 mr-2" />
+            Appearance
           </CardTitle>
           <CardDescription>
             Colors, logo, and position
           </CardDescription>
         </CardHeader>
-        {appearanceExpanded && (
-          <CardContent className="space-y-6">
+        <CardContent className="space-y-6">
             {/* Primary Color */}
             <div className="space-y-3">
               <Label>Primary Color</Label>
@@ -128,31 +114,21 @@ export function EssentialsSection({ settings, onChange }: EssentialsSectionProps
               value={settings.position}
               onChange={(position) => onChange({ position })}
             />
-          </CardContent>
-        )}
+        </CardContent>
       </Card>
 
       {/* Messages */}
       <Card>
-        <CardHeader
-          className="cursor-pointer hover:bg-gray-50/50 transition-colors"
-          onClick={() => setMessagesExpanded(!messagesExpanded)}
-        >
-          <CardTitle className="flex items-center justify-between">
-            <div className="flex items-center">
-              <MessageSquare className="h-5 w-5 mr-2" />
-              Messages
-            </div>
-            <span className="text-sm text-muted-foreground">
-              {messagesExpanded ? '▼' : '▶'}
-            </span>
+        <CardHeader>
+          <CardTitle className="flex items-center">
+            <MessageSquare className="h-5 w-5 mr-2" />
+            Messages
           </CardTitle>
           <CardDescription>
             Customize the chat messages
           </CardDescription>
         </CardHeader>
-        {messagesExpanded && (
-          <CardContent className="space-y-4">
+        <CardContent className="space-y-4">
             <div className="space-y-2">
               <Label htmlFor="botName">Bot Name</Label>
               <Input
@@ -189,31 +165,21 @@ export function EssentialsSection({ settings, onChange }: EssentialsSectionProps
                 maxLength={50}
               />
             </div>
-          </CardContent>
-        )}
+        </CardContent>
       </Card>
 
       {/* Behavior */}
       <Card>
-        <CardHeader
-          className="cursor-pointer hover:bg-gray-50/50 transition-colors"
-          onClick={() => setBehaviorExpanded(!behaviorExpanded)}
-        >
-          <CardTitle className="flex items-center justify-between">
-            <div className="flex items-center">
-              <Settings2 className="h-5 w-5 mr-2" />
-              Behavior
-            </div>
-            <span className="text-sm text-muted-foreground">
-              {behaviorExpanded ? '▼' : '▶'}
-            </span>
+        <CardHeader>
+          <CardTitle className="flex items-center">
+            <Settings2 className="h-5 w-5 mr-2" />
+            Behavior
           </CardTitle>
           <CardDescription>
             How the widget behaves
           </CardDescription>
         </CardHeader>
-        {behaviorExpanded && (
-          <CardContent className="space-y-6">
+        <CardContent className="space-y-6">
             <div className="flex items-center justify-between">
               <div className="space-y-0.5">
                 <Label>Show Avatar</Label>
@@ -272,8 +238,7 @@ export function EssentialsSection({ settings, onChange }: EssentialsSectionProps
                 onCheckedChange={(checked) => onChange({ soundNotifications: checked })}
               />
             </div>
-          </CardContent>
-        )}
+        </CardContent>
       </Card>
     </div>
   );

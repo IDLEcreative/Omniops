@@ -311,6 +311,7 @@ async function testScenario(scenario: TestScenario, conversationId: string): Pro
       body: JSON.stringify({
         message: scenario.userMessage,
         conversationId,
+        session_id: conversationId, // Required field
         domain: 'thompsonseparts.co.uk'
       })
     });

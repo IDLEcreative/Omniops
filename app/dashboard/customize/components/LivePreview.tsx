@@ -154,7 +154,7 @@ export function LivePreview({ config }: LivePreviewProps) {
                           {config.intelligence.personality === 'professional'
                             ? "Thank you for your inquiry. I'd be happy to provide information about our product catalog."
                             : config.intelligence.personality === 'friendly'
-                            ? "Great question! 😊 I'd love to show you what we have!"
+                            ? "Great question! I'd love to show you what we have!"
                             : "We have multiple categories. What interests you?"}
                         </p>
                       </div>
@@ -170,7 +170,7 @@ export function LivePreview({ config }: LivePreviewProps) {
                             color: config.essentials.primaryColor,
                           }}
                         >
-                          💡 Show bestsellers
+                          Show bestsellers
                         </button>
                         <button
                           className="px-3 py-1.5 text-xs rounded-full border-2 hover:shadow-md transition-all"
@@ -179,7 +179,7 @@ export function LivePreview({ config }: LivePreviewProps) {
                             color: config.essentials.primaryColor,
                           }}
                         >
-                          💡 Contact us
+                          Contact us
                         </button>
                       </div>
                     )}
@@ -236,8 +236,8 @@ export function LivePreview({ config }: LivePreviewProps) {
             <div className="flex justify-between">
               <span>Smart Features:</span>
               <span className="font-medium">
-                {config.intelligence.enableSmartSuggestions ? '✓' : '✗'} Suggestions
-                {config.intelligence.enableWebSearch ? ', ✓ Web Search' : ''}
+                {config.intelligence.enableSmartSuggestions ? 'Suggestions' : 'No suggestions'}
+                {config.intelligence.enableWebSearch ? ', Web Search' : ''}
               </span>
             </div>
           </div>

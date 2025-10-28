@@ -22,7 +22,7 @@ interface ConnectSectionProps {
 
 export function ConnectSection({ settings, onChange }: ConnectSectionProps) {
   return (
-    <div className="space-y-4">
+    <div className="space-y-6">
       {/* E-commerce Integrations */}
       <Card>
         <CardHeader>
@@ -110,7 +110,7 @@ export function ConnectSection({ settings, onChange }: ConnectSectionProps) {
             {/* Knowledge Base */}
             <div className="flex items-center justify-between p-3 rounded-lg bg-blue-50 border border-blue-200">
               <div className="space-y-0.5">
-                <Label className="text-blue-900">📚 Knowledge Base</Label>
+                <Label className="text-blue-900">Knowledge Base</Label>
                 <p className="text-sm text-blue-700">
                   Your website content (always enabled)
                 </p>
@@ -123,7 +123,7 @@ export function ConnectSection({ settings, onChange }: ConnectSectionProps) {
             {/* Product Catalog */}
             <div className="flex items-center justify-between">
               <div className="space-y-0.5">
-                <Label>🛍️ Product Catalog</Label>
+                <Label>Product Catalog</Label>
                 <p className="text-sm text-muted-foreground">
                   Product information and inventory
                 </p>
@@ -137,7 +137,7 @@ export function ConnectSection({ settings, onChange }: ConnectSectionProps) {
             {/* Info Box */}
             <div className="mt-4 p-3 bg-gray-50 rounded-lg border border-gray-200">
               <p className="text-xs text-gray-600">
-                💡 <strong>Tip:</strong> The bot searches all enabled sources automatically
+                <strong>Tip:</strong> The bot searches all enabled sources automatically
                 to find the best answer for each question.
               </p>
             </div>

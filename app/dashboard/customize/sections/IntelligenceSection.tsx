@@ -20,16 +20,16 @@ interface IntelligenceSectionProps {
 }
 
 const languages = [
-  { value: "auto", label: "🌍 Auto-detect", flag: "🌍" },
-  { value: "en", label: "🇺🇸 English", flag: "🇺🇸" },
-  { value: "es", label: "🇪🇸 Spanish", flag: "🇪🇸" },
-  { value: "fr", label: "🇫🇷 French", flag: "🇫🇷" },
-  { value: "de", label: "🇩🇪 German", flag: "🇩🇪" },
+  { value: "auto", label: "Auto-detect" },
+  { value: "en", label: "English" },
+  { value: "es", label: "Spanish" },
+  { value: "fr", label: "French" },
+  { value: "de", label: "German" },
 ];
 
 export function IntelligenceSection({ settings, onChange }: IntelligenceSectionProps) {
   return (
-    <div className="space-y-4">
+    <div className="space-y-6">
       {/* Personality */}
       <Card>
         <CardHeader>
@@ -186,16 +186,16 @@ export function IntelligenceSection({ settings, onChange }: IntelligenceSectionP
 
           {settings.enableSmartSuggestions && (
             <div className="pl-4 border-l-2 border-primary/20">
-              <p className="text-xs text-muted-foreground mb-2">Preview:</p>
+              <p className="text-xs text-muted-foreground mb-2">Preview suggestions:</p>
               <div className="flex flex-wrap gap-2">
                 <Badge variant="secondary" className="text-xs">
-                  📌 &quot;Tell me more&quot;
+                  &quot;Tell me more&quot;
                 </Badge>
                 <Badge variant="secondary" className="text-xs">
-                  📌 &quot;Show pricing&quot;
+                  &quot;Show pricing&quot;
                 </Badge>
                 <Badge variant="secondary" className="text-xs">
-                  📌 &quot;Contact support&quot;
+                  &quot;Contact support&quot;
                 </Badge>
               </div>
             </div>
@@ -262,13 +262,13 @@ export function IntelligenceSection({ settings, onChange }: IntelligenceSectionP
             {settings.enableSmartSuggestions && (
               <div className="flex flex-wrap gap-2">
                 <Badge variant="outline" className="text-xs bg-white">
-                  💡 &quot;Show me bestsellers&quot;
+                  &quot;Show me bestsellers&quot;
                 </Badge>
                 <Badge variant="outline" className="text-xs bg-white">
-                  💡 &quot;What categories?&quot;
+                  &quot;What categories?&quot;
                 </Badge>
                 <Badge variant="outline" className="text-xs bg-white">
-                  💡 &quot;Price range?&quot;
+                  &quot;Price range?&quot;
                 </Badge>
               </div>
             )}

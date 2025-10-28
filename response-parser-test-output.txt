@@ -1,0 +1,16 @@
+
+> customer-service-agent@0.1.0 test
+> jest --testPathPattern=response-parser --passWithNoTests
+
+(node:92451) [DEP0040] DeprecationWarning: The `punycode` module is deprecated. Please use a userland alternative instead.
+(Use `node --trace-deprecation ...` to show where the warning was created)
+PASS __tests__/lib/chat/response-parser-core.test.ts
+(node:92450) [DEP0040] DeprecationWarning: The `punycode` module is deprecated. Please use a userland alternative instead.
+(Use `node --trace-deprecation ...` to show where the warning was created)
+PASS __tests__/lib/chat/response-parser-lists.test.ts
+
+Test Suites: 2 passed, 2 total
+Tests:       28 passed, 28 total
+Snapshots:   0 total
+Time:        1.796 s
+Ran all test suites matching /response-parser/i.
