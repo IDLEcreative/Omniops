@@ -10,6 +10,7 @@ import {
   Bot,
   Palette,
   UserPlus,
+  Download,
   type LucideIcon
 } from "lucide-react";
 
@@ -84,6 +85,12 @@ export const navigation: NavigationSection[] = [
   {
     title: "Configuration",
     items: [
+      {
+        name: "Installation",
+        href: "/dashboard/installation",
+        icon: Download,
+        badge: null,
+      },
       {
         name: "Integrations",
         href: "/dashboard/integrations",
