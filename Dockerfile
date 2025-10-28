@@ -27,6 +27,8 @@ COPY . .
 
 # Next.js collects anonymous telemetry data about general usage.
 ENV NEXT_TELEMETRY_DISABLED=1
+# Flag to enable standalone output for Docker
+ENV DOCKER_BUILD=true
 
 # Build the application
 RUN npm run build

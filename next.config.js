@@ -136,9 +136,9 @@ const nextConfig = {
   
   // Compression
   compress: true,
-  
-  // Output standalone for Docker
-  output: 'standalone',
+
+  // Output standalone for Docker only (not on Vercel)
+  ...(process.env.DOCKER_BUILD === 'true' ? { output: 'standalone' } : {}),
 };
 
 module.exports = nextConfig;
