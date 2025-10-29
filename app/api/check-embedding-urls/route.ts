@@ -1,10 +1,11 @@
 import { NextResponse } from 'next/server';
-import { createClient } from '@supabase/supabase-js';
+import { createServiceRoleClient } from '@/lib/supabase/server';
 
 export async function GET() {
-  const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL!;
-  const supabaseServiceRoleKey = process.env.SUPABASE_SERVICE_ROLE_KEY!;
-  const supabase = createClient(supabaseUrl, supabaseServiceRoleKey);
+      const supabase = await createServiceRoleClient();
+  if (!supabase) {
+    return NextResponse.json({ error: 'Database unavailable' }, { status: 503 });
+  }
   
   try {
     // Check what URLs are stored with embeddings that contain "trailer sheet"

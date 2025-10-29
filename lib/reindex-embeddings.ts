@@ -12,7 +12,7 @@
  * - Proper error handling
  */
 
-import { createClient } from '@supabase/supabase-js';
+import { createServiceRoleClientSync } from '@/lib/supabase/server';
 import OpenAI from 'openai';
 import {
   ReindexOptions,
@@ -45,7 +45,7 @@ export class EmbeddingReindexer {
     supabaseKey: string,
     openaiKey: string
   ) {
-    this.supabase = createClient(supabaseUrl, supabaseKey);
+    this.supabase = createServiceRoleClientSync();
     this.openai = new OpenAI({ apiKey: openaiKey });
     this.progress = {
       phase: 'clearing',
@@ -274,8 +274,6 @@ export async function reindexEmbeddings(
   domainId?: string,
   options: Partial<ReindexOptions> = {}
 ): Promise<ReindexResult> {
-  const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL!;
-  const supabaseKey = process.env.SUPABASE_SERVICE_ROLE_KEY!;
   const openaiKey = process.env.OPENAI_API_KEY!;
 
   const reindexer = new EmbeddingReindexer(supabaseUrl, supabaseKey, openaiKey);

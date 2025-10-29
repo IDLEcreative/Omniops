@@ -9,7 +9,7 @@
 import * as fs from 'fs';
 import * as path from 'path';
 import { EventEmitter } from 'events';
-import { createClient, SupabaseClient } from '@supabase/supabase-js';
+import type { SupabaseClient } from '@supabase/supabase-js';
 import { ScraperConfigSchema, type ScraperConfig } from './scraper-config-schemas';
 import {
   ConfigPriority,
@@ -104,7 +104,7 @@ export class ScraperConfigManager extends EventEmitter {
     const supabaseKey = process.env.SUPABASE_SERVICE_ROLE_KEY;
 
     if (supabaseUrl && supabaseKey) {
-      this.supabase = createClient(supabaseUrl, supabaseKey);
+      this.supabase = createServiceRoleClientSync();
     }
   }
 

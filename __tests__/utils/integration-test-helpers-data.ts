@@ -85,7 +85,8 @@ export class TestDataFactory {
       }
     ];
 
-    const selectedTemplate = templates[Math.floor(Math.random() * templates.length)];
+    // Use deterministic selection instead of Math.random()
+    const selectedTemplate = templates[templateCount % templates.length];
 
     return Array.from({ length: templateCount }, (_, i) => {
       const variation = selectedTemplate.variations[i % selectedTemplate.variations.length];
@@ -204,13 +205,14 @@ export class TestUtilities {
   }
 
   /**
-   * Generate random test data
+   * Generate deterministic test data (was using Math.random())
    */
   static generateRandomString(length: number = 10): string {
     const chars = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789';
     let result = '';
     for (let i = 0; i < length; i++) {
-      result += chars.charAt(Math.floor(Math.random() * chars.length));
+      // Use deterministic index based on position
+      result += chars.charAt(i % chars.length);
     }
     return result;
   }
@@ -227,14 +229,18 @@ export class TestUtilities {
   /**
    * Create test product data
    */
+  private static productCounter = 0;
   static createTestProduct(overrides: Partial<NormalizedProduct> = {}): NormalizedProduct {
+    // Use deterministic pricing instead of Math.random()
+    const productPrice = (this.productCounter * 47) % 1000 + 10; // Deterministic: 10-1010
+    this.productCounter++;
     return {
       name: `Test Product ${this.generateRandomString(6)}`,
       scrapedAt: new Date().toISOString(),
       price: {
-        amount: Math.floor(Math.random() * 1000) + 10,
+        amount: productPrice,
         currency: 'GBP',
-        formatted: '£' + (Math.floor(Math.random() * 1000) + 10).toFixed(2)
+        formatted: '£' + productPrice.toFixed(2)
       },
       sku: `TEST-${this.generateRandomString(6).toUpperCase()}`,
       description: `Test product description with ${this.generateRandomString(20)} details`,

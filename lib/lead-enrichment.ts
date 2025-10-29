@@ -3,7 +3,7 @@
  * Automatically finds contact emails for demo leads using web search
  */
 
-import { createClient } from '@supabase/supabase-js';
+import { createServiceRoleClientSync } from '@/lib/supabase/server';
 
 const supabase = createClient(
   process.env.NEXT_PUBLIC_SUPABASE_URL!,

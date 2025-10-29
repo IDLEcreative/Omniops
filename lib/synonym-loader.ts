@@ -4,7 +4,7 @@
  * Replaces hardcoded synonym mappings with database-backed system
  */
 
-import { createClient } from '@supabase/supabase-js';
+import { createServiceRoleClientSync } from '@/lib/supabase/server';
 
 interface DomainSynonym {
   term: string;
@@ -22,9 +22,7 @@ export class DomainSynonymLoader {
   private supabase: any;
 
   constructor() {
-    const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL!;
-    const supabaseKey = process.env.SUPABASE_SERVICE_ROLE_KEY!;
-    this.supabase = createClient(supabaseUrl, supabaseKey);
+    this.supabase = createServiceRoleClientSync();
   }
 
   /**

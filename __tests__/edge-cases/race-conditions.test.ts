@@ -367,8 +367,12 @@ describe('Race Condition Edge Cases', () => {
       // Simulate: Multiple agents/users sending messages to same conversation
       const messages: Array<{ conversationId: string; text: string; timestamp: number }> = [];
 
+      let messageCounter = 0;
       const createMessage = async (conversationId: string, text: string) => {
-        await new Promise((resolve) => setTimeout(resolve, Math.random() * 20));
+        // Use deterministic delay instead of Math.random()
+        const delayMs = (messageCounter % 5) * 4; // Deterministic: 0, 4, 8, 12, 16
+        messageCounter++;
+        await new Promise((resolve) => setTimeout(resolve, delayMs));
 
         messages.push({
           conversationId,
@@ -420,9 +424,10 @@ describe('Race Condition Edge Cases', () => {
         // Simulate OpenAI API call (expensive!)
         await new Promise((resolve) => setTimeout(resolve, 100));
 
+        // Create deterministic embedding instead of random
         const embedding = Array(1536)
           .fill(0)
-          .map(() => Math.random());
+          .map((_, i) => (i % 256) / 256);
         embeddings.set(contentId, embedding);
 
         return embedding;

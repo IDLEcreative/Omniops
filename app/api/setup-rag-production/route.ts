@@ -1,15 +1,15 @@
 import { NextResponse } from 'next/server';
-import { createClient } from '@supabase/supabase-js';
+import { createServiceRoleClient } from '@/lib/supabase/server';
 
 export async function POST(request: Request) {
   // Use YOUR production database credentials
-  const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL!;
-  const supabaseServiceRoleKey = process.env.SUPABASE_SERVICE_ROLE_KEY!;
-
-  // This should be birugqyuqhiahxvxeyqg.supabase.co
+      // This should be birugqyuqhiahxvxeyqg.supabase.co
   console.log('Connecting to:', supabaseUrl);
 
-  const supabase = createClient(supabaseUrl, supabaseServiceRoleKey);
+  const supabase = await createServiceRoleClient();
+  if (!supabase) {
+    return NextResponse.json({ error: 'Database unavailable' }, { status: 503 });
+  }
 
   // Get domain and business details from request body
   const body = await request.json();

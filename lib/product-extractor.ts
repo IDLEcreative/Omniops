@@ -1,4 +1,4 @@
-import { createClient } from '@supabase/supabase-js';
+import { createServiceRoleClientSync } from '@/lib/supabase/server';
 import OpenAI from 'openai';
 import { z } from 'zod';
 
@@ -38,7 +38,7 @@ export class ProductExtractor {
   private openai: OpenAI;
 
   constructor(supabaseUrl: string, supabaseKey: string, openaiKey: string) {
-    this.supabase = createClient(supabaseUrl, supabaseKey);
+    this.supabase = createServiceRoleClientSync();
     this.openai = new OpenAI({ apiKey: openaiKey });
   }
 

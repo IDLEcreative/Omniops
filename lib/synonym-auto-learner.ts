@@ -3,7 +3,7 @@
  * Analyzes scraped content to build domain-specific synonym mappings
  */
 
-import { createClient } from '@supabase/supabase-js';
+import { createServiceRoleClientSync } from '@/lib/supabase/server';
 import { synonymExpander } from './synonym-expander-dynamic';
 
 interface ExtractedTerm {

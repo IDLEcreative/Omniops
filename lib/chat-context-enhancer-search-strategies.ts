@@ -3,7 +3,7 @@
  * Handles hybrid, embedding, and smart search execution
  */
 
-import { createClient } from '@supabase/supabase-js';
+import { createServiceRoleClientSync } from '@/lib/supabase/server';
 import { searchSimilarContentEnhanced } from './enhanced-embeddings';
 import { smartSearch } from './search-wrapper';
 import { ContextChunk, BusinessClassification } from './chat-context-enhancer-types';

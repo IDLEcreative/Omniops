@@ -4,7 +4,7 @@
  * No hardcoding - uses dynamic pattern detection
  */
 
-import { createClient } from '@supabase/supabase-js';
+import { createServiceRoleClientSync } from '@/lib/supabase/server';
 
 export interface CategoryMapping {
   pattern: string;           // URL pattern or keyword

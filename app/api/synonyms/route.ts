@@ -5,10 +5,7 @@
 
 import { NextRequest, NextResponse } from 'next/server';
 import { synonymLoader } from '@/lib/synonym-loader';
-import { createClient } from '@supabase/supabase-js';
-
-const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL!;
-const supabaseKey = process.env.SUPABASE_SERVICE_ROLE_KEY!;
+import { createServiceRoleClient } from '@/lib/supabase/server';
 
 /**
  * GET /api/synonyms?domainId=uuid
@@ -65,7 +62,13 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    const supabase = createClient(supabaseUrl, supabaseKey);
+    const supabase = await createServiceRoleClient();
+    if (!supabase) {
+      return NextResponse.json(
+        { error: 'Database unavailable' },
+        { status: 503 }
+      );
+    }
 
     const { data, error } = await supabase
       .from('domain_synonym_mappings')
@@ -116,7 +119,13 @@ export async function DELETE(request: NextRequest) {
   }
 
   try {
-    const supabase = createClient(supabaseUrl, supabaseKey);
+    const supabase = await createServiceRoleClient();
+    if (!supabase) {
+      return NextResponse.json(
+        { error: 'Database unavailable' },
+        { status: 503 }
+      );
+    }
 
     const { error } = await supabase
       .from('domain_synonym_mappings')

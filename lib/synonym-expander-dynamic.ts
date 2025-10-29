@@ -3,7 +3,7 @@
  * Loads synonyms from database to prevent cross-domain contamination
  */
 
-import { createClient } from '@supabase/supabase-js';
+import { createServiceRoleClientSync } from '@/lib/supabase/server';
 
 export class DynamicSynonymExpander {
   private supabase: any = null;

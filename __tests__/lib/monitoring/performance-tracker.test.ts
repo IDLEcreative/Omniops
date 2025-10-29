@@ -245,7 +245,9 @@ describe('PerformanceTracker', () => {
         tracker.trackAsync(
           'concurrent-test',
           async () => {
-            await new Promise(resolve => setTimeout(resolve, Math.random() * 100));
+            // Use deterministic delay instead of Math.random()
+            const delayMs = (i * 10) % 100; // 0, 10, 20, ..., 90, 0, 10...
+            await new Promise(resolve => setTimeout(resolve, delayMs));
             return i;
           }
         )

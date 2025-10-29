@@ -90,7 +90,23 @@ const eslintConfig = [
     rules: {
       "@typescript-eslint/no-explicit-any": "warn",
       "@typescript-eslint/no-unused-vars": "warn",
-      "react/no-unescaped-entities": "off"
+      "react/no-unescaped-entities": "off",
+      "no-restricted-imports": [
+        "error",
+        {
+          "patterns": [
+            {
+              "group": ["@supabase/supabase-js"],
+              "message": "Import from @/lib/supabase/server (for service role) or @/lib/supabase/client (for browser) instead. Only import types with 'import type { SupabaseClient } from @supabase/supabase-js'."
+            },
+            {
+              "group": ["@supabase/ssr"],
+              "importNames": ["createServerClient", "createBrowserClient"],
+              "message": "Import from @/lib/supabase/server (server-side), @/lib/supabase/client (client-side), or @/lib/supabase/middleware (middleware) instead."
+            }
+          ]
+        }
+      ]
     }
   }
 ];

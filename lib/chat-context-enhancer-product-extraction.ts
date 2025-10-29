@@ -3,7 +3,7 @@
  * Handles extraction of product data from various sources
  */
 
-import { createClient } from '@supabase/supabase-js';
+import { createServiceRoleClientSync } from '@/lib/supabase/server';
 import { ContextChunk, BusinessClassification } from './chat-context-enhancer-types';
 
 /**

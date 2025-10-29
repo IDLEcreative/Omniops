@@ -27,7 +27,7 @@ export const mockContentGaps = {
 export const mockPeakUsage = {
   hourlyDistribution: Array(24).fill(null).map((_, i) => ({
     hour: i,
-    avgMessages: Math.random() * 100
+    avgMessages: (i * 4.167) % 100 // Deterministic: 0-100 range
   })),
   busiestDays: [],
   peakHours: [14, 15]

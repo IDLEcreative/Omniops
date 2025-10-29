@@ -3,7 +3,7 @@
  * Adapts to any business type using detected classification
  */
 
-import { createClient } from '@supabase/supabase-js';
+import { createServiceRoleClientSync } from '@/lib/supabase/server';
 
 export interface BusinessContext {
   businessType: string;
@@ -23,7 +23,7 @@ export class DomainAgnosticAgent {
   private businessContext: BusinessContext | null = null;
   
   constructor(supabaseUrl: string, supabaseKey: string) {
-    this.supabase = createClient(supabaseUrl, supabaseKey);
+    this.supabase = createServiceRoleClientSync();
   }
   
   /**

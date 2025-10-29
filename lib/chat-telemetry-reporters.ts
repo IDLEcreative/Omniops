@@ -3,7 +3,7 @@
  * Session summary generation and data persistence
  */
 
-import { createClient } from '@supabase/supabase-js';
+import { createServiceRoleClientSync } from '@/lib/supabase/server';
 import type {
   ChatSession,
   SessionSummary,

@@ -5,11 +5,15 @@ describe('Rate Limiting', () => {
   // Store original Date.now
   let originalDateNow: () => number
   let currentTime: number
+  let testCounter = 0
 
   beforeEach(() => {
     // Clear the rate limit map by making multiple requests with old timestamps
     // This ensures tests start with a clean state
     jest.clearAllMocks()
+
+    // Reset deterministic counter
+    testCounter = 0
 
     // Mock Date.now for consistent testing
     originalDateNow = Date.now

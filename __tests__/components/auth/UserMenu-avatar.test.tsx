@@ -1,13 +1,13 @@
 import { describe, it, expect, jest, beforeEach } from '@jest/globals';
 import { render, screen, waitFor } from '@/__tests__/utils/test-utils';
 import { UserMenu } from '@/components/auth/user-menu';
-import { createBrowserClient } from '@supabase/ssr';
+import { createClient } from '@/lib/supabase/client';
 
 // Mock Supabase client
 const mockCreateBrowserClient = jest.fn();
 
-jest.mock('@supabase/ssr', () => ({
-  createBrowserClient: mockCreateBrowserClient,
+jest.mock('@/lib/supabase/client', () => ({
+  createClient: mockCreateBrowserClient,
 }));
 
 // Mock Next.js navigation

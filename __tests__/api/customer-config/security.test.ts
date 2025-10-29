@@ -12,7 +12,7 @@
  */
 
 import { describe, it, expect, beforeAll, afterAll } from '@jest/globals';
-import { createClient } from '@supabase/supabase-js';
+import type { SupabaseClient } from '@supabase/supabase-js';
 import { insertAsAdmin, deleteAsAdmin, createAdminClient } from '@/test-utils/rls-test-helpers';
 
 // Mark as E2E test to use real credentials (not mocks)

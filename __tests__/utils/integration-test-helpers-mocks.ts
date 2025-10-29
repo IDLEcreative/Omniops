@@ -252,7 +252,8 @@ export class MockFactory {
             {
               object: 'embedding',
               index: 0,
-              embedding: Array.from({ length: 1536 }, () => Math.random() * 0.1)
+              // Use deterministic embedding instead of Math.random()
+              embedding: Array.from({ length: 1536 }, (_, i) => ((i % 256) / 256) * 0.1)
             }
           ],
           model: 'text-embedding-ada-002',

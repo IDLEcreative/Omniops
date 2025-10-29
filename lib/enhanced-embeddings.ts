@@ -9,7 +9,7 @@
  * - enhanced-embeddings-utils.ts: Utility functions and stats
  */
 
-import { createClient } from '@supabase/supabase-js';
+import { createServiceRoleClientSync } from '@/lib/supabase/server';
 import {
   DEFAULT_CHUNKS,
   MIN_CHUNKS,

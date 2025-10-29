@@ -1,9 +1,10 @@
 # Supabase Database Schema Documentation
 
-> **Version**: 2.0
+> **Version**: 2.1
+> **Last Updated**: 2025-10-29 (Issue #11: Removed duplicate chat tables)
 > **Last Verified**: 2025-10-24
 > **Verification Method**: Direct query via Supabase MCP tools
-> **Total Tables**: 31 (public schema)
+> **Total Tables**: 29 (public schema) - was 31, removed 2 duplicates
 > **Total Foreign Keys**: 24 relationships
 > **Total Indexes**: 214 indexes
 > **RLS Policies**: Active on 24 tables
@@ -71,7 +72,11 @@
 | **Business Intelligence** | 1 | Business type classification |
 | **Caching** | 2 | Query and search result caching |
 
-**Total Active Tables**: 31
+**Total Active Tables**: 29
+
+**Note**: After Issue #11 cleanup (2025-10-29), removed 2 duplicate tables:
+- `chat_sessions` (replaced by `conversations`)
+- `chat_messages` (replaced by `messages`)
 
 ---
 
@@ -1585,15 +1590,18 @@ CREATE POLICY "Org members access" ON customer_configs
    - `demo_attempts` - Demo tracking
    - `search_cache` - Search result caching
 
-### Removed Tables (8)
+### Removed Tables (16)
 
+#### Cleaned Up (Issue #11, 2025-10-29)
+- `chat_sessions` - Duplicate of conversations (0 code references)
+- `chat_messages` - Duplicate of messages (0 code references)
+
+#### Historical Removals
 - `customers` - Consolidated into organization model
 - `customer_verifications` - Replaced by auth system
 - `customer_access_logs` - Replaced by GDPR audit log
 - `customer_data_cache` - Replaced by query_cache
 - `privacy_requests` - Consolidated into GDPR audit log
-- `chat_sessions` - Duplicate of conversations
-- `chat_messages` - Duplicate of messages
 - `businesses` - Replaced by organizations
 - `business_configs` - Merged into customer_configs
 - `business_usage` - Replaced by telemetry

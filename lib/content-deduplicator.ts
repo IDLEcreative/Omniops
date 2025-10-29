@@ -1,4 +1,4 @@
-import { createClient } from '@supabase/supabase-js';
+import { createServiceRoleClientSync } from '@/lib/supabase/server';
 import Redis from 'ioredis';
 import { LRUCache, MinHash } from './content-deduplicator-similarity';
 import { detectTemplatePattern } from './content-deduplicator-utils';

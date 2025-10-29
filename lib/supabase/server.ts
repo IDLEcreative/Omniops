@@ -94,22 +94,23 @@ export async function createClient() {
 }
 
 /**
- * Creates a Supabase client with service role permissions
+ * Creates a Supabase client with service role permissions (synchronous)
  * Safe for production - returns null if env vars are missing
  * Uses createClient directly for service role (not SSR client which is for cookies)
+ * Use this in class constructors and synchronous contexts
  */
-export async function createServiceRoleClient() {
+export function createServiceRoleClientSync() {
   try {
     const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL
     const serviceRoleKey = process.env.SUPABASE_SERVICE_ROLE_KEY
-    
+
     if (!supabaseUrl || !serviceRoleKey) {
       if (process.env.NODE_ENV === 'development') {
         console.warn('[Supabase] Missing environment variables for service role client')
       }
       return null
     }
-    
+
     // Use createClient directly for service role, not createServerClient
     // createServerClient is for cookie-based auth, not service role
     return createSupabaseClient(
@@ -138,6 +139,15 @@ export async function createServiceRoleClient() {
     console.error('[Supabase] Failed to create service role client:', error)
     return null
   }
+}
+
+/**
+ * Creates a Supabase client with service role permissions (async wrapper)
+ * Async version for API routes - calls the sync version
+ * Use this in API routes and async contexts
+ */
+export async function createServiceRoleClient() {
+  return createServiceRoleClientSync()
 }
 
 /**

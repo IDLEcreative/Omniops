@@ -3,7 +3,7 @@ import { z } from 'zod';
 import { quickScrape, generateDemoEmbeddings } from '@/lib/demo-scraper';
 import { getRedisClient } from '@/lib/redis';
 import { randomBytes } from 'crypto';
-import { createClient } from '@supabase/supabase-js';
+import { createServiceRoleClient } from '@/lib/supabase/server';
 
 const scrapeSchema = z.object({
   url: z.string().url()

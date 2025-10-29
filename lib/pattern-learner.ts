@@ -4,7 +4,7 @@
  * for improved future scraping performance
  */
 
-import { createClient } from '@supabase/supabase-js';
+import { createServiceRoleClientSync } from '@/lib/supabase/server';
 import { NormalizedProduct } from './product-normalizer';
 
 export interface ExtractedPattern {

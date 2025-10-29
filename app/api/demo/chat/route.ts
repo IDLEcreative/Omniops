@@ -2,7 +2,7 @@ import { NextRequest, NextResponse } from 'next/server';
 import { z } from 'zod';
 import { getRedisClient } from '@/lib/redis';
 import OpenAI from 'openai';
-import { createClient } from '@supabase/supabase-js';
+import { createServiceRoleClient } from '@/lib/supabase/server';
 
 const chatSchema = z.object({
   session_id: z.string(),

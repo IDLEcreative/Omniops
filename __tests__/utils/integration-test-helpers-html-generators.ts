@@ -184,8 +184,9 @@ export class HTMLGenerators {
       availability: index % 3 === 0 ? 'OutOfStock' : 'InStock',
       category: ['Electronics', 'Computers', 'Accessories'][index % 3],
       brand: ['TechBrand', 'ProMaker', 'QualityFirst'][index % 3],
-      rating: (4.0 + Math.random() * 1).toFixed(1),
-      reviewCount: Math.floor(Math.random() * 200) + 50
+      // Use deterministic ratings instead of Math.random()
+      rating: (4.0 + (index % 10) * 0.1).toFixed(1),
+      reviewCount: (index % 200) + 50
     };
 
     const structuredData = config.includeStructuredData ? `

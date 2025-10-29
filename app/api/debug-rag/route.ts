@@ -1,5 +1,5 @@
 import { NextResponse } from 'next/server';
-import { createClient } from '@supabase/supabase-js';
+import { createServiceRoleClient } from '@/lib/supabase/server';
 import OpenAI from 'openai';
 
 /**
@@ -44,7 +44,10 @@ export async function GET(request: Request) {
     );
   }
 
-  const supabase = createClient(supabaseUrl, supabaseServiceRoleKey);
+  const supabase = await createServiceRoleClient();
+  if (!supabase) {
+    return NextResponse.json({ error: 'Database unavailable' }, { status: 503 });
+  }
 
   const openai = new OpenAI({
     apiKey: process.env.OPENAI_API_KEY,

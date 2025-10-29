@@ -56,7 +56,7 @@ if (process.env.NODE_ENV !== 'production') {
 jest.unmock('@supabase/supabase-js');
 
 import { describe, it, expect, beforeAll, afterAll } from '@jest/globals';
-import { createClient } from '@supabase/supabase-js';
+import { createServiceRoleClientSync } from '@/lib/supabase/server';
 
 // Helper to get service role client with proper configuration
 async function getSupabaseClient() {
@@ -65,25 +65,11 @@ async function getSupabaseClient() {
     hasServiceKey: !!process.env.SUPABASE_SERVICE_ROLE_KEY
   });
 
-  const supabase = createClient(
-    process.env.NEXT_PUBLIC_SUPABASE_URL!,
-    process.env.SUPABASE_SERVICE_ROLE_KEY!,
-    {
-      auth: {
-        persistSession: false,
-        autoRefreshToken: false,
-      },
-      db: {
-        schema: 'public',
-      },
-      global: {
-        headers: {
-          'apikey': process.env.SUPABASE_SERVICE_ROLE_KEY!,
-          'Authorization': `Bearer ${process.env.SUPABASE_SERVICE_ROLE_KEY!}`,
-        },
-      },
-    }
-  );
+  const supabase = createServiceRoleClientSync();
+
+  if (!supabase) {
+    throw new Error('Failed to create Supabase client');
+  }
 
   console.log('[getSupabaseClient] Client created:', !!supabase);
   return supabase;
