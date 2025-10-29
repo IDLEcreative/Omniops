@@ -11,6 +11,7 @@ import {
   Palette,
   UserPlus,
   Download,
+  ShoppingBag,
   type LucideIcon
 } from "lucide-react";
 
@@ -43,6 +44,12 @@ export const navigation: NavigationSection[] = [
         icon: MessageSquare,
         badge: "12",
         badgeVariant: "default",
+      },
+      {
+        name: "Shop",
+        href: "/dashboard/shop",
+        icon: ShoppingBag,
+        badge: null,
       },
       {
         name: "Analytics",

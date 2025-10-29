@@ -8,6 +8,8 @@ interface DashboardHeaderProps {
   isRefreshing: boolean;
   onBack: () => void;
   onRefresh: () => void;
+  title?: string;
+  subtitle?: string;
 }
 
 const formatCacheTime = (cachedAt: string) => {
@@ -25,7 +27,9 @@ export function DashboardHeader({
   cachedAt,
   isRefreshing,
   onBack,
-  onRefresh
+  onRefresh,
+  title = "WooCommerce Analytics",
+  subtitle = "What matters for your business today"
 }: DashboardHeaderProps) {
   return (
     <div className="mb-6">
@@ -40,9 +44,9 @@ export function DashboardHeader({
             <ArrowLeft className="h-4 w-4" />
           </Button>
           <div>
-            <h1 className="text-2xl font-bold">WooCommerce Analytics</h1>
+            <h1 className="text-2xl font-bold">{title}</h1>
             <p className="text-sm text-muted-foreground">
-              What matters for your business today
+              {subtitle}
               {isCached && cachedAt && (
                 <span className="ml-2 text-xs">
                   (Cached {formatCacheTime(cachedAt)})
