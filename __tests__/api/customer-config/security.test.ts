@@ -7,10 +7,23 @@
  * - Organization membership enforcement
  * - Role-based access control
  * - Cross-organization isolation
+ *
+ * @jest-environment node
  */
 
 import { describe, it, expect, beforeAll, afterAll } from '@jest/globals';
 import { createClient } from '@supabase/supabase-js';
+import { insertAsAdmin, deleteAsAdmin, createAdminClient } from '@/test-utils/rls-test-helpers';
+
+// Mark as E2E test to use real credentials (not mocks)
+process.env.E2E_TEST = 'true';
+
+// Load real environment variables for security testing
+// The Jest setup file overrides these with mocks, but security tests need real credentials
+if (!process.env.NEXT_PUBLIC_SUPABASE_URL?.includes('birugqyuqhiahxvxeyqg')) {
+  // Force-load from .env.local (override=true)
+  require('dotenv').config({ path: '.env.local', override: true });
+}
 
 // Test configuration
 const SUPABASE_URL = process.env.NEXT_PUBLIC_SUPABASE_URL!;
@@ -18,7 +31,7 @@ const SUPABASE_ANON_KEY = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!;
 const SUPABASE_SERVICE_ROLE_KEY = process.env.SUPABASE_SERVICE_ROLE_KEY!;
 
 describe('Customer Config API Security', () => {
-  let serviceClient: ReturnType<typeof createClient>;
+  let serviceClient: ReturnType<typeof createAdminClient>;
   let org1Id: string;
   let org2Id: string;
   let user1Id: string;
@@ -31,19 +44,25 @@ describe('Customer Config API Security', () => {
 
   beforeAll(async () => {
     // Initialize service role client for setup
-    serviceClient = createClient(SUPABASE_URL, SUPABASE_SERVICE_ROLE_KEY);
+    serviceClient = createAdminClient();
 
-    // Create test organizations
-    const { data: orgs } = await serviceClient
-      .from('organizations')
-      .insert([
-        { name: `Test Org 1 - ${timestamp}` },
-        { name: `Test Org 2 - ${timestamp}` }
-      ])
-      .select();
+    // Create test organizations using admin helper to bypass RLS
+    const org1 = await insertAsAdmin('organizations', {
+      name: `Test Org 1 - ${timestamp}`,
+      slug: `test-org-1-${timestamp}`
+    });
 
-    org1Id = orgs![0].id;
-    org2Id = orgs![1].id;
+    const org2 = await insertAsAdmin('organizations', {
+      name: `Test Org 2 - ${timestamp}`,
+      slug: `test-org-2-${timestamp}`
+    });
+
+    if (!org1 || !org2) {
+      throw new Error('Failed to create test organizations');
+    }
+
+    org1Id = org1.id;
+    org2Id = org2.id;
 
     // Create test users
     user1Email = `test-user-1-${timestamp}@example.com`;
@@ -65,83 +84,61 @@ describe('Customer Config API Security', () => {
     user2Id = user2!.id;
 
     // Add user1 as owner of org1
-    await serviceClient
-      .from('organization_members')
-      .insert({
-        organization_id: org1Id,
-        user_id: user1Id,
-        role: 'owner'
-      });
+    await insertAsAdmin('organization_members', {
+      organization_id: org1Id,
+      user_id: user1Id,
+      role: 'owner'
+    });
 
     // Add user2 as member (not admin) of org2
-    await serviceClient
-      .from('organization_members')
-      .insert({
-        organization_id: org2Id,
-        user_id: user2Id,
-        role: 'member'
-      });
+    await insertAsAdmin('organization_members', {
+      organization_id: org2Id,
+      user_id: user2Id,
+      role: 'member'
+    });
 
     // Create customer configs for each org
-    const { data: configs } = await serviceClient
-      .from('customer_configs')
-      .insert([
-        {
-          organization_id: org1Id,
-          domain: `test1-${timestamp}.example.com`,
-          business_name: 'Test Business 1'
-        },
-        {
-          organization_id: org2Id,
-          domain: `test2-${timestamp}.example.com`,
-          business_name: 'Test Business 2'
-        }
-      ])
-      .select();
+    const config1 = await insertAsAdmin('customer_configs', {
+      organization_id: org1Id,
+      domain: `test1-${timestamp}.example.com`,
+      business_name: 'Test Business 1'
+    });
 
-    config1Id = configs![0].id;
-    config2Id = configs![1].id;
+    const config2 = await insertAsAdmin('customer_configs', {
+      organization_id: org2Id,
+      domain: `test2-${timestamp}.example.com`,
+      business_name: 'Test Business 2'
+    });
+
+    if (!config1 || !config2) {
+      throw new Error('Failed to create test customer configs');
+    }
+
+    config1Id = config1.id;
+    config2Id = config2.id;
   });
 
   afterAll(async () => {
     // Cleanup in reverse order of dependencies
     if (config1Id) {
-      await serviceClient
-        .from('customer_configs')
-        .delete()
-        .eq('id', config1Id);
+      await deleteAsAdmin('customer_configs', { id: config1Id });
     }
     if (config2Id) {
-      await serviceClient
-        .from('customer_configs')
-        .delete()
-        .eq('id', config2Id);
+      await deleteAsAdmin('customer_configs', { id: config2Id });
     }
     if (user1Id) {
-      await serviceClient
-        .from('organization_members')
-        .delete()
-        .eq('user_id', user1Id);
+      await deleteAsAdmin('organization_members', { user_id: user1Id });
       await serviceClient.auth.admin.deleteUser(user1Id);
     }
     if (user2Id) {
-      await serviceClient
-        .from('organization_members')
-        .delete()
-        .eq('user_id', user2Id);
+      await deleteAsAdmin('organization_members', { user_id: user2Id });
       await serviceClient.auth.admin.deleteUser(user2Id);
     }
     if (org1Id) {
-      await serviceClient
-        .from('organizations')
-        .delete()
-        .eq('id', org1Id);
+      await deleteAsAdmin('organizations', { id: org1Id });
     }
     if (org2Id) {
-      await serviceClient
-        .from('organizations')
-        .delete()
-        .eq('id', org2Id);
+      await deleteAsAdmin('organizations', { id: org2Id });
     }
   });
 
@@ -393,17 +390,17 @@ describe('Customer Config API Security', () => {
 
     beforeAll(async () => {
       // Create a temp config to delete
-      const { data } = await serviceClient
-        .from('customer_configs')
-        .insert({
-          organization_id: org1Id,
-          domain: `test-delete-${timestamp}.example.com`,
-          business_name: 'Delete Me'
-        })
-        .select()
-        .single();
+      const data = await insertAsAdmin('customer_configs', {
+        organization_id: org1Id,
+        domain: `test-delete-${timestamp}.example.com`,
+        business_name: 'Delete Me'
+      });
 
-      tempConfigId = data!.id;
+      if (!data) {
+        throw new Error('Failed to create temp config for DELETE test');
+      }
+
+      tempConfigId = data.id;
     });
 
     it('should reject unauthenticated requests', async () => {
@@ -446,15 +443,15 @@ describe('Customer Config API Security', () => {
 
     it('should reject regular members', async () => {
       // Create temp config in org2
-      const { data: tempConfig } = await serviceClient
-        .from('customer_configs')
-        .insert({
-          organization_id: org2Id,
-          domain: `test-delete-member-${timestamp}.example.com`,
-          business_name: 'Delete Me 2'
-        })
-        .select()
-        .single();
+      const tempConfig = await insertAsAdmin('customer_configs', {
+        organization_id: org2Id,
+        domain: `test-delete-member-${timestamp}.example.com`,
+        business_name: 'Delete Me 2'
+      });
+
+      if (!tempConfig) {
+        throw new Error('Failed to create temp config for member test');
+      }
 
       // Sign in as user2 (member, not admin)
       const { data: { session } } = await serviceClient.auth.signInWithPassword({
@@ -463,7 +460,7 @@ describe('Customer Config API Security', () => {
       });
 
       const response = await fetch(
-        `http://localhost:3000/api/customer/config?id=${tempConfig!.id}`,
+        `http://localhost:3000/api/customer/config?id=${tempConfig.id}`,
         {
           method: 'DELETE',
           headers: {
@@ -477,10 +474,7 @@ describe('Customer Config API Security', () => {
       expect(data.error).toContain('admins and owners');
 
       // Cleanup
-      await serviceClient
-        .from('customer_configs')
-        .delete()
-        .eq('id', tempConfig!.id);
+      await deleteAsAdmin('customer_configs', { id: tempConfig.id });
 
       await serviceClient.auth.signOut();
     });
