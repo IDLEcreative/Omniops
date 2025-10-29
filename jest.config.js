@@ -18,6 +18,8 @@ const customJestConfig = {
     '^@supabase/supabase-js$': '<rootDir>/__mocks__/@supabase/supabase-js.js',
     // Map cheerio to its CommonJS build to avoid ESM issues in Jest
     '^cheerio$': '<rootDir>/node_modules/cheerio/dist/commonjs/index.js',
+    // Mock node-fetch v3 (ESM-only) with CommonJS wrapper
+    '^node-fetch$': '<rootDir>/__mocks__/node-fetch.js',
     // Internal module mocks - MUST come before the catch-all '^@/(.*)$' pattern
     '^@/lib/supabase-server$': '<rootDir>/__mocks__/@/lib/supabase-server.ts',
     '^@/lib/supabase/server$': '<rootDir>/__mocks__/@/lib/supabase/server.ts',
@@ -40,7 +42,9 @@ const customJestConfig = {
     '/node_modules/',
     '/__tests__/utils/',
     '/__tests__/mocks/',
-    '/__tests__/fixtures/'
+    '/__tests__/fixtures/',
+    '/__tests__/playwright/', // Exclude Playwright tests (use npx playwright test)
+    '.spec.ts$' // Exclude all .spec.ts files (Playwright convention)
   ],
   // Transform ESM packages in node_modules
   // Note: cheerio is mapped to CommonJS build above, but its dependencies may need transformation
