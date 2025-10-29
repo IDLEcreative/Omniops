@@ -115,7 +115,7 @@ describe('CustomerServiceAgent', () => {
     it('should handle product inquiries without verification', () => {
       const prompt = CustomerServiceAgent.getActionPrompt('do you sell products?');
 
-      // Returns: 'This is a product inquiry. Answer about products/brands without asking for verification.'
+      // Returns: 'This is a product inquiry. Answer about pumps/brands without asking for verification.'
       expect(prompt).toContain('product inquiry');
       expect(prompt).toContain('without asking for verification');
     });
@@ -307,7 +307,7 @@ describe('CustomerServiceAgent', () => {
       });
     });
 
-    it('should always show available products first', () => {
+    it('should always show available pumps first', () => {
       const levels = ['full', 'basic', 'none'];
 
       levels.forEach((level) => {

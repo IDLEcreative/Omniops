@@ -24,7 +24,7 @@ Here are your options:
 2. [Product B](https://example.com/products/item-b)
 3. [Product C](https://example.com/products/item-c)
     `;
-    const turn1User = 'Show me products';
+    const turn1User = 'Show me pumps';
 
     await parseAndTrackEntities(turn1AI, turn1User, manager);
     manager.incrementTurn();

@@ -401,7 +401,7 @@ describe('Agent 4: Pronoun & Correction Tests', () => {
 
       try {
         // Turn 1
-        const turn1 = await sendChatMessage('Show me products', conversationId, sessionId);
+        const turn1 = await sendChatMessage('Show me pumps', conversationId, sessionId);
         conversationId = turn1.conversationId;
         testConversations.push(conversationId);
 
@@ -474,7 +474,7 @@ describe('Agent 4: Pronoun & Correction Tests', () => {
 
       try {
         // Turn 1
-        const turn1 = await sendChatMessage('Show me available products', conversationId, sessionId);
+        const turn1 = await sendChatMessage('Show me available pumps', conversationId, sessionId);
         conversationId = turn1.conversationId;
         testConversations.push(conversationId);
 

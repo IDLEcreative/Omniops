@@ -90,7 +90,7 @@ describe('ResponseParser - Core Features', () => {
   describe('Product Extraction', () => {
     test('should extract product from markdown link', () => {
       const result = ResponseParser.parseResponse(
-        'Show me products',
+        'Show me pumps',
         'Here is the [Item A](https://example.com/products/item-a)',
         1
       );

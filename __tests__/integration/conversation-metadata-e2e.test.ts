@@ -111,7 +111,7 @@ Here's the [ZF4 Pump](https://example.com/products/zf4):
       // Turn 1: AI returns numbered list
       manager.incrementTurn();
       const listResponse = `
-Here are the available products:
+Here are the available pumps:
 
 1. [Product Model A](https://example.com/products/model-a)
 2. [Product Model B](https://example.com/products/model-b)
@@ -120,7 +120,7 @@ Here are the available products:
 
       await parseAndTrackEntities(
         listResponse,
-        'Show me products',
+        'Show me pumps',
         manager
       );
 

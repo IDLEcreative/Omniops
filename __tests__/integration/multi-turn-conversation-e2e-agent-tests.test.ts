@@ -28,7 +28,7 @@ describe('Agent Memory & State - E2E (Tests 14-17)', () => {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({
-        message: 'Show me all available products',
+        message: 'Show me all available pumps',
         session_id: sessionId,
         domain: testDomain
       })
@@ -229,7 +229,7 @@ describe('Agent Memory & State - E2E (Tests 14-17)', () => {
 
     const messages = [
       'Hello, I need help',
-      'Show me available products',
+      'Show me available pumps',
       'What types do you have?',
       'Tell me about Category A products',
       'What are the prices?',

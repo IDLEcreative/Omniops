@@ -237,7 +237,7 @@ describe('Complete Agent Flow - E2E', () => {
   });
 
   describe('Product Search Flow', () => {
-    it('should handle product search with real AI', async () => {
+    it('should handle pump search with real AI', async () => {
       const { customerConfig, configError, testDomain, supabase } = await createTestConfig('product-search');
 
       if (configError || !customerConfig) {
@@ -261,7 +261,7 @@ describe('Complete Agent Flow - E2E', () => {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify({
-            message: 'Show me products',
+            message: 'Show me pumps',
             domain: testDomain,
             session_id: sessionId
           })
@@ -453,7 +453,7 @@ describe('Complete Agent Flow - E2E', () => {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify({
-            message: 'Show me all available products',
+            message: 'Show me all available pumps',
             domain: testDomain,
             session_id: `test-session-${Date.now()}`,
             config: {
