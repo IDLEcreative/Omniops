@@ -2,6 +2,43 @@ import { createServerClient } from '@supabase/ssr'
 import { NextResponse, type NextRequest } from 'next/server'
 
 export async function middleware(request: NextRequest) {
+  const { pathname } = request.nextUrl
+
+  // ========================================
+  // SECURITY: Block debug/test endpoints in production
+  // ========================================
+  const isProduction = process.env.NODE_ENV === 'production'
+  const debugEnabled = process.env.ENABLE_DEBUG_ENDPOINTS === 'true'
+
+  if (isProduction && !debugEnabled) {
+    const debugPatterns = [
+      '/api/debug',
+      '/api/test-',
+      '/api/check-',
+      '/api/fix-',
+      '/api/setup-',
+      '/api/simple-rag-test',
+      '/api/rag-health',
+      '/api/verify-customer',
+      '/api/query-indexes',
+      '/api/woocommerce/test',
+      '/api/woocommerce/cart/test',
+      '/api/woocommerce/customers/test',
+      '/api/woocommerce/customer-test',
+      '/api/shopify/test',
+      '/api/dashboard/test-connection',
+    ]
+
+    const isDebugEndpoint = debugPatterns.some(pattern => pathname.startsWith(pattern))
+
+    if (isDebugEndpoint) {
+      return NextResponse.json(
+        { error: 'Not found' },
+        { status: 404 }
+      )
+    }
+  }
+
   let response = NextResponse.next({
     request: {
       headers: request.headers,
@@ -35,7 +72,7 @@ export async function middleware(request: NextRequest) {
   // Protected routes that require organization membership
   const protectedPaths = ['/dashboard', '/admin']
   const isProtectedPath = protectedPaths.some(path =>
-    request.nextUrl.pathname.startsWith(path)
+    pathname.startsWith(path)
   )
 
   // Allow onboarding page without organization

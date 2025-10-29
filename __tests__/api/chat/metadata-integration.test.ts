@@ -214,11 +214,11 @@ describe('Chat Route Metadata Integration', () => {
       const manager = new ConversationMetadataManager();
       manager.incrementTurn();
 
-      const userMessage = 'Show me pumps';
+      const userMessage = 'Show me products';
       const aiResponse = `
-Here are the available pumps:
-1. [ZF4 Pump](https://example.com/zf4)
-2. [ZF5 Pump](https://example.com/zf5)
+Here are the available products:
+1. [Product A](https://example.com/product-a)
+2. [Product B](https://example.com/product-b)
       `.trim();
 
       // Simulate chat route parsing entities

@@ -11,6 +11,8 @@
  *
  * IMPORTANT: These tests use REAL USER SESSIONS to validate RLS policies.
  * Service keys bypass RLS, so they CANNOT be used for security testing.
+ *
+ * @jest-environment node
  */
 
 import {
@@ -26,9 +28,22 @@ import {
   deleteAsAdmin
 } from '@/test-utils/rls-test-helpers';
 
+// Mark as E2E test to use real credentials (not mocks)
+process.env.E2E_TEST = 'true';
+
+// Load real environment variables for RLS testing
+// The Jest setup file overrides these with mocks, but RLS tests need real credentials
+if (!process.env.NEXT_PUBLIC_SUPABASE_URL?.includes('birugqyuqhiahxvxeyqg')) {
+  // Force-load from .env.local (override=true)
+  require('dotenv').config({ path: '.env.local', override: true });
+}
+
 // Skip if credentials not available
 const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL!;
-const shouldRun = supabaseUrl && process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY && process.env.SUPABASE_SERVICE_ROLE_KEY;
+const shouldRun = supabaseUrl &&
+  supabaseUrl.includes('supabase.co') && // Ensure it's a real URL, not mock
+  process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY &&
+  process.env.SUPABASE_SERVICE_ROLE_KEY;
 
 describe('Multi-Tenant Data Isolation', () => {
   const rlsTest = setupRLSTest();

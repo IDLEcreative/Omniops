@@ -86,7 +86,7 @@ describe('Enhanced Context Window - Real-World Scenarios', () => {
 
   describe('Real-world Scenario Testing', () => {
     it('should handle complex product queries with enhanced context', () => {
-      const complexQuery = 'I need a heavy-duty industrial pump with stainless steel construction, flow rate over 100 GPM, and compatible with corrosive chemicals. What options do you have and what is the price?';
+      const complexQuery = 'I need a heavy-duty product with stainless steel construction, high performance specifications, and compatible with specialized uses. What options do you have and what is the price?';
 
       const intent = analyzeQueryIntent(complexQuery);
       expect(intent.needsTechnicalContext).toBe(true);

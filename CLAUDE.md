@@ -27,6 +27,40 @@
 
 **VIOLATION CONSEQUENCES**: Hardcoding specific information will break the system for other tenants and violate the multi-tenant architecture. All business-specific data must come from the database configuration, NOT from code.
 
+### ✅ EXCEPTION: TEST DATA
+
+**Tests MAY use domain-specific terminology to verify real-world behavior.**
+
+Tests should use actual product names, industry terms, and domain-specific queries to ensure the system works correctly:
+
+```typescript
+// ✅ ALLOWED in tests - Verifies system handles real queries
+it('should find products when user asks about pumps', async () => {
+  const result = await agent.query('Do you have any pumps?');
+  expect(result.products).toBeDefined();
+});
+
+// ✅ ALLOWED - Tests with realistic data for primary customer (Thompson's)
+const testData = {
+  query: 'Show me ZF5 hydraulic pumps',
+  expectedProducts: ['A4VTG90', 'BP-001']
+};
+```
+
+**Rationale:** Tests verify the system works with real-world data. If the primary customer (Thompson's) sells pumps, tests should use "pumps" to ensure accurate behavior verification.
+
+**Where this applies:**
+- `__tests__/` - All test files can use domain-specific terms
+- E2E tests simulating real user queries
+- Integration tests with actual product data
+- Test fixtures and mock data
+
+**Where this does NOT apply:**
+- Production code in `lib/`, `app/`, `components/`
+- Default configurations
+- UI templates or placeholders
+- Documentation examples (should show multi-industry support)
+
 ---
 
 This file provides guidance to Claude Code (claude.ai/code) when working with code in this repository.

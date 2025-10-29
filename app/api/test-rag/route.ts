@@ -3,7 +3,22 @@ import { createClient } from '@supabase/supabase-js';
 import { searchSimilarContent } from '@/lib/embeddings';
 import OpenAI from 'openai';
 
+/**
+ * DEBUG ENDPOINT - Development use only
+ * Tests RAG search functionality end-to-end
+ *
+ * SECURITY: Protected by middleware in production
+ */
+
 export async function GET(request: NextRequest) {
+  // Additional layer of protection (middleware is primary)
+  if (process.env.NODE_ENV === 'production' && !process.env.ENABLE_DEBUG_ENDPOINTS) {
+    return NextResponse.json(
+      { error: 'Not found' },
+      { status: 404 }
+    );
+  }
+
   const openai = new OpenAI({
     apiKey: process.env.OPENAI_API_KEY!,
   });

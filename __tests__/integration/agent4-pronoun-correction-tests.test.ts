@@ -136,7 +136,7 @@ describe('Agent 4: Pronoun & Correction Tests', () => {
         {
           title: 'Premium Hydraulic Pump Model A',
           url: `https://${TEST_DOMAIN}/pump-a`,
-          content: 'Premium Hydraulic Pump Model A - High performance industrial pump. Price: $299.99. Stock: Available (15 units). Warranty: 2 years.',
+          content: 'Premium Product Model A - High performance item. Price: $299.99. Stock: Available (15 units). Warranty: 2 years.',
           metadata: { price: 299.99, stock: 'available', warranty_years: 2 }
         },
         {
@@ -228,11 +228,11 @@ describe('Agent 4: Pronoun & Correction Tests', () => {
 
       try {
         // Turn 1
-        const turn1 = await sendChatMessage('Do you have hydraulic pumps?', conversationId, sessionId);
+        const turn1 = await sendChatMessage('Do you have products?', conversationId, sessionId);
         conversationId = turn1.conversationId;
         testConversations.push(conversationId);
 
-        const turn1Valid = turn1.response.toLowerCase().includes('pump') || turn1.response.toLowerCase().includes('hydraulic');
+        const turn1Valid = turn1.response.toLowerCase().includes('product') || turn1.response.toLowerCase().includes('item');
         expect(turn1Valid).toBe(true);
 
         await new Promise(resolve => setTimeout(resolve, 1000));
@@ -273,7 +273,7 @@ describe('Agent 4: Pronoun & Correction Tests', () => {
 
       try {
         // Turn 1
-        const turn1 = await sendChatMessage('Show me pumps under $500', conversationId, sessionId);
+        const turn1 = await sendChatMessage('Show me products under $500', conversationId, sessionId);
         conversationId = turn1.conversationId;
         testConversations.push(conversationId);
 
@@ -286,7 +286,7 @@ describe('Agent 4: Pronoun & Correction Tests', () => {
 
         const turn2Plural = turn2.response.toLowerCase().includes('all') ||
           turn2.response.toLowerCase().includes('both') ||
-          turn2.response.toLowerCase().includes('pumps');
+          turn2.response.toLowerCase().includes('product');
 
         expect(turn2Plural).toBe(true);
 
@@ -401,17 +401,17 @@ describe('Agent 4: Pronoun & Correction Tests', () => {
 
       try {
         // Turn 1
-        const turn1 = await sendChatMessage('Show me pumps', conversationId, sessionId);
+        const turn1 = await sendChatMessage('Show me products', conversationId, sessionId);
         conversationId = turn1.conversationId;
         testConversations.push(conversationId);
 
         await new Promise(resolve => setTimeout(resolve, 1000));
 
         // Turn 2 - Multiple corrections
-        const turn2 = await sendChatMessage('Actually, I meant under $400, and I need hydraulic not pneumatic', conversationId, sessionId);
+        const turn2 = await sendChatMessage('Actually, I meant under $400, and I need Category A not Category B', conversationId, sessionId);
 
         const handlesMultiple = (turn2.response.includes('400') || turn2.response.includes('$4')) &&
-          turn2.response.toLowerCase().includes('hydraulic');
+          turn2.response.toLowerCase().includes('category');
 
         expect(handlesMultiple).toBe(true);
 
@@ -435,7 +435,7 @@ describe('Agent 4: Pronoun & Correction Tests', () => {
 
       try {
         // Turn 1
-        const turn1 = await sendChatMessage('Show me pumps under $500', conversationId, sessionId);
+        const turn1 = await sendChatMessage('Show me products under $500', conversationId, sessionId);
         conversationId = turn1.conversationId;
         testConversations.push(conversationId);
 
@@ -474,7 +474,7 @@ describe('Agent 4: Pronoun & Correction Tests', () => {
 
       try {
         // Turn 1
-        const turn1 = await sendChatMessage('Show me available pumps', conversationId, sessionId);
+        const turn1 = await sendChatMessage('Show me available products', conversationId, sessionId);
         conversationId = turn1.conversationId;
         testConversations.push(conversationId);
 

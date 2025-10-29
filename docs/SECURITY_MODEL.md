@@ -1,24 +1,25 @@
 # Security Model Documentation
 
-> **Version**: 1.0
+> **Version**: 1.1
 > **Last Updated**: 2025-10-28
 > **Migration**: 20251028_fix_security_advisories.sql
 
 ## Overview
 
-This document describes the comprehensive security model for the Omniops platform, including Row Level Security (RLS) policies, view security, and access control patterns.
+This document describes the comprehensive security model for the Omniops platform, including Row Level Security (RLS) policies, view security, debug endpoint protection, and access control patterns.
 
 ---
 
 ## Table of Contents
 
 1. [Security Principles](#security-principles)
-2. [Row Level Security (RLS) Overview](#row-level-security-rls-overview)
-3. [View Security: SECURITY INVOKER vs SECURITY DEFINER](#view-security-security-invoker-vs-security-definer)
-4. [RLS Policies by Table](#rls-policies-by-table)
-5. [Access Control Patterns](#access-control-patterns)
-6. [Testing RLS Policies](#testing-rls-policies)
-7. [Security Best Practices](#security-best-practices)
+2. [Debug Endpoint Protection](#debug-endpoint-protection)
+3. [Row Level Security (RLS) Overview](#row-level-security-rls-overview)
+4. [View Security: SECURITY INVOKER vs SECURITY DEFINER](#view-security-security-invoker-vs-security-definer)
+5. [RLS Policies by Table](#rls-policies-by-table)
+6. [Access Control Patterns](#access-control-patterns)
+7. [Testing RLS Policies](#testing-rls-policies)
+8. [Security Best Practices](#security-best-practices)
 
 ---
 
@@ -38,6 +39,159 @@ This document describes the comprehensive security model for the Omniops platfor
 | `service_role` | Full access to all tables | Backend API operations, migrations, system tasks |
 | `authenticated` | Organization-scoped access | Dashboard users, authenticated API calls |
 | `anon` | Public endpoints only | Unauthenticated chat widget, public APIs |
+
+---
+
+## Debug Endpoint Protection
+
+### Overview
+
+All debug, test, and diagnostic endpoints are **blocked in production** by default to prevent information disclosure, configuration leakage, and unauthorized system access.
+
+### Protected Endpoint Patterns
+
+The following endpoint patterns are automatically blocked in production:
+
+| Pattern | Examples | Risk Level |
+|---------|----------|------------|
+| `/api/debug/*` | `/api/debug/example.com` | 🔴 CRITICAL - Exposes configuration, stats, credentials |
+| `/api/test-*` | `/api/test-rag`, `/api/test-embeddings`, `/api/test-db` | 🔴 CRITICAL - Database access, API testing |
+| `/api/check-*` | `/api/check-rag`, `/api/check-domain-content` | 🟡 HIGH - System diagnostics |
+| `/api/fix-*` | `/api/fix-rag`, `/api/fix-customer-config` | 🔴 CRITICAL - Modifies system state |
+| `/api/setup-*` | `/api/setup-rag`, `/api/setup-rag-production` | 🔴 CRITICAL - Configuration changes |
+| `/api/*/test` | `/api/woocommerce/test`, `/api/shopify/test` | 🟡 HIGH - Integration testing |
+
+### Protection Strategy: Defense in Depth
+
+**Layer 1: Middleware Protection**
+```typescript
+// middleware.ts
+if (isProduction && !debugEnabled) {
+  const debugPatterns = [
+    '/api/debug', '/api/test-', '/api/check-',
+    '/api/fix-', '/api/setup-', // ... more patterns
+  ];
+
+  if (isDebugEndpoint) {
+    return NextResponse.json({ error: 'Not found' }, { status: 404 });
+  }
+}
+```
+
+**Layer 2: Endpoint-Level Protection**
+```typescript
+// Each debug endpoint also checks internally
+export async function GET(request: Request) {
+  if (process.env.NODE_ENV === 'production' && !process.env.ENABLE_DEBUG_ENDPOINTS) {
+    return NextResponse.json({ error: 'Not found' }, { status: 404 });
+  }
+  // ... endpoint logic
+}
+```
+
+### Environment Configuration
+
+**Production (Default):**
+```bash
+NODE_ENV=production
+# Debug endpoints blocked automatically
+```
+
+**Production with Debug Access (Emergency Only):**
+```bash
+NODE_ENV=production
+ENABLE_DEBUG_ENDPOINTS=true  # ⚠️ Use with extreme caution
+```
+
+**Development:**
+```bash
+NODE_ENV=development
+# Debug endpoints available
+```
+
+### Security Guarantees
+
+✅ **404 Response**: All blocked endpoints return generic 404 "Not found"
+✅ **No Information Leakage**: Error messages don't reveal why endpoint is blocked
+✅ **No Bypass**: Even compromised application code can't enable debug endpoints without environment variable
+✅ **Audit Trail**: All debug endpoint access should be logged and monitored
+
+### Testing Debug Protection
+
+See `__tests__/api/security/debug-endpoints.test.ts` for comprehensive tests:
+
+```typescript
+it('should block debug endpoints in production', async () => {
+  process.env.NODE_ENV = 'production';
+  const response = await fetch('/api/debug/test');
+  expect(response.status).toBe(404);
+});
+```
+
+### Protected Endpoints Inventory
+
+**Complete list of protected endpoints:**
+
+1. `/api/debug/[domain]` - Domain configuration and statistics
+2. `/api/test-rag` - RAG system testing
+3. `/api/test-embeddings` - Embeddings search testing
+4. `/api/test-db` - Database connectivity testing
+5. `/api/test-woocommerce` - WooCommerce integration testing
+6. `/api/test-woo` - WooCommerce quick test
+7. `/api/check-rag` - RAG health check
+8. `/api/check-domain-content` - Domain content verification
+9. `/api/fix-rag` - RAG system repair
+10. `/api/fix-customer-config` - Customer configuration repair
+11. `/api/setup-rag` - RAG initialization
+12. `/api/setup-rag-production` - Production RAG setup
+13. `/api/debug-rag` - RAG debugging (has own protection)
+14. `/api/simple-rag-test` - Simple RAG test
+15. `/api/woocommerce/test` - WooCommerce full test
+16. `/api/woocommerce/cart/test` - Cart endpoint testing
+17. `/api/woocommerce/customers/test` - Customer endpoint testing
+18. `/api/woocommerce/customer-test` - Customer action testing
+19. `/api/shopify/test` - Shopify integration testing
+20. `/api/dashboard/test-connection` - Dashboard connection testing
+
+### Monitoring and Alerts
+
+**Recommended monitoring:**
+
+```sql
+-- Track blocked debug endpoint attempts (if logged)
+SELECT COUNT(*) as blocked_attempts
+FROM api_logs
+WHERE path LIKE '/api/debug%'
+  OR path LIKE '/api/test-%'
+  OR path LIKE '/api/check-%'
+  OR path LIKE '/api/fix-%'
+  OR path LIKE '/api/setup-%'
+AND status = 404
+AND created_at > NOW() - INTERVAL '1 hour';
+```
+
+**Alert thresholds:**
+- 🚨 **CRITICAL**: >10 blocked debug endpoint attempts in 1 hour
+- ⚠️ **WARNING**: Debug endpoints enabled in production (`ENABLE_DEBUG_ENDPOINTS=true`)
+- 🚨 **CRITICAL**: Debug endpoint accessed with valid credentials (should never happen)
+
+### Emergency Access Procedure
+
+**If debug access is needed in production:**
+
+1. **Approve**: Get explicit approval from security team
+2. **Enable**: Set `ENABLE_DEBUG_ENDPOINTS=true` environment variable
+3. **Redeploy**: Restart application to apply change
+4. **Time-Limit**: Enable for maximum 1 hour
+5. **Audit**: Log all actions taken during debug session
+6. **Disable**: Remove flag immediately after debugging
+7. **Review**: Document what was accessed and why
+
+**Never:**
+- ❌ Leave debug endpoints enabled permanently
+- ❌ Share debug endpoint URLs with untrusted parties
+- ❌ Use debug endpoints for normal operations
+- ❌ Commit `ENABLE_DEBUG_ENDPOINTS=true` to version control
 
 ---
 

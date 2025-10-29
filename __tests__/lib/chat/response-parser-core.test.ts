@@ -78,7 +78,7 @@ describe('ResponseParser - Core Features', () => {
 
     test('should not detect false positives', () => {
       const result = ResponseParser.parseResponse(
-        'I like pumps',
+        'I like products',
         'Ok',
         1
       );
@@ -90,8 +90,8 @@ describe('ResponseParser - Core Features', () => {
   describe('Product Extraction', () => {
     test('should extract product from markdown link', () => {
       const result = ResponseParser.parseResponse(
-        'Show me pumps',
-        'Here is the [ZF4 Pump](https://example.com/products/zf4)',
+        'Show me products',
+        'Here is the [Item A](https://example.com/products/item-a)',
         1
       );
 

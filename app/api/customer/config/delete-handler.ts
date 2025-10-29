@@ -9,6 +9,7 @@ import { checkSupabaseEnv, getSupabaseClient } from './utils'
 /**
  * DELETE /api/customer/config/[id]
  * Delete a customer configuration and cancel any pending scraping
+ * REQUIRES AUTHENTICATION: User must be admin/owner of the organization
  */
 export async function handleDelete(request: NextRequest) {
   try {
@@ -25,6 +26,17 @@ export async function handleDelete(request: NextRequest) {
     const { client: supabase, error: clientError } = await getSupabaseClient()
     if (clientError) return clientError
 
+    // SECURITY: Require authentication
+    const { data: { user }, error: authError } = await supabase!.auth.getUser()
+    if (authError || !user) {
+      logger.warn('Unauthenticated request to DELETE /api/customer/config')
+      return NextResponse.json(
+        { error: 'Authentication required' },
+        { status: 401 }
+      )
+    }
+
+    // Fetch config first to get organization_id
     const { data: config, error: fetchError } = await supabase!
       .from('customer_configs')
       .select('*')
@@ -33,6 +45,39 @@ export async function handleDelete(request: NextRequest) {
 
     if (fetchError || !config) {
       return NextResponse.json({ error: 'Configuration not found' }, { status: 404 })
+    }
+
+    // SECURITY: Verify user is member of the config's organization
+    const { data: membership, error: membershipError } = await supabase!
+      .from('organization_members')
+      .select('role')
+      .eq('user_id', user.id)
+      .eq('organization_id', config.organization_id)
+      .single()
+
+    if (membershipError || !membership) {
+      logger.warn('User not authorized to delete config', {
+        userId: user.id,
+        configId,
+        organizationId: config.organization_id
+      })
+      return NextResponse.json(
+        { error: 'Forbidden: Not a member of this organization' },
+        { status: 403 }
+      )
+    }
+
+    // SECURITY: Only admins and owners can delete configs
+    if (!['admin', 'owner'].includes(membership.role)) {
+      logger.warn('Insufficient permissions to delete config', {
+        userId: user.id,
+        role: membership.role,
+        configId
+      })
+      return NextResponse.json(
+        { error: 'Forbidden: Only admins and owners can delete configurations' },
+        { status: 403 }
+      )
     }
 
     const { data: pendingJobs, error: jobsError } = await supabase!

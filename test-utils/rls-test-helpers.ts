@@ -9,10 +9,25 @@
 
 import { createClient } from '@supabase/supabase-js';
 import type { SupabaseClient } from '@supabase/supabase-js';
+import { fetch as undicicFetch } from 'undici';
 
-const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL!;
-const supabaseAnonKey = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!;
-const serviceRoleKey = process.env.SUPABASE_SERVICE_ROLE_KEY!;
+// Use undici's fetch directly to bypass MSW interception in tests
+// MSW wraps globalThis.fetch, but undici is the underlying implementation
+const nativeFetch = undicicFetch as typeof fetch;
+
+// Helper functions to get environment variables dynamically
+// This allows tests to override them after module import
+function getSupabaseUrl(): string {
+  return process.env.NEXT_PUBLIC_SUPABASE_URL!;
+}
+
+function getSupabaseAnonKey(): string {
+  return process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!;
+}
+
+function getServiceRoleKey(): string {
+  return process.env.SUPABASE_SERVICE_ROLE_KEY!;
+}
 
 /**
  * Direct REST API helper for Supabase database operations
@@ -25,16 +40,16 @@ async function supabaseRestInsert(
 ): Promise<any> {
   const headers: Record<string, string> = {
     'Content-Type': 'application/json',
-    'apikey': options.serviceRole ? serviceRoleKey : supabaseAnonKey,
+    'apikey': options.serviceRole ? getServiceRoleKey() : getSupabaseAnonKey(),
     'Prefer': 'return=representation'
   };
 
   if (options.serviceRole) {
-    headers['Authorization'] = `Bearer ${serviceRoleKey}`;
+    headers['Authorization'] = `Bearer ${getServiceRoleKey()}`;
   }
 
-  const response = await fetch(
-    `${supabaseUrl}/rest/v1/${table}`,
+  const response = await nativeFetch(
+    `${getSupabaseUrl()}/rest/v1/${table}`,
     {
       method: 'POST',
       headers,
@@ -72,15 +87,15 @@ async function supabaseRestDelete(
   }
 
   const headers: Record<string, string> = {
-    'apikey': options.serviceRole ? serviceRoleKey : supabaseAnonKey
+    'apikey': options.serviceRole ? getServiceRoleKey() : getSupabaseAnonKey()
   };
 
   if (options.serviceRole) {
-    headers['Authorization'] = `Bearer ${serviceRoleKey}`;
+    headers['Authorization'] = `Bearer ${getServiceRoleKey()}`;
   }
 
-  const response = await fetch(
-    `${supabaseUrl}/rest/v1/${table}?${queryString}`,
+  const response = await nativeFetch(
+    `${getSupabaseUrl()}/rest/v1/${table}?${queryString}`,
     {
       method: 'DELETE',
       headers
@@ -114,17 +129,17 @@ async function supabaseRestSelect(
   }
 
   const headers: Record<string, string> = {
-    'apikey': options.serviceRole ? serviceRoleKey : supabaseAnonKey
+    'apikey': options.serviceRole ? getServiceRoleKey() : getSupabaseAnonKey()
   };
 
   if (options.serviceRole) {
-    headers['Authorization'] = `Bearer ${serviceRoleKey}`;
+    headers['Authorization'] = `Bearer ${getServiceRoleKey()}`;
   } else if (options.accessToken) {
     headers['Authorization'] = `Bearer ${options.accessToken}`;
   }
 
-  const response = await fetch(
-    `${supabaseUrl}/rest/v1/${table}?${params.toString()}`,
+  const response = await nativeFetch(
+    `${getSupabaseUrl()}/rest/v1/${table}?${params.toString()}`,
     {
       method: 'GET',
       headers
@@ -145,13 +160,13 @@ async function supabaseRestSelect(
 export async function getUserAccessToken(email: string): Promise<string> {
   const password = process.env.TEST_USER_PASSWORD || 'test-password-123';
 
-  const response = await fetch(
-    `${supabaseUrl}/auth/v1/token?grant_type=password`,
+  const response = await nativeFetch(
+    `${getSupabaseUrl()}/auth/v1/token?grant_type=password`,
     {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
-        'apikey': supabaseAnonKey
+        'apikey': getSupabaseAnonKey()
       },
       body: JSON.stringify({ email, password })
     }
@@ -216,11 +231,14 @@ export async function deleteAsAdmin(
  * IMPORTANT: This client bypasses RLS policies - use only for test infrastructure, never for security assertions
  */
 export function createAdminClient() {
-  if (!supabaseUrl || !serviceRoleKey) {
+  const url = getSupabaseUrl();
+  const key = getServiceRoleKey();
+
+  if (!url || !key) {
     throw new Error('Missing Supabase credentials for admin client creation. Ensure NEXT_PUBLIC_SUPABASE_URL and SUPABASE_SERVICE_ROLE_KEY are set.');
   }
 
-  return createClient(supabaseUrl, serviceRoleKey, {
+  return createClient(url, key, {
     auth: {
       autoRefreshToken: false,
       persistSession: false
@@ -248,13 +266,13 @@ export async function createUserClient(
   // Sign in via REST API (SDK has issues in Jest environment)
   const password = process.env.TEST_USER_PASSWORD || 'test-password-123';
 
-  const response = await fetch(
-    `${supabaseUrl}/auth/v1/token?grant_type=password`,
+  const response = await nativeFetch(
+    `${getSupabaseUrl()}/auth/v1/token?grant_type=password`,
     {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
-        'apikey': supabaseAnonKey
+        'apikey': getSupabaseAnonKey()
       },
       body: JSON.stringify({ email, password })
     }
@@ -272,7 +290,7 @@ export async function createUserClient(
   }
 
   // Create client with the session
-  const client = createClient(supabaseUrl, supabaseAnonKey, {
+  const client = createClient(getSupabaseUrl(), getSupabaseAnonKey(), {
     global: {
       headers: {
         Authorization: `Bearer ${data.access_token}`
@@ -298,14 +316,14 @@ export async function createTestUser(
 ): Promise<string> {
   // Use Supabase Management API directly instead of SDK
   // This bypasses Jest/Supabase compatibility issues with auth.admin
-  const response = await fetch(
-    `${supabaseUrl}/auth/v1/admin/users`,
+  const response = await nativeFetch(
+    `${getSupabaseUrl()}/auth/v1/admin/users`,
     {
       method: 'POST',
       headers: {
-        'Authorization': `Bearer ${serviceRoleKey}`,
+        'Authorization': `Bearer ${getServiceRoleKey()}`,
         'Content-Type': 'application/json',
-        'apikey': serviceRoleKey
+        'apikey': getServiceRoleKey()
       },
       body: JSON.stringify({
         email,
@@ -316,18 +334,34 @@ export async function createTestUser(
     }
   );
 
+  const responseText = await response.text();
+
   if (!response.ok) {
-    const error = await response.text();
-    throw new Error(`Failed to create test user ${email}: ${response.status} ${error}`);
+    throw new Error(
+      `Failed to create test user ${email}: ${response.status} ${responseText}. ` +
+      `URL: ${getSupabaseUrl()}, Service Key: ${getServiceRoleKey()?.substring(0, 20)}...`
+    );
   }
 
-  const data = await response.json();
-
-  if (!data.id) {
-    throw new Error(`No user ID returned when creating test user ${email}`);
+  let data;
+  try {
+    data = JSON.parse(responseText);
+  } catch (e) {
+    throw new Error(
+      `Failed to parse create user response for ${email}. ` +
+      `Status: ${response.status}, Body: ${responseText}`
+    );
   }
 
-  return data.id;
+  if (!data.id && !data.user?.id) {
+    throw new Error(
+      `No user ID returned when creating test user ${email}. ` +
+      `Response: ${JSON.stringify(data)}. ` +
+      `URL: ${getSupabaseUrl()}, Service Key: ${getServiceRoleKey()?.substring(0, 20)}...`
+    );
+  }
+
+  return data.id || data.user?.id;
 }
 
 /**
@@ -347,13 +381,13 @@ export async function deleteTestUser(userId: string): Promise<void> {
     }
 
     // Use Supabase Management API to delete the auth user
-    const response = await fetch(
-      `${supabaseUrl}/auth/v1/admin/users/${userId}`,
+    const response = await nativeFetch(
+      `${getSupabaseUrl()}/auth/v1/admin/users/${userId}`,
       {
         method: 'DELETE',
         headers: {
-          'Authorization': `Bearer ${serviceRoleKey}`,
-          'apikey': serviceRoleKey
+          'Authorization': `Bearer ${getServiceRoleKey()}`,
+          'apikey': getServiceRoleKey()
         }
       }
     );

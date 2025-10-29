@@ -111,26 +111,26 @@ Here's the [ZF4 Pump](https://example.com/products/zf4):
       // Turn 1: AI returns numbered list
       manager.incrementTurn();
       const listResponse = `
-Here are the available mixer pumps:
+Here are the available products:
 
-1. [Cifa K35L Mixer Pump](https://example.com/products/k35l)
-2. [Cifa K45L Mixer Pump](https://example.com/products/k45l)
-3. [Cifa K50L Mixer Pump](https://example.com/products/k50l)
+1. [Product Model A](https://example.com/products/model-a)
+2. [Product Model B](https://example.com/products/model-b)
+3. [Product Model C](https://example.com/products/model-c)
       `.trim();
 
       await parseAndTrackEntities(
         listResponse,
-        'Show me Cifa mixer pumps',
+        'Show me products',
         manager
       );
 
       // Verify list was tracked
       const item1 = manager.resolveListItem(1);
-      expect(item1?.name).toBe('Cifa K35L Mixer Pump');
-      expect(item1?.url).toBe('https://example.com/products/k35l');
+      expect(item1?.name).toBe('Product Model A');
+      expect(item1?.url).toBe('https://example.com/products/model-a');
 
       const item2 = manager.resolveListItem(2);
-      expect(item2?.name).toBe('Cifa K45L Mixer Pump');
+      expect(item2?.name).toBe('Product Model B');
 
       // Turn 2: User asks about "item 2"
       manager.incrementTurn();

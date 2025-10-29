@@ -12,11 +12,52 @@ import { checkSupabaseEnv, getSupabaseClient } from './utils'
 /**
  * POST /api/customer/config
  * Create a new customer configuration and trigger automatic scraping
+ * REQUIRES AUTHENTICATION: User must be authenticated and member of organization
  */
 export async function handlePost(request: NextRequest) {
   try {
     const envError = checkSupabaseEnv()
     if (envError) return envError
+
+    const { client: supabase, error: clientError } = await getSupabaseClient()
+    if (clientError) return clientError
+
+    // SECURITY: Require authentication
+    const { data: { user }, error: authError } = await supabase!.auth.getUser()
+    if (authError || !user) {
+      logger.warn('Unauthenticated request to POST /api/customer/config')
+      return NextResponse.json(
+        { error: 'Authentication required' },
+        { status: 401 }
+      )
+    }
+
+    // SECURITY: Get user's organization
+    const { data: membership, error: membershipError } = await supabase!
+      .from('organization_members')
+      .select('organization_id, role')
+      .eq('user_id', user.id)
+      .single()
+
+    if (membershipError || !membership) {
+      logger.warn('User has no organization membership', { userId: user.id })
+      return NextResponse.json(
+        { error: 'No organization found for user' },
+        { status: 404 }
+      )
+    }
+
+    // SECURITY: Only admins and owners can create configs
+    if (!['admin', 'owner'].includes(membership.role)) {
+      logger.warn('Insufficient permissions to create config', {
+        userId: user.id,
+        role: membership.role
+      })
+      return NextResponse.json(
+        { error: 'Forbidden: Only admins and owners can create configurations' },
+        { status: 403 }
+      )
+    }
 
     const json = await request.json()
     const parsed = CreateConfigSchema.safeParse(json)
@@ -41,8 +82,6 @@ export async function handlePost(request: NextRequest) {
     }
 
     const normalizedDomain = domainValidation.domain!
-    const { client: supabase, error: clientError } = await getSupabaseClient()
-    if (clientError) return clientError
 
     const domainStatus = await domainValidator.checkDomainStatus(normalizedDomain)
     if (domainStatus.exists && domainStatus.customerConfigId) {

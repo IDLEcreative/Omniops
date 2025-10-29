@@ -12,6 +12,7 @@ import { checkSupabaseEnv, getSupabaseClient } from './utils'
 /**
  * PUT /api/customer/config/[id]
  * Update an existing customer configuration
+ * REQUIRES AUTHENTICATION: User must be admin/owner of the organization
  */
 export async function handlePut(request: NextRequest) {
   try {
@@ -25,18 +26,20 @@ export async function handlePut(request: NextRequest) {
       return NextResponse.json({ error: 'Configuration ID is required' }, { status: 400 })
     }
 
-    const json = await request.json()
-    const parsed = UpdateConfigSchema.safeParse(json)
-    if (!parsed.success) {
-      return NextResponse.json(
-        { error: 'Invalid request body', details: parsed.error.flatten() },
-        { status: 400 }
-      )
-    }
-    const body = parsed.data
     const { client: supabase, error: clientError } = await getSupabaseClient()
     if (clientError) return clientError
 
+    // SECURITY: Require authentication
+    const { data: { user }, error: authError } = await supabase!.auth.getUser()
+    if (authError || !user) {
+      logger.warn('Unauthenticated request to PUT /api/customer/config')
+      return NextResponse.json(
+        { error: 'Authentication required' },
+        { status: 401 }
+      )
+    }
+
+    // Fetch config first to get organization_id
     const { data: existingConfig, error: fetchError } = await supabase!
       .from('customer_configs')
       .select('*')
@@ -46,6 +49,49 @@ export async function handlePut(request: NextRequest) {
     if (fetchError || !existingConfig) {
       return NextResponse.json({ error: 'Configuration not found' }, { status: 404 })
     }
+
+    // SECURITY: Verify user is member of the config's organization
+    const { data: membership, error: membershipError } = await supabase!
+      .from('organization_members')
+      .select('role')
+      .eq('user_id', user.id)
+      .eq('organization_id', existingConfig.organization_id)
+      .single()
+
+    if (membershipError || !membership) {
+      logger.warn('User not authorized to update config', {
+        userId: user.id,
+        configId,
+        organizationId: existingConfig.organization_id
+      })
+      return NextResponse.json(
+        { error: 'Forbidden: Not a member of this organization' },
+        { status: 403 }
+      )
+    }
+
+    // SECURITY: Only admins and owners can update configs
+    if (!['admin', 'owner'].includes(membership.role)) {
+      logger.warn('Insufficient permissions to update config', {
+        userId: user.id,
+        role: membership.role,
+        configId
+      })
+      return NextResponse.json(
+        { error: 'Forbidden: Only admins and owners can update configurations' },
+        { status: 403 }
+      )
+    }
+
+    const json = await request.json()
+    const parsed = UpdateConfigSchema.safeParse(json)
+    if (!parsed.success) {
+      return NextResponse.json(
+        { error: 'Invalid request body', details: parsed.error.flatten() },
+        { status: 400 }
+      )
+    }
+    const body = parsed.data
 
     let domainValidation = null
     let normalizedDomain = existingConfig.domain

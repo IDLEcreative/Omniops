@@ -152,21 +152,21 @@ describe('Multi-Turn Conversation - E2E', () => {
       /**
        * Test Flow (3 turns):
        * Turn 1:
-       *   User: "Do you have hydraulic pumps?"
-       *   AI: [Lists 3 pumps: Pump A, Pump B, Pump C]
-       *   Metadata: Should track all 3 pumps as "products_mentioned"
+       *   User: "Do you have products?"
+       *   AI: [Lists 3 products: Product A, Product B, Product C]
+       *   Metadata: Should track all 3 products as "products_mentioned"
        *
        * Turn 2:
        *   User: "What's the price of the first one?"
-       *   AI: Should resolve "first one" → Pump A
-       *   AI: "Pump A costs $299.99"
-       *   Metadata: Should show context resolution: "first one" → "Pump A"
+       *   AI: Should resolve "first one" → Product A
+       *   AI: "Product A costs $299.99"
+       *   Metadata: Should show context resolution: "first one" → "Product A"
        *
        * Turn 3:
        *   User: "Is it in stock?"
-       *   AI: Should resolve "it" → Pump A (from Turn 2)
-       *   AI: "Yes, Pump A is in stock"
-       *   Metadata: Should track pronoun chain: "it" → "first one" → "Pump A"
+       *   AI: Should resolve "it" → Product A (from Turn 2)
+       *   AI: "Yes, Product A is in stock"
+       *   Metadata: Should track pronoun chain: "it" → "first one" → "Product A"
        *
        * Validation:
        * - AI correctly resolves pronouns across all turns
@@ -189,7 +189,7 @@ describe('Multi-Turn Conversation - E2E', () => {
     it.skip('should resolve "they" for plural references (IMPLEMENT ME)', async () => {
       /**
        * Test Flow:
-       * Turn 1: "Show me pumps under $500"
+       * Turn 1: "Show me products under $500"
        * Turn 2: "Are they all in stock?" (plural "they")
        * Turn 3: "What are their warranty periods?" (plural "their")
        *
@@ -206,11 +206,11 @@ describe('Multi-Turn Conversation - E2E', () => {
     it.skip('should handle ambiguous pronouns gracefully (IMPLEMENT ME)', async () => {
       /**
        * Test Flow:
-       * Turn 1: User asks about Pump A and Pump B
+       * Turn 1: User asks about Product A and Product B
        * Turn 2: "What's the price of it?" (ambiguous - which one?)
        *
        * Expected AI Behavior:
-       * - AI should ask for clarification: "Which one? Pump A or Pump B?"
+       * - AI should ask for clarification: "Which one? Product A or Product B?"
        * - Should NOT guess which product user means
        * - Should NOT hallucinate a price
        *
@@ -230,17 +230,17 @@ describe('Multi-Turn Conversation - E2E', () => {
       /**
        * Test Flow:
        * Turn 1:
-       *   User: "Show me ZF5 pumps"
-       *   AI: [Shows ZF5 results]
-       *   Metadata: products_mentioned = ["ZF5 Pump A", "ZF5 Pump B"]
+       *   User: "Show me Model A products"
+       *   AI: [Shows Model A results]
+       *   Metadata: products_mentioned = ["Model A Product A", "Model A Product B"]
        *
        * Turn 2:
-       *   User: "Sorry, I meant ZF4 not ZF5"
+       *   User: "Sorry, I meant Model B not Model A"
        *   Expected AI Behavior:
        *     - Recognize correction pattern
-       *     - Acknowledge mistake: "No problem! Let me show you ZF4 pumps instead."
-       *     - Execute new search for ZF4
-       *     - Clear old ZF5 metadata, replace with ZF4
+       *     - Acknowledge mistake: "No problem! Let me show you Model B products instead."
+       *     - Execute new search for Model B
+       *     - Clear old Model A metadata, replace with Model B
        *
        * Validation:
        * - Correction detected in metadata (correction_detected: true)
@@ -528,12 +528,12 @@ describe('Multi-Turn Conversation - E2E', () => {
        */
 
       // Turn 1: Product search intent
-      const turn1 = await sendMessage('I need to find a hydraulic pump');
+      const turn1 = await sendMessage('I need to find a product');
       testConversations.push(turn1.conversationId);
 
       const turn1IsProductSearch =
-        turn1.response.toLowerCase().includes('pump') ||
-        turn1.response.toLowerCase().includes('product');
+        turn1.response.toLowerCase().includes('product') ||
+        turn1.response.toLowerCase().includes('item');
 
       expect(turn1IsProductSearch).toBe(true);
 
@@ -574,7 +574,7 @@ describe('Multi-Turn Conversation - E2E', () => {
        */
 
       // Turn 1
-      const turn1 = await sendMessage('Show me pumps');
+      const turn1 = await sendMessage('Show me products');
       testConversations.push(turn1.conversationId);
 
       const dbMetadata1 = await fetchMetadataFromDB(turn1.conversationId);
@@ -614,14 +614,14 @@ describe('Multi-Turn Conversation - E2E', () => {
        */
 
       // Turn 1: Initial request
-      const turn1 = await sendMessage('Show me ZF5 pumps');
+      const turn1 = await sendMessage('Show me Model B products');
       testConversations.push(turn1.conversationId);
 
       const dbMetadata1 = await fetchMetadataFromDB(turn1.conversationId);
       expect(dbMetadata1.currentTurn).toBe(1);
 
       // Turn 2: User correction
-      const turn2 = await sendMessage('Sorry, I meant ZF4 not ZF5', turn1.conversationId);
+      const turn2 = await sendMessage('Sorry, I meant Model A not Model B', turn1.conversationId);
 
       const dbMetadata2 = await fetchMetadataFromDB(turn1.conversationId);
 
@@ -631,16 +631,16 @@ describe('Multi-Turn Conversation - E2E', () => {
       // If corrections array exists, verify it has the correction
       if (Array.isArray(dbMetadata2.corrections) && dbMetadata2.corrections.length > 0) {
         const correction = dbMetadata2.corrections[0];
-        expect(correction.originalValue).toMatch(/ZF5/i);
-        expect(correction.correctedValue).toMatch(/ZF4/i);
+        expect(correction.originalValue).toMatch(/Model B/i);
+        expect(correction.correctedValue).toMatch(/Model A/i);
       }
 
       // Turn 3: Verify new context is used
       const turn3 = await sendMessage('What are the prices for those?', turn2.conversationId);
 
-      // Response should reference ZF4, not ZF5
-      const mentionsCorrectModel = turn3.response.toLowerCase().includes('zf4');
-      const mentionsWrongModel = turn3.response.toLowerCase().includes('zf5');
+      // Response should reference Model A, not Model B
+      const mentionsCorrectModel = turn3.response.toLowerCase().includes('model a');
+      const mentionsWrongModel = turn3.response.toLowerCase().includes('model b');
 
       // Ideally should mention correct model
       // Even if not explicitly mentioned, should not hallucinate the wrong one
@@ -665,7 +665,7 @@ describe('Multi-Turn Conversation - E2E', () => {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
-          message: 'Show me all available pumps',
+          message: 'Show me all available products',
           session_id: sessionId,
           domain: testDomain
         })
@@ -722,7 +722,7 @@ describe('Multi-Turn Conversation - E2E', () => {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify({
-            message: 'Show me hydraulic pumps',
+            message: 'Show me Category A products',
             session_id: sessionA,
             domain: testDomain
           })
@@ -731,7 +731,7 @@ describe('Multi-Turn Conversation - E2E', () => {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify({
-            message: 'Show me electric pumps',
+            message: 'Show me Category B products',
             session_id: sessionB,
             domain: testDomain
           })
@@ -756,7 +756,7 @@ describe('Multi-Turn Conversation - E2E', () => {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify({
-            message: 'What types of hydraulic pumps do you have?',
+            message: 'What types of Category A products do you have?',
             conversation_id: conversationIdA,
             session_id: sessionA,
             domain: testDomain
@@ -766,7 +766,7 @@ describe('Multi-Turn Conversation - E2E', () => {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify({
-            message: 'What types of electric pumps are available?',
+            message: 'What types of Category B products are available?',
             conversation_id: conversationIdB,
             session_id: sessionB,
             domain: testDomain
@@ -855,9 +855,9 @@ describe('Multi-Turn Conversation - E2E', () => {
 
       const messages = [
         'Hello, I need help',
-        'Show me available pumps',
+        'Show me available products',
         'What types do you have?',
-        'Tell me about hydraulic pumps',
+        'Tell me about Category A products',
         'What are the prices?',
         'Do you have any in stock?',
         'What about the first one?',

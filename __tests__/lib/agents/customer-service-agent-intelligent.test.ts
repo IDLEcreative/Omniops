@@ -194,11 +194,11 @@ describe('IntelligentCustomerServiceAgent', () => {
       const context = IntelligentCustomerServiceAgent.buildCompleteContext(
         'none',
         null,
-        'Do you have pumps?'
+        'Do you have products?'
       );
 
       expect(context).toContain('isn\'t verified yet');
-      expect(context).toContain('Customer Query: "Do you have pumps?"');
+      expect(context).toContain('Customer Query: "Do you have products?"');
     });
 
     it('should include verification context for unverified users', () => {

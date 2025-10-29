@@ -3,7 +3,22 @@ export const runtime = 'nodejs'
 export const dynamic = 'force-dynamic'
 import { createServiceRoleClient } from '@/lib/supabase-server';
 
+/**
+ * DEBUG ENDPOINT - Development use only
+ * Tests database connectivity and table access
+ *
+ * SECURITY: Protected by middleware in production
+ */
+
 export async function GET(request: NextRequest) {
+  // Additional layer of protection (middleware is primary)
+  if (process.env.NODE_ENV === 'production' && !process.env.ENABLE_DEBUG_ENDPOINTS) {
+    return NextResponse.json(
+      { error: 'Not found' },
+      { status: 404 }
+    );
+  }
+
   try {
     const supabase = await createServiceRoleClient();
     

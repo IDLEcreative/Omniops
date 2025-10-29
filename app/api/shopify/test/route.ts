@@ -1,12 +1,22 @@
 /**
  * Shopify Integration Test Endpoint
  * Tests Shopify API connection and credentials
+ *
+ * SECURITY: Protected by middleware in production
  */
 
 import { NextResponse } from 'next/server';
 import { getDynamicShopifyClient } from '@/lib/shopify-dynamic';
 
 export async function GET(request: Request) {
+  // Additional layer of protection (middleware is primary)
+  if (process.env.NODE_ENV === 'production' && !process.env.ENABLE_DEBUG_ENDPOINTS) {
+    return NextResponse.json(
+      { error: 'Not found' },
+      { status: 404 }
+    );
+  }
+
   const { searchParams } = new URL(request.url);
   const domain = searchParams.get('domain');
 

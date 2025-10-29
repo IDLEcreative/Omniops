@@ -20,11 +20,11 @@ describe('Conversation Metadata Integration Test', () => {
     // Turn 1: AI shows product list
     const turn1AI = `
 Here are your options:
-1. [ZF4 Hydraulic Pump](https://example.com/products/zf4)
-2. [ZF5 Hydraulic Pump](https://example.com/products/zf5)
-3. [ZF6 Hydraulic Pump](https://example.com/products/zf6)
+1. [Product A](https://example.com/products/item-a)
+2. [Product B](https://example.com/products/item-b)
+3. [Product C](https://example.com/products/item-c)
     `;
-    const turn1User = 'Show me pumps';
+    const turn1User = 'Show me products';
 
     await parseAndTrackEntities(turn1AI, turn1User, manager);
     manager.incrementTurn();

@@ -28,7 +28,7 @@ describe('Agent Memory & State - E2E (Tests 14-17)', () => {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({
-        message: 'Show me all available pumps',
+        message: 'Show me all available products',
         session_id: sessionId,
         domain: testDomain
       })
@@ -90,7 +90,7 @@ describe('Agent Memory & State - E2E (Tests 14-17)', () => {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
-          message: 'Show me hydraulic pumps',
+          message: 'Show me Category A products',
           session_id: sessionA,
           domain: testDomain
         })
@@ -99,7 +99,7 @@ describe('Agent Memory & State - E2E (Tests 14-17)', () => {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
-          message: 'Show me electric pumps',
+          message: 'Show me Category B products',
           session_id: sessionB,
           domain: testDomain
         })
@@ -126,7 +126,7 @@ describe('Agent Memory & State - E2E (Tests 14-17)', () => {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
-          message: 'What types of hydraulic pumps do you have?',
+          message: 'What types of Category A products do you have?',
           conversation_id: conversationIdA,
           session_id: sessionA,
           domain: testDomain
@@ -136,7 +136,7 @@ describe('Agent Memory & State - E2E (Tests 14-17)', () => {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
-          message: 'What types of electric pumps are available?',
+          message: 'What types of Category B products are available?',
           conversation_id: conversationIdB,
           session_id: sessionB,
           domain: testDomain
@@ -205,7 +205,7 @@ describe('Agent Memory & State - E2E (Tests 14-17)', () => {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({
-        message: 'I need help finding pumps',
+        message: 'I need help finding products',
         conversation_id: conversationId,
         session_id: sessionId,
         domain: testDomain
@@ -229,9 +229,9 @@ describe('Agent Memory & State - E2E (Tests 14-17)', () => {
 
     const messages = [
       'Hello, I need help',
-      'Show me available pumps',
+      'Show me available products',
       'What types do you have?',
-      'Tell me about hydraulic pumps',
+      'Tell me about Category A products',
       'What are the prices?',
       'Do you have any in stock?',
       'What about the first one?',

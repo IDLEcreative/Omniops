@@ -248,9 +248,9 @@ describe('Complete Agent Flow - E2E', () => {
 
       await supabase.from('scraped_pages').insert({
         domain_id: customerConfig.id,
-        url: 'https://' + testDomain + '/products/hydraulic-pump-a',
-        title: 'Hydraulic Pump Model A',
-        content_text: 'Hydraulic Pump Model A. Price: $299.99. In Stock.',
+        url: 'https://' + testDomain + '/products/model-a',
+        title: 'Product Model A',
+        content_text: 'Product Model A. Price: $299.99. In Stock.',
         last_scraped: new Date().toISOString(),
         content_type: 'text/html',
         status_code: 200
@@ -261,7 +261,7 @@ describe('Complete Agent Flow - E2E', () => {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify({
-            message: 'Show me hydraulic pumps',
+            message: 'Show me products',
             domain: testDomain,
             session_id: sessionId
           })
@@ -386,7 +386,7 @@ describe('Complete Agent Flow - E2E', () => {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify({
-            message: 'Show me pumps and my recent orders',
+            message: 'Show me products and my recent orders',
             domain: testDomain,
             session_id: 'test-session-' + Date.now()
           })
@@ -453,7 +453,7 @@ describe('Complete Agent Flow - E2E', () => {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify({
-            message: 'Show me all available products and search for pumps',
+            message: 'Show me all available products',
             domain: testDomain,
             session_id: `test-session-${Date.now()}`,
             config: {
@@ -515,9 +515,9 @@ describe('Complete Agent Flow - E2E', () => {
         .from('scraped_pages')
         .insert({
           domain_id: customerConfig!.id,
-          url: `https://${testDomain}/products/test-pump`,
-          title: 'ZF4 Hydraulic Pump - Premium Quality',
-          content_text: 'ZF4 Hydraulic Pump - High performance hydraulic pump. Price: $499.99. In Stock.',
+          url: `https://${testDomain}/products/test-product`,
+          title: 'Product Model ZF4 - Premium Quality',
+          content_text: 'Product Model ZF4 - High performance item. Price: $499.99. In Stock.',
           last_scraped: new Date().toISOString(),
           content_type: 'text/html',
           status_code: 200

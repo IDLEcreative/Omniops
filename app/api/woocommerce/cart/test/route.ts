@@ -1,7 +1,22 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { WooCommerceAPI } from '@/lib/woocommerce-api';
 
+/**
+ * WooCommerce Cart Test Endpoint
+ * Tests cart-related API endpoints and functionality
+ *
+ * SECURITY: Protected by middleware in production
+ */
+
 export async function GET(request: NextRequest) {
+  // Additional layer of protection (middleware is primary)
+  if (process.env.NODE_ENV === 'production' && !process.env.ENABLE_DEBUG_ENDPOINTS) {
+    return NextResponse.json(
+      { error: 'Not found' },
+      { status: 404 }
+    );
+  }
+
   try {
     const url = process.env.WOOCOMMERCE_URL;
     const consumerKey = process.env.WOOCOMMERCE_CONSUMER_KEY;

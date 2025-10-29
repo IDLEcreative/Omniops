@@ -2,7 +2,22 @@ import { NextResponse } from 'next/server';
 import { createServiceRoleClient } from '@/lib/supabase-server';
 import { searchSimilarContent } from '@/lib/embeddings';
 
+/**
+ * DEBUG ENDPOINT - Development use only
+ * Tests embeddings search functionality
+ *
+ * SECURITY: Protected by middleware in production
+ */
+
 export async function GET(request: Request) {
+  // Additional layer of protection (middleware is primary)
+  if (process.env.NODE_ENV === 'production' && !process.env.ENABLE_DEBUG_ENDPOINTS) {
+    return NextResponse.json(
+      { error: 'Not found' },
+      { status: 404 }
+    );
+  }
+
   const { searchParams } = new URL(request.url);
   const domain = searchParams.get('domain') || 'localhost';
   const query = searchParams.get('query') || 'what do you sell';

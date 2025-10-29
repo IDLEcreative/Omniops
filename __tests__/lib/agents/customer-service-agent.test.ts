@@ -113,7 +113,7 @@ describe('CustomerServiceAgent', () => {
     });
 
     it('should handle product inquiries without verification', () => {
-      const prompt = CustomerServiceAgent.getActionPrompt('do you sell pumps?');
+      const prompt = CustomerServiceAgent.getActionPrompt('do you sell products?');
 
       // Returns: 'This is a product inquiry. Answer about products/brands without asking for verification.'
       expect(prompt).toContain('product inquiry');

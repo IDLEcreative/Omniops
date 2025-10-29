@@ -2,6 +2,13 @@ import { NextRequest, NextResponse } from 'next/server';
 import { WooCommerceAPI } from '@/lib/woocommerce-api';
 import { Product } from '@/lib/woocommerce-full';
 
+/**
+ * WooCommerce Integration Test Endpoint
+ * Tests WooCommerce API connection and functionality
+ *
+ * SECURITY: Protected by middleware in production
+ */
+
 interface TestResult {
   success: boolean;
   error?: string;
@@ -49,6 +56,14 @@ interface TestResults {
 }
 
 export async function GET(request: NextRequest) {
+  // Additional layer of protection (middleware is primary)
+  if (process.env.NODE_ENV === 'production' && !process.env.ENABLE_DEBUG_ENDPOINTS) {
+    return NextResponse.json(
+      { error: 'Not found' },
+      { status: 404 }
+    );
+  }
+
   try {
     // Get test mode from query params
     const searchParams = request.nextUrl.searchParams;

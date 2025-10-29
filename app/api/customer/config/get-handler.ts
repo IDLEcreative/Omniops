@@ -10,11 +10,40 @@ import { checkSupabaseEnv, getSupabaseClient, parsePaginationParams, buildPagina
 /**
  * GET /api/customer/config
  * Get customer configurations (optionally filtered by customer ID or domain)
+ * REQUIRES AUTHENTICATION: User must be authenticated and member of organization
  */
 export async function handleGet(request: NextRequest) {
   try {
     const envError = checkSupabaseEnv()
     if (envError) return envError
+
+    const { client: supabase, error: clientError } = await getSupabaseClient()
+    if (clientError) return clientError
+
+    // SECURITY: Require authentication
+    const { data: { user }, error: authError } = await supabase!.auth.getUser()
+    if (authError || !user) {
+      logger.warn('Unauthenticated request to GET /api/customer/config')
+      return NextResponse.json(
+        { error: 'Authentication required' },
+        { status: 401 }
+      )
+    }
+
+    // SECURITY: Get user's organization to enforce isolation
+    const { data: membership, error: membershipError } = await supabase!
+      .from('organization_members')
+      .select('organization_id, role')
+      .eq('user_id', user.id)
+      .single()
+
+    if (membershipError || !membership) {
+      logger.warn('User has no organization membership', { userId: user.id })
+      return NextResponse.json(
+        { error: 'No organization found for user' },
+        { status: 404 }
+      )
+    }
 
     const { searchParams } = new URL(request.url)
     const customerId = searchParams.get('customerId')
@@ -22,12 +51,11 @@ export async function handleGet(request: NextRequest) {
     const includeStatus = (searchParams.get('includeStatus') ?? '').toLowerCase() === 'true'
     const { limit, offset } = parsePaginationParams(searchParams)
 
-    const { client: supabase, error: clientError } = await getSupabaseClient()
-    if (clientError) return clientError
-
+    // SECURITY: Always filter by user's organization
     let query = supabase!
       .from('customer_configs')
       .select('*', { count: 'exact' })
+      .eq('organization_id', membership.organization_id)
       .range(offset, offset + limit - 1)
       .order('created_at', { ascending: false })
 

@@ -3,10 +3,25 @@ export const runtime = 'nodejs'
 export const dynamic = 'force-dynamic'
 import { createServiceRoleClient } from '@/lib/supabase-server';
 
+/**
+ * DEBUG ENDPOINT - Development use only
+ * Shows configuration and usage statistics for a domain
+ *
+ * SECURITY: Protected by middleware in production
+ */
+
 export async function GET(
   request: NextRequest,
   { params }: { params: Promise<{ domain: string }> }
 ) {
+  // Additional layer of protection (middleware is primary)
+  if (process.env.NODE_ENV === 'production' && !process.env.ENABLE_DEBUG_ENDPOINTS) {
+    return NextResponse.json(
+      { error: 'Not found' },
+      { status: 404 }
+    );
+  }
+
   try {
     const resolvedParams = await params;
     const domain = resolvedParams.domain;
