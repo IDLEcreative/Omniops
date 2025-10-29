@@ -133,7 +133,7 @@ psql $DATABASE_URL -c "SELECT 1"
 ## 📞 Support Resources
 
 - **Docs**: `/docs` directory
-- **API Reference**: `docs/API.md`
+- **API Reference**: `docs/03-API/REFERENCE_API_ENDPOINTS.md`
 - **Architecture**: `docs/ARCHITECTURE.md`
 - **Deployment**: `docs/DEPLOYMENT.md`
 

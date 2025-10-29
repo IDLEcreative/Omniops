@@ -401,4 +401,4 @@ npm run test:integration -- organizations
 
 - [Database Schema](../07-REFERENCE/REFERENCE_DATABASE_SCHEMA.md)
 - [Authentication](docs/AUTHENTICATION_LINKAGE.md)
-- [API Documentation](docs/API.md)
+- [API Documentation](docs/03-API/REFERENCE_API_ENDPOINTS.md)

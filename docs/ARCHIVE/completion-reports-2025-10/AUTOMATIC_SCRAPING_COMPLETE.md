@@ -211,7 +211,7 @@ The system is production-ready with comprehensive monitoring, error handling, an
 
 - Worker Service: `lib/workers/README.md`
 - Queue System: `lib/queue/README.md`
-- API Documentation: `docs/API.md`
+- API Documentation: `docs/03-API/REFERENCE_API_ENDPOINTS.md`
 - Monitoring Guide: `docs/MONITORING.md`
 - Troubleshooting: `docs/TROUBLESHOOTING.md`
 
