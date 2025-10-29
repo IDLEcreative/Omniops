@@ -194,11 +194,11 @@ describe('IntelligentCustomerServiceAgent', () => {
       const context = IntelligentCustomerServiceAgent.buildCompleteContext(
         'none',
         null,
-        'Do you have products?'
+        'Do you sell A4VTG90 hydraulic pumps?'
       );
 
       expect(context).toContain('isn\'t verified yet');
-      expect(context).toContain('Customer Query: "Do you have products?"');
+      expect(context).toContain('Customer Query: "Do you sell A4VTG90 hydraulic pumps?"');
     });
 
     it('should include verification context for unverified users', () => {

@@ -212,13 +212,13 @@ describe('DomainAgnosticAgent - Integration', () => {
 
     it('should build complete context string', () => {
       const customerContext = 'Premium customer, frequent buyer';
-      const userQuery = 'Show me your latest products';
+      const userQuery = 'Show me your latest ZF hydraulic pumps';
       const searchResults = [
         {
-          name: 'Product A',
+          name: 'ZF5 Hydraulic Pump',
           price: 49.99,
           is_available: true,
-          primary_identifier: 'SKU-001'
+          primary_identifier: 'ZF5-001'
         }
       ];
 
@@ -228,9 +228,9 @@ describe('DomainAgnosticAgent - Integration', () => {
       expect(context).toContain('Customer Context');
       expect(context).toContain('Premium customer');
       expect(context).toContain('User Query');
-      expect(context).toContain('Show me your latest products');
+      expect(context).toContain('Show me your latest ZF hydraulic pumps');
       expect(context).toContain('Available products');
-      expect(context).toContain('Product A');
+      expect(context).toContain('ZF5 Hydraulic Pump');
       expect(context).toContain('Your Task');
       expect(context).toContain('Remember to');
     });
