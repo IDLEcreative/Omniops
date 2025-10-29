@@ -12,10 +12,10 @@
 |----------|---------|----------|
 | **[This File](#overview)** | Master index and quick links | Everyone |
 | **[Quick Reference](BRAND_MONITORING_QUICK_REF.md)** | Commands and cheat sheet | Developers |
-| **[Setup Guide](docs/MONITORING_SETUP.md)** | Installation and configuration | DevOps/Ops |
+| **[Setup Guide](docs/02-GUIDES/GUIDE_MONITORING_SETUP_V2.md)** | Installation and configuration | DevOps/Ops |
 | **[Implementation](BRAND_MONITORING_IMPLEMENTATION.md)** | Technical details and report | Tech Leads |
 | **[Summary](BRAND_MONITORING_SUMMARY.md)** | Executive overview | Management |
-| **[Flow Diagrams](docs/BRAND_MONITORING_FLOW.md)** | Visual architecture | Architects |
+| **[Flow Diagrams](docs/02-GUIDES/GUIDE_BRAND_MONITORING_FLOW.md)** | Visual architecture | Architects |
 
 ---
 
@@ -40,8 +40,8 @@ This is a **multi-tenant, brand-agnostic system**. The Brand Reference Monitorin
 - GitHub Actions workflow: `/.github/workflows/brand-check.yml`
 
 **Documentation:**
-- Setup guide: `/docs/MONITORING_SETUP.md`
-- Flow diagrams: `/docs/BRAND_MONITORING_FLOW.md`
+- Setup guide: `/docs/02-GUIDES/GUIDE_MONITORING_SETUP_V2.md`
+- Flow diagrams: `/docs/02-GUIDES/GUIDE_BRAND_MONITORING_FLOW.md`
 - Implementation report: `/BRAND_MONITORING_IMPLEMENTATION.md`
 - Summary document: `/BRAND_MONITORING_SUMMARY.md`
 - Quick reference: `/BRAND_MONITORING_QUICK_REF.md`
@@ -161,7 +161,7 @@ Start here: [Quick Reference](BRAND_MONITORING_QUICK_REF.md)
 - Troubleshooting
 
 ### For DevOps
-Start here: [Setup Guide](docs/MONITORING_SETUP.md)
+Start here: [Setup Guide](docs/02-GUIDES/GUIDE_MONITORING_SETUP_V2.md)
 - Installation instructions
 - Configuration options
 - Deployment strategies
@@ -182,7 +182,7 @@ Start here: [Summary Document](BRAND_MONITORING_SUMMARY.md)
 - Action items
 
 ### For Architects
-Start here: [Flow Diagrams](docs/BRAND_MONITORING_FLOW.md)
+Start here: [Flow Diagrams](docs/02-GUIDES/GUIDE_BRAND_MONITORING_FLOW.md)
 - Visual architecture
 - Data flow diagrams
 - Integration patterns
@@ -247,7 +247,7 @@ Start here: [Flow Diagrams](docs/BRAND_MONITORING_FLOW.md)
 ## Support
 
 ### Documentation
-- Full setup guide: [MONITORING_SETUP.md](docs/MONITORING_SETUP.md)
+- Full setup guide: [MONITORING_SETUP.md](docs/02-GUIDES/GUIDE_MONITORING_SETUP_V2.md)
 - Troubleshooting: See setup guide section
 - FAQ: See quick reference
 
@@ -288,10 +288,10 @@ Implements brand-agnostic architecture requirements.
 
 **Quick Links:**
 - [Quick Reference](BRAND_MONITORING_QUICK_REF.md) - Commands & examples
-- [Setup Guide](docs/MONITORING_SETUP.md) - Installation & config
+- [Setup Guide](docs/02-GUIDES/GUIDE_MONITORING_SETUP_V2.md) - Installation & config
 - [Implementation](BRAND_MONITORING_IMPLEMENTATION.md) - Technical details
 - [Summary](BRAND_MONITORING_SUMMARY.md) - Executive overview
-- [Flow Diagrams](docs/BRAND_MONITORING_FLOW.md) - Visual architecture
+- [Flow Diagrams](docs/02-GUIDES/GUIDE_BRAND_MONITORING_FLOW.md) - Visual architecture
 
 **System Status:** ✅ Operational and ready for deployment
 

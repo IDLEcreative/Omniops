@@ -1,5 +1,40 @@
 # Privacy & Data Protection Guide
 
+**Type:** Guide
+**Status:** Active
+**Last Updated:** 2025-10-29
+**Verified For:** v0.1.0
+**Dependencies:**
+- [Privacy Compliance Guide](GUIDE_PRIVACY_COMPLIANCE.md)
+- [GDPR Audit Runbook](GUIDE_GDPR_AUDIT_RUNBOOK.md)
+- [Privacy API Endpoints](../03-API/)
+**Estimated Read Time:** 12 minutes
+
+## Purpose
+Implementation guide for privacy features including opt-out controls, data retention policies, consent management, and widget-level privacy configuration. Provides practical privacy controls for both website visitors and business owners.
+
+## Quick Links
+- [Privacy Features Overview](#-privacy-features-overview)
+- [Privacy Configuration](#-privacy-configuration)
+- [Widget Privacy Controls](#️-widget-privacy-controls)
+- [API Reference](#️-api-reference)
+- [Data Handling](#-data-handling)
+- [Compliance](#-compliance)
+- [Privacy Incident Response](#-privacy-incident-response)
+- [Privacy Best Practices](#-privacy-best-practices)
+
+## Keywords
+privacy features, opt-out controls, data retention, consent management, privacy dashboard, GDPR settings, CCPA settings, widget privacy, user rights, data export, data deletion, privacy API, cookie consent, IP anonymization, privacy notice, privacy controls
+
+## Aliases
+- "opt-out" (also known as: privacy withdrawal, disable tracking, data collection controls)
+- "data retention" (also known as: retention period, automatic deletion, data lifecycle, cleanup policies)
+- "consent management" (also known as: explicit consent, privacy consent, consent flow, cookie consent)
+- "privacy dashboard" (also known as: privacy settings, privacy control panel, admin privacy interface)
+- "widget privacy" (also known as: embedded privacy controls, chat widget privacy, visitor privacy options)
+
+---
+
 This guide covers privacy features, compliance settings, and data protection capabilities of the Customer Service Agent.
 
 ## 🔒 Privacy Features Overview

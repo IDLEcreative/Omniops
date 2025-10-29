@@ -1,5 +1,39 @@
 # Dashboard Integration Guide
 
+**Type:** Guide
+**Status:** Active
+**Last Updated:** 2025-10-29
+**Verified For:** v0.1.0
+**Dependencies:**
+- [Dashboard Implementation Guide](GUIDE_DASHBOARD.md)
+- [Telemetry System](../01-ARCHITECTURE/TELEMETRY_SYSTEM.md)
+**Estimated Read Time:** 19 minutes
+
+## Purpose
+Quick-start integration guide for connecting analytics dashboard to telemetry endpoints with step-by-step frontend integration examples. Covers telemetry enablement in chat endpoints, parallel API fetching patterns, real-time data display components, domain-specific filtering, cost threshold alerts, and missing products analysis for business intelligence.
+
+## Quick Links
+- [Enable Telemetry](#step-1-enable-telemetry)
+- [Access Dashboard Data](#step-2-access-dashboard-data)
+- [Display Key Metrics](#step-3-display-key-metrics)
+- [Monitor Domain-Specific Metrics](#step-4-monitor-domain-specific-metrics)
+- [Set Up Alerts](#step-5-set-up-alerts)
+- [Analyze Missing Products](#step-6-analyze-missing-products)
+- [Available Endpoints](#available-endpoints)
+- [Best Practices](#best-practices)
+
+## Keywords
+dashboard integration, telemetry setup, analytics endpoints, React components, data fetching, API integration, cost monitoring, performance widgets, domain filtering, alert configuration, CostWidget, PerformanceWidget, DomainMetrics, MissingProductsAnalysis, frontend integration, real-time updates
+
+## Aliases
+- "telemetry" (also known as: usage tracking, metrics collection, analytics data, performance monitoring)
+- "dashboard data" (also known as: analytics data, metrics data, dashboard metrics, KPI data)
+- "cost threshold" (also known as: budget alert, spending limit, cost alert, usage alert)
+- "domain-specific" (also known as: tenant-specific, customer-specific, per-domain, multi-tenant filtering)
+- "widgets" (also known as: dashboard components, metric cards, display components, UI widgets)
+
+---
+
 ## Quick Start
 
 This guide helps you integrate the analytics dashboard into your application and start tracking metrics immediately.

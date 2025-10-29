@@ -1,5 +1,40 @@
 # Brand Reference Monitoring Setup
 
+**Type:** Guide
+**Status:** Active
+**Last Updated:** 2025-10-29
+**Verified For:** v0.1.0
+**Dependencies:**
+- [Brand Monitoring Flow](GUIDE_BRAND_MONITORING_FLOW.md)
+- Node.js, TypeScript (tsx), Bash scripting, Husky (optional)
+**Estimated Read Time:** 17 minutes
+
+## Purpose
+Complete setup and operational guide for automated brand reference detection system covering 4 monitoring scripts (real-time log monitor, code audit, pre-commit hook, CI/CD workflow). Includes installation instructions, usage examples, alert configuration, NPM scripts integration, testing procedures, maintenance workflows, and production deployment patterns for Docker and Kubernetes environments.
+
+## Quick Links
+- [Why This Matters](#why-this-matters)
+- [Scripts](#scripts)
+- [Alert Configuration](#alert-configuration)
+- [NPM Scripts](#npm-scripts)
+- [Testing the Scripts](#testing-the-scripts)
+- [Maintenance](#maintenance)
+- [Production Deployment](#production-deployment)
+- [Troubleshooting](#troubleshooting)
+- [Best Practices](#best-practices)
+
+## Keywords
+brand monitoring setup, automated detection, log monitoring script, code audit, pre-commit hooks, CI/CD integration, alert configuration, NPM scripts, testing procedures, Docker integration, Kubernetes deployment, brand-agnostic enforcement, multi-tenant validation, hardcoded reference detection
+
+## Aliases
+- "monitoring setup" (also known as: detection setup, alert configuration, monitoring installation, system setup)
+- "log monitor" (also known as: real-time monitor, log watcher, runtime detection, tail monitor)
+- "code audit" (also known as: static analysis, codebase scan, reference scanner, violation checker)
+- "pre-commit hook" (also known as: git hook, commit blocker, staged file validator, commit-time check)
+- "production deployment" (also known as: Docker setup, Kubernetes config, production monitoring, deployment integration)
+
+---
+
 ## Overview
 Automated monitoring to detect hardcoded brand references in production code, logs, and commits. This ensures the system remains fully brand-agnostic for multi-tenant use.
 

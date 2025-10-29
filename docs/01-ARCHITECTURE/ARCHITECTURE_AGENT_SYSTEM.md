@@ -1,5 +1,25 @@
 # Agent Layer
 
+**Type:** Architecture
+**Status:** Active
+**Last Updated:** 2025-10-29
+**Verified For:** v0.1.0
+**Estimated Read Time:** 2 minutes
+
+## Purpose
+This project uses a modular Agent architecture to keep the main Customer Service Agent lean and provider-agnostic while enabling specialized e-commerce logic via provider agents.
+
+## Quick Links
+- [Components](#components)
+- [Routing](#routing)
+- [Rationale](#rationale)
+
+## Keywords
+agent, architecture, components, rationale, routing, system
+
+---
+
+
 This project uses a modular Agent architecture to keep the main Customer Service Agent lean and provider-agnostic while enabling specialized e-commerce logic via provider agents.
 
 ## Components

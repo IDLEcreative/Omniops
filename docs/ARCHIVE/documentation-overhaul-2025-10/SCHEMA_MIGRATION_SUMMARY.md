@@ -114,9 +114,9 @@ The SUPABASE_SCHEMA.md documentation has been completely rewritten and moved to 
 
 **Other Docs** (6 files):
 - ✅ `docs/.metadata/version-matrix.md`
-- ✅ `docs/DASHBOARD.md`
+- ✅ `docs/02-GUIDES/GUIDE_DASHBOARD.md`
 - ✅ `docs/DASHBOARD_API.md`
-- ✅ `docs/DATABASE_CLEANUP.md`
+- ✅ `docs/02-GUIDES/GUIDE_DATABASE_CLEANUP.md`
 - ✅ `docs/MULTI_SEAT_ORGANIZATIONS.md`
 - ✅ `docs/05-DEPLOYMENT/production-checklist.md`
 

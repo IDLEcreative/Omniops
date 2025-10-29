@@ -1,5 +1,27 @@
 # Troubleshooting Guide
 
+**Type:** Troubleshooting
+**Status:** Active
+**Last Updated:** 2025-10-29
+**Verified For:** v0.1.0
+**Estimated Read Time:** 220 minutes
+
+## Purpose
+Something's broken - where do I start? │ ├─ Is the server running?
+
+## Quick Links
+- [🚨 Quick Diagnostic Flowchart](#-quick-diagnostic-flowchart)
+- [Table of Contents](#table-of-contents)
+- [1. Chat System Issues](#1-chat-system-issues)
+- [2. Search & Embeddings Issues](#2-search--embeddings-issues)
+- [3. Database Issues](#3-database-issues)
+
+## Keywords
+additional, authentication, authorization, chat, contents, contribution, database, deployment, development, diagnostic
+
+---
+
+
 **Last Updated:** 2025-10-24
 **Purpose:** Comprehensive diagnostic and troubleshooting guide for Omniops
 **Audience:** Developers, DevOps, Support Engineers
@@ -2534,7 +2556,7 @@ echo $REDIS_URL
 - Use Redis persistence
 
 **Related Docs:**
-- [Redis Setup](../setup/VERCEL_REDIS_SETUP.md)
+- [Redis Setup](../docs/00-GETTING-STARTED/VERCEL_REDIS_SETUP.md)
 - [Docker Configuration](../00-GETTING-STARTED/SETUP_DOCKER_PRODUCTION.md)
 
 ---
@@ -3554,7 +3576,7 @@ npm run dev 2>&1 | tee dev.log
 
 **Related Docs:**
 - [Setup Guide](../SETUP_GUIDE.md)
-- [Quick Start](../setup/QUICK_START.md)
+- [Quick Start](../docs/00-GETTING-STARTED/QUICK_START.md)
 
 ---
 
@@ -3695,7 +3717,7 @@ npm run dev
 
 **Related Docs:**
 - [Environment Setup](../DEPLOYMENT_ENVIRONMENT_VARIABLES.md)
-- [Vercel Env Setup](../setup/VERCEL_ENV_SETUP.md)
+- [Vercel Env Setup](../docs/00-GETTING-STARTED/VERCEL_ENV_SETUP.md)
 
 ---
 
@@ -4068,7 +4090,7 @@ curl https://your-app.com/api/debug-env
 
 **Related Docs:**
 - [Deployment Environment Variables](../DEPLOYMENT_ENVIRONMENT_VARIABLES.md)
-- [Vercel Setup](../setup/VERCEL_ENV_SETUP.md)
+- [Vercel Setup](../docs/00-GETTING-STARTED/VERCEL_ENV_SETUP.md)
 
 ---
 

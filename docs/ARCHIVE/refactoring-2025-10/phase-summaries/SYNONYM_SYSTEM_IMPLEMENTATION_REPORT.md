@@ -147,7 +147,7 @@ npx tsx test-synonym-system.ts
 ### 5. Documentation
 
 #### **Primary Documentation**
-**File**: `/Users/jamesguy/Omniops/docs/SYNONYM_SYSTEM.md` (12K)
+**File**: `/Users/jamesguy/Omniops/docs/01-ARCHITECTURE/ARCHITECTURE_SYNONYM_SYSTEM.md` (12K)
 
 **Contents:**
 - Database schema reference
@@ -249,7 +249,7 @@ UNIQUE(term)
 2. ✅ `app/api/synonyms/route.ts` - CRUD API (3.5K)
 3. ✅ `app/api/synonyms/expand/route.ts` - Expansion API (1.1K)
 4. ✅ `test-synonym-system.ts` - Test suite (5.5K)
-5. ✅ `docs/SYNONYM_SYSTEM.md` - Documentation (12K)
+5. ✅ `docs/01-ARCHITECTURE/ARCHITECTURE_SYNONYM_SYSTEM.md` - Documentation (12K)
 6. ✅ `docs/MIGRATION_HARDCODED_SYNONYMS.md` - Migration guide (10K)
 7. ✅ `SYNONYM_SYSTEM_IMPLEMENTATION_REPORT.md` - This report
 
@@ -500,7 +500,7 @@ npx tsx test-synonym-system.ts
 ```
 
 **Documentation:**
-- See `docs/SYNONYM_SYSTEM.md` for complete guide
+- See `docs/01-ARCHITECTURE/ARCHITECTURE_SYNONYM_SYSTEM.md` for complete guide
 - See `docs/MIGRATION_HARDCODED_SYNONYMS.md` for migration steps
 
 ---

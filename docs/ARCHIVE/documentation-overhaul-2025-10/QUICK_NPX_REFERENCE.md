@@ -155,7 +155,7 @@ Scripts use emoji for quick status recognition:
 
 - **Detailed Implementation:** `NPX_SCRIPTS_IMPLEMENTATION.md`
 - **Main Config:** `CLAUDE.md` (Key Commands section)
-- **Database Cleanup:** `docs/DATABASE_CLEANUP.md`
+- **Database Cleanup:** `docs/02-GUIDES/GUIDE_DATABASE_CLEANUP.md`
 - **Hallucination Prevention:** `docs/02-GUIDES/GUIDE_HALLUCINATION_PREVENTION.md`
 - **All NPX Tools:** `docs/NPX_TOOLS_GUIDE.md`
 

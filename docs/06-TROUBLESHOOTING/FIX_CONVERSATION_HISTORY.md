@@ -1,5 +1,27 @@
 # Conversation History Fix Documentation
 
+**Type:** Troubleshooting
+**Status:** Active
+**Last Updated:** 2025-10-29
+**Verified For:** v0.1.0
+**Estimated Read Time:** 5 minutes
+
+## Purpose
+The chatbot was not maintaining conversation context between messages. When users referenced previous messages (e.g., "tell me about item 10" from a numbered list), the AI couldn't access the conversation history. Additionally, when customers provided their email and received order information, follow-up questions were not understood in context.
+
+## Quick Links
+- [Problem](#problem)
+- [Root Causes](#root-causes)
+- [Solution](#solution)
+- [Testing](#testing)
+- [Impact](#impact)
+
+## Keywords
+causes, conversation, details, fix, history, impact, learned, lessons, problem, root
+
+---
+
+
 ## Problem
 The chatbot was not maintaining conversation context between messages. When users referenced previous messages (e.g., "tell me about item 10" from a numbered list), the AI couldn't access the conversation history. Additionally, when customers provided their email and received order information, follow-up questions were not understood in context.
 

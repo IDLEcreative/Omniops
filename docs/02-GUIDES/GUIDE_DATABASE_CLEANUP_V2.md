@@ -1,5 +1,41 @@
 # Database Cleanup Guide
 
+**Type:** Guide
+**Status:** Planned Feature
+**Last Updated:** 2025-10-29
+**Verified For:** v0.1.0
+**Dependencies:**
+- [Database Schema Reference](../07-REFERENCE/REFERENCE_DATABASE_SCHEMA.md)
+- [NPX Scripts Roadmap](NPX_SCRIPTS_ROADMAP.md)
+- [Scraper Enhancements](GUIDE_SCRAPER_ENHANCEMENTS.md)
+**Estimated Read Time:** 26 minutes
+
+## Purpose
+Planned comprehensive database cleanup system providing multiple methods to safely remove scraped data, embeddings, and related content. Supports fresh re-scraping, data hygiene, storage management, and domain-specific cleanup operations using CASCADE foreign keys.
+
+## Quick Links
+- [Overview](#overview)
+- [Quick Start](#quick-start)
+- [Architecture](#architecture)
+- [Methods](#methods)
+- [Use Cases](#use-cases)
+- [Safety Features](#safety-features)
+- [Performance Considerations](#performance-considerations)
+- [Troubleshooting](#troubleshooting)
+- [Integration Examples](#integration-examples)
+
+## Keywords
+database cleanup, data purging, scraper maintenance, CASCADE deletion, embeddings cleanup, domain cleanup, dry-run mode, cleanup API, database maintenance, storage management, foreign key constraints, data hygiene, scraping reset, test-database-cleanup, cleanup script
+
+## Aliases
+- "database cleanup" (also known as: data purging, data maintenance, scraper reset, database maintenance)
+- "CASCADE deletion" (also known as: hierarchical deletion, foreign key cascade, referential integrity cleanup)
+- "embeddings cleanup" (also known as: vector cleanup, embedding deletion, semantic data removal)
+- "dry-run mode" (also known as: preview mode, simulation mode, test cleanup, non-destructive preview)
+- "domain cleanup" (also known as: tenant cleanup, customer data removal, domain-specific deletion)
+
+---
+
 > **⚠️ IMPLEMENTATION STATUS: PLANNED FEATURE**
 >
 > The `test-database-cleanup.ts` script documented here is not yet implemented. This documentation describes the planned functionality and design.

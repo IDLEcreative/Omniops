@@ -1,5 +1,27 @@
 # WooCommerce API Endpoints Documentation
 
+**Type:** Integration
+**Status:** Active
+**Last Updated:** 2025-10-29
+**Verified For:** v0.1.0
+**Estimated Read Time:** 13 minutes
+
+## Purpose
+This customer service agent now has full access to all WooCommerce REST API v3 endpoints. Below is a comprehensive list of all available endpoints.
+
+## Quick Links
+- [Base URL](#base-url)
+- [Authentication](#authentication)
+- [Available Endpoints](#available-endpoints)
+- [Query Parameters](#query-parameters)
+- [Batch Operations](#batch-operations)
+
+## Keywords
+api, authentication, available, base, batch, endpoints, error, example, integration, operations
+
+---
+
+
 This customer service agent now has full access to all WooCommerce REST API v3 endpoints. Below is a comprehensive list of all available endpoints.
 
 ## Base URL

@@ -1,5 +1,27 @@
 # Shopify Configuration Guide
 
+**Type:** Integration
+**Status:** Active
+**Last Updated:** 2025-10-29
+**Verified For:** v0.1.0
+**Estimated Read Time:** 14 minutes
+
+## Purpose
+This guide explains how to configure Shopify integration for customer domains, enabling order lookup, product search, and inventory management through the chat widget.
+
+## Quick Links
+- [Overview](#overview)
+- [Prerequisites](#prerequisites)
+- [Step 1: Generate Shopify Admin API Access Token](#step-1-generate-shopify-admin-api-access-token)
+- [Step 2: Find Your Shopify Shop Domain](#step-2-find-your-shopify-shop-domain)
+- [Step 3: Configure in Omniops](#step-3-configure-in-omniops)
+
+## Keywords
+access, admin, best, chat, configuration, configurations, configure, documentation, domain, enhancements
+
+---
+
+
 ## Overview
 
 This guide explains how to configure Shopify integration for customer domains, enabling order lookup, product search, and inventory management through the chat widget.

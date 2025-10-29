@@ -1,5 +1,39 @@
 # Monitoring & Alerting Setup Guide
 
+**Type:** Setup
+**Status:** Active
+**Last Updated:** 2025-10-29
+**Verified For:** v0.1.0
+**Dependencies:**
+- [ARCHITECTURE_TELEMETRY_SYSTEM.md](../01-ARCHITECTURE/ARCHITECTURE_TELEMETRY_SYSTEM.md)
+- [REFERENCE_TELEMETRY_RUNBOOK.md](../07-REFERENCE/REFERENCE_TELEMETRY_RUNBOOK.md)
+- [.github/workflows/nightly-telemetry-gdpr.yml](../../.github/workflows/nightly-telemetry-gdpr.yml)
+**Estimated Read Time:** 12 minutes
+
+## Purpose
+Step-by-step setup guide for configuring the complete monitoring system including telemetry tracking (chat usage, tokens, response times), GDPR audit log monitoring, alert webhooks (Slack/Discord), and automated nightly GitHub Actions workflows with validation scripts and environment variable configuration for local and CI/CD environments.
+
+## Quick Links
+- [Prerequisites](#prerequisites)
+- [Local Environment Setup](#step-1-local-environment-setup)
+- [GitHub Secrets Configuration](#step-2-github-secrets-configuration)
+- [Database Setup](#step-3-database-setup)
+- [Validate Setup](#step-4-validate-setup)
+- [Test Monitoring Scripts](#step-5-test-monitoring-scripts)
+- [Troubleshooting](#troubleshooting)
+
+## Keywords
+monitoring setup, telemetry configuration, GDPR audit, alert webhooks, Slack integration, Discord webhooks, GitHub Actions secrets, Supabase monitoring, nightly workflows, npm monitoring scripts, environment variables, webhook.site testing, chat telemetry rollups, audit log validation, validate-monitoring.ts
+
+## Aliases
+- "MONITOR_ALERT_WEBHOOK_URL" (also known as: alert webhook, notification webhook, monitoring alerts)
+- "telemetry rollups" (also known as: telemetry aggregation, usage rollups, chat usage summaries)
+- "GDPR audit log" (also known as: privacy audit trail, compliance logs, audit entries)
+- "nightly workflow" (also known as: scheduled validation, automated monitoring, cron workflow)
+- "webhook.site" (also known as: test webhook, webhook testing, development webhook)
+
+---
+
 This guide walks you through setting up the complete monitoring and alerting system for the Omniops application.
 
 ## Overview

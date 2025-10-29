@@ -1,8 +1,33 @@
 # Data Model Architecture - Clarified
 
-**Date:** 2025-10-29
-**Status:** Authoritative Reference
-**Purpose:** Eliminate confusion around customer_id, domain_id, and organization_id
+**Type:** Architecture
+**Status:** Active
+**Last Updated:** 2025-10-29
+**Verified For:** v0.1.0
+**Dependencies:**
+- [Database Schema](../07-REFERENCE/REFERENCE_DATABASE_SCHEMA.md) - Complete table definitions
+- [Multi-Tenant Architecture](./ARCHITECTURE_MULTI_TENANT.md) - Organization isolation patterns
+**Estimated Read Time:** 18 minutes
+
+## Purpose
+Authoritative reference eliminating confusion around customer_id, domain_id, and organization_id in the multi-tenant data model, documenting the correct entity hierarchy (organizations → domains → conversations → messages) and clarifying deprecated columns versus active foreign keys.
+
+## Quick Links
+- [Executive Summary](#-executive-summary) - Core architecture principles
+- [Entity Hierarchy](#-entity-hierarchy) - Four-level data model
+- [Common Confusions](#️-common-confusions-clarified) - customer_configs naming issues
+- [Correct Access Patterns](#-correct-data-access-patterns) - Query examples
+- [Migration Status](#-migration-status-issue-6) - Issue #6 completion tracking
+
+## Keywords
+data model, database design, entity relationships, schema design, multi-tenant, organizations, domains, conversations, messages, customer_configs, foreign keys, entity hierarchy, tenant isolation, data integrity, migration, PostgreSQL, Supabase
+
+## Aliases
+- "data model" (also known as: schema design, database structure, entity model, database architecture)
+- "multi-tenant" (also known as: tenant isolation, organization separation, SaaS architecture)
+- "customer_configs" (also known as: domain configs, configuration table, domain settings)
+- "organization_id" (also known as: tenant ID, org ID, tenant identifier)
+- "domain_id" (also known as: website ID, config ID, site identifier)
 
 ---
 

@@ -1,5 +1,25 @@
 # MOVED: Database Schema Documentation
 
+**Type:** Reference
+**Status:** Active
+**Last Updated:** 2025-10-29
+**Verified For:** v0.1.0
+**Estimated Read Time:** 2 minutes
+
+## Purpose
+> **This file has been moved to a new location**
+
+## Quick Links
+- [Why This Move?](#why-this-move)
+- [What Changed in v2.0?](#what-changed-in-v20)
+- [Quick Links](#quick-links)
+
+## Keywords
+changed, links, quick, reference, schema, supabase, what
+
+---
+
+
 > **This file has been moved to a new location**
 
 The database schema documentation has been reorganized and moved to:

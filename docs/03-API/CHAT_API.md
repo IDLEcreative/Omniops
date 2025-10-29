@@ -1,5 +1,27 @@
 # Chat API Reference
 
+**Type:** Reference
+**Status:** Active
+**Last Updated:** 2025-10-29
+**Verified For:** v0.1.0
+**Estimated Read Time:** 23 minutes
+
+## Purpose
+The Chat API provides AI-powered conversational capabilities with Retrieval-Augmented Generation (RAG) for contextual responses.
+
+## Quick Links
+- [Endpoint](#endpoint)
+- [Overview](#overview)
+- [Authentication](#authentication)
+- [Request](#request)
+- [Response](#response)
+
+## Keywords
+advanced, api, authentication, best, chat, codes, documentation, endpoint, error, examples
+
+---
+
+
 The Chat API provides AI-powered conversational capabilities with Retrieval-Augmented Generation (RAG) for contextual responses.
 
 ## Endpoint

@@ -1,5 +1,27 @@
 # Getting Started: For DevOps Engineers
 
+**Type:** Setup
+**Status:** Active
+**Last Updated:** 2025-10-29
+**Verified For:** v0.1.0
+**Estimated Read Time:** 158 minutes
+
+## Purpose
+Omniops is a multi-tenant, AI-powered customer service platform providing an embeddable chat widget. The system combines:
+
+## Quick Links
+- [1. System Overview](#1-system-overview)
+- [2. Infrastructure Requirements](#2-infrastructure-requirements)
+- [3. Deployment Options](#3-deployment-options)
+- [4. Environment Configuration](#4-environment-configuration)
+- [5. Database Setup & Migrations](#5-database-setup--migrations)
+
+## Keywords
+backup, checklist, configuration, cost, database, deployment, devops, disaster, docker, environment
+
+---
+
+
 **Target Audience:** DevOps/Infrastructure engineers deploying and operating Omniops in production
 **Last Updated:** 2025-10-24
 **Estimated Setup Time:** 2-4 hours
@@ -3137,7 +3159,7 @@ This guide covered:
 - **Documentation**: `/docs` directory
 - **Database Schema**: `/07-REFERENCE/REFERENCE_DATABASE_SCHEMA.md`
 - **Architecture**: `/docs/ARCHITECTURE.md`
-- **API Reference**: `/docs/API_REFERENCE.md`
+- **API Reference**: `/docs/03-API/REFERENCE_API_OVERVIEW.md`
 - **Troubleshooting**: This guide (section 12)
 
 **For urgent production issues:**

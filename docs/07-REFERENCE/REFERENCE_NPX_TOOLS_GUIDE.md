@@ -1,5 +1,27 @@
 # NPX Tools Documentation
 
+**Type:** Reference
+**Status:** Active
+**Last Updated:** 2025-10-29
+**Verified For:** v0.1.0
+**Estimated Read Time:** 26 minutes
+
+## Purpose
+This document provides comprehensive documentation for all custom NPX tools created for system monitoring, optimization, and maintenance.
+
+## Quick Links
+- [Overview](#overview)
+- [🏥 Health Monitoring Tool](#-health-monitoring-tool)
+- [🔧 Chunk Size Optimizer](#-chunk-size-optimizer)
+- [🔄 Batch Re-chunking Tool](#-batch-re-chunking-tool)
+- [🚀 Simple Re-chunking Tool](#-simple-re-chunking-tool)
+
+## Keywords
+batch, best, cases, chunk, common, dashboard, documentation, enhancements, future, guide
+
+---
+
+
 ## Overview
 
 This document provides comprehensive documentation for all custom NPX tools created for system monitoring, optimization, and maintenance.

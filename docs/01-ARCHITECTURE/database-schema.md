@@ -1,5 +1,20 @@
 # DEPRECATED: This file has moved
 
+**Type:** Architecture
+**Status:** Active
+**Last Updated:** 2025-10-29
+**Verified For:** v0.1.0
+**Estimated Read Time:** 2 minutes
+
+## Purpose
+Please update your bookmarks and links to point to the new location.
+
+## Keywords
+database, schema
+
+---
+
+
 **New Location:** [REFERENCE_DATABASE_SCHEMA.md](docs/07-REFERENCE/REFERENCE_DATABASE_SCHEMA.md)
 
 **Reason:** Documentation restructuring - moved from ARCHITECTURE to REFERENCE (2025-10-29)

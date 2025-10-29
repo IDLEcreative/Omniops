@@ -1,5 +1,38 @@
 # Bot Link Providing Examples
 
+**Type:** Guide
+**Status:** Active
+**Last Updated:** 2025-10-29
+**Verified For:** v0.1.0
+**Dependencies:**
+- MessageContent component (components/chat/MessageContent.tsx)
+- System prompt configuration for AI link inclusion
+**Estimated Read Time:** 4 minutes
+
+## Purpose
+Practical examples demonstrating how the AI bot provides clickable source links in chat responses. Covers inline markdown links, plain URLs, natural language with URLs, system prompt enhancements, MessageContent component link detection/conversion, source tracking, security attributes (target="_blank", rel="noopener noreferrer"), and benefits for user navigation and trust building.
+
+## Quick Links
+- [Product Inquiry Example](#example-1-product-inquiry)
+- [Shipping Information Example](#example-2-shipping-information)
+- [Multiple Links Example](#example-3-multiple-links)
+- [Contact Information Example](#example-4-contact-information)
+- [Link Formats Supported](#link-formats-supported)
+- [Implementation Details](#implementation-details)
+- [Testing the Feature](#testing-the-feature)
+
+## Keywords
+bot responses, clickable links, source citations, markdown links, URL detection, MessageContent component, link formatting, system prompt, AI citations, response links, link security, target blank, noopener, noreferrer, trust signals, source tracking
+
+## Aliases
+- "bot links" (also known as: source links, response links, citation links, reference URLs, clickable sources)
+- "MessageContent" (also known as: message renderer, chat content, response formatter, message component)
+- "markdown links" (also known as: inline links, formatted links, [text](url) format, hyperlinks)
+- "source tracking" (also known as: citation tracking, link attribution, source references, page references)
+- "security attributes" (also known as: link security, safe links, external link handling, target blank)
+
+---
+
 ## How It Works
 
 When the bot finds relevant content from your website, it will now include direct links in its responses.

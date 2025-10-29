@@ -279,7 +279,7 @@ The enhanced system prompt function is **production-ready** and awaiting integra
 
 ## 📚 References
 
-- **Implementation Plan:** `/Users/jamesguy/Omniops/docs/EXPERT_LEVEL_IMPROVEMENT_PLAN.md` (Section 3.1)
+- **Implementation Plan:** `/Users/jamesguy/Omniops/docs/04-ANALYSIS/ANALYSIS_EXPERT_IMPROVEMENTS.md` (Section 3.1)
 - **Metadata System:** `/Users/jamesguy/Omniops/lib/chat/conversation-metadata.ts`
 - **System Prompts:** `/Users/jamesguy/Omniops/lib/chat/system-prompts.ts`
 

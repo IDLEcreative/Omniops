@@ -1,5 +1,43 @@
 # Customer Scraping Integration Documentation
 
+**Type:** Guide
+**Status:** Active
+**Last Updated:** 2025-10-29
+**Verified For:** v0.1.0
+**Dependencies:**
+- `lib/integrations/customer-scraping-integration.ts`
+- `lib/utils/domain-validator.ts`
+- `lib/scrape-job-manager.ts`
+- API route: `/api/customer/config`
+**Estimated Read Time:** 22 minutes
+
+## Purpose
+Provides comprehensive documentation for the automatic scraping integration that triggers when customers add their website URL. Covers domain validation, configuration management, job creation, queue integration, and error handling for seamless customer onboarding.
+
+## Quick Links
+- [Overview](#overview)
+- [File Structure](#file-structure)
+- [Core Components](#core-components)
+- [How It Works](#how-it-works)
+- [API Usage Examples](#api-usage-examples)
+- [Testing](#testing)
+- [Database Schema](#database-schema)
+- [Configuration](#configuration)
+- [Monitoring and Logging](#monitoring-and-logging)
+- [Error Handling](#error-handling)
+- [Future Enhancements](#future-enhancements)
+
+## Keywords
+customer onboarding, automatic scraping, domain validation, configuration management, job creation, queue integration, scraping strategy, priority management, API integration, webhook notifications, real-time monitoring, scraping job, domain accessibility, URL normalization
+
+## Aliases
+- "domain validation" (also known as: URL validation, domain verification, accessibility check)
+- "scraping job" (also known as: crawl job, scraping task, web scraping job)
+- "customer config" (also known as: domain configuration, website settings, scraping configuration)
+- "queue integration" (also known as: job queue, background processing, async processing)
+
+---
+
 This document describes the complete customer onboarding to automatic scraping integration system that has been implemented.
 
 ## 🎯 Overview

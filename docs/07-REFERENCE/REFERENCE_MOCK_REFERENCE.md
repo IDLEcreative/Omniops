@@ -1,5 +1,27 @@
 # Mock Reference Guide
 
+**Type:** Reference
+**Status:** Active
+**Last Updated:** 2025-10-29
+**Verified For:** v0.1.0
+**Estimated Read Time:** 26 minutes
+
+## Purpose
+This guide documents all available mocks and how to use them effectively in your tests.
+
+## Quick Links
+- [Overview](#overview)
+- [Table of Contents](#table-of-contents)
+- [Supabase Mocks](#supabase-mocks)
+- [WooCommerce Mocks](#woocommerce-mocks)
+- [OpenAI Mocks](#openai-mocks)
+
+## Keywords
+best, contents, custom, examples, feature, handlers, helpers, mock, mocks, openai
+
+---
+
+
 ## Overview
 
 This guide documents all available mocks and how to use them effectively in your tests.

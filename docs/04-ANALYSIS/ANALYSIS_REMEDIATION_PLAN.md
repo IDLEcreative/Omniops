@@ -1,5 +1,27 @@
 # 8-Week Remediation Plan: Addressing 87 Critical Issues
 
+**Type:** Analysis
+**Status:** Active
+**Last Updated:** 2025-10-29
+**Verified For:** v0.1.0
+**Estimated Read Time:** 87 minutes
+
+## Purpose
+This remediation plan addresses **87 identified issues** across security, architecture, testing, and database integrity:
+
+## Quick Links
+- [Executive Overview](#executive-overview)
+- [Phase 0: Emergency Fixes (Day 1, 4-6 hours)](#phase-0-emergency-fixes-day-1-4-6-hours)
+- [Phase 1: Critical Security & Architecture (Week 1, 12-16 hours)](#phase-1-critical-security--architecture-week-1-12-16-hours)
+- [Phase 2: High Priority Issues (Weeks 2-3, 24-30 hours)](#phase-2-high-priority-issues-weeks-2-3-24-30-hours)
+- [Phase 3: Testing & Quality (Weeks 4-5, 30-40 hours)](#phase-3-testing--quality-weeks-4-5-30-40-hours)
+
+## Keywords
+accountability, analysis, appendices, architecture, communication, conclusion, critical, dependencies, documentation, emergency
+
+---
+
+
 **Document Version**: 1.0
 **Created**: 2025-10-28
 **Target Completion**: 2025-12-23 (8 weeks)
@@ -1038,7 +1060,7 @@ describe('Scraping Pipeline End-to-End', () => {
 #### Week 7, Day 3-4: Testing Documentation (4-6 hours)
 
 **Create/Update Testing Guides**:
-- [ ] `/Users/jamesguy/Omniops/docs/TESTING_GUIDE.md` (new)
+- [ ] `/Users/jamesguy/Omniops/docs/04-DEVELOPMENT/testing/TESTING_GUIDE.md` (new)
   - How to write tests (with examples)
   - Test helper usage guide
   - Mocking strategies
@@ -1458,7 +1480,7 @@ If test refactoring causes instability:
 - Win celebrations
 
 **Documentation Updates**:
-- All plan changes committed to `/Users/jamesguy/Omniops/docs/REMEDIATION_PLAN.md`
+- All plan changes committed to `/Users/jamesguy/Omniops/docs/04-ANALYSIS/ANALYSIS_REMEDIATION_PLAN.md`
 - Version control with change log
 - Decisions documented in `/Users/jamesguy/Omniops/docs/decisions/`
 
@@ -1547,7 +1569,7 @@ npm test -- --bail --passWithNoTests
 - `/Users/jamesguy/Omniops/__tests__/api/organizations/*.test.ts` (8 files)
 - `/Users/jamesguy/Omniops/__tests__/integration/*.test.ts` (3 files)
 - `/Users/jamesguy/Omniops/docs/runbooks/*.md` (3 files)
-- `/Users/jamesguy/Omniops/docs/TESTING_GUIDE.md`
+- `/Users/jamesguy/Omniops/docs/04-DEVELOPMENT/testing/TESTING_GUIDE.md`
 
 ---
 

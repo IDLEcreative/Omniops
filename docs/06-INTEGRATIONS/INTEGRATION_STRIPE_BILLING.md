@@ -1,11 +1,34 @@
 # Stripe Billing Integration
 
-Complete Stripe subscription billing integration for Omniops.
+**Type:** Integration
+**Status:** Active
+**Last Updated:** 2025-10-29
+**Verified For:** v0.1.0 (Production Ready)
+**Dependencies:**
+- [Database Schema](../07-REFERENCE/REFERENCE_DATABASE_SCHEMA.md) - billing_events and invoices tables
+- [Multi-Tenant Architecture](../01-ARCHITECTURE/ARCHITECTURE_MULTI_TENANT.md) - Organization billing isolation
+**Estimated Read Time:** 21 minutes
 
-**Status**: ✅ **Production Ready**
-**Version**: 1.0.0
-**Implemented**: October 2025
-**Last Updated**: October 2025
+## Purpose
+Complete Stripe subscription billing integration providing Starter (£29/month) and Professional (£99/month) plans with webhook-driven subscription management, idempotent event processing, Customer Portal access, invoice history with PDF downloads, and production-ready security features including signature verification and RLS policies.
+
+## Quick Links
+- [Architecture](#architecture) - 6 API routes, 5 components, 3 database tables
+- [Quick Start](#quick-start) - Setup in 5 steps
+- [Testing](#testing) - Automated and manual test scenarios
+- [Security Features](#security-features) - Webhook verification, idempotency, RLS
+- [Production Deployment](#production-deployment) - Live environment setup
+- [Troubleshooting](#troubleshooting) - Common issues and solutions
+
+## Keywords
+Stripe, billing, payments, subscriptions, payment processing, invoices, webhooks, idempotency, checkout, customer portal, subscription management, recurring billing, payment methods, 3D Secure, PCI compliance, pricing tiers, SCA
+
+## Aliases
+- "Stripe" (also known as: payment processor, payment gateway, billing provider, payment platform)
+- "webhook" (also known as: callback, event notification, API event, HTTP callback)
+- "idempotency" (also known as: duplicate prevention, request deduplication, idempotent operations)
+- "3D Secure" (also known as: 3DS, SCA, Strong Customer Authentication)
+- "subscription" (also known as: recurring payment, billing plan, membership plan)
 
 ---
 

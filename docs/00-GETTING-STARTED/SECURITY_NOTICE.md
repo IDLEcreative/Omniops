@@ -1,5 +1,38 @@
 # Security Notice
 
+**Type:** Setup
+**Status:** Active
+**Last Updated:** 2025-10-29
+**Verified For:** v2.1.0
+**Dependencies:**
+- [.env.example](../../.env.example)
+- [VERCEL_ENV_SETUP.md](VERCEL_ENV_SETUP.md)
+**Estimated Read Time:** 3 minutes
+
+## Purpose
+Critical security advisory documenting removal of all sensitive API keys (Supabase URLs, OpenAI tokens, WooCommerce consumer keys) from version control, providing instructions for obtaining replacement credentials from respective platforms (app.supabase.com, platform.openai.com), implementing API key rotation policies, configuring secrets management for production deployments (Vercel, AWS Secrets Manager, Heroku), and enforcing zero-commit policy for .env.local files.
+
+## Quick Links
+- [API Keys Removed](#api-keys-removed)
+- [For developers](#for-developers)
+- [Security recommendations](#security-recommendations)
+- [Environment variable sources](#environment-variable-sources)
+- [Production deployment](#production-deployment)
+
+## Keywords
+security notice, API key removal, sensitive credentials, .env.local security, Supabase keys removed, OpenAI key rotation, WooCommerce consumer keys, secrets management, zero-commit policy, credential rotation, production secrets, Vercel environment variables, AWS Secrets Manager, openssl rand -hex 16, key restrictions, IP restrictions, domain restrictions
+
+## Aliases
+- ".env.local" (also known as: local environment file, development secrets, env file)
+- "API key rotation" (also known as: credential rotation, key refresh, security rotation)
+- "secrets management" (also known as: credential management, key storage, secrets vault)
+- "service role key" (also known as: admin key, backend key, Supabase service key)
+- "consumer key" (also known as: WooCommerce API key, REST API credential, integration key)
+- "placeholder values" (also known as: example keys, dummy credentials, template values)
+
+---
+
+
 ## API Keys Removed
 
 All sensitive API keys have been removed from `.env.local` and replaced with placeholder values for security reasons.

@@ -1,5 +1,27 @@
 # Architecture Documentation
 
+**Type:** Architecture
+**Status:** Active
+**Last Updated:** 2025-10-29
+**Verified For:** v0.1.0
+**Estimated Read Time:** 18 minutes
+
+## Purpose
+The Customer Service Agent is a multi-tenant SaaS application built with modern web technologies. It provides an embeddable AI-powered chat widget that can be integrated into any website.
+
+## Quick Links
+- [Overview](#overview)
+- [System Architecture](#system-architecture)
+- [Agent Architecture](#agent-architecture)
+- [Component Architecture](#component-architecture)
+- [Data Flow](#data-flow)
+
+## Keywords
+agent, architecture, component, considerations, data, database, decisions, deployment, development, flow
+
+---
+
+
 ## Overview
 
 The Customer Service Agent is a multi-tenant SaaS application built with modern web technologies. It provides an embeddable AI-powered chat widget that can be integrated into any website.

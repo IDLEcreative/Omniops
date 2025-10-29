@@ -288,7 +288,7 @@ openssl rand -hex 16
 
 ### New Documentation Created
 
-1. **[WOOCOMMERCE_CUSTOMIZATION.md](docs/WOOCOMMERCE_CUSTOMIZATION.md)**
+1. **[WOOCOMMERCE_CUSTOMIZATION.md](docs/02-GUIDES/GUIDE_WOOCOMMERCE_CUSTOMIZATION.md)**
    - Comprehensive customization guide
    - Adding new operations
    - Multi-platform support
@@ -337,7 +337,7 @@ curl http://localhost:3000/api/woocommerce/test | python3 -m json.tool
 
 ### Documentation Created (3 total)
 
-1. `docs/WOOCOMMERCE_CUSTOMIZATION.md` - Customization guide
+1. `docs/02-GUIDES/GUIDE_WOOCOMMERCE_CUSTOMIZATION.md` - Customization guide
 2. `WOOCOMMERCE_INTEGRATION_TEST_REPORT.md` - Test report
 3. `OPTIONAL_STEPS_COMPLETION_REPORT.md` - This document
 

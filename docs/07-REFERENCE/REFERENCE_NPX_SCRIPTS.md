@@ -1,7 +1,32 @@
 # NPX Scripts Implementation Summary
 
-**Date:** October 24, 2025
-**Status:** ✅ Complete
+**Type:** Reference
+**Status:** Active
+**Last Updated:** 2025-10-29
+**Verified For:** v0.1.0
+**Dependencies:**
+- [Database Schema](./REFERENCE_DATABASE_SCHEMA.md) - Tables affected by cleanup scripts
+- [Hallucination Prevention Guide](../02-GUIDES/GUIDE_HALLUCINATION_PREVENTION.md) - Testing procedures
+**Estimated Read Time:** 15 minutes
+
+## Purpose
+Complete reference for three essential NPX maintenance scripts (database cleanup, embeddings health monitoring, hallucination testing) providing command syntax, usage examples, safety features (dry-run, countdown), CASCADE deletion behavior, and production-ready automation tools for database maintenance and quality assurance.
+
+## Quick Links
+- [Database Cleanup Script](#1-test-database-cleanuptests-92-references---highest-priority) - Fresh re-scraping tool
+- [Embeddings Health Monitor](#2-monitor-embeddings-healthts-37-references) - Vector search optimization
+- [Hallucination Testing](#3-test-hallucination-preventionts-30-references) - AI accuracy validation
+
+## Keywords
+NPX scripts, database cleanup, embeddings health, hallucination testing, maintenance tools, monitoring, CLI utilities, TypeScript execution, database management, quality assurance, automation scripts
+
+## Aliases
+- "NPX scripts" (also known as: command-line tools, CLI utilities, maintenance scripts, automation tools)
+- "database cleanup" (also known as: data cleanup, scraping cleanup, fresh re-scrape, data maintenance)
+- "embeddings health" (also known as: vector health, embedding quality, search optimization, vector maintenance)
+- "hallucination testing" (also known as: AI accuracy testing, response validation, quality assurance, anti-hallucination)
+
+---
 
 ## Overview
 
@@ -374,7 +399,7 @@ These scripts are now referenced in:
 
 ### Primary Documentation
 - ✅ `CLAUDE.md` - Added to Key Commands section
-- ✅ `docs/DATABASE_CLEANUP.md` - Referenced as primary tool
+- ✅ `docs/02-GUIDES/GUIDE_DATABASE_CLEANUP.md` - Referenced as primary tool
 - ✅ `docs/02-GUIDES/GUIDE_HALLUCINATION_PREVENTION.md` - Test suite documentation
 - ✅ `docs/PERFORMANCE_OPTIMIZATION.md` - Health monitoring tools
 

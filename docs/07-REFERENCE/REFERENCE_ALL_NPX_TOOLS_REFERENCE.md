@@ -1,5 +1,27 @@
 # Complete NPX Tools Reference Guide
 
+**Type:** Reference
+**Status:** Active
+**Last Updated:** 2025-10-29
+**Verified For:** v0.1.0
+**Estimated Read Time:** 51 minutes
+
+## Purpose
+This document provides a comprehensive reference for ALL NPX tools available in the Omniops project. These tools are organized by category for easy navigation.
+
+## Quick Links
+- [Overview](#overview)
+- [Table of Contents](#table-of-contents)
+- [Database Management Tools](#database-management-tools)
+- [Performance Monitoring & Optimization](#performance-monitoring--optimization)
+- [Testing & Validation Tools](#testing--validation-tools)
+
+## Keywords
+all, cache, card, categories, chaos, chat, cleanup, contents, contributing, data
+
+---
+
+
 ## Overview
 
 This document provides a comprehensive reference for ALL NPX tools available in the Omniops project. These tools are organized by category for easy navigation.

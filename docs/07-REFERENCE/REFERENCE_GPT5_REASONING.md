@@ -1,5 +1,27 @@
 # GPT-5 Reasoning Model Architecture
 
+**Type:** Reference
+**Status:** Active
+**Last Updated:** 2025-10-29
+**Verified For:** v0.1.0
+**Estimated Read Time:** 21 minutes
+
+## Purpose
+GPT-4o (Fast Pattern Matching): User: "Will the A4VTG90 pump fit my 2018 Cifa SL8 mixer?" AI: *searches database* "Yes, the A4VTG90 is compatible with Cifa mixers."
+
+## Quick Links
+- [Why GPT-5 (Reasoning Models)](#why-gpt-5-reasoning-models)
+- [Performance Characteristics](#performance-characteristics)
+- [Reasoning Examples](#reasoning-examples)
+- [When Reasoning Matters Most](#when-reasoning-matters-most)
+- [Cost Comparison](#cost-comparison)
+
+## Keywords
+behavior, characteristics, comparison, cost, customer, documentation, examples, fallback, feedback, integration
+
+---
+
+
 **Date:** 2025-01-09
 **Critical:** This system uses GPT-5-mini for its reasoning capability - DO NOT switch to GPT-4o/4
 

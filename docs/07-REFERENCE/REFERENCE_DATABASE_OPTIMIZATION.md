@@ -1,5 +1,27 @@
 # Database Performance Optimization Guide
 
+**Type:** Reference
+**Status:** Active
+**Last Updated:** 2025-10-29
+**Verified For:** v0.1.0
+**Estimated Read Time:** 12 minutes
+
+## Purpose
+This document describes the database performance optimizations implemented for the Omniops application, focusing on the page_embeddings table which handles high-volume vector operations.
+
+## Quick Links
+- [Overview](#overview)
+- [Problem Analysis](#problem-analysis)
+- [Implemented Solutions](#implemented-solutions)
+- [Usage Guide](#usage-guide)
+- [Monitoring Tools](#monitoring-tools)
+
+## Keywords
+analysis, best, database, files, future, guide, implemented, metrics, migration, monitoring
+
+---
+
+
 This document describes the database performance optimizations implemented for the Omniops application, focusing on the page_embeddings table which handles high-volume vector operations.
 
 ## Overview

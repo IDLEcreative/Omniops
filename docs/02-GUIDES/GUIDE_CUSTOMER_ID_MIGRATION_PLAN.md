@@ -1,5 +1,43 @@
 # Customer ID → Organization ID Migration Plan
 
+**Type:** Guide
+**Status:** Active
+**Last Updated:** 2025-10-29
+**Verified For:** v0.1.0
+**Dependencies:**
+- Database migrations (`supabase/migrations/`)
+- `organizations` table schema
+- `organization_members` table
+- Code references to customer_id/customerId
+**Estimated Read Time:** 56 minutes
+
+## Purpose
+Provides a comprehensive analysis and phased migration plan for replacing legacy customer_id references with organization_id architecture. Documents scope analysis (595 references across 115 files), database schema changes, code migration strategy, testing approach, and rollback procedures for safe transition to multi-seat organization model.
+
+## Quick Links
+- [Executive Summary](#executive-summary)
+- [Migration Scope Analysis](#migration-scope-analysis)
+- [Database Schema Changes](#database-schema-changes)
+- [Code Migration Strategy](#code-migration-strategy)
+- [Phase-by-Phase Plan](#phase-by-phase-plan)
+- [Risk Assessment](#risk-assessment)
+- [Rollback Plan](#rollback-plan)
+- [Testing Strategy](#testing-strategy)
+- [Execution Timeline](#execution-timeline)
+- [Success Criteria](#success-criteria)
+
+## Keywords
+database migration, schema changes, customer_id replacement, organization_id, multi-seat support, tenant architecture, migration plan, data backfill, dual-column approach, backward compatibility, RLS policies, WooCommerce integration, migration phases, rollback procedures, testing strategy
+
+## Aliases
+- "customer_id" (also known as: legacy tenant ID, customer identifier, single-seat reference)
+- "organization_id" (also known as: org ID, multi-seat identifier, team identifier)
+- "dual-column approach" (also known as: backward compatibility strategy, gradual migration, parallel columns)
+- "backfill" (also known as: data migration, historical data update, column population)
+- "RLS" (also known as: Row Level Security, policy enforcement, access control)
+
+---
+
 ## Executive Summary
 
 This document provides a comprehensive analysis and migration plan for replacing legacy `customer_id` references with the new `organization_id` architecture across the Omniops codebase.

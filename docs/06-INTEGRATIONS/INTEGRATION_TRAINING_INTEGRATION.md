@@ -1,5 +1,27 @@
 # Training System Integration Guide
 
+**Type:** Integration
+**Status:** Active
+**Last Updated:** 2025-10-29
+**Verified For:** v0.1.0
+**Estimated Read Time:** 13 minutes
+
+## Purpose
+The bot training system is designed to improve AI responses by allowing users to add custom content that gets converted into searchable embeddings.
+
+## Quick Links
+- [Architecture Overview](#architecture-overview)
+- [Components](#components)
+- [Integration Points](#integration-points)
+- [Data Flow](#data-flow)
+- [Configuration](#configuration)
+
+## Keywords
+architecture, components, configuration, considerations, data, enhancements, extending, flow, future, integration
+
+---
+
+
 ## Architecture Overview
 
 The bot training system is designed to improve AI responses by allowing users to add custom content that gets converted into searchable embeddings.

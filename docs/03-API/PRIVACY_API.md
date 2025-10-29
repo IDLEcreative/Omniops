@@ -1,5 +1,27 @@
 # Privacy API Reference
 
+**Type:** Reference
+**Status:** Active
+**Last Updated:** 2025-10-29
+**Verified For:** v0.1.0
+**Estimated Read Time:** 28 minutes
+
+## Purpose
+The Privacy API provides GDPR/CCPA-compliant endpoints for user data access, export, and deletion.
+
+## Quick Links
+- [Overview](#overview)
+- [Endpoints](#endpoints)
+- [Rate Limiting](#rate-limiting)
+- [Compliance Features](#compliance-features)
+- [Integration Examples](#integration-examples)
+
+## Keywords
+api, compliance, considerations, documentation, endpoints, error, examples, features, handling, integration
+
+---
+
+
 The Privacy API provides GDPR/CCPA-compliant endpoints for user data access, export, and deletion.
 
 ## Overview

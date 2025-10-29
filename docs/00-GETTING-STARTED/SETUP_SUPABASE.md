@@ -1,5 +1,27 @@
 # Supabase Database Setup Instructions
 
+**Type:** Setup
+**Status:** Active
+**Last Updated:** 2025-10-29
+**Verified For:** v0.1.0
+**Estimated Read Time:** 7 minutes
+
+## Purpose
+1. **Open SQL Editor**: https://supabase.com/dashboard/project/birugqyuqhiahxvxeyqg/sql/new
+
+## Quick Links
+- [Your Project Details](#your-project-details)
+- [Quick Setup (2 Options)](#quick-setup-2-options)
+- [Which Schema Should You Choose?](#which-schema-should-you-choose)
+- [After Creating Tables](#after-creating-tables)
+- [Need Help?](#need-help)
+
+## Keywords
+after, creating, details, important, need, notes, project, quick, schema, setup
+
+---
+
+
 ## Your Project Details
 - **Project ID**: `birugqyuqhiahxvxeyqg`
 - **Dashboard URL**: https://supabase.com/dashboard/project/birugqyuqhiahxvxeyqg

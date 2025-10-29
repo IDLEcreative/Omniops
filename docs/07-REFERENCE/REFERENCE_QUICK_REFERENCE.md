@@ -1,5 +1,27 @@
 # Quick Reference Guide
 
+**Type:** Reference
+**Status:** Active
+**Last Updated:** 2025-10-29
+**Verified For:** v0.1.0
+**Estimated Read Time:** 8 minutes
+
+## Purpose
+npm run dev # Start dev server npm test # Run tests npm run test:watch # Watch mode
+
+## Quick Links
+- [🚀 Quick Commands](#-quick-commands)
+- [🔧 Environment Variables](#-environment-variables)
+- [📁 Key Files & Locations](#-key-files--locations)
+- [🔌 API Endpoints](#-api-endpoints)
+- [🗄️ Database Tables](#-database-tables)
+
+## Keywords
+checklist, commands, common, database, deployment, embedding, endpoints, environment, files, issues
+
+---
+
+
 ## 🚀 Quick Commands
 
 ```bash

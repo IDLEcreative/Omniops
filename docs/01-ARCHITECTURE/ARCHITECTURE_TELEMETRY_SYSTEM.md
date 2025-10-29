@@ -1,5 +1,41 @@
 # Telemetry System Documentation
 
+**Type:** Architecture
+**Status:** Active
+**Last Updated:** 2025-10-29
+**Verified For:** v0.1.0
+**Dependencies:**
+- [lib/chat-telemetry.ts](../../lib/chat-telemetry.ts)
+- [app/api/dashboard/telemetry/route.ts](../../app/api/dashboard/telemetry/route.ts)
+- [GUIDE_MONITORING_SETUP.md](../02-GUIDES/GUIDE_MONITORING_SETUP.md)
+- [REFERENCE_TELEMETRY_RUNBOOK.md](../07-REFERENCE/REFERENCE_TELEMETRY_RUNBOOK.md)
+**Estimated Read Time:** 16 minutes
+
+## Purpose
+Comprehensive technical architecture documentation for the telemetry system covering ChatTelemetry class implementation, TelemetryManager singleton pattern, real-time cost tracking ($10-30/M tokens for GPT-4), token usage monitoring (input/output/total), session management, database schema (chat_telemetry table with 13 columns), Dashboard API endpoints, and integration patterns for tracking AI model performance and operational costs.
+
+## Quick Links
+- [Architecture](#architecture)
+- [Features](#features)
+- [API Endpoints](#api-endpoints)
+- [Implementation](#implementation)
+- [Database Schema](#database-schema)
+- [Monitoring Dashboard Integration](#monitoring-dashboard-integration)
+- [Best Practices](#best-practices)
+
+## Keywords
+telemetry system, ChatTelemetry class, TelemetryManager singleton, cost tracking, token usage monitoring, GPT-4 pricing, chat_telemetry table, session management, real-time metrics, performance analytics, Dashboard API, cost projections, model analytics, domain analytics, SESSION_CLEANUP_INTERVAL, MODEL_PRICING, search operation tracking
+
+## Aliases
+- "ChatTelemetry" (also known as: telemetry session, usage tracker, metrics collector)
+- "TelemetryManager" (also known as: telemetry singleton, session manager, global telemetry)
+- "cost tracking" (also known as: usage cost calculation, AI spend monitoring, token pricing)
+- "chat_telemetry" (also known as: telemetry table, metrics database, usage history)
+- "token usage" (also known as: token consumption, API usage, model tokens)
+- "projectedMonthlyCost" (also known as: cost forecast, monthly spend estimate, budget projection)
+
+---
+
 ## Overview
 
 The telemetry system provides comprehensive monitoring, cost tracking, and performance analytics for the AI-powered chat system. It tracks every interaction, calculates costs in real-time, and provides actionable insights for optimization.

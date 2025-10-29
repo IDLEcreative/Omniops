@@ -1,7 +1,29 @@
+# Search Architecture & Result Limits
+
+**Type:** Architecture
+**Status:** Active
+**Last Updated:** 2025-10-29
+**Verified For:** v0.1.0
+**Estimated Read Time:** 7 minutes
+
+## Purpose
+This documentation has been moved to the architecture section and updated with current implementation details:
+
+## Quick Links
+- [What Changed](#what-changed)
+- [Quick Reference](#quick-reference)
+- [Why It Moved](#why-it-moved)
+- [New Content Includes](#new-content-includes)
+- [Update Your Bookmarks](#update-your-bookmarks)
+
+## Keywords
+architecture, bookmarks, changed, content, includes, moved, quick, reference, search, update
+
+---
+
 **Last Updated:** 2025-10-24
 **Verified Accurate For:** v0.1.0
 
-# Search Architecture & Result Limits
 
 **⚠️ THIS FILE HAS MOVED**
 

@@ -1,5 +1,40 @@
 # Complete Guide: Scraper Enhancements, Error Prevention & Performance Optimizations
 
+**Type:** Guide
+**Status:** Active
+**Last Updated:** 2025-10-29
+**Verified For:** v0.1.0
+**Dependencies:**
+- [Database Cleanup Guide](GUIDE_DATABASE_CLEANUP_V2.md)
+- [Smart Periodic Scraper API](GUIDE_SMART_PERIODIC_SCRAPER_API_EXAMPLES.md)
+- [Performance Optimization](../01-ARCHITECTURE/performance-optimization.md)
+**Estimated Read Time:** 25 minutes
+
+## Purpose
+Comprehensive implementation guide for advanced scraper enhancements including 15+ metadata extraction features, OpenAI token limit solutions, Redis connection management, and 60% performance improvements. Documents successful reduction from 8-10 hours to 1-1.5 hours for 4,431 pages.
+
+## Quick Links
+- [Executive Summary](#executive-summary)
+- [Enhanced Features Implemented](#enhanced-features-implemented)
+- [Error Prevention Fixes](#error-prevention-fixes)
+- [Performance Optimizations](#performance-optimizations)
+- [Technical Implementation Details](#technical-implementation-details)
+- [Testing & Validation](#testing--validation)
+- [Operational Guide](#operational-guide)
+- [Troubleshooting](#troubleshooting)
+
+## Keywords
+scraper enhancements, metadata extraction, token limit handling, Redis connection, performance optimization, semantic chunking, content classification, entity detection, price extraction, embedding generation, Crawlee, Playwright, OpenAI API, error prevention, scraper performance
+
+## Aliases
+- "metadata extraction" (also known as: content analysis, semantic metadata, content classification)
+- "token limit" (also known as: OpenAI token boundary, 8192 token limit, context length limit)
+- "Redis connection" (also known as: Redis keepalive, connection management, circuit breaker)
+- "semantic chunking" (also known as: intelligent splitting, content segmentation, chunk optimization)
+- "scraper performance" (also known as: crawling speed, scraping efficiency, page processing rate)
+
+---
+
 ## Table of Contents
 1. [Executive Summary](#executive-summary)
 2. [Enhanced Features Implemented](#enhanced-features-implemented)

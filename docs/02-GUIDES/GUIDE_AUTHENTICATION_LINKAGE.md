@@ -1,5 +1,42 @@
 # Authentication & Domain Linkage Documentation
 
+**Type:** Guide
+**Status:** Active
+**Last Updated:** 2025-10-29
+**Verified For:** v0.1.0
+**Dependencies:**
+- `auth.users` (Supabase Auth)
+- `customer_configs` table
+- Row Level Security policies
+- Supabase client authentication
+**Estimated Read Time:** 8 minutes
+
+## Purpose
+Describes the authentication and domain ownership model for multi-tenant security in OmniOps. Documents how each domain configuration links to an authenticated user account through customer_id references, Row Level Security enforcement, and ownership verification to prevent unauthorized access to business configurations.
+
+## Quick Links
+- [Overview](#overview)
+- [Database Schema](#database-schema)
+- [Security Model](#security-model)
+- [Current Production Setup](#current-production-setup)
+- [Common Operations](#common-operations)
+- [Security Considerations](#security-considerations)
+- [Troubleshooting](#troubleshooting)
+- [Migration Path](#migration-path)
+- [Best Practices](#best-practices)
+- [API Integration](#api-integration)
+
+## Keywords
+authentication, domain ownership, multi-tenancy, Row Level Security, RLS policies, customer linkage, Supabase Auth, user verification, access control, ownership verification, domain isolation, security model, orphaned domains, audit trail
+
+## Aliases
+- "domain linkage" (also known as: domain ownership, domain association, user-domain mapping)
+- "customer_id" (also known as: user ID, auth user ID, owner ID)
+- "RLS" (also known as: Row Level Security, policy enforcement, database-level access control)
+- "orphaned domain" (also known as: unlinked domain, unassociated domain, ownerless configuration)
+
+---
+
 ## Overview
 This document describes the authentication and domain ownership model for the OmniOps customer service platform. Each domain configuration must be linked to an authenticated user account for security and multi-tenancy support.
 

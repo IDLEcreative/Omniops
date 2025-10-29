@@ -146,14 +146,14 @@ While all key redirects are working, 25 non-critical issues were found in other 
    - **Impact**: None - external links expected
 
 3. **Internal anchors** (4 files): Links to sections within same document
-   - Example: `docs/DASHBOARD.md -> #executive-summary`
+   - Example: `docs/02-GUIDES/GUIDE_DASHBOARD.md -> #executive-summary`
    - **Impact**: Low - document-internal navigation
 
 ### Files with Non-Critical Issues
 ```
 docs/TEST_ANALYSIS_SUMMARY.md
 docs/TEST_FIX_STATUS.md
-docs/DASHBOARD.md
+docs/02-GUIDES/GUIDE_DASHBOARD.md
 docs/COMMERCE_PROVIDER_REFACTOR_FINAL_REPORT.md
 docs/TEST_TIMEOUT_INVESTIGATION.md
 docs/TEST_DOCUMENTATION.md
@@ -171,8 +171,8 @@ docs/ARCHIVE/analysis/TEST_REFACTORING_COMPLETE.md
 docs/ARCHIVE/analysis/WOOCOMMERCE_STATUS_FINAL.md
 docs/ARCHIVE/analysis/TELEMETRY_SUPABASE_STATUS.md
 docs/.metadata/version-matrix.md
-docs/setup/VERCEL_ENV_SETUP.md
-docs/setup/QUICK_START.md
+docs/00-GETTING-STARTED/VERCEL_ENV_SETUP.md
+docs/00-GETTING-STARTED/QUICK_START.md
 docs/05-DEPLOYMENT/production-checklist.md
 docs/05-DEPLOYMENT/runbooks.md
 docs/reports/chat-analysis-report.md

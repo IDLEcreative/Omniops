@@ -68,7 +68,7 @@ curl -X POST "http://localhost:3000/api/synonyms/expand" \
 | `app/api/synonyms/route.ts` | CRUD API | 3.5K |
 | `app/api/synonyms/expand/route.ts` | Expansion API | 1.1K |
 | `test-synonym-system.ts` | Test suite | 5.5K |
-| `docs/SYNONYM_SYSTEM.md` | Full documentation | 12K |
+| `docs/01-ARCHITECTURE/ARCHITECTURE_SYNONYM_SYSTEM.md` | Full documentation | 12K |
 | `docs/MIGRATION_HARDCODED_SYNONYMS.md` | Migration guide | 10K |
 
 ---
@@ -206,7 +206,7 @@ See: `docs/MIGRATION_HARDCODED_SYNONYMS.md`
 
 ## Documentation
 
-- **Full Guide**: `docs/SYNONYM_SYSTEM.md`
+- **Full Guide**: `docs/01-ARCHITECTURE/ARCHITECTURE_SYNONYM_SYSTEM.md`
 - **Migration**: `docs/MIGRATION_HARDCODED_SYNONYMS.md`
 - **Implementation Report**: `SYNONYM_SYSTEM_IMPLEMENTATION_REPORT.md`
 - **This Card**: `SYNONYM_QUICK_REFERENCE.md`

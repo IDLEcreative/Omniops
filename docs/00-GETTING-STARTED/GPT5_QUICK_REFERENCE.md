@@ -1,5 +1,27 @@
 # GPT-5-mini Quick Reference Card
 
+**Type:** Setup
+**Status:** Active
+**Last Updated:** 2025-10-29
+**Verified For:** v0.1.0
+**Estimated Read Time:** 4 minutes
+
+## Purpose
+model: 'gpt-5-mini' max_completion_tokens: 2500 reasoning_effort: 'low' // NOT 'minimal' - that disables reasoning!
+
+## Quick Links
+- [⚡ Current Production Settings](#-current-production-settings)
+- [🎯 Key Insights from Testing](#-key-insights-from-testing)
+- [🔍 Quick Debugging](#-quick-debugging)
+- [📊 Model Comparison](#-model-comparison)
+- [🚀 Quick Test Command](#-quick-test-command)
+
+## Keywords
+command, comparison, current, debugging, insights, model, production, quick, reference, remember
+
+---
+
+
 ## ⚡ Current Production Settings
 
 ```typescript

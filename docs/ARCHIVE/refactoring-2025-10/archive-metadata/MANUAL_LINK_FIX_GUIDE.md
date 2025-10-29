@@ -158,7 +158,7 @@ docs/04-DEVELOPMENT/code-patterns/ → docs/04-DEVELOPMENT/code-patterns/adding-
 
 # API Links
 ❌ docs/03-API/reference.md (doesn't exist)
-✅ docs/API_REFERENCE.md
+✅ docs/03-API/REFERENCE_API_OVERVIEW.md
 
 # Development Links
 ❌ docs/04-DEVELOPMENT/testing.md

@@ -1,5 +1,24 @@
 # Scraping Architecture Documentation
 
+**Type:** Guide (Redirect)
+**Status:** Deprecated - Redirects to consolidated documentation
+**Last Updated:** 2025-10-29
+**Verified For:** v0.1.0
+**Dependencies:**
+- [Scraping System README](../02-FEATURES/scraping/README.md) - Architecture section
+**Estimated Read Time:** <1 minute
+
+## Purpose
+Redirect file pointing to scraping architecture documentation with complete overview, diagrams, API reference, configuration presets, content extraction strategies, performance optimization, troubleshooting, and production deployment guide.
+
+## Quick Links
+- [Architecture Documentation](../02-FEATURES/scraping/README.md#architecture) - Complete architecture guide
+
+## Keywords
+redirect, deprecated, scraping architecture, system design, consolidated documentation
+
+---
+
 **⚠️ This document has been moved and consolidated.**
 
 Please refer to the comprehensive scraping documentation at:

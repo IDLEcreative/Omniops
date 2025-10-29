@@ -1,5 +1,42 @@
 # Privacy & Compliance
 
+**Type:** Guide
+**Status:** Active
+**Last Updated:** 2025-10-29
+**Verified For:** v0.1.0
+**Dependencies:**
+- [Privacy Features Guide](GUIDE_PRIVACY_FEATURES.md)
+- [GDPR Audit Runbook](GUIDE_GDPR_AUDIT_RUNBOOK.md)
+- [Privacy API Documentation](../03-API/)
+**Estimated Read Time:** 14 minutes
+
+## Purpose
+Comprehensive privacy and compliance framework covering GDPR, CCPA, and data protection regulations. Details user data rights, encryption standards, retention policies, and compliance checklists for privacy-first operations.
+
+## Quick Links
+- [Overview](#overview)
+- [Key Privacy Features](#key-privacy-features)
+- [GDPR Compliance](#gdpr-compliance)
+- [CCPA Compliance](#ccpa-compliance)
+- [Data We Collect](#data-we-collect)
+- [Privacy APIs](#privacy-apis)
+- [Configuration](#configuration)
+- [Data Security](#data-security)
+- [Compliance Checklist](#compliance-checklist)
+- [Privacy by Design](#privacy-by-design)
+
+## Keywords
+GDPR compliance, CCPA compliance, data protection, privacy by design, encryption, AES-256, user data rights, data retention, data export, data deletion, privacy APIs, row level security, audit logging, privacy compliance, data minimization, GDPR Article 15, GDPR Article 17
+
+## Aliases
+- "GDPR" (also known as: General Data Protection Regulation, EU data protection, European privacy law)
+- "CCPA" (also known as: California Consumer Privacy Act, California privacy law, consumer data rights)
+- "data retention" (also known as: retention policies, automatic deletion, data lifecycle, retention period)
+- "encryption at rest" (also known as: AES-256 encryption, data encryption, encrypted storage)
+- "right to erasure" (also known as: right to deletion, data deletion, right to be forgotten, GDPR Article 17)
+
+---
+
 OmniOps is built with privacy-first architecture and is designed to comply with GDPR, CCPA, and other data protection regulations.
 
 ## Overview

@@ -1,5 +1,27 @@
 # Migration Guide: Hardcoded Synonyms → Database-Driven
 
+**Type:** Analysis
+**Status:** Active
+**Last Updated:** 2025-10-29
+**Verified For:** v0.1.0
+**Estimated Read Time:** 19 minutes
+
+## Purpose
+> **Status**: In Progress > **Target Completion**: TBD > **Impact**: All domains using hardcoded synonyms in `lib/synonym-expander.ts`
+
+## Quick Links
+- [Overview](#overview)
+- [Current State](#current-state)
+- [Migration Steps](#migration-steps)
+- [Rollback Plan](#rollback-plan)
+- [Success Criteria](#success-criteria)
+
+## Keywords
+analysis, criteria, current, decisions, hardcoded, migration, overview, plan, questions, references
+
+---
+
+
 > **Status**: In Progress
 > **Target Completion**: TBD
 > **Impact**: All domains using hardcoded synonyms in `lib/synonym-expander.ts`
@@ -364,7 +386,7 @@ async function expandQuery(domainId: string, query: string): Promise<string> {
 
 ## References
 
-- **New System**: [docs/SYNONYM_SYSTEM.md](SYNONYM_SYSTEM.md)
+- **New System**: [docs/01-ARCHITECTURE/ARCHITECTURE_SYNONYM_SYSTEM.md](docs/01-ARCHITECTURE/ARCHITECTURE_SYNONYM_SYSTEM.md)
 - **Database Schema**: [docs/07-REFERENCE/REFERENCE_DATABASE_SCHEMA.md](07-REFERENCE/REFERENCE_DATABASE_SCHEMA.md#synonym-management)
 - **Legacy Code**: `lib/synonym-expander.ts`, `lib/synonym-expander-dynamic.ts`
 

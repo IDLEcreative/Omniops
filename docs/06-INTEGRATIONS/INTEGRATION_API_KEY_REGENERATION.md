@@ -1,5 +1,27 @@
 # WooCommerce API Key Regeneration Guide
 
+**Type:** Integration
+**Status:** Active
+**Last Updated:** 2025-10-29
+**Verified For:** v0.1.0
+**Estimated Read Time:** 10 minutes
+
+## Purpose
+1. Log into WordPress admin dashboard 2. Navigate to: **WooCommerce → Settings** 3. Click the **Advanced** tab
+
+## Quick Links
+- [🔐 How to Regenerate WooCommerce API Keys](#-how-to-regenerate-woocommerce-api-keys)
+- [🔄 Update Credentials in Application](#-update-credentials-in-application)
+- [✅ Verify New Credentials Work](#-verify-new-credentials-work)
+- [🔍 Troubleshooting](#-troubleshooting)
+- [📋 Quick Reference](#-quick-reference)
+
+## Keywords
+api, application, checklist, credentials, integration, key, keys, quick, reference, regenerate
+
+---
+
+
 **Issue**: 401 Unauthorized - `woocommerce_rest_cannot_view`
 **Cause**: API keys have insufficient permissions or have been revoked
 **Solution**: Regenerate API keys with Read/Write permissions

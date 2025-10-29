@@ -1,5 +1,40 @@
 # Brand Reference Monitoring Flow
 
+**Type:** Guide
+**Status:** Active
+**Last Updated:** 2025-10-29
+**Verified For:** v0.1.0
+**Dependencies:**
+- [Brand Monitoring Setup](GUIDE_MONITORING_SETUP_V2.md)
+- scripts/audit-brand-references.ts, scripts/monitor-brand-references.sh
+**Estimated Read Time:** 23 minutes
+
+## Purpose
+Complete architectural flow documentation for 4-layer brand reference monitoring system (Development, Commit, PR/Push, Production) with detailed detection points, data flow diagrams, alert mechanisms, and performance characteristics. Provides visual architecture showing pre-commit hooks, GitHub Actions CI/CD, runtime log monitoring, and configuration management for maintaining brand-agnostic multi-tenant codebase.
+
+## Quick Links
+- [System Architecture](#system-architecture)
+- [Detection Points](#detection-points)
+- [Detection Flow (Detailed)](#detection-flow-detailed)
+- [Data Flow](#data-flow)
+- [Configuration Flow](#configuration-flow)
+- [Alert Flow](#alert-flow)
+- [Performance Flow](#performance-flow)
+- [Integration Points](#integration-points)
+- [Summary](#summary)
+
+## Keywords
+brand monitoring architecture, multi-layer defense, pre-commit hooks, GitHub Actions workflows, log monitoring, real-time alerts, detection flow, data flow, configuration management, CI/CD integration, audit scripts, monitoring system, brand-agnostic enforcement, violation detection, alert mechanisms
+
+## Aliases
+- "brand monitoring" (also known as: brand detection, reference monitoring, hardcoded brand checking, brand violation tracking)
+- "4-layer defense" (also known as: multi-stage monitoring, layered security, defense in depth, staged validation)
+- "pre-commit hook" (also known as: git hook, commit hook, pre-commit validation, staged file checking)
+- "log monitoring" (also known as: runtime monitoring, real-time log analysis, log surveillance, production monitoring)
+- "detection flow" (also known as: violation detection, monitoring pipeline, check sequence, validation flow)
+
+---
+
 ## System Architecture
 
 ```

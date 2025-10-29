@@ -65,6 +65,6 @@
 - Chat System Deep Dive – `docs/CHAT_SYSTEM_DOCUMENTATION.md`
 - Agent Architecture – `docs/AGENTS.md`
 - Intelligent Chat Summary – `INTELLIGENT_CHAT_SYSTEM_SUMMARY.md`
-- Telemetry System – `docs/TELEMETRY_SYSTEM.md`
+- Telemetry System – `docs/01-ARCHITECTURE/ARCHITECTURE_TELEMETRY_SYSTEM.md`
 - WooCommerce Agent Integration – `WOOCOMMERCE_AGENT_INTEGRATION_COMPLETE.md`
 - Observability Guide – `OBSERVABILITY_GUIDE.md`

@@ -661,7 +661,7 @@ With Parallelization: Saved 16.67 hours across Phases 3-4!
 
 ### Related Documentation
 - [REFACTORING_COMPLETION_REPORT.md](REFACTORING_COMPLETION_REPORT.md) - File modularization (Phase 3.5)
-- [WOOCOMMERCE_COMPREHENSIVE_EXPANSION_PLAN.md](docs/WOOCOMMERCE_COMPREHENSIVE_EXPANSION_PLAN.md) - Original expansion plan
+- [WOOCOMMERCE_COMPREHENSIVE_EXPANSION_PLAN.md](docs/04-ANALYSIS/ANALYSIS_WOOCOMMERCE_EXPANSION_PLAN.md) - Original expansion plan
 - [CLAUDE.md](CLAUDE.md) - Agent orchestration framework
 
 ---

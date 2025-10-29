@@ -412,7 +412,7 @@ Apply the same optimization pattern to other tables with RLS policies:
 ## Documentation
 
 **Related Files:**
-- [SECURITY_CONFIGURATION_GUIDE.md](docs/SECURITY_CONFIGURATION_GUIDE.md) - RLS security model
+- [SECURITY_CONFIGURATION_GUIDE.md](docs/02-GUIDES/GUIDE_SECURITY_CONFIGURATION_GUIDE.md) - RLS security model
 - [WIDGET_RLS_IMPLEMENTATION_REPORT.md](WIDGET_RLS_IMPLEMENTATION_REPORT.md) - Original implementation
 
 **Supabase Resources:**

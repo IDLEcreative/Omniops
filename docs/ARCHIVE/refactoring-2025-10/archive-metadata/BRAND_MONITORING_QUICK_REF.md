@@ -96,7 +96,7 @@ git commit --no-verify -m "Emergency fix"
 
 ## Quick Links
 
-- Full Documentation: [/docs/MONITORING_SETUP.md](docs/MONITORING_SETUP.md)
+- Full Documentation: [/docs/02-GUIDES/GUIDE_MONITORING_SETUP_V2.md](docs/02-GUIDES/GUIDE_MONITORING_SETUP_V2.md)
 - Implementation Report: [/BRAND_MONITORING_IMPLEMENTATION.md](BRAND_MONITORING_IMPLEMENTATION.md)
 - CLAUDE.md Guidelines: [/CLAUDE.md](CLAUDE.md)
 

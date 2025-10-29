@@ -1,5 +1,27 @@
 # Code Organization Guide
 
+**Type:** Architecture
+**Status:** Active
+**Last Updated:** 2025-10-29
+**Verified For:** v0.1.0
+**Estimated Read Time:** 16 minutes
+
+## Purpose
+This document explains the code organization and structure of the Customer Service Agent project.
+
+## Quick Links
+- [Directory Structure](#directory-structure)
+- [Code Organization Principles](#code-organization-principles)
+- [Best Practices](#best-practices)
+- [Migration Guide](#migration-guide)
+- [Example Refactoring](#example-refactoring)
+
+## Keywords
+architecture, best, code, directory, example, future, guide, improvements, migration, organization
+
+---
+
+
 This document explains the code organization and structure of the Customer Service Agent project.
 
 ## Directory Structure

@@ -417,7 +417,7 @@ npm run dev
 ## Resources
 
 ### Documentation
-- [WooCommerce Customization Guide](docs/WOOCOMMERCE_CUSTOMIZATION.md)
+- [WooCommerce Customization Guide](docs/02-GUIDES/GUIDE_WOOCOMMERCE_CUSTOMIZATION.md)
 - [Commerce Provider Architecture](lib/agents/commerce-provider.ts)
 - [Chat Tool Definitions](lib/chat/tool-definitions.ts)
 

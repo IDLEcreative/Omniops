@@ -1,5 +1,26 @@
 # Performance Optimization
 
+**Type:** Reference
+**Status:** Active
+**Last Updated:** 2025-10-29
+**Verified For:** v0.1.0
+**Estimated Read Time:** 3 minutes
+
+## Purpose
+This documentation has been moved to the architecture section:
+
+## Quick Links
+- [Quick Links](#quick-links)
+- [What Changed](#what-changed)
+- [New Content Includes](#new-content-includes)
+- [Performance Analysis (Historical)](#performance-analysis-historical)
+
+## Keywords
+analysis, changed, content, includes, links, optimization, performance, quick, reference, what
+
+---
+
+
 **⚠️ THIS FILE HAS MOVED**
 
 This documentation has been moved to the architecture section:

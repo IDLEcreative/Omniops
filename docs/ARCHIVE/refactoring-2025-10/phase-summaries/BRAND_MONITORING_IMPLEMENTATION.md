@@ -161,7 +161,7 @@ on:
 ---
 
 ### ✅ Documentation
-**Location:** `/docs/MONITORING_SETUP.md`
+**Location:** `/docs/02-GUIDES/GUIDE_MONITORING_SETUP_V2.md`
 **Status:** Complete - Comprehensive Guide
 
 **Contents:**

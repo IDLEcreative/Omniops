@@ -1,5 +1,27 @@
 # ResponseParser Regex Patterns Documentation
 
+**Type:** Reference
+**Status:** Active
+**Last Updated:** 2025-10-29
+**Verified For:** v0.1.0
+**Estimated Read Time:** 24 minutes
+
+## Purpose
+The ResponseParser automatically detects and extracts entities, corrections, and lists from user messages and AI responses to improve conversation context awareness.
+
+## Quick Links
+- [Overview](#overview)
+- [Detection Patterns](#detection-patterns)
+- [Integration with ConversationMetadataManager](#integration-with-conversationmetadatamanager)
+- [Entity Types and Aliases](#entity-types-and-aliases)
+- [Test Coverage Summary](#test-coverage-summary)
+
+## Keywords
+aliases, characteristics, conversationmetadatamanager, coverage, detection, enhancements, entity, examples, future, integration
+
+---
+
+
 **File:** `/Users/jamesguy/Omniops/lib/chat/response-parser.ts`
 **LOC:** 208 (under 300 LOC limit)
 **Test Coverage:** 23/23 tests passing (100%)

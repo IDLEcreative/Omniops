@@ -165,7 +165,7 @@ All documentation is complete and pushed to repository:
    - Timeline and results documented
    - Optional Week 3 outlined
 
-5. **[CONVERSATION_ACCURACY_IMPROVEMENTS.md](docs/CONVERSATION_ACCURACY_IMPROVEMENTS.md)**
+5. **[CONVERSATION_ACCURACY_IMPROVEMENTS.md](docs/02-GUIDES/GUIDE_CONVERSATION_ACCURACY.md)**
    - Technical architecture
    - Implementation details
    - Performance metrics

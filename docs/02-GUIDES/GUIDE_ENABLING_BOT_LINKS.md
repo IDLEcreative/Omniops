@@ -1,5 +1,38 @@
 # Enabling Bot to Provide Links
 
+**Type:** Guide
+**Status:** Active
+**Last Updated:** 2025-10-29
+**Verified For:** v0.1.0
+**Dependencies:**
+- [Chat API Documentation](../03-API/)
+- [Widget Configuration](../02-GUIDES/)
+**Estimated Read Time:** 8 minutes
+
+## Purpose
+Implementation guide for enabling chatbot to include source URLs in responses using system prompt modification, enhanced source display components, and inline link processing. Improves user experience with clickable references to relevant website pages.
+
+## Quick Links
+- [Current Status](#current-status)
+- [Quick Implementation Guide](#quick-implementation-guide)
+- [Option 1: Modify System Prompt](#option-1-modify-system-prompt-easiest)
+- [Option 2: Enhanced Source Display](#option-2-enhanced-source-display-better-ux)
+- [Option 3: Inline Link Processing](#option-3-inline-link-processing)
+- [Implementation Steps](#implementation-steps)
+- [Advanced Features](#advanced-features)
+- [Benefits](#benefits)
+
+## Keywords
+bot links, source URLs, chatbot references, system prompt, markdown links, ReactMarkdown, link integration, source display, link tracking, smart link suggestions, link analytics, clickable references, response enrichment
+
+## Aliases
+- "bot links" (also known as: source URLs, reference links, chatbot citations, content sources)
+- "system prompt" (also known as: AI instructions, prompt engineering, chatbot configuration)
+- "source display" (also known as: reference UI, source component, citation display)
+- "link tracking" (also known as: click analytics, link metrics, engagement tracking)
+
+---
+
 ## Current Status
 The bot already tracks source URLs when finding relevant content, but doesn't currently include them in responses.
 

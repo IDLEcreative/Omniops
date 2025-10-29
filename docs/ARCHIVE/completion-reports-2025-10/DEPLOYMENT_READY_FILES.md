@@ -63,13 +63,13 @@
 
 ### Architecture Documentation
 1. `docs/ARCHITECTURE_DATA_MODEL.md` - Complete architecture reference (Issue #6)
-2. `docs/CUSTOMER_CONFIG_SECURITY.md` - Security model (Issue #9)
+2. `docs/02-GUIDES/GUIDE_CUSTOMER_CONFIG_SECURITY.md` - Security model (Issue #9)
 3. `docs/SUPABASE_CLIENT_GUIDE.md` - 400+ line guide (Issue #10)
 4. `docs/DATABASE_CLEANUP_REPORT.md` - Database cleanup (Issue #11)
 5. `docs/STRIPE_INTEGRATION.md` - Stripe setup guide
 6. `docs/WOOCOMMERCE_ARCHITECTURE_ANALYSIS.md` - WooCommerce analysis
-7. `docs/WOOCOMMERCE_COMPREHENSIVE_EXPANSION_PLAN.md` - Expansion plan
-8. `docs/WOOCOMMERCE_CUSTOMIZATION.md` - Customization guide
+7. `docs/04-ANALYSIS/ANALYSIS_WOOCOMMERCE_EXPANSION_PLAN.md` - Expansion plan
+8. `docs/02-GUIDES/GUIDE_WOOCOMMERCE_CUSTOMIZATION.md` - Customization guide
 
 ### Completion Reports (13)
 9. `PR4_FINAL_VERIFICATION_AND_DEPLOYMENT_REPORT.md` - **THIS IS THE PRIMARY REPORT**
@@ -198,7 +198,7 @@ Co-Authored-By: Claude <noreply@anthropic.com>"
 ```bash
 # Commit 1: Critical Security Fixes
 git add middleware.ts app/api/*/route.ts lib/auth/
-git add __tests__/api/security/ docs/SECURITY_MODEL.md
+git add __tests__/api/security/ docs/02-GUIDES/GUIDE_SECURITY_MODEL.md
 git commit -m "fix(security): implement critical security fixes (Issues #5, #8, #9)"
 
 # Commit 2: Performance Optimization

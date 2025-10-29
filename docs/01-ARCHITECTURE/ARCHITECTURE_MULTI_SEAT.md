@@ -1,5 +1,27 @@
 # Multi-Seat Organization Support
 
+**Type:** Architecture
+**Status:** Active
+**Last Updated:** 2025-10-29
+**Verified For:** v0.1.0
+**Estimated Read Time:** 21 minutes
+
+## Purpose
+The multi-seat organization feature allows multiple users (seats) from the same business to access and collaborate on shared data. This enables teams to work together on scraped content, conversations, and analytics without sharing individual login credentials.
+
+## Quick Links
+- [Overview](#overview)
+- [Architecture](#architecture)
+- [API Endpoints](#api-endpoints)
+- [Usage](#usage)
+- [Migration Guide](#migration-guide)
+
+## Keywords
+architecture, considerations, documentation, endpoints, enhancements, future, guide, migration, multi, overview
+
+---
+
+
 ## Overview
 
 The multi-seat organization feature allows multiple users (seats) from the same business to access and collaborate on shared data. This enables teams to work together on scraped content, conversations, and analytics without sharing individual login credentials.

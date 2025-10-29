@@ -1,5 +1,39 @@
 # Project Overview
 
+**Type:** Setup
+**Status:** Active
+**Last Updated:** 2025-10-29
+**Verified For:** v2.1.0
+**Dependencies:**
+- [QUICK_START.md](QUICK_START.md)
+- [GETTING_STARTED.md](GETTING_STARTED.md)
+- [SETUP_GUIDE.md](SETUP_GUIDE.md)
+**Estimated Read Time:** 10 minutes
+
+## Purpose
+High-level architectural overview of the enterprise-grade AI customer service chat widget covering 200+ source files organized into 7 core directories, 50+ npm dependencies, Next.js 15 + React 19 + TypeScript stack, multi-tenant architecture, WooCommerce integration, vector search with pgvector, Redis job queue, AES-256 encryption, 70%+ test coverage target, and production deployment strategies.
+
+## Quick Links
+- [Directory Structure](#-directory-structure)
+- [Configuration Files](#-configuration-files)
+- [Key Features](#-key-features)
+- [Tech Stack](#-tech-stack)
+- [Security Features](#-security-features)
+- [Deployment](#-deployment)
+
+## Keywords
+project overview, system architecture, Next.js 15, React 19, TypeScript, Supabase, multi-tenant, WooCommerce integration, pgvector search, Redis queue, Crawlee scraping, OpenAI GPT-4, GDPR compliance, AES-256 encryption, Row Level Security, production ready, v2.1.0, directory structure, tech stack
+
+## Aliases
+- "Customer Service Agent" (also known as: chat widget, AI assistant, support bot)
+- "multi-tenant architecture" (also known as: domain-based isolation, per-customer deployment)
+- "pgvector" (also known as: vector search, semantic search, embeddings database)
+- "RLS" (also known as: Row Level Security, database security policies)
+- "Crawlee" (also known as: web scraper, website crawler, content extractor)
+- "/app" (also known as: App Router, Next.js pages, route handlers)
+
+---
+
 ## Customer Service Agent
 
 An enterprise-grade, AI-powered customer service chat widget that can be embedded on any website. Built with Next.js 15, React 19, TypeScript, and Supabase.

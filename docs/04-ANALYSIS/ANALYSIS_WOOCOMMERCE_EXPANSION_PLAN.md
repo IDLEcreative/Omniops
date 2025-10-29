@@ -1,9 +1,34 @@
 # WooCommerce Tools Comprehensive Expansion Plan
 
-**Created:** 2025-10-29
-**Goal:** Expand WooCommerce integration from 6 tools to 16 tools (167% increase)
-**Timeline:** 4 phases over ~40 hours of implementation
-**Current Coverage:** 5.7% → **Target Coverage:** 15.2%
+**Type:** Analysis
+**Status:** Active
+**Last Updated:** 2025-10-29
+**Verified For:** v0.1.0
+**Dependencies:**
+- [WooCommerce Architecture Analysis](./ANALYSIS_WOOCOMMERCE_ARCHITECTURE.md) - Current 5.7% API coverage analysis
+- [WooCommerce Customization Guide](../02-GUIDES/GUIDE_WOOCOMMERCE_CUSTOMIZATION.md) - Implementation patterns
+**Estimated Read Time:** 35 minutes
+
+## Purpose
+Systematic expansion plan increasing WooCommerce integration from 6 tools (5.7% coverage) to 16 tools (15.2% coverage) across 4 phases, targeting 10 high-value customer-facing and business intelligence capabilities with detailed implementation steps, test cases, example usage, and 40-hour timeline breakdown.
+
+## Quick Links
+- [Executive Summary](#executive-summary) - Success metrics and goals
+- [Phase 1: Customer Experience](#phase-1-customer-experience-tools-high-priority) - Categories, reviews, coupons (7 hrs)
+- [Phase 2: Order Management](#phase-2-order-management-high-priority) - Refunds, history, notes (11 hrs)
+- [Phase 3: Advanced Features](#phase-3-advanced-product-features-medium-priority) - Variations, shipping (10 hrs)
+- [Phase 4: Business Intelligence](#phase-4-business-intelligence-medium-priority) - Analytics, reports (12 hrs)
+- [Testing Strategy](#testing-strategy) - Quality assurance approach
+
+## Keywords
+WooCommerce expansion, tool development, API integration, product categories, product reviews, coupon validation, refund tracking, order history, product variations, shipping methods, implementation plan, testing strategy, phased rollout
+
+## Aliases
+- "tool expansion" (also known as: feature expansion, capability growth, API coverage expansion)
+- "product categories" (also known as: category browsing, product taxonomy, catalog navigation)
+- "coupon validation" (also known as: discount validation, promo code checking, voucher verification)
+- "refund status" (also known as: return processing, refund tracking, payment reversal)
+- "implementation phases" (also known as: rollout stages, development phases, sprint planning)
 
 ---
 
@@ -594,7 +619,7 @@ npx tsx monitor-woocommerce.ts
 - Add usage examples
 
 #### 2. Customization Guide
-**File:** `docs/WOOCOMMERCE_CUSTOMIZATION.md`
+**File:** `docs/02-GUIDES/GUIDE_WOOCOMMERCE_CUSTOMIZATION.md`
 - Add section for each new tool
 - Include example usage
 - Document parameters and return types
@@ -820,9 +845,9 @@ Project is complete when:
 8. New `test-woocommerce-performance-benchmark.ts`
 
 ### Documentation (5 files)
-1. Updated `docs/WOOCOMMERCE_CUSTOMIZATION.md`
+1. Updated `docs/02-GUIDES/GUIDE_WOOCOMMERCE_CUSTOMIZATION.md`
 2. Updated `docs/04-ANALYSIS/ANALYSIS_WOOCOMMERCE_ARCHITECTURE.md`
-3. This plan document (`docs/WOOCOMMERCE_COMPREHENSIVE_EXPANSION_PLAN.md`)
+3. This plan document (`docs/04-ANALYSIS/ANALYSIS_WOOCOMMERCE_EXPANSION_PLAN.md`)
 4. Final completion report (`WOOCOMMERCE_EXPANSION_COMPLETION_REPORT.md`)
 5. Updated `CLAUDE.md`
 

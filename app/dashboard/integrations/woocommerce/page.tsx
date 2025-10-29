@@ -8,6 +8,7 @@ import { KPICards } from "@/components/dashboard/integrations/woocommerce/KPICar
 import { RevenueChart } from "@/components/dashboard/integrations/woocommerce/RevenueChart";
 import { AbandonedCartsCard } from "@/components/dashboard/integrations/woocommerce/AbandonedCartsCard";
 import { LowStockCard } from "@/components/dashboard/integrations/woocommerce/LowStockCard";
+import { OperationAnalyticsCard } from "@/components/dashboard/integrations/woocommerce/OperationAnalyticsCard";
 import { ErrorState } from "@/components/dashboard/integrations/woocommerce/ErrorState";
 
 interface DashboardData {
@@ -59,9 +60,12 @@ export default function WooCommerceAnalyticsPage() {
   const [recoveringCart, setRecoveringCart] = useState<number | null>(null);
   const [isCached, setIsCached] = useState(false);
   const [cachedAt, setCachedAt] = useState<string | null>(null);
+  const [operationStats, setOperationStats] = useState<any>(null);
+  const [analyticsPeriod, setAnalyticsPeriod] = useState<string>('Last 7 days');
 
   useEffect(() => {
     loadDashboard();
+    loadOperationAnalytics();
   }, []);
 
   const loadDashboard = async (forceRefresh = false) => {
@@ -91,9 +95,26 @@ export default function WooCommerceAnalyticsPage() {
     }
   };
 
+  const loadOperationAnalytics = async (days: number = 7) => {
+    try {
+      const response = await fetch(`/api/woocommerce/analytics?days=${days}`);
+      const result = await response.json();
+
+      if (result.success) {
+        setOperationStats(result.data.stats);
+        setAnalyticsPeriod(`Last ${days} days`);
+      }
+    } catch (err) {
+      console.error('Failed to load operation analytics:', err);
+    }
+  };
+
   const handleRefresh = async () => {
     setIsRefreshing(true);
-    await loadDashboard(true);
+    await Promise.all([
+      loadDashboard(true),
+      loadOperationAnalytics()
+    ]);
   };
 
   const handleRecoverCart = async (orderId: number) => {
@@ -165,6 +186,16 @@ export default function WooCommerceAnalyticsPage() {
           currencySymbol={data.kpis.revenue.currencySymbol}
         />
       </div>
+
+      {/* Operation Analytics */}
+      {operationStats && (
+        <div className="mt-4">
+          <OperationAnalyticsCard
+            stats={operationStats}
+            period={analyticsPeriod}
+          />
+        </div>
+      )}
     </div>
   );
 }

@@ -317,7 +317,7 @@ ALTER TABLE gdpr_audit_log DISABLE ROW LEVEL SECURITY;
 
 ## Documentation
 
-- **Security Model**: [docs/SECURITY_MODEL.md](docs/SECURITY_MODEL.md)
+- **Security Model**: [docs/02-GUIDES/GUIDE_SECURITY_MODEL.md](docs/02-GUIDES/GUIDE_SECURITY_MODEL.md)
 - **Migration SQL**: [supabase/migrations/20251028_fix_security_advisories.sql](supabase/migrations/20251028_fix_security_advisories.sql)
 - **Verification Script**: [verify-security-migration.ts](verify-security-migration.ts)
 - **RLS Test Suite**: [test-rls-policies.ts](test-rls-policies.ts)
@@ -342,7 +342,7 @@ After applying the migration, verify:
 If you encounter issues:
 
 1. Check the troubleshooting section above
-2. Review [docs/SECURITY_MODEL.md](docs/SECURITY_MODEL.md)
+2. Review [docs/02-GUIDES/GUIDE_SECURITY_MODEL.md](docs/02-GUIDES/GUIDE_SECURITY_MODEL.md)
 3. Run verification script: `npx tsx verify-security-migration.ts`
 4. Check Supabase logs for detailed error messages
 

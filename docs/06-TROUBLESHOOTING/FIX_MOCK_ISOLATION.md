@@ -1,5 +1,27 @@
 # Mock Isolation Fix - Complete
 
+**Type:** Troubleshooting
+**Status:** Active
+**Last Updated:** 2025-10-29
+**Verified For:** v0.1.0
+**Estimated Read Time:** 10 minutes
+
+## Purpose
+Tests in `__tests__/api/chat/route.test.ts` were passing individually but failing when run in batch mode. This was due to mock state bleeding between tests.
+
+## Quick Links
+- [Problem Statement](#problem-statement)
+- [Root Cause Analysis](#root-cause-analysis)
+- [Solution](#solution)
+- [Files Modified](#files-modified)
+- [Verification](#verification)
+
+## Keywords
+analysis, cause, criteria, documentation, files, fix, future, insights, isolation, mock
+
+---
+
+
 **Date**: 2025-10-24
 **Status**: ✅ FIXED
 **Time Taken**: ~2.5 hours

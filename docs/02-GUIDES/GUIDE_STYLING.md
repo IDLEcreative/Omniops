@@ -1,4 +1,38 @@
-# Styling Guide - Customer Service Agent
+# Styling Guide
+
+**Type:** Guide
+**Status:** Active
+**Last Updated:** 2025-10-29
+**Verified For:** v0.1.0
+**Dependencies:**
+- tailwindcss 3.x, tailwindcss-animate, Radix UI components
+- shadcn/ui component library, clsx, tailwind-merge, class-variance-authority
+**Estimated Read Time:** 6 minutes
+
+## Purpose
+Comprehensive styling reference for shadcn/ui + Tailwind CSS setup covering CSS variables for theming, file structure, dependency management, dark mode configuration, and troubleshooting common styling issues. Ensures consistent component styling across the application with proper animation support and Radix UI integration.
+
+## Quick Links
+- [Core Dependencies](#core-dependencies)
+- [File Structure](#file-structure)
+- [CSS Variables](#css-variables)
+- [Common Issues and Solutions](#common-issues-and-solutions)
+- [Maintenance Commands](#maintenance-commands)
+- [Adding New shadcn/ui Components](#adding-new-shadcnui-components)
+- [Troubleshooting Steps](#troubleshooting-steps)
+- [Best Practices](#best-practices)
+
+## Keywords
+Tailwind CSS, shadcn/ui, styling framework, CSS variables, theming, dark mode, Radix UI, component styling, animations, postcss configuration, tailwind config, globals.css, cn utility, design system, UI framework, style troubleshooting
+
+## Aliases
+- "shadcn/ui" (also known as: shadcn, shadcn components, ui components, component library)
+- "Tailwind CSS" (also known as: Tailwind, utility-first CSS, atomic CSS, CSS framework)
+- "CSS variables" (also known as: CSS custom properties, theme variables, design tokens, style variables)
+- "cn()" (also known as: classnames utility, class merger, className helper, style utility)
+- "dark mode" (also known as: theme switching, color scheme, dark theme, theme toggle)
+
+---
 
 ## Overview
 

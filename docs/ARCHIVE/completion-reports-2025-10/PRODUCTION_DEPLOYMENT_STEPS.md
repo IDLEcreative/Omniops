@@ -425,7 +425,7 @@ vercel logs --follow | grep -i error
 - **Deployment Checklist:** [DEPLOYMENT_CHECKLIST.md](DEPLOYMENT_CHECKLIST.md)
 - **Validation Report:** [REAL_WORLD_VALIDATION_REPORT.md](REAL_WORLD_VALIDATION_REPORT.md)
 - **Technical Debt Tracking:** [TECH_DEBT.md](TECH_DEBT.md) (Item 8.2)
-- **Feature Documentation:** [CONVERSATION_ACCURACY_IMPROVEMENTS.md](docs/CONVERSATION_ACCURACY_IMPROVEMENTS.md)
+- **Feature Documentation:** [CONVERSATION_ACCURACY_IMPROVEMENTS.md](docs/02-GUIDES/GUIDE_CONVERSATION_ACCURACY.md)
 
 ---
 

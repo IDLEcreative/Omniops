@@ -1,7 +1,37 @@
 # Security Configuration Guide
 
-**Last Updated:** 2025-10-28
-**Status:** Manual configuration required for non-code security settings
+**Type:** Guide
+**Status:** Active
+**Last Updated:** 2025-10-29
+**Verified For:** v0.1.0
+**Dependencies:**
+- [Security Advisories Resolution](GUIDE_SECURITY_ADVISORIES_RESOLUTION.md)
+- [Supabase Database Schema](../07-REFERENCE/REFERENCE_DATABASE_SCHEMA.md)
+**Estimated Read Time:** 11 minutes
+
+## Purpose
+Step-by-step instructions for configuring Supabase Dashboard security settings including leaked password protection, MFA options, and PostgreSQL upgrades. Complements automated security fixes with manual configuration requirements.
+
+## Quick Links
+- [Code-Level Security](#-code-level-security-completed)
+- [Dashboard Configuration Required](#-dashboard-configuration-required)
+- [Enable Leaked Password Protection](#1-enable-leaked-password-protection)
+- [Enable Additional MFA Options](#2-enable-additional-mfa-options)
+- [Upgrade PostgreSQL Version](#3-upgrade-postgresql-version)
+- [Security Checklist](#-security-checklist)
+- [Verification Commands](#-verification-commands)
+- [Additional Recommendations](#-additional-recommendations)
+
+## Keywords
+security configuration, Supabase Dashboard, leaked password protection, multi-factor authentication, MFA, TOTP, PostgreSQL upgrade, security definer, RLS, row level security, authentication settings, password security, database security, security advisories, security best practices
+
+## Aliases
+- "RLS" (also known as: Row Level Security, access control policies, tenant isolation)
+- "MFA" (also known as: multi-factor authentication, 2FA, two-factor authentication, TOTP)
+- "leaked password protection" (also known as: compromised password detection, HaveIBeenPwned integration, breach detection)
+- "security definer" (also known as: privilege escalation protection, view security, function security)
+
+---
 
 This guide documents the security configurations that cannot be applied via code migrations and must be configured through the Supabase Dashboard.
 

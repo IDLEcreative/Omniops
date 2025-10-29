@@ -14,11 +14,11 @@ Updated all test documentation to reflect the comprehensive test suite improveme
 
 ## Files Updated
 
-### 1. New File: `docs/TESTING_GUIDE.md`
+### 1. New File: `docs/04-DEVELOPMENT/testing/TESTING_GUIDE.md`
 
 **Status:** ✅ Created (new file)
 **Size:** 732 lines
-**Link:** [docs/TESTING_GUIDE.md](/Users/jamesguy/Omniops/docs/TESTING_GUIDE.md)
+**Link:** [docs/04-DEVELOPMENT/testing/TESTING_GUIDE.md](/Users/jamesguy/Omniops/docs/04-DEVELOPMENT/testing/TESTING_GUIDE.md)
 
 **Contents:**
 - Comprehensive testing guide for developers
@@ -277,7 +277,7 @@ All documentation is now interconnected for easy navigation:
 
 | File | Status | Lines Changed | Type |
 |------|--------|---------------|------|
-| `docs/TESTING_GUIDE.md` | Created | 732 lines | New comprehensive guide |
+| `docs/04-DEVELOPMENT/testing/TESTING_GUIDE.md` | Created | 732 lines | New comprehensive guide |
 | `__tests__/README.md` | Updated | +150 lines | Enhanced structure & examples |
 | `README.md` | Updated | +40 lines | Added quality metrics |
 | **Total** | - | **922 lines** | **Documentation** |
@@ -321,7 +321,7 @@ All documentation is now interconnected for easy navigation:
 ## Contact & Support
 
 For questions about the testing documentation:
-1. Review the [Testing Guide](docs/TESTING_GUIDE.md)
+1. Review the [Testing Guide](docs/04-DEVELOPMENT/testing/TESTING_GUIDE.md)
 2. Check the [Test Suite README](__tests__/README.md)
 3. Search existing test files for patterns
 4. Ask in team discussions

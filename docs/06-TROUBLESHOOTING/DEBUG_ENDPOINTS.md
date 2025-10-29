@@ -1,5 +1,27 @@
 # Debug & Setup API Endpoints
 
+**Type:** Troubleshooting
+**Status:** Active
+**Last Updated:** 2025-10-29
+**Verified For:** v0.1.0
+**Estimated Read Time:** 20 minutes
+
+## Purpose
+⚠️ **These endpoints are for development and testing only** ⚠️ **Do not expose in production without authentication**
+
+## Quick Links
+- [Overview](#overview)
+- [Security Configuration](#security-configuration)
+- [Setup Endpoints](#setup-endpoints)
+- [Testing Endpoints](#testing-endpoints)
+- [Error Responses](#error-responses)
+
+## Keywords
+common, compliance, configuration, debug, documentation, endpoints, error, implementation, notes, overview
+
+---
+
+
 **Last Updated:** 2025-10-26
 
 ⚠️ **These endpoints are for development and testing only**

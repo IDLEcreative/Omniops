@@ -85,7 +85,7 @@ USING (is_organization_member(organization_id, auth.uid()));
    - Tests authentication, authorization, and RLS policies
    - 15+ test cases covering all attack scenarios
 
-3. **`/docs/CUSTOMER_CONFIG_SECURITY.md`** (600+ lines)
+3. **`/docs/02-GUIDES/GUIDE_CUSTOMER_CONFIG_SECURITY.md`** (600+ lines)
    - Complete security model documentation
    - Attack scenario examples with defenses
    - Implementation guides and best practices
@@ -268,7 +268,7 @@ SELECT * FROM customer_configs WHERE organization_id != '<my_org>';
 
 ### Security Documentation Created
 
-1. **`/docs/CUSTOMER_CONFIG_SECURITY.md`**
+1. **`/docs/02-GUIDES/GUIDE_CUSTOMER_CONFIG_SECURITY.md`**
    - Complete security model explanation
    - Layer-by-layer defense description
    - Attack scenarios with mitigation
@@ -283,8 +283,8 @@ SELECT * FROM customer_configs WHERE organization_id != '<my_org>';
 
 ### Documentation Updates Needed
 
-- ✅ Created `/docs/CUSTOMER_CONFIG_SECURITY.md`
-- ⏸️ Consider updating `/docs/SECURITY_MODEL.md` to reference customer config security
+- ✅ Created `/docs/02-GUIDES/GUIDE_CUSTOMER_CONFIG_SECURITY.md`
+- ⏸️ Consider updating `/docs/02-GUIDES/GUIDE_SECURITY_MODEL.md` to reference customer config security
 - ⏸️ Consider updating API documentation with auth requirements
 
 ## Verification Checklist

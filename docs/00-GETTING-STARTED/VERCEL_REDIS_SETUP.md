@@ -1,5 +1,42 @@
 # Vercel Redis Setup Guide
 
+**Type:** Setup
+**Status:** Active
+**Last Updated:** 2025-10-29
+**Verified For:** v2.1.0
+**Dependencies:**
+- [lib/redis-unified.ts](../../lib/redis-unified.ts)
+- [lib/redis-enhanced.ts](../../lib/redis-enhanced.ts)
+- [lib/redis-fallback.ts](../../lib/redis-fallback.ts)
+- [VERCEL_ENV_SETUP.md](VERCEL_ENV_SETUP.md)
+**Estimated Read Time:** 6 minutes
+
+## Purpose
+Production Redis configuration guide covering Vercel Redis setup, REDIS_URL environment variable configuration, automatic in-memory fallback system, ResilientRedis client with circuit breaker pattern, job queue architecture for web scraping, rate limiting implementation (10 req/min scraping, 100 req/min API), content deduplication, health monitoring endpoint (/api/health/comprehensive), and troubleshooting with 60-second TTL cleanup automation.
+
+## Quick Links
+- [Current Status](#current-status)
+- [Setting Up Vercel Redis](#setting-up-vercel-redis)
+- [How Redis is Used in Your Application](#how-redis-is-used-in-your-application)
+- [Architecture Overview](#architecture-overview)
+- [Key Files](#key-files)
+- [Monitoring Redis Health](#monitoring-redis-health)
+- [Troubleshooting](#troubleshooting)
+
+## Keywords
+Vercel Redis, REDIS_URL configuration, redis-unified.ts, ResilientRedis client, in-memory fallback, circuit breaker pattern, job queue, rate limiting, content deduplication, caching layer, ioredis package, InMemoryStore, health monitoring, production Redis, automatic fallback, TTL cleanup, redis://localhost:6379, Vercel CLI, vercel env add
+
+## Aliases
+- "ResilientRedis" (also known as: Redis client, unified Redis, enhanced Redis)
+- "InMemoryStore" (also known as: fallback storage, in-memory cache, local storage)
+- "circuit breaker" (also known as: resilience pattern, failure protection, fault tolerance)
+- "job queue" (also known as: task queue, background jobs, async processing)
+- "REDIS_URL" (also known as: Redis connection string, Redis endpoint, cache URL)
+- "redis-unified.ts" (also known as: main Redis client, unified client, primary Redis interface)
+
+---
+
+
 ## Current Status
 ✅ **Local Development**: Redis is working perfectly at `redis://localhost:6379`
 ✅ **Fallback System**: In-memory fallback is implemented for when Redis is unavailable

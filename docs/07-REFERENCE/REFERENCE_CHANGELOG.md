@@ -1,6 +1,25 @@
+# Changelog
+
+**Type:** Reference
+**Status:** Active
+**Last Updated:** 2025-10-29
+**Verified For:** v0.1.0
+**Estimated Read Time:** 6 minutes
+
+## Purpose
+All notable changes to this project will be documented in this file.
+
+## Quick Links
+- [[Unreleased]](#unreleased)
+- [[0.1.0] - Previous Release](#010---previous-release)
+
+## Keywords
+changelog, previous, reference, release
+
+---
+
 **Last Updated:** 2025-10-24
 
-# Changelog
 
 All notable changes to this project will be documented in this file.
 

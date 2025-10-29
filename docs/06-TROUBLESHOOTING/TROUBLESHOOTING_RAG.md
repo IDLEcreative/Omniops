@@ -1,5 +1,27 @@
 # RAG Troubleshooting Guide
 
+**Type:** Troubleshooting
+**Status:** Active
+**Last Updated:** 2025-10-29
+**Verified For:** v0.1.0
+**Estimated Read Time:** 15 minutes
+
+## Purpose
+echo $NEXT_PUBLIC_SUPABASE_URL
+
+## Quick Links
+- [Quick Diagnostic Checklist](#quick-diagnostic-checklist)
+- [Step-by-Step Verification](#step-by-step-verification)
+- [Common Error Messages and Fixes](#common-error-messages-and-fixes)
+- [Debug Logging](#debug-logging)
+- [Testing Tools](#testing-tools)
+
+## Keywords
+checklist, common, debug, diagnostic, else, emergency, error, fails, fixes, logging
+
+---
+
+
 ## Quick Diagnostic Checklist
 
 - [ ] Database connected to production (birugqyuqhiahxvxeyqg.supabase.co)

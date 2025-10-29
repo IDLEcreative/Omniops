@@ -96,7 +96,7 @@ Successfully completed 10 of 11 critical issues from PR #4's 87-issue technical 
 - ✅ Updated `middleware.ts` - Primary defense
 - ✅ Protected 20 endpoints with dual-layer security
 - ✅ `__tests__/api/security/debug-endpoints.test.ts` - 29 tests (all passing)
-- ✅ Updated `docs/SECURITY_MODEL.md`
+- ✅ Updated `docs/02-GUIDES/GUIDE_SECURITY_MODEL.md`
 - ✅ `DEBUG_ENDPOINT_SECURITY_REPORT.md` - Complete documentation
 
 **Security Guarantee**: All debug endpoints return 404 in production (zero information leakage)
@@ -125,7 +125,7 @@ Successfully completed 10 of 11 critical issues from PR #4's 87-issue technical 
 - ✅ `lib/auth/api-helpers.ts` - Reusable auth utilities
 - ✅ Updated 4 config handlers: create, get, update, delete
 - ✅ `__tests__/api/customer-config/security.test.ts` - 16 tests
-- ✅ `docs/CUSTOMER_CONFIG_SECURITY.md` - Complete security guide
+- ✅ `docs/02-GUIDES/GUIDE_CUSTOMER_CONFIG_SECURITY.md` - Complete security guide
 - ✅ `ISSUE_9_COMPLETION_REPORT.md` - Implementation report
 
 **Impact**: Multi-layer defense prevents unauthorized config access
@@ -427,11 +427,11 @@ Successfully completed 10 of 11 critical issues from PR #4's 87-issue technical 
 - `scripts/restore-pump-terminology.sh` - Bulk text replacement
 
 **Documentation (15)**:
-- `docs/CUSTOMER_CONFIG_SECURITY.md` - Security guide
+- `docs/02-GUIDES/GUIDE_CUSTOMER_CONFIG_SECURITY.md` - Security guide
 - `docs/SUPABASE_CLIENT_GUIDE.md` - 400+ lines
 - `docs/DATABASE_CLEANUP_REPORT.md` - Database cleanup
 - `docs/ARCHITECTURE_DATA_MODEL.md` - Architecture reference
-- `docs/SECURITY_MODEL.md` - Updated
+- `docs/02-GUIDES/GUIDE_SECURITY_MODEL.md` - Updated
 - `docs/01-ARCHITECTURE/database-schema.md` - Updated
 - `docs/01-ARCHITECTURE/performance-optimization.md` - Updated
 - Plus 9 completion reports:

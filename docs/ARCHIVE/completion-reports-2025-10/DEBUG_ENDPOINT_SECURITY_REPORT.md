@@ -165,7 +165,7 @@ Time:        1.548 s
 
 ### 4. Security Documentation
 
-**File**: `docs/SECURITY_MODEL.md` (Updated)
+**File**: `docs/02-GUIDES/GUIDE_SECURITY_MODEL.md` (Updated)
 
 **Added Section**: "Debug Endpoint Protection"
 
@@ -345,7 +345,7 @@ npx tsc --noEmit
 
 | File | Changes | Impact |
 |------|---------|--------|
-| `docs/SECURITY_MODEL.md` | Added debug endpoint section | Version 1.0 → 1.1 |
+| `docs/02-GUIDES/GUIDE_SECURITY_MODEL.md` | Added debug endpoint section | Version 1.0 → 1.1 |
 | `DEBUG_ENDPOINT_SECURITY_REPORT.md` | Created implementation report | New file |
 
 ---

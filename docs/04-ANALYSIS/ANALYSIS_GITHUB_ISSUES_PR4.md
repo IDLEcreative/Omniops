@@ -1,5 +1,27 @@
 # GitHub Issues for PR #4 Critical Findings
 
+**Type:** Analysis
+**Status:** Active
+**Last Updated:** 2025-10-29
+**Verified For:** v0.1.0
+**Estimated Read Time:** 132 minutes
+
+## Purpose
+Multi-tenant RLS tests currently use `SUPABASE_SERVICE_ROLE_KEY` which bypasses Row Level Security policies. This means our tests don't actually validate that Organization A can't access Organization B's data in production.
+
+## Quick Links
+- [Issue 1: 🔴 CRITICAL - Fix RLS Testing to Use User Sessions](#issue-1--critical---fix-rls-testing-to-use-user-sessions)
+- [Issue 2: 🔴 CRITICAL - Complete customer_id → organization_id Migration](#issue-2--critical---complete-customerid--organizationid-migration)
+- [Issue 3: 🟠 HIGH - Standardize Supabase Client Imports](#issue-3--high---standardize-supabase-client-imports)
+- [Issue 4: 🟡 MEDIUM - Fix Non-Deterministic Rate Limit Cleanup](#issue-4--medium---fix-non-deterministic-rate-limit-cleanup)
+- [Issue 5: 🟡 MEDIUM - Fix WooCommerce Provider Test Mocking](#issue-5--medium---fix-woocommerce-provider-test-mocking)
+
+## Keywords
+analysis, authentication, bypass, clean, cleanup, client, code, complete, config, create
+
+---
+
+
 **Purpose**: These 12 issues track the critical findings from the 8-agent codebase analysis (PR #4).
 
 **Generated**: 2025-10-28

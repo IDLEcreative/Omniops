@@ -1,5 +1,27 @@
 # 🚀 Quick Setup Guide
 
+**Type:** Setup
+**Status:** Active
+**Last Updated:** 2025-10-29
+**Verified For:** v0.1.0
+**Estimated Read Time:** 9 minutes
+
+## Purpose
+git clone [your-repo-url] cd customer-service-agent npm install
+
+## Quick Links
+- [Step 1: Clone and Install](#step-1-clone-and-install)
+- [Step 2: Set Up Supabase (5 minutes)](#step-2-set-up-supabase-5-minutes)
+- [Step 3: Get API Keys (5 minutes)](#step-3-get-api-keys-5-minutes)
+- [Step 4: Configure Environment](#step-4-configure-environment)
+- [Step 5: Run Locally](#step-5-run-locally)
+
+## Keywords
+clone, configure, cost, customer, deploy, endpoints, environment, estimates, everything, first
+
+---
+
+
 ## Step 1: Clone and Install
 
 ```bash

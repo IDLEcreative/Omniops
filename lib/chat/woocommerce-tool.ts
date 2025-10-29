@@ -4,7 +4,10 @@
  */
 
 import { getDynamicWooCommerceClient } from '@/lib/woocommerce-dynamic';
+import { createClient } from '@/lib/supabase/server';
 import type { WooCommerceOperationParams, WooCommerceOperationResult } from './woocommerce-tool-types';
+import { getCurrency } from '@/lib/woocommerce-currency';
+import type { CurrencyData } from '@/lib/woocommerce-types';
 
 // Product operations
 import {
@@ -19,7 +22,7 @@ import {
   searchProducts
 } from './product-operations';
 
-// Order operations (from modularized directory)
+// Order operations
 import {
   checkOrder,
   getShippingInfo,
@@ -27,7 +30,7 @@ import {
   getOrderNotes,
   checkRefundStatus,
   cancelOrder
-} from './order-operations/index';
+} from './order-operations';
 
 // Store configuration operations
 import {
@@ -61,20 +64,64 @@ export { formatWooCommerceResponse } from './woocommerce-tool-formatters';
 export type { WooCommerceOperationParams, WooCommerceOperationResult } from './woocommerce-tool-types';
 
 /**
+ * Track WooCommerce operation metrics
+ * Non-invasive tracking that doesn't break operations if it fails
+ */
+async function trackOperationMetrics(metrics: {
+  operation: string;
+  duration_ms: number;
+  success: boolean;
+  error_type?: string;
+  error_message?: string;
+  domain: string;
+  customer_config_id?: string;
+}) {
+  try {
+    const supabase = await createClient();
+    await supabase
+      .from('woocommerce_usage_metrics')
+      .insert(metrics);
+  } catch (error) {
+    // Silent fail - metrics tracking should never break operations
+    console.error('[Analytics] Failed to track metrics:', error);
+  }
+}
+
+/**
  * Execute a WooCommerce operation
- * Main entry point for WooCommerce tool execution
+ * Main entry point for WooCommerce tool execution with analytics tracking
  */
 export async function executeWooCommerceOperation(
   operation: string,
   params: WooCommerceOperationParams,
   domain: string
 ): Promise<WooCommerceOperationResult> {
+  const start = Date.now();
   console.log(`[WooCommerce Agent] Executing: ${operation}`, params);
 
   try {
+    // Get customer config ID for analytics
+    const supabase = await createClient();
+    const { data: config } = await supabase
+      .from('customer_configs')
+      .select('id')
+      .eq('domain', domain)
+      .single();
+
     const wc = await getDynamicWooCommerceClient(domain);
 
     if (!wc) {
+      // Track configuration error
+      await trackOperationMetrics({
+        operation,
+        duration_ms: Date.now() - start,
+        success: false,
+        error_type: 'ConfigurationError',
+        error_message: 'WooCommerce not configured',
+        domain,
+        customer_config_id: config?.id
+      });
+
       return {
         success: false,
         data: null,
@@ -82,92 +129,158 @@ export async function executeWooCommerceOperation(
       };
     }
 
+    // Fetch currency for this domain (cached for 24 hours)
+    const currency = await getCurrency(wc, domain);
+
     // Route to appropriate operation handler
+    // Pass currency to operations that need it
+    let result: WooCommerceOperationResult;
+
     switch (operation) {
       case "check_stock":
-        return await checkStock(wc, params);
+        result = await checkStock(wc, params);
+        break;
 
       case "get_stock_quantity":
-        return await getStockQuantity(wc, params);
+        result = await getStockQuantity(wc, params);
+        break;
 
       case "search_products":
-        return await searchProducts(wc, params);
+        result = await searchProducts(wc, params);
+        break;
 
       case "get_product_details":
-        return await getProductDetails(wc, params);
+        result = await getProductDetails(wc, params);
+        break;
 
       case "check_order":
-        return await checkOrder(wc, params);
+        result = await checkOrder(wc, params);
+        break;
 
       case "get_shipping_info":
-        return await getShippingInfo(wc);
+        result = await getShippingInfo(wc);
+        break;
 
       case "get_shipping_methods":
-        return await getShippingMethods(wc, params);
+        result = await getShippingMethods(wc, params);
+        break;
 
       case "get_payment_methods":
-        return await getPaymentMethods(wc, params);
+        result = await getPaymentMethods(wc, params);
+        break;
 
       case "check_price":
-        return await checkPrice(wc, params);
+        result = await checkPrice(wc, params);
+        break;
 
       case "get_product_variations":
-        return await getProductVariations(wc, params);
+        result = await getProductVariations(wc, params);
+        break;
 
       case "get_product_categories":
-        return await getProductCategories(wc, params);
+        result = await getProductCategories(wc, params);
+        break;
 
       case "get_product_reviews":
-        return await getProductReviews(wc, params);
+        result = await getProductReviews(wc, params);
+        break;
 
       case "get_low_stock_products":
-        return await getLowStockProducts(wc, params);
+        result = await getLowStockProducts(wc, params);
+        break;
 
       case "validate_coupon":
-        return await validateCoupon(wc, params);
+        result = await validateCoupon(wc, params);
+        break;
 
       case "check_refund_status":
-        return await checkRefundStatus(wc, params);
+        result = await checkRefundStatus(wc, params);
+        break;
 
       case "cancel_order":
-        return await cancelOrder(wc, params);
+        result = await cancelOrder(wc, params);
+        break;
 
       case "get_customer_orders":
-        return await getCustomerOrders(wc, params);
+        result = await getCustomerOrders(wc, params);
+        break;
 
       case "get_order_notes":
-        return await getOrderNotes(wc, params);
+        result = await getOrderNotes(wc, params);
+        break;
 
       case "get_customer_insights":
-        return await getCustomerInsights(wc, params);
+        result = await getCustomerInsights(wc, params);
+        break;
 
       case "get_sales_report":
-        return await getSalesReport(wc, params);
+        result = await getSalesReport(wc, params);
+        break;
 
       case "add_to_cart":
-        return await addToCart(wc, params);
+        result = await addToCart(wc, params);
+        break;
 
       case "get_cart":
-        return await getCart(wc, params);
+        result = await getCart(wc, params);
+        break;
 
       case "remove_from_cart":
-        return await removeFromCart(wc, params);
+        result = await removeFromCart(wc, params);
+        break;
 
       case "update_cart_quantity":
-        return await updateCartQuantity(wc, params);
+        result = await updateCartQuantity(wc, params);
+        break;
 
       case "apply_coupon_to_cart":
-        return await applyCouponToCart(wc, params);
+        result = await applyCouponToCart(wc, params);
+        break;
 
       default:
-        return {
+        result = {
           success: false,
           data: null,
           message: `Unknown operation: ${operation}`
         };
     }
+
+    // Track operation metrics
+    await trackOperationMetrics({
+      operation,
+      duration_ms: Date.now() - start,
+      success: result.success,
+      domain,
+      customer_config_id: config?.id
+    });
+
+    // Add currency info to result
+    return {
+      ...result,
+      currency: currency.code,
+      currencySymbol: currency.symbol
+    };
   } catch (error) {
     console.error('[WooCommerce Agent] Error:', error);
+
+    // Track error metrics
+    const supabase = await createClient();
+    const { data: config } = await supabase
+      .from('customer_configs')
+      .select('id')
+      .eq('domain', domain)
+      .single();
+
+    await trackOperationMetrics({
+      operation,
+      duration_ms: Date.now() - start,
+      success: false,
+      error_type: error instanceof Error ? error.constructor.name : 'UnknownError',
+      error_message: error instanceof Error ? error.message : 'Unknown error',
+      domain,
+      customer_config_id: config?.id
+    });
+
     return {
       success: false,
       data: null,

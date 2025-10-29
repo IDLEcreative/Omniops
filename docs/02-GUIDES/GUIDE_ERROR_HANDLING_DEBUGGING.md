@@ -1,5 +1,40 @@
 # Error Handling and Debugging Documentation
 
+**Type:** Guide
+**Status:** Active
+**Last Updated:** 2025-10-29
+**Verified For:** v0.1.0
+**Dependencies:**
+- [Health Check API](../03-API/)
+- [Logger Utility](../../lib/logger.ts)
+- [Error Boundary Component](../../components/error-boundary.tsx)
+**Estimated Read Time:** 14 minutes
+
+## Purpose
+Comprehensive error handling and debugging system documentation covering error boundaries, structured logging, health checks, and debugging workflows. Provides graceful error recovery, detailed logging, and monitoring capabilities for production environments.
+
+## Quick Links
+- [Overview](#overview)
+- [Components](#components)
+- [Error Boundary Component](#1-error-boundary-component-componentserror-boundarytsx)
+- [Logger Utility](#2-logger-utility-libloggerts)
+- [Enhanced Error Pages](#3-enhanced-error-pages-apperrortsx)
+- [Health Check Endpoint](#4-health-check-endpoint-appapihealthroutets)
+- [Best Practices](#best-practices)
+- [Troubleshooting](#troubleshooting)
+- [Future Enhancements](#future-enhancements)
+
+## Keywords
+error handling, debugging, error boundary, logger utility, structured logging, health check, error recovery, monitoring, log export, error tracking, React errors, API errors, production debugging, error pages, uptime monitoring
+
+## Aliases
+- "error boundary" (also known as: error catcher, fallback UI, error recovery component)
+- "logger utility" (also known as: structured logging, logging system, log manager)
+- "health check" (also known as: uptime monitor, service health, availability check, liveness probe)
+- "structured logging" (also known as: log levels, contextual logging, diagnostic logging)
+
+---
+
 ## Overview
 
 This document describes the comprehensive error handling and debugging system implemented in the customer service agent application. The system provides graceful error recovery, detailed logging, and monitoring capabilities to prevent and diagnose issues.

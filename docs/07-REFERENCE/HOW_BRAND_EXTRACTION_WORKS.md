@@ -1,5 +1,27 @@
 # How Universal Brand Extraction Works
 
+**Type:** Reference
+**Status:** Active
+**Last Updated:** 2025-10-29
+**Verified For:** v0.1.0
+**Estimated Read Time:** 8 minutes
+
+## Purpose
+The brand extraction uses **pure pattern recognition** without any hardcoded brand names. It analyzes the structure and capitalization patterns in product titles to identify brands.
+
+## Quick Links
+- [Overview](#overview)
+- [Pattern Detection Methods](#pattern-detection-methods)
+- [Processing Flow](#processing-flow)
+- [Why It Works Universally](#why-it-works-universally)
+- [Success Factors](#success-factors)
+
+## Keywords
+brand, cases, detection, edge, extraction, factors, flow, handled, how, limitations
+
+---
+
+
 ## Overview
 The brand extraction uses **pure pattern recognition** without any hardcoded brand names. It analyzes the structure and capitalization patterns in product titles to identify brands.
 

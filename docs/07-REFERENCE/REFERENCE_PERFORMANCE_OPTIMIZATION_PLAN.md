@@ -1,5 +1,27 @@
 # Performance Optimization Plan
 
+**Type:** Reference
+**Status:** Active
+**Last Updated:** 2025-10-29
+**Verified For:** v0.1.0
+**Estimated Read Time:** 16 minutes
+
+## Purpose
+The primary bottleneck is in `lib/embeddings.ts:searchSimilarContent()`:
+
+## Quick Links
+- [Current Performance Issues](#current-performance-issues)
+- [Optimization Solutions](#optimization-solutions)
+- [Implementation Priority](#implementation-priority)
+- [Monitoring & Metrics](#monitoring--metrics)
+- [Expected Results](#expected-results)
+
+## Keywords
+current, expected, implementation, issues, metrics, monitoring, optimization, performance, plan, priority
+
+---
+
+
 ## Current Performance Issues
 
 ### 1. Database Query Bottlenecks (20+ seconds)

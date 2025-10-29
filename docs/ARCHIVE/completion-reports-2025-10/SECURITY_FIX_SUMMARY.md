@@ -24,7 +24,7 @@
 ---
 
 ### 2. Security Documentation
-**File**: [docs/SECURITY_MODEL.md](docs/SECURITY_MODEL.md)
+**File**: [docs/02-GUIDES/GUIDE_SECURITY_MODEL.md](docs/02-GUIDES/GUIDE_SECURITY_MODEL.md)
 
 **Size**: ~600 lines
 **Purpose**: Comprehensive security reference
@@ -242,7 +242,7 @@ Expected output:
 
 | Document | Purpose | Lines |
 |----------|---------|-------|
-| [SECURITY_MODEL.md](docs/SECURITY_MODEL.md) | Comprehensive security reference | ~600 |
+| [SECURITY_MODEL.md](docs/02-GUIDES/GUIDE_SECURITY_MODEL.md) | Comprehensive security reference | ~600 |
 | [SECURITY_MIGRATION_GUIDE.md](SECURITY_MIGRATION_GUIDE.md) | Step-by-step application guide | ~400 |
 | [20251028_fix_security_advisories.sql](supabase/migrations/20251028_fix_security_advisories.sql) | Migration SQL | 409 |
 | [verify-security-migration.ts](verify-security-migration.ts) | Verification script | ~400 |
@@ -345,7 +345,7 @@ This ensures:
 
 ### Files Created
 - [supabase/migrations/20251028_fix_security_advisories.sql](supabase/migrations/20251028_fix_security_advisories.sql)
-- [docs/SECURITY_MODEL.md](docs/SECURITY_MODEL.md)
+- [docs/02-GUIDES/GUIDE_SECURITY_MODEL.md](docs/02-GUIDES/GUIDE_SECURITY_MODEL.md)
 - [SECURITY_MIGRATION_GUIDE.md](SECURITY_MIGRATION_GUIDE.md)
 - [verify-security-migration.ts](verify-security-migration.ts)
 - [test-rls-policies.ts](test-rls-policies.ts)

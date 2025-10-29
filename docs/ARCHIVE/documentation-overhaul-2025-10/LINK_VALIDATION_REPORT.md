@@ -564,7 +564,7 @@
   - Reason: Anchor not found in source file
   - Link text: "Anchor not found in source file"
 
-### /docs/API_REFERENCE.md
+### /docs/03-API/REFERENCE_API_OVERVIEW.md
 
 - **Line 510:** `./MIGRATION_V2.md`
   - Reason: File not found
@@ -1234,7 +1234,7 @@
   - Reason: File not found
   - Link text: "File not found"
 
-### /docs/DATABASE_CLEANUP.md
+### /docs/02-GUIDES/GUIDE_DATABASE_CLEANUP.md
 
 - **Line 513:** `./SCRAPING.md`
   - Reason: File not found
@@ -1244,7 +1244,7 @@
   - Reason: File not found
   - Link text: "File not found"
 
-### /docs/DEPENDENCY_INJECTION.md
+### /docs/01-ARCHITECTURE/ARCHITECTURE_DEPENDENCY_INJECTION.md
 
 - **Line 586:** `../__tests__/api/chat/route.test.ts`
   - Reason: File not found
@@ -1778,7 +1778,7 @@
   - Reason: File not found
   - Link text: "File not found"
 
-### /docs/RLS_TESTING_INFRASTRUCTURE.md
+### /docs/04-DEVELOPMENT/testing/TESTING_RLS_INFRASTRUCTURE.md
 
 - **Line 453:** `../test-utils/integration/multi-tenant-isolation.test.ts`
   - Reason: File not found
@@ -1790,7 +1790,7 @@
   - Reason: Anchor not found in source file
   - Link text: "Anchor not found in source file"
 
-### /docs/setup/QUICK_START.md
+### /docs/00-GETTING-STARTED/QUICK_START.md
 
 - **Line 228:** `./CHAT_SYSTEM_DOCS.md`
   - Reason: File not found
@@ -1840,7 +1840,7 @@
   - Reason: Anchor not found in source file
   - Link text: "Anchor not found in source file"
 
-### /docs/TELEMETRY_SYSTEM.md
+### /docs/01-ARCHITECTURE/ARCHITECTURE_TELEMETRY_SYSTEM.md
 
 - **Line 328:** `./CHAT_ARCHITECTURE.md`
   - Reason: File not found
@@ -2292,7 +2292,7 @@ Links that work but may need attention:
 
 ### app.supabase.com (1)
 
-- /docs/setup/VERCEL_ENV_SETUP.md:55
+- /docs/00-GETTING-STARTED/VERCEL_ENV_SETUP.md:55
 
 ### cheatsheetseries.owasp.org (1)
 
@@ -2363,7 +2363,7 @@ Links that work but may need attention:
 
 ### logrocket.com (1)
 
-- /docs/DASHBOARD.md:2010
+- /docs/02-GUIDES/GUIDE_DASHBOARD.md:2010
 
 ### modelcontextprotocol.io (1)
 
@@ -2417,7 +2417,7 @@ Links that work but may need attention:
 
 ### postgrest.org (1)
 
-- /docs/RLS_TESTING_INFRASTRUCTURE.md:451
+- /docs/04-DEVELOPMENT/testing/TESTING_RLS_INFRASTRUCTURE.md:451
 
 ### radix-ui.com (1)
 
@@ -2425,7 +2425,7 @@ Links that work but may need attention:
 
 ### react.dev (2)
 
-- /docs/DASHBOARD.md:2003
+- /docs/02-GUIDES/GUIDE_DASHBOARD.md:2003
 - /docs/README.md:435
 
 ### redis.io (1)
@@ -2443,7 +2443,7 @@ Links that work but may need attention:
 
 ### sentry.io (1)
 
-- /docs/DASHBOARD.md:2009
+- /docs/02-GUIDES/GUIDE_DASHBOARD.md:2009
 
 ### shopify.dev (1)
 
@@ -2456,11 +2456,11 @@ Links that work but may need attention:
 - /docs/ARCHIVE/analysis/SECURITY_AUDIT_REPORT.md:113
 - /docs/ARCHIVE/analysis/SECURITY_AUDIT_REPORT.md:114
 - /docs/ARCHIVE/analysis/SECURITY_AUDIT_REPORT.md:115
-- /docs/DASHBOARD.md:2004
+- /docs/02-GUIDES/GUIDE_DASHBOARD.md:2004
 - /docs/DATABASE_OPTIMIZATION.md:223
 - /docs/GETTING_STARTED.md:10
 - /docs/README.md:434
-- /docs/RLS_TESTING_INFRASTRUCTURE.md:450
+- /docs/04-DEVELOPMENT/testing/TESTING_RLS_INFRASTRUCTURE.md:450
 - ... and 6 more
 
 ### tailwindcss.com (1)
@@ -2478,7 +2478,7 @@ Links that work but may need attention:
 
 ### vercel.com (2)
 
-- /docs/DASHBOARD.md:2008
+- /docs/02-GUIDES/GUIDE_DASHBOARD.md:2008
 - /docs/SETUP_GUIDE.md:101
 
 ### wiki.postgresql.org (1)
@@ -2500,7 +2500,7 @@ Links that work but may need attention:
 
 ### www.postman.com (1)
 
-- /docs/DASHBOARD.md:2005
+- /docs/02-GUIDES/GUIDE_DASHBOARD.md:2005
 
 ### www.thompsonseparts.co.uk (4)
 

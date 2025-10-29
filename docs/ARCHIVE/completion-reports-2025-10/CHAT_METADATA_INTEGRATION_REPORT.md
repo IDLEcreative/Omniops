@@ -9,7 +9,7 @@
 
 ## Executive Summary
 
-The metadata integration specified in `docs/EXPERT_LEVEL_IMPROVEMENT_PLAN.md` Section 1.1 has been **fully implemented** in the chat route. All required integration points are in place and functional.
+The metadata integration specified in `docs/04-ANALYSIS/ANALYSIS_EXPERT_IMPROVEMENTS.md` Section 1.1 has been **fully implemented** in the chat route. All required integration points are in place and functional.
 
 ---
 
@@ -257,7 +257,7 @@ The following changes were made to integrate the metadata system:
 
 ## Compliance with Improvement Plan
 
-**Reference:** `docs/EXPERT_LEVEL_IMPROVEMENT_PLAN.md` Section 1.1
+**Reference:** `docs/04-ANALYSIS/ANALYSIS_EXPERT_IMPROVEMENTS.md` Section 1.1
 
 | Requirement | Status | Notes |
 |-------------|--------|-------|

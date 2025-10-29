@@ -1,5 +1,27 @@
 # Multi-Tenant Chat Widget Setup Guide
 
+**Type:** Architecture
+**Status:** Active
+**Last Updated:** 2025-10-29
+**Verified For:** v0.1.0
+**Estimated Read Time:** 7 minutes
+
+## Purpose
+The chat widget currently works for single-tenant testing with Thompson's E Parts. For production multi-tenant deployment, several changes are needed.
+
+## Quick Links
+- [Current State](#current-state)
+- [How Multi-Tenancy Should Work](#how-multi-tenancy-should-work)
+- [Required Changes for Production](#required-changes-for-production)
+- [Testing Strategy for Multiple Customers](#testing-strategy-for-multiple-customers)
+- [Security Requirements](#security-requirements)
+
+## Keywords
+architecture, changes, checklist, current, customers, deployment, example, files, flow, implementation
+
+---
+
+
 ## Current State
 The chat widget currently works for single-tenant testing with Thompson's E Parts. For production multi-tenant deployment, several changes are needed.
 

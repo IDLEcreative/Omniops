@@ -1,5 +1,27 @@
 # Bot Training Quick Reference
 
+**Type:** Reference
+**Status:** Active
+**Last Updated:** 2025-10-29
+**Verified For:** v0.1.0
+**Estimated Read Time:** 7 minutes
+
+## Purpose
+http://localhost:3000/dashboard/training
+
+## Quick Links
+- [🚀 Quick Start](#-quick-start)
+- [📊 Training Data Types](#-training-data-types)
+- [🔥 Pro Tips](#-pro-tips)
+- [⚡ API Quick Reference](#-api-quick-reference)
+- [🎯 Training Strategy](#-training-strategy)
+
+## Keywords
+avoid, common, data, metrics, mistakes, need, quick, reference, start, strategy
+
+---
+
+
 ## 🚀 Quick Start
 
 ### 1. Access Training

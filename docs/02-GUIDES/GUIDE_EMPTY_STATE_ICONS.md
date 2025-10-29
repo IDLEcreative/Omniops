@@ -1,5 +1,39 @@
 # Empty State Icon Mapping Guide
 
+**Type:** Guide
+**Status:** Active
+**Last Updated:** 2025-10-29
+**Verified For:** v0.1.0
+**Dependencies:**
+- lucide-react icon library
+- EmptyState component (components/ui/empty-state.tsx)
+**Estimated Read Time:** 11 minutes
+
+## Purpose
+Standardized icon mapping reference for EmptyState component using Lucide React icons across all dashboard pages. Provides consistent visual communication with categorized icon selections for people/users, communication, analytics, time, search, system, e-commerce, performance, and content contexts. Includes decision tree, usage patterns, implementation examples, and multi-tenant considerations.
+
+## Quick Links
+- [Icon Import Statement](#icon-import-statement)
+- [Core Icon Mappings](#core-icon-mappings)
+- [Usage Patterns by Context](#usage-patterns-by-context)
+- [Implementation Examples](#implementation-examples)
+- [Decision Tree for Icon Selection](#decision-tree-for-icon-selection)
+- [Best Practices](#best-practices)
+- [Extending the Icon Set](#extending-the-icon-set)
+- [Multi-Tenant Considerations](#multi-tenant-considerations)
+
+## Keywords
+Lucide React icons, empty state design, icon mapping, visual consistency, EmptyState component, icon guidelines, UI patterns, icon selection, dashboard icons, empty data states, icon categorization, icon decision tree, component design, icon semantics
+
+## Aliases
+- "empty state" (also known as: no data state, zero state, blank slate, null state, empty view)
+- "Lucide icons" (also known as: Lucide React, icon library, SVG icons, React icons)
+- "icon mapping" (also known as: icon guide, icon reference, icon standards, icon dictionary, icon catalog)
+- "EmptyState component" (also known as: empty view component, no-data component, zero state component)
+- "visual consistency" (also known as: design consistency, UI uniformity, icon standards, design patterns)
+
+---
+
 This guide provides a standardized mapping of Lucide React icons to be used with the `EmptyState` component across the application. Following these guidelines ensures visual consistency and intuitive communication throughout the user interface.
 
 ## Icon Import Statement

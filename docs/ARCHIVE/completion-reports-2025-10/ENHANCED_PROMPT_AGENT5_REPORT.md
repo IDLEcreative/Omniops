@@ -2,7 +2,7 @@
 
 **Date:** 2025-10-26
 **Task:** Enhance system prompts with context-aware instructions
-**Reference:** docs/EXPERT_LEVEL_IMPROVEMENT_PLAN.md (Section 3.1)
+**Reference:** docs/04-ANALYSIS/ANALYSIS_EXPERT_IMPROVEMENTS.md (Section 3.1)
 **Status:** ✅ COMPLETE
 
 ---
@@ -165,7 +165,7 @@ Turn 4: User says "tell me about item 2"
 
 ## Expected Impact
 
-### Accuracy Improvements (from docs/EXPERT_LEVEL_IMPROVEMENT_PLAN.md)
+### Accuracy Improvements (from docs/04-ANALYSIS/ANALYSIS_EXPERT_IMPROVEMENTS.md)
 
 | Metric | Baseline | Target | Expected Impact |
 |--------|----------|--------|-----------------|

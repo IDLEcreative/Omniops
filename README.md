@@ -82,7 +82,7 @@ npm run dev
 - Zero tolerance for `any` types in new code
 - Comprehensive error handling
 
-**→ Full testing guide:** [docs/TESTING_GUIDE.md](docs/TESTING_GUIDE.md)
+**→ Full testing guide:** [docs/04-DEVELOPMENT/testing/TESTING_GUIDE.md](docs/04-DEVELOPMENT/testing/TESTING_GUIDE.md)
 
 ---
 
@@ -198,7 +198,7 @@ Enterprise-grade scalability with domain-based isolation.
 - [Privacy APIs](docs/api/PRIVACY_API.md)
 
 ### Development
-- [Testing Guide](docs/TESTING_GUIDE.md) - Comprehensive testing patterns and best practices
+- [Testing Guide](docs/04-DEVELOPMENT/testing/TESTING_GUIDE.md) - Comprehensive testing patterns and best practices
 - [Test Suite Overview](__tests__/README.md) - Test directory structure and statistics
 - [Code Patterns](docs/04-DEVELOPMENT/code-patterns/)
 - [Component Library](components/README.md)

@@ -1,5 +1,27 @@
 # Deployment Runbooks
 
+**Type:** Guide
+**Status:** Active
+**Last Updated:** 2025-10-29
+**Verified For:** v0.1.0
+**Estimated Read Time:** 155 minutes
+
+## Purpose
+> **Comprehensive operational guides for all deployment scenarios** > **Version**: 1.0 > **Last Updated**: October 2025
+
+## Quick Links
+- [Table of Contents](#table-of-contents)
+- [Runbook Overview](#runbook-overview)
+- [1. Standard Release Deployment](#1-standard-release-deployment)
+- [2. Hotfix Deployment](#2-hotfix-deployment)
+- [3. Database Migration](#3-database-migration)
+
+## Keywords
+cause, contacts, contents, database, deploy, deployment, detection, disaster, emergency, hotfix
+
+---
+
+
 > **Comprehensive operational guides for all deployment scenarios**
 > **Version**: 1.0
 > **Last Updated**: October 2025

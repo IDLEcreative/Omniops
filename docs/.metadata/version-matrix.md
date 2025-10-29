@@ -144,8 +144,8 @@
 
 | Document | Last Updated | Verified Accurate For | Next Review | Status |
 |----------|-------------|----------------------|-------------|---------|
-| `docs/setup/QUICK_START.md` | 2025-10-24 | v0.1.0 | As-needed | ✅ Current |
-| `docs/setup/MODEL_CONFIGURATION.md` | 2025-01-09 | v0.0.9 | As-needed | ✅ Current |
+| `docs/00-GETTING-STARTED/QUICK_START.md` | 2025-10-24 | v0.1.0 | As-needed | ✅ Current |
+| `docs/00-GETTING-STARTED/MODEL_CONFIGURATION.md` | 2025-01-09 | v0.0.9 | As-needed | ✅ Current |
 | `docs/00-GETTING-STARTED/SETUP_DOCKER_PRODUCTION.md` | 2024-10-30 | v0.0.6 | As-needed | ✅ Current |
 | `docs/00-GETTING-STARTED/SETUP_DOCKER_PRODUCTION.md` | 2024-10-30 | v0.0.6 | As-needed | ✅ Current |
 | `.env.example` | 2025-10-24 | v0.1.0 | As-needed | ✅ Current |

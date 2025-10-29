@@ -1,5 +1,30 @@
 # Chat System Documentation
 
+**Type:** Guide (Redirect)
+**Status:** Deprecated - Redirects to consolidated documentation
+**Last Updated:** 2025-10-29
+**Verified For:** v0.1.0
+**Dependencies:**
+- [Chat System README](../02-FEATURES/chat-system/README.md) - New unified location
+- [Hallucination Prevention](GUIDE_HALLUCINATION_PREVENTION.md) - Anti-hallucination guide
+**Estimated Read Time:** 1 minute
+
+## Purpose
+Redirect file pointing to consolidated chat system documentation, guiding users to the new unified location in docs/02-FEATURES/chat-system/ with updated architecture, API reference, and comprehensive implementation details.
+
+## Quick Links
+- [Main Documentation](../02-FEATURES/chat-system/README.md) - Complete chat system guide
+- [Hallucination Prevention](GUIDE_HALLUCINATION_PREVENTION.md) - Accuracy safeguards
+- [Search Architecture](../01-ARCHITECTURE/ARCHITECTURE_SEARCH_SYSTEM.md) - RAG implementation
+
+## Keywords
+redirect, deprecated, consolidated documentation, chat system, migration, unified docs, documentation reorganization
+
+## Aliases
+- "consolidated documentation" (also known as: unified docs, single source of truth, merged documentation)
+
+---
+
 **⚠️ THIS FILE HAS BEEN CONSOLIDATED**
 
 This documentation has been moved to the new unified location:

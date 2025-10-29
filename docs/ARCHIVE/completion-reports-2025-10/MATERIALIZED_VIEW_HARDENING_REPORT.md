@@ -311,7 +311,7 @@ SELECT * FROM organization_seat_usage; -- Should return permission denied
 - **SECURITY_ADVISORIES_RESOLUTION.md** - Original security advisory
 - **SUPABASE_SCHEMA.md** - Complete database schema reference
 - **supabase/migrations/20251021_add_organization_indexes.sql** - Original view creation
-- **docs/SECURITY_MODEL.md** - Application security model (if exists)
+- **docs/02-GUIDES/GUIDE_SECURITY_MODEL.md** - Application security model (if exists)
 
 ---
 

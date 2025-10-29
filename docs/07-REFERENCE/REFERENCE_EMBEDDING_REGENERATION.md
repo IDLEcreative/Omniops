@@ -1,5 +1,27 @@
 # Embedding Regeneration Documentation
 
+**Type:** Reference
+**Status:** Active
+**Last Updated:** 2025-10-29
+**Verified For:** v0.1.0
+**Estimated Read Time:** 8 minutes
+
+## Purpose
+Successfully completed full regeneration of embeddings for thompsonseparts.co.uk to fix metadata enrichment and remove navigation contamination.
+
+## Quick Links
+- [Overview](#overview)
+- [Problem Statement](#problem-statement)
+- [Solution Implemented](#solution-implemented)
+- [Results](#results)
+- [Usage](#usage)
+
+## Keywords
+chat, details, embedding, files, future, impact, implemented, improvements, learned, lessons
+
+---
+
+
 ## Overview
 Successfully completed full regeneration of embeddings for thompsonseparts.co.uk to fix metadata enrichment and remove navigation contamination.
 

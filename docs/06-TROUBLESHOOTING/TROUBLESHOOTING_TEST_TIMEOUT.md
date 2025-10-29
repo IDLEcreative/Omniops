@@ -1,5 +1,27 @@
 # Test Timeout Investigation Report
 
+**Type:** Troubleshooting
+**Status:** Active
+**Last Updated:** 2025-10-29
+**Verified For:** v0.1.0
+**Estimated Read Time:** 13 minutes
+
+## Purpose
+Integration tests in `__tests__/api/chat/route.test.ts` are timing out after 2 minutes, preventing validation of the commerce provider refactoring.
+
+## Quick Links
+- [Problem Statement](#problem-statement)
+- [Root Cause Analysis](#root-cause-analysis)
+- [Evidence](#evidence)
+- [Performance Bottlenecks](#performance-bottlenecks)
+- [Solutions](#solutions)
+
+## Keywords
+analysis, bottlenecks, cause, conclusion, evidence, metrics, performance, problem, recommendations, root
+
+---
+
+
 ## Problem Statement
 Integration tests in `__tests__/api/chat/route.test.ts` are timing out after 2 minutes, preventing validation of the commerce provider refactoring.
 

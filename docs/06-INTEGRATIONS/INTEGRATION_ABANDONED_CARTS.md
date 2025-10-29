@@ -1,5 +1,27 @@
 # WooCommerce Abandoned Cart Tracking
 
+**Type:** Integration
+**Status:** Active
+**Last Updated:** 2025-10-29
+**Verified For:** v0.1.0
+**Estimated Read Time:** 25 minutes
+
+## Purpose
+The Abandoned Cart Tracking feature provides comprehensive monitoring and recovery tools for incomplete purchases in your WooCommerce store. Since WooCommerce REST API v3 doesn't provide direct cart access, this implementation uses pending, on-hold, and failed orders as a proxy for abandoned carts.
+
+## Quick Links
+- [Overview](#overview)
+- [Table of Contents](#table-of-contents)
+- [Architecture](#architecture)
+- [Installation](#installation)
+- [API Reference](#api-reference)
+
+## Keywords
+abandoned, architecture, best, carts, configuration, contents, documentation, examples, guide, installation
+
+---
+
+
 ## Overview
 
 The Abandoned Cart Tracking feature provides comprehensive monitoring and recovery tools for incomplete purchases in your WooCommerce store. Since WooCommerce REST API v3 doesn't provide direct cart access, this implementation uses pending, on-hold, and failed orders as a proxy for abandoned carts.

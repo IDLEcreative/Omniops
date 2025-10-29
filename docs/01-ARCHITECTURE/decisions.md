@@ -1,5 +1,27 @@
 # Architecture Decision Records
 
+**Type:** Architecture
+**Status:** Active
+**Last Updated:** 2025-10-29
+**Verified For:** v0.1.0
+**Estimated Read Time:** 25 minutes
+
+## Purpose
+This document captures key architectural decisions made during the development of the Omniops AI customer service chat widget. These ADRs serve as historical context for understanding why certain technical choices were made.
+
+## Quick Links
+- [ADR-001: Why Supabase as Database Platform](#adr-001-why-supabase-as-database-platform)
+- [ADR-002: Why pgvector for Vector Search](#adr-002-why-pgvector-for-vector-search)
+- [ADR-003: Why Next.js 15 and React 19](#adr-003-why-nextjs-15-and-react-19)
+- [ADR-004: Why Multi-Tenant Architecture](#adr-004-why-multi-tenant-architecture)
+- [ADR-005: Why Hybrid Search (Vector + Keyword)](#adr-005-why-hybrid-search-vector--keyword)
+
+## Keywords
+additional, architecture, chat, crawlee, credential, database, decision, decisions, document, embeddable
+
+---
+
+
 This document captures key architectural decisions made during the development of the Omniops AI customer service chat widget. These ADRs serve as historical context for understanding why certain technical choices were made.
 
 ---

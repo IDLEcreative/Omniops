@@ -1,5 +1,39 @@
 # Vercel Environment Variables Setup Guide
 
+**Type:** Setup
+**Status:** Active
+**Last Updated:** 2025-10-29
+**Verified For:** v2.1.0
+**Dependencies:**
+- [SETUP_SUPABASE.md](SETUP_SUPABASE.md)
+- [VERCEL_REDIS_SETUP.md](VERCEL_REDIS_SETUP.md)
+- [.env.example](../../.env.example)
+**Estimated Read Time:** 7 minutes
+
+## Purpose
+Step-by-step configuration guide for setting up 7 required Vercel environment variables including Supabase credentials (URL, anon key, service role key), OpenAI API key, Redis connection string, 32-byte AES encryption key, with instructions for accessing Vercel dashboard, generating secure keys, testing deployments, and security best practices for production vs development environments.
+
+## Quick Links
+- [Required Environment Variables](#required-environment-variables)
+- [How to Add Environment Variables in Vercel](#how-to-add-environment-variables-in-vercel)
+- [Verifying Your Setup](#verifying-your-setup)
+- [Getting Your Supabase Keys](#getting-your-supabase-keys)
+- [Generating an Encryption Key](#generating-an-encryption-key)
+- [Troubleshooting](#troubleshooting)
+
+## Keywords
+Vercel environment variables, Supabase configuration, NEXT_PUBLIC_SUPABASE_URL, SUPABASE_SERVICE_ROLE_KEY, OPENAI_API_KEY, REDIS_URL, ENCRYPTION_KEY, deployment secrets, production config, environment setup, Vercel dashboard, API key management, crypto.randomBytes, service role security, anon key, 32-byte encryption
+
+## Aliases
+- "NEXT_PUBLIC_SUPABASE_URL" (also known as: Supabase URL, project URL, database URL)
+- "SUPABASE_SERVICE_ROLE_KEY" (also known as: service key, admin key, backend key)
+- "NEXT_PUBLIC_SUPABASE_ANON_KEY" (also known as: anon key, public key, client key)
+- "ENCRYPTION_KEY" (also known as: secret key, AES key, credential encryption key)
+- "REDIS_URL" (also known as: Redis connection string, cache URL, job queue URL)
+- "environment variables" (also known as: env vars, config vars, deployment secrets)
+
+---
+
 ## Required Environment Variables
 
 You need to configure the following environment variables in your Vercel project settings:

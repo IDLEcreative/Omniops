@@ -1,5 +1,27 @@
 # Supabase CLI Documentation
 
+**Type:** Reference
+**Status:** Active
+**Last Updated:** 2025-10-29
+**Verified For:** v0.1.0
+**Estimated Read Time:** 32 minutes
+
+## Purpose
+> Complete guide for using Supabase CLI with the OmniOps project
+
+## Quick Links
+- [Table of Contents](#table-of-contents)
+- [Installation & Setup](#installation--setup)
+- [Core Commands](#core-commands)
+- [Database Management](#database-management)
+- [TypeScript Types](#typescript-types)
+
+## Keywords
+advanced, card, cli, commands, contents, core, database, development, edge, features
+
+---
+
+
 > Complete guide for using Supabase CLI with the OmniOps project
 
 ## Table of Contents

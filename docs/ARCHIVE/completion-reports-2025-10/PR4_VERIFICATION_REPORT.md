@@ -183,7 +183,7 @@ Tests:       16 passed, 16 total
 **Files Created:**
 - `lib/auth/api-helpers.ts` - Reusable auth utilities
 - `__tests__/api/customer-config/security.test.ts` - 16 security tests
-- `docs/CUSTOMER_CONFIG_SECURITY.md` - Documentation
+- `docs/02-GUIDES/GUIDE_CUSTOMER_CONFIG_SECURITY.md` - Documentation
 
 **Files Modified:**
 - `app/api/customer/config/create-handler.ts` - Added authentication

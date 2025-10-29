@@ -1,5 +1,27 @@
 # NPX Scripts Roadmap
 
+**Type:** Reference
+**Status:** Active
+**Last Updated:** 2025-10-29
+**Verified For:** v0.1.0
+**Estimated Read Time:** 19 minutes
+
+## Purpose
+This document tracks the implementation status of NPX utility scripts that are mentioned in documentation but not yet built. These scripts are planned enhancements to improve developer experience and operational efficiency.
+
+## Quick Links
+- [Overview](#overview)
+- [High Priority Scripts](#high-priority-scripts)
+- [Medium Priority Scripts](#medium-priority-scripts)
+- [Low Priority Scripts](#low-priority-scripts)
+- [Implementation Strategy](#implementation-strategy)
+
+## Keywords
+contributing, design, documentation, high, implementation, legend, medium, notes, npx, overview
+
+---
+
+
 **Last Updated:** 2025-10-24
 **Purpose:** Track planned NPX utility scripts referenced in CLAUDE.md but not yet implemented
 
@@ -332,7 +354,7 @@ All NPX scripts should follow these principles:
 - **[NPX_TOOLS_GUIDE.md](NPX_TOOLS_GUIDE.md)** - Guide for existing NPX tools
 - **[ALL_NPX_TOOLS_REFERENCE.md](ALL_NPX_TOOLS_REFERENCE.md)** - Complete reference of all tools
 - **[HALLUCINATION_PREVENTION.md](HALLUCINATION_PREVENTION.md)** - Anti-hallucination guidelines
-- **[DATABASE_CLEANUP.md](DATABASE_CLEANUP.md)** - Database cleanup documentation (planned)
+- **[DATABASE_CLEANUP.md](docs/02-GUIDES/GUIDE_DATABASE_CLEANUP.md)** - Database cleanup documentation (planned)
 
 ---
 

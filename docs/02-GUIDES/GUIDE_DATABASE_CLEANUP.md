@@ -1,5 +1,31 @@
 # Omniops Directory Cleanup Guide
 
+**Type:** Guide
+**Status:** Active
+**Last Updated:** 2025-10-29
+**Verified For:** v0.1.0
+**Dependencies:**
+- [Database Schema](../01-ARCHITECTURE/database-schema.md) - Table structures
+**Estimated Read Time:** 8 minutes
+
+## Purpose
+Operational guide for cleaning nested directory structure in Omniops project using cleanup-root.sh script, analyzing file completeness, creating backups, moving complete application to root, resolving conflicts, and organizing loose test files.
+
+## Quick Links
+- [Current Structure Issue](#current-structure-issue) - Problem description
+- [What the Script Does](#what-the-script-does) - Cleanup operations
+- [Key Decisions](#key-decisions-the-script-makes) - File preference logic
+- [Usage Options](#usage-options) - Dry run and execution
+
+## Keywords
+directory cleanup, nested structure, script automation, file organization, backup management, conflict resolution, project structure, root directory, configuration management
+
+## Aliases
+- "nested structure" (also known as: duplicate directories, recursive folders, nested paths)
+- "cleanup script" (also known as: reorganization tool, structure flattening, directory merger)
+
+---
+
 This guide explains how to use the `cleanup-root.sh` script to clean up the nested directory structure in the Omniops project.
 
 ## Current Structure Issue

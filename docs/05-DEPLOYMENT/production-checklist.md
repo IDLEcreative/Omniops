@@ -1,5 +1,27 @@
 # Production Deployment Checklist
 
+**Type:** Guide
+**Status:** Active
+**Last Updated:** 2025-10-29
+**Verified For:** v0.1.0
+**Estimated Read Time:** 81 minutes
+
+## Purpose
+> **Comprehensive Guide for Deploying Omniops to Production** > **Version**: 2.0 > **Last Updated**: October 2025
+
+## Quick Links
+- [Table of Contents](#table-of-contents)
+- [1. Pre-Deployment Checklist](#1-pre-deployment-checklist)
+- [2. Environment Setup](#2-environment-setup)
+- [3. Database Migration](#3-database-migration)
+- [4. Deployment Process](#4-deployment-process)
+
+## Keywords
+checklist, commands, compliance, contacts, contents, database, deployment, documentation, emergency, environment
+
+---
+
+
 > **Comprehensive Guide for Deploying Omniops to Production**
 > **Version**: 2.0
 > **Last Updated**: October 2025

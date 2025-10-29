@@ -1,5 +1,36 @@
 # Chatbot Customization - Final Clean Version
 
+**Type:** Guide
+**Status:** Active
+**Last Updated:** 2025-10-29
+**Verified For:** v0.1.0
+**Dependencies:**
+- React 19.1.0, Next.js 15.4.3, shadcn/ui components
+- app/dashboard/customize/* components
+**Estimated Read Time:** 5 minutes
+
+## Purpose
+Concise documentation of the final streamlined customization interface at /dashboard/customize with 3-tab design (Essentials, Intelligence, Connect). Describes minimal file structure (7 files total), user-facing settings elimination of technical bloat, smart defaults philosophy, and successfully cleaned build size (14.3 kB) after removing advanced/v2 complexity.
+
+## Quick Links
+- [File Structure](#file-structure)
+- [What Users See](#what-users-see)
+- [The Philosophy](#the-philosophy)
+- [Build Size](#build-size)
+- [What's Deleted](#whats-deleted)
+
+## Keywords
+customization interface, simplified UI, minimal design, smart defaults, widget customization, 3-tab design, Essentials tab, Intelligence tab, Connect tab, personality selector, brand customization, chatbot configuration, streamlined UX, no-bloat design
+
+## Aliases
+- "customization" (also known as: widget config, bot settings, chat configuration, appearance settings)
+- "Essentials" (also known as: appearance settings, basic settings, visual config, core settings)
+- "Intelligence" (also known as: AI settings, personality config, bot behavior, language settings)
+- "Connect" (also known as: integrations, e-commerce settings, data sources, privacy settings)
+- "smart defaults" (also known as: automatic settings, preset configurations, optimized defaults, best practices)
+
+---
+
 ## What We Have Now
 
 **One interface. Minimal. Elegant. No bloat.**

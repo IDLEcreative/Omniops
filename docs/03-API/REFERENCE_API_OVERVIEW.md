@@ -1,5 +1,27 @@
 # API Documentation
 
+**Type:** Reference
+**Status:** Active
+**Last Updated:** 2025-10-29
+**Verified For:** v0.1.0
+**Estimated Read Time:** 27 minutes
+
+## Purpose
+Complete API reference for the Customer Service Agent.
+
+## Quick Links
+- [Base URL](#base-url)
+- [Authentication](#authentication)
+- [Rate Limiting](#rate-limiting)
+- [Endpoints](#endpoints)
+- [Error Handling](#error-handling)
+
+## Keywords
+api, authentication, base, endpoints, error, examples, handling, limiting, overview, rate
+
+---
+
+
 Complete API reference for the Customer Service Agent.
 
 ## Base URL

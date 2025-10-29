@@ -1,5 +1,38 @@
 # Chat API Model Configuration
 
+**Type:** Setup
+**Status:** Active
+**Last Updated:** 2025-10-29
+**Verified For:** v2.1.0
+**Dependencies:**
+- [app/api/chat/route.ts](../../app/api/chat/route.ts)
+- [.env.local](.env.local)
+**Estimated Read Time:** 8 minutes
+
+## Purpose
+Technical configuration guide for AI model selection covering GPT-5-mini primary model (2500 tokens, low reasoning effort, 6-14s response time, $0.01/1K tokens), GPT-4.1 fallback model (500 tokens, 0.7 temperature), reasoning effort levels (minimal/low/medium/high), performance benchmarks, token usage monitoring, and automatic fallback mechanism with testing commands and troubleshooting procedures.
+
+## Quick Links
+- [Current Setup](#current-setup-)
+- [Reasoning Effort Explained](#reasoning-effort-explained)
+- [Performance Characteristics](#performance-characteristics)
+- [Quick Commands](#quick-commands)
+- [Configuration Location](#configuration-location)
+- [Troubleshooting](#troubleshooting)
+
+## Keywords
+GPT-5-mini configuration, AI model selection, reasoning effort levels, max_completion_tokens, GPT-4.1 fallback, token usage monitoring, response time optimization, USE_GPT5_MINI, reasoning tokens, temperature settings, model benchmarks, automatic fallback, chat API configuration, low reasoning effort, performance tuning
+
+## Aliases
+- "GPT-5-mini" (also known as: primary model, main AI model, GPT5 mini)
+- "reasoning effort" (also known as: thinking level, analysis depth, reasoning intensity)
+- "max_completion_tokens" (also known as: output limit, completion length, response tokens)
+- "fallback model" (also known as: backup model, secondary AI, GPT-4.1)
+- "reasoning tokens" (also known as: thinking tokens, analysis tokens, internal reasoning)
+- "low reasoning" (also known as: balanced mode, standard reasoning, moderate thinking)
+
+---
+
 ## Current Setup ✅
 
 ### Primary Model: GPT-5-mini

@@ -516,7 +516,7 @@ This agent orchestration successfully implemented **32 integration tests in 4-6 
 ## 🔗 Related Documents
 
 - [TECH_DEBT.md](TECH_DEBT.md) - Item 9 completion reference
-- [CONVERSATION_ACCURACY_IMPROVEMENTS.md](docs/CONVERSATION_ACCURACY_IMPROVEMENTS.md) - Metadata system
+- [CONVERSATION_ACCURACY_IMPROVEMENTS.md](docs/02-GUIDES/GUIDE_CONVERSATION_ACCURACY.md) - Metadata system
 - [HALLUCINATION_PREVENTION.md](docs/HALLUCINATION_PREVENTION.md) - Anti-hallucination rules
 - [METADATA_SYSTEM_E2E_VERIFICATION.md](METADATA_SYSTEM_E2E_VERIFICATION.md) - Previous validation
 - Individual agent reports (10 files listed above)

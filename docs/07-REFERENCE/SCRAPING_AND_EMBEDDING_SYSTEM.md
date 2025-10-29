@@ -1,5 +1,20 @@
 # Scraping & Embedding System Documentation
 
+**Type:** Reference
+**Status:** Active
+**Last Updated:** 2025-10-29
+**Verified For:** v0.1.0
+**Estimated Read Time:** 1 minutes
+
+## Purpose
+Please refer to the comprehensive scraping documentation at:
+
+## Keywords
+embedding, scraping, system
+
+---
+
+
 **⚠️ This document has been moved and consolidated.**
 
 Please refer to the comprehensive scraping documentation at:

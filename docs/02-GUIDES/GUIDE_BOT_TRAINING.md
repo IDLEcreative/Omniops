@@ -1,5 +1,35 @@
 # Bot Training Guide
 
+**Type:** Guide
+**Status:** Active
+**Last Updated:** 2025-10-29
+**Verified For:** v0.1.0
+**Dependencies:**
+- [Database Schema](../01-ARCHITECTURE/database-schema.md) - training_data table reference
+- [Embedding Search](GUIDE_EMBEDDING_SEARCH.md) - Vector search integration
+**Estimated Read Time:** 16 minutes
+
+## Purpose
+Comprehensive guide to customizing and improving AI assistant responses through website scraping, file uploads, Q&A pairs, and custom text training, ensuring accurate and brand-aligned customer service interactions with practical API reference and best practices.
+
+## Quick Links
+- [Training Methods](#training-methods) - Website scraping, files, Q&A, text
+- [API Reference](#api-reference) - REST API endpoints and examples
+- [Database Schema](#database-schema) - Table structures and relationships
+- [Best Practices](#best-practices) - Content quality and security
+- [Troubleshooting](#troubleshooting) - Common issues and solutions
+
+## Keywords
+bot training, AI customization, chatbot, embeddings, vector search, OpenAI, content training, website scraping, Q&A pairs, knowledge base, customer service AI, training data, semantic search, pgvector, machine learning
+
+## Aliases
+- "training data" (also known as: knowledge base, bot content, AI training corpus)
+- "embeddings" (also known as: vector embeddings, semantic representations, vector search)
+- "Q&A pairs" (also known as: FAQ training, question-answer dataset, conversational training)
+- "website scraping" (also known as: web crawling, content extraction, site indexing)
+
+---
+
 ## Overview
 
 The Bot Training feature allows you to customize and improve your AI assistant's responses by providing it with specific content, Q&A pairs, and documents. This ensures your bot gives accurate, brand-aligned responses to customer queries.

@@ -1,5 +1,27 @@
 # Dashboard API Documentation
 
+**Type:** Reference
+**Status:** Active
+**Last Updated:** 2025-10-29
+**Verified For:** v0.1.0
+**Estimated Read Time:** 21 minutes
+
+## Purpose
+The Dashboard API provides real-time analytics and metrics for the customer service chat system. All endpoints return data from the Supabase database and include intelligent fallbacks for when data is unavailable.
+
+## Quick Links
+- [Overview](#overview)
+- [Base URL](#base-url)
+- [Endpoints](#endpoints)
+- [Error Handling](#error-handling)
+- [Rate Limiting](#rate-limiting)
+
+## Keywords
+api, authentication, base, component, considerations, dashboard, development, documentation, endpoints, enhancements
+
+---
+
+
 ## Overview
 
 The Dashboard API provides real-time analytics and metrics for the customer service chat system. All endpoints return data from the Supabase database and include intelligent fallbacks for when data is unavailable.

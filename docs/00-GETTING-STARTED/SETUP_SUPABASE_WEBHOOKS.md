@@ -1,5 +1,27 @@
 # Supabase Webhook Configuration for Automatic Scraping
 
+**Type:** Setup
+**Status:** Active
+**Last Updated:** 2025-10-29
+**Verified For:** v0.1.0
+**Estimated Read Time:** 16 minutes
+
+## Purpose
+This document provides step-by-step instructions for setting up Supabase webhooks to enable automatic scraping when domains are added or modified.
+
+## Quick Links
+- [Overview](#overview)
+- [Prerequisites](#prerequisites)
+- [Step 1: Database Setup (Already Completed)](#step-1-database-setup-already-completed)
+- [Step 2: Configure Environment Variables](#step-2-configure-environment-variables)
+- [Step 3: Create Supabase Webhooks](#step-3-create-supabase-webhooks)
+
+## Keywords
+configuration, configure, create, database, environment, functionality, next, overview, prerequisites, production
+
+---
+
+
 This document provides step-by-step instructions for setting up Supabase webhooks to enable automatic scraping when domains are added or modified.
 
 ## Overview

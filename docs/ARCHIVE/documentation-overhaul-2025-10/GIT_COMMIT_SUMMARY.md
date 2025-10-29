@@ -147,8 +147,8 @@ Successfully committed comprehensive documentation improvements across 159 files
 **Updates:**
 - `docs/TESTING.md`: Redirect to consolidated testing guide
 - `docs/TESTING_QUICKSTART.md`: Version metadata updates
-- `docs/DATABASE_CLEANUP.md`: Latest cleanup procedures
-- `docs/DASHBOARD.md`: Dashboard documentation updates
+- `docs/02-GUIDES/GUIDE_DATABASE_CLEANUP.md`: Latest cleanup procedures
+- `docs/02-GUIDES/GUIDE_DASHBOARD.md`: Dashboard documentation updates
 - `docs/DASHBOARD_API.md`: API reference updates
 - `docs/MULTI_SEAT_ORGANIZATIONS.md`: Multi-tenant guide updates
 - Deleted `docs/CHAT_IMPROVEMENTS_ROADMAP.md` (moved to archive)
@@ -258,7 +258,7 @@ Successfully committed comprehensive documentation improvements across 159 files
    - Comprehensive database maintenance tool
    - Commands: stats, clean, clean --domain=X, clean --dry-run
    - Safe CASCADE deletion preserving customer configs
-   - Implements `docs/DATABASE_CLEANUP.md` procedures
+   - Implements `docs/02-GUIDES/GUIDE_DATABASE_CLEANUP.md` procedures
 
 2. **`monitor-embeddings-health.ts` (48+ doc references)**
    - Embedding quality checks
@@ -296,7 +296,7 @@ Successfully committed comprehensive documentation improvements across 159 files
 
 **Updates:**
 - `CLAUDE.md`: Add NPX script references for new utilities
-- `docs/DATABASE_CLEANUP.md`: Update with test-database-cleanup.ts examples
+- `docs/02-GUIDES/GUIDE_DATABASE_CLEANUP.md`: Update with test-database-cleanup.ts examples
 - `__tests__/api/chat/route.test.ts`: Minor formatting adjustments
 
 ---

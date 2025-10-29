@@ -1,5 +1,27 @@
 # Migration Guide: Single-User to Multi-Seat Organizations
 
+**Type:** Analysis
+**Status:** Active
+**Last Updated:** 2025-10-29
+**Verified For:** v0.1.0
+**Estimated Read Time:** 15 minutes
+
+## Purpose
+This guide walks you through migrating from the single-user model to the new multi-seat organization model.
+
+## Quick Links
+- [Overview](#overview)
+- [What Changes](#what-changes)
+- [Migration Steps](#migration-steps)
+- [Rollback Plan](#rollback-plan)
+- [Common Migration Issues](#common-migration-issues)
+
+## Keywords
+analysis, changes, checklist, cleanup, common, considerations, documentation, issues, migration, next
+
+---
+
+
 ## Overview
 
 This guide walks you through migrating from the single-user model to the new multi-seat organization model.

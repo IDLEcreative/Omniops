@@ -45,7 +45,7 @@ Successfully implemented **all 11 critical fixes** from PR #4's 87-issue analysi
 - Updated `middleware.ts` - Primary defense layer
 - Protected 20 endpoints across `app/api/`
 - Created `__tests__/api/security/debug-endpoints.test.ts` (29 tests, all passing)
-- Updated `docs/SECURITY_MODEL.md`
+- Updated `docs/02-GUIDES/GUIDE_SECURITY_MODEL.md`
 
 **Key Achievement:** Zero production endpoint exposure (all return 404 in production)
 
@@ -60,7 +60,7 @@ Successfully implemented **all 11 critical fixes** from PR #4's 87-issue analysi
 - `lib/auth/api-helpers.ts` - Reusable auth utilities
 - Updated 4 customer config handlers with 4-layer security
 - Created `__tests__/api/customer-config/security.test.ts` (16 tests)
-- Updated `docs/CUSTOMER_CONFIG_SECURITY.md`
+- Updated `docs/02-GUIDES/GUIDE_CUSTOMER_CONFIG_SECURITY.md`
 
 **Key Achievement:** Multi-layer defense (authentication → membership → role → RLS)
 
@@ -296,10 +296,10 @@ Successfully implemented **all 11 critical fixes** from PR #4's 87-issue analysi
 - `scripts/restore-pump-terminology.sh` - Bulk text replacement
 
 **Documentation (16):**
-- `docs/CUSTOMER_CONFIG_SECURITY.md`
+- `docs/02-GUIDES/GUIDE_CUSTOMER_CONFIG_SECURITY.md`
 - `docs/SUPABASE_CLIENT_GUIDE.md` (400+ lines)
 - `docs/DATABASE_CLEANUP_REPORT.md`
-- `docs/SECURITY_MODEL.md` (updated)
+- `docs/02-GUIDES/GUIDE_SECURITY_MODEL.md` (updated)
 - `docs/01-ARCHITECTURE/database-schema.md` (updated)
 - `docs/01-ARCHITECTURE/performance-optimization.md` (updated)
 - `ISSUE_6_VERIFICATION_REPORT.md` (comprehensive verification)

@@ -1,5 +1,27 @@
 # Glossary
 
+**Type:** Setup
+**Status:** Active
+**Last Updated:** 2025-10-29
+**Verified For:** v0.1.0
+**Estimated Read Time:** 24 minutes
+
+## Purpose
+Quick reference for technical terms used throughout the Omniops documentation.
+
+## Quick Links
+- [Architecture Terms](#architecture-terms)
+- [Chat & AI Terms](#chat--ai-terms)
+- [Search & Retrieval Terms](#search--retrieval-terms)
+- [E-commerce Terms](#e-commerce-terms)
+- [Web Scraping Terms](#web-scraping-terms)
+
+## Keywords
+architecture, chat, compliance, database, deployment, development, documentation, glossary, index, infrastructure
+
+---
+
+
 Quick reference for technical terms used throughout the Omniops documentation.
 
 **Last Updated:** 2025-10-24

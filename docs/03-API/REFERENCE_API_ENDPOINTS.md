@@ -1,5 +1,36 @@
 # API Reference Guide
 
+**Type:** Reference
+**Status:** Active
+**Last Updated:** 2025-10-29
+**Verified For:** v0.1.0
+**Dependencies:**
+- [Database Schema](../07-REFERENCE/REFERENCE_DATABASE_SCHEMA.md) - Data models for API responses
+- [Rate Limiting Architecture](../01-ARCHITECTURE/ARCHITECTURE_RATE_LIMITING.md) - Rate limit implementation
+**Estimated Read Time:** 35 minutes
+
+## Purpose
+Complete API reference providing authentication methods (API key Bearer tokens), rate limiting specifications (100 req/min, 20 req/sec burst), endpoint documentation for chat, scraping, privacy, WooCommerce, Shopify, analytics, and management features, with request/response examples, error codes, and pagination patterns for all 50+ production endpoints.
+
+## Quick Links
+- [Authentication](#authentication) - API key setup
+- [Rate Limiting](#rate-limiting) - Request limits and headers
+- [Chat Endpoints](#chat-api) - Conversation management
+- [Scraping Endpoints](#scraping-api) - Website content indexing
+- [WooCommerce Endpoints](#woocommerce-api) - E-commerce integration
+- [Privacy Endpoints](#privacy-api) - GDPR/CCPA compliance
+
+## Keywords
+API reference, REST API, authentication, rate limiting, endpoints, HTTP methods, request/response, JSON, API keys, Bearer tokens, pagination, error codes, webhooks, async processing, multi-tenant API, domain isolation
+
+## Aliases
+- "API key" (also known as: Bearer token, authentication token, access token, API token)
+- "rate limiting" (also known as: throttling, request limiting, quota management, API limits)
+- "pagination" (also known as: cursor pagination, page navigation, result batching)
+- "webhook" (also known as: callback, event notification, HTTP push, API event)
+
+---
+
 ## Overview
 
 The Omniops API provides programmatic access to all customer service, analytics, and management features. This guide covers authentication, endpoints, request/response formats, and best practices.

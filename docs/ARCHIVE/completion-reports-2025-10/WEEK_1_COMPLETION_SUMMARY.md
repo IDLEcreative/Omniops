@@ -528,7 +528,7 @@ USE_ENHANCED_METADATA_CONTEXT=true (production)
 
 ### Documentation Created
 
-1. **[EXPERT_LEVEL_IMPROVEMENT_PLAN.md](docs/EXPERT_LEVEL_IMPROVEMENT_PLAN.md)**
+1. **[EXPERT_LEVEL_IMPROVEMENT_PLAN.md](docs/04-ANALYSIS/ANALYSIS_EXPERT_IMPROVEMENTS.md)**
    - Complete 2-3 week roadmap
    - Technical specifications
    - Success metrics
@@ -543,7 +543,7 @@ USE_ENHANCED_METADATA_CONTEXT=true (production)
    - Rollback plan
    - Week 2 action plan
 
-4. **[CONVERSATION_ACCURACY_IMPROVEMENTS.md](docs/CONVERSATION_ACCURACY_IMPROVEMENTS.md)**
+4. **[CONVERSATION_ACCURACY_IMPROVEMENTS.md](docs/02-GUIDES/GUIDE_CONVERSATION_ACCURACY.md)**
    - User-facing improvements
    - Example conversations
    - Future enhancements

@@ -1,5 +1,27 @@
 # Streaming Chat Responses - Future Feature
 
+**Type:** Analysis
+**Status:** Active
+**Last Updated:** 2025-10-29
+**Verified For:** v0.1.0
+**Estimated Read Time:** 31 minutes
+
+## Purpose
+Currently, users experience a **13-30 second silent wait** when sending messages before seeing any response. This creates uncertainty about whether the system is working and leads to a poor user experience, especially for complex queries that require multiple search iterations.
+
+## Quick Links
+- [Problem Statement](#problem-statement)
+- [Why This Was Postponed](#why-this-was-postponed)
+- [Architecture: The Right Way](#architecture-the-right-way)
+- [Brand-Agnostic Message Templates](#brand-agnostic-message-templates)
+- [Implementation Phases](#implementation-phases)
+
+## Keywords
+analysis, backward, common, compatibility, conclusion, considerations, feature, implementation, message, metrics
+
+---
+
+
 **Status:** Not Implemented
 **Priority:** Medium
 **Estimated Effort:** 8-12 hours

@@ -1,5 +1,35 @@
 # GDPR Audit & Nightly Validation Runbook
 
+**Type:** Guide
+**Status:** Active
+**Last Updated:** 2025-10-29
+**Verified For:** v0.1.0
+**Dependencies:**
+- [Privacy Compliance Guide](GUIDE_PRIVACY_COMPLIANCE.md)
+- [Privacy Features Guide](GUIDE_PRIVACY_FEATURES.md)
+- [Telemetry Nightly Runbook](TELEMETRY_NIGHTLY_RUNBOOK.md)
+**Estimated Read Time:** 6 minutes
+
+## Purpose
+Operational runbook for automating GDPR export/delete validation and maintaining gdpr_audit_log table health. Includes nightly pipeline procedures, GitHub Actions configuration, CSV export operations, and automated retention policies.
+
+## Quick Links
+- [Environment Requirements](#1-environment-requirements)
+- [Nightly GDPR Pipeline](#2-nightly-gdpr-pipeline)
+- [GitHub Actions Snippet](#3-github-actions-snippet)
+
+## Keywords
+GDPR audit, audit runbook, compliance validation, gdpr_audit_log, nightly pipeline, Playwright testing, audit log retention, CSV export, GDPR monitoring, compliance automation, audit procedures, backfill script, retention policies
+
+## Aliases
+- "GDPR audit" (also known as: compliance audit, privacy audit, data protection audit)
+- "audit runbook" (also known as: compliance playbook, operational procedures, GDPR checklist)
+- "gdpr_audit_log" (also known as: audit trail, compliance log, GDPR tracking table)
+- "nightly pipeline" (also known as: automated validation, scheduled checks, CI/CD compliance)
+- "retention policies" (also known as: data pruning, log cleanup, automated deletion, data lifecycle)
+
+---
+
 This runbook complements the telemetry schedule by automating GDPR export/delete validation and ensuring the new `gdpr_audit_log` table stays healthy.
 
 ---

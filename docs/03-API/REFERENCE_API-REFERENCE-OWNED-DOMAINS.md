@@ -1,5 +1,27 @@
 # API Reference: Owned Domains
 
+**Type:** Reference
+**Status:** Active
+**Last Updated:** 2025-10-29
+**Verified For:** v0.1.0
+**Estimated Read Time:** 14 minutes
+
+## Purpose
+GET /api/admin/config Authorization: Bearer {token}
+
+## Quick Links
+- [REST API Endpoints](#rest-api-endpoints)
+- [JavaScript/TypeScript API](#javascripttypescript-api)
+- [Class: OwnSiteDetector](#class-ownsitedetector)
+- [Class: CustomerConfigLoader](#class-customerconfigloader)
+- [Configuration Objects](#configuration-objects)
+
+## Keywords
+api, configuration, customerconfigloader, database, domains, endpoints, environment, error, events, handling
+
+---
+
+
 ## REST API Endpoints
 
 ### Get Customer Configuration

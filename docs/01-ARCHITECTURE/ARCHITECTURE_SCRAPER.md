@@ -1,5 +1,23 @@
 # Scraper Architecture Documentation
 
+**Type:** Architecture
+**Status:** Active
+**Last Updated:** 2025-10-29
+**Verified For:** v0.1.0
+**Estimated Read Time:** 2 minutes
+
+## Purpose
+Please refer to the comprehensive scraping documentation at:
+
+## Quick Links
+- [What's New](#whats-new)
+
+## Keywords
+architecture, scraper
+
+---
+
+
 **⚠️ This document has been moved and consolidated.**
 
 Please refer to the comprehensive scraping documentation at:

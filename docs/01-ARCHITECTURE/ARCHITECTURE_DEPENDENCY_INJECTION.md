@@ -1,7 +1,34 @@
 # Dependency Injection Pattern
 
-**Status**: ✅ Implemented
-**Last Updated**: 2025-10-24
+**Type:** Architecture
+**Status:** Active
+**Last Updated:** 2025-10-29
+**Verified For:** v0.1.0
+**Dependencies:**
+- [Testing Strategy Guide](../04-DEVELOPMENT/testing/GUIDE_TESTING_STRATEGY.md) - Unit testing approach
+- [Technical Debt Tracker](../04-ANALYSIS/ANALYSIS_TECHNICAL_DEBT_TRACKER.md) - Testability improvements
+**Estimated Read Time:** 22 minutes
+
+## Purpose
+Complete architectural pattern guide for dependency injection (DI) in API routes enabling testable code without complex jest.mock() configurations, using constructor injection for database clients, external APIs, and utility functions, with practical before/after examples, implementation steps, test patterns, and SOLID principles application resulting in 80% faster tests and simplified mock management.
+
+## Quick Links
+- [Why Dependency Injection?](#why-dependency-injection) - Problems it solves
+- [Pattern Implementation](#pattern-implementation) - Step-by-step guide
+- [Testing with DI](#testing-with-di) - Unit test examples
+- [Migration Guide](#migration-guide) - Convert existing code
+- [Best Practices](#best-practices) - Design principles
+
+## Keywords
+dependency injection, DI, testability, mocking, unit testing, constructor injection, SOLID principles, IoC, inversion of control, test doubles, coupling reduction, API routes, route testing, test isolation
+
+## Aliases
+- "dependency injection" (also known as: DI, inversion of control, IoC container, constructor injection)
+- "test double" (also known as: mock, stub, fake, spy, test replacement)
+- "testability" (also known as: test-friendly code, unit test support, mockability)
+- "SOLID principles" (also known as: software design principles, OOP principles, clean code principles)
+
+---
 
 ## Overview
 

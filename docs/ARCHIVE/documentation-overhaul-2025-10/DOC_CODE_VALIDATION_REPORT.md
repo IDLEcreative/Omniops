@@ -1149,7 +1149,7 @@ Generated: 2025-10-24T21:30:13.392Z
 - Code: `-- Check trigger exists
 SELECT * FROM pg_trigger WHERE tgname = 'validate_chunk_size_trigger';`
 
-### docs/DATABASE_CLEANUP.md
+### docs/02-GUIDES/GUIDE_DATABASE_CLEANUP.md
 
 🔴 **CRITICAL** (Line 17, bash)
 - Script does not exist: test-database-cleanup.ts
@@ -3413,7 +3413,7 @@ export class ApiError extends Error {
 - Environment variable used: DATABASE_URL - ensure it's documented
 - Code: `psql $DATABASE_URL -c "SELECT COUNT(*), COUNT(organization_id) FROM customer_configs"`
 
-### docs/DASHBOARD.md
+### docs/02-GUIDES/GUIDE_DASHBOARD.md
 
 🟡 **WARNING** (Line 907, typescript)
 - Import path may not exist: @/hooks/useTelemetry
@@ -3478,7 +3478,7 @@ const cache = new Map<string, { data: any; expires: number }>();
 
 export func`
 
-### docs/DEPENDENCY_INJECTION.md
+### docs/01-ARCHITECTURE/ARCHITECTURE_DEPENDENCY_INJECTION.md
 
 🟡 **WARNING** (Line 169, typescript)
 - Import path may not exist: @/app/api/your-route/route
@@ -5752,18 +5752,18 @@ These issues should be fixed immediately as they would prevent users from succes
 - **docs/CUSTOMER_SERVICE_OPTIMIZATION.md** (Line 172): Script does not exist: test-performance-diagnostic.ts
 - **docs/CUSTOMER_SERVICE_OPTIMIZATION.md** (Line 172): Script does not exist: test-performance-comparison.ts
 - **docs/CUSTOMER_SERVICE_OPTIMIZATION.md** (Line 172): Script does not exist: test-cache-performance.ts
-- **docs/DATABASE_CLEANUP.md** (Line 17): Script does not exist: test-database-cleanup.ts
-- **docs/DATABASE_CLEANUP.md** (Line 23): Script does not exist: test-database-cleanup.ts
-- **docs/DATABASE_CLEANUP.md** (Line 29): Script does not exist: test-database-cleanup.ts
-- **docs/DATABASE_CLEANUP.md** (Line 84): Script does not exist: test-database-cleanup.ts
-- **docs/DATABASE_CLEANUP.md** (Line 84): Script does not exist: test-database-cleanup.ts
-- **docs/DATABASE_CLEANUP.md** (Line 84): Script does not exist: test-database-cleanup.ts
-- **docs/DATABASE_CLEANUP.md** (Line 84): Script does not exist: test-database-cleanup.ts
-- **docs/DATABASE_CLEANUP.md** (Line 84): Script does not exist: test-database-cleanup.ts
-- **docs/DATABASE_CLEANUP.md** (Line 84): Script does not exist: test-database-cleanup.ts
-- **docs/DATABASE_CLEANUP.md** (Line 270): Script does not exist: test-database-cleanup.ts
-- **docs/DATABASE_CLEANUP.md** (Line 278): Script does not exist: test-database-cleanup.ts
-- **docs/DATABASE_CLEANUP.md** (Line 292): Script does not exist: test-database-cleanup.ts
+- **docs/02-GUIDES/GUIDE_DATABASE_CLEANUP.md** (Line 17): Script does not exist: test-database-cleanup.ts
+- **docs/02-GUIDES/GUIDE_DATABASE_CLEANUP.md** (Line 23): Script does not exist: test-database-cleanup.ts
+- **docs/02-GUIDES/GUIDE_DATABASE_CLEANUP.md** (Line 29): Script does not exist: test-database-cleanup.ts
+- **docs/02-GUIDES/GUIDE_DATABASE_CLEANUP.md** (Line 84): Script does not exist: test-database-cleanup.ts
+- **docs/02-GUIDES/GUIDE_DATABASE_CLEANUP.md** (Line 84): Script does not exist: test-database-cleanup.ts
+- **docs/02-GUIDES/GUIDE_DATABASE_CLEANUP.md** (Line 84): Script does not exist: test-database-cleanup.ts
+- **docs/02-GUIDES/GUIDE_DATABASE_CLEANUP.md** (Line 84): Script does not exist: test-database-cleanup.ts
+- **docs/02-GUIDES/GUIDE_DATABASE_CLEANUP.md** (Line 84): Script does not exist: test-database-cleanup.ts
+- **docs/02-GUIDES/GUIDE_DATABASE_CLEANUP.md** (Line 84): Script does not exist: test-database-cleanup.ts
+- **docs/02-GUIDES/GUIDE_DATABASE_CLEANUP.md** (Line 270): Script does not exist: test-database-cleanup.ts
+- **docs/02-GUIDES/GUIDE_DATABASE_CLEANUP.md** (Line 278): Script does not exist: test-database-cleanup.ts
+- **docs/02-GUIDES/GUIDE_DATABASE_CLEANUP.md** (Line 292): Script does not exist: test-database-cleanup.ts
 - **docs/DATABASE_IMPROVEMENTS_2025.md** (Line 163): Script does not exist: run-product-extraction.ts
 - **docs/DATABASE_IMPROVEMENTS_2025.md** (Line 168): Script does not exist: test-improved-chat-accuracy.ts
 - **docs/DATABASE_OPTIMIZATION.md** (Line 118): Script does not exist: optimize-database-performance.ts

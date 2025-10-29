@@ -405,7 +405,7 @@ After applying migration, test these features:
 
 ## Documentation References
 
-- **Security Model**: [docs/SECURITY_MODEL.md](docs/SECURITY_MODEL.md)
+- **Security Model**: [docs/02-GUIDES/GUIDE_SECURITY_MODEL.md](docs/02-GUIDES/GUIDE_SECURITY_MODEL.md)
 - **Migration Guide**: [SECURITY_MIGRATION_GUIDE.md](SECURITY_MIGRATION_GUIDE.md)
 - **Database Schema**: [docs/01-ARCHITECTURE/database-schema.md](docs/01-ARCHITECTURE/database-schema.md)
 - **Widget Tables Creation**: [migrations/create_widget_configs_tables.sql](migrations/create_widget_configs_tables.sql)

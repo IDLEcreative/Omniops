@@ -1,7 +1,38 @@
 # GitHub Actions CI/CD Monitoring Guide
 
-**Last Updated:** 2025-10-25
-**Repository:** https://github.com/IDLEcreative/Omniops
+**Type:** Guide
+**Status:** Active
+**Last Updated:** 2025-10-29
+**Verified For:** v0.1.0
+**Dependencies:**
+- [scripts/validate-doc-links.ts](../../scripts/validate-doc-links.ts)
+- [scripts/fix-doc-links.ts](../../scripts/fix-doc-links.ts)
+- [scripts/audit-doc-versions.ts](../../scripts/audit-doc-versions.ts)
+**Estimated Read Time:** 20 minutes
+
+## Purpose
+Comprehensive operational guide for monitoring and managing two automated GitHub Actions workflows that validate documentation links (fixing 509+ broken links with auto-repair) and audit version metadata consistency across 1,475+ documentation links with 30-day artifact retention and automated PR commenting.
+
+## Quick Links
+- [Workflow Status](#workflow-status)
+- [Local Testing](#local-testing)
+- [Viewing GitHub Actions Results](#viewing-github-actions-results)
+- [Fixing Failing Workflows](#fixing-failing-workflows)
+- [Troubleshooting Common Issues](#troubleshooting-common-issues)
+- [Workflow Configuration Reference](#workflow-configuration-reference)
+
+## Keywords
+GitHub Actions, CI/CD workflows, documentation validation, link checking, version auditing, automated testing, PR comments, workflow artifacts, continuous integration, doc-link-check.yml, doc-version-check.yml, npx tsx scripts, workflow monitoring, GitHub bot comments, artifact retention, auto-fix automation, workflow triggers
+
+## Aliases
+- "GHA" (also known as: GitHub Actions, Actions workflows, CI/CD pipelines)
+- "doc-link-check.yml" (also known as: link validation workflow, documentation link checker)
+- "doc-version-check.yml" (also known as: version audit workflow, documentation version checker)
+- "artifacts" (also known as: workflow reports, CI reports, validation reports)
+- "PR comments" (also known as: bot comments, automated comments, workflow feedback)
+- "auto-fix" (also known as: automatic repair, automated link fixes, self-healing validation)
+
+---
 
 ## Overview
 

@@ -1,8 +1,38 @@
 # Security Model Documentation
 
-> **Version**: 1.1
-> **Last Updated**: 2025-10-28
-> **Migration**: 20251028_fix_security_advisories.sql
+**Type:** Guide
+**Status:** Active
+**Last Updated:** 2025-10-28
+**Verified For:** v0.1.0
+**Migration:** 20251028_fix_security_advisories.sql
+**Dependencies:**
+- [Database Schema](../01-ARCHITECTURE/database-schema.md) - RLS policy implementation
+- [Customer Config Security](GUIDE_CUSTOMER_CONFIG_SECURITY.md) - API security model
+**Estimated Read Time:** 36 minutes
+
+**Version**: 1.1
+
+## Purpose
+Comprehensive platform security model documentation covering Row Level Security policies, view security (SECURITY INVOKER vs DEFINER), debug endpoint protection, multi-tenant isolation, access control patterns, and security best practices for Omniops platform with complete RLS policies by table and testing procedures.
+
+## Quick Links
+- [Security Principles](#security-principles) - Core guarantees
+- [Debug Endpoint Protection](#debug-endpoint-protection) - Production safeguards
+- [RLS Overview](#row-level-security-rls-overview) - Policy framework
+- [View Security](#view-security-security-invoker-vs-security-definer) - View permissions
+- [RLS Policies by Table](#rls-policies-by-table) - Complete policy reference
+- [Testing RLS](#testing-rls-policies) - Security validation
+
+## Keywords
+security model, Row Level Security, RLS, PostgreSQL policies, multi-tenant isolation, RBAC, debug protection, view security, SECURITY INVOKER, SECURITY DEFINER, access control, Supabase RLS, service_role, authenticated role, audit trail, security testing
+
+## Aliases
+- "RLS" (also known as: Row Level Security, database policies, PostgreSQL policies)
+- "SECURITY INVOKER" (also known as: invoker rights, user context execution)
+- "SECURITY DEFINER" (also known as: definer rights, owner context execution, elevated privileges)
+- "multi-tenant isolation" (also known as: tenant separation, data isolation, organization-scoped access)
+
+---
 
 ## Overview
 

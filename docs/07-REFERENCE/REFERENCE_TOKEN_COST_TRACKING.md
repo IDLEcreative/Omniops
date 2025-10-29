@@ -1,5 +1,27 @@
 # Token Cost Tracking System
 
+**Type:** Reference
+**Status:** Active
+**Last Updated:** 2025-10-29
+**Verified For:** v0.1.0
+**Estimated Read Time:** 11 minutes
+
+## Purpose
+Comprehensive token usage logging and cost tracking system for the intelligent chat API, providing real-time cost monitoring, analytics, and budget management capabilities.
+
+## Quick Links
+- [Overview](#overview)
+- [Features](#features)
+- [Implementation Details](#implementation-details)
+- [Usage Examples](#usage-examples)
+- [Cost Optimization Strategies](#cost-optimization-strategies)
+
+## Keywords
+cost, details, documentation, enhancements, examples, features, future, history, implementation, migration
+
+---
+
+
 ## Overview
 Comprehensive token usage logging and cost tracking system for the intelligent chat API, providing real-time cost monitoring, analytics, and budget management capabilities.
 

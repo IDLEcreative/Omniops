@@ -1,5 +1,27 @@
 # React Performance Quick Reference
 
+**Type:** Reference
+**Status:** Active
+**Last Updated:** 2025-10-29
+**Verified For:** v0.1.0
+**Estimated Read Time:** 15 minutes
+
+## Purpose
+Optimization Hook Usage: ┌─────────────────────────┬──────────┬────────────┐ │ Hook │ Usage │ % Codebase │
+
+## Quick Links
+- [Current State at a Glance](#current-state-at-a-glance)
+- [Critical Issues by Component](#critical-issues-by-component)
+- [Fix Priority Matrix](#fix-priority-matrix)
+- [Phase 1 Checklist (1-2 hours)](#phase-1-checklist-1-2-hours)
+- [Phase 2 Checklist (2-4 hours)](#phase-2-checklist-2-4-hours)
+
+## Keywords
+checklist, commands, common, component, critical, current, expected, glance, implement, improvements
+
+---
+
+
 ## Current State at a Glance
 
 ```

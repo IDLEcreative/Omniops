@@ -1,5 +1,27 @@
 # Chat System Quick Start Guide
 
+**Type:** Setup
+**Status:** Active
+**Last Updated:** 2025-10-29
+**Verified For:** v0.1.0
+**Estimated Read Time:** 12 minutes
+
+## Purpose
+git clone [repository] cd customer-service-agent npm install
+
+## Quick Links
+- [🚀 5-Minute Setup](#-5-minute-setup)
+- [📝 Essential Code Snippets](#-essential-code-snippets)
+- [🧪 Testing Commands](#-testing-commands)
+- [📊 Key Files Reference](#-key-files-reference)
+- [🔧 Common Tasks](#-common-tasks)
+
+## Keywords
+code, commands, common, essential, files, fixes, important, more, notes, quick
+
+---
+
+
 ## 🚀 5-Minute Setup
 
 ### 1. Prerequisites

@@ -1,5 +1,27 @@
 # WooCommerce Chatbot - Quick Start Guide
 
+**Type:** Integration
+**Status:** Active
+**Last Updated:** 2025-10-29
+**Verified For:** v0.1.0
+**Estimated Read Time:** 13 minutes
+
+## Purpose
+curl -O https://your-server.com/wordpress-plugin/customer-service-chat.php
+
+## Quick Links
+- [🚀 5-Minute Setup](#-5-minute-setup)
+- [📊 What Data is Available?](#-what-data-is-available)
+- [🎯 Common Use Cases](#-common-use-cases)
+- [🔧 Customization](#-customization)
+- [🐛 Quick Debugging](#-quick-debugging)
+
+## Keywords
+cases, code, common, customization, data, debugging, embed, integration, issues, minimal
+
+---
+
+
 ## 🚀 5-Minute Setup
 
 ### Prerequisites

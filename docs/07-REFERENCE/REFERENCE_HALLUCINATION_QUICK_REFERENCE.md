@@ -1,5 +1,27 @@
 # Hallucination Prevention Quick Reference
 
+**Type:** Reference
+**Status:** Active
+**Last Updated:** 2025-10-29
+**Verified For:** v0.1.0
+**Estimated Read Time:** 4 minutes
+
+## Purpose
+Without explicit data in the product content, the AI must NEVER:
+
+## Quick Links
+- [🚫 What the AI Must NEVER Do](#-what-the-ai-must-never-do)
+- [✅ What the AI Should Do Instead](#-what-the-ai-should-do-instead)
+- [🧪 Quick Test Commands](#-quick-test-commands)
+- [📍 Key Files](#-key-files)
+- [⚡ Emergency Fix](#-emergency-fix)
+
+## Keywords
+commands, emergency, files, golden, hallucination, instead, must, never, quick, reference
+
+---
+
+
 ## 🚫 What the AI Must NEVER Do
 
 Without explicit data in the product content, the AI must NEVER:

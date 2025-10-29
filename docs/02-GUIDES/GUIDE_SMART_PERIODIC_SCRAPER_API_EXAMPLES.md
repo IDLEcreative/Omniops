@@ -1,5 +1,41 @@
 # Smart Periodic Scraper - API Request/Response Examples
 
+**Type:** Guide
+**Status:** Active
+**Last Updated:** 2025-10-29
+**Verified For:** v0.1.0
+**Dependencies:**
+- [Smart Periodic Scraper Deployment](GUIDE_SMART_PERIODIC_SCRAPER_DEPLOYMENT_CHECKLIST.md)
+- [Scraper Enhancements](GUIDE_SCRAPER_ENHANCEMENTS.md)
+- [API Documentation](../03-API/)
+**Estimated Read Time:** 35 minutes
+
+## Purpose
+Complete API request/response examples for smart periodic scraper including configuration management, manual scraping control, job monitoring, analytics, schedule management, smart mode features, webhooks, and error handling. Provides production-ready client SDK examples.
+
+## Quick Links
+- [Configuration Management APIs](#1-configuration-management-apis)
+- [Manual Scraping Control APIs](#2-manual-scraping-control-apis)
+- [Job Status and Monitoring APIs](#3-job-status-and-monitoring-apis)
+- [Analytics and Reporting APIs](#4-analytics-and-reporting-apis)
+- [Schedule Management APIs](#5-schedule-management-apis)
+- [Smart Mode APIs](#6-smart-mode-apis)
+- [Error Handling Examples](#7-error-handling-examples)
+- [Client SDK Examples](#client-sdk-examples)
+- [Webhook Integration Examples](#webhook-integration-examples)
+
+## Keywords
+smart periodic scraper, scraper API, API examples, configuration management, job monitoring, WebSocket streaming, analytics API, schedule management, smart mode, AI-optimized scraping, webhook integration, rate limiting, error handling, client SDK, REST API
+
+## Aliases
+- "smart scraper" (also known as: intelligent scraper, adaptive scraper, AI-optimized crawler)
+- "job monitoring" (also known as: progress tracking, scraping status, real-time updates)
+- "WebSocket streaming" (also known as: real-time progress, live updates, job streaming)
+- "smart mode" (also known as: AI mode, intelligent scheduling, adaptive optimization)
+- "schedule management" (also known as: cron configuration, scraping schedule, periodic scraping)
+
+---
+
 ## Complete API Implementation Examples
 
 ### 1. Configuration Management APIs

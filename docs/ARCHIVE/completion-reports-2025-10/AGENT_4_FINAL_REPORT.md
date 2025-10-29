@@ -9,7 +9,7 @@
 
 ## Summary
 
-The metadata integration specified in `docs/EXPERT_LEVEL_IMPROVEMENT_PLAN.md` Section 1.1 has been **fully implemented** in `/Users/jamesguy/Omniops/app/api/chat/route.ts`. All four required integration points are in place and functional.
+The metadata integration specified in `docs/04-ANALYSIS/ANALYSIS_EXPERT_IMPROVEMENTS.md` Section 1.1 has been **fully implemented** in `/Users/jamesguy/Omniops/app/api/chat/route.ts`. All four required integration points are in place and functional.
 
 ---
 
@@ -264,7 +264,7 @@ The chat route successfully integrates the metadata system with:
 - `/Users/jamesguy/Omniops/__tests__/lib/chat/conversation-metadata.test.ts` (⚠️ 2 failures)
 
 **Documentation:**
-- `/Users/jamesguy/Omniops/docs/EXPERT_LEVEL_IMPROVEMENT_PLAN.md` (Section 1.1)
+- `/Users/jamesguy/Omniops/docs/04-ANALYSIS/ANALYSIS_EXPERT_IMPROVEMENTS.md` (Section 1.1)
 
 ---
 

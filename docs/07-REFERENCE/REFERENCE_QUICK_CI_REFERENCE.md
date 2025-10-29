@@ -1,5 +1,27 @@
 # Quick CI/CD Reference Card
 
+**Type:** Reference
+**Status:** Active
+**Last Updated:** 2025-10-29
+**Verified For:** v0.1.0
+**Estimated Read Time:** 8 minutes
+
+## Purpose
+npx tsx scripts/validate-doc-links.ts npx tsx scripts/audit-doc-versions.ts
+
+## Quick Links
+- [Workflow Status at a Glance](#workflow-status-at-a-glance)
+- [Quick Commands](#quick-commands)
+- [View Results](#view-results)
+- [Understanding CI Results](#understanding-ci-results)
+- [PR Comment Guide](#pr-comment-guide)
+
+## Keywords
+commands, comment, common, file, glance, guide, issues, locations, more, need
+
+---
+
+
 **Last Updated:** 2025-10-25
 
 ---
@@ -126,7 +148,7 @@ Reports:
 ├── docs/reports/doc-version-audit.md (generated)
 
 Documentation:
-├── docs/GITHUB_ACTIONS_MONITORING.md (full guide)
+├── docs/02-GUIDES/GUIDE_GITHUB_ACTIONS_MONITORING.md (full guide)
 └── WORKFLOW_VERIFICATION_REPORT.md (verification status)
 ```
 
@@ -134,7 +156,7 @@ Documentation:
 
 ## Need More Help?
 
-📖 **Full Guide:** `docs/GITHUB_ACTIONS_MONITORING.md`
+📖 **Full Guide:** `docs/02-GUIDES/GUIDE_GITHUB_ACTIONS_MONITORING.md`
 📊 **Verification Report:** `WORKFLOW_VERIFICATION_REPORT.md`
 🐛 **Issues:** https://github.com/IDLEcreative/Omniops/issues
 

@@ -1,5 +1,27 @@
 # Enhanced Metadata Search Migration - Manual Application Instructions
 
+**Type:** Setup
+**Status:** Active
+**Last Updated:** 2025-10-29
+**Verified For:** v0.1.0
+**Estimated Read Time:** 9 minutes
+
+## Purpose
+The enhanced metadata search migration failed to apply automatically due to limitations with direct SQL execution via the Supabase client library. This document provides instructions for manually applying the migration.
+
+## Quick Links
+- [Overview](#overview)
+- [Migration File](#migration-file)
+- [Manual Application Steps](#manual-application-steps)
+- [What the Migration Creates](#what-the-migration-creates)
+- [Verification Steps](#verification-steps)
+
+## Keywords
+after, application, benefits, creates, file, instructions, manual, migration, next, overview
+
+---
+
+
 ## Overview
 The enhanced metadata search migration failed to apply automatically due to limitations with direct SQL execution via the Supabase client library. This document provides instructions for manually applying the migration.
 

@@ -40,7 +40,7 @@ lib/agents/providers/woocommerce-provider
 
 **Files to Fix:**
 - Multiple files in `docs/00-GETTING-STARTED/`
-- `docs/DASHBOARD.md`
+- `docs/02-GUIDES/GUIDE_DASHBOARD.md`
 - Various other docs
 
 **Pattern to Fix:**

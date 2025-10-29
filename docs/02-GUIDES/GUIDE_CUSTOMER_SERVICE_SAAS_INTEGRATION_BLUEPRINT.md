@@ -1,5 +1,44 @@
 # OmniOps Customer Service SaaS – End-to-End Integration Blueprint
 
+**Type:** Guide
+**Status:** Active
+**Last Updated:** 2025-10-29
+**Verified For:** v0.1.0
+**Dependencies:**
+- Supabase database schema
+- Dashboard API routes (`/api/dashboard/*`)
+- Chat telemetry system
+- WooCommerce integration
+- React hooks (`hooks/dashboard/*`)
+**Estimated Read Time:** 15 minutes
+
+## Purpose
+Provides an end-to-end blueprint for integrating live data into the OmniOps customer service SaaS platform. Eliminates placeholder fixtures by mapping each UI element to authoritative Supabase tables, APIs, and external connectors, transforming the platform into an Intercom-caliber solution with real-time analytics and automation.
+
+## Quick Links
+- [Objective](#1-objective)
+- [Product Pillars](#2-product-pillars--experience-goals)
+- [Platform Topology](#3-platform-topology)
+- [Data Sources & Pipelines](#4-data-sources--pipelines)
+- [Domain Model Snapshot](#5-domain-model-snapshot)
+- [API Inventory & Gaps](#6-api-inventory--gaps)
+- [Chat Widget → Analytics Data Flow](#7-chat-widget--analytics-data-flow)
+- [Dashboard Pages & Required Data Connections](#8-dashboard-pages--required-data-connections)
+- [Implementation Roadmap](#14-implementation-roadmap)
+- [Testing & Validation Strategy](#16-testing--validation-strategy)
+
+## Keywords
+SaaS integration, live data, dashboard wiring, API endpoints, data pipelines, chat telemetry, real-time analytics, multi-tenant isolation, Supabase integration, React Query, conversational AI, customer 360, automation workflows, GDPR compliance, WooCommerce sync
+
+## Aliases
+- "dashboard wiring" (also known as: UI data binding, live data integration, API consumption)
+- "chat telemetry" (also known as: conversation analytics, usage metrics, performance tracking)
+- "Customer 360" (also known as: unified profile, customer view, customer intelligence)
+- "multi-tenant isolation" (also known as: tenant separation, organization isolation, data segregation)
+- "RLS" (also known as: Row Level Security, policy enforcement, access control)
+
+---
+
 ## 1. Objective
 - Deliver an Intercom-caliber platform with live data powering every visualization, workflow, and automation.
 - Eradicate placeholder fixtures by mapping each UI element to authoritative Supabase tables, APIs, or external connectors (WooCommerce, scraping, telemetry).

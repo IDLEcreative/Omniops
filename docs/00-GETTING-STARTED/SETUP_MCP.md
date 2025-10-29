@@ -1,5 +1,27 @@
 # Setting Up MCP Server for Customer Service Supabase Project
 
+**Type:** Setup
+**Status:** Active
+**Last Updated:** 2025-10-29
+**Verified For:** v0.1.0
+**Estimated Read Time:** 6 minutes
+
+## Purpose
+This MCP (Model Context Protocol) server allows Claude to directly interact with your Supabase project (`birugqyuqhiahxvxeyqg`) to manage database operations.
+
+## Quick Links
+- [Overview](#overview)
+- [Setup Instructions](#setup-instructions)
+- [Available MCP Commands](#available-mcp-commands)
+- [Security Notes](#security-notes)
+- [Testing the Connection](#testing-the-connection)
+
+## Keywords
+available, commands, connection, details, instructions, mcp, notes, overview, project, security
+
+---
+
+
 ## Overview
 This MCP (Model Context Protocol) server allows Claude to directly interact with your Supabase project (`birugqyuqhiahxvxeyqg`) to manage database operations.
 

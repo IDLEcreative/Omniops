@@ -177,7 +177,7 @@ Successfully completed **ALL 11 issues** from PR #4's comprehensive codebase ana
 - `PR4_COMPLETION_SUMMARY.md` - Executive summary
 - `PR4_FINAL_STATUS.md` - Implementation status
 - `ISSUE_6_MIGRATION_COMPLETE.md` - Migration details
-- `docs/CUSTOMER_CONFIG_SECURITY.md` - Security docs
+- `docs/02-GUIDES/GUIDE_CUSTOMER_CONFIG_SECURITY.md` - Security docs
 - `docs/SUPABASE_CLIENT_GUIDE.md` - 400+ line guide
 - Plus 11 agent completion reports
 

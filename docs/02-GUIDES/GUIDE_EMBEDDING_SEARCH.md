@@ -1,5 +1,33 @@
 # Embedding Search Guide
 
+**Type:** Guide
+**Status:** Active
+**Last Updated:** 2025-10-29
+**Verified For:** v0.1.0
+**Dependencies:**
+- [Search Architecture](../01-ARCHITECTURE/ARCHITECTURE_SEARCH_SYSTEM.md) - Vector search system
+- [Database Schema](../01-ARCHITECTURE/database-schema.md) - page_embeddings table
+**Estimated Read Time:** 7 minutes
+
+## Purpose
+Technical guide documenting correct embedding search implementation in Omniops, covering page_embeddings and scraped_pages table structures, common issues (missing domain_id, NULL values, parameter mismatches), and SQL solutions for proper vector search filtering.
+
+## Quick Links
+- [Database Structure](#database-structure) - Table schemas
+- [Common Issues](#common-issues-and-solutions) - Problems and fixes
+- [Search Functions](#search-function-variations) - Implementation patterns
+
+## Keywords
+embeddings, vector search, pgvector, OpenAI embeddings, semantic search, page_embeddings table, domain filtering, database migration, NULL values, chunk_text, similarity search, cosine distance
+
+## Aliases
+- "embeddings" (also known as: vector embeddings, semantic vectors, dense representations)
+- "vector search" (also known as: similarity search, semantic search, nearest neighbor search)
+- "domain_id" (also known as: customer identifier, tenant ID, domain filter)
+- "chunk_text" (also known as: text segment, content chunk, embedding source)
+
+---
+
 ## Overview
 This guide documents the correct way to search embeddings in the Omniops system and common issues to avoid.
 

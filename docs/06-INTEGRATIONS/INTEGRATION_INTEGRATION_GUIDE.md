@@ -1,5 +1,27 @@
 # WooCommerce Integration Guide
 
+**Type:** Integration
+**Status:** Active
+**Last Updated:** 2025-10-29
+**Verified For:** v0.1.0
+**Estimated Read Time:** 11 minutes
+
+## Purpose
+This guide will help you integrate WooCommerce with your Customer Service Agent in 5 minutes.
+
+## Quick Links
+- [Quick Start](#quick-start)
+- [Prerequisites](#prerequisites)
+- [Step 1: Generate WooCommerce API Keys](#step-1-generate-woocommerce-api-keys)
+- [Step 2: Configure the Integration](#step-2-configure-the-integration)
+- [Step 3: Test the Integration](#step-3-test-the-integration)
+
+## Keywords
+advanced, best, cases, changelog, chat, common, configuration, configure, enable, features
+
+---
+
+
 ## Quick Start
 
 This guide will help you integrate WooCommerce with your Customer Service Agent in 5 minutes.

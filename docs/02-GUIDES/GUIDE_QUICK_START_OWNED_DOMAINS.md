@@ -1,5 +1,39 @@
 # Quick Start: Owned Domains for Fast Scraping
 
+**Type:** Guide
+**Status:** Active
+**Last Updated:** 2025-10-29
+**Verified For:** v0.1.0
+**Dependencies:**
+- Admin panel configuration
+- Scraping system
+- Domain detection logic
+**Estimated Read Time:** 5 minutes
+
+## Purpose
+Quick start guide for configuring owned domains to enable turbo-speed web scraping (20-50x faster) when training customer service bots on your own websites. Covers setup in admin panel, automatic detection, performance expectations, and troubleshooting for high-speed concurrent scraping without rate limits.
+
+## Quick Links
+- [What is it?](#what-is-it)
+- [Setup (2 minutes)](#setup-2-minutes)
+- [What Happens Next?](#what-happens-next)
+- [Usage](#usage)
+- [Performance Expectations](#performance-expectations)
+- [FAQ](#faq)
+- [Troubleshooting](#troubleshooting)
+- [Security Note](#security-note)
+
+## Keywords
+owned domains, fast scraping, turbo mode, web scraping, concurrent browsers, parallel jobs, rate limits, domain detection, training data, performance optimization, scraping configuration, admin panel, domain ownership, high-speed scraping
+
+## Aliases
+- "owned domains" (also known as: your domains, whitelisted domains, turbo domains)
+- "turbo mode" (also known as: high-speed mode, fast scraping, accelerated scraping)
+- "concurrent browsers" (also known as: parallel scrapers, simultaneous crawlers, browser pool)
+- "rate limits" (also known as: throttling, request limits, scraping restrictions)
+
+---
+
 ## What is it?
 
 When training your customer service bot on your own website, you can now scrape 20-50x faster by telling the system which domains you own.

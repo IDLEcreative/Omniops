@@ -18,7 +18,7 @@ Successfully created a production-ready brand reference monitoring system with 1
 | 2 | Code Audit Script | ✅ Complete | `/scripts/audit-brand-references.ts` | 4.1 KB | N/A |
 | 3 | Pre-Commit Hook | ✅ Complete | `/scripts/pre-commit-hook.sh` | 1.2 KB | ✅ Yes |
 | 4 | CI/CD Workflow | ✅ Complete | `/.github/workflows/brand-check.yml` | 681 B | N/A |
-| 5 | Documentation | ✅ Complete | `/docs/MONITORING_SETUP.md` | 7.5 KB | N/A |
+| 5 | Documentation | ✅ Complete | `/docs/02-GUIDES/GUIDE_MONITORING_SETUP_V2.md` | 7.5 KB | N/A |
 | 6 | Implementation Report | ✅ Complete | `/BRAND_MONITORING_IMPLEMENTATION.md` | ~20 KB | N/A |
 | 7 | Quick Reference | ✅ Complete | `/BRAND_MONITORING_QUICK_REF.md` | ~3 KB | N/A |
 | 8 | NPM Scripts | ✅ Added | `/package.json` | 2 scripts | N/A |
@@ -259,7 +259,7 @@ const domain = searchParams.get('domain') || process.env.DEFAULT_TEST_DOMAIN || 
 
 | Document | Purpose | Location | Length |
 |----------|---------|----------|--------|
-| **Setup Guide** | Comprehensive usage instructions | `/docs/MONITORING_SETUP.md` | 400+ lines |
+| **Setup Guide** | Comprehensive usage instructions | `/docs/02-GUIDES/GUIDE_MONITORING_SETUP_V2.md` | 400+ lines |
 | **Implementation Report** | Complete delivery documentation | `/BRAND_MONITORING_IMPLEMENTATION.md` | 600+ lines |
 | **Quick Reference** | Developer cheat sheet | `/BRAND_MONITORING_QUICK_REF.md` | 100+ lines |
 | **Summary** | Executive overview (this file) | `/BRAND_MONITORING_SUMMARY.md` | This file |
@@ -403,7 +403,7 @@ const EXCLUDE_PATTERNS = [
 **Technical Owner:** [Your Name]
 **Documentation:** [Your Name]
 **Maintenance:** DevOps Team
-**Questions:** See `/docs/MONITORING_SETUP.md`
+**Questions:** See `/docs/02-GUIDES/GUIDE_MONITORING_SETUP_V2.md`
 
 ---
 

@@ -1,5 +1,27 @@
 # Getting Started with OmniOps
 
+**Type:** Setup
+**Status:** Active
+**Last Updated:** 2025-10-29
+**Verified For:** v0.1.0
+**Estimated Read Time:** 13 minutes
+
+## Purpose
+A 5-minute quick start guide to get OmniOps running on your local machine.
+
+## Quick Links
+- [Prerequisites](#prerequisites)
+- [Quick Setup (5 minutes)](#quick-setup-5-minutes)
+- [Verify Your Setup](#verify-your-setup)
+- [Common Issues](#common-issues)
+- [Next Steps](#next-steps)
+
+## Keywords
+commands, common, development, essential, getting, help, important, issues, next, notes
+
+---
+
+
 A 5-minute quick start guide to get OmniOps running on your local machine.
 
 ## Prerequisites

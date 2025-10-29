@@ -1,5 +1,27 @@
 # Getting Started Guide for New Developers
 
+**Type:** Setup
+**Status:** Active
+**Last Updated:** 2025-10-29
+**Verified For:** v0.1.0
+**Estimated Read Time:** 46 minutes
+
+## Purpose
+Welcome to the OmniOps AI Customer Service Platform! This guide will help you set up your development environment and understand the codebase on your first day.
+
+## Quick Links
+- [Table of Contents](#table-of-contents)
+- [Prerequisites](#prerequisites)
+- [Initial Setup](#initial-setup)
+- [Your First Tasks](#your-first-tasks)
+- [Understanding the Codebase](#understanding-the-codebase)
+
+## Keywords
+codebase, commands, common, concepts, contents, developers, development, first, getting, help
+
+---
+
+
 Welcome to the OmniOps AI Customer Service Platform! This guide will help you set up your development environment and understand the codebase on your first day.
 
 ## Table of Contents
@@ -722,16 +744,16 @@ Now that your environment is set up, here's what to learn next:
 **Architecture & Design:**
 - `docs/01-ARCHITECTURE/` - System architecture details
 - `docs/PERFORMANCE_OPTIMIZATION.md` - Performance patterns
-- `docs/DEPENDENCY_INJECTION.md` - Code organization patterns
+- `docs/01-ARCHITECTURE/ARCHITECTURE_DEPENDENCY_INJECTION.md` - Code organization patterns
 
 **Feature Documentation:**
 - `docs/02-FEATURES/` - Detailed feature docs
 - `docs/HALLUCINATION_PREVENTION.md` - AI accuracy safeguards
-- `docs/DATABASE_CLEANUP.md` - Data management
+- `docs/02-GUIDES/GUIDE_DATABASE_CLEANUP.md` - Data management
 
 **API Reference:**
 - `docs/03-API/` - API endpoint documentation
-- `docs/API_REFERENCE.md` - Complete API guide
+- `docs/03-API/REFERENCE_API_OVERVIEW.md` - Complete API guide
 
 **Development Guides:**
 - `docs/04-DEVELOPMENT/` - Development best practices

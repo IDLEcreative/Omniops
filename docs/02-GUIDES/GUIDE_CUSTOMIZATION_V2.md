@@ -1,5 +1,39 @@
 # Customization V2 - Simplified Interface Guide
 
+**Type:** Guide
+**Status:** Deprecated
+**Last Updated:** 2025-10-29
+**Verified For:** v0.1.0
+**Dependencies:**
+- See [GUIDE_CUSTOMIZATION_FINAL.md](GUIDE_CUSTOMIZATION_FINAL.md) for current version
+**Estimated Read Time:** 19 minutes
+
+## Purpose
+Historical documentation of the V2 simplified customization interface that reduced settings by 59% (58 → 24 settings) and target setup time from 15 minutes to <2 minutes. V2 introduced 3-tab structure (Essentials, Intelligence, Connect), visual pickers, personality cards, and progressive disclosure patterns. Now superseded by final clean version at /dashboard/customize.
+
+## Quick Links
+- [Key Improvements](#key-improvements)
+- [Tab Structure](#tab-structure)
+- [File Structure](#file-structure)
+- [State Management](#state-management)
+- [API Integration](#api-integration)
+- [Features](#features)
+- [Design Principles](#design-principles)
+- [Migration Path](#migration-path)
+- [Success Metrics](#success-metrics)
+
+## Keywords
+deprecated interface, customization V2, simplified configuration, 3-tab design, widget settings reduction, setup time optimization, personality cards, progressive disclosure, visual pickers, smart defaults, A/B testing, migration documentation, historical reference
+
+## Aliases
+- "V2" (also known as: version 2, second iteration, simplified version, intermediate version)
+- "deprecated" (also known as: superseded, replaced, legacy, outdated, historical)
+- "customization" (also known as: widget config, bot settings, configuration interface, setup wizard)
+- "progressive disclosure" (also known as: collapsible sections, show-on-demand, conditional rendering, expandable UI)
+- "A/B testing" (also known as: split testing, comparative testing, variant testing, user testing)
+
+---
+
 ## Overview
 
 The new simplified customization interface (`/dashboard/customize-v2`) reduces complexity by 59% while maintaining all essential functionality. This guide explains the new structure and how to use it.

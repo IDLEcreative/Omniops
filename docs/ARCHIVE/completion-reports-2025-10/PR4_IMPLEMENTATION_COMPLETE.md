@@ -100,7 +100,7 @@ Successfully deployed **7 specialized agents** to fix **7 critical and high-prio
 - `app/api/debug/[domain]/route.ts` (protected)
 - `app/api/test-*.ts` (8 files protected)
 - `__tests__/api/security/debug-endpoints.test.ts` (created)
-- `docs/SECURITY_MODEL.md` (updated)
+- `docs/02-GUIDES/GUIDE_SECURITY_MODEL.md` (updated)
 - `DEBUG_ENDPOINT_SECURITY_REPORT.md` (created)
 
 **Time**: 4 hours
@@ -135,7 +135,7 @@ Successfully deployed **7 specialized agents** to fix **7 critical and high-prio
 - `lib/auth/api-helpers.ts` (created)
 - `app/api/customer/config/*.ts` (4 handlers secured)
 - `__tests__/api/customer-config/security.test.ts` (created)
-- `docs/CUSTOMER_CONFIG_SECURITY.md` (created)
+- `docs/02-GUIDES/GUIDE_CUSTOMER_CONFIG_SECURITY.md` (created)
 - `ISSUE_9_COMPLETION_REPORT.md` (created)
 
 **Time**: 5.5 hours
@@ -294,14 +294,14 @@ Successfully deployed **7 specialized agents** to fix **7 critical and high-prio
 - `__tests__/performance/dashboard-queries.test.ts` - Performance benchmarks (8 tests)
 - `__tests__/lib/agents/providers/shopify-provider.test.ts` - Shopify provider tests
 - `scripts/benchmark-dashboard.ts` - Dashboard performance benchmark
-- `docs/CUSTOMER_CONFIG_SECURITY.md` - Security documentation
+- `docs/02-GUIDES/GUIDE_CUSTOMER_CONFIG_SECURITY.md` - Security documentation
 - `types/supabase-new.ts` - Updated type definitions
 - 3 completion reports (DEBUG_ENDPOINT, ISSUE_7, ISSUE_9)
 
 ### Modified (30+ files)
 - `CLAUDE.md` - Added test data exception
 - `middleware.ts` - Debug endpoint protection
-- `docs/SECURITY_MODEL.md` - Updated security architecture
+- `docs/02-GUIDES/GUIDE_SECURITY_MODEL.md` - Updated security architecture
 - `docs/01-ARCHITECTURE/performance-optimization.md` - N+1 query optimization
 - 8 debug endpoint routes - Added production checks
 - 4 customer config handlers - Added authentication

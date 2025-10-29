@@ -1,5 +1,27 @@
 # Product Search & Specification Retrieval Fix
 
+**Type:** Troubleshooting
+**Status:** Active
+**Last Updated:** 2025-10-29
+**Verified For:** v0.1.0
+**Estimated Read Time:** 7 minutes
+
+## Purpose
+The chat bot was not retrieving detailed product specifications for items like the EDBRO 4B PISTON PUMP KIT despite the data existing in the database. When asked about specific products, the bot would respond with "I don't have that information" instead of providing the actual specifications (SKU, flow rate, pressure, price, etc.).
+
+## Quick Links
+- [Issue Description](#issue-description)
+- [Root Cause Analysis](#root-cause-analysis)
+- [Solution Implemented](#solution-implemented)
+- [Results](#results)
+- [Testing Approach](#testing-approach)
+
+## Keywords
+analysis, approach, cause, changed, description, files, fix, implemented, issue, learnings
+
+---
+
+
 ## Issue Description
 The chat bot was not retrieving detailed product specifications for items like the EDBRO 4B PISTON PUMP KIT despite the data existing in the database. When asked about specific products, the bot would respond with "I don't have that information" instead of providing the actual specifications (SKU, flow rate, pressure, price, etc.).
 

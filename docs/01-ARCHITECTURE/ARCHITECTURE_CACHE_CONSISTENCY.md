@@ -1,5 +1,27 @@
 # Cache Consistency & Versioning System
 
+**Type:** Architecture
+**Status:** Active
+**Last Updated:** 2025-10-29
+**Verified For:** v0.1.0
+**Estimated Read Time:** 12 minutes
+
+## Purpose
+The search system uses a multi-layered caching strategy to improve performance from 3-26 seconds to <1 second response times. This document explains how the cache versioning system works and how to resolve consistency issues.
+
+## Quick Links
+- [Overview](#overview)
+- [Architecture](#architecture)
+- [Common Issues & Solutions](#common-issues--solutions)
+- [Maintenance Commands](#maintenance-commands)
+- [Implementation Details](#implementation-details)
+
+## Keywords
+architecture, best, cache, commands, common, consistency, details, future, impact, implementation
+
+---
+
+
 ## Overview
 
 The search system uses a multi-layered caching strategy to improve performance from 3-26 seconds to <1 second response times. This document explains how the cache versioning system works and how to resolve consistency issues.

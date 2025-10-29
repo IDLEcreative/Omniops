@@ -1,7 +1,32 @@
 # Technical Debt Tracker
 
-**Last Updated**: 2025-10-26
-**Status**: All critical priorities resolved! Focus now on architecture improvements.
+**Type:** Analysis
+**Status:** Active
+**Last Updated:** 2025-10-29
+**Verified For:** v0.1.0
+**Dependencies:**
+- [Dependency Injection Pattern](../01-ARCHITECTURE/ARCHITECTURE_DEPENDENCY_INJECTION.md) - Testability improvements
+- [File Length Violations Report](../ARCHIVE/refactoring-2025-10/phase-summaries/REFACTORING_COMPLETION_REPORT.md) - 99 files refactored
+- [RLS Security Testing Guide](../04-DEVELOPMENT/testing/GUIDE_RLS_SECURITY_TESTING.md) - Multi-tenant security testing
+**Estimated Read Time:** 45 minutes
+
+## Purpose
+Authoritative tracker of all technical debt items across code quality, architecture, security, and testing domains, providing priority-based categorization (Critical/High/Medium/Low), completion status for resolved items (file length violations, RLS testing, conversation accuracy), and detailed action plans for backlog items including effort estimates and impact analysis.
+
+## Quick Links
+- [Quick Reference](#-quick-reference) - Priority matrix table
+- [Completed Items](#-completed-items) - File length, RLS, accuracy improvements
+- [Status Legend](#status-legend) - Status indicators explained
+
+## Keywords
+technical debt, code quality, file length violations, RLS security, test infrastructure, dependency injection, untestable architecture, legacy code, refactoring, code review, maintenance backlog, architecture improvements
+
+## Aliases
+- "technical debt" (also known as: code debt, design debt, maintenance burden, legacy issues)
+- "file length violations" (also known as: LOC limit, code size issues, file modularity)
+- "RLS" (also known as: Row Level Security, multi-tenant security, data isolation policies)
+- "dependency injection" (also known as: DI, IoC, inversion of control, testability pattern)
+- "refactoring" (also known as: code restructuring, architecture improvement, code cleanup)
 
 ---
 
@@ -160,7 +185,7 @@ $ npm test -- __tests__/api/chat/route.test.ts
 - ✅ Implemented dependency injection in `POST` function
 - ✅ Updated helper functions to accept deps
 - ✅ Zero breaking changes
-- ✅ Comprehensive documentation created ([docs/DEPENDENCY_INJECTION.md](docs/DEPENDENCY_INJECTION.md))
+- ✅ Comprehensive documentation created ([docs/01-ARCHITECTURE/ARCHITECTURE_DEPENDENCY_INJECTION.md](docs/01-ARCHITECTURE/ARCHITECTURE_DEPENDENCY_INJECTION.md))
 - ✅ Migration guide for other routes
 - ✅ JSDoc comments added to interfaces
 - ✅ Testing best practices documented
@@ -474,8 +499,8 @@ export USE_ENHANCED_METADATA_CONTEXT=false
 **Documentation**:
 - [WEEK_1_COMPLETION_SUMMARY.md](WEEK_1_COMPLETION_SUMMARY.md) - Week 1 achievements
 - [CONSERVATIVE_DEPLOYMENT_STRATEGY.md](CONSERVATIVE_DEPLOYMENT_STRATEGY.md) - Deployment approach
-- [docs/EXPERT_LEVEL_IMPROVEMENT_PLAN.md](docs/EXPERT_LEVEL_IMPROVEMENT_PLAN.md) - Complete roadmap
-- [docs/CONVERSATION_ACCURACY_IMPROVEMENTS.md](docs/CONVERSATION_ACCURACY_IMPROVEMENTS.md) - User-facing improvements
+- [docs/04-ANALYSIS/ANALYSIS_EXPERT_IMPROVEMENTS.md](docs/04-ANALYSIS/ANALYSIS_EXPERT_IMPROVEMENTS.md) - Complete roadmap
+- [docs/02-GUIDES/GUIDE_CONVERSATION_ACCURACY.md](docs/02-GUIDES/GUIDE_CONVERSATION_ACCURACY.md) - User-facing improvements
 
 **Effort**: 2-3 days (prompt optimization + gradual rollout)
 **Risk**: Medium (behavioral changes require monitoring, but feature flag enables instant rollback)
@@ -764,7 +789,7 @@ Use this template when adding new items:
 - [MOCK_ISOLATION_FIX.md](docs/MOCK_ISOLATION_FIX.md) - Test infrastructure improvements
 - [CRITICAL_ISSUES_ANALYSIS.md](docs/CRITICAL_ISSUES_ANALYSIS.md) - Detailed security & architecture analysis
 - [CODE_ISSUES_FROM_TESTING.md](docs/CODE_ISSUES_FROM_TESTING.md) - Testability problems discovered
-- [DEPENDENCY_INJECTION.md](docs/DEPENDENCY_INJECTION.md) - DI pattern implementation guide
+- [DEPENDENCY_INJECTION.md](docs/01-ARCHITECTURE/ARCHITECTURE_DEPENDENCY_INJECTION.md) - DI pattern implementation guide
 - [CLAUDE.md](CLAUDE.md) - Development guidelines and rules
 
 ---

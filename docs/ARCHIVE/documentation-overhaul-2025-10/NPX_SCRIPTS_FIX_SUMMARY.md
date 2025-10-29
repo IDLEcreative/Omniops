@@ -91,7 +91,7 @@ This created confusion as developers would try to run these commands and fail.
    - Line 339: Hallucination testing
    - Lines 317-327: Database cleanup section
 
-2. `/Users/jamesguy/Omniops/docs/DATABASE_CLEANUP.md`
+2. `/Users/jamesguy/Omniops/docs/02-GUIDES/GUIDE_DATABASE_CLEANUP.md`
    - Added implementation status banner (lines 3-9)
 
 3. `/Users/jamesguy/Omniops/docs/HALLUCINATION_PREVENTION.md`

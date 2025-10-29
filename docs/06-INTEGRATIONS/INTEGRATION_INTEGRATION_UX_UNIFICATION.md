@@ -1,5 +1,27 @@
 # Integration UX Unification - Complete Implementation
 
+**Type:** Integration
+**Status:** Active
+**Last Updated:** 2025-10-29
+**Verified For:** v0.1.0
+**Estimated Read Time:** 22 minutes
+
+## Purpose
+This document describes the complete redesign of the integrations UX to provide a **consistent, simple, and user-friendly experience** for both WooCommerce and Shopify integrations.
+
+## Quick Links
+- [Overview](#overview)
+- [Problem Statement](#problem-statement)
+- [Implementation Details](#implementation-details)
+- [User Journey Comparison](#user-journey-comparison)
+- [Side-by-Side Comparison](#side-by-side-comparison)
+
+## Keywords
+accessibility, checklist, comparison, conclusion, details, features, files, impact, implementation, integration
+
+---
+
+
 ## Overview
 
 This document describes the complete redesign of the integrations UX to provide a **consistent, simple, and user-friendly experience** for both WooCommerce and Shopify integrations.

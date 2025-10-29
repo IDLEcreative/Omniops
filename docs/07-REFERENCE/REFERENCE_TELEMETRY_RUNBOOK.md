@@ -1,5 +1,27 @@
 # Telemetry Nightly Maintenance Runbook
 
+**Type:** Reference
+**Status:** Active
+**Last Updated:** 2025-10-29
+**Verified For:** v0.1.0
+**Estimated Read Time:** 7 minutes
+
+## Purpose
+This runbook orchestrates the nightly telemetry refresh, verification, and smoke validation cycles for the OmniOps dashboard. The goal is to keep `/dashboard/telemetry` backed by fresh Supabase rollups, ensure freshness alerts trigger reliably, and confirm the UI renders healthy metrics after each run.
+
+## Quick Links
+- [1. Prerequisites](#1-prerequisites)
+- [1.1 GitHub Actions Setup](#11-github-actions-setup)
+- [2. Nightly Pipeline Steps](#2-nightly-pipeline-steps)
+- [3. Example GitHub Actions Workflow Snippet](#3-example-github-actions-workflow-snippet)
+- [4. Operational Notes](#4-operational-notes)
+
+## Keywords
+actions, commands, example, github, nightly, notes, operational, pipeline, prerequisites, quick
+
+---
+
+
 This runbook orchestrates the nightly telemetry refresh, verification, and smoke validation cycles for the OmniOps dashboard. The goal is to keep `/dashboard/telemetry` backed by fresh Supabase rollups, ensure freshness alerts trigger reliably, and confirm the UI renders healthy metrics after each run.
 
 ---

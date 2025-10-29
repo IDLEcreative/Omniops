@@ -1,5 +1,35 @@
 # Chat Routes Comparison: Basic vs Intelligent
 
+**Type:** Guide
+**Status:** Active
+**Last Updated:** 2025-10-29
+**Verified For:** v0.1.0
+**Dependencies:**
+- [Chat System Documentation](../02-FEATURES/chat-system/README.md) - Main chat architecture
+- [Performance Optimization](../07-REFERENCE/REFERENCE_PERFORMANCE_OPTIMIZATION.md) - System optimization strategies
+**Estimated Read Time:** 12 minutes
+
+## Purpose
+Detailed comparison between basic and intelligent chat routes, analyzing search strategies, performance metrics, telemetry tracking, and cost monitoring to guide migration decisions for improved search quality and observability in production deployments.
+
+## Quick Links
+- [Feature Comparison](#feature-comparison) - Side-by-side capabilities
+- [Technical Differences](#technical-differences) - Implementation details
+- [Performance Metrics](#performance-metrics) - Speed and quality benchmarks
+- [Migration Path](#migration-path) - Switching to intelligent route
+- [Testing Commands](#testing-commands) - Validation procedures
+
+## Keywords
+chat routes, intelligent search, function calling, GPT-5-mini, semantic search, telemetry, cost tracking, token usage, parallel search, iterative refinement, performance optimization, A/B testing, migration strategy, API endpoints
+
+## Aliases
+- "intelligent route" (also known as: advanced chat, function-calling endpoint, smart search route)
+- "telemetry" (also known as: monitoring, observability, usage tracking, metrics collection)
+- "function calling" (also known as: tool usage, AI agents, structured API calls)
+- "iterative refinement" (also known as: search iteration, progressive enhancement, multi-pass search)
+
+---
+
 ## Current Status
 **⚠️ IMPORTANT**: The chat widget is currently using the **basic route** (`/api/chat`), NOT the intelligent route.
 

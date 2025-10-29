@@ -1,7 +1,35 @@
 # WooCommerce Chat Integration - Customization Guide
 
+**Type:** Guide
+**Status:** Active
 **Last Updated:** 2025-10-29
-**Status:** ✅ Fully Functional
+**Verified For:** v0.1.0
+**Dependencies:**
+- [WooCommerce Architecture Analysis](../04-ANALYSIS/ANALYSIS_WOOCOMMERCE_ARCHITECTURE.md) - Integration patterns
+- [Security Model](../01-ARCHITECTURE/ARCHITECTURE_SECURITY_MODEL.md) - Credential encryption
+**Estimated Read Time:** 20 minutes
+
+## Purpose
+Comprehensive customization guide for WooCommerce chat integration covering dual configuration methods (environment variables and database per-domain), secure encrypted credential storage, multi-platform support (WooCommerce + Shopify), custom operation creation, testing procedures, and monitoring setup for Thompson's E-Parts production deployment.
+
+## Quick Links
+- [Current Status](#current-status) - What's working now
+- [Configuration Methods](#configuration-methods) - Environment variables vs database
+- [Custom Operations](#creating-custom-operations) - Extending functionality
+- [Multi-Platform Support](#multi-platform-support) - Shopify integration
+- [Testing](#testing) - Verification procedures
+- [Monitoring](#monitoring) - Health checks
+
+## Keywords
+WooCommerce customization, chat integration, configuration methods, environment variables, database storage, custom operations, multi-platform support, provider pattern, API credentials, encrypted storage, testing, monitoring, security
+
+## Aliases
+- "customization" (also known as: configuration, setup, integration setup, custom configuration)
+- "provider pattern" (also known as: integration pattern, commerce provider, platform abstraction)
+- "encrypted credentials" (also known as: secure storage, encrypted API keys, credential encryption)
+- "commerce platform" (also known as: e-commerce platform, online store platform, shop system)
+
+---
 
 ## Overview
 

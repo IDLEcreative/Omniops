@@ -1,5 +1,40 @@
 # Supabase Client Usage Guide
 
+**Type:** Guide
+**Status:** Active
+**Last Updated:** 2025-10-29
+**Verified For:** v0.1.0
+**Dependencies:**
+- `lib/supabase/server.ts`
+- `lib/supabase/client.ts`
+- `lib/supabase/middleware.ts`
+- ESLint configuration
+**Estimated Read Time:** 19 minutes
+
+## Purpose
+Standardizes Supabase client imports across the codebase with a single, ESLint-enforced pattern for server components, API routes, client components, and middleware. Eliminates confusion, prevents SSR bugs, and provides type-safe, maintainable, and testable database access with clear separation between user context and service role operations.
+
+## Quick Links
+- [Overview](#overview)
+- [Quick Reference](#quick-reference)
+- [Detailed Examples](#detailed-examples)
+- [Why This Pattern?](#why-this-pattern)
+- [Common Pitfalls](#common-pitfalls)
+- [Helper File Reference](#helper-file-reference)
+- [ESLint Enforcement](#eslint-enforcement)
+- [Migration Checklist](#migration-checklist)
+
+## Keywords
+Supabase client, server components, client components, API routes, service role, user context, SSR-safe, middleware, dependency injection, type safety, Row Level Security, RLS policies, database access, authentication, ESLint enforcement
+
+## Aliases
+- "service role client" (also known as: admin client, privileged client, RLS-bypass client)
+- "user context client" (also known as: authenticated client, RLS client, session client)
+- "SSR-safe" (also known as: server-side rendering safe, Next.js compatible, cookie-aware)
+- "middleware session" (also known as: auth refresh, session update, cookie handling)
+
+---
+
 **Last Updated**: 2025-10-29
 **Issue**: #10 - Standardize Supabase client imports
 
