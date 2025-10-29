@@ -42,14 +42,14 @@ export const ShippingMethodSchema = z.object({
 // Payment Gateway schema
 export const PaymentGatewaySchema = z.object({
   id: z.string(),
-  title: z.string(),
-  description: z.string(),
-  order: z.number(),
+  title: z.string().nullable(), // WooCommerce API can return null for title
+  description: z.string().nullable(), // WooCommerce API can return null for description
+  order: z.coerce.number(), // WooCommerce API sometimes returns string, coerce to number
   enabled: z.boolean(),
   method_title: z.string(),
   method_description: z.string(),
   method_supports: z.array(z.string()),
-  settings: z.record(z.any()),
+  settings: z.union([z.record(z.any()), z.array(z.any())]), // Can be object or array depending on gateway
 });
 
 // Webhook schema
