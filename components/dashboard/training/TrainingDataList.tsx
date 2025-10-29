@@ -1,7 +1,7 @@
 'use client';
 
 import { memo } from 'react';
-import { FixedSizeList } from 'react-window';
+import { List } from 'react-window';
 import { cn } from '@/lib/utils';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
@@ -64,17 +64,16 @@ export const TrainingDataList = memo(function TrainingDataList({
   onStartTraining,
   onSetActiveTab
 }: TrainingDataListProps) {
-  // Row renderer - only renders visible items for optimal performance
-  const Row = ({ index, style }: { index: number; style: React.CSSProperties }) => {
+  // Row renderer component - only renders visible items for optimal performance
+  const Row = memo(({ index }: { index: number }) => {
     const item = trainingData[index];
+    if (!item) return null;
+
     const config = typeConfig[item.type] || { icon: FileText, color: 'text-gray-600', bg: 'bg-gray-100' };
     const Icon = config.icon;
 
     return (
-      <div
-        style={style}
-        className="group flex items-center justify-between py-2 px-3 border-b hover:bg-muted/50 transition-colors"
-      >
+      <div className="group flex items-center justify-between py-2 px-3 border-b hover:bg-muted/50 transition-colors">
         <div className="flex items-center gap-2 flex-1 min-w-0">
           <Icon className={cn('h-3 w-3 flex-shrink-0', config.color)} />
           <p className="text-sm truncate flex-1">{item.content}</p>
@@ -102,7 +101,7 @@ export const TrainingDataList = memo(function TrainingDataList({
         </div>
       </div>
     );
-  };
+  });
 
   return (
     <Card className="shadow-sm">
@@ -170,15 +169,14 @@ export const TrainingDataList = memo(function TrainingDataList({
         ) : (
           <div>
             {/* Virtual scrolling container - renders only visible items */}
-            <FixedSizeList
-              height={500}
-              itemCount={trainingData.length}
-              itemSize={60}
-              width="100%"
+            <List
+              defaultHeight={500}
+              rowCount={trainingData.length}
+              rowHeight={60}
+              style={{ width: '100%' }}
               className="border rounded-md"
-            >
-              {Row}
-            </FixedSizeList>
+              rowComponent={Row}
+            />
 
             {/* Load More button outside virtual list */}
             {hasMore && (
