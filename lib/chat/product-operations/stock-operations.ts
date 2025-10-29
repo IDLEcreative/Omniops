@@ -11,6 +11,7 @@ import {
   formatStockMessage,
   extractStockInfo
 } from '../woocommerce-tool-formatters';
+import { getCurrencySymbol } from '../currency-utils';
 
 /**
  * Check stock status for a product

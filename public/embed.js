@@ -26,7 +26,11 @@
   // Default configuration
   const defaultConfig = {
     serverUrl: getServerUrl(),
-    appearance: {},
+    appearance: {
+      position: 'bottom-right', // Default to bottom-right corner
+      width: 400,
+      height: 600,
+    },
     features: {},
     behavior: {},
     privacy: {

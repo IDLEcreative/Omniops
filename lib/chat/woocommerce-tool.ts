@@ -4,7 +4,7 @@
  */
 
 import { getDynamicWooCommerceClient } from '@/lib/woocommerce-dynamic';
-import { createClient } from '@/lib/supabase/server';
+import { createServiceRoleClient } from '@/lib/supabase/server';
 import type { WooCommerceOperationParams, WooCommerceOperationResult } from './woocommerce-tool-types';
 import { getCurrency } from '@/lib/woocommerce-currency';
 import type { CurrencyData } from '@/lib/woocommerce-types';
@@ -77,9 +77,9 @@ async function trackOperationMetrics(metrics: {
   customer_config_id?: string;
 }) {
   try {
-    const supabase = await createClient();
+    const supabase = await createServiceRoleClient();
     await supabase
-      .from('woocommerce_usage_metrics')
+      ?.from('woocommerce_usage_metrics')
       .insert(metrics);
   } catch (error) {
     // Silent fail - metrics tracking should never break operations
@@ -101,9 +101,9 @@ export async function executeWooCommerceOperation(
 
   try {
     // Get customer config ID for analytics
-    const supabase = await createClient();
+    const supabase = await createServiceRoleClient();
     const { data: config } = await supabase
-      .from('customer_configs')
+      ?.from('customer_configs')
       .select('id')
       .eq('domain', domain)
       .single();
@@ -273,9 +273,9 @@ export async function executeWooCommerceOperation(
     console.error('[WooCommerce Agent] Error:', error);
 
     // Track error metrics
-    const supabase = await createClient();
+    const supabase = await createServiceRoleClient();
     const { data: config } = await supabase
-      .from('customer_configs')
+      ?.from('customer_configs')
       .select('id')
       .eq('domain', domain)
       .single();

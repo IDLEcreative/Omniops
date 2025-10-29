@@ -44,17 +44,16 @@ CREATE INDEX idx_woocommerce_metrics_dashboard ON woocommerce_usage_metrics(
 -- Enable Row Level Security
 ALTER TABLE woocommerce_usage_metrics ENABLE ROW LEVEL SECURITY;
 
--- RLS Policy: Users can only see metrics for their own domains
+-- RLS Policy: Users can only see metrics for their organization's domains
 CREATE POLICY "Users can view own domain metrics"
   ON woocommerce_usage_metrics
   FOR SELECT
+  TO public
   USING (
-    domain IN (
-      SELECT domain FROM customer_configs
-      WHERE customer_configs.id = (
-        SELECT customer_config_id FROM user_profiles
-        WHERE user_profiles.id = auth.uid()
-      )
+    customer_config_id IN (
+      SELECT id
+      FROM customer_configs
+      WHERE is_organization_member(organization_id, (select auth.uid()))
     )
   );
 
@@ -62,7 +61,8 @@ CREATE POLICY "Users can view own domain metrics"
 CREATE POLICY "Service role can insert metrics"
   ON woocommerce_usage_metrics
   FOR INSERT
-  WITH CHECK (true); -- Service role only, enforced at application level
+  TO public
+  WITH CHECK (true);
 
 -- Add helpful comment
 COMMENT ON TABLE woocommerce_usage_metrics IS 'Tracks WooCommerce operation usage for analytics, monitoring, and performance optimization';

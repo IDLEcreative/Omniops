@@ -9,6 +9,7 @@ import type {
   WooCommerceOperationResult,
   CustomerInsightsInfo
 } from './woocommerce-tool-types';
+import { getCurrencySymbol } from './currency-utils';
 
 /**
  * Get customer insights

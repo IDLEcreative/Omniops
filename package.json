@@ -5,7 +5,7 @@
   "scripts": {
     "dev": "next dev",
     "prebuild": "ls -la lib/supabase/ && echo 'Supabase files found'",
-    "build": "next build",
+    "build": "NODE_OPTIONS='--max-old-space-size=4096' next build",
     "start": "next start",
     "lint": "eslint . --max-warnings 50",
     "lint:fix": "eslint . --fix",
@@ -25,7 +25,7 @@
     "deduplicate:embeddings": "node scripts/deduplicate-embeddings.js",
     "deduplicate:cache:clear": "node -e \"const { getDeduplicator } = require('./lib/embedding-deduplicator'); getDeduplicator().clearAllCaches().then(() => process.exit(0));\"",
     "check:deps": "npm ls",
-    "check:all": "npm run check:deps && npm run lint && npx tsc --noEmit",
+    "check:all": "npm run check:deps && npm run lint && NODE_OPTIONS='--max-old-space-size=4096' npx tsc --noEmit",
     "worker:start": "node lib/workers/scraper-worker-service.js",
     "worker:dev": "ts-node lib/workers/scraper-worker-service.ts",
     "worker:build": "tsc lib/workers/scraper-worker-service.ts --outDir dist/workers",

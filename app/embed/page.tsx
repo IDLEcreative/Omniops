@@ -60,9 +60,14 @@ export default function EmbedPage() {
       setInitialOpen(true);
     }
     
-    // Hide hints on production domains
+    // Hide hints on production domains OR when embedded in iframe
     const hostname = window.location.hostname;
+    const isEmbedded = window.self !== window.top;
     if (!hostname.includes('localhost') && !hostname.includes('127.0.0.1') && !hostname.includes('vercel')) {
+      setShowHints(false);
+    }
+    // Always hide hints when embedded in iframe (WordPress, etc.)
+    if (isEmbedded) {
       setShowHints(false);
     }
   }, []);
