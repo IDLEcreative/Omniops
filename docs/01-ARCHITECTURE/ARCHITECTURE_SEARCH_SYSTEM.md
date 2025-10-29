@@ -1,13 +1,32 @@
 # Search Architecture & Result Limits
 
-**Last Updated:** 2025-10-24
-**Status:** Production Reference - Verified Current
-**Critical Reference:** This document explains how search results flow through the system and the ACTUAL limits (not assumed limits).
+**Type:** Architecture
+**Status:** Active
+**Last Updated:** 2025-10-29
+**Verified For:** v0.1.0
+**Dependencies:**
+- [Performance Optimization](./docs/07-REFERENCE/REFERENCE_PERFORMANCE_OPTIMIZATION.md)
+- [Hallucination Prevention](../02-GUIDES/GUIDE_HALLUCINATION_PREVENTION.md)
+- [Database Schema](../SUPABASE_SCHEMA.md)
+**Estimated Read Time:** 15 minutes
 
-**Related Docs:**
-- [Performance Optimization](./performance-optimization.md) - Response times and bottlenecks
-- [Hallucination Prevention](../02-FEATURES/chat-system/hallucination-prevention.md) - Quality safeguards
-- [Database Schema](../SUPABASE_SCHEMA.md) - Tables and indexes
+## Purpose
+Comprehensive documentation of the search architecture explaining how search results flow through the system, the actual result limits (100-200, not 20), hybrid search behavior combining keyword and vector approaches, and token usage implications for AI context windows.
+
+## Quick Links
+- [Result Limit Hierarchy](#result-limit-hierarchy) - Understand the actual limits at each layer
+- [Hybrid Search Strategy](#hybrid-search-strategy) - How keyword and vector search combine
+- [Token Usage Calculation](#token-usage-calculation) - Cost and performance implications
+- [Performance Characteristics](#performance-characteristics) - Response times and bottlenecks
+
+## Keywords
+search, hybrid search, pgvector, embeddings, semantic search, keyword search, vector similarity, result limits, token usage, performance optimization, OpenAI embeddings, text-embedding-3-small, cosine similarity, search cache
+
+## Aliases
+- "vector search" (also known as: semantic search, embedding search, similarity search)
+- "keyword search" (also known as: text search, ILIKE search, full-text search)
+- "hybrid search" (also known as: combined search, multi-strategy search)
+- "result limits" (also known as: search limits, query limits, pagination limits)
 
 ---
 
@@ -698,7 +717,7 @@ similarityThreshold: 0.3  // High relevance only
 
 ### Bottleneck Analysis
 
-**From [Performance Optimization](./performance-optimization.md):**
+**From [Performance Optimization](./docs/07-REFERENCE/REFERENCE_PERFORMANCE_OPTIMIZATION.md):**
 
 ```
 13.7s Simple Query Breakdown:
@@ -896,8 +915,8 @@ ORDER BY mean_exec_time DESC;
 - Indexes: `page_embeddings_vector_idx`, `page_embeddings_domain_idx`
 
 **Documentation:**
-- [Performance Optimization](./performance-optimization.md) - Response times and costs
-- [Hallucination Prevention](../02-FEATURES/chat-system/hallucination-prevention.md) - Quality safeguards
+- [Performance Optimization](./docs/07-REFERENCE/REFERENCE_PERFORMANCE_OPTIMIZATION.md) - Response times and costs
+- [Hallucination Prevention](../02-GUIDES/GUIDE_HALLUCINATION_PREVENTION.md) - Quality safeguards
 - [Chat System](../02-FEATURES/chat-system/README.md) - Complete chat architecture
 
 ---

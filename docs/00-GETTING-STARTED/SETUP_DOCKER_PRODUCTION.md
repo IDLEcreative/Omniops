@@ -1,5 +1,38 @@
 # Docker Setup for Omniops
 
+**Type:** Setup
+**Status:** Active
+**Last Updated:** 2025-10-29
+**Verified For:** v0.1.0
+**Dependencies:**
+- [Performance Optimization](docs/07-REFERENCE/REFERENCE_PERFORMANCE_OPTIMIZATION.md) - Container optimization
+- [Database Schema](docs/07-REFERENCE/REFERENCE_DATABASE_SCHEMA.md) - Connection setup
+**Estimated Read Time:** 8 minutes
+
+## Purpose
+Complete Docker setup guide for building and running the Omniops application using Docker Compose, covering both production and development configurations with multi-stage builds (59% faster with cache), Redis integration for job queuing, health checks, and container orchestration including troubleshooting and performance optimization.
+
+## Quick Links
+- [Quick Start](#quick-start) - Get running in 3 steps
+- [Docker Configuration Files](#docker-configuration-files) - Production vs development setup
+- [Common Commands](#common-commands) - Container management essentials
+- [Architecture](#architecture) - Next.js app + Redis setup
+- [Troubleshooting](#troubleshooting) - Common issues and solutions
+
+## Keywords
+Docker, containerization, deployment, Docker Compose, Dockerfile, docker-compose.yml, multi-stage build, Redis, environment variables, production, development, hot reload, orchestration, container management, image building, Docker Desktop, .dockerignore, health check
+
+## Aliases
+- "Docker Compose" (also known as: docker-compose, compose, multi-container Docker, container orchestration)
+- "Dockerfile" (also known as: Docker image definition, container build file, image recipe, build configuration)
+- "multi-stage build" (also known as: staged build, layered build, optimized build, build optimization)
+- "hot reload" (also known as: live reload, auto-refresh, development mode, watch mode)
+- ".dockerignore" (also known as: Docker ignore file, build exclusions, ignored files, build context filter)
+- "health check" (also known as: container health, health endpoint, status check, readiness probe)
+- "Docker Desktop" (also known as: Docker for Mac, Docker for Windows, Docker GUI, Docker client)
+
+---
+
 This guide explains how to build and run the Omniops application using Docker.
 
 ## Prerequisites

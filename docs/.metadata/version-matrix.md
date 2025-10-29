@@ -73,7 +73,7 @@
 ### Real-Time (Every Code Change)
 **Updated immediately when code changes:**
 
-- `01-ARCHITECTURE/database-schema.md` - Database schema reference
+- `07-REFERENCE/REFERENCE_DATABASE_SCHEMA.md` - Database schema reference
 - `lib/agents/README.md` - Agent system documentation
 - `docs/02-FEATURES/*/README.md` - Feature-specific guides
 - API endpoint documentation
@@ -122,10 +122,10 @@
 
 | Document | Last Updated | Verified Accurate For | Next Review | Status |
 |----------|-------------|----------------------|-------------|---------|
-| `01-ARCHITECTURE/database-schema.md` | 2025-10-24 | v0.1.0 | 2025-11-24 | ✅ Current |
+| `07-REFERENCE/REFERENCE_DATABASE_SCHEMA.md` | 2025-10-24 | v0.1.0 | 2025-11-24 | ✅ Current |
 | `docs/SEARCH_ARCHITECTURE.md` | 2025-10-24 | v0.1.0 | 2025-11-24 | ✅ Current |
-| `docs/02-FEATURES/chat-system/hallucination-prevention.md` | 2025-10-24 | v0.1.0 | 2025-11-24 | ✅ Current |
-| `docs/01-ARCHITECTURE/performance-optimization.md` | 2025-10-24 | v0.1.0 | 2025-11-24 | ✅ Current |
+| `docs/02-GUIDES/GUIDE_HALLUCINATION_PREVENTION.md` | 2025-10-24 | v0.1.0 | 2025-11-24 | ✅ Current |
+| `docs/07-REFERENCE/REFERENCE_PERFORMANCE_OPTIMIZATION.md` | 2025-10-24 | v0.1.0 | 2025-11-24 | ✅ Current |
 | `CLAUDE.md` | 2025-10-24 | v0.1.0 | 2025-11-24 | ✅ Current |
 | `README.md` | 2025-10-24 | v0.1.0 | 2025-11-24 | ✅ Current |
 
@@ -146,8 +146,8 @@
 |----------|-------------|----------------------|-------------|---------|
 | `docs/setup/QUICK_START.md` | 2025-10-24 | v0.1.0 | As-needed | ✅ Current |
 | `docs/setup/MODEL_CONFIGURATION.md` | 2025-01-09 | v0.0.9 | As-needed | ✅ Current |
-| `docs/setup/DOCKER_README.md` | 2024-10-30 | v0.0.6 | As-needed | ✅ Current |
-| `DOCKER_README.md` | 2024-10-30 | v0.0.6 | As-needed | ✅ Current |
+| `docs/00-GETTING-STARTED/SETUP_DOCKER_PRODUCTION.md` | 2024-10-30 | v0.0.6 | As-needed | ✅ Current |
+| `docs/00-GETTING-STARTED/SETUP_DOCKER_PRODUCTION.md` | 2024-10-30 | v0.0.6 | As-needed | ✅ Current |
 | `.env.example` | 2025-10-24 | v0.1.0 | As-needed | ✅ Current |
 
 ### Reference Documentation (Review Annually)
@@ -171,8 +171,8 @@
 | **WooCommerce** | `docs/02-FEATURES/woocommerce/README.md` | `docs/WOOCOMMERCE_INTEGRATION_GUIDE.md`, API endpoints | v0.0.2 | 2025-10-24 | ✅ Complete |
 | **Chat System** | `docs/02-FEATURES/chat-system/README.md` | `docs/SEARCH_ARCHITECTURE.md`, hallucination prevention | v0.0.1 | 2025-10-24 | ✅ Complete |
 | **Web Scraping** | `docs/02-FEATURES/scraping/README.md` | `lib/crawler-config.ts`, job monitoring | v0.0.3 | 2025-10-24 | ✅ Complete |
-| **Hallucination Prevention** | `docs/02-FEATURES/chat-system/hallucination-prevention.md` | `test-hallucination-prevention.ts` | v0.0.6 | 2025-10-24 | ✅ Complete |
-| **Multi-tenant Architecture** | `docs/MULTI_TENANT_SETUP.md` | `01-ARCHITECTURE/database-schema.md`, RLS policies | v0.0.1 | 2024-09-15 | ✅ Complete |
+| **Hallucination Prevention** | `docs/02-GUIDES/GUIDE_HALLUCINATION_PREVENTION.md` | `test-hallucination-prevention.ts` | v0.0.6 | 2025-10-24 | ✅ Complete |
+| **Multi-tenant Architecture** | `docs/MULTI_TENANT_SETUP.md` | `07-REFERENCE/REFERENCE_DATABASE_SCHEMA.md`, RLS policies | v0.0.1 | 2024-09-15 | ✅ Complete |
 | **Privacy Compliance** | `docs/PRIVACY_GUIDE.md` | GDPR endpoints, data export/deletion | v0.0.1 | 2024-12-15 | ✅ Complete |
 | **Commerce Provider Registry** | `CHANGELOG.md` (Unreleased) | `lib/agents/providers/`, `lib/commerce-provider-registry.ts` | v0.1.0 | 2025-10-24 | ✅ Complete |
 | **Smart Periodic Scraper** | `docs/SMART_PERIODIC_SCRAPER_*.md` | Migration scripts, API examples | v0.0.8 | 2024-12-15 | ✅ Complete |
@@ -503,7 +503,7 @@ const provider = await resolveCommerceProvider(domain);
 npx tsx scripts/audit-doc-versions.ts
 
 # Check specific document
-npx tsx scripts/audit-doc-versions.ts --doc=01-ARCHITECTURE/database-schema.md
+npx tsx scripts/audit-doc-versions.ts --doc=07-REFERENCE/REFERENCE_DATABASE_SCHEMA.md
 
 # Generate report
 npx tsx scripts/audit-doc-versions.ts --report
@@ -592,7 +592,7 @@ npx tsx scripts/check-doc-versions.ts --quick
 - [CHANGELOG.md](../../CHANGELOG.md) - Detailed version changes
 - [README.md](../../README.md) - Quick start and overview
 - [CLAUDE.md](../../CLAUDE.md) - Development guidelines
-- [01-ARCHITECTURE/database-schema.md](../../01-ARCHITECTURE/database-schema.md) - Database reference
+- [07-REFERENCE/REFERENCE_DATABASE_SCHEMA.md](docs/07-REFERENCE/REFERENCE_DATABASE_SCHEMA.md) - Database reference
 
 **External Resources:**
 - [Semantic Versioning](https://semver.org/)

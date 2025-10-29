@@ -21,7 +21,7 @@ All current chat system documentation is now located at:
 
 ### Structure:
 - `README.md` - Complete chat system guide
-- `hallucination-prevention.md` - Anti-hallucination measures
+- `docs/02-GUIDES/GUIDE_HALLUCINATION_PREVENTION.md` - Anti-hallucination measures
 
 ### Related Documentation:
 - `docs/CHAT_ROUTES_COMPARISON.md` - Route comparison (kept current)
@@ -35,7 +35,7 @@ The following files have been converted to redirect files pointing to new docume
 - `docs/CHAT_SYSTEM_DOCS.md`
 - `docs/CHAT_SYSTEM_DOCUMENTATION.md`
 - `docs/INTELLIGENT_CHAT_MIGRATION.md`
-- `docs/HALLUCINATION_PREVENTION.md`
+- `docs/02-GUIDES/GUIDE_HALLUCINATION_PREVENTION.md`
 
 ## Reason for Consolidation
 

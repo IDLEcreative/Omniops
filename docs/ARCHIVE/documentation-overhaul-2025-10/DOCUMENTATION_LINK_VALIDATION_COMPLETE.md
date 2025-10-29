@@ -36,7 +36,7 @@
 ```
 docs/
   ├── SUPABASE_SCHEMA.md
-  ├── DOCKER_README.md
+  ├── docs/00-GETTING-STARTED/SETUP_DOCKER_PRODUCTION.md
   ├── TESTING.md
   └── ...
 ```
@@ -46,12 +46,12 @@ To:
 docs/
   ├── 00-GETTING-STARTED/
   ├── 01-ARCHITECTURE/
-  │   └── database-schema.md (was SUPABASE_SCHEMA.md)
+  │   └── docs/07-REFERENCE/REFERENCE_DATABASE_SCHEMA.md (was SUPABASE_SCHEMA.md)
   ├── 02-FEATURES/
   ├── 04-DEVELOPMENT/
   │   └── testing/README.md (was TESTING.md)
   └── setup/
-      └── DOCKER_README.md
+      └── docs/00-GETTING-STARTED/SETUP_DOCKER_PRODUCTION.md
 ```
 
 **Impact:** 300+ links still point to old locations
@@ -61,11 +61,11 @@ docs/
 #### A. Absolute Path to Root Files (High Volume)
 ```markdown
 ❌ [Schema](/docs/SUPABASE_SCHEMA.md)
-❌ [Docker](/docs/setup/DOCKER_README.md)
+❌ [Docker](/docs/00-GETTING-STARTED/SETUP_DOCKER_PRODUCTION.md)
 ❌ [Testing](/docs/TESTING.md)
 
 ✅ [Schema](/docs/SUPABASE_SCHEMA.md)
-✅ [Docker](/docs/setup/DOCKER_README.md)
+✅ [Docker](/docs/00-GETTING-STARTED/SETUP_DOCKER_PRODUCTION.md)
 ✅ [Testing](/docs/04-DEVELOPMENT/testing/README.md)
 ```
 **Count:** ~100 occurrences
@@ -74,7 +74,7 @@ docs/
 #### B. Relative Path Depth Issues (High Volume)
 ```markdown
 ❌ [Schema](../SUPABASE_SCHEMA.md)  # from docs/01-ARCHITECTURE/
-❌ [Testing](../docs/TESTING.md)       # incorrect relative depth
+❌ [Testing](docs/TESTING.md)       # incorrect relative depth
 
 ✅ [Schema](../SUPABASE_SCHEMA.md)
 ✅ [Testing](../04-DEVELOPMENT/testing/README.md)
@@ -106,7 +106,7 @@ docs/
 
 Many files exist in BOTH old and new locations:
 - `docs/SUPABASE_SCHEMA.md` ✅ exists
-- `docs/01-ARCHITECTURE/database-schema.md` ✅ exists (same content)
+- `docs/07-REFERENCE/REFERENCE_DATABASE_SCHEMA.md` ✅ exists (same content)
 
 **Decision Needed:**
 - Keep both temporarily for backward compatibility?
@@ -172,9 +172,9 @@ npx tsx scripts/fix-doc-links.ts
 ### Critical Documentation (HIGHEST PRIORITY)
 
 #### docs/01-ARCHITECTURE/ (15 broken links)
-- `database-schema.md`: 7 internal anchor links need fixing
-- `performance-optimization.md`: 3 anchor links
-- `search-architecture.md`: 5 file path links
+- `docs/07-REFERENCE/REFERENCE_DATABASE_SCHEMA.md`: 7 internal anchor links need fixing
+- `docs/07-REFERENCE/REFERENCE_PERFORMANCE_OPTIMIZATION.md`: 3 anchor links
+- `docs/01-ARCHITECTURE/ARCHITECTURE_SEARCH_SYSTEM.md`: 5 file path links
 
 **Impact:** High - Core technical documentation used by developers
 

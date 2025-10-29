@@ -9,7 +9,7 @@ This documentation has been moved to the new unified location:
 ## Quick Links
 
 - **Main Documentation**: [Chat System README](./02-FEATURES/chat-system/README.md)
-- **Hallucination Prevention**: [Hallucination Prevention Guide](./02-FEATURES/chat-system/hallucination-prevention.md)
+- **Hallucination Prevention**: [Hallucination Prevention Guide](./02-GUIDES/GUIDE_HALLUCINATION_PREVENTION.md)
 - **Search Architecture**: [Search Architecture](./SEARCH_ARCHITECTURE.md)
 
 ## What Changed

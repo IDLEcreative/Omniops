@@ -106,7 +106,7 @@ Output:
 - Total documents: 10
 - Passed: 8 ✅
 - Warnings: 2 ⚠️
-  - performance-optimization.md (>90 days old)
+  - docs/07-REFERENCE/REFERENCE_PERFORMANCE_OPTIMIZATION.md (>90 days old)
   - version-matrix.md (old version references)
 ```
 
@@ -211,7 +211,7 @@ c19eb4c - docs: add automated quality control systems
    - **Owner:** Development team
 
 ### Warnings
-1. **performance-optimization.md** - Last updated 274 days ago
+1. **docs/07-REFERENCE/REFERENCE_PERFORMANCE_OPTIMIZATION.md** - Last updated 274 days ago
    - **Action:** Review and update content
    - **Timeline:** Next 30 days
    - **Owner:** Documentation team
@@ -324,7 +324,7 @@ Both GitHub Actions workflows are:
    ```
 
 2. **Short-term (7 days):** Update outdated documentation
-   - Review `performance-optimization.md`
+   - Review `docs/07-REFERENCE/REFERENCE_PERFORMANCE_OPTIMIZATION.md`
    - Update content and metadata
 
 3. **Medium-term (30 days):** Clean up version references

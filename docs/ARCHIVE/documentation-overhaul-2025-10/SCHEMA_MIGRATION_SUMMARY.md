@@ -3,7 +3,7 @@
 **Date**: 2025-10-24
 **Status**: ✅ COMPLETED
 **Old Location**: `docs/SUPABASE_SCHEMA.md`
-**New Location**: `docs/01-ARCHITECTURE/database-schema.md`
+**New Location**: `docs/07-REFERENCE/REFERENCE_DATABASE_SCHEMA.md`
 
 ---
 
@@ -15,7 +15,7 @@ The SUPABASE_SCHEMA.md documentation has been completely rewritten and moved to 
 
 **Documentation Location**:
 - ❌ Old: `docs/SUPABASE_SCHEMA.md` (root-level, dated 2025-08-28)
-- ✅ New: `docs/01-ARCHITECTURE/database-schema.md` (organized, dated 2025-10-24)
+- ✅ New: `docs/07-REFERENCE/REFERENCE_DATABASE_SCHEMA.md` (organized, dated 2025-10-24)
 
 **Documentation Quality**:
 - ❌ Old: 406 lines, manually maintained, potentially outdated
@@ -220,7 +220,7 @@ The SUPABASE_SCHEMA.md documentation has been completely rewritten and moved to 
 **Process**:
 1. Run MCP tool queries: `mcp__supabase-omni__list_tables`
 2. Execute schema queries from documentation
-3. Update `docs/01-ARCHITECTURE/database-schema.md`
+3. Update `docs/07-REFERENCE/REFERENCE_DATABASE_SCHEMA.md`
 4. Increment version number
 5. Add changes to "Notable Changes" section
 6. Update "Last Verified" timestamp
@@ -238,7 +238,7 @@ To verify the migration was successful:
 
 ```bash
 # Check new file exists
-ls -lh docs/01-ARCHITECTURE/database-schema.md
+ls -lh docs/07-REFERENCE/REFERENCE_DATABASE_SCHEMA.md
 # Should show: 1718 lines
 
 # Check redirect exists
@@ -250,7 +250,7 @@ grep -r "SUPABASE_SCHEMA.md" docs/00-GETTING-STARTED docs/01-ARCHITECTURE docs/0
 # Should show: minimal/no results (archived files excluded)
 
 # Check file count
-wc -l docs/01-ARCHITECTURE/database-schema.md
+wc -l docs/07-REFERENCE/REFERENCE_DATABASE_SCHEMA.md
 # Should show: 1718 lines
 ```
 

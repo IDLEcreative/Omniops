@@ -73,81 +73,80 @@ export function PlanSelector({ organizationId, canManage }: PlanSelectorProps) {
   };
 
   return (
-    <div className="space-y-8">
-      <div className="text-center">
-        <h2 className="text-3xl font-bold mb-4">
+    <div className="space-y-6 animate-in fade-in duration-700">
+      <div className="text-center space-y-3">
+        <h2 className="text-2xl font-bold animate-in slide-in-from-top duration-500">
           Choose the plan that fits your needs
         </h2>
-        <p className="text-xl text-muted-foreground mb-4">
-          Simple, transparent pricing
-        </p>
-        <Badge variant="secondary" className="text-base px-4 py-2">
-          <Sparkles className="mr-1 h-4 w-4" />
+        <Badge variant="secondary" className="text-sm px-3 py-1 animate-in slide-in-from-top duration-500 delay-100">
+          <Sparkles className="mr-1 h-3 w-3" />
           Flexible monthly billing • Cancel anytime
         </Badge>
       </div>
 
-      <div className="grid md:grid-cols-2 gap-6 max-w-4xl mx-auto">
-        {PLANS.map((plan) => (
+      <div className="grid md:grid-cols-2 gap-4 max-w-3xl mx-auto">
+        {PLANS.map((plan, index) => (
           <Card
             key={plan.name}
             className={cn(
-              "relative hover:shadow-lg transition-shadow",
-              plan.popular && "border-primary shadow-lg"
+              "relative hover:scale-105 hover:shadow-xl transition-all duration-300 animate-in slide-in-from-bottom",
+              plan.popular && "border-primary shadow-lg scale-[1.02]",
+              index === 0 && "delay-200",
+              index === 1 && "delay-300"
             )}
           >
             {plan.popular && (
-              <Badge className="absolute -top-3 left-1/2 -translate-x-1/2">
+              <Badge className="absolute -top-2 left-1/2 -translate-x-1/2 animate-pulse">
                 Most Popular
               </Badge>
             )}
-            <CardHeader>
-              <CardTitle className="text-2xl">{plan.name}</CardTitle>
-              <CardDescription>{plan.description}</CardDescription>
-              <div className="mt-4">
-                <span className="text-4xl font-bold">{plan.price}</span>
-                <span className="text-muted-foreground">/month</span>
+            <CardHeader className="pb-3">
+              <CardTitle className="text-xl">{plan.name}</CardTitle>
+              <CardDescription className="text-xs">{plan.description}</CardDescription>
+              <div className="mt-2">
+                <span className="text-3xl font-bold">{plan.price}</span>
+                <span className="text-sm text-muted-foreground">/month</span>
               </div>
             </CardHeader>
-            <CardContent>
-              <ul className="space-y-3 mb-6">
+            <CardContent className="space-y-4">
+              <ul className="space-y-2">
                 {plan.features.map((feature, i) => (
-                  <li key={i} className="flex items-start gap-2">
-                    <CheckCircle2 className="h-5 w-5 text-primary shrink-0 mt-0.5" />
-                    <span className="text-sm">{feature}</span>
+                  <li key={i} className="flex items-start gap-2 animate-in fade-in duration-500" style={{ animationDelay: `${(index * 100) + (i * 50)}ms` }}>
+                    <CheckCircle2 className="h-4 w-4 text-primary shrink-0 mt-0.5" />
+                    <span className="text-xs">{feature}</span>
                   </li>
                 ))}
               </ul>
               <Button
                 onClick={() => handleSelectPlan(plan.priceId)}
                 disabled={!canManage || loading === plan.priceId}
-                className="w-full"
+                className="w-full transition-all duration-300 hover:scale-105"
                 variant={plan.popular ? "default" : "outline"}
               >
-                {loading === plan.priceId ? 'Processing...' : 'Get Started'}
+                {loading === plan.priceId ? (
+                  <span className="flex items-center gap-2">
+                    <span className="animate-spin">⏳</span>
+                    Processing...
+                  </span>
+                ) : (
+                  'Get Started'
+                )}
               </Button>
             </CardContent>
           </Card>
         ))}
       </div>
 
-      <Card className="bg-muted/50 max-w-4xl mx-auto">
-        <CardContent className="pt-6">
-          <div className="text-center">
-            <h3 className="font-semibold text-xl mb-2">Enterprise</h3>
-            <p className="text-muted-foreground mb-4">
-              Custom pricing tailored for large organizations
-            </p>
-            <Button variant="outline">
-              Contact Sales
-            </Button>
-          </div>
-        </CardContent>
-      </Card>
+      <div className="text-center text-xs text-muted-foreground animate-in fade-in duration-500 delay-500">
+        Need enterprise features?{' '}
+        <button className="underline hover:text-primary transition-colors">
+          Contact sales
+        </button>
+      </div>
 
       {!canManage && (
-        <div className="bg-yellow-50 border border-yellow-200 rounded-lg p-4 max-w-4xl mx-auto">
-          <p className="text-sm text-yellow-800 text-center">
+        <div className="bg-yellow-50 border border-yellow-200 rounded-lg p-3 max-w-3xl mx-auto animate-in slide-in-from-bottom duration-500">
+          <p className="text-xs text-yellow-800 text-center">
             Only organization owners and admins can manage subscriptions.
           </p>
         </div>

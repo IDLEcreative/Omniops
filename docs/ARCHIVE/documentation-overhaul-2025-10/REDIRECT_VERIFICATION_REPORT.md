@@ -32,9 +32,9 @@ All 31 key redirect files have been verified and are functioning correctly. Each
 
 | Source | Target | Status |
 |--------|--------|--------|
-| `SUPABASE_SCHEMA.md` | `01-ARCHITECTURE/database-schema.md` | ✅ Working |
-| `SEARCH_ARCHITECTURE.md` | `01-ARCHITECTURE/search-architecture.md` | ✅ Working |
-| `PERFORMANCE_OPTIMIZATION.md` | `01-ARCHITECTURE/performance-optimization.md` | ✅ Working |
+| `SUPABASE_SCHEMA.md` | `07-REFERENCE/REFERENCE_DATABASE_SCHEMA.md` | ✅ Working |
+| `SEARCH_ARCHITECTURE.md` | `01-ARCHITECTURE/ARCHITECTURE_SEARCH_SYSTEM.md` | ✅ Working |
+| `PERFORMANCE_OPTIMIZATION.md` | `07-REFERENCE/REFERENCE_PERFORMANCE_OPTIMIZATION.md` | ✅ Working |
 
 #### 2. Chat System Documentation (4 redirects)
 ✅ All working
@@ -43,7 +43,7 @@ All 31 key redirect files have been verified and are functioning correctly. Each
 |--------|--------|--------|
 | `CHAT_SYSTEM_DOCS.md` | `02-FEATURES/chat-system/README.md` | ✅ Working |
 | `CHAT_SYSTEM_DOCUMENTATION.md` | `02-FEATURES/chat-system/README.md` | ✅ Working |
-| `HALLUCINATION_PREVENTION.md` | `02-FEATURES/chat-system/hallucination-prevention.md` | ✅ Working |
+| `HALLUCINATION_PREVENTION.md` | `02-GUIDES/GUIDE_HALLUCINATION_PREVENTION.md` | ✅ Working |
 | `TESTING.md` | `04-DEVELOPMENT/testing/README.md` | ✅ Working |
 
 #### 3. WooCommerce Documentation (6 redirects)
@@ -123,7 +123,7 @@ Please see: [WooCommerce Integration Guide](02-FEATURES/woocommerce/README.md)
 
 This documentation has been moved to the architecture section:
 
-**New Location**: [docs/01-ARCHITECTURE/search-architecture.md](./01-ARCHITECTURE/search-architecture.md)
+**New Location**: [docs/01-ARCHITECTURE/ARCHITECTURE_SEARCH_SYSTEM.md](./01-ARCHITECTURE/ARCHITECTURE_SEARCH_SYSTEM.md)
 
 ## What Changed
 - ✅ **Verified** against current implementation
@@ -205,17 +205,17 @@ The main project instructions file (`CLAUDE.md`) correctly references the new lo
 ```markdown
 ## Key Documentation
 
-- **[Search Architecture](docs/01-ARCHITECTURE/search-architecture.md)** - ✅ Correct
-- **[Performance Optimization](docs/01-ARCHITECTURE/performance-optimization.md)** - ✅ Correct
+- **[Search Architecture](docs/01-ARCHITECTURE/ARCHITECTURE_SEARCH_SYSTEM.md)** - ✅ Correct
+- **[Performance Optimization](docs/07-REFERENCE/REFERENCE_PERFORMANCE_OPTIMIZATION.md)** - ✅ Correct
 - **[Supabase Schema](docs/SUPABASE_SCHEMA.md)** - ⚠️ Points to redirect (works but indirect)
-- **[Hallucination Prevention](docs/HALLUCINATION_PREVENTION.md)** - ⚠️ Points to redirect (works but indirect)
+- **[Hallucination Prevention](docs/02-GUIDES/GUIDE_HALLUCINATION_PREVENTION.md)** - ⚠️ Points to redirect (works but indirect)
 ```
 
 ### Recommendation
 Consider updating CLAUDE.md to point directly to new locations:
 ```markdown
-- **[Database Schema](docs/01-ARCHITECTURE/database-schema.md)**
-- **[Hallucination Prevention](docs/02-FEATURES/chat-system/hallucination-prevention.md)**
+- **[Database Schema](docs/07-REFERENCE/REFERENCE_DATABASE_SCHEMA.md)**
+- **[Hallucination Prevention](docs/02-GUIDES/GUIDE_HALLUCINATION_PREVENTION.md)**
 ```
 
 ---
@@ -256,7 +256,7 @@ None required - all key redirects are working correctly.
      ---
      type: redirect
      from: SUPABASE_SCHEMA.md
-     to: 01-ARCHITECTURE/database-schema.md
+     to: 07-REFERENCE/REFERENCE_DATABASE_SCHEMA.md
      date: 2025-10-24
      ---
      ```

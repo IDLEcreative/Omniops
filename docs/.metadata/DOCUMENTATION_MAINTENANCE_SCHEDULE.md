@@ -69,10 +69,10 @@ These documents are reviewed every month:
 1. **CLAUDE.md** - Developer guidelines and project instructions
 2. **README.md** - Project overview and quick start
 3. **CHANGELOG.md** - Version history and recent changes
-4. **docs/01-ARCHITECTURE/database-schema.md** - Database schema reference
-5. **docs/01-ARCHITECTURE/search-architecture.md** - Search system documentation
-6. **docs/01-ARCHITECTURE/performance-optimization.md** - Performance best practices
-7. **docs/02-FEATURES/chat-system/hallucination-prevention.md** - Anti-hallucination safeguards
+4. **docs/07-REFERENCE/REFERENCE_DATABASE_SCHEMA.md** - Database schema reference
+5. **docs/01-ARCHITECTURE/ARCHITECTURE_SEARCH_SYSTEM.md** - Search system documentation
+6. **docs/07-REFERENCE/REFERENCE_PERFORMANCE_OPTIMIZATION.md** - Performance best practices
+7. **docs/02-GUIDES/GUIDE_HALLUCINATION_PREVENTION.md** - Anti-hallucination safeguards
 8. **docs/.metadata/version-matrix.md** - Version tracking and compatibility
 9. **docs/00-GETTING-STARTED/for-developers.md** - Developer onboarding
 10. **docs/00-GETTING-STARTED/for-devops.md** - DevOps setup guide
@@ -114,10 +114,10 @@ These documents are reviewed every month:
 - [ ] CLAUDE.md reviewed and updated
 - [ ] README.md reviewed and updated
 - [ ] CHANGELOG.md reviewed and updated
-- [ ] database-schema.md reviewed and updated
-- [ ] search-architecture.md reviewed and updated
-- [ ] performance-optimization.md reviewed and updated
-- [ ] hallucination-prevention.md reviewed and updated
+- [ ] docs/07-REFERENCE/REFERENCE_DATABASE_SCHEMA.md reviewed and updated
+- [ ] docs/01-ARCHITECTURE/ARCHITECTURE_SEARCH_SYSTEM.md reviewed and updated
+- [ ] docs/07-REFERENCE/REFERENCE_PERFORMANCE_OPTIMIZATION.md reviewed and updated
+- [ ] docs/02-GUIDES/GUIDE_HALLUCINATION_PREVENTION.md reviewed and updated
 - [ ] version-matrix.md reviewed and updated
 - [ ] for-developers.md reviewed and updated
 - [ ] for-devops.md reviewed and updated

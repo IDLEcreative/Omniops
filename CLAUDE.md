@@ -71,12 +71,12 @@ This is a General purpose AI-powered customer service chat widget built with Nex
 
 ## Key Documentation
 
-- **[Search Architecture](docs/01-ARCHITECTURE/search-architecture.md)** - CRITICAL: Explains actual search result limits (100-200, NOT 20!), hybrid search behavior, and token usage
-- **[Performance Optimization](docs/01-ARCHITECTURE/performance-optimization.md)** - Comprehensive optimization guide covering database, API, AI, and frontend performance
-- **[Database Schema](docs/01-ARCHITECTURE/database-schema.md)** - Complete database schema reference with 31 tables, 214 indexes, verified 2025-10-24
+- **[Search Architecture](docs/01-ARCHITECTURE/ARCHITECTURE_SEARCH_SYSTEM.md)** - CRITICAL: Explains actual search result limits (100-200, NOT 20!), hybrid search behavior, and token usage
+- **[Performance Optimization](docs/07-REFERENCE/REFERENCE_PERFORMANCE_OPTIMIZATION.md)** - Comprehensive optimization guide covering database, API, AI, and frontend performance
+- **[Database Schema](docs/07-REFERENCE/REFERENCE_DATABASE_SCHEMA.md)** - Complete database schema reference with 31 tables, 214 indexes, verified 2025-10-24
 - **[Conversation Accuracy](docs/CONVERSATION_ACCURACY_IMPROVEMENTS.md)** - Metadata tracking system for 86% conversation accuracy
 - **[Hallucination Prevention](docs/HALLUCINATION_PREVENTION.md)** - Anti-hallucination safeguards and testing
-- **[Docker Setup](docs/setup/DOCKER_README.md)** - Complete Docker configuration and commands
+- **[Docker Setup](docs/00-GETTING-STARTED/SETUP_DOCKER_PRODUCTION.md)** - Complete Docker configuration and commands
 
 ---
 
@@ -368,7 +368,7 @@ Before considering a document "AI-ready", verify:
 
 **Example of a Well-Structured Document:**
 
-See [REFERENCE_DATABASE_SCHEMA.md](docs/SUPABASE_SCHEMA.md) as the gold standard - it includes:
+See [REFERENCE_DATABASE_SCHEMA.md](docs/07-REFERENCE/REFERENCE_DATABASE_SCHEMA.md) as the gold standard - it includes:
 - Clear metadata header
 - Comprehensive TOC
 - Annotated schema definitions
@@ -744,7 +744,7 @@ The application follows a service-oriented architecture with clear separation of
 
 ## Database Structure
 
-**📚 Complete Schema Reference: See [SUPABASE_SCHEMA.md](docs/SUPABASE_SCHEMA.md) for authoritative database documentation**
+**📚 Complete Schema Reference: See [REFERENCE_DATABASE_SCHEMA.md](docs/07-REFERENCE/REFERENCE_DATABASE_SCHEMA.md) for authoritative database documentation**
 
 Main tables:
 - `customer_configs`: Customer settings and encrypted credentials
@@ -795,7 +795,7 @@ Required environment variables (copy `.env.example` to `.env.local`):
 
 ### Docker Setup
 - **Docker Desktop**: Version 28.3.2 installed and configured
-- **Full Docker Documentation**: See [DOCKER_README.md](docs/setup/DOCKER_README.md) for complete setup guide
+- **Full Docker Documentation**: See [SETUP_DOCKER_PRODUCTION.md](docs/00-GETTING-STARTED/SETUP_DOCKER_PRODUCTION.md) for complete setup guide
 
 #### Quick Docker Commands
 ```bash

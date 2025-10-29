@@ -76,8 +76,8 @@ The README.md has been successfully reduced from 800+ lines to 326 lines while r
 
 **docs/01-ARCHITECTURE/**
 - overview.md
-- database-schema.md
-- search-architecture.md
+- docs/07-REFERENCE/REFERENCE_DATABASE_SCHEMA.md
+- docs/01-ARCHITECTURE/ARCHITECTURE_SEARCH_SYSTEM.md
 - multi-tenancy.md
 - security.md
 - adr/ (Architecture Decision Records)
@@ -121,9 +121,9 @@ The README.md has been successfully reduced from 800+ lines to 326 lines while r
 **docs/07-REFERENCE/**
 - tech-stack.md
 - configuration.md
-- database-schema.md
-- hallucination-prevention.md
-- search-architecture.md
+- docs/07-REFERENCE/REFERENCE_DATABASE_SCHEMA.md
+- docs/02-GUIDES/GUIDE_HALLUCINATION_PREVENTION.md
+- docs/01-ARCHITECTURE/ARCHITECTURE_SEARCH_SYSTEM.md
 - npx-tools-guide.md
 
 **docs/ARCHIVE/**
@@ -141,7 +141,7 @@ The README.md has been successfully reduced from 800+ lines to 326 lines while r
 |-----------------|--------------|
 | Detailed installation | docs/00-GETTING-STARTED/getting-started-developers.md |
 | Architecture details | docs/01-ARCHITECTURE/overview.md |
-| Database schema | docs/01-ARCHITECTURE/database-schema.md |
+| Database schema | docs/07-REFERENCE/REFERENCE_DATABASE_SCHEMA.md |
 | Search implementation | docs/SEARCH_ARCHITECTURE.md |
 | Chat system details | docs/02-FEATURES/chat-system/ |
 | WooCommerce integration | docs/02-FEATURES/woocommerce/ |

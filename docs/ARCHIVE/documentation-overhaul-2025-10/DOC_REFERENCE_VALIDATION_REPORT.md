@@ -96,7 +96,7 @@ These are likely placeholder text, example paths, or relative links that need co
    - **Action:** Create these README files as directory indexes
 
 6. **Database Schema References**
-   - `01-ARCHITECTURE/database-schema.md` referenced without `docs/` prefix
+   - `07-REFERENCE/REFERENCE_DATABASE_SCHEMA.md` referenced without `docs/` prefix
    - **Impact:** Some links will break
    - **Action:** Standardize all references to include `docs/` prefix
 
@@ -123,9 +123,9 @@ These are likely placeholder text, example paths, or relative links that need co
 
 **Missing References:**
 - Line 289: `app/api/privacy/export/route.ts`
-- Line 41: `docs/01-ARCHITECTURE/performance-optimization.md` (path format issue)
+- Line 41: `docs/07-REFERENCE/REFERENCE_PERFORMANCE_OPTIMIZATION.md` (path format issue)
 - Line 43: `docs/HALLUCINATION_PREVENTION.md` (wrong path)
-- Line 44: `docs/setup/DOCKER_README.md` (correct path should be checked)
+- Line 44: `docs/00-GETTING-STARTED/SETUP_DOCKER_PRODUCTION.md` (correct path should be checked)
 
 **Recommendation:** Fix CLAUDE.md first as it's the primary reference for developers.
 
@@ -156,7 +156,7 @@ components/ui/Button.tsx
 
 ✅ **Relative Markdown Links with Full Path**
 ```markdown
-[Text](../../01-ARCHITECTURE/search-architecture.md)
+[Text](../../01-ARCHITECTURE/ARCHITECTURE_SEARCH_SYSTEM.md)
 ```
 
 ✅ **Code Block Imports with Context**
@@ -173,7 +173,7 @@ import { X } from './lib/something';  // Fails validation without source file co
 
 ❌ **Link References Without Extensions**
 ```markdown
-See: [Search Architecture](search-architecture)  // Should be search-architecture.md
+See: [Search Architecture](search-architecture)  // Should be docs/01-ARCHITECTURE/ARCHITECTURE_SEARCH_SYSTEM.md
 ```
 
 ❌ **Abbreviated Paths**
@@ -252,7 +252,7 @@ jobs:
 | `app/api/privacy/export/route.ts` | 4 | Missing - needs creation or path correction |
 | `./providers/woocommerce-provider` | 5 | Missing - path incorrect, should be `lib/agents/providers/woocommerce-provider` |
 | `app/api/chat-intelligent/route.ts` | 8 | Deleted - was deprecated, docs need updating |
-| `01-ARCHITECTURE/database-schema.md` | 12 | Path format - missing `docs/` prefix |
+| `07-REFERENCE/REFERENCE_DATABASE_SCHEMA.md` | 12 | Path format - missing `docs/` prefix |
 
 ### Critical Documentation Files with Broken References
 

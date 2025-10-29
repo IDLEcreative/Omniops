@@ -207,7 +207,7 @@ This document captures key architectural decisions made during the development o
 **References:**
 - `lib/redis.ts` - Redis client and queue implementation
 - `lib/scrape-job-processor.ts` - Job processing logic
-- `DOCKER_README.md` - Redis setup in Docker
+- `docs/00-GETTING-STARTED/SETUP_DOCKER_PRODUCTION.md` - Redis setup in Docker
 
 ---
 

@@ -34,8 +34,8 @@ lib/agents/providers/woocommerce-provider
 ```
 
 ### 2. Database Schema ✅
-**Issue:** Referenced as `01-ARCHITECTURE/database-schema.md`
-**Reality:** Located at `docs/01-ARCHITECTURE/database-schema.md`
+**Issue:** Referenced as `07-REFERENCE/REFERENCE_DATABASE_SCHEMA.md`
+**Reality:** Located at `docs/07-REFERENCE/REFERENCE_DATABASE_SCHEMA.md`
 **Fix:** Add `docs/` prefix to all references
 
 **Files to Fix:**
@@ -46,10 +46,10 @@ lib/agents/providers/woocommerce-provider
 **Pattern to Fix:**
 ```markdown
 # Wrong:
-See [01-ARCHITECTURE/database-schema.md]
+See [07-REFERENCE/REFERENCE_DATABASE_SCHEMA.md]
 
 # Correct:
-See [docs/01-ARCHITECTURE/database-schema.md]
+See [docs/07-REFERENCE/REFERENCE_DATABASE_SCHEMA.md]
 ```
 
 ### 3. Hallucination Prevention Doc ✅

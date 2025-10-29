@@ -1,8 +1,33 @@
 # Performance Optimization Guide
 
-**Last Updated:** 2025-01-24
-**Status:** Comprehensive Reference - Production Ready
-**Related Docs:** [Search Architecture](../SEARCH_ARCHITECTURE.md) | [Hallucination Prevention](../02-FEATURES/chat-system/hallucination-prevention.md)
+**Type:** Reference
+**Status:** Active
+**Last Updated:** 2025-10-29
+**Verified For:** v0.1.0
+**Dependencies:**
+- [Search Architecture](../SEARCH_ARCHITECTURE.md)
+- [Hallucination Prevention](../02-GUIDES/GUIDE_HALLUCINATION_PREVENTION.md)
+- [Database Schema](../SUPABASE_SCHEMA.md)
+**Estimated Read Time:** 25 minutes
+
+## Purpose
+Comprehensive performance optimization strategies for the Omniops multi-tenant AI chat platform, covering database query optimization (N+1 elimination achieving 90% faster load times), API layer parallelization, search and embeddings performance tuning, AI model selection (GPT-5-mini for 83% cost reduction), frontend optimization, and multi-layer caching strategies.
+
+## Quick Links
+- [Database Optimizations](#database-optimizations) - Query batching and indexing strategies
+- [AI Model Optimization](#ai-model-optimization) - Model selection and token management
+- [Caching Strategies](#caching-strategies) - Multi-layer caching architecture
+- [Implementation Roadmap](#implementation-roadmap) - Phased rollout plan
+
+## Keywords
+performance, optimization, caching, database queries, API response time, token usage, GPT-5-mini, cost reduction, N+1 queries, batch queries, parallel processing, response streaming, vector search, embedding cache, Redis, query optimization, indexes, rate limiting, bundle size, lazy loading
+
+## Aliases
+- "N+1 queries" (also known as: sequential queries, query loops, repeated queries)
+- "batch queries" (also known as: query batching, bulk queries, grouped queries)
+- "caching" (also known as: memoization, result storage, query cache)
+- "response time" (also known as: latency, request duration, query speed)
+- "token budget" (also known as: context window, token limit, token allocation)
 
 ---
 
@@ -1184,10 +1209,10 @@ Use this checklist when implementing new features:
 ## Related Documentation
 
 - **[Search Architecture](../SEARCH_ARCHITECTURE.md)** - Search limits, hybrid search, token usage
-- **[Hallucination Prevention](../02-FEATURES/chat-system/hallucination-prevention.md)** - Quality safeguards
+- **[Hallucination Prevention](../02-GUIDES/GUIDE_HALLUCINATION_PREVENTION.md)** - Quality safeguards
 - **[Database Cleanup](../DATABASE_CLEANUP.md)** - Maintenance procedures
 - **[NPX Tools Guide](../NPX_TOOLS_GUIDE.md)** - Monitoring and optimization tools
-- **[Docker Setup](../setup/DOCKER_README.md)** - Container optimization
+- **[Docker Setup](../00-GETTING-STARTED/SETUP_DOCKER_PRODUCTION.md)** - Container optimization
 - **[API Reference](../API_REFERENCE.md)** - API endpoints and usage
 
 ---

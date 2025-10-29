@@ -1,6 +1,34 @@
-**Last Updated:** 2025-10-24
-
 # Hallucination Prevention in Chat System
+
+**Type:** Guide
+**Status:** Active
+**Last Updated:** 2025-10-29
+**Verified For:** v0.1.0
+**Dependencies:**
+- [Search Architecture](../../01-ARCHITECTURE/ARCHITECTURE_SEARCH_SYSTEM.md) - Result grounding
+- [Performance Optimization](docs/07-REFERENCE/REFERENCE_PERFORMANCE_OPTIMIZATION.md) - System prompts
+**Estimated Read Time:** 12 minutes
+
+## Purpose
+Comprehensive anti-hallucination measures for the AI chat system ensuring accurate information delivery and proper uncertainty admission through multi-layered prevention including system prompt rules, context grounding, response validation, and a comprehensive testing suite across 10 hallucination-prone categories.
+
+## Quick Links
+- [Solution Architecture](#solution-architecture) - Multi-layered prevention approach
+- [Implementation Details](#implementation-details) - Enhanced context and strict rules
+- [Standard Response Templates](#standard-response-templates) - Handling unknown information
+- [Testing](#testing) - Comprehensive hallucination detection tests
+- [Best Practices](#best-practices) - Accuracy over helpfulness
+
+## Keywords
+hallucination, AI safety, accuracy, validation, testing, anti-hallucination, RAG, retrieval augmented generation, system prompts, context grounding, response validation, false claims, uncertainty admission, product accuracy, technical specifications, GPT-4o-mini
+
+## Aliases
+- "hallucination" (also known as: false information, AI confabulation, invented facts, made-up data)
+- "context grounding" (also known as: RAG, retrieval augmented generation, source-based responses)
+- "uncertainty admission" (also known as: confidence thresholds, I don't know responses, information gaps)
+- "response validation" (also known as: fact checking, accuracy verification, claim validation)
+
+---
 
 ## Overview
 

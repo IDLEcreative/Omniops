@@ -158,7 +158,7 @@ This is **textbook dependency injection** - a fundamental design pattern for tes
 
 ## 📋 Known Technical Debt
 
-See [TECH_DEBT.md](TECH_DEBT.md) for complete tracking of:
+See [TECH_DEBT.md](docs/04-ANALYSIS/ANALYSIS_TECHNICAL_DEBT_TRACKER.md) for complete tracking of:
 1. **File Length Violations** - `app/api/chat/route.ts` (1204 LOC) and test file (612 LOC) need refactoring
 2. **Test Infrastructure** - Mock isolation issues causing batch test failures
 3. **Documentation** - DI pattern needs developer documentation
@@ -198,7 +198,7 @@ curl -X POST http://localhost:3000/api/chat \
 ## 📝 Next Steps (Optional)
 
 ### Immediate (Not Blocking)
-1. Fix test isolation issues (see [TECH_DEBT.md](TECH_DEBT.md))
+1. Fix test isolation issues (see [TECH_DEBT.md](docs/04-ANALYSIS/ANALYSIS_TECHNICAL_DEBT_TRACKER.md))
 2. Refactor file length violations
 
 ### Future Enhancements

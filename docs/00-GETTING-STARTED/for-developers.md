@@ -170,7 +170,7 @@ Your Supabase project needs the database schema. You have two options:
 **Option A: Using Supabase Dashboard (Recommended for first-time setup)**
 1. Go to your Supabase project dashboard
 2. Navigate to SQL Editor
-3. Copy the schema from `docs/01-ARCHITECTURE/database-schema.md` or ask a team member for the latest migration file
+3. Copy the schema from `docs/07-REFERENCE/REFERENCE_DATABASE_SCHEMA.md` or ask a team member for the latest migration file
 4. Run the SQL to create all tables
 
 **Option B: Using Supabase CLI (Advanced)**
@@ -329,7 +329,7 @@ Before writing code, read these files to understand the system:
 
 1. **`CLAUDE.md`** (root) - Development guidelines and philosophy
 2. **`README.md`** (root) - Project overview and features
-3. **`docs/01-ARCHITECTURE/database-schema.md`** - Complete database schema
+3. **`docs/07-REFERENCE/REFERENCE_DATABASE_SCHEMA.md`** - Complete database schema
 4. **`docs/SEARCH_ARCHITECTURE.md`** - How RAG and search works
 5. **`lib/config.ts`** - Feature flags and configuration
 
@@ -702,7 +702,7 @@ Now that your environment is set up, here's what to learn next:
 **Week 1: Understand the Architecture**
 1. Read `docs/ARCHITECTURE.md` - Overall system design
 2. Read `docs/SEARCH_ARCHITECTURE.md` - How RAG works
-3. Read `docs/01-ARCHITECTURE/database-schema.md` - Database structure
+3. Read `docs/07-REFERENCE/REFERENCE_DATABASE_SCHEMA.md` - Database structure
 4. Explore the codebase with VS Code search
 
 **Week 2: Dive into Features**
@@ -847,7 +847,7 @@ Run it: `npm test hello`
 
 **Complete Guides:**
 - `README.md` - Feature overview
-- `docs/01-ARCHITECTURE/database-schema.md` - Database schema
+- `docs/07-REFERENCE/REFERENCE_DATABASE_SCHEMA.md` - Database schema
 - `docs/SEARCH_ARCHITECTURE.md` - Search system
 - `docs/TESTING.md` - Testing practices
 

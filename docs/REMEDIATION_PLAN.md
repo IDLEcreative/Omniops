@@ -1017,7 +1017,7 @@ describe('Scraping Pipeline End-to-End', () => {
 #### Week 7, Day 1-2: Architecture Documentation (6 hours)
 
 **Update Core Documentation**:
-- [ ] `/Users/jamesguy/Omniops/docs/01-ARCHITECTURE/database-schema.md`
+- [ ] `/Users/jamesguy/Omniops/docs/07-REFERENCE/REFERENCE_DATABASE_SCHEMA.md`
   - Document organization_id migration
   - Remove references to unused tables
   - Add new tables created (scrape_jobs, query_cache)
@@ -1537,7 +1537,7 @@ npm test -- --bail --passWithNoTests
 - `/Users/jamesguy/Omniops/lib/supabase/server.ts`
 - `/Users/jamesguy/Omniops/lib/rate-limit.ts`
 - `/Users/jamesguy/Omniops/supabase/migrations/20251104000000_complete_customer_id_to_organization_id.sql`
-- `/Users/jamesguy/Omniops/docs/01-ARCHITECTURE/database-schema.md`
+- `/Users/jamesguy/Omniops/docs/07-REFERENCE/REFERENCE_DATABASE_SCHEMA.md`
 - `/Users/jamesguy/Omniops/docs/SUPABASE_SCHEMA.md`
 
 **New Files Created**:

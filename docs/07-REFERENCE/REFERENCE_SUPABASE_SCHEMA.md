@@ -4,7 +4,7 @@
 
 The database schema documentation has been reorganized and moved to:
 
-**New Location**: [`docs/01-ARCHITECTURE/database-schema.md`](01-ARCHITECTURE/database-schema.md)
+**New Location**: [`docs/07-REFERENCE/REFERENCE_DATABASE_SCHEMA.md`](07-REFERENCE/REFERENCE_DATABASE_SCHEMA.md)
 
 ## Why This Move?
 
@@ -26,12 +26,12 @@ The new documentation includes:
 
 ## Quick Links
 
-- [Database Schema v2.0](01-ARCHITECTURE/database-schema.md)
-- [Search Architecture](01-ARCHITECTURE/search-architecture.md)
-- [Performance Optimization](01-ARCHITECTURE/performance-optimization.md)
+- [Database Schema v2.0](07-REFERENCE/REFERENCE_DATABASE_SCHEMA.md)
+- [Search Architecture](01-ARCHITECTURE/ARCHITECTURE_SEARCH_SYSTEM.md)
+- [Performance Optimization](07-REFERENCE/REFERENCE_PERFORMANCE_OPTIMIZATION.md)
 
 ---
 
 **Last Updated**: 2025-10-24
 **Redirect From**: docs/SUPABASE_SCHEMA.md
-**Redirect To**: docs/01-ARCHITECTURE/database-schema.md
+**Redirect To**: docs/07-REFERENCE/REFERENCE_DATABASE_SCHEMA.md

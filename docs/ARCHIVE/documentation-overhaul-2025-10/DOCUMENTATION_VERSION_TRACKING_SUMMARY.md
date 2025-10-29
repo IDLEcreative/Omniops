@@ -162,9 +162,9 @@ All documentation MUST include in the first 20 lines:
 - README.md
 - CLAUDE.md
 - CHANGELOG.md
-- docs/01-ARCHITECTURE/search-architecture.md
-- docs/01-ARCHITECTURE/performance-optimization.md
-- docs/02-FEATURES/chat-system/hallucination-prevention.md
+- docs/01-ARCHITECTURE/ARCHITECTURE_SEARCH_SYSTEM.md
+- docs/07-REFERENCE/REFERENCE_PERFORMANCE_OPTIMIZATION.md
+- docs/02-GUIDES/GUIDE_HALLUCINATION_PREVENTION.md
 - docs/.metadata/version-matrix.md
 
 **Process:**
@@ -358,7 +358,7 @@ if (daysSinceUpdate > 90) {  // Change 90 to new value
 - 40 documentation files in docs/
 
 **Remaining Warnings:**
-1. `docs/01-ARCHITECTURE/performance-optimization.md` - Last updated 273 days ago (2025-01-24)
+1. `docs/07-REFERENCE/REFERENCE_PERFORMANCE_OPTIMIZATION.md` - Last updated 273 days ago (2025-01-24)
 2. `docs/.metadata/version-matrix.md` - Contains 16 references to old versions (informational only)
 
 **Git Statistics:**
@@ -405,7 +405,7 @@ if (daysSinceUpdate > 90) {  // Change 90 to new value
    - ✅ Report generated: `docs/reports/doc-version-audit.md`
 
 2. **Optional Follow-up:**
-   - Review `performance-optimization.md` (273 days since last update)
+   - Review `docs/07-REFERENCE/REFERENCE_PERFORMANCE_OPTIMIZATION.md` (273 days since last update)
    - Update old version references in `version-matrix.md` (low priority)
    - Commit metadata changes to git
 

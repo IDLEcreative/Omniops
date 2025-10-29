@@ -67,7 +67,7 @@ npm run migrate:encrypt-credentials          # Run migrations
 1. **[Testing Guide](04-DEVELOPMENT/testing.md)** - Testing strategy and patterns
 2. **[Debugging Procedures](06-TROUBLESHOOTING/debugging.md)** - Common debugging workflows
 3. **[API Reference](03-API/reference.md)** - Endpoint testing guide
-4. **[Hallucination Prevention](07-REFERENCE/hallucination-prevention.md)** - AI quality testing
+4. **[Hallucination Prevention](07-REFERENCE/docs/02-GUIDES/GUIDE_HALLUCINATION_PREVENTION.md)** - AI quality testing
 
 **Quick Commands:**
 ```bash
@@ -110,7 +110,7 @@ Our documentation is organized into numbered categories for easy navigation:
 
 - **[System Architecture Overview](01-ARCHITECTURE/overview.md)** - Complete system design
 - **[Architecture Decision Records (ADRs)](01-ARCHITECTURE/adr/)** - Design decisions and rationale
-- **[Database Schema](01-ARCHITECTURE/database-schema.md)** - Tables, relationships, RLS policies
+- **[Database Schema](07-REFERENCE/REFERENCE_DATABASE_SCHEMA.md)** - Tables, relationships, RLS policies
 - **[Search Architecture](SEARCH_ARCHITECTURE.md)** - Hybrid search design (100-200 result limits!)
 - **[Multi-Tenancy](01-ARCHITECTURE/multi-tenancy.md)** - Domain-based isolation
 - **[Security Architecture](01-ARCHITECTURE/security.md)** - Encryption, authentication, RLS
@@ -240,7 +240,7 @@ npx tsx test-database-cleanup.ts clean                # Clean all
 
 - **[Technology Stack](07-REFERENCE/tech-stack.md)** - Frameworks, libraries, versions
 - **[Configuration Reference](07-REFERENCE/configuration.md)** - Feature flags, settings
-- **[Database Schema](07-REFERENCE/database-schema.md)** - Complete schema reference
+- **[Database Schema](07-REFERENCE/docs/07-REFERENCE/REFERENCE_DATABASE_SCHEMA.md)** - Complete schema reference
 - **[Hallucination Prevention](HALLUCINATION_PREVENTION.md)** - Anti-hallucination safeguards
 - **[Search Architecture](SEARCH_ARCHITECTURE.md)** - Search limits and behavior
 - **[NPX Tools Guide](NPX_TOOLS_GUIDE.md)** - Monitoring and maintenance tools
@@ -438,7 +438,7 @@ Contains historical documentation that may be outdated but preserved for referen
 ### Project Files
 - [Main README](../README.md) - Project overview
 - [CLAUDE.md](../CLAUDE.md) - Development guidelines
-- [TECH_DEBT.md](../TECH_DEBT.md) - Known technical debt
+- [TECH_DEBT.md](docs/04-ANALYSIS/ANALYSIS_TECHNICAL_DEBT_TRACKER.md) - Known technical debt
 - [CHANGELOG.md](../CHANGELOG.md) - Version history
 
 ---

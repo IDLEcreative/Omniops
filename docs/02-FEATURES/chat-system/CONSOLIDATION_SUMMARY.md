@@ -27,7 +27,7 @@ Successfully consolidated 7+ fragmented chat system documentation files into a u
      - Troubleshooting guide
      - Performance & scaling
 
-2. **docs/02-FEATURES/chat-system/hallucination-prevention.md**
+2. **docs/02-GUIDES/GUIDE_HALLUCINATION_PREVENTION.md**
    - **Lines**: 610
    - **Size**: 17KB
    - **Topics**:
@@ -63,9 +63,9 @@ Successfully consolidated 7+ fragmented chat system documentation files into a u
    - Converted to redirect file
    - Migration history added to README.md
 
-4. **docs/HALLUCINATION_PREVENTION.md** (232 lines)
+4. **docs/02-GUIDES/GUIDE_HALLUCINATION_PREVENTION.md** (232 lines)
    - Converted to redirect file
-   - Content enhanced in hallucination-prevention.md
+   - Content enhanced in docs/02-GUIDES/GUIDE_HALLUCINATION_PREVENTION.md
 
 5. **docs/CHAT_IMPROVEMENTS_ROADMAP.md** (427 lines)
    - Archived to docs/ARCHIVE/chat-system-old/
@@ -123,7 +123,7 @@ These were likely already moved to `docs/ARCHIVE/analysis/` or `docs/implementat
 - ✅ Performance metrics & scaling
 - ✅ Version history
 
-### hallucination-prevention.md (Specialized Guide)
+### docs/02-GUIDES/GUIDE_HALLUCINATION_PREVENTION.md (Specialized Guide)
 - ✅ Problem statement with examples
 - ✅ Multi-layered prevention architecture
 - ✅ Implementation details (3 levels)
@@ -175,8 +175,8 @@ Four files converted to redirect documents:
    - Points to: docs/02-FEATURES/chat-system/README.md
    - Explains integration into main docs
 
-4. **docs/HALLUCINATION_PREVENTION.md**
-   - Points to: docs/02-FEATURES/chat-system/hallucination-prevention.md
+4. **docs/02-GUIDES/GUIDE_HALLUCINATION_PREVENTION.md**
+   - Points to: docs/02-GUIDES/GUIDE_HALLUCINATION_PREVENTION.md
    - Dedicated guide reference
 
 ## Archived Files

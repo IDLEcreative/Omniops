@@ -26,10 +26,10 @@ find . -name "*.md" -exec sed -i '' 's|./providers/woocommerce-provider|lib/agen
 ### 2. Fix Schema References (Manual)
 ```markdown
 # Wrong:
-[Schema](01-ARCHITECTURE/database-schema.md)
+[Schema](07-REFERENCE/REFERENCE_DATABASE_SCHEMA.md)
 
 # Right:
-[Schema](docs/01-ARCHITECTURE/database-schema.md)
+[Schema](docs/07-REFERENCE/REFERENCE_DATABASE_SCHEMA.md)
 ```
 
 ### 3. Fix Privacy API (Manual)

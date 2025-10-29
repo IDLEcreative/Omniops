@@ -375,7 +375,7 @@ These scripts are now referenced in:
 ### Primary Documentation
 - ✅ `CLAUDE.md` - Added to Key Commands section
 - ✅ `docs/DATABASE_CLEANUP.md` - Referenced as primary tool
-- ✅ `docs/02-FEATURES/chat-system/hallucination-prevention.md` - Test suite documentation
+- ✅ `docs/02-GUIDES/GUIDE_HALLUCINATION_PREVENTION.md` - Test suite documentation
 - ✅ `docs/PERFORMANCE_OPTIMIZATION.md` - Health monitoring tools
 
 ### Command Reference

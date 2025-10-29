@@ -190,8 +190,8 @@ docker logs omniops-app | grep "search_products completed"
 - Implement query result caching
 
 **Related Docs:**
-- [Performance Optimization](../01-ARCHITECTURE/performance-optimization.md)
-- [Search Architecture](../01-ARCHITECTURE/search-architecture.md)
+- [Performance Optimization](../07-REFERENCE/REFERENCE_PERFORMANCE_OPTIMIZATION.md)
+- [Search Architecture](../01-ARCHITECTURE/ARCHITECTURE_SEARCH_SYSTEM.md)
 
 ---
 
@@ -259,7 +259,7 @@ grep -A 20 "IMPORTANT RULES" lib/chat/system-prompts.ts
 - Implement user feedback system
 
 **Related Docs:**
-- [Hallucination Prevention](../02-FEATURES/chat-system/hallucination-prevention.md)
+- [Hallucination Prevention](../02-GUIDES/GUIDE_HALLUCINATION_PREVENTION.md)
 - [Chat System Testing](../04-DEVELOPMENT/testing/README.md)
 
 ---
@@ -565,7 +565,7 @@ docker logs omniops-app | grep "search_products completed"
 - Set up token usage alerts
 
 **Related Docs:**
-- [Search Architecture](../01-ARCHITECTURE/search-architecture.md)
+- [Search Architecture](../01-ARCHITECTURE/ARCHITECTURE_SEARCH_SYSTEM.md)
 - [Token Cost Tracking](../TOKEN_COST_TRACKING.md)
 
 ---
@@ -728,7 +728,7 @@ psql $DATABASE_URL -c "
 - Collect user feedback on results
 
 **Related Docs:**
-- [Search Architecture](../01-ARCHITECTURE/search-architecture.md)
+- [Search Architecture](../01-ARCHITECTURE/ARCHITECTURE_SEARCH_SYSTEM.md)
 - [Embeddings Health Monitoring](../NPX_TOOLS_GUIDE.md)
 
 ---
@@ -813,7 +813,7 @@ psql $DATABASE_URL -c "
 - Implement multi-level caching
 
 **Related Docs:**
-- [Performance Optimization](../01-ARCHITECTURE/performance-optimization.md)
+- [Performance Optimization](../07-REFERENCE/REFERENCE_PERFORMANCE_OPTIMIZATION.md)
 - [Database Optimization](../DATABASE_OPTIMIZATION.md)
 
 ---
@@ -1034,7 +1034,7 @@ EOF
 - Implement cache warming
 
 **Related Docs:**
-- [Performance Optimization](../01-ARCHITECTURE/performance-optimization.md)
+- [Performance Optimization](../07-REFERENCE/REFERENCE_PERFORMANCE_OPTIMIZATION.md)
 - [Caching Strategy](../CACHE_CONSISTENCY.md)
 
 ---
@@ -1593,7 +1593,7 @@ psql $DATABASE_URL -c "
 - Use streaming for large results
 
 **Related Docs:**
-- [Performance Optimization](../01-ARCHITECTURE/performance-optimization.md)
+- [Performance Optimization](../07-REFERENCE/REFERENCE_PERFORMANCE_OPTIMIZATION.md)
 - [Database Cleanup](../DATABASE_CLEANUP.md)
 
 ---
@@ -2535,7 +2535,7 @@ echo $REDIS_URL
 
 **Related Docs:**
 - [Redis Setup](../setup/VERCEL_REDIS_SETUP.md)
-- [Docker Configuration](../setup/DOCKER_README.md)
+- [Docker Configuration](../00-GETTING-STARTED/SETUP_DOCKER_PRODUCTION.md)
 
 ---
 
@@ -2687,7 +2687,7 @@ EOF
 
 **Related Docs:**
 - [Scraper Memory Optimization](../SCRAPER_MEMORY_OPTIMIZATION.md)
-- [Performance Optimization](../01-ARCHITECTURE/performance-optimization.md)
+- [Performance Optimization](../07-REFERENCE/REFERENCE_PERFORMANCE_OPTIMIZATION.md)
 
 ---
 
@@ -2767,7 +2767,7 @@ EOF
 - Regular performance testing
 
 **Related Docs:**
-- [Performance Optimization](../01-ARCHITECTURE/performance-optimization.md)
+- [Performance Optimization](../07-REFERENCE/REFERENCE_PERFORMANCE_OPTIMIZATION.md)
 - [API Performance](../PERFORMANCE_IMPROVEMENTS.md)
 
 ---
@@ -2846,7 +2846,7 @@ node --inspect app.js
 
 **Related Docs:**
 - [Memory Monitoring](../ARCHIVE/analysis/MEMORY_MONITOR_IMPLEMENTATION_REPORT.md)
-- [Performance Optimization](../01-ARCHITECTURE/performance-optimization.md)
+- [Performance Optimization](../07-REFERENCE/REFERENCE_PERFORMANCE_OPTIMIZATION.md)
 
 ---
 
@@ -3012,7 +3012,7 @@ redis-cli GET "cache:search:test"
 
 **Related Docs:**
 - [Cache Consistency](../CACHE_CONSISTENCY.md)
-- [Performance Optimization](../01-ARCHITECTURE/performance-optimization.md)
+- [Performance Optimization](../07-REFERENCE/REFERENCE_PERFORMANCE_OPTIMIZATION.md)
 
 ---
 
@@ -3622,7 +3622,7 @@ docker run hello-world
 - Document Docker requirements
 
 **Related Docs:**
-- [Docker Setup](../setup/DOCKER_README.md)
+- [Docker Setup](../00-GETTING-STARTED/SETUP_DOCKER_PRODUCTION.md)
 - [Docker Improvements](../ARCHIVE/analysis/DOCKER_IMPROVEMENTS_2025.md)
 
 ---

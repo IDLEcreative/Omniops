@@ -48,7 +48,7 @@ The most significant issue: **11 frequently-referenced scripts do not exist**:
 **Affected Documentation:**
 - `CLAUDE.md` (main project instructions)
 - `docs/00-GETTING-STARTED/for-developers.md`
-- `docs/01-ARCHITECTURE/performance-optimization.md`
+- `docs/07-REFERENCE/REFERENCE_PERFORMANCE_OPTIMIZATION.md`
 - `docs/02-FEATURES/chat-system/README.md`
 - `docs/02-FEATURES/scraping/README.md`
 - `docs/ALL_NPX_TOOLS_REFERENCE.md` (100+ broken references)
@@ -100,7 +100,7 @@ DROP TABLE IF EXISTS old_table;
 **SQL Anti-patterns:**
 - 31 instances of `SELECT *` (should specify columns)
 - Example locations:
-  - `docs/01-ARCHITECTURE/database-schema.md`
+  - `docs/07-REFERENCE/REFERENCE_DATABASE_SCHEMA.md`
   - `docs/04-DEVELOPMENT/code-patterns/adding-database-tables.md`
   - `docs/06-TROUBLESHOOTING/README.md`
 
@@ -229,7 +229,7 @@ Total code blocks analyzed: **10,486**
    - Primary project documentation for AI assistants
    - Includes broken command examples in "Key Commands" section
 
-4. **`docs/01-ARCHITECTURE/performance-optimization.md`** - 8 critical issues
+4. **`docs/07-REFERENCE/REFERENCE_PERFORMANCE_OPTIMIZATION.md`** - 8 critical issues
    - Performance monitoring tools all reference missing scripts
 
 5. **`docs/02-FEATURES/chat-system/README.md`** - 8 critical issues
@@ -238,7 +238,7 @@ Total code blocks analyzed: **10,486**
 ### Medium Priority (3-9 critical issues)
 
 - `docs/00-GETTING-STARTED/for-developers.md` (6 issues)
-- `docs/02-FEATURES/chat-system/hallucination-prevention.md` (5 issues)
+- `docs/02-GUIDES/GUIDE_HALLUCINATION_PREVENTION.md` (5 issues)
 - `docs/02-FEATURES/scraping/README.md` (5 issues)
 
 ### All Other Files

@@ -1207,7 +1207,7 @@ SELECT * FROM pg_trigger WHERE tgname = 'validate_chunk_size_trigger';`
 - Using cd with && - consider using absolute paths instead
 - Code: `0 2 * * 0 cd /path/to/project && npx tsx test-database-cleanup.ts clean --domain=old-site.com`
 
-### docs/01-ARCHITECTURE/performance-optimization.md
+### docs/07-REFERENCE/REFERENCE_PERFORMANCE_OPTIMIZATION.md
 
 🔵 **INFO** (Line 595, typescript)
 - Use of "any" type - consider more specific type
@@ -1554,7 +1554,7 @@ const cacheResponse = (key: string, data: any, ttl: number = `
 - Script does not exist: monitor-embeddings-health.ts
 - Code: `npx tsx monitor-embeddings-health.ts check`
 
-### docs/02-FEATURES/chat-system/hallucination-prevention.md
+### docs/02-GUIDES/GUIDE_HALLUCINATION_PREVENTION.md
 
 🔴 **CRITICAL** (Line 216, bash)
 - Script does not exist: test-chat-accuracy.ts
@@ -1754,7 +1754,7 @@ const cacheResponse = (key: string, data: any, ttl: number = `
 - Script does not exist: test-database-cleanup.ts
 - Code: `npx tsx test-database-cleanup.ts clean    # Clean scraped data`
 
-### docs/01-ARCHITECTURE/search-architecture.md
+### docs/01-ARCHITECTURE/ARCHITECTURE_SEARCH_SYSTEM.md
 
 🔴 **CRITICAL** (Line 752, bash)
 - Script does not exist: <<
@@ -1964,7 +1964,7 @@ SELECT
 - Environment variable used: NF - ensure it's documented
 - Code: `vercel logs | grep "Duration:" | awk '{sum+=$NF; count++} END {print "Avg:", sum/count/1000, "s"}'`
 
-### docs/01-ARCHITECTURE/database-schema.md
+### docs/07-REFERENCE/REFERENCE_DATABASE_SCHEMA.md
 
 🔵 **INFO** (Line 126, sql)
 - Using SELECT * - consider specifying columns
@@ -5499,19 +5499,19 @@ These issues should be fixed immediately as they would prevent users from succes
 - **docs/00-GETTING-STARTED/for-developers.md** (Line 534): Script does not exist: test-database-cleanup.ts
 - **docs/00-GETTING-STARTED/for-developers.md** (Line 534): Script does not exist: monitor-embeddings-health.ts
 - **docs/00-GETTING-STARTED/for-developers.md** (Line 534): Script does not exist: monitor-embeddings-health.ts
-- **docs/01-ARCHITECTURE/performance-optimization.md** (Line 743): Script does not exist: monitor-embeddings-health.ts
-- **docs/01-ARCHITECTURE/performance-optimization.md** (Line 743): Script does not exist: monitor-embeddings-health.ts
-- **docs/01-ARCHITECTURE/performance-optimization.md** (Line 743): Script does not exist: monitor-embeddings-health.ts
-- **docs/01-ARCHITECTURE/performance-optimization.md** (Line 743): Script does not exist: optimize-chunk-sizes.ts
-- **docs/01-ARCHITECTURE/performance-optimization.md** (Line 743): Script does not exist: optimize-chunk-sizes.ts
-- **docs/01-ARCHITECTURE/performance-optimization.md** (Line 743): Script does not exist: batch-rechunk-embeddings.ts
-- **docs/01-ARCHITECTURE/performance-optimization.md** (Line 743): Script does not exist: test-database-cleanup.ts
-- **docs/01-ARCHITECTURE/performance-optimization.md** (Line 901): Script does not exist: test-performance-profile.ts
-- **docs/01-ARCHITECTURE/search-architecture.md** (Line 752): Script does not exist: <<
-- **docs/02-FEATURES/chat-system/hallucination-prevention.md** (Line 216): Script does not exist: test-chat-accuracy.ts
-- **docs/02-FEATURES/chat-system/hallucination-prevention.md** (Line 228): Script does not exist: test-hallucination-prevention.ts
-- **docs/02-FEATURES/chat-system/hallucination-prevention.md** (Line 246): Script does not exist: test-hallucination-prevention.ts
-- **docs/02-FEATURES/chat-system/hallucination-prevention.md** (Line 539): Script does not exist: test-hallucination-prevention.ts
+- **docs/07-REFERENCE/REFERENCE_PERFORMANCE_OPTIMIZATION.md** (Line 743): Script does not exist: monitor-embeddings-health.ts
+- **docs/07-REFERENCE/REFERENCE_PERFORMANCE_OPTIMIZATION.md** (Line 743): Script does not exist: monitor-embeddings-health.ts
+- **docs/07-REFERENCE/REFERENCE_PERFORMANCE_OPTIMIZATION.md** (Line 743): Script does not exist: monitor-embeddings-health.ts
+- **docs/07-REFERENCE/REFERENCE_PERFORMANCE_OPTIMIZATION.md** (Line 743): Script does not exist: optimize-chunk-sizes.ts
+- **docs/07-REFERENCE/REFERENCE_PERFORMANCE_OPTIMIZATION.md** (Line 743): Script does not exist: optimize-chunk-sizes.ts
+- **docs/07-REFERENCE/REFERENCE_PERFORMANCE_OPTIMIZATION.md** (Line 743): Script does not exist: batch-rechunk-embeddings.ts
+- **docs/07-REFERENCE/REFERENCE_PERFORMANCE_OPTIMIZATION.md** (Line 743): Script does not exist: test-database-cleanup.ts
+- **docs/07-REFERENCE/REFERENCE_PERFORMANCE_OPTIMIZATION.md** (Line 901): Script does not exist: test-performance-profile.ts
+- **docs/01-ARCHITECTURE/ARCHITECTURE_SEARCH_SYSTEM.md** (Line 752): Script does not exist: <<
+- **docs/02-GUIDES/GUIDE_HALLUCINATION_PREVENTION.md** (Line 216): Script does not exist: test-chat-accuracy.ts
+- **docs/02-GUIDES/GUIDE_HALLUCINATION_PREVENTION.md** (Line 228): Script does not exist: test-hallucination-prevention.ts
+- **docs/02-GUIDES/GUIDE_HALLUCINATION_PREVENTION.md** (Line 246): Script does not exist: test-hallucination-prevention.ts
+- **docs/02-GUIDES/GUIDE_HALLUCINATION_PREVENTION.md** (Line 539): Script does not exist: test-hallucination-prevention.ts
 - **docs/02-FEATURES/chat-system/QUICK_REFERENCE.md** (Line 50): Script does not exist: test-hallucination-prevention.ts
 - **docs/02-FEATURES/chat-system/README.md** (Line 366): Script does not exist: test-hallucination-prevention.ts
 - **docs/02-FEATURES/chat-system/README.md** (Line 581): Script does not exist: test-chat-integration.ts

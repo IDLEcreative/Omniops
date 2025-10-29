@@ -338,10 +338,10 @@ npx tsx test-hallucination-prevention.ts --verbose
 └── docs/00-GETTING-STARTED/brand-agnostic-checklist.md → Critical!
 
 💎 Critical Technical Docs:
-├── docs/01-ARCHITECTURE/database-schema.md  → Complete schema
-├── docs/01-ARCHITECTURE/search-architecture.md → Search limits (100-200!)
-├── docs/01-ARCHITECTURE/performance-optimization.md → Bottlenecks
-└── docs/07-REFERENCE/hallucination-prevention.md → AI safeguards
+├── docs/07-REFERENCE/REFERENCE_DATABASE_SCHEMA.md  → Complete schema
+├── docs/01-ARCHITECTURE/ARCHITECTURE_SEARCH_SYSTEM.md → Search limits (100-200!)
+├── docs/07-REFERENCE/REFERENCE_PERFORMANCE_OPTIMIZATION.md → Bottlenecks
+└── docs/07-REFERENCE/docs/02-GUIDES/GUIDE_HALLUCINATION_PREVENTION.md → AI safeguards
 
 🚀 Feature Documentation:
 ├── docs/02-FEATURES/woocommerce/            → E-commerce integration
@@ -374,12 +374,12 @@ WOOCOMMERCE_INTEGRATION.md         →  docs/02-FEATURES/woocommerce/README.md
 WEB_SCRAPING.md                    →  docs/02-FEATURES/scraping/README.md
 TESTING.md                         →  docs/04-DEVELOPMENT/testing/README.md
 ARCHITECTURE.md                    →  docs/01-ARCHITECTURE/overview.md
-DATABASE_SCHEMA.md                 →  docs/01-ARCHITECTURE/database-schema.md
+DATABASE_SCHEMA.md                 →  docs/07-REFERENCE/REFERENCE_DATABASE_SCHEMA.md
 API_REFERENCE.md                   →  docs/03-API/reference.md
 DEPLOYMENT.md                      →  docs/05-DEPLOYMENT/
 ERROR_HANDLING.md                  →  docs/06-TROUBLESHOOTING/common-errors.md
 PERFORMANCE_OPTIMIZATION.md        →  docs/07-REFERENCE/performance.md
-HALLUCINATION_PREVENTION.md        →  docs/07-REFERENCE/hallucination-prevention.md
+HALLUCINATION_PREVENTION.md        →  docs/07-REFERENCE/docs/02-GUIDES/GUIDE_HALLUCINATION_PREVENTION.md
 ```
 
 ### All Old Paths Have Redirects
@@ -536,15 +536,15 @@ Accessibility:         92%  █████████████████�
 
 ### Most Used
 - [🏗️ Architecture Overview](docs/01-ARCHITECTURE/overview.md)
-- [💾 Database Schema](docs/01-ARCHITECTURE/database-schema.md)
+- [💾 Database Schema](docs/07-REFERENCE/REFERENCE_DATABASE_SCHEMA.md)
 - [🔌 API Reference](docs/03-API/reference.md)
 - [🧪 Testing Guide](docs/04-DEVELOPMENT/testing/README.md)
 - [🔧 Troubleshooting](docs/06-TROUBLESHOOTING/README.md)
 
 ### Critical Reads
 - [⚠️ Brand-Agnostic Checklist](docs/00-GETTING-STARTED/brand-agnostic-checklist.md)
-- [🔍 Search Architecture](docs/01-ARCHITECTURE/search-architecture.md) (100-200 results!)
-- [🚫 Hallucination Prevention](docs/07-REFERENCE/hallucination-prevention.md)
+- [🔍 Search Architecture](docs/01-ARCHITECTURE/ARCHITECTURE_SEARCH_SYSTEM.md) (100-200 results!)
+- [🚫 Hallucination Prevention](docs/07-REFERENCE/docs/02-GUIDES/GUIDE_HALLUCINATION_PREVENTION.md)
 - [⚡ Performance Optimization](docs/07-REFERENCE/performance.md)
 
 ---

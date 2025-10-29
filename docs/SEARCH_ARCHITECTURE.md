@@ -7,7 +7,7 @@
 
 This documentation has been moved to the architecture section and updated with current implementation details:
 
-**New Location**: [docs/01-ARCHITECTURE/search-architecture.md](./01-ARCHITECTURE/search-architecture.md)
+**New Location**: [docs/01-ARCHITECTURE/ARCHITECTURE_SEARCH_SYSTEM.md](./01-ARCHITECTURE/ARCHITECTURE_SEARCH_SYSTEM.md)
 
 ---
 
@@ -57,7 +57,7 @@ The search architecture documentation has been:
 ## Why It Moved
 
 This document is **core architecture documentation** and belongs with:
-- [Performance Optimization](./01-ARCHITECTURE/performance-optimization.md)
+- [Performance Optimization](./07-REFERENCE/REFERENCE_PERFORMANCE_OPTIMIZATION.md)
 - [Architectural Decisions](./01-ARCHITECTURE/decisions.md)
 
 The new location provides:
@@ -107,11 +107,11 @@ The updated document now includes:
 ## Update Your Bookmarks
 
 **Old Path:** `docs/SEARCH_ARCHITECTURE.md`
-**New Path:** `docs/01-ARCHITECTURE/search-architecture.md`
+**New Path:** `docs/01-ARCHITECTURE/ARCHITECTURE_SEARCH_SYSTEM.md`
 
 **Related Documentation:**
-- [Performance Optimization](./01-ARCHITECTURE/performance-optimization.md) - Response times and bottlenecks
-- [Hallucination Prevention](./02-FEATURES/chat-system/hallucination-prevention.md) - Quality safeguards
+- [Performance Optimization](./07-REFERENCE/REFERENCE_PERFORMANCE_OPTIMIZATION.md) - Response times and bottlenecks
+- [Hallucination Prevention](./02-GUIDES/GUIDE_HALLUCINATION_PREVENTION.md) - Quality safeguards
 - [Chat System](./02-FEATURES/chat-system/README.md) - Complete chat architecture
 - [For Developers](./00-GETTING-STARTED/for-developers.md) - Getting started guide
 
@@ -120,4 +120,4 @@ The updated document now includes:
 **Redirect created:** 2025-10-24
 **Original last update:** 2025-01-09 (9 months old)
 **New version verified:** 2025-10-24 (current)
-**See:** [01-ARCHITECTURE/search-architecture.md](./01-ARCHITECTURE/search-architecture.md) for complete documentation
+**See:** [01-ARCHITECTURE/ARCHITECTURE_SEARCH_SYSTEM.md](./01-ARCHITECTURE/ARCHITECTURE_SEARCH_SYSTEM.md) for complete documentation

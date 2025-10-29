@@ -352,7 +352,7 @@ curl -X POST "http://localhost:3000/api/fix-rag" \
 
 - [CLAUDE.md](CLAUDE.md) - Project instructions emphasizing brand-agnostic design
 - [DEBUG_ENDPOINTS.md](docs/DEBUG_ENDPOINTS.md) - Complete endpoint documentation
-- [Database Schema](docs/01-ARCHITECTURE/database-schema.md) - customer_configs table reference
+- [Database Schema](docs/07-REFERENCE/REFERENCE_DATABASE_SCHEMA.md) - customer_configs table reference
 
 ## Conclusion
 

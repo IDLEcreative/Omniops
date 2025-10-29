@@ -289,7 +289,7 @@ npm run analyze
 ## Related Documentation
 
 - CLAUDE.md - Project guidelines (especially performance philosophy)
-- docs/01-ARCHITECTURE/performance-optimization.md - Broader optimization guide
+- docs/07-REFERENCE/REFERENCE_PERFORMANCE_OPTIMIZATION.md - Broader optimization guide
 - docs/HALLUCINATION_PREVENTION.md - Quality assurance practices
 
 ---

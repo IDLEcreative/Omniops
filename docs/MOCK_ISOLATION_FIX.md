@@ -173,7 +173,7 @@ Tests: 1 passed ✅
 
 ## Related Documentation
 
-- [TECH_DEBT.md](../TECH_DEBT.md) - Technical debt tracking
+- [TECH_DEBT.md](docs/04-ANALYSIS/ANALYSIS_TECHNICAL_DEBT_TRACKER.md) - Technical debt tracking
 - [CLAUDE.md](../CLAUDE.md) - Project guidelines
 
 ## Success Criteria

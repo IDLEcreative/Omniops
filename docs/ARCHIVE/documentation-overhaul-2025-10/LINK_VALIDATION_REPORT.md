@@ -198,7 +198,7 @@
   - Reason: File not found
   - Link text: "File not found"
 
-- **Line 159:** `../../01-ARCHITECTURE/search-architecture.md`
+- **Line 159:** `../../01-ARCHITECTURE/ARCHITECTURE_SEARCH_SYSTEM.md`
   - Reason: File not found
   - Link text: "File not found"
 
@@ -208,7 +208,7 @@
 
 ### /DOC_VALIDATION_QUICK_REF.md
 
-- **Line 29:** `01-ARCHITECTURE/database-schema.md`
+- **Line 29:** `07-REFERENCE/REFERENCE_DATABASE_SCHEMA.md`
   - Reason: File not found
   - Link text: "File not found"
 
@@ -220,11 +220,11 @@
 
 ### /docs/00-GETTING-STARTED/glossary.md
 
-- **Line 176:** `../../01-ARCHITECTURE/database-schema.md`
+- **Line 176:** `../../07-REFERENCE/REFERENCE_DATABASE_SCHEMA.md`
   - Reason: File not found
   - Link text: "File not found"
 
-- **Line 192:** `../../01-ARCHITECTURE/database-schema.md`
+- **Line 192:** `../../07-REFERENCE/REFERENCE_DATABASE_SCHEMA.md`
   - Reason: File not found
   - Link text: "File not found"
 
@@ -248,11 +248,11 @@
   - Reason: Anchor #content-truncation-analysis not found in target file
   - Link text: "Anchor #content-truncation-analysis not found in target file"
 
-- **Line 453:** `../../01-ARCHITECTURE/database-schema.md`
+- **Line 453:** `../../07-REFERENCE/REFERENCE_DATABASE_SCHEMA.md`
   - Reason: File not found
   - Link text: "File not found"
 
-### /docs/01-ARCHITECTURE/database-schema.md
+### /docs/07-REFERENCE/REFERENCE_DATABASE_SCHEMA.md
 
 - **Line 19:** `#content--scraping`
   - Reason: Anchor not found in source file
@@ -274,7 +274,7 @@
   - Reason: Anchor not found in source file
   - Link text: "Anchor not found in source file"
 
-### /docs/01-ARCHITECTURE/performance-optimization.md
+### /docs/07-REFERENCE/REFERENCE_PERFORMANCE_OPTIMIZATION.md
 
 - **Line 12:** `#performance-goals-and-current-metrics`
   - Reason: Anchor not found in source file
@@ -288,7 +288,7 @@
   - Reason: Anchor not found in source file
   - Link text: "Anchor not found in source file"
 
-### /docs/01-ARCHITECTURE/search-architecture.md
+### /docs/01-ARCHITECTURE/ARCHITECTURE_SEARCH_SYSTEM.md
 
 - **Line 16:** `#common-misconception`
   - Reason: Anchor not found in source file
@@ -418,7 +418,7 @@
   - Reason: Anchor not found in source file
   - Link text: "Anchor not found in source file"
 
-- **Line 1610:** `/docs/setup/DOCKER_README.md`
+- **Line 1610:** `/docs/00-GETTING-STARTED/SETUP_DOCKER_PRODUCTION.md`
   - Reason: File not found
   - Link text: "File not found"
 
@@ -434,7 +434,7 @@
   - Reason: File not found
   - Link text: "File not found"
 
-- **Line 1614:** `/docs/HALLUCINATION_PREVENTION.md`
+- **Line 1614:** `/docs/02-GUIDES/GUIDE_HALLUCINATION_PREVENTION.md`
   - Reason: File not found
   - Link text: "File not found"
 
@@ -476,7 +476,7 @@
   - Reason: File not found
   - Link text: "File not found"
 
-- **Line 3084:** `/docs/setup/DOCKER_README.md`
+- **Line 3084:** `/docs/00-GETTING-STARTED/SETUP_DOCKER_PRODUCTION.md`
   - Reason: File not found
   - Link text: "File not found"
 
@@ -1438,7 +1438,7 @@
 
 ### /docs/MULTI_SEAT_ORGANIZATIONS.md
 
-- **Line 402:** `../01-ARCHITECTURE/database-schema.md`
+- **Line 402:** `../07-REFERENCE/REFERENCE_DATABASE_SCHEMA.md`
   - Reason: File not found
   - Link text: "File not found"
 
@@ -1520,7 +1520,7 @@
   - Reason: File not found
   - Link text: "File not found"
 
-- **Line 70:** `07-REFERENCE/hallucination-prevention.md`
+- **Line 70:** `07-REFERENCE/docs/02-GUIDES/GUIDE_HALLUCINATION_PREVENTION.md`
   - Reason: File not found
   - Link text: "File not found"
 
@@ -1660,7 +1660,7 @@
   - Reason: File not found
   - Link text: "File not found"
 
-- **Line 243:** `07-REFERENCE/database-schema.md`
+- **Line 243:** `07-REFERENCE/docs/07-REFERENCE/REFERENCE_DATABASE_SCHEMA.md`
   - Reason: File not found
   - Link text: "File not found"
 
@@ -2096,7 +2096,7 @@
   - Reason: File not found
   - Link text: "File not found"
 
-- **Line 64:** `/docs/setup/DOCKER_README.md`
+- **Line 64:** `/docs/00-GETTING-STARTED/SETUP_DOCKER_PRODUCTION.md`
   - Reason: File not found
   - Link text: "File not found"
 
@@ -2108,7 +2108,7 @@
   - Reason: File not found
   - Link text: "File not found"
 
-- **Line 68:** `/docs/setup/DOCKER_README.md`
+- **Line 68:** `/docs/00-GETTING-STARTED/SETUP_DOCKER_PRODUCTION.md`
   - Reason: File not found
   - Link text: "File not found"
 
@@ -2206,11 +2206,11 @@
   - Reason: File not found
   - Link text: "File not found"
 
-- **Line 106:** `/docs/setup/DOCKER_README.md`
+- **Line 106:** `/docs/00-GETTING-STARTED/SETUP_DOCKER_PRODUCTION.md`
   - Reason: File not found
   - Link text: "File not found"
 
-- **Line 107:** `/docs/setup/DOCKER_README.md`
+- **Line 107:** `/docs/00-GETTING-STARTED/SETUP_DOCKER_PRODUCTION.md`
   - Reason: File not found
   - Link text: "File not found"
 
@@ -2264,7 +2264,7 @@
   - Reason: File not found
   - Link text: "File not found"
 
-- **Line 126:** `./01-ARCHITECTURE/search-architecture.md`
+- **Line 126:** `./01-ARCHITECTURE/ARCHITECTURE_SEARCH_SYSTEM.md`
   - Reason: File not found
   - Link text: "File not found"
 
@@ -2524,7 +2524,7 @@ Links that work but may need attention:
 Validating critical documentation paths:
 
 - ✅ Root to docs index: `README.md` → `docs/README.md`
-- ✅ Claude to search docs: `CLAUDE.md` → `docs/01-ARCHITECTURE/search-architecture.md`
+- ✅ Claude to search docs: `CLAUDE.md` → `docs/01-ARCHITECTURE/ARCHITECTURE_SEARCH_SYSTEM.md`
 - ❌ Docs index to getting started: `docs/README.md` → `docs/00-GETTING-STARTED`
 
 ## 🔧 Recommended Fixes

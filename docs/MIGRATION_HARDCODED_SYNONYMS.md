@@ -365,7 +365,7 @@ async function expandQuery(domainId: string, query: string): Promise<string> {
 ## References
 
 - **New System**: [docs/SYNONYM_SYSTEM.md](SYNONYM_SYSTEM.md)
-- **Database Schema**: [docs/01-ARCHITECTURE/database-schema.md](01-ARCHITECTURE/database-schema.md#synonym-management)
+- **Database Schema**: [docs/07-REFERENCE/REFERENCE_DATABASE_SCHEMA.md](07-REFERENCE/REFERENCE_DATABASE_SCHEMA.md#synonym-management)
 - **Legacy Code**: `lib/synonym-expander.ts`, `lib/synonym-expander-dynamic.ts`
 
 ---

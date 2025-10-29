@@ -729,7 +729,7 @@ git revert <commit-range>
 
 Files to update after implementation:
 - ✅ [CUSTOMER_SERVICE_ACCURACY_TESTING.md](CUSTOMER_SERVICE_ACCURACY_TESTING.md)
-- ✅ [01-ARCHITECTURE/search-architecture.md](01-ARCHITECTURE/search-architecture.md)
+- ✅ [01-ARCHITECTURE/ARCHITECTURE_SEARCH_SYSTEM.md](01-ARCHITECTURE/ARCHITECTURE_SEARCH_SYSTEM.md)
 - ✅ [README.md](../README.md) - Add metadata system documentation
 - ✅ [CLAUDE.md](../CLAUDE.md) - Update with new capabilities
 

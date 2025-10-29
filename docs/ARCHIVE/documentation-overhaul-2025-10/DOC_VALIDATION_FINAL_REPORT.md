@@ -98,7 +98,7 @@ REDIS_URL                       # ✓ In .env.example
    - Guide for developers using performance tools
    - **Impact: HIGH**
 
-4. **`docs/01-ARCHITECTURE/performance-optimization.md`** - 8 broken references
+4. **`docs/07-REFERENCE/REFERENCE_PERFORMANCE_OPTIMIZATION.md`** - 8 broken references
    - Performance monitoring section completely broken
    - **Impact: HIGH**
 

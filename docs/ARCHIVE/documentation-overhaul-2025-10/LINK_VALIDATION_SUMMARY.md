@@ -24,9 +24,9 @@ The recent move from flat structure to organized directories broke many links:
 ### 2. Link Pattern Issues
 
 #### A. Absolute Path Issues (Common)
-**Pattern:** `/DOCKER_README.md` or `/SUPABASE_SCHEMA.md`
+**Pattern:** `/docs/00-GETTING-STARTED/SETUP_DOCKER_PRODUCTION.md` or `/SUPABASE_SCHEMA.md`
 **Issue:** Files moved to subdirectories
-**Fix:** Update to `/docs/setup/DOCKER_README.md`, `/docs/SUPABASE_SCHEMA.md`
+**Fix:** Update to `/docs/00-GETTING-STARTED/SETUP_DOCKER_PRODUCTION.md`, `/docs/SUPABASE_SCHEMA.md`
 
 **Files Affected:** ~50+
 - All deployment docs
@@ -69,9 +69,9 @@ Some referenced files don't exist:
 
 ### Critical Documentation (High Priority)
 1. **docs/01-ARCHITECTURE/** - 15 broken links
-   - database-schema.md: 7 broken anchors
-   - performance-optimization.md: 3 broken anchors
-   - search-architecture.md: 5 broken links
+   - docs/07-REFERENCE/REFERENCE_DATABASE_SCHEMA.md: 7 broken anchors
+   - docs/07-REFERENCE/REFERENCE_PERFORMANCE_OPTIMIZATION.md: 3 broken anchors
+   - docs/01-ARCHITECTURE/ARCHITECTURE_SEARCH_SYSTEM.md: 5 broken links
 
 2. **docs/05-DEPLOYMENT/** - 12 broken links
    - production-checklist.md: 10+ broken links
@@ -96,7 +96,7 @@ Can be automated with high confidence:
 
 1. **Update absolute paths** (50+ fixes)
    ```
-   /DOCKER_README.md → /docs/setup/DOCKER_README.md
+   /docs/00-GETTING-STARTED/SETUP_DOCKER_PRODUCTION.md → /docs/00-GETTING-STARTED/SETUP_DOCKER_PRODUCTION.md
    /SUPABASE_SCHEMA.md → /docs/SUPABASE_SCHEMA.md
    ```
 

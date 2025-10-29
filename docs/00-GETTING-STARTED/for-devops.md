@@ -469,7 +469,7 @@ SELECT * FROM pg_extension WHERE extname IN ('uuid-ossp', 'pgvector');
 
 **Option A: Via Supabase Dashboard**
 ```bash
-# Copy SQL from 01-ARCHITECTURE/database-schema.md
+# Copy SQL from 07-REFERENCE/REFERENCE_DATABASE_SCHEMA.md
 # Paste into SQL Editor → Run
 # Verify tables created: Database → Tables
 ```
@@ -505,7 +505,7 @@ scrape_jobs                | 1K-100K     | Background scraping queue
 query_cache                | 10K-1M      | Performance cache
 ```
 
-**Full schema**: See `/01-ARCHITECTURE/database-schema.md` (authoritative reference)
+**Full schema**: See `/07-REFERENCE/REFERENCE_DATABASE_SCHEMA.md` (authoritative reference)
 
 ### Row Level Security (RLS)
 
@@ -3135,7 +3135,7 @@ This guide covered:
 ## Support & Resources
 
 - **Documentation**: `/docs` directory
-- **Database Schema**: `/01-ARCHITECTURE/database-schema.md`
+- **Database Schema**: `/07-REFERENCE/REFERENCE_DATABASE_SCHEMA.md`
 - **Architecture**: `/docs/ARCHITECTURE.md`
 - **API Reference**: `/docs/API_REFERENCE.md`
 - **Troubleshooting**: This guide (section 12)

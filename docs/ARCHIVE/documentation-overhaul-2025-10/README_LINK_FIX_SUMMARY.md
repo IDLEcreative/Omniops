@@ -64,9 +64,9 @@ Fixed all broken links by redirecting to correct locations:
 - docs/ENVIRONMENT.md → docs/00-GETTING-STARTED/for-devops.md
 
 # Architecture Section
-- docs/SUPABASE_SCHEMA.md → docs/01-ARCHITECTURE/database-schema.md
-- docs/SEARCH_ARCHITECTURE.md → docs/01-ARCHITECTURE/search-architecture.md
-- docs/PERFORMANCE_OPTIMIZATION.md → docs/01-ARCHITECTURE/performance-optimization.md
+- docs/SUPABASE_SCHEMA.md → docs/07-REFERENCE/REFERENCE_DATABASE_SCHEMA.md
+- docs/SEARCH_ARCHITECTURE.md → docs/01-ARCHITECTURE/ARCHITECTURE_SEARCH_SYSTEM.md
+- docs/PERFORMANCE_OPTIMIZATION.md → docs/07-REFERENCE/REFERENCE_PERFORMANCE_OPTIMIZATION.md
 
 # API Reference Section
 + docs/api/CHAT_API.md (NEW)
@@ -128,9 +128,9 @@ All 40 documentation links now point to existing files:
 ✅ docs/api/PRIVACY_API.md (NEW)
 ✅ docs/00-GETTING-STARTED/for-developers.md
 ✅ docs/00-GETTING-STARTED/for-devops.md
-✅ docs/01-ARCHITECTURE/database-schema.md
-✅ docs/01-ARCHITECTURE/search-architecture.md
-✅ docs/01-ARCHITECTURE/performance-optimization.md
+✅ docs/07-REFERENCE/REFERENCE_DATABASE_SCHEMA.md
+✅ docs/01-ARCHITECTURE/ARCHITECTURE_SEARCH_SYSTEM.md
+✅ docs/07-REFERENCE/REFERENCE_PERFORMANCE_OPTIMIZATION.md
 ✅ docs/04-DEVELOPMENT/code-patterns/
 ✅ docs/05-DEPLOYMENT/production-checklist.md
 ✅ docs/05-DEPLOYMENT/runbooks.md
@@ -146,7 +146,7 @@ All 40 documentation links now point to existing files:
 ✅ docs/TESTING.md
 ✅ docs/WEB_SCRAPING.md
 ✅ docs/WOOCOMMERCE_DEVELOPER_REFERENCE.md
-✅ docs/setup/DOCKER_README.md
+✅ docs/00-GETTING-STARTED/SETUP_DOCKER_PRODUCTION.md
 ✅ docs/woocommerce/WOOCOMMERCE_INTEGRATION_DOCUMENTATION.md
 ✅ components/README.md
 

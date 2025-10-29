@@ -18,7 +18,7 @@
 
 ## ⚠️ Warnings
 
-### `docs/01-ARCHITECTURE/performance-optimization.md`
+### `docs/07-REFERENCE/REFERENCE_PERFORMANCE_OPTIMIZATION.md`
 
 - **Last Updated:** 2025-01-24
 
@@ -62,7 +62,7 @@
 - **Verified For:** v0.1.0
 - **Last Modified (Git):** 2025-10-09
 
-### `docs/02-FEATURES/chat-system/hallucination-prevention.md`
+### `docs/02-GUIDES/GUIDE_HALLUCINATION_PREVENTION.md`
 
 - **Last Updated:** 2025-10-24
 

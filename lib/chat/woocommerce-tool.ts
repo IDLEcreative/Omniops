@@ -15,7 +15,8 @@ import {
   getProductCategories,
   getProductReviews,
   getProductVariations,
-  getLowStockProducts
+  getLowStockProducts,
+  searchProducts
 } from './product-operations';
 
 // Order operations
@@ -24,7 +25,8 @@ import {
   getShippingInfo,
   getCustomerOrders,
   getOrderNotes,
-  checkRefundStatus
+  checkRefundStatus,
+  cancelOrder
 } from './order-operations';
 
 // Store configuration operations
@@ -43,6 +45,15 @@ import {
 import {
   getSalesReport
 } from './report-operations';
+
+// Cart operations
+import {
+  addToCart,
+  getCart,
+  removeFromCart,
+  updateCartQuantity,
+  applyCouponToCart
+} from './cart-operations';
 
 // Re-export types and tool definition
 export { WOOCOMMERCE_TOOL } from './woocommerce-tool-types';
@@ -78,6 +89,9 @@ export async function executeWooCommerceOperation(
 
       case "get_stock_quantity":
         return await getStockQuantity(wc, params);
+
+      case "search_products":
+        return await searchProducts(wc, params);
 
       case "get_product_details":
         return await getProductDetails(wc, params);
@@ -115,6 +129,9 @@ export async function executeWooCommerceOperation(
       case "check_refund_status":
         return await checkRefundStatus(wc, params);
 
+      case "cancel_order":
+        return await cancelOrder(wc, params);
+
       case "get_customer_orders":
         return await getCustomerOrders(wc, params);
 
@@ -126,6 +143,21 @@ export async function executeWooCommerceOperation(
 
       case "get_sales_report":
         return await getSalesReport(wc, params);
+
+      case "add_to_cart":
+        return await addToCart(wc, params);
+
+      case "get_cart":
+        return await getCart(wc, params);
+
+      case "remove_from_cart":
+        return await removeFromCart(wc, params);
+
+      case "update_cart_quantity":
+        return await updateCartQuantity(wc, params);
+
+      case "apply_coupon_to_cart":
+        return await applyCouponToCart(wc, params);
 
       default:
         return {

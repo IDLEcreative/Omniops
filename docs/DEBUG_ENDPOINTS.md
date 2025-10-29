@@ -381,8 +381,8 @@ These endpoints follow the multi-tenant, brand-agnostic architecture:
 ## Related Documentation
 
 - [CLAUDE.md](../CLAUDE.md) - Project instructions and guidelines
-- [Database Schema](01-ARCHITECTURE/database-schema.md) - Complete database reference
-- [Search Architecture](01-ARCHITECTURE/search-architecture.md) - RAG system details
+- [Database Schema](07-REFERENCE/REFERENCE_DATABASE_SCHEMA.md) - Complete database reference
+- [Search Architecture](01-ARCHITECTURE/ARCHITECTURE_SEARCH_SYSTEM.md) - RAG system details
 
 ---
 

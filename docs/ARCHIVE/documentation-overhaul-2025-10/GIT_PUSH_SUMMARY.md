@@ -153,10 +153,10 @@ docs/
 │   ├── for-devops.md (3,152 lines)
 │   └── glossary.md
 ├── 01-ARCHITECTURE/
-│   ├── database-schema.md (1,718 lines)
+│   ├── docs/07-REFERENCE/REFERENCE_DATABASE_SCHEMA.md (1,718 lines)
 │   ├── decisions.md
-│   ├── performance-optimization.md (1,154 lines)
-│   └── search-architecture.md (923 lines)
+│   ├── docs/07-REFERENCE/REFERENCE_PERFORMANCE_OPTIMIZATION.md (1,154 lines)
+│   └── docs/01-ARCHITECTURE/ARCHITECTURE_SEARCH_SYSTEM.md (923 lines)
 ├── 02-FEATURES/
 │   ├── chat-system/
 │   ├── privacy-compliance/

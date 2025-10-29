@@ -244,7 +244,7 @@ OmniOps follows privacy-by-design principles:
 ### Documentation
 
 - **Complete Privacy Guide**: [docs/PRIVACY_GUIDE.md](PRIVACY_GUIDE.md)
-- **Database Schema**: [docs/01-ARCHITECTURE/database-schema.md](01-ARCHITECTURE/database-schema.md)
+- **Database Schema**: [docs/07-REFERENCE/REFERENCE_DATABASE_SCHEMA.md](07-REFERENCE/REFERENCE_DATABASE_SCHEMA.md)
 - **API Reference**: [docs/03-API/](03-API/)
 
 ### External Resources

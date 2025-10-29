@@ -16,13 +16,13 @@
 - **Add tool calling** → [README.md#tool-calling](./README.md#tool-calling)
 
 ### Prevent Issues
-- **Stop hallucinations** → [hallucination-prevention.md](./hallucination-prevention.md)
+- **Stop hallucinations** → [docs/02-GUIDES/GUIDE_HALLUCINATION_PREVENTION.md](./docs/02-GUIDES/GUIDE_HALLUCINATION_PREVENTION.md)
 - **Handle errors** → [README.md#troubleshooting](./README.md#troubleshooting)
 - **Optimize performance** → [README.md#performance--scaling](./README.md#performance--scaling)
 
 ### Test & Debug
 - **Run tests** → [README.md#testing](./README.md#testing)
-- **Check hallucinations** → [hallucination-prevention.md#testing](./hallucination-prevention.md#testing)
+- **Check hallucinations** → [docs/02-GUIDES/GUIDE_HALLUCINATION_PREVENTION.md#testing](./docs/02-GUIDES/GUIDE_HALLUCINATION_PREVENTION.md#testing)
 - **Debug issues** → [README.md#troubleshooting](./README.md#troubleshooting)
 
 ### Learn More
@@ -50,7 +50,7 @@ const response = await fetch('/api/chat', {
 ```bash
 npx tsx test-hallucination-prevention.ts
 ```
-[Full Testing Guide →](./hallucination-prevention.md#testing)
+[Full Testing Guide →](./docs/02-GUIDES/GUIDE_HALLUCINATION_PREVENTION.md#testing)
 
 ### Configure response mode
 ```bash
@@ -73,7 +73,7 @@ const history = await getConversationHistory(conversationId, limit: 10);
 | File | Purpose | Lines | Topics |
 |------|---------|-------|--------|
 | **README.md** | Main documentation | 788 | Architecture, API, Testing, Config |
-| **hallucination-prevention.md** | Anti-hallucination guide | 610 | Prevention, Testing, Best Practices |
+| **docs/02-GUIDES/GUIDE_HALLUCINATION_PREVENTION.md** | Anti-hallucination guide | 610 | Prevention, Testing, Best Practices |
 | **CONSOLIDATION_SUMMARY.md** | Consolidation details | 308 | What changed, metrics, benefits |
 | **QUICK_REFERENCE.md** | This file | - | Quick navigation |
 
@@ -88,7 +88,7 @@ const history = await getConversationHistory(conversationId, limit: 10);
 ## Need Help?
 
 1. **Can't find information?** → Search README.md table of contents
-2. **Hallucination issues?** → See [hallucination-prevention.md](./hallucination-prevention.md)
+2. **Hallucination issues?** → See [docs/02-GUIDES/GUIDE_HALLUCINATION_PREVENTION.md](./docs/02-GUIDES/GUIDE_HALLUCINATION_PREVENTION.md)
 3. **Performance problems?** → See [README.md#performance--scaling](./README.md#performance--scaling)
 4. **Code not working?** → See [README.md#troubleshooting](./README.md#troubleshooting)
 5. **Still stuck?** → Check related documentation above

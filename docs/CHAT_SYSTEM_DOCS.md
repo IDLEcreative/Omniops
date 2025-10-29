@@ -9,7 +9,7 @@ This documentation has been moved to the new unified location:
 ## Quick Links
 
 - **Main Documentation**: [Chat System README](./02-FEATURES/chat-system/README.md)
-- **Hallucination Prevention**: [Hallucination Prevention Guide](./02-FEATURES/chat-system/hallucination-prevention.md)
+- **Hallucination Prevention**: [Hallucination Prevention Guide](./02-GUIDES/GUIDE_HALLUCINATION_PREVENTION.md)
 - **Search Architecture**: [Search Architecture](./SEARCH_ARCHITECTURE.md)
 - **Performance**: [Performance Optimization](./PERFORMANCE_OPTIMIZATION.md)
 
@@ -17,7 +17,7 @@ This documentation has been moved to the new unified location:
 
 All chat system documentation has been consolidated into a single source of truth:
 - `docs/02-FEATURES/chat-system/README.md` - Complete chat system guide
-- `docs/02-FEATURES/chat-system/hallucination-prevention.md` - Anti-hallucination measures
+- `docs/02-GUIDES/GUIDE_HALLUCINATION_PREVENTION.md` - Anti-hallucination measures
 
 The new documentation includes:
 - Architecture overview

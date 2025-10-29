@@ -4,13 +4,13 @@
 
 This documentation has been moved to the architecture section:
 
-**New Location**: [docs/01-ARCHITECTURE/performance-optimization.md](./01-ARCHITECTURE/performance-optimization.md)
+**New Location**: [docs/07-REFERENCE/REFERENCE_PERFORMANCE_OPTIMIZATION.md](./07-REFERENCE/REFERENCE_PERFORMANCE_OPTIMIZATION.md)
 
 ## Quick Links
 
-- **[Performance Optimization Guide](./01-ARCHITECTURE/performance-optimization.md)** - Complete comprehensive guide
+- **[Performance Optimization Guide](./07-REFERENCE/REFERENCE_PERFORMANCE_OPTIMIZATION.md)** - Complete comprehensive guide
 - **[Search Architecture](./SEARCH_ARCHITECTURE.md)** - Search limits and result flow
-- **[Hallucination Prevention](./02-FEATURES/chat-system/hallucination-prevention.md)** - Quality safeguards
+- **[Hallucination Prevention](./02-GUIDES/GUIDE_HALLUCINATION_PREVENTION.md)** - Quality safeguards
 
 ## What Changed
 
@@ -53,4 +53,4 @@ The original analysis from 2025-01-09 has been preserved and expanded in the new
 
 **Redirect created:** 2025-01-24
 **Original content:** Preserved in new comprehensive guide
-**See:** [01-ARCHITECTURE/performance-optimization.md](./01-ARCHITECTURE/performance-optimization.md) for complete documentation
+**See:** [07-REFERENCE/REFERENCE_PERFORMANCE_OPTIMIZATION.md](./07-REFERENCE/REFERENCE_PERFORMANCE_OPTIMIZATION.md) for complete documentation

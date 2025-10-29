@@ -399,6 +399,6 @@ npm run test:integration -- organizations
 
 ## Related Documentation
 
-- [Database Schema](../01-ARCHITECTURE/database-schema.md)
-- [Authentication](../docs/AUTHENTICATION_LINKAGE.md)
-- [API Documentation](../docs/API.md)
+- [Database Schema](../07-REFERENCE/REFERENCE_DATABASE_SCHEMA.md)
+- [Authentication](docs/AUTHENTICATION_LINKAGE.md)
+- [API Documentation](docs/API.md)

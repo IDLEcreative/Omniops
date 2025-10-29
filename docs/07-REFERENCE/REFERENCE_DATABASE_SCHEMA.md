@@ -1,15 +1,44 @@
 # Supabase Database Schema Documentation
 
+**Type:** Reference
+**Status:** Active
+**Last Updated:** 2025-10-29
+**Verified For:** v0.1.0 (Issue #11: Removed duplicate chat tables)
+**Dependencies:**
+- [Search Architecture](./docs/01-ARCHITECTURE/ARCHITECTURE_SEARCH_SYSTEM.md) - Uses page_embeddings and scraped_pages
+- [Performance Optimization](./docs/07-REFERENCE/REFERENCE_PERFORMANCE_OPTIMIZATION.md) - Index strategies
+**Estimated Read Time:** 30 minutes
+
+## Purpose
+Complete authoritative reference for the Omniops Supabase database schema documenting 29 active tables across 10 categories (core business, multi-tenant, content/scraping, AI/embeddings, chat, telemetry, privacy, widgets, synonyms, business intelligence, caching), including 214 indexes, 24 foreign key relationships, and Row Level Security policies for multi-tenant isolation.
+
+## Quick Links
+- [Schema Summary](#schema-summary) - Table categories and counts
+- [Multi-Tenant Architecture](#multi-tenant-architecture) - Organization-based isolation
+- [AI & Embeddings](#ai--embeddings) - Vector search tables (20,229 embeddings)
+- [Entity Relationship Diagram](#entity-relationship-diagram) - Visual schema relationships
+- [Index Strategy](#index-strategy) - 214 indexes breakdown
+- [Row Level Security](#row-level-security) - RLS policies (53 total)
+
+## Keywords
+database, schema, PostgreSQL, Supabase, pgvector, multi-tenant, RLS, Row Level Security, tables, indexes, foreign keys, organizations, embeddings, vector search, HNSW, GIN indexes, B-tree indexes, cascade deletion, entity catalog, telemetry, GDPR, data model
+
+## Aliases
+- "RLS" (also known as: Row Level Security, tenant isolation, access control policies)
+- "pgvector" (also known as: vector extension, embedding storage, similarity search)
+- "HNSW" (also known as: Hierarchical Navigable Small World, vector index, fast similarity search)
+- "GIN index" (also known as: Generalized Inverted Index, full-text index, JSONB index)
+- "cascade deletion" (also known as: cascading delete, ON DELETE CASCADE, referential integrity)
+
+---
+
 > **Version**: 2.1
-> **Last Updated**: 2025-10-29 (Issue #11: Removed duplicate chat tables)
 > **Last Verified**: 2025-10-24
 > **Verification Method**: Direct query via Supabase MCP tools
 > **Total Tables**: 29 (public schema) - was 31, removed 2 duplicates
 > **Total Foreign Keys**: 24 relationships
 > **Total Indexes**: 214 indexes
 > **RLS Policies**: Active on 24 tables
-
----
 
 ## 📋 Table of Contents
 

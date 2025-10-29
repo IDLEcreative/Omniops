@@ -62,7 +62,7 @@ Most broken links fall into acceptable categories:
 
 **Critical Navigation Paths:**
 - ✅ Root to docs index: `README.md` → `docs/README.md`
-- ✅ Claude to search docs: `CLAUDE.md` → `docs/01-ARCHITECTURE/search-architecture.md`
+- ✅ Claude to search docs: `CLAUDE.md` → `docs/01-ARCHITECTURE/ARCHITECTURE_SEARCH_SYSTEM.md`
 - ⚠️ Docs index to getting started: Some placeholder files missing (non-critical)
 
 #### Recommendations
@@ -97,14 +97,14 @@ Most broken links fall into acceptable categories:
 2. `CLAUDE.md` - v0.1.0, 2025-10-24 ✅
 3. `CHANGELOG.md` - 2025-10-24 ✅
 4. `docs/SEARCH_ARCHITECTURE.md` - v0.1.0, 2025-10-24 ✅
-5. `docs/02-FEATURES/chat-system/hallucination-prevention.md` - 2025-10-24 ✅
+5. `docs/02-GUIDES/GUIDE_HALLUCINATION_PREVENTION.md` - 2025-10-24 ✅
 6. `docs/02-FEATURES/chat-system/README.md` - v0.1.0, 2025-10-24 ✅
 7. `docs/02-FEATURES/woocommerce/README.md` - v0.1.0, 2025-10-24 ✅
 8. `docs/02-FEATURES/scraping/README.md` - v0.1.0, 2025-10-24 ✅
 
 **⚠️ Warnings (2 docs):**
 
-1. `docs/01-ARCHITECTURE/performance-optimization.md`
+1. `docs/07-REFERENCE/REFERENCE_PERFORMANCE_OPTIMIZATION.md`
    - Last updated: 2025-01-24 (273 days ago)
    - Status: ⚠️ Needs review (>90 days)
    - Impact: LOW (performance metrics, not core functionality)
@@ -167,9 +167,9 @@ Most broken links fall into acceptable categories:
 | `CLAUDE.md` | ✅ | ✅ | YES |
 | `CHANGELOG.md` | ✅ | ✅ | YES |
 | `docs/README.md` | ✅ | ✅ | YES |
-| `docs/01-ARCHITECTURE/database-schema.md` | ✅ | ✅ | YES |
-| `docs/01-ARCHITECTURE/search-architecture.md` | ✅ | ✅ | YES |
-| `docs/01-ARCHITECTURE/performance-optimization.md` | ✅ | ⚠️ | YES |
+| `docs/07-REFERENCE/REFERENCE_DATABASE_SCHEMA.md` | ✅ | ✅ | YES |
+| `docs/01-ARCHITECTURE/ARCHITECTURE_SEARCH_SYSTEM.md` | ✅ | ✅ | YES |
+| `docs/07-REFERENCE/REFERENCE_PERFORMANCE_OPTIMIZATION.md` | ✅ | ⚠️ | YES |
 | `docs/02-FEATURES/chat-system/README.md` | ✅ | ✅ | YES |
 | `docs/02-FEATURES/woocommerce/README.md` | ✅ | ✅ | YES |
 | `docs/02-FEATURES/scraping/README.md` | ✅ | ✅ | YES |
@@ -222,8 +222,8 @@ Most broken links fall into acceptable categories:
 
 1. ✅ Chat API endpoint example (docs/02-FEATURES/chat-system/README.md)
 2. ✅ WooCommerce integration setup (docs/02-FEATURES/woocommerce/README.md)
-3. ✅ Database schema examples (docs/01-ARCHITECTURE/database-schema.md)
-4. ✅ Docker setup commands (docs/setup/DOCKER_README.md)
+3. ✅ Database schema examples (docs/07-REFERENCE/REFERENCE_DATABASE_SCHEMA.md)
+4. ✅ Docker setup commands (docs/00-GETTING-STARTED/SETUP_DOCKER_PRODUCTION.md)
 5. ✅ Environment configuration (.env.example)
 6. ✅ Test examples (docs/04-DEVELOPMENT/testing/README.md)
 
@@ -354,7 +354,7 @@ No high priority issues found.
 
 #### 1. Performance Optimization Documentation Outdated
 
-**Issue:** `docs/01-ARCHITECTURE/performance-optimization.md` last updated 273 days ago
+**Issue:** `docs/07-REFERENCE/REFERENCE_PERFORMANCE_OPTIMIZATION.md` last updated 273 days ago
 
 **Impact:** Medium
 **Status:** ⚠️ Acknowledged

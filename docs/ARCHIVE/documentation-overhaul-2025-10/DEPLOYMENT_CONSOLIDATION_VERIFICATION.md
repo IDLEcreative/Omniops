@@ -210,7 +210,7 @@ Sample verification for all 8 files:
 ## Cross-Reference Verification
 
 ### Links to Other Documentation
-✅ Docker Setup Guide (/DOCKER_README.md)  
+✅ Docker Setup Guide (/docs/00-GETTING-STARTED/SETUP_DOCKER_PRODUCTION.md)  
 ✅ Database Schema Reference (/SUPABASE_SCHEMA.md)  
 ✅ Search Architecture (/docs/SEARCH_ARCHITECTURE.md)  
 ✅ Performance Optimization (/docs/PERFORMANCE_OPTIMIZATION.md)  

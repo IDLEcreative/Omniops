@@ -2046,6 +2046,6 @@ No new migrations needed! All tables already exist:
 - [SEARCH_ARCHITECTURE.md](SEARCH_ARCHITECTURE.md) - Search system details
 - [PERFORMANCE_OPTIMIZATION.md](PERFORMANCE_OPTIMIZATION.md) - Performance tuning
 - [HALLUCINATION_PREVENTION.md](HALLUCINATION_PREVENTION.md) - AI quality safeguards
-- [01-ARCHITECTURE/database-schema.md](01-ARCHITECTURE/database-schema.md) - Complete database reference
+- [07-REFERENCE/REFERENCE_DATABASE_SCHEMA.md](07-REFERENCE/REFERENCE_DATABASE_SCHEMA.md) - Complete database reference
 
 **Ready to start building?** Begin with Phase 1 and connect your first real data to the dashboard! 🚀

@@ -186,7 +186,7 @@ psql $DATABASE_URL -c "SELECT COUNT(*) FROM pg_policies WHERE tablename IN ('cha
 
 ### Phase 3: Documentation Updates
 
-Update `docs/01-ARCHITECTURE/database-schema.md`:
+Update `docs/07-REFERENCE/REFERENCE_DATABASE_SCHEMA.md`:
 - Remove from "Removed Tables" section if present
 - Add to "Cleaned Up Tables" section
 - Update table counts in schema summary

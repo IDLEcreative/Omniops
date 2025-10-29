@@ -51,12 +51,12 @@ export default async function BillingPage() {
   const typedMemberships = memberships as Membership[];
 
   return (
-    <div className="min-h-screen bg-background">
+    <div className="min-h-screen bg-background flex items-center justify-center">
       <div className="absolute inset-0 bg-gradient-to-br from-primary/5 via-transparent to-primary/5 pointer-events-none" />
-      <div className="relative container mx-auto px-4 py-12">
+      <div className="relative container mx-auto px-4 py-6 max-w-5xl">
         <Suspense fallback={
-          <div className="text-center py-12">
-            <div className="text-muted-foreground">Loading billing information...</div>
+          <div className="text-center py-8">
+            <div className="text-sm text-muted-foreground animate-pulse">Loading billing information...</div>
           </div>
         }>
           <BillingDashboard

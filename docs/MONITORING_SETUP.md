@@ -324,7 +324,7 @@ bash .git/hooks/pre-commit
 
 - [CLAUDE.md](/CLAUDE.md) - Brand-agnostic requirements
 - [ARCHITECTURE.md](/docs/01-ARCHITECTURE/README.md) - Multi-tenant architecture
-- [Database Schema](/docs/01-ARCHITECTURE/database-schema.md) - Configuration storage
+- [Database Schema](/docs/07-REFERENCE/REFERENCE_DATABASE_SCHEMA.md) - Configuration storage
 
 ## Support
 

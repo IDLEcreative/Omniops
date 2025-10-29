@@ -103,8 +103,8 @@ npx tsx scripts/fix-doc-links.ts
 ❌ [Schema](/docs/SUPABASE_SCHEMA.md)
 ✅ [Schema](/docs/SUPABASE_SCHEMA.md)
 
-❌ [Docker](/docs/setup/DOCKER_README.md)
-✅ [Docker](/docs/setup/DOCKER_README.md)
+❌ [Docker](/docs/00-GETTING-STARTED/SETUP_DOCKER_PRODUCTION.md)
+✅ [Docker](/docs/00-GETTING-STARTED/SETUP_DOCKER_PRODUCTION.md)
 ```
 
 ### 2. Wrong Relative Depth (150+ occurrences)

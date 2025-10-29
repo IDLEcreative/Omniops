@@ -509,7 +509,7 @@ jobs:
 
 ## Related Documentation
 
-- [Database Schema](./01-ARCHITECTURE/database-schema.md)
+- [Database Schema](./07-REFERENCE/REFERENCE_DATABASE_SCHEMA.md)
 - [Scraping Guide](./SCRAPING.md)
 - [API Documentation](./API.md)
 - [Admin Panel Guide](./ADMIN.md)

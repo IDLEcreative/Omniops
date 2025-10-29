@@ -64,7 +64,7 @@ docker-compose ps
 **Option A: Supabase Dashboard (Recommended)**
 1. Go to your Supabase project dashboard
 2. Navigate to SQL Editor
-3. Copy schema from `docs/01-ARCHITECTURE/database-schema.md`
+3. Copy schema from `docs/07-REFERENCE/REFERENCE_DATABASE_SCHEMA.md`
 4. Run the SQL to create tables
 
 **Option B: Supabase CLI**
@@ -243,7 +243,7 @@ All files must be under **300 lines of code** (LOC). If a file exceeds this:
 Before contributing code, read:
 1. **CLAUDE.md** - Development guidelines and philosophy
 2. **docs/00-GETTING-STARTED/brand-agnostic-checklist.md** - Critical multi-tenant rules
-3. **docs/01-ARCHITECTURE/database-schema.md** - Database structure
+3. **docs/07-REFERENCE/REFERENCE_DATABASE_SCHEMA.md** - Database structure
 4. **docs/SEARCH_ARCHITECTURE.md** - How RAG and search works
 
 ## Welcome!

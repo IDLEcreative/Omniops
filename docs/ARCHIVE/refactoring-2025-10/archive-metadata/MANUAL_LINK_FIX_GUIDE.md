@@ -55,15 +55,15 @@ Files moved from `docs/` to `docs/01-ARCHITECTURE/`:
 ```markdown
 ❌ BEFORE                                  ✅ AFTER
 ────────────────────────────────────────────────────────────────
-[Schema](SUPABASE_SCHEMA.md)            [Schema](docs/01-ARCHITECTURE/database-schema.md)
-[Schema](docs/SUPABASE_SCHEMA.md)       [Schema](docs/01-ARCHITECTURE/database-schema.md)
-[Schema](../SUPABASE_SCHEMA.md)         [Schema](../01-ARCHITECTURE/database-schema.md)
+[Schema](SUPABASE_SCHEMA.md)            [Schema](docs/07-REFERENCE/REFERENCE_DATABASE_SCHEMA.md)
+[Schema](docs/SUPABASE_SCHEMA.md)       [Schema](docs/07-REFERENCE/REFERENCE_DATABASE_SCHEMA.md)
+[Schema](../SUPABASE_SCHEMA.md)         [Schema](../07-REFERENCE/REFERENCE_DATABASE_SCHEMA.md)
 
-[Search](SEARCH_ARCHITECTURE.md)        [Search](docs/01-ARCHITECTURE/search-architecture.md)
-[Search](docs/SEARCH_ARCHITECTURE.md)   [Search](docs/01-ARCHITECTURE/search-architecture.md)
+[Search](SEARCH_ARCHITECTURE.md)        [Search](docs/01-ARCHITECTURE/ARCHITECTURE_SEARCH_SYSTEM.md)
+[Search](docs/SEARCH_ARCHITECTURE.md)   [Search](docs/01-ARCHITECTURE/ARCHITECTURE_SEARCH_SYSTEM.md)
 
-[Perf](PERFORMANCE_OPTIMIZATION.md)     [Perf](docs/01-ARCHITECTURE/performance-optimization.md)
-[Perf](docs/PERFORMANCE_OPTIMIZATION.md) [Perf](docs/01-ARCHITECTURE/performance-optimization.md)
+[Perf](PERFORMANCE_OPTIMIZATION.md)     [Perf](docs/07-REFERENCE/REFERENCE_PERFORMANCE_OPTIMIZATION.md)
+[Perf](docs/PERFORMANCE_OPTIMIZATION.md) [Perf](docs/07-REFERENCE/REFERENCE_PERFORMANCE_OPTIMIZATION.md)
 ```
 
 ### Pattern 2: Feature Documentation
@@ -97,7 +97,7 @@ Files moved to `docs/05-DEPLOYMENT/`:
 ❌ BEFORE                                  ✅ AFTER
 ────────────────────────────────────────────────────────────────
 [Deployment](PRODUCTION_CHECKLIST.md)    [Deployment](docs/05-DEPLOYMENT/production-checklist.md)
-[Docker](docs/setup/DOCKER_README.md)    [Docker](docs/setup/DOCKER_README.md)  # No change
+[Docker](docs/00-GETTING-STARTED/SETUP_DOCKER_PRODUCTION.md)    [Docker](docs/00-GETTING-STARTED/SETUP_DOCKER_PRODUCTION.md)  # No change
 ```
 
 ### Pattern 5: Troubleshooting
@@ -129,7 +129,7 @@ These files are accessed most frequently and create the worst first impression w
 code README.md
 
 # Find and replace
-docs/01-ARCHITECTURE/          → docs/01-ARCHITECTURE/database-schema.md
+docs/01-ARCHITECTURE/          → docs/07-REFERENCE/REFERENCE_DATABASE_SCHEMA.md
 docs/04-DEVELOPMENT/code-patterns/ → docs/04-DEVELOPMENT/code-patterns/adding-api-endpoints.md
 ```
 
@@ -154,7 +154,7 @@ docs/04-DEVELOPMENT/code-patterns/ → docs/04-DEVELOPMENT/code-patterns/adding-
 
 # Architecture Links
 ❌ docs/01-ARCHITECTURE/overview.md (doesn't exist)
-✅ docs/01-ARCHITECTURE/database-schema.md
+✅ docs/07-REFERENCE/REFERENCE_DATABASE_SCHEMA.md
 
 # API Links
 ❌ docs/03-API/reference.md (doesn't exist)
@@ -196,7 +196,7 @@ docs/04-DEVELOPMENT/code-patterns/ → docs/04-DEVELOPMENT/code-patterns/adding-
 ```markdown
 # Common issues in chat-system docs:
 ❌ ../SUPABASE_SCHEMA.md
-✅ ../../01-ARCHITECTURE/database-schema.md
+✅ ../../07-REFERENCE/REFERENCE_DATABASE_SCHEMA.md
 
 ❌ #performance--scaling (anchor doesn't exist)
 ✅ #performance-and-scaling (correct anchor)
@@ -213,7 +213,7 @@ docs/04-DEVELOPMENT/code-patterns/ → docs/04-DEVELOPMENT/code-patterns/adding-
 ✅ ../../API_REFERENCE.md
 
 ❌ ../SUPABASE_SCHEMA.md
-✅ ../../01-ARCHITECTURE/database-schema.md
+✅ ../../07-REFERENCE/REFERENCE_DATABASE_SCHEMA.md
 ```
 
 **Files to check:**
@@ -223,7 +223,7 @@ docs/04-DEVELOPMENT/code-patterns/ → docs/04-DEVELOPMENT/code-patterns/adding-
 **Broken link patterns:**
 ```markdown
 ❌ ../SUPABASE_SCHEMA.md
-✅ ../../01-ARCHITECTURE/database-schema.md
+✅ ../../07-REFERENCE/REFERENCE_DATABASE_SCHEMA.md
 ```
 
 **Files to check:**
@@ -329,24 +329,24 @@ Ctrl/Cmd + Shift + H
 ```
 # Pattern 1: Schema links
 Find:     docs/SUPABASE_SCHEMA.md
-Replace:  docs/01-ARCHITECTURE/database-schema.md
+Replace:  docs/07-REFERENCE/REFERENCE_DATABASE_SCHEMA.md
 
 Find:     ../SUPABASE_SCHEMA.md
-Replace:  ../01-ARCHITECTURE/database-schema.md
+Replace:  ../07-REFERENCE/REFERENCE_DATABASE_SCHEMA.md
 
 # Pattern 2: Search architecture
 Find:     docs/SEARCH_ARCHITECTURE.md
-Replace:  docs/01-ARCHITECTURE/search-architecture.md
+Replace:  docs/01-ARCHITECTURE/ARCHITECTURE_SEARCH_SYSTEM.md
 
 Find:     ../SEARCH_ARCHITECTURE.md
-Replace:  ../01-ARCHITECTURE/search-architecture.md
+Replace:  ../01-ARCHITECTURE/ARCHITECTURE_SEARCH_SYSTEM.md
 
 # Pattern 3: Performance
 Find:     docs/PERFORMANCE_OPTIMIZATION.md
-Replace:  docs/01-ARCHITECTURE/performance-optimization.md
+Replace:  docs/07-REFERENCE/REFERENCE_PERFORMANCE_OPTIMIZATION.md
 
 Find:     ../PERFORMANCE_OPTIMIZATION.md
-Replace:  ../01-ARCHITECTURE/performance-optimization.md
+Replace:  ../07-REFERENCE/REFERENCE_PERFORMANCE_OPTIMIZATION.md
 
 # Pattern 4: Testing
 Find:     docs/TESTING.md
@@ -391,9 +391,9 @@ git log --oneline -5  # Last 5 commits
 ## Category-by-Category Checklist
 
 ### Architecture Links (12 files)
-- [ ] Fix `SUPABASE_SCHEMA.md` → `01-ARCHITECTURE/database-schema.md`
-- [ ] Fix `SEARCH_ARCHITECTURE.md` → `01-ARCHITECTURE/search-architecture.md`
-- [ ] Fix `PERFORMANCE_OPTIMIZATION.md` → `01-ARCHITECTURE/performance-optimization.md`
+- [ ] Fix `SUPABASE_SCHEMA.md` → `07-REFERENCE/REFERENCE_DATABASE_SCHEMA.md`
+- [ ] Fix `SEARCH_ARCHITECTURE.md` → `01-ARCHITECTURE/ARCHITECTURE_SEARCH_SYSTEM.md`
+- [ ] Fix `PERFORMANCE_OPTIMIZATION.md` → `07-REFERENCE/REFERENCE_PERFORMANCE_OPTIMIZATION.md`
 
 **Files affected:**
 - docs/README.md
@@ -449,17 +449,17 @@ git log --oneline -5  # Last 5 commits
 
 **1. Using absolute paths from root:**
 ```markdown
-❌ [Schema](/Users/jamesguy/Omniops/docs/01-ARCHITECTURE/database-schema.md)
-✅ [Schema](docs/01-ARCHITECTURE/database-schema.md)  # From project root
-✅ [Schema](../01-ARCHITECTURE/database-schema.md)     # Relative path
+❌ [Schema](/Users/jamesguy/Omniops/docs/07-REFERENCE/REFERENCE_DATABASE_SCHEMA.md)
+✅ [Schema](docs/07-REFERENCE/REFERENCE_DATABASE_SCHEMA.md)  # From project root
+✅ [Schema](../07-REFERENCE/REFERENCE_DATABASE_SCHEMA.md)     # Relative path
 ```
 
 **2. Forgetting `../` for relative paths:**
 ```markdown
 # From docs/02-FEATURES/woocommerce/README.md
 
-❌ [Schema](01-ARCHITECTURE/database-schema.md)  # Missing ../
-✅ [Schema](../../01-ARCHITECTURE/database-schema.md)
+❌ [Schema](07-REFERENCE/REFERENCE_DATABASE_SCHEMA.md)  # Missing ../
+✅ [Schema](docs/07-REFERENCE/REFERENCE_DATABASE_SCHEMA.md)
 ```
 
 **3. Breaking working links:**
@@ -484,13 +484,13 @@ npx tsx scripts/validate-doc-links.ts
 **1. Use relative paths correctly:**
 ```markdown
 # From project root (README.md, CLAUDE.md)
-[Schema](docs/01-ARCHITECTURE/database-schema.md)
+[Schema](docs/07-REFERENCE/REFERENCE_DATABASE_SCHEMA.md)
 
 # From docs/ directory
-[Schema](01-ARCHITECTURE/database-schema.md)
+[Schema](07-REFERENCE/REFERENCE_DATABASE_SCHEMA.md)
 
 # From docs/02-FEATURES/woocommerce/
-[Schema](../../01-ARCHITECTURE/database-schema.md)
+[Schema](docs/07-REFERENCE/REFERENCE_DATABASE_SCHEMA.md)
 ```
 
 **2. Test links after fixing:**
@@ -638,10 +638,10 @@ Impact: Only minor historical docs broken
 # Count directory levels
 
 # From: docs/02-FEATURES/woocommerce/README.md
-# To: docs/01-ARCHITECTURE/database-schema.md
+# To: docs/07-REFERENCE/REFERENCE_DATABASE_SCHEMA.md
 
 # Levels up: 2 (woocommerce → 02-FEATURES → docs)
-# Path: ../../01-ARCHITECTURE/database-schema.md
+# Path: ../../07-REFERENCE/REFERENCE_DATABASE_SCHEMA.md
 
 # Test: Count ../ should equal levels up
 ```
@@ -653,11 +653,11 @@ Impact: Only minor historical docs broken
 **Solution:**
 ```markdown
 # Instead of:
-❌ [Schema](docs/01-ARCHITECTURE/database-schema.md)
+❌ [Schema](docs/07-REFERENCE/REFERENCE_DATABASE_SCHEMA.md)
    (Only works from project root)
 
 # Use relative path that works from anywhere:
-✅ [Schema](../../01-ARCHITECTURE/database-schema.md)
+✅ [Schema](docs/07-REFERENCE/REFERENCE_DATABASE_SCHEMA.md)
    (Works from current file location)
 ```
 
@@ -678,7 +678,7 @@ find . -name "*schema*" -type f
 ls docs/01-ARCHITECTURE/
 
 # Check git history
-git log --oneline --follow docs/01-ARCHITECTURE/database-schema.md
+git log --oneline --follow docs/07-REFERENCE/REFERENCE_DATABASE_SCHEMA.md
 ```
 
 ### Issue: Anchor not found
@@ -688,7 +688,7 @@ git log --oneline --follow docs/01-ARCHITECTURE/database-schema.md
 **Solution:**
 ```markdown
 # Find actual header in target file
-grep "^#" docs/01-ARCHITECTURE/database-schema.md
+grep "^#" docs/07-REFERENCE/REFERENCE_DATABASE_SCHEMA.md
 
 # Common issues:
 ❌ #performance--scaling (double dash)
@@ -748,7 +748,7 @@ git grep -l "SUPABASE_SCHEMA.md" docs/
 
 # VSCode find/replace (Ctrl/Cmd + Shift + H):
 Find:     /SUPABASE_SCHEMA\.md
-Replace:  /01-ARCHITECTURE/database-schema.md
+Replace:  /07-REFERENCE/REFERENCE_DATABASE_SCHEMA.md
 Files:    docs/**/*.md
 
 # Validate

@@ -64,7 +64,7 @@ Comprehensive link validation system created for the Omniops documentation:
 ```
 docs/
   ├── SUPABASE_SCHEMA.md
-  ├── DOCKER_README.md
+  ├── docs/00-GETTING-STARTED/SETUP_DOCKER_PRODUCTION.md
   ├── TESTING.md
   ├── PERFORMANCE_OPTIMIZATION.md
   └── SEARCH_ARCHITECTURE.md
@@ -75,14 +75,14 @@ docs/
 docs/
   ├── 00-GETTING-STARTED/
   ├── 01-ARCHITECTURE/
-  │   ├── database-schema.md (was SUPABASE_SCHEMA.md)
-  │   ├── performance-optimization.md
-  │   └── search-architecture.md
+  │   ├── docs/07-REFERENCE/REFERENCE_DATABASE_SCHEMA.md (was SUPABASE_SCHEMA.md)
+  │   ├── docs/07-REFERENCE/REFERENCE_PERFORMANCE_OPTIMIZATION.md
+  │   └── docs/01-ARCHITECTURE/ARCHITECTURE_SEARCH_SYSTEM.md
   ├── 02-FEATURES/
   ├── 04-DEVELOPMENT/
   │   └── testing/README.md (was TESTING.md)
   └── setup/
-      └── DOCKER_README.md
+      └── docs/00-GETTING-STARTED/SETUP_DOCKER_PRODUCTION.md
 ```
 
 **Impact:** 300+ links still pointing to old locations
@@ -91,7 +91,7 @@ docs/
 
 1. **Absolute paths to moved files** (~100 links)
    - `/SUPABASE_SCHEMA.md` → `/docs/SUPABASE_SCHEMA.md`
-   - `/DOCKER_README.md` → `/docs/setup/DOCKER_README.md`
+   - `/docs/00-GETTING-STARTED/SETUP_DOCKER_PRODUCTION.md` → `/docs/00-GETTING-STARTED/SETUP_DOCKER_PRODUCTION.md`
 
 2. **Incorrect relative path depth** (~150 links)
    - `../../SUPABASE_SCHEMA.md` from wrong depth
@@ -206,9 +206,9 @@ npx tsx scripts/fix-doc-links.ts
 
 #### 1. docs/01-ARCHITECTURE/ (15 broken links)
 **Files:**
-- `database-schema.md`: 7 anchor links
-- `performance-optimization.md`: 3 anchor links
-- `search-architecture.md`: 5 file path links
+- `docs/07-REFERENCE/REFERENCE_DATABASE_SCHEMA.md`: 7 anchor links
+- `docs/07-REFERENCE/REFERENCE_PERFORMANCE_OPTIMIZATION.md`: 3 anchor links
+- `docs/01-ARCHITECTURE/ARCHITECTURE_SEARCH_SYSTEM.md`: 5 file path links
 
 **Impact:** Critical - Core technical documentation
 

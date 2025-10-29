@@ -322,7 +322,7 @@ When approaching limits:
 
 ## Hallucination Prevention
 
-**See full guide**: [hallucination-prevention.md](./hallucination-prevention.md)
+**See full guide**: [docs/02-GUIDES/GUIDE_HALLUCINATION_PREVENTION.md](./docs/02-GUIDES/GUIDE_HALLUCINATION_PREVENTION.md)
 
 ### Core Principles
 
@@ -770,7 +770,7 @@ CREATE INDEX idx_messages_created_at ON messages(created_at DESC);
 
 ## Related Documentation
 
-- **[Hallucination Prevention](./hallucination-prevention.md)** - Detailed anti-hallucination measures
+- **[Hallucination Prevention](./docs/02-GUIDES/GUIDE_HALLUCINATION_PREVENTION.md)** - Detailed anti-hallucination measures
 - **[Search Architecture](../../SEARCH_ARCHITECTURE.md)** - Embeddings and search internals
 - **[Performance Optimization](../../PERFORMANCE_OPTIMIZATION.md)** - Response time analysis
 - **[Supabase Schema](../SUPABASE_SCHEMA.md)** - Complete database schema

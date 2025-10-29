@@ -468,11 +468,11 @@ npm run test:integration -- synonyms
 
 ## References
 
-- **Database Schema**: [docs/01-ARCHITECTURE/database-schema.md](01-ARCHITECTURE/database-schema.md#synonym-management)
+- **Database Schema**: [docs/07-REFERENCE/REFERENCE_DATABASE_SCHEMA.md](07-REFERENCE/REFERENCE_DATABASE_SCHEMA.md#synonym-management)
 - **Legacy Code**: `lib/synonym-expander.ts` (deprecated), `lib/synonym-expander-dynamic.ts`
 - **Related**: `lib/synonym-auto-learner.ts` (AI-powered learning)
 
 ---
 
 **Maintained By**: Omniops Engineering
-**Questions?** See [docs/01-ARCHITECTURE/database-schema.md](01-ARCHITECTURE/database-schema.md) or raise an issue.
+**Questions?** See [docs/07-REFERENCE/REFERENCE_DATABASE_SCHEMA.md](07-REFERENCE/REFERENCE_DATABASE_SCHEMA.md) or raise an issue.

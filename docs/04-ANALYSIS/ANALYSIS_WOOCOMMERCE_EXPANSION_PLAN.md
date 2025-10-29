@@ -600,7 +600,7 @@ npx tsx monitor-woocommerce.ts
 - Document parameters and return types
 
 #### 3. Architecture Analysis
-**File:** `docs/WOOCOMMERCE_ARCHITECTURE_ANALYSIS.md`
+**File:** `docs/04-ANALYSIS/ANALYSIS_WOOCOMMERCE_ARCHITECTURE.md`
 - Update coverage statistics
 - Mark tools as implemented
 - Update gap analysis
@@ -821,7 +821,7 @@ Project is complete when:
 
 ### Documentation (5 files)
 1. Updated `docs/WOOCOMMERCE_CUSTOMIZATION.md`
-2. Updated `docs/WOOCOMMERCE_ARCHITECTURE_ANALYSIS.md`
+2. Updated `docs/04-ANALYSIS/ANALYSIS_WOOCOMMERCE_ARCHITECTURE.md`
 3. This plan document (`docs/WOOCOMMERCE_COMPREHENSIVE_EXPANSION_PLAN.md`)
 4. Final completion report (`WOOCOMMERCE_EXPANSION_COMPLETION_REPORT.md`)
 5. Updated `CLAUDE.md`

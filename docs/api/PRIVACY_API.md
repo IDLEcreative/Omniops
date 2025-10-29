@@ -534,7 +534,7 @@ npx tsx scripts/privacy-metrics.ts report
 
 - [Privacy Compliance Guide](../PRIVACY_COMPLIANCE.md)
 - [Privacy Guide](../PRIVACY_GUIDE.md)
-- [Database Schema](../01-ARCHITECTURE/database-schema.md)
+- [Database Schema](../07-REFERENCE/REFERENCE_DATABASE_SCHEMA.md)
 - [Troubleshooting](../06-TROUBLESHOOTING/README.md)
 
 ## Support
