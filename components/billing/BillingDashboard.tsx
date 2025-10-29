@@ -55,20 +55,20 @@ export default function BillingDashboard({ organizations }: BillingDashboardProp
   const canManageBilling = selectedOrg && ['owner', 'admin'].includes(selectedOrg.role);
 
   return (
-    <div className="space-y-8">
-      <div>
-        <h1 className="text-3xl font-bold">Billing & Subscription</h1>
-        <p className="text-gray-600 mt-2">Manage your subscription and billing information</p>
+    <div className="space-y-12">
+      <div className="text-center space-y-4">
+        <h1 className="text-4xl font-bold tracking-tight">Billing & Subscription</h1>
+        <p className="text-xl text-muted-foreground">Manage your subscription and billing information</p>
       </div>
 
       {/* Organization Selector */}
       {organizations.length > 1 && (
-        <div>
-          <label className="block text-sm font-medium mb-2">Select Organization</label>
+        <div className="max-w-md mx-auto">
+          <label className="block text-sm font-medium mb-2 text-muted-foreground">Select Organization</label>
           <select
             value={selectedOrgId}
             onChange={(e) => setSelectedOrgId(e.target.value)}
-            className="w-full max-w-md px-4 py-2 border rounded-lg"
+            className="w-full px-4 py-3 border rounded-lg bg-background hover:bg-muted/50 transition-colors"
           >
             {organizations.map(org => (
               <option key={org.id} value={org.id}>
@@ -80,7 +80,9 @@ export default function BillingDashboard({ organizations }: BillingDashboardProp
       )}
 
       {loading ? (
-        <div className="text-center py-12">Loading subscription details...</div>
+        <div className="text-center py-12">
+          <div className="text-muted-foreground">Loading subscription details...</div>
+        </div>
       ) : (
         <>
           {subscription?.hasSubscription ? (

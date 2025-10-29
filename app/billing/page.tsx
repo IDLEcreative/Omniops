@@ -51,17 +51,24 @@ export default async function BillingPage() {
   const typedMemberships = memberships as Membership[];
 
   return (
-    <div className="container mx-auto px-4 py-8">
-      <Suspense fallback={<div>Loading billing information...</div>}>
-        <BillingDashboard
-          organizations={typedMemberships.map(m => ({
-            id: m.organizations.id,
-            name: m.organizations.name,
-            planType: m.organizations.plan_type,
-            role: m.role,
-          }))}
-        />
-      </Suspense>
+    <div className="min-h-screen bg-background">
+      <div className="absolute inset-0 bg-gradient-to-br from-primary/5 via-transparent to-primary/5 pointer-events-none" />
+      <div className="relative container mx-auto px-4 py-12">
+        <Suspense fallback={
+          <div className="text-center py-12">
+            <div className="text-muted-foreground">Loading billing information...</div>
+          </div>
+        }>
+          <BillingDashboard
+            organizations={typedMemberships.map(m => ({
+              id: m.organizations.id,
+              name: m.organizations.name,
+              planType: m.organizations.plan_type,
+              role: m.role,
+            }))}
+          />
+        </Suspense>
+      </div>
     </div>
   );
 }

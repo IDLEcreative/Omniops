@@ -13,7 +13,7 @@ export async function fetchConversations(
 ): Promise<ConversationRecord[]> {
   const { data, error } = await supabase
     .from('conversations')
-    .select('id, session_id, customer_id, metadata, created_at, ended_at')
+    .select('id, session_id, organization_id, metadata, created_at, ended_at')
     .gte('created_at', startDate.toISOString())
     .order('created_at', { ascending: false });
 

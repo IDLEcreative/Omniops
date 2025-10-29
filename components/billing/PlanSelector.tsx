@@ -1,38 +1,49 @@
 'use client';
 
 import { useState } from 'react';
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
+import { Badge } from '@/components/ui/badge';
+import { Button } from '@/components/ui/button';
+import { CheckCircle2, Sparkles } from 'lucide-react';
+import { cn } from '@/lib/utils';
 
 interface Plan {
   name: string;
   price: string;
+  description: string;
   priceId: string;
   features: string[];
+  popular: boolean;
 }
 
 const PLANS: Plan[] = [
   {
     name: 'Starter',
     price: '£29',
+    description: 'Perfect for small businesses',
     priceId: process.env.NEXT_PUBLIC_STRIPE_STARTER_PRICE_ID || '',
     features: [
-      '1,000 messages/month',
-      'Web scraping',
-      'Basic integrations',
+      '500 conversations/month',
+      'Basic AI chat widget',
+      'Single website',
       'Email support',
     ],
+    popular: false,
   },
   {
     name: 'Professional',
-    price: '£99',
+    price: '£499',
+    description: 'For growing companies',
     priceId: process.env.NEXT_PUBLIC_STRIPE_PROFESSIONAL_PRICE_ID || '',
     features: [
-      '10,000 messages/month',
+      '10,000 conversations/month',
+      'Advanced AI (86% accuracy)',
+      'Full WooCommerce & Shopify',
+      'Advanced analytics dashboard',
       'Priority support',
-      'Advanced analytics',
-      'WooCommerce & Shopify',
-      'Custom branding',
+      'Unlimited websites',
     ],
+    popular: true,
   },
 ];
 
@@ -62,56 +73,81 @@ export function PlanSelector({ organizationId, canManage }: PlanSelectorProps) {
   };
 
   return (
-    <div className="space-y-6">
-      <div>
-        <h2 className="text-2xl font-bold">Choose Your Plan</h2>
-        <p className="text-gray-600 mt-2">Select a plan to get started</p>
+    <div className="space-y-8">
+      <div className="text-center">
+        <h2 className="text-3xl font-bold mb-4">
+          Choose the plan that fits your needs
+        </h2>
+        <p className="text-xl text-muted-foreground mb-4">
+          Simple, transparent pricing
+        </p>
+        <Badge variant="secondary" className="text-base px-4 py-2">
+          <Sparkles className="mr-1 h-4 w-4" />
+          Flexible monthly billing • Cancel anytime
+        </Badge>
       </div>
 
-      <div className="grid md:grid-cols-2 gap-6">
+      <div className="grid md:grid-cols-2 gap-6 max-w-4xl mx-auto">
         {PLANS.map((plan) => (
-          <Card key={plan.name} className="hover:shadow-lg transition">
+          <Card
+            key={plan.name}
+            className={cn(
+              "relative hover:shadow-lg transition-shadow",
+              plan.popular && "border-primary shadow-lg"
+            )}
+          >
+            {plan.popular && (
+              <Badge className="absolute -top-3 left-1/2 -translate-x-1/2">
+                Most Popular
+              </Badge>
+            )}
             <CardHeader>
-              <CardTitle>{plan.name}</CardTitle>
-              <div className="mt-4 mb-2">
+              <CardTitle className="text-2xl">{plan.name}</CardTitle>
+              <CardDescription>{plan.description}</CardDescription>
+              <div className="mt-4">
                 <span className="text-4xl font-bold">{plan.price}</span>
-                <span className="text-gray-600">/month</span>
+                <span className="text-muted-foreground">/month</span>
               </div>
             </CardHeader>
             <CardContent>
               <ul className="space-y-3 mb-6">
                 {plan.features.map((feature, i) => (
-                  <li key={i} className="flex items-start">
-                    <span className="text-green-600 mr-2">✓</span>
-                    <span className="text-gray-700">{feature}</span>
+                  <li key={i} className="flex items-start gap-2">
+                    <CheckCircle2 className="h-5 w-5 text-primary shrink-0 mt-0.5" />
+                    <span className="text-sm">{feature}</span>
                   </li>
                 ))}
               </ul>
-              <button
+              <Button
                 onClick={() => handleSelectPlan(plan.priceId)}
                 disabled={!canManage || loading === plan.priceId}
-                className="w-full px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 disabled:opacity-50"
+                className="w-full"
+                variant={plan.popular ? "default" : "outline"}
               >
-                {loading === plan.priceId ? 'Processing...' : 'Select Plan'}
-              </button>
+                {loading === plan.priceId ? 'Processing...' : 'Get Started'}
+              </Button>
             </CardContent>
           </Card>
         ))}
       </div>
 
-      <Card className="bg-gray-50">
-        <CardContent>
-          <h3 className="font-semibold text-lg">Enterprise</h3>
-          <p className="text-gray-600 mt-2">Custom pricing for large organizations</p>
-          <button className="mt-4 px-4 py-2 border border-gray-300 rounded-lg hover:bg-white">
-            Contact Sales
-          </button>
+      <Card className="bg-muted/50 max-w-4xl mx-auto">
+        <CardContent className="pt-6">
+          <div className="text-center">
+            <h3 className="font-semibold text-xl mb-2">Enterprise</h3>
+            <p className="text-muted-foreground mb-4">
+              Custom pricing tailored for large organizations
+            </p>
+            <Button variant="outline">
+              Contact Sales
+            </Button>
+          </div>
         </CardContent>
       </Card>
 
       {!canManage && (
-        <div className="bg-yellow-50 border border-yellow-200 rounded p-4">
-          <p className="text-sm text-yellow-800">
+        <div className="bg-yellow-50 border border-yellow-200 rounded-lg p-4 max-w-4xl mx-auto">
+          <p className="text-sm text-yellow-800 text-center">
             Only organization owners and admins can manage subscriptions.
           </p>
         </div>

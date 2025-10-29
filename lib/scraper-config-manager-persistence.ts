@@ -24,14 +24,14 @@ import { ScraperConfigSchema, type ScraperConfig } from './scraper-config-schema
  */
 export async function saveToDatabase(
   supabase: SupabaseClient,
-  customerId: string,
+  domainConfigId: string,
   config: ScraperConfig
 ): Promise<void> {
   try {
     const { error } = await supabase
       .from('scraper_configs')
       .upsert({
-        customer_id: customerId,
+        domain_config_id: domainConfigId,
         config: config,
         updated_at: new Date().toISOString(),
       });

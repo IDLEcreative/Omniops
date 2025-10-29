@@ -356,17 +356,17 @@ export function loadFromEnvironment(): Partial<ScraperConfig> {
 // ============================================================================
 
 /**
- * Load configuration from database for a specific customer
+ * Load configuration from database for a specific domain config
  */
 export async function loadFromDatabase(
   supabase: SupabaseClient,
-  customerId: string
+  domainConfigId: string
 ): Promise<Partial<ScraperConfig> | null> {
   try {
     const { data, error } = await supabase
       .from('scraper_configs')
       .select('config')
-      .eq('customer_id', customerId)
+      .eq('domain_config_id', domainConfigId)
       .single();
 
     if (error) {

@@ -9,7 +9,7 @@
     "start": "next start",
     "lint": "eslint . --max-warnings 50",
     "lint:fix": "eslint . --fix",
-    "test": "jest",
+    "test": "NODE_OPTIONS='--max-old-space-size=4096' jest",
     "test:unit": "jest --config=config/jest/jest.unit.config.js",
     "test:integration": "jest --config=config/jest/jest.integration.config.js",
     "test:integration:watch": "jest --config=config/jest/jest.integration.config.js --watch",

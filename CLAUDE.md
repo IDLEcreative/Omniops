@@ -1,4 +1,4 @@
-**Last Updated:** 2025-10-26 (Added Agent Orchestration Framework)
+**Last Updated:** 2025-10-29 (Added Documentation Standards for AI Discoverability)
 **Verified Accurate For:** v0.1.0
 
 # CLAUDE.md
@@ -78,6 +78,305 @@ This is a General purpose AI-powered customer service chat widget built with Nex
 - **[Hallucination Prevention](docs/HALLUCINATION_PREVENTION.md)** - Anti-hallucination safeguards and testing
 - **[Docker Setup](docs/setup/DOCKER_README.md)** - Complete Docker configuration and commands
 
+---
+
+## Documentation Standards for AI Discoverability
+
+**Purpose:** This section defines how documentation should be named, structured, and written to maximize AI agent efficiency when scanning, searching, and understanding the codebase.
+
+### Why This Matters
+
+When I (Claude) scan documentation, I need to quickly:
+1. **Identify** what a document contains without reading it fully
+2. **Locate** specific information across multiple documents
+3. **Understand** relationships between documents
+4. **Determine** if a document is current and authoritative
+5. **Navigate** hierarchies efficiently without getting lost
+
+**Poor documentation structure costs 10-50x more time** in agent context consumption and requires multiple file reads to find simple information.
+
+### File Naming Conventions
+
+**Pattern:** `{PREFIX}_{DESCRIPTIVE_NAME}.md`
+
+**Prefix Categories:**
+- `ARCHITECTURE_` - System design, patterns, data models
+- `GUIDE_` - How-to instructions, walkthroughs
+- `REFERENCE_` - Complete API/schema references
+- `ANALYSIS_` - Problem analysis, decisions, investigations
+- `SETUP_` - Installation, configuration, environment
+- `TESTING_` - Test strategies, coverage, quality
+- `TROUBLESHOOTING_` - Common issues and solutions
+- `API_` - API endpoint documentation
+- `INTEGRATION_` - Third-party integrations
+
+**Good Examples:**
+```
+✅ docs/01-ARCHITECTURE/ARCHITECTURE_SEARCH_SYSTEM.md
+✅ docs/02-GUIDES/GUIDE_DOCKER_SETUP.md
+✅ docs/03-REFERENCE/REFERENCE_DATABASE_SCHEMA.md
+✅ docs/04-ANALYSIS/ANALYSIS_WOOCOMMERCE_EXPANSION.md
+✅ docs/05-TROUBLESHOOTING/TROUBLESHOOTING_TEST_FAILURES.md
+```
+
+**Bad Examples (Hard to Scan):**
+```
+❌ docs/woocommerce.md  (What about WooCommerce? Setup? API? Analysis?)
+❌ docs/stuff.md  (Completely ambiguous)
+❌ docs/notes-2025-10-26.md  (Date-based, no content indicator)
+❌ docs/final_final_v2.md  (Version soup, no description)
+```
+
+**Naming Rules:**
+1. **Be Specific**: "GUIDE_STRIPE_INTEGRATION.md" NOT "stripe.md"
+2. **Use Prefixes**: Makes grep/glob searches faster
+3. **No Dates in Filenames**: Use metadata instead
+4. **Snake_case**: Use `UPPER_SNAKE_CASE`, never `camelCase` or `kebab-case`
+5. **No Redundancy**: "docs/GUIDE_..." NOT "docs/guides/GUIDE_..."
+
+### Directory Structure
+
+**Hierarchical Organization:**
+```
+docs/
+├── 01-ARCHITECTURE/       # System design & patterns
+│   ├── ARCHITECTURE_DATA_MODEL.md
+│   ├── ARCHITECTURE_SEARCH_SYSTEM.md
+│   └── ARCHITECTURE_SECURITY.md
+│
+├── 02-GUIDES/             # Step-by-step instructions
+│   ├── GUIDE_DOCKER_SETUP.md
+│   ├── GUIDE_STRIPE_INTEGRATION.md
+│   └── GUIDE_DEPLOYMENT.md
+│
+├── 03-REFERENCE/          # Complete references
+│   ├── REFERENCE_DATABASE_SCHEMA.md
+│   ├── REFERENCE_API_ENDPOINTS.md
+│   └── REFERENCE_ENV_VARIABLES.md
+│
+├── 04-ANALYSIS/           # Decisions & investigations
+│   ├── ANALYSIS_WOOCOMMERCE_EXPANSION.md
+│   ├── ANALYSIS_PERFORMANCE_BOTTLENECKS.md
+│   └── ANALYSIS_TECH_DEBT.md
+│
+├── 05-TROUBLESHOOTING/    # Common problems
+│   ├── TROUBLESHOOTING_TEST_FAILURES.md
+│   ├── TROUBLESHOOTING_DOCKER_ISSUES.md
+│   └── TROUBLESHOOTING_DATABASE_MIGRATIONS.md
+│
+└── 06-INTEGRATIONS/       # Third-party integrations
+    ├── INTEGRATION_WOOCOMMERCE.md
+    ├── INTEGRATION_SHOPIFY.md
+    └── INTEGRATION_STRIPE.md
+```
+
+**Benefits:**
+- **Fast Scanning**: I can `ls docs/02-GUIDES/` to find all guides
+- **Glob Patterns**: `grep -r "search" docs/01-ARCHITECTURE/` finds architecture docs only
+- **Clear Context**: Directory tells me document category immediately
+- **Scalability**: Easy to add new docs without clutter
+
+### Document Header Standards
+
+**Every document MUST start with this metadata block:**
+
+```markdown
+# Document Title
+
+**Type:** [Architecture | Guide | Reference | Analysis | Troubleshooting]
+**Status:** [Active | Draft | Deprecated | Archived]
+**Last Updated:** 2025-10-29
+**Verified For:** v0.1.0
+**Dependencies:** [List of related docs]
+**Estimated Read Time:** 5 minutes
+
+## Purpose
+[1-2 sentence summary of what this document covers and why it exists]
+
+## Quick Links
+- [Related Document 1](../path/to/doc.md)
+- [Related Document 2](../path/to/doc.md)
+
+## Table of Contents
+- [Section 1](#section-1)
+- [Section 2](#section-2)
+
+---
+
+[Document content starts here]
+```
+
+**Why This Format:**
+- **Status**: I immediately know if doc is current
+- **Last Updated**: I can assess freshness
+- **Verified For**: I know which version this applies to
+- **Dependencies**: I can read prerequisites first
+- **Purpose**: I understand the doc without reading it all
+- **Quick Links**: I can navigate related docs efficiently
+- **TOC**: I can jump to specific sections
+
+### Content Structure Standards
+
+**1. Progressive Detail (Inverted Pyramid)**
+
+Start with the most critical information, then add details:
+
+```markdown
+## Feature Name
+
+**TL;DR:** [1 sentence - what it does]
+
+**Quick Start:** [2-3 lines - minimal example]
+
+**Common Use Cases:** [Bullet list - when to use]
+
+**Detailed Explanation:** [Full details for deep dive]
+
+**Advanced Topics:** [Edge cases, optimizations]
+```
+
+**2. Code Examples Must Be Annotated**
+
+```typescript
+// ❌ BAD: No context
+function process(data) { return data.map(x => x * 2); }
+
+// ✅ GOOD: Clear purpose
+// Doubles all values in price array for tax calculation
+// Used by: billing-service.ts, invoice-generator.ts
+function applyTaxMultiplier(prices: number[]): number[] {
+  return prices.map(price => price * 2);
+}
+```
+
+**3. Consistent Terminology**
+
+Maintain a glossary and use terms consistently:
+
+```markdown
+✅ "customer configuration" (always use this)
+❌ "customer settings", "config", "customer data" (inconsistent)
+
+✅ "scraped pages" (database table name)
+❌ "crawled pages", "web pages", "content" (ambiguous)
+```
+
+**4. Cross-References Use Full Paths**
+
+```markdown
+✅ See [Architecture: Search System](docs/01-ARCHITECTURE/ARCHITECTURE_SEARCH_SYSTEM.md#hybrid-search)
+❌ See search architecture docs (where? what section?)
+```
+
+### Searchability Optimization
+
+**1. Keyword Front-Loading**
+
+Place important terms early in headings and paragraphs:
+
+```markdown
+✅ ## WooCommerce Integration: Product Sync Implementation
+❌ ## How We Implemented the Thing That Syncs Products with WooCommerce
+```
+
+**2. Synonyms and Aliases**
+
+Include common search terms:
+
+```markdown
+## Database Schema Reference
+
+**Keywords:** postgres, supabase, tables, indexes, SQL, database structure, data model
+
+**Aliases:**
+- "customer_configs" table (also known as: customer settings, config table)
+- "scraped_pages" table (also known as: crawled pages, website content)
+```
+
+**3. Anchor Links for Sub-Sections**
+
+```markdown
+## API Endpoints
+
+### POST /api/chat {#endpoint-chat}
+[Details...]
+
+### GET /api/scrape/status {#endpoint-scrape-status}
+[Details...]
+
+// Now I can link directly: [Chat Endpoint](docs/API.md#endpoint-chat)
+```
+
+### Anti-Patterns (What Makes Docs Hard to Scan)
+
+❌ **Generic Filenames**
+- `notes.md`, `todo.md`, `misc.md`, `temp.md`
+
+❌ **No Metadata**
+- Missing update dates, status, or version info
+
+❌ **Wall of Text**
+- No headings, code blocks, or visual breaks
+
+❌ **Hidden Context**
+- Important info buried in middle of document
+
+❌ **Broken Links**
+- Dead cross-references make navigation impossible
+
+❌ **Inconsistent Terms**
+- Same concept called different things across docs
+
+❌ **No Table of Contents**
+- Long docs without navigation structure
+
+### Migration Plan for Existing Docs
+
+**Phase 1: Quick Wins (Do First)**
+1. Add metadata headers to all docs
+2. Rename ambiguous files (`woocommerce.md` → `ANALYSIS_WOOCOMMERCE_EXPANSION.md`)
+3. Add table of contents to docs >100 lines
+4. Fix broken cross-references
+
+**Phase 2: Structural Improvements**
+1. Move docs into categorized folders
+2. Add keyword sections
+3. Standardize code example formats
+4. Create cross-reference map
+
+**Phase 3: Content Enhancement**
+1. Add "Purpose" and "Quick Links" sections
+2. Create missing prerequisite docs
+3. Build comprehensive glossary
+4. Add troubleshooting sections
+
+### Validation Checklist
+
+Before considering a document "AI-ready", verify:
+
+- [ ] Filename is descriptive and follows prefix pattern
+- [ ] Document has metadata header (status, date, version)
+- [ ] Purpose is clear in first 2 sentences
+- [ ] Table of contents exists (if doc >100 lines)
+- [ ] Code examples are annotated with context
+- [ ] Cross-references use full paths
+- [ ] Keywords/aliases section present
+- [ ] Last updated date is accurate
+- [ ] Related documents are linked
+- [ ] No broken links
+- [ ] Consistent terminology with other docs
+
+**Example of a Well-Structured Document:**
+
+See [REFERENCE_DATABASE_SCHEMA.md](docs/SUPABASE_SCHEMA.md) as the gold standard - it includes:
+- Clear metadata header
+- Comprehensive TOC
+- Annotated schema definitions
+- Cross-references to related docs
+- Examples with context
+- Consistent terminology
+
+---
 
 ### FILE LENGTH
 - **STRICT RULE**: All files must be under 300 LOC

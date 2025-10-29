@@ -6,7 +6,8 @@
 export interface ConversationRecord {
   id: string;
   session_id: string | null;
-  customer_id: string | null;
+  organization_id: string | null;
+  // Note: customer_id exists in DB but is deprecated (always NULL) - omitted from type
   metadata: Record<string, unknown> | null;
   created_at: string;
   ended_at: string | null;

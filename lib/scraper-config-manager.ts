@@ -29,6 +29,7 @@ import {
   type ConfigChangeEvent,
   type PlatformConfig,
 } from './scraper-config-manager-persistence';
+import { createServiceRoleClientSync } from './supabase/server';
 
 // Re-export types
 export type { ConfigChangeEvent, PlatformConfig };
