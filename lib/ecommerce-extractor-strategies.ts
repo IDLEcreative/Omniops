@@ -298,6 +298,7 @@ function normalizeProductSafely(product: ProductData, url: string): NormalizedPr
       description: product.description,
       images: product.images,
       specifications: product.specifications,
+      variants: product.variants, // Include variants for variable products
       categories: product.categories,
       brand: product.brand,
       rating: product.rating,
