@@ -202,7 +202,7 @@ describe('DomainAgnosticAgent - Execution', () => {
       const queries = [
         'What do you have available?',
         'Show me what\'s in stock',
-        'Do you have any products?'
+        'Do you have any pumps?'
       ];
 
       queries.forEach(query => {
