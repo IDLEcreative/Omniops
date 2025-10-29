@@ -3,6 +3,9 @@ import { redirect } from 'next/navigation';
 import { createClient } from '@/lib/supabase-server';
 import BillingDashboard from '@/components/billing/BillingDashboard';
 
+// Force dynamic rendering since this page uses auth cookies
+export const dynamic = 'force-dynamic';
+
 interface Organization {
   id: string;
   name: string;

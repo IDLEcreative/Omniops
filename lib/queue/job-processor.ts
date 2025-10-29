@@ -30,7 +30,7 @@ import {
  */
 export class JobProcessor {
   private worker: Worker;
-  private redis: any = getRedisClient(); // Using any for BullMQ compatibility with ResilientRedisClient
+  private redis: any; // Using any for BullMQ compatibility with ResilientRedisClient
   private config: JobProcessorConfig;
   private metrics: ProcessingMetrics;
   private isShuttingDown = false;
@@ -45,6 +45,9 @@ export class JobProcessor {
     };
 
     this.metrics = createInitialMetrics();
+
+    // Lazy initialization - only create Redis connection when needed
+    this.redis = getRedisClient();
 
     const workerOptions: WorkerOptions = {
       connection: this.redis,

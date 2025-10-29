@@ -1,7 +1,7 @@
 'use client';
 
 import { memo } from 'react';
-import { List } from 'react-window';
+import { FixedSizeList } from 'react-window';
 import { cn } from '@/lib/utils';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
@@ -65,7 +65,7 @@ export const TrainingDataList = memo(function TrainingDataList({
   onSetActiveTab
 }: TrainingDataListProps) {
   // Row renderer component - only renders visible items for optimal performance
-  const Row = memo(({ index }: { index: number }) => {
+  const Row = memo(({ index, style }: { index: number; style: React.CSSProperties }) => {
     const item = trainingData[index];
     if (!item) return null;
 
@@ -73,7 +73,7 @@ export const TrainingDataList = memo(function TrainingDataList({
     const Icon = config.icon;
 
     return (
-      <div className="group flex items-center justify-between py-2 px-3 border-b hover:bg-muted/50 transition-colors">
+      <div style={style} className="group flex items-center justify-between py-2 px-3 border-b hover:bg-muted/50 transition-colors">
         <div className="flex items-center gap-2 flex-1 min-w-0">
           <Icon className={cn('h-3 w-3 flex-shrink-0', config.color)} />
           <p className="text-sm truncate flex-1">{item.content}</p>
@@ -167,16 +167,16 @@ export const TrainingDataList = memo(function TrainingDataList({
             variant="default"
           />
         ) : (
-          <div>
+          <div className="border rounded-md">
             {/* Virtual scrolling container - renders only visible items */}
-            <List
-              defaultHeight={500}
-              rowCount={trainingData.length}
-              rowHeight={60}
-              style={{ width: '100%' }}
-              className="border rounded-md"
-              rowComponent={Row}
-            />
+            <FixedSizeList
+              height={500}
+              itemCount={trainingData.length}
+              itemSize={80}
+              width="100%"
+            >
+              {Row}
+            </FixedSizeList>
 
             {/* Load More button outside virtual list */}
             {hasMore && (
