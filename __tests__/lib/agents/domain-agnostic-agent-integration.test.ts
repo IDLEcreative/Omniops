@@ -3,7 +3,7 @@
  * Tests for entity formatting and context building
  */
 
-import { DomainAgnosticAgent, BusinessContext } from '@/lib/agents/domain-agnostic-agent';
+import { DomainAgnosticAgent } from '@/lib/agents/domain-agnostic-agent';
 
 // Mock Supabase
 const mockSupabase = {

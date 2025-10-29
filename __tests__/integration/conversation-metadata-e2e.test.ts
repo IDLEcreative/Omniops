@@ -5,9 +5,9 @@
  * Validates Wave 1 (infrastructure) + Wave 2 (integration) implementation.
  */
 
-import { describe, test, expect, beforeEach, afterEach } from '@jest/globals';
+import { describe, test, expect, beforeEach } from '@jest/globals';
 import { ConversationMetadataManager } from '@/lib/chat/conversation-metadata';
-import { ResponseParser, parseAndTrackEntities } from '@/lib/chat/response-parser';
+import { parseAndTrackEntities } from '@/lib/chat/response-parser';
 import { getEnhancedCustomerServicePrompt } from '@/lib/chat/system-prompts';
 
 describe('E2E: Conversation Metadata Flow', () => {
@@ -113,9 +113,9 @@ Here's the [ZF4 Pump](https://example.com/products/zf4):
       const listResponse = `
 Here are the available pumps:
 
-1. [Product Model A](https://example.com/products/model-a)
-2. [Product Model B](https://example.com/products/model-b)
-3. [Product Model C](https://example.com/products/model-c)
+1. [Cifa K35L Mixer Pump](https://example.com/products/k35l)
+2. [Cifa K45L Mixer Pump](https://example.com/products/k45l)
+3. [ZF5 Hydraulic Pump](https://example.com/products/zf5)
       `.trim();
 
       await parseAndTrackEntities(
@@ -126,11 +126,11 @@ Here are the available pumps:
 
       // Verify list was tracked
       const item1 = manager.resolveListItem(1);
-      expect(item1?.name).toBe('Product Model A');
-      expect(item1?.url).toBe('https://example.com/products/model-a');
+      expect(item1?.name).toBe('Cifa K35L Mixer Pump');
+      expect(item1?.url).toBe('https://example.com/products/k35l');
 
       const item2 = manager.resolveListItem(2);
-      expect(item2?.name).toBe('Product Model B');
+      expect(item2?.name).toBe('Cifa K45L Mixer Pump');
 
       // Turn 2: User asks about "item 2"
       manager.incrementTurn();
