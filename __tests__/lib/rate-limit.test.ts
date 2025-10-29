@@ -10,14 +10,11 @@ describe('Rate Limiting', () => {
     // Clear the rate limit map by making multiple requests with old timestamps
     // This ensures tests start with a clean state
     jest.clearAllMocks()
-    
+
     // Mock Date.now for consistent testing
     originalDateNow = Date.now
     currentTime = 1000000
     Date.now = jest.fn(() => currentTime)
-    
-    // Mock Math.random to control cleanup behavior
-    jest.spyOn(Math, 'random').mockReturnValue(0.5) // Won't trigger cleanup
   })
 
   afterEach(() => {
@@ -118,26 +115,24 @@ describe('Rate Limiting', () => {
       expect(result.resetTime).toBe(currentTime + 60000) // Default is 1 minute
     })
 
-    it('should clean up old entries periodically', () => {
-      // Set random to trigger cleanup
-      jest.spyOn(Math, 'random').mockReturnValue(0.005)
-
-      // Create an old entry
+    it('should clean up old entries deterministically', () => {
+      // Create multiple entries to trigger deterministic cleanup
+      // Cleanup threshold is 100 checks
       const oldIdentifier = 'old-entry'
       checkRateLimit(oldIdentifier, 5, 60000)
 
       // Advance time past the window
       currentTime += 70000
 
-      // Create a new entry - this should trigger cleanup
-      const newIdentifier = 'new-entry'
-      const result = checkRateLimit(newIdentifier, 5, 60000)
-      
-      expect(result.allowed).toBe(true)
+      // Make 100 requests to trigger deterministic cleanup
+      for (let i = 0; i < 100; i++) {
+        checkRateLimit(`trigger-${i}`, 5, 60000)
+      }
 
-      // The old entry should now be treated as new when accessed
+      // The old entry should now be cleaned up when accessed (expired)
       const oldResult = checkRateLimit(oldIdentifier, 5, 60000)
       expect(oldResult.remaining).toBe(4) // Should be reset, not continuing from old count
+      expect(oldResult.allowed).toBe(true)
     })
 
     it('should handle edge case of exactly reaching rate limit', () => {
