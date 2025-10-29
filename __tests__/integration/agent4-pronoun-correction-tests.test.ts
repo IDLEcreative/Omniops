@@ -228,11 +228,11 @@ describe('Agent 4: Pronoun & Correction Tests', () => {
 
       try {
         // Turn 1
-        const turn1 = await sendChatMessage('Do you have products?', conversationId, sessionId);
+        const turn1 = await sendChatMessage('Do you sell hydraulic pumps?', conversationId, sessionId);
         conversationId = turn1.conversationId;
         testConversations.push(conversationId);
 
-        const turn1Valid = turn1.response.toLowerCase().includes('product') || turn1.response.toLowerCase().includes('item');
+        const turn1Valid = turn1.response.toLowerCase().includes('pump') || turn1.response.toLowerCase().includes('hydraulic');
         expect(turn1Valid).toBe(true);
 
         await new Promise(resolve => setTimeout(resolve, 1000));
@@ -273,7 +273,7 @@ describe('Agent 4: Pronoun & Correction Tests', () => {
 
       try {
         // Turn 1
-        const turn1 = await sendChatMessage('Show me products under $500', conversationId, sessionId);
+        const turn1 = await sendChatMessage('Show me hydraulic pumps under $500', conversationId, sessionId);
         conversationId = turn1.conversationId;
         testConversations.push(conversationId);
 
@@ -435,7 +435,7 @@ describe('Agent 4: Pronoun & Correction Tests', () => {
 
       try {
         // Turn 1
-        const turn1 = await sendChatMessage('Show me products under $500', conversationId, sessionId);
+        const turn1 = await sendChatMessage('Show me hydraulic pumps under $500', conversationId, sessionId);
         conversationId = turn1.conversationId;
         testConversations.push(conversationId);
 

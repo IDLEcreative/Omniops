@@ -57,7 +57,7 @@ describe('Agent Flow E2E - Tests 11-15', () => {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
-          message: 'Show me products',
+          message: 'Show me hydraulic pumps',
           conversation_id: conversationId,
           session_id: crypto.randomUUID(),
           domain: testDomain,

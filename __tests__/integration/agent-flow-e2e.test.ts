@@ -372,7 +372,7 @@ describe('Complete Agent Flow - E2E', () => {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify({
-            message: 'Show me products and my recent orders',
+            message: 'Show me hydraulic pumps and my recent orders',
             domain: testDomain,
             session_id: 'test-session-' + Date.now()
           })
@@ -381,7 +381,7 @@ describe('Complete Agent Flow - E2E', () => {
         expect(response.ok).toBe(true);
         const data = await response.json();
         const lower = data.message.toLowerCase();
-        expect(lower.includes('pump') || lower.includes('product')).toBe(true);
+        expect(lower.includes('pump') || lower.includes('hydraulic')).toBe(true);
         expect(lower.includes('order') || lower.includes('email')).toBe(true);
 
         console.log('[Test 5 PASSED] Parallel tools handled');

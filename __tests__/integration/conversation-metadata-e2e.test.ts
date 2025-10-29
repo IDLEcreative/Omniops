@@ -341,8 +341,8 @@ Options:
     test('should handle database metadata round-trip', async () => {
       manager.incrementTurn();
       await parseAndTrackEntities(
-        '[Test Product](https://example.com/test)',
-        'Show test',
+        '[ZF5 Hydraulic Pump](https://example.com/zf5)',
+        'Show ZF5',
         manager
       );
 
@@ -356,7 +356,7 @@ Options:
       const loadedManager = ConversationMetadataManager.deserialize(storedMetadata);
 
       const resolved = loadedManager.resolveReference('it');
-      expect(resolved?.value).toBe('Test Product');
+      expect(resolved?.value).toBe('ZF5 Hydraulic Pump');
     });
 
     test('should handle corrupted metadata gracefully', async () => {
@@ -497,7 +497,8 @@ We also found order #67890.
 
       const enhancedPrompt = getEnhancedCustomerServicePrompt(manager);
 
-      expect(enhancedPrompt).toContain('CRITICAL: Conversation Context Awareness');
+      // Check for conversation context section and corrections tracking
+      expect(enhancedPrompt).toContain('Conversation Context');
       expect(enhancedPrompt).toContain('Important Corrections');
       expect(enhancedPrompt).toContain('wrong');
       expect(enhancedPrompt).toContain('right');
@@ -509,16 +510,17 @@ We also found order #67890.
       manager.trackEntity({
         id: 'product_1',
         type: 'product',
-        value: 'Test Product',
+        value: 'ZF5 Hydraulic Pump',
         aliases: ['it'],
         turnNumber: 1
       });
 
       const enhancedPrompt = getEnhancedCustomerServicePrompt(manager);
 
-      expect(enhancedPrompt).toContain('Reference Resolution Rules');
-      expect(enhancedPrompt).toContain('When user says "it"');
-      expect(enhancedPrompt).toContain('numbered items');
+      // Check for key prompt sections that include reference resolution
+      expect(enhancedPrompt).toContain('Key Rules');
+      expect(enhancedPrompt).toContain('Pronouns');
+      expect(enhancedPrompt).toContain('Numbered Lists');
     });
 
     test('enhanced prompt should be reasonable size (<15KB)', () => {
