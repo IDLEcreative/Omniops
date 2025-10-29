@@ -7,7 +7,7 @@ import { z } from 'zod';
 export const BaseSchema = z.object({
   id: z.number(),
   date_created: z.string(),
-  date_modified: z.string(),
+  date_modified: z.string().nullable(), // WooCommerce API can return null for date_modified
 });
 
 export const MetaDataSchema = z.object({

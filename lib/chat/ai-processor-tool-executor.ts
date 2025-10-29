@@ -18,6 +18,7 @@ import {
   executeGetCompletePageDetails,
   executeLookupOrder
 } from './tool-handlers';
+import { executeWooCommerceOperation } from './woocommerce-tool';
 import type { ToolExecutionResult, AIProcessorDependencies } from './ai-processor-types';
 
 /**
@@ -118,6 +119,29 @@ export async function executeToolCallsParallel(
               domain || '',
               { getCommerceProvider: getProviderFn }
             );
+          case 'woocommerce_operations': {
+            // Execute WooCommerce operation and format result as SearchResult
+            const wcResult = await executeWooCommerceOperation(
+              parsedArgs.operation,
+              parsedArgs,
+              domain || ''
+            );
+
+            // Convert WooCommerce result to SearchResult format for consistency
+            const searchResults: SearchResult[] = wcResult.success ? [{
+              url: domain || 'woocommerce',
+              title: `WooCommerce: ${parsedArgs.operation}`,
+              content: wcResult.message,
+              similarity: 1.0,
+              metadata: wcResult.data
+            }] : [];
+
+            return {
+              success: wcResult.success,
+              results: searchResults,
+              source: 'woocommerce-api'
+            };
+          }
           default:
             throw new Error(`Unknown tool: ${toolName}`);
         }

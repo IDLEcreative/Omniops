@@ -5,6 +5,8 @@
  * validation logic, and timeout utilities.
  */
 
+import { WOOCOMMERCE_TOOL } from './woocommerce-tool';
+
 /**
  * OpenAI function calling tool definitions
  */
@@ -112,7 +114,8 @@ export const SEARCH_TOOLS = [
         required: ["pageQuery"]
       }
     }
-  }
+  },
+  WOOCOMMERCE_TOOL
 ];
 
 /**
@@ -138,6 +141,8 @@ export function validateToolArguments(toolName: string, toolArgs: Record<string,
       return ensureString(toolArgs.pageQuery, 'pageQuery');
     case 'lookup_order':
       return ensureString(toolArgs.orderId, 'orderId');
+    case 'woocommerce_operations':
+      return ensureString(toolArgs.operation, 'operation');
     default:
       return null;
   }

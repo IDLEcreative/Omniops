@@ -19,7 +19,7 @@ import {
   searchProducts
 } from './product-operations';
 
-// Order operations
+// Order operations (from modularized directory)
 import {
   checkOrder,
   getShippingInfo,
@@ -27,7 +27,7 @@ import {
   getOrderNotes,
   checkRefundStatus,
   cancelOrder
-} from './order-operations';
+} from './order-operations/index';
 
 // Store configuration operations
 import {
