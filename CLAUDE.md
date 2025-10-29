@@ -589,7 +589,7 @@ Return findings in structured format.
 4. Time savings achieved
 5. Next recommended steps
 
-**Reference**: See TECH_DEBT.md Item 9 completion (Oct 2025) for example of successful agent orchestration with full documentation.
+**Reference**: See [ANALYSIS_TECHNICAL_DEBT_TRACKER.md](docs/04-ANALYSIS/ANALYSIS_TECHNICAL_DEBT_TRACKER.md) Item 9 completion (Oct 2025) for example of successful agent orchestration with full documentation.
 
 ---
 
@@ -707,7 +707,7 @@ npx tsx scripts/tests/test-metadata-tracking.ts     # Test conversation accuracy
 
 # Performance Monitoring & Optimization (Additional Tools)
 # ⚠️ NOTE: Additional NPX tools are available but not documented here.
-# See docs/NPX_TOOLS_GUIDE.md and NPX_SCRIPTS_IMPLEMENTATION.md for complete list.
+# See docs/NPX_TOOLS_GUIDE.md and docs/07-REFERENCE/REFERENCE_NPX_SCRIPTS.md for complete list.
 
 # Dependencies
 npm run check:deps       # Check for dependency issues
@@ -922,7 +922,7 @@ The cleanup system uses CASCADE foreign keys for safe deletion:
 - Removes: scraped pages, embeddings, extractions, cache
 - Preserves: customer configs, credentials, user accounts
 - See `test-database-cleanup.ts` for implementation
-- Full docs: `NPX_SCRIPTS_IMPLEMENTATION.md`
+- Full docs: [REFERENCE_NPX_SCRIPTS.md](docs/07-REFERENCE/REFERENCE_NPX_SCRIPTS.md)
 
 ## Critical Development Guidelines
 
