@@ -114,7 +114,7 @@ export async function checkPrice(
       }
 
       const priceInfo = extractPriceInfo(product);
-      const message = formatPriceMessage(product);
+      const message = formatPriceMessage(product, params);
 
       return {
         success: true,

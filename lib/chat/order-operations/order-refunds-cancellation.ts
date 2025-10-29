@@ -9,6 +9,7 @@ import type {
   RefundInfo,
   CancelOrderInfo
 } from '../woocommerce-tool-types';
+import { getCurrencySymbol } from '../currency-utils';
 
 /**
  * Check refund status for an order

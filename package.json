@@ -3,7 +3,7 @@
   "version": "0.1.0",
   "private": true,
   "scripts": {
-    "dev": "next dev",
+    "dev": "NODE_OPTIONS='--max-old-space-size=4096' next dev",
     "prebuild": "ls -la lib/supabase/ && echo 'Supabase files found'",
     "build": "NODE_OPTIONS='--max-old-space-size=4096' next build",
     "start": "next start",

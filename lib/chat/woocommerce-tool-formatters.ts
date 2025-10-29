@@ -91,7 +91,8 @@ export function extractOrderInfo(order: any): OrderInfo {
 /**
  * Format price information into a human-readable message
  */
-export function formatPriceMessage(product: any): string {
+export function formatPriceMessage(product: any, params?: any): string {
+  const currencySymbol = params ? getCurrencySymbol(params) : '$';
   let message = `${product.name}: ${currencySymbol}${product.price || product.regular_price}`;
   if (product.on_sale && product.sale_price) {
     message += ` (On sale! Was ${currencySymbol}${product.regular_price})`;
