@@ -1,22 +1,21 @@
 /**
  * WooCommerce Cart Operations
- * Provides cart-related information and guidance
+ * Provides cart-related operations with dual mode support:
  *
- * FUTURE ENHANCEMENT: Full Cart API Integration
+ * 1. INFORMATIONAL MODE (default, legacy):
+ *    - Provides "add to cart" URLs for user to click
+ *    - No session management required
+ *    - Works immediately without complex setup
  *
- * To enable direct cart manipulation (without requiring customer clicks):
- * 1. Implement WooCommerce Store API client (separate from REST API v3)
- * 2. Add session management (cart tokens/cookies)
- * 3. Use endpoints:
- *    - POST /wp-json/wc/store/v1/cart/add-item
- *    - GET /wp-json/wc/store/v1/cart
- *    - DELETE /wp-json/wc/store/v1/cart/items/{key}
- *    - PUT /wp-json/wc/store/v1/cart/items/{key}
- * 4. Handle guest vs logged-in users
- * 5. Implement cart persistence
+ * 2. TRANSACTIONAL MODE (Store API):
+ *    - Direct cart manipulation via WooCommerce Store API
+ *    - Session-based persistence
+ *    - Real-time cart totals
+ *    - Requires: WOOCOMMERCE_STORE_API_ENABLED=true
  *
- * Current implementation provides "add to cart" links which work immediately
- * and don't require complex session management infrastructure.
+ * Feature Flag: WOOCOMMERCE_STORE_API_ENABLED
+ * - Set to 'true' to enable transactional mode
+ * - Defaults to informational mode if unset or 'false'
  *
  * Note: WooCommerce REST API v3 does NOT support cart operations.
  * Cart operations require WooCommerce Store API and session management.
@@ -28,13 +27,101 @@ import type {
   CartInfo,
   AddToCartInfo
 } from './woocommerce-tool-types';
+import { getCurrencySymbol } from './currency-utils';
+
+// Import transactional functions (lazy loaded when needed)
+import type { WooCommerceStoreAPI } from '@/lib/woocommerce-store-api';
+
+// Feature flag check
+const USE_STORE_API = process.env.WOOCOMMERCE_STORE_API_ENABLED === 'true';
+
+// ==================== PUBLIC API (MODE-AWARE) ====================
+
+/**
+ * Add to cart (mode-aware)
+ * Automatically switches between informational and transactional modes
+ */
+export async function addToCart(
+  wc: any,
+  params: WooCommerceOperationParams
+): Promise<WooCommerceOperationResult> {
+  if (USE_STORE_API && params.storeAPI) {
+    // Transactional mode (requires Store API client)
+    const { addToCartDirect } = await import('./cart-operations-transactional');
+    return addToCartDirect(params.storeAPI, params);
+  } else {
+    // Informational mode (default)
+    return addToCartInformational(wc, params);
+  }
+}
+
+/**
+ * Get cart (mode-aware)
+ */
+export async function getCart(
+  wc: any,
+  params: WooCommerceOperationParams
+): Promise<WooCommerceOperationResult> {
+  if (USE_STORE_API && params.storeAPI) {
+    const { getCartDirect } = await import('./cart-operations-transactional');
+    return getCartDirect(params.storeAPI, params);
+  } else {
+    return getCartInformational(wc, params);
+  }
+}
+
+/**
+ * Remove from cart (mode-aware)
+ */
+export async function removeFromCart(
+  wc: any,
+  params: WooCommerceOperationParams
+): Promise<WooCommerceOperationResult> {
+  if (USE_STORE_API && params.storeAPI) {
+    const { removeFromCartDirect } = await import('./cart-operations-transactional');
+    return removeFromCartDirect(params.storeAPI, params);
+  } else {
+    return removeFromCartInformational(wc, params);
+  }
+}
+
+/**
+ * Update cart quantity (mode-aware)
+ */
+export async function updateCartQuantity(
+  wc: any,
+  params: WooCommerceOperationParams
+): Promise<WooCommerceOperationResult> {
+  if (USE_STORE_API && params.storeAPI) {
+    const { updateCartQuantityDirect } = await import('./cart-operations-transactional');
+    return updateCartQuantityDirect(params.storeAPI, params);
+  } else {
+    return updateCartQuantityInformational(wc, params);
+  }
+}
+
+/**
+ * Apply coupon to cart (mode-aware)
+ */
+export async function applyCouponToCart(
+  wc: any,
+  params: WooCommerceOperationParams
+): Promise<WooCommerceOperationResult> {
+  if (USE_STORE_API && params.storeAPI) {
+    const { applyCouponToCartDirect } = await import('./cart-operations-transactional');
+    return applyCouponToCartDirect(params.storeAPI, params);
+  } else {
+    return applyCouponToCartInformational(wc, params);
+  }
+}
+
+// ==================== INFORMATIONAL MODE (LEGACY) ====================
 
 /**
  * Add to cart (informational)
  * Provides product details and "add to cart" link for customer to complete action
- * Direct cart manipulation requires WooCommerce Store API integration (future enhancement)
  */
-export async function addToCart(
+async function addToCartInformational(
   wc: any,
   params: WooCommerceOperationParams
 ): Promise<WooCommerceOperationResult> {
@@ -85,15 +172,16 @@ export async function addToCart(
     // Calculate total
     const itemPrice = parseFloat(product.price);
     const itemTotal = itemPrice * quantity;
+    const currencySymbol = getCurrencySymbol(params);
 
     let message = `🛒 Ready to Add to Cart\n\n`;
     message += `Product: ${product.name}\n`;
-    message += `Price: £${product.price} each\n`;
+    message += `Price: ${currencySymbol}${product.price} each\n`;
     message += `Quantity: ${quantity}\n`;
-    message += `Total: £${itemTotal.toFixed(2)}\n\n`;
+    message += `Total: ${currencySymbol}${itemTotal.toFixed(2)}\n\n`;
 
     if (product.on_sale && product.sale_price) {
-      message += `💰 SALE! Regular price: £${product.regular_price}\n\n`;
+      message += `💰 SALE! Regular price: ${currencySymbol}${product.regular_price}\n\n`;
     }
 
     message += `📦 Stock: ${product.stock_quantity !== null ? `${product.stock_quantity} available` : 'In stock'}\n\n`;
@@ -132,7 +220,7 @@ export async function addToCart(
  * Note: Direct cart access requires Store API and session management
  * Current implementation provides guidance to view cart on store
  */
-export async function getCart(
+function getCartInformational(
   wc: any,
   params: WooCommerceOperationParams
 ): Promise<WooCommerceOperationResult> {
@@ -155,7 +243,7 @@ export async function getCart(
  * Remove from cart (informational)
  * Provides guidance for cart management
  */
-export async function removeFromCart(
+function removeFromCartInformational(
   wc: any,
   params: WooCommerceOperationParams
 ): Promise<WooCommerceOperationResult> {
@@ -178,7 +266,7 @@ export async function removeFromCart(
  * Update cart quantity (informational)
  * Provides guidance for quantity updates
  */
-export async function updateCartQuantity(
+function updateCartQuantityInformational(
   wc: any,
   params: WooCommerceOperationParams
 ): Promise<WooCommerceOperationResult> {
@@ -201,7 +289,7 @@ export async function updateCartQuantity(
  * Apply coupon to cart (informational)
  * Validates coupon and provides guidance for application
  */
-export async function applyCouponToCart(
+async function applyCouponToCartInformational(
   wc: any,
   params: WooCommerceOperationParams
 ): Promise<WooCommerceOperationResult> {
@@ -250,17 +338,18 @@ export async function applyCouponToCart(
 
     const domain = params.domain || 'store';
     const cartUrl = `https://${domain}/cart`;
+    const currencySymbol = getCurrencySymbol(params);
 
     let message = `✅ Coupon "${params.couponCode}" is Valid!\n\n`;
 
     if (coupon.discount_type === 'percent') {
       message += `Discount: ${coupon.amount}% off\n`;
     } else {
-      message += `Discount: £${coupon.amount} off\n`;
+      message += `Discount: ${currencySymbol}${coupon.amount} off\n`;
     }
 
     if (coupon.minimum_amount) {
-      message += `Minimum spend: £${coupon.minimum_amount}\n`;
+      message += `Minimum spend: ${currencySymbol}${coupon.minimum_amount}\n`;
     }
 
     if (coupon.date_expires) {

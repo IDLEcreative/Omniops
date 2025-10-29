@@ -20,6 +20,7 @@ export async function getCustomerInsights(
   params: WooCommerceOperationParams
 ): Promise<WooCommerceOperationResult> {
   try {
+    const currencySymbol = getCurrencySymbol(params);
     const limit = params.limit || 10;
 
     // Get all customers
@@ -104,16 +105,16 @@ export async function getCustomerInsights(
     message += `👥 Overview:\n`;
     message += `   Total Customers: ${customers.length}\n`;
     message += `   Active Customers: ${topCustomers.length}\n`;
-    message += `   Average Lifetime Value: £${averageLTV.toFixed(2)}\n\n`;
+    message += `   Average Lifetime Value: ${currencySymbol}${averageLTV.toFixed(2)}\n\n`;
 
     if (topCustomers.length > 0) {
       message += `🏆 Top ${topCustomers.length} Customers by Spend:\n\n`;
       topCustomers.forEach((customer, index) => {
         message += `${index + 1}. ${customer.name}\n`;
         message += `   Email: ${customer.email}\n`;
-        message += `   Total Spent: £${customer.totalSpent.toFixed(2)}\n`;
+        message += `   Total Spent: ${currencySymbol}${customer.totalSpent.toFixed(2)}\n`;
         message += `   Orders: ${customer.orderCount}\n`;
-        message += `   Avg Order Value: £${customer.averageOrderValue.toFixed(2)}\n\n`;
+        message += `   Avg Order Value: ${currencySymbol}${customer.averageOrderValue.toFixed(2)}\n\n`;
       });
     } else {
       message += `No customers with completed orders found.\n`;

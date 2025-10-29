@@ -121,6 +121,24 @@ export const WOOCOMMERCE_TOOL = {
         domain: {
           type: "string",
           description: "Store domain for URL generation"
+        },
+        page: {
+          type: "number",
+          description: "Page number for pagination (1-indexed, default: 1)",
+          default: 1,
+          minimum: 1
+        },
+        per_page: {
+          type: "number",
+          description: "Results per page (default: 20, max: 100)",
+          default: 20,
+          minimum: 1,
+          maximum: 100
+        },
+        offset: {
+          type: "number",
+          description: "Number of results to skip (alternative to page-based pagination)",
+          minimum: 0
         }
       },
       required: ["operation"]

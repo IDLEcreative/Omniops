@@ -8,6 +8,7 @@ import type {
   WooCommerceOperationResult,
   ProductVariationInfo
 } from '../woocommerce-tool-types';
+import { getCurrencySymbol } from '../currency-utils';
 
 /**
  * Get product variations
@@ -88,6 +89,8 @@ export async function getProductVariations(
           available: variation.purchasable && variation.stock_status === 'instock'
         };
 
+        const currencySymbol = getCurrencySymbol(params);
+
         let message = `${product.name}\n\n`;
         message += `📦 Variation: `;
         variationInfo.attributes.forEach((attr, idx) => {
@@ -96,9 +99,9 @@ export async function getProductVariations(
         });
         message += `\n\n`;
         message += `SKU: ${variationInfo.sku}\n`;
-        message += `Price: £${variationInfo.price}`;
+        message += `Price: ${currencySymbol}${variationInfo.price}`;
         if (variation.on_sale) {
-          message += ` (regular: £${variationInfo.regularPrice})`;
+          message += ` (regular: ${currencySymbol}${variationInfo.regularPrice})`;
         }
         message += `\n`;
         message += `Stock: ${variationInfo.stockStatus}`;
@@ -142,6 +145,8 @@ export async function getProductVariations(
       message += `❌ Unavailable: ${unavailable.length}\n\n`;
 
       // Show available variations
+      const currencySymbol = getCurrencySymbol(params);
+
       if (available.length > 0) {
         message += `✅ Available Variations:\n\n`;
         available.forEach((variation, index) => {
@@ -152,9 +157,9 @@ export async function getProductVariations(
           });
           message += `\n`;
           message += `   SKU: ${variation.sku}\n`;
-          message += `   Price: £${variation.price}`;
+          message += `   Price: ${currencySymbol}${variation.price}`;
           if (variation.salePrice && parseFloat(variation.salePrice) < parseFloat(variation.regularPrice)) {
-            message += ` (was £${variation.regularPrice})`;
+            message += ` (was ${currencySymbol}${variation.regularPrice})`;
           }
           message += `\n`;
           if (variation.stockQuantity !== null) {

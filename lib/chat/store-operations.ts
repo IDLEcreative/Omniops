@@ -5,6 +5,7 @@
  */
 
 import { getDynamicWooCommerceClient } from '@/lib/woocommerce-dynamic';
+import { getCurrencySymbol } from './currency-utils';
 import type {
   WooCommerceOperationParams,
   WooCommerceOperationResult,
@@ -21,6 +22,7 @@ export async function validateCoupon(
   wc: any,
   params: WooCommerceOperationParams
 ): Promise<WooCommerceOperationResult> {
+  const currencySymbol = getCurrencySymbol(params);
   if (!params.couponCode) {
     return {
       success: false,
@@ -61,9 +63,9 @@ export async function validateCoupon(
       if (couponInfo.discountType === 'percent') {
         discountText = `${couponInfo.amount}% off`;
       } else if (couponInfo.discountType === 'fixed_cart') {
-        discountText = `£${couponInfo.amount} off your order`;
+        discountText = `${currencySymbol}${couponInfo.amount} off your order`;
       } else if (couponInfo.discountType === 'fixed_product') {
-        discountText = `£${couponInfo.amount} off per product`;
+        discountText = `${currencySymbol}${couponInfo.amount} off per product`;
       }
 
       // Build status message
@@ -93,11 +95,11 @@ export async function validateCoupon(
       message += `💰 Discount: ${discountText}\n`;
 
       if (couponInfo.minimumAmount && parseFloat(couponInfo.minimumAmount) > 0) {
-        message += `📌 Minimum spend: £${couponInfo.minimumAmount}\n`;
+        message += `📌 Minimum spend: ${currencySymbol}${couponInfo.minimumAmount}\n`;
       }
 
       if (couponInfo.maximumAmount && parseFloat(couponInfo.maximumAmount) > 0) {
-        message += `📌 Maximum discount: £${couponInfo.maximumAmount}\n`;
+        message += `📌 Maximum discount: ${currencySymbol}${couponInfo.maximumAmount}\n`;
       }
 
       if (expiryDate) {
@@ -242,6 +244,7 @@ export async function getShippingMethods(
   params: WooCommerceOperationParams
 ): Promise<WooCommerceOperationResult> {
   try {
+    const currencySymbol = getCurrencySymbol(params);
     // Get shipping zones
     const zones = await wc.get('shipping/zones');
 
@@ -330,14 +333,14 @@ export async function getShippingMethods(
 
             // Show cost if available
             if (method.settings?.cost?.value) {
-              message += `     Cost: £${method.settings.cost.value}\n`;
+              message += `     Cost: ${currencySymbol}${method.settings.cost.value}\n`;
             } else if (method.method_id === 'free_shipping') {
               message += `     Cost: FREE\n`;
             }
 
             // Show minimum order if applicable
             if (method.settings?.min_amount?.value) {
-              message += `     Min Order: £${method.settings.min_amount.value}\n`;
+              message += `     Min Order: ${currencySymbol}${method.settings.min_amount.value}\n`;
             }
 
             message += `\n`;

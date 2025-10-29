@@ -1,4 +1,6 @@
 import { WooCommerceAPI } from './woocommerce-api';
+import { WooCommerceStoreAPI } from './woocommerce-store-api';
+import { getCartSessionManager } from './cart-session-manager';
 import { createServiceRoleClient } from '@/lib/supabase-server';
 import { decryptWooCommerceConfig } from '@/lib/encryption';
 
@@ -90,6 +92,59 @@ export async function searchProductsDynamic(domain: string, query: string, limit
   } catch (error) {
     console.error('Error searching products:', error);
     return [];
+  }
+}
+
+/**
+ * Get WooCommerce Store API client with dynamic configuration
+ * Used for cart operations (not admin operations)
+ */
+export async function getDynamicStoreAPIClient(
+  domain: string,
+  userId?: string
+): Promise<WooCommerceStoreAPI | null> {
+  const supabase = await createServiceRoleClient();
+
+  if (!supabase) {
+    return null;
+  }
+
+  // Fetch configuration for this domain
+  const { data: config, error } = await supabase
+    .from('customer_configs')
+    .select('woocommerce_url')
+    .eq('domain', domain)
+    .single();
+
+  if (error || !config || !config.woocommerce_url) {
+    return null;
+  }
+
+  // Get or create session for this user
+  const sessionManager = getCartSessionManager();
+  const guestUserId = userId || sessionManager.generateGuestId();
+  const session = await sessionManager.getSession(guestUserId, domain);
+
+  // Create Store API client with session nonce
+  return new WooCommerceStoreAPI({
+    url: config.woocommerce_url,
+    nonce: session.nonce,
+  });
+}
+
+/**
+ * Check if Store API is available for a domain
+ */
+export async function isStoreAPIAvailable(domain: string): Promise<boolean> {
+  try {
+    const storeAPI = await getDynamicStoreAPIClient(domain);
+    if (!storeAPI) {
+      return false;
+    }
+    return await storeAPI.isAvailable();
+  } catch (error) {
+    console.error('[WooCommerce Store API] Availability check failed:', error);
+    return false;
   }
 }
 

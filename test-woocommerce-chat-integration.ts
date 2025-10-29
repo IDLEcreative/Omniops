@@ -12,6 +12,8 @@
 
 const CHAT_API_URL = 'http://localhost:3000/api/chat';
 const DOMAIN = 'thompsonseparts.co.uk';
+const TIMEOUT_MS = 120000; // 120 seconds (2 minutes) per operation
+const DELAY_BETWEEN_TESTS = 4000; // 4 seconds between tests to avoid rate limiting
 
 interface ChatRequest {
   message: string;
@@ -56,27 +58,49 @@ async function sendChatMessage(message: string): Promise<{ response: ChatRespons
   };
 
   try {
-    const response = await fetch(CHAT_API_URL, {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json'
-      },
-      body: JSON.stringify(request)
-    });
+    // Create AbortController for timeout
+    const controller = new AbortController();
+    const timeoutId = setTimeout(() => controller.abort(), TIMEOUT_MS);
 
-    if (!response.ok) {
-      throw new Error(`HTTP ${response.status}: ${response.statusText}`);
-    }
+    try {
+      const response = await fetch(CHAT_API_URL, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json'
+        },
+        body: JSON.stringify(request),
+        signal: controller.signal
+      });
 
-    const data = await response.json();
+      clearTimeout(timeoutId);
+
+      if (!response.ok) {
+        throw new Error(`HTTP ${response.status}: ${response.statusText}`);
+      }
+
+      const data = await response.json();
 
     // Update conversation ID for subsequent messages
     if (data.conversation_id) {
       conversationId = data.conversation_id;
     }
 
-    const duration = Date.now() - startTime;
-    return { response: data, duration };
+      const duration = Date.now() - startTime;
+      return { response: data, duration };
+    } catch (fetchError) {
+      clearTimeout(timeoutId);
+      const duration = Date.now() - startTime;
+
+      // Handle AbortError specifically
+      if (fetchError instanceof Error && fetchError.name === 'AbortError') {
+        throw {
+          error: new Error(`Request timeout after ${TIMEOUT_MS/1000} seconds`),
+          duration
+        };
+      }
+
+      throw { error: fetchError, duration };
+    }
   } catch (error) {
     const duration = Date.now() - startTime;
     throw { error, duration };
@@ -136,7 +160,7 @@ async function testOperation(
     };
   } catch (err: any) {
     const duration = err.duration || 0;
-    const errorMsg = err.error?.message || String(err);
+    const errorMsg = err.error?.message || err.message || JSON.stringify(err) || String(err);
 
     console.log(`❌ FAIL (${duration}ms): ${errorMsg}`);
 
@@ -176,7 +200,7 @@ async function runTests() {
     'How many units of A4VTG90 do you have in stock?'
   ));
 
-  await new Promise(resolve => setTimeout(resolve, 2000)); // Rate limit delay
+  await new Promise(resolve => setTimeout(resolve, DELAY_BETWEEN_TESTS)); // Rate limit delay
 
   // Test 2: Check Stock Status
   results.push(await testOperation(
@@ -185,7 +209,7 @@ async function runTests() {
     'Is the A4VTG71 pump in stock?'
   ));
 
-  await new Promise(resolve => setTimeout(resolve, 2000));
+  await new Promise(resolve => setTimeout(resolve, DELAY_BETWEEN_TESTS));
 
   // Test 3: Get Product Details
   results.push(await testOperation(
@@ -194,7 +218,7 @@ async function runTests() {
     'Can you give me full details on product SKU A4VTG90?'
   ));
 
-  await new Promise(resolve => setTimeout(resolve, 2000));
+  await new Promise(resolve => setTimeout(resolve, DELAY_BETWEEN_TESTS));
 
   // Test 4: Check Price
   results.push(await testOperation(
@@ -203,7 +227,7 @@ async function runTests() {
     'What is the price of A4VTG90?'
   ));
 
-  await new Promise(resolve => setTimeout(resolve, 2000));
+  await new Promise(resolve => setTimeout(resolve, DELAY_BETWEEN_TESTS));
 
   // Test 5: Search Products
   results.push(await testOperation(
@@ -212,7 +236,7 @@ async function runTests() {
     'Show me all hydraulic pumps under £500'
   ));
 
-  await new Promise(resolve => setTimeout(resolve, 2000));
+  await new Promise(resolve => setTimeout(resolve, DELAY_BETWEEN_TESTS));
 
   // Test 6: Get Product Categories
   results.push(await testOperation(
@@ -221,7 +245,7 @@ async function runTests() {
     'What product categories do you have?'
   ));
 
-  await new Promise(resolve => setTimeout(resolve, 2000));
+  await new Promise(resolve => setTimeout(resolve, DELAY_BETWEEN_TESTS));
 
   // Test 7: Get Product Variations
   results.push(await testOperation(
@@ -230,7 +254,7 @@ async function runTests() {
     'What variations are available for product A4VTG90?'
   ));
 
-  await new Promise(resolve => setTimeout(resolve, 2000));
+  await new Promise(resolve => setTimeout(resolve, DELAY_BETWEEN_TESTS));
 
   // ========================================================================
   // CATEGORY 2: ORDER OPERATIONS
@@ -245,7 +269,7 @@ async function runTests() {
     'What is the status of order #1234?'
   ));
 
-  await new Promise(resolve => setTimeout(resolve, 2000));
+  await new Promise(resolve => setTimeout(resolve, DELAY_BETWEEN_TESTS));
 
   // Test 9: Check Order Status (by email)
   results.push(await testOperation(
@@ -254,7 +278,7 @@ async function runTests() {
     'Can you look up orders for test@example.com?'
   ));
 
-  await new Promise(resolve => setTimeout(resolve, 2000));
+  await new Promise(resolve => setTimeout(resolve, DELAY_BETWEEN_TESTS));
 
   // Test 10: Get Customer Order History
   results.push(await testOperation(
@@ -263,7 +287,7 @@ async function runTests() {
     'Show me all orders for customer@example.com in the last 30 days'
   ));
 
-  await new Promise(resolve => setTimeout(resolve, 2000));
+  await new Promise(resolve => setTimeout(resolve, DELAY_BETWEEN_TESTS));
 
   // Test 11: Get Order Notes
   results.push(await testOperation(
@@ -272,7 +296,7 @@ async function runTests() {
     'What are the notes on order #1234?'
   ));
 
-  await new Promise(resolve => setTimeout(resolve, 2000));
+  await new Promise(resolve => setTimeout(resolve, DELAY_BETWEEN_TESTS));
 
   // Test 12: Check Refund Status
   results.push(await testOperation(
@@ -281,7 +305,7 @@ async function runTests() {
     'Has order #1234 been refunded?'
   ));
 
-  await new Promise(resolve => setTimeout(resolve, 2000));
+  await new Promise(resolve => setTimeout(resolve, DELAY_BETWEEN_TESTS));
 
   // ========================================================================
   // CATEGORY 3: CART & COUPON OPERATIONS
@@ -296,7 +320,7 @@ async function runTests() {
     'I want to add 2 units of A4VTG90 to my cart'
   ));
 
-  await new Promise(resolve => setTimeout(resolve, 2000));
+  await new Promise(resolve => setTimeout(resolve, DELAY_BETWEEN_TESTS));
 
   // Test 14: Get Cart
   results.push(await testOperation(
@@ -305,7 +329,7 @@ async function runTests() {
     'Show me my shopping cart'
   ));
 
-  await new Promise(resolve => setTimeout(resolve, 2000));
+  await new Promise(resolve => setTimeout(resolve, DELAY_BETWEEN_TESTS));
 
   // Test 15: Validate Coupon
   results.push(await testOperation(
@@ -314,7 +338,7 @@ async function runTests() {
     'Is coupon code SAVE10 valid?'
   ));
 
-  await new Promise(resolve => setTimeout(resolve, 2000));
+  await new Promise(resolve => setTimeout(resolve, DELAY_BETWEEN_TESTS));
 
   // Test 16: Apply Coupon
   results.push(await testOperation(
@@ -323,7 +347,7 @@ async function runTests() {
     'How do I apply coupon SAVE10 to my order?'
   ));
 
-  await new Promise(resolve => setTimeout(resolve, 2000));
+  await new Promise(resolve => setTimeout(resolve, DELAY_BETWEEN_TESTS));
 
   // ========================================================================
   // CATEGORY 4: STORE OPERATIONS
@@ -338,7 +362,7 @@ async function runTests() {
     'What shipping options do you offer to the UK?'
   ));
 
-  await new Promise(resolve => setTimeout(resolve, 2000));
+  await new Promise(resolve => setTimeout(resolve, DELAY_BETWEEN_TESTS));
 
   // Test 18: Get Payment Methods
   results.push(await testOperation(
@@ -347,7 +371,7 @@ async function runTests() {
     'What payment methods do you accept?'
   ));
 
-  await new Promise(resolve => setTimeout(resolve, 2000));
+  await new Promise(resolve => setTimeout(resolve, DELAY_BETWEEN_TESTS));
 
   // Test 19: Get Product Reviews
   results.push(await testOperation(
@@ -356,7 +380,7 @@ async function runTests() {
     'What do customers say about A4VTG90?'
   ));
 
-  await new Promise(resolve => setTimeout(resolve, 2000));
+  await new Promise(resolve => setTimeout(resolve, DELAY_BETWEEN_TESTS));
 
   // ========================================================================
   // SUMMARY

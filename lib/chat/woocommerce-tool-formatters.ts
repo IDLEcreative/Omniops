@@ -4,6 +4,7 @@
  */
 
 import type { StockInfo, OrderInfo, OrderItem, PriceInfo } from './woocommerce-tool-types';
+import { getCurrencySymbol } from './currency-utils';
 
 /**
  * Format stock information into a human-readable message
@@ -91,9 +92,9 @@ export function extractOrderInfo(order: any): OrderInfo {
  * Format price information into a human-readable message
  */
 export function formatPriceMessage(product: any): string {
-  let message = `${product.name}: £${product.price || product.regular_price}`;
+  let message = `${product.name}: ${currencySymbol}${product.price || product.regular_price}`;
   if (product.on_sale && product.sale_price) {
-    message += ` (On sale! Was £${product.regular_price})`;
+    message += ` (On sale! Was ${currencySymbol}${product.regular_price})`;
   }
   return message;
 }

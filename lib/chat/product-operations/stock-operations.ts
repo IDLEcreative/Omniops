@@ -76,6 +76,7 @@ export async function getStockQuantity(
   wc: any,
   params: WooCommerceOperationParams
 ): Promise<WooCommerceOperationResult> {
+  const currencySymbol = getCurrencySymbol(params);
   if (!params.productId) {
     return {
       success: false,
@@ -126,9 +127,9 @@ export async function getStockQuantity(
 
       // Add pricing info
       if (product.price) {
-        message += `Price: £${product.price}`;
+        message += `Price: ${currencySymbol}${product.price}`;
         if (product.on_sale && product.sale_price) {
-          message += ` (regular: £${product.regular_price})`;
+          message += ` (regular: ${currencySymbol}${product.regular_price})`;
         }
       }
 
@@ -164,6 +165,7 @@ export async function getLowStockProducts(
   params: WooCommerceOperationParams
 ): Promise<WooCommerceOperationResult> {
   try {
+    const currencySymbol = getCurrencySymbol(params);
     const threshold = params.threshold || 5;
 
     // Query parameters
@@ -224,7 +226,7 @@ export async function getLowStockProducts(
         message += `${index + 1}. ${product.name}\n`;
         message += `   SKU: ${product.sku}\n`;
         message += `   Stock: ${product.stock_quantity} units\n`;
-        message += `   Price: £${product.price}\n`;
+        message += `   Price: ${currencySymbol}${product.price}\n`;
         if (product.categories && product.categories.length > 0) {
           message += `   Category: ${product.categories[0].name}\n`;
         }
@@ -238,7 +240,7 @@ export async function getLowStockProducts(
         message += `${index + 1}. ${product.name}\n`;
         message += `   SKU: ${product.sku}\n`;
         message += `   Stock: ${product.stock_quantity} units\n`;
-        message += `   Price: £${product.price}\n`;
+        message += `   Price: ${currencySymbol}${product.price}\n`;
         if (product.categories && product.categories.length > 0) {
           message += `   Category: ${product.categories[0].name}\n`;
         }

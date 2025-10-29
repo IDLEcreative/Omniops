@@ -9,6 +9,8 @@ import type {
   CategoryInfo,
   SearchProductsInfo
 } from '../woocommerce-tool-types';
+import { calculatePagination, formatPaginationMessage, offsetToPage } from '../pagination-utils';
+import { getCurrencySymbol, formatPriceRange } from '../currency-utils';
 
 /**
  * Get product categories
@@ -19,9 +21,19 @@ export async function getProductCategories(
   params: WooCommerceOperationParams
 ): Promise<WooCommerceOperationResult> {
   try {
+    // Handle pagination parameters
+    let page = params.page || 1;
+    const perPage = params.per_page || 100; // Default to 100 for categories
+
+    // If offset is provided, convert to page number
+    if (params.offset !== undefined) {
+      page = offsetToPage(params.offset, perPage);
+    }
+
     // Build query parameters
     const queryParams: any = {
-      per_page: 100, // Get all categories
+      per_page: Math.min(perPage, 100), // Cap at 100 per WooCommerce API limits
+      page: page,
       hide_empty: false // Include categories with no products
     };
 
@@ -75,8 +87,15 @@ export async function getProductCategories(
         count: cat.count
       }));
 
+      // Estimate total for pagination (if we got full page, there may be more)
+      const estimatedTotal = categories.length < perPage
+        ? (page - 1) * perPage + categories.length
+        : page * perPage + perPage;
+
+      const pagination = calculatePagination(page, perPage, estimatedTotal);
+
       // Format message with category list
-      let message = `Found ${categoryList.length} categories:\n\n`;
+      let message = `Found ${categoryList.length} categories on this page:\n\n`;
 
       // Group by top-level categories
       const topLevel = categoryList.filter(c => c.parent === 0);
@@ -101,18 +120,25 @@ export async function getProductCategories(
         });
       }
 
+      // Add pagination message
+      message += formatPaginationMessage(pagination);
+
       return {
         success: true,
         data: categoryList,
-        message
+        message,
+        pagination
       };
     } else {
+      const pagination = calculatePagination(page, perPage, 0);
+
       return {
         success: true,
         data: [],
         message: params.parentCategory !== undefined
           ? `No subcategories found for parent category ${params.parentCategory}`
-          : "No categories found"
+          : "No categories found",
+        pagination
       };
     }
   } catch (error) {
@@ -135,8 +161,18 @@ export async function searchProducts(
   params: WooCommerceOperationParams
 ): Promise<WooCommerceOperationResult> {
   try {
+    // Handle pagination parameters
+    let page = params.page || 1;
+    const perPage = params.per_page || params.limit || 20;
+
+    // If offset is provided, convert to page number
+    if (params.offset !== undefined) {
+      page = offsetToPage(params.offset, perPage);
+    }
+
     const queryParams: any = {
-      per_page: params.limit || 20,
+      per_page: Math.min(perPage, 100), // Cap at 100 per WooCommerce API limits
+      page: page,
       orderby: params.orderby || 'title', // Valid WooCommerce API values: 'date', 'id', 'title', 'price', 'popularity', 'rating'
       order: 'desc'
     };
@@ -173,8 +209,11 @@ export async function searchProducts(
       let message = "No products found";
       if (params.query) message += ` matching "${params.query}"`;
       if (params.minPrice || params.maxPrice) {
-        message += ` in price range £${params.minPrice || 0}-£${params.maxPrice || '∞'}`;
+        message += ` in price range ${formatPriceRange(params.minPrice, params.maxPrice, params)}`;
       }
+
+      // Calculate pagination even for empty results
+      const pagination = calculatePagination(page, perPage, 0);
 
       return {
         success: true,
@@ -188,23 +227,38 @@ export async function searchProducts(
             categoryId: params.categoryId
           }
         },
-        message
+        message,
+        pagination
       };
     }
+
+    // WooCommerce REST API returns total count in response headers
+    // We'll estimate total based on current page results
+    // Note: Full total requires accessing response headers, which may not be available
+    const totalResults = products.length;
+    const estimatedTotal = page === 1 && products.length < perPage
+      ? products.length
+      : page * perPage + (products.length === perPage ? perPage : 0);
+
+    // Calculate pagination metadata
+    const pagination = calculatePagination(page, perPage, estimatedTotal);
 
     // Build formatted message
     let message = `🔍 Search Results`;
     if (params.query) message += ` for "${params.query}"`;
-    message += ` (${products.length} products)\n\n`;
+    message += ` (${products.length} products on this page)\n\n`;
+
+    const currencySymbol = getCurrencySymbol(params);
 
     products.slice(0, 10).forEach((product: any, index: number) => {
-      message += `${index + 1}. ${product.name}\n`;
+      const displayIndex = (page - 1) * perPage + index + 1;
+      message += `${displayIndex}. ${product.name}\n`;
 
       // Price display
       if (product.on_sale && product.sale_price) {
-        message += `   Price: ~~£${product.regular_price}~~ £${product.sale_price} (SALE!)\n`;
+        message += `   Price: ~~${currencySymbol}${product.regular_price}~~ ${currencySymbol}${product.sale_price} (SALE!)\n`;
       } else {
-        message += `   Price: £${product.price}\n`;
+        message += `   Price: ${currencySymbol}${product.price}\n`;
       }
 
       // Stock status
@@ -240,7 +294,7 @@ export async function searchProducts(
     // Add filter summary if filters were used
     const filterParts = [];
     if (params.minPrice !== undefined || params.maxPrice !== undefined) {
-      filterParts.push(`Price: £${params.minPrice || 0}-£${params.maxPrice || '∞'}`);
+      filterParts.push(`Price: ${formatPriceRange(params.minPrice, params.maxPrice, params)}`);
     }
     if (params.categoryId) {
       filterParts.push(`Category: ${params.categoryId}`);
@@ -248,6 +302,9 @@ export async function searchProducts(
     if (filterParts.length > 0) {
       message += `\n📊 Filters applied: ${filterParts.join(', ')}`;
     }
+
+    // Add pagination message
+    message += formatPaginationMessage(pagination);
 
     const searchData: SearchProductsInfo = {
       products: products.map((p: any) => ({
@@ -277,7 +334,8 @@ export async function searchProducts(
     return {
       success: true,
       data: searchData,
-      message
+      message,
+      pagination
     };
   } catch (error) {
     console.error('[WooCommerce Agent] Search products error:', error);

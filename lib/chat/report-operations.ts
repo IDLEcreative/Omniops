@@ -5,6 +5,7 @@
  */
 
 import { getDynamicWooCommerceClient } from '@/lib/woocommerce-dynamic';
+import { getCurrencySymbol } from './currency-utils';
 import type {
   WooCommerceOperationParams,
   WooCommerceOperationResult,
@@ -21,6 +22,7 @@ export async function getSalesReport(
   params: WooCommerceOperationParams
 ): Promise<WooCommerceOperationResult> {
   try {
+    const currencySymbol = getCurrencySymbol(params);
     const period = params.period || 'week';
 
     // Calculate date range based on period
@@ -114,16 +116,16 @@ export async function getSalesReport(
     message += `📅 Period: ${startDate.toLocaleDateString()} - ${endDate.toLocaleDateString()}\n\n`;
 
     message += `💰 Revenue Summary:\n`;
-    message += `   Total Revenue: £${totalRevenue.toFixed(2)}\n`;
+    message += `   Total Revenue: ${currencySymbol}${totalRevenue.toFixed(2)}\n`;
     message += `   Total Orders: ${totalOrders}\n`;
-    message += `   Average Order Value: £${averageOrderValue.toFixed(2)}\n\n`;
+    message += `   Average Order Value: ${currencySymbol}${averageOrderValue.toFixed(2)}\n\n`;
 
     if (topProducts.length > 0) {
       message += `🏆 Top ${topProducts.length} Products by Revenue:\n\n`;
       topProducts.forEach((product, index) => {
         message += `${index + 1}. ${product.productName}\n`;
         message += `   Units Sold: ${product.quantitySold}\n`;
-        message += `   Revenue: £${product.revenue.toFixed(2)}\n\n`;
+        message += `   Revenue: ${currencySymbol}${product.revenue.toFixed(2)}\n\n`;
       });
     }
 

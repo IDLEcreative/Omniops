@@ -132,29 +132,38 @@ export async function executeWooCommerceOperation(
     // Fetch currency for this domain (cached for 24 hours)
     const currency = await getCurrency(wc, domain);
 
+    // Inject currency into params for all operations
+    const enrichedParams = {
+      ...params,
+      currency: {
+        code: currency.code,
+        symbol: currency.symbol,
+        name: currency.name
+      }
+    };
+
     // Route to appropriate operation handler
-    // Pass currency to operations that need it
     let result: WooCommerceOperationResult;
 
     switch (operation) {
       case "check_stock":
-        result = await checkStock(wc, params);
+        result = await checkStock(wc, enrichedParams);
         break;
 
       case "get_stock_quantity":
-        result = await getStockQuantity(wc, params);
+        result = await getStockQuantity(wc, enrichedParams);
         break;
 
       case "search_products":
-        result = await searchProducts(wc, params);
+        result = await searchProducts(wc, enrichedParams);
         break;
 
       case "get_product_details":
-        result = await getProductDetails(wc, params);
+        result = await getProductDetails(wc, enrichedParams);
         break;
 
       case "check_order":
-        result = await checkOrder(wc, params);
+        result = await checkOrder(wc, enrichedParams);
         break;
 
       case "get_shipping_info":
@@ -162,79 +171,79 @@ export async function executeWooCommerceOperation(
         break;
 
       case "get_shipping_methods":
-        result = await getShippingMethods(wc, params);
+        result = await getShippingMethods(wc, enrichedParams);
         break;
 
       case "get_payment_methods":
-        result = await getPaymentMethods(wc, params);
+        result = await getPaymentMethods(wc, enrichedParams);
         break;
 
       case "check_price":
-        result = await checkPrice(wc, params);
+        result = await checkPrice(wc, enrichedParams);
         break;
 
       case "get_product_variations":
-        result = await getProductVariations(wc, params);
+        result = await getProductVariations(wc, enrichedParams);
         break;
 
       case "get_product_categories":
-        result = await getProductCategories(wc, params);
+        result = await getProductCategories(wc, enrichedParams);
         break;
 
       case "get_product_reviews":
-        result = await getProductReviews(wc, params);
+        result = await getProductReviews(wc, enrichedParams);
         break;
 
       case "get_low_stock_products":
-        result = await getLowStockProducts(wc, params);
+        result = await getLowStockProducts(wc, enrichedParams);
         break;
 
       case "validate_coupon":
-        result = await validateCoupon(wc, params);
+        result = await validateCoupon(wc, enrichedParams);
         break;
 
       case "check_refund_status":
-        result = await checkRefundStatus(wc, params);
+        result = await checkRefundStatus(wc, enrichedParams);
         break;
 
       case "cancel_order":
-        result = await cancelOrder(wc, params);
+        result = await cancelOrder(wc, enrichedParams);
         break;
 
       case "get_customer_orders":
-        result = await getCustomerOrders(wc, params);
+        result = await getCustomerOrders(wc, enrichedParams);
         break;
 
       case "get_order_notes":
-        result = await getOrderNotes(wc, params);
+        result = await getOrderNotes(wc, enrichedParams);
         break;
 
       case "get_customer_insights":
-        result = await getCustomerInsights(wc, params);
+        result = await getCustomerInsights(wc, enrichedParams);
         break;
 
       case "get_sales_report":
-        result = await getSalesReport(wc, params);
+        result = await getSalesReport(wc, enrichedParams);
         break;
 
       case "add_to_cart":
-        result = await addToCart(wc, params);
+        result = await addToCart(wc, enrichedParams);
         break;
 
       case "get_cart":
-        result = await getCart(wc, params);
+        result = await getCart(wc, enrichedParams);
         break;
 
       case "remove_from_cart":
-        result = await removeFromCart(wc, params);
+        result = await removeFromCart(wc, enrichedParams);
         break;
 
       case "update_cart_quantity":
-        result = await updateCartQuantity(wc, params);
+        result = await updateCartQuantity(wc, enrichedParams);
         break;
 
       case "apply_coupon_to_cart":
-        result = await applyCouponToCart(wc, params);
+        result = await applyCouponToCart(wc, enrichedParams);
         break;
 
       default:

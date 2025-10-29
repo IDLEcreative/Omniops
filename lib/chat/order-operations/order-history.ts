@@ -9,6 +9,8 @@ import type {
   OrderNoteInfo
 } from '../woocommerce-tool-types';
 import { extractOrderInfo } from '../woocommerce-tool-formatters';
+import { calculatePagination, formatPaginationMessage, offsetToPage } from '../pagination-utils';
+import { getCurrencySymbol } from '../currency-utils';
 
 /**
  * Get customer order history
@@ -19,6 +21,7 @@ export async function getCustomerOrders(
   wc: any,
   params: WooCommerceOperationParams
 ): Promise<WooCommerceOperationResult> {
+  const currencySymbol = getCurrencySymbol(params);
   if (!params.email) {
     return {
       success: false,
@@ -28,9 +31,19 @@ export async function getCustomerOrders(
   }
 
   try {
+    // Handle pagination parameters
+    let page = params.page || 1;
+    const perPage = params.per_page || params.limit || 20; // Default to 20 for orders
+
+    // If offset is provided, convert to page number
+    if (params.offset !== undefined) {
+      page = offsetToPage(params.offset, perPage);
+    }
+
     // Build query parameters
     const queryParams: any = {
-      per_page: params.limit || 10,
+      per_page: Math.min(perPage, 100), // Cap at 100 per WooCommerce API limits
+      page: page,
       orderby: 'date',
       order: 'desc'
     };
@@ -59,6 +72,13 @@ export async function getCustomerOrders(
       // Extract order information
       const orderList = orders.map((order: any) => extractOrderInfo(order));
 
+      // Estimate total for pagination
+      const estimatedTotal = orders.length < perPage
+        ? (page - 1) * perPage + orders.length
+        : page * perPage + perPage;
+
+      const pagination = calculatePagination(page, perPage, estimatedTotal);
+
       // Calculate summary statistics
       const totalOrders = orderList.length;
       const totalSpent = orderList.reduce((sum, o) => sum + parseFloat(o.total), 0);
@@ -75,8 +95,8 @@ export async function getCustomerOrders(
 
       message += `📊 Summary:\n`;
       message += `   Total Orders: ${totalOrders}\n`;
-      message += `   Total Spent: £${totalSpent.toFixed(2)}\n`;
-      message += `   Average Order: £${averageOrderValue.toFixed(2)}\n\n`;
+      message += `   Total Spent: ${currencySymbol}${totalSpent.toFixed(2)}\n`;
+      message += `   Average Order: ${currencySymbol}${averageOrderValue.toFixed(2)}\n\n`;
 
       // Show status breakdown
       message += `📈 Status Breakdown:\n`;
@@ -101,7 +121,7 @@ export async function getCustomerOrders(
 
         message += `${index + 1}. Order #${order.number} ${statusEmoji}\n`;
         message += `   Date: ${new Date(order.date).toLocaleDateString()}\n`;
-        message += `   Total: £${parseFloat(order.total).toFixed(2)}\n`;
+        message += `   Total: ${currencySymbol}${parseFloat(order.total).toFixed(2)}\n`;
         message += `   Status: ${order.status}\n`;
 
         // Show items (limit to 3)
@@ -128,9 +148,8 @@ export async function getCustomerOrders(
         message += `🔍 Filters applied: ${filters.join(', ')}\n`;
       }
 
-      if (orders.length >= (params.limit || 10)) {
-        message += `\n⚠️ Showing first ${params.limit || 10} orders. There may be more.`;
-      }
+      // Add pagination message
+      message += formatPaginationMessage(pagination);
 
       return {
         success: true,
@@ -143,10 +162,13 @@ export async function getCustomerOrders(
             statusCounts
           }
         },
-        message
+        message,
+        pagination
       };
     } else {
       // No orders found
+      const pagination = calculatePagination(page, perPage, 0);
+
       let message = `No orders found for ${params.email}`;
 
       if (params.status || params.dateFrom || params.dateTo) {
@@ -159,7 +181,8 @@ export async function getCustomerOrders(
       return {
         success: true,
         data: { orders: [], summary: { totalOrders: 0, totalSpent: 0, averageOrderValue: 0, statusCounts: {} } },
-        message
+        message,
+        pagination
       };
     }
   } catch (error) {

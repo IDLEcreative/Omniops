@@ -18,6 +18,7 @@ export async function checkRefundStatus(
   wc: any,
   params: WooCommerceOperationParams
 ): Promise<WooCommerceOperationResult> {
+  const currencySymbol = getCurrencySymbol(params);
   if (!params.orderId) {
     return {
       success: false,
@@ -69,9 +70,9 @@ export async function checkRefundStatus(
 
       // Build message
       let message = `💸 Refund Status for Order #${orderId}\n\n`;
-      message += `Order Total: £${orderTotal.toFixed(2)}\n`;
-      message += `Total Refunded: £${totalRefunded.toFixed(2)}\n`;
-      message += `Remaining: £${remainingAmount.toFixed(2)}\n\n`;
+      message += `Order Total: ${currencySymbol}${orderTotal.toFixed(2)}\n`;
+      message += `Total Refunded: ${currencySymbol}${totalRefunded.toFixed(2)}\n`;
+      message += `Remaining: ${currencySymbol}${remainingAmount.toFixed(2)}\n\n`;
 
       if (totalRefunded >= orderTotal) {
         message += `✅ Order fully refunded\n\n`;
@@ -86,7 +87,7 @@ export async function checkRefundStatus(
         const time = new Date(refund.dateCreated).toLocaleTimeString();
 
         message += `${index + 1}. Refund #${refund.id}\n`;
-        message += `   Amount: £${parseFloat(refund.amount).toFixed(2)}\n`;
+        message += `   Amount: ${currencySymbol}${parseFloat(refund.amount).toFixed(2)}\n`;
         message += `   Date: ${date} at ${time}\n`;
         message += `   Reason: ${refund.reason}\n`;
 
@@ -112,7 +113,7 @@ export async function checkRefundStatus(
       return {
         success: true,
         data: { refunds: [], totalRefunded: 0, orderTotal: parseFloat(order.total) },
-        message: `No refunds found for Order #${orderId}\n\nOrder Total: £${parseFloat(order.total).toFixed(2)}\nRefunded: £0.00\n\n✅ Order has not been refunded`
+        message: `No refunds found for Order #${orderId}\n\nOrder Total: ${currencySymbol}${parseFloat(order.total).toFixed(2)}\nRefunded: ${currencySymbol}0.00\n\n✅ Order has not been refunded`
       };
     }
   } catch (error) {

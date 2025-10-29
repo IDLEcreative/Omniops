@@ -8,16 +8,16 @@
 export {
   checkOrder,
   getShippingInfo
-} from './order-lookup.js';
+} from './order-lookup';
 
 // Order history and notes
 export {
   getCustomerOrders,
   getOrderNotes
-} from './order-history.js';
+} from './order-history';
 
 // Refunds and cancellation
 export {
   checkRefundStatus,
   cancelOrder
-} from './order-refunds-cancellation.js';
+} from './order-refunds-cancellation';
