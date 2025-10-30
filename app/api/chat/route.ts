@@ -245,13 +245,13 @@ export async function POST(
       {
         error: 'Failed to process chat message',
         message: 'An unexpected error occurred. Please try again.',
-        // Include error details in test environment
-        ...(process.env.NODE_ENV === 'test' && {
-          debug: {
-            message: error instanceof Error ? error.message : String(error),
-            stack: error instanceof Error ? error.stack?.split('\n').slice(0, 5) : undefined
-          }
-        })
+        // TEMPORARY: Include error details for debugging production issue
+        // TODO: Remove after fixing staging domain 500 error
+        debug: {
+          message: error instanceof Error ? error.message : String(error),
+          stack: error instanceof Error ? error.stack?.split('\n').slice(0, 5) : undefined,
+          timestamp: new Date().toISOString()
+        }
       },
       { status: 500 }
     );
