@@ -1630,7 +1630,7 @@ redis-cli FLUSHDB
 ## Related Documentation
 
 - [Docker Setup Guide](/docs/00-GETTING-STARTED/SETUP_DOCKER_PRODUCTION.md)
-- [Database Schema Reference](/docs/SUPABASE_SCHEMA.md)
+- [Database Schema Reference](/docs/09-REFERENCE/REFERENCE_DATABASE_SCHEMA.md)
 - [Search Architecture](/docs/SEARCH_ARCHITECTURE.md)
 - [Performance Optimization](/docs/PERFORMANCE_OPTIMIZATION.md)
 - [Hallucination Prevention](/docs/HALLUCINATION_PREVENTION.md)

@@ -55,7 +55,7 @@ This document captures key architectural decisions made during the development o
 - **Neutral:** Learning curve for RLS policies, must follow Supabase best practices
 
 **References:**
-- `SUPABASE_SCHEMA.md` - Complete schema documentation
+- `09-REFERENCE/REFERENCE_DATABASE_SCHEMA.md` - Complete schema documentation
 - `lib/supabase/client.ts` and `lib/supabase/server.ts` - Client implementations
 
 ---
@@ -158,7 +158,7 @@ This document captures key architectural decisions made during the development o
 - **Neutral:** Requires discipline in query design, careful RLS policy management
 
 **References:**
-- `SUPABASE_SCHEMA.md` - RLS policies documented
+- `09-REFERENCE/REFERENCE_DATABASE_SCHEMA.md` - RLS policies documented
 - `lib/config.ts` - Domain-based configuration
 - All API routes include domain-based filtering
 

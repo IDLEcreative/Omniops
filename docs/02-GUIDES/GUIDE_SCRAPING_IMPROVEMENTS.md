@@ -5,15 +5,15 @@
 **Last Updated:** 2025-10-29
 **Verified For:** v0.1.0
 **Dependencies:**
-- [Scraping System README](../02-FEATURES/scraping/README.md) - Performance & Features sections
+- [Scraping System README](../08-FEATURES/scraping/README.md) - Performance & Features sections
 **Estimated Read Time:** <1 minute
 
 ## Purpose
 Redirect file pointing to web scraping improvements documentation now consolidated in main guide under Performance Optimization and Key Features sections.
 
 ## Quick Links
-- [Performance Optimization](../02-FEATURES/scraping/README.md#performance-optimization) - Optimization techniques
-- [Key Features](../02-FEATURES/scraping/README.md#key-features) - Feature improvements
+- [Performance Optimization](../08-FEATURES/scraping/README.md#performance-optimization) - Optimization techniques
+- [Key Features](../08-FEATURES/scraping/README.md#key-features) - Feature improvements
 
 ## Keywords
 redirect, deprecated, scraping improvements, performance optimization, feature enhancements
@@ -24,7 +24,7 @@ redirect, deprecated, scraping improvements, performance optimization, feature e
 
 Please refer to the comprehensive scraping documentation at:
 
-**[docs/02-FEATURES/scraping/README.md](02-FEATURES/scraping/README.md)**
+**[docs/08-FEATURES/scraping/README.md](08-FEATURES/scraping/README.md)**
 
 All improvements are now documented in the main guide under:
 - **Performance Optimization** section

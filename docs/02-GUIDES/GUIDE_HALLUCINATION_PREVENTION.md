@@ -604,9 +604,9 @@ our customer service team.
 - `/__tests__/api/chat/route.test.ts` - Unit tests
 
 ### Documentation
-- `/docs/02-FEATURES/chat-system/README.md` - Main chat system docs
+- `/docs/08-FEATURES/chat-system/README.md` - Main chat system docs
 - `/docs/SEARCH_ARCHITECTURE.md` - Search and embeddings internals
-- `/docs/SUPABASE_SCHEMA.md` - Database schema reference
+- `/docs/09-REFERENCE/REFERENCE_DATABASE_SCHEMA.md` - Database schema reference
 
 ## Version History
 

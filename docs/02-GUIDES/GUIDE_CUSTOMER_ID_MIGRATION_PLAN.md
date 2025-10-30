@@ -674,7 +674,7 @@ describe('Organization Multi-Tenant Isolation', () => {
 
 **Files to update:**
 - `docs/ARCHITECTURE.md`
-- `docs/SUPABASE_SCHEMA.md`
+- `docs/09-REFERENCE/REFERENCE_DATABASE_SCHEMA.md`
 - `docs/AUTHENTICATION_LINKAGE.md`
 - `docs/CUSTOMER_VERIFICATION_SYSTEM.md`
 

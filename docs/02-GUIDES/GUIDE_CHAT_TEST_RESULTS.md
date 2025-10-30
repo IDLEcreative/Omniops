@@ -5,7 +5,7 @@
 **Last Updated:** 2025-10-29
 **Verified For:** v0.1.0
 **Dependencies:**
-- [Chat System Documentation](../02-FEATURES/chat-system/README.md) - Main architecture
+- [Chat System Documentation](../08-FEATURES/chat-system/README.md) - Main architecture
 - [Hallucination Prevention](GUIDE_HALLUCINATION_PREVENTION.md) - Accuracy testing
 **Estimated Read Time:** 10 minutes
 

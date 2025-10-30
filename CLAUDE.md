@@ -174,8 +174,8 @@ This is a General purpose AI-powered customer service chat widget built with Nex
 ## Key Documentation
 
 - **[Search Architecture](docs/01-ARCHITECTURE/ARCHITECTURE_SEARCH_SYSTEM.md)** - CRITICAL: Explains actual search result limits (100-200, NOT 20!), hybrid search behavior, and token usage
-- **[Performance Optimization](docs/07-REFERENCE/REFERENCE_PERFORMANCE_OPTIMIZATION.md)** - Comprehensive optimization guide covering database, API, AI, and frontend performance
-- **[Database Schema](docs/07-REFERENCE/REFERENCE_DATABASE_SCHEMA.md)** - Complete database schema reference with 31 tables, 214 indexes, verified 2025-10-24
+- **[Performance Optimization](docs/09-REFERENCE/REFERENCE_PERFORMANCE_OPTIMIZATION.md)** - Comprehensive optimization guide covering database, API, AI, and frontend performance
+- **[Database Schema](docs/09-REFERENCE/REFERENCE_DATABASE_SCHEMA.md)** - Complete database schema reference with 31 tables, 214 indexes, verified 2025-10-24
 - **[Conversation Accuracy](docs/CONVERSATION_ACCURACY_IMPROVEMENTS.md)** - Metadata tracking system for 86% conversation accuracy
 - **[Hallucination Prevention](docs/HALLUCINATION_PREVENTION.md)** - Anti-hallucination safeguards and testing
 - **[Docker Setup](docs/00-GETTING-STARTED/SETUP_DOCKER_PRODUCTION.md)** - Complete Docker configuration and commands
@@ -470,7 +470,7 @@ Before considering a document "AI-ready", verify:
 
 **Example of a Well-Structured Document:**
 
-See [REFERENCE_DATABASE_SCHEMA.md](docs/07-REFERENCE/REFERENCE_DATABASE_SCHEMA.md) as the gold standard - it includes:
+See [REFERENCE_DATABASE_SCHEMA.md](docs/09-REFERENCE/REFERENCE_DATABASE_SCHEMA.md) as the gold standard - it includes:
 - Clear metadata header
 - Comprehensive TOC
 - Annotated schema definitions
@@ -790,7 +790,7 @@ Return findings in structured format.
 4. Time savings achieved
 5. Next recommended steps
 
-**Reference**: See [ANALYSIS_TECHNICAL_DEBT_TRACKER.md](docs/04-ANALYSIS/ANALYSIS_TECHNICAL_DEBT_TRACKER.md) Item 9 completion (Oct 2025) for example of successful agent orchestration with full documentation.
+**Reference**: See [ANALYSIS_TECHNICAL_DEBT_TRACKER.md](docs/10-ANALYSIS/ANALYSIS_TECHNICAL_DEBT_TRACKER.md) Item 9 completion (Oct 2025) for example of successful agent orchestration with full documentation.
 
 ---
 
@@ -945,7 +945,7 @@ The application follows a service-oriented architecture with clear separation of
 
 ## Database Structure
 
-**📚 Complete Schema Reference: See [REFERENCE_DATABASE_SCHEMA.md](docs/07-REFERENCE/REFERENCE_DATABASE_SCHEMA.md) for authoritative database documentation**
+**📚 Complete Schema Reference: See [REFERENCE_DATABASE_SCHEMA.md](docs/09-REFERENCE/REFERENCE_DATABASE_SCHEMA.md) for authoritative database documentation**
 
 Main tables:
 - `customer_configs`: Customer settings and encrypted credentials
@@ -1123,7 +1123,7 @@ The cleanup system uses CASCADE foreign keys for safe deletion:
 - Removes: scraped pages, embeddings, extractions, cache
 - Preserves: customer configs, credentials, user accounts
 - See `test-database-cleanup.ts` for implementation
-- Full docs: [REFERENCE_NPX_SCRIPTS.md](docs/07-REFERENCE/REFERENCE_NPX_SCRIPTS.md)
+- Full docs: [REFERENCE_NPX_SCRIPTS.md](docs/09-REFERENCE/REFERENCE_NPX_SCRIPTS.md)
 
 ## Critical Development Guidelines
 

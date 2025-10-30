@@ -6,7 +6,7 @@
 **Verified For:** v0.1.0
 **Dependencies:**
 - [Search Architecture](../01-ARCHITECTURE/ARCHITECTURE_SEARCH_SYSTEM.md) - Embedding search system
-- [Chat System Documentation](../02-FEATURES/chat-system/README.md) - Main architecture
+- [Chat System Documentation](../08-FEATURES/chat-system/README.md) - Main architecture
 **Estimated Read Time:** 14 minutes
 
 ## Purpose

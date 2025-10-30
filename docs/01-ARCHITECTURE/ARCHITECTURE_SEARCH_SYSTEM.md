@@ -5,9 +5,9 @@
 **Last Updated:** 2025-10-29
 **Verified For:** v0.1.0
 **Dependencies:**
-- [Performance Optimization](./docs/07-REFERENCE/REFERENCE_PERFORMANCE_OPTIMIZATION.md)
+- [Performance Optimization](../09-REFERENCE/REFERENCE_PERFORMANCE_OPTIMIZATION.md)
 - [Hallucination Prevention](../02-GUIDES/GUIDE_HALLUCINATION_PREVENTION.md)
-- [Database Schema](../SUPABASE_SCHEMA.md)
+- [Database Schema](../09-REFERENCE/REFERENCE_DATABASE_SCHEMA.md)
 **Estimated Read Time:** 15 minutes
 
 ## Purpose
@@ -717,7 +717,7 @@ similarityThreshold: 0.3  // High relevance only
 
 ### Bottleneck Analysis
 
-**From [Performance Optimization](./docs/07-REFERENCE/REFERENCE_PERFORMANCE_OPTIMIZATION.md):**
+**From [Performance Optimization](../09-REFERENCE/REFERENCE_PERFORMANCE_OPTIMIZATION.md):**
 
 ```
 13.7s Simple Query Breakdown:
@@ -915,9 +915,9 @@ ORDER BY mean_exec_time DESC;
 - Indexes: `page_embeddings_vector_idx`, `page_embeddings_domain_idx`
 
 **Documentation:**
-- [Performance Optimization](./docs/07-REFERENCE/REFERENCE_PERFORMANCE_OPTIMIZATION.md) - Response times and costs
+- [Performance Optimization](../09-REFERENCE/REFERENCE_PERFORMANCE_OPTIMIZATION.md) - Response times and costs
 - [Hallucination Prevention](../02-GUIDES/GUIDE_HALLUCINATION_PREVENTION.md) - Quality safeguards
-- [Chat System](../02-FEATURES/chat-system/README.md) - Complete chat architecture
+- [Chat System](../08-FEATURES/chat-system/README.md) - Complete chat architecture
 
 ---
 

@@ -5,16 +5,16 @@
 **Last Updated:** 2025-10-29
 **Verified For:** v0.1.0
 **Dependencies:**
-- [Scraping System README](../02-FEATURES/scraping/README.md) - Operations sections
+- [Scraping System README](../08-FEATURES/scraping/README.md) - Operations sections
 **Estimated Read Time:** <1 minute
 
 ## Purpose
 Redirect file pointing to scraping operations documentation with monitoring, debugging, troubleshooting, and maintenance procedures consolidated in main guide.
 
 ## Quick Links
-- [Monitoring & Debugging](../02-FEATURES/scraping/README.md#monitoring--debugging) - Operational monitoring
-- [Troubleshooting](../02-FEATURES/scraping/README.md#troubleshooting) - Problem resolution
-- [Maintenance](../02-FEATURES/scraping/README.md#maintenance) - Maintenance procedures
+- [Monitoring & Debugging](../08-FEATURES/scraping/README.md#monitoring--debugging) - Operational monitoring
+- [Troubleshooting](../08-FEATURES/scraping/README.md#troubleshooting) - Problem resolution
+- [Maintenance](../08-FEATURES/scraping/README.md#maintenance) - Maintenance procedures
 
 ## Keywords
 redirect, deprecated, scraping operations, monitoring, debugging, maintenance
@@ -25,7 +25,7 @@ redirect, deprecated, scraping operations, monitoring, debugging, maintenance
 
 Please refer to the comprehensive scraping documentation at:
 
-**[docs/02-FEATURES/scraping/README.md](02-FEATURES/scraping/README.md)**
+**[docs/08-FEATURES/scraping/README.md](08-FEATURES/scraping/README.md)**
 
 Operational procedures are now in:
 - **Monitoring & Debugging** section

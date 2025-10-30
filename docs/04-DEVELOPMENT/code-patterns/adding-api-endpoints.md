@@ -1295,5 +1295,5 @@ export async function POST(request: NextRequest) {
 **Maintainer**: Development Team
 **Related Docs**:
 - [Testing Guide](../../04-DEVELOPMENT/testing/testing-guide.md)
-- [Database Schema](../../SUPABASE_SCHEMA.md)
-- [Authentication Patterns](../07-REFERENCE/authentication.md)
+- [Database Schema](../../09-REFERENCE/REFERENCE_DATABASE_SCHEMA.md)
+- [Authentication Patterns](../../09-REFERENCE/authentication.md)

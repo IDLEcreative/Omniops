@@ -850,7 +850,7 @@ describe('User Preferences RLS', () => {
 
 ### Step 10: Document the Table
 
-**Update SUPABASE_SCHEMA.md:**
+**Update 09-REFERENCE/REFERENCE_DATABASE_SCHEMA.md:**
 
 ```markdown
 #### `user_preferences`
@@ -1751,7 +1751,7 @@ When adding a new table, ensure you've completed:
 - [ ] Generated TypeScript types
 - [ ] Created service layer for data access
 - [ ] Written unit tests for service layer
-- [ ] Updated SUPABASE_SCHEMA.md documentation
+- [ ] Updated 09-REFERENCE/REFERENCE_DATABASE_SCHEMA.md documentation
 - [ ] Reviewed for performance implications
 - [ ] Checked for brand-agnostic compliance
 

@@ -1,6 +1,6 @@
 # DEPRECATED: This file has moved
 
-**New Location:** [ANALYSIS_WOOCOMMERCE_EXPANSION_PLAN.md](docs/04-ANALYSIS/ANALYSIS_WOOCOMMERCE_EXPANSION_PLAN.md)
+**New Location:** [ANALYSIS_WOOCOMMERCE_EXPANSION_PLAN.md](docs/10-ANALYSIS/ANALYSIS_WOOCOMMERCE_EXPANSION_PLAN.md)
 
 **Reason:** Documentation restructuring for AI discoverability (2025-10-29)
 
@@ -12,9 +12,9 @@ Please update your bookmarks and links to point to the new location.
 
 If you're linking from code or scripts, update to:
 ```
-docs/04-ANALYSIS/ANALYSIS_WOOCOMMERCE_EXPANSION_PLAN.md
+docs/10-ANALYSIS/ANALYSIS_WOOCOMMERCE_EXPANSION_PLAN.md
 ```
 
 **See also:**
-- [WooCommerce Architecture Analysis](docs/04-ANALYSIS/ANALYSIS_WOOCOMMERCE_ARCHITECTURE.md)
+- [WooCommerce Architecture Analysis](docs/10-ANALYSIS/ANALYSIS_WOOCOMMERCE_ARCHITECTURE.md)
 - [WooCommerce Customization Guide](docs/02-GUIDES/GUIDE_WOOCOMMERCE_CUSTOMIZATION.md)

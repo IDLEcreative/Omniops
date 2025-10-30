@@ -5,7 +5,7 @@
 **Last Updated:** 2025-10-29
 **Verified For:** v0.1.0
 **Dependencies:**
-- [Chat System Documentation](../02-FEATURES/chat-system/README.md) - Main chat architecture
+- [Chat System Documentation](../08-FEATURES/chat-system/README.md) - Main chat architecture
 - [Performance Optimization](../07-REFERENCE/REFERENCE_PERFORMANCE_OPTIMIZATION.md) - System optimization strategies
 **Estimated Read Time:** 12 minutes
 

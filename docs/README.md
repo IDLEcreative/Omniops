@@ -45,7 +45,7 @@ npm test                 # Run tests
 1. **[Getting Started for DevOps](00-GETTING-STARTED/getting-started-devops.md)** - Deployment prerequisites
 2. **[Production Deployment Checklist](05-DEPLOYMENT/production-checklist.md)** - Pre-launch verification
 3. **[Docker Setup Guide](05-DEPLOYMENT/docker.md)** - Container orchestration
-4. **[Environment Variables Reference](07-REFERENCE/environment-variables.md)** - Configuration guide
+4. **[Environment Variables Reference](09-REFERENCE/environment-variables.md)** - Configuration guide
 
 **Quick Commands:**
 ```bash
@@ -65,9 +65,9 @@ npm run migrate:encrypt-credentials          # Run migrations
 **Goal:** Test features and verify quality
 
 1. **[Testing Guide](04-DEVELOPMENT/testing.md)** - Testing strategy and patterns
-2. **[Debugging Procedures](06-TROUBLESHOOTING/debugging.md)** - Common debugging workflows
+2. **[Debugging Procedures](07-TROUBLESHOOTING/debugging.md)** - Common debugging workflows
 3. **[API Reference](03-API/reference.md)** - Endpoint testing guide
-4. **[Hallucination Prevention](07-REFERENCE/docs/02-GUIDES/GUIDE_HALLUCINATION_PREVENTION.md)** - AI quality testing
+4. **[Hallucination Prevention](HALLUCINATION_PREVENTION.md)** - AI quality testing
 
 **Quick Commands:**
 ```bash
@@ -85,9 +85,9 @@ npx tsx test-hallucination-prevention.ts  # AI quality check
 **Goal:** Understand features, capabilities, and architecture
 
 1. **[System Architecture Overview](01-ARCHITECTURE/overview.md)** - High-level system design
-2. **[Feature Documentation](02-FEATURES/)** - All implemented features
+2. **[Feature Documentation](08-FEATURES/)** - All implemented features
 3. **[Multi-Tenancy Guide](01-ARCHITECTURE/multi-tenancy.md)** - Brand-agnostic design
-4. **[Privacy & Compliance](02-FEATURES/privacy-compliance/)** - GDPR/CCPA features
+4. **[Privacy & Compliance](08-FEATURES/privacy-compliance/)** - GDPR/CCPA features
 
 ---
 
@@ -110,7 +110,7 @@ Our documentation is organized into numbered categories for easy navigation:
 
 - **[System Architecture Overview](01-ARCHITECTURE/overview.md)** - Complete system design
 - **[Architecture Decision Records (ADRs)](01-ARCHITECTURE/adr/)** - Design decisions and rationale
-- **[Database Schema](07-REFERENCE/REFERENCE_DATABASE_SCHEMA.md)** - Tables, relationships, RLS policies
+- **[Database Schema](09-REFERENCE/REFERENCE_DATABASE_SCHEMA.md)** - Tables, relationships, RLS policies
 - **[Search Architecture](SEARCH_ARCHITECTURE.md)** - Hybrid search design (100-200 result limits!)
 - **[Multi-Tenancy](01-ARCHITECTURE/multi-tenancy.md)** - Domain-based isolation
 - **[Security Architecture](01-ARCHITECTURE/security.md)** - Encryption, authentication, RLS
@@ -121,41 +121,13 @@ Our documentation is organized into numbered categories for easy navigation:
 
 ---
 
-### ⚡ **02-FEATURES/**
-*Feature documentation organized by domain*
+### 📖 **02-GUIDES/**
+*Step-by-step instructions and tutorials*
 
-#### **[Chat System](02-FEATURES/chat-system/)**
-- Real-time AI chat with context retrieval
-- Hallucination prevention mechanisms
-- Message history and conversation management
-
-#### **[WooCommerce Integration](02-FEATURES/woocommerce/)**
-- Product catalog integration
-- Order management
-- Cart tracking and abandoned carts
-- Stock level monitoring
-
-#### **[Shopify Integration](02-FEATURES/shopify/)**
-- Product sync
-- Inventory management
-- Order processing
-
-#### **[Web Scraping](02-FEATURES/scraping/)**
-- Crawlee + Playwright implementation
-- Content extraction with Mozilla Readability
-- Background job processing with Redis
-- Incremental scraping strategies
-
-#### **[Privacy & Compliance](02-FEATURES/privacy-compliance/)**
-- GDPR data export
-- CCPA data deletion
-- User consent management
-- Data retention policies
-
-**Related Docs:**
-- `WEB_SCRAPING.md` - Scraping system overview
-- `HALLUCINATION_PREVENTION.md` - Chat quality safeguards
-- `PERFORMANCE_OPTIMIZATION.md` - Response time analysis
+- **[Docker Setup Guide](02-GUIDES/GUIDE_DOCKER_SETUP.md)** - Container configuration walkthrough
+- **[Stripe Integration](02-GUIDES/GUIDE_STRIPE_INTEGRATION.md)** - Payment processing setup
+- **[Deployment Guide](02-GUIDES/GUIDE_DEPLOYMENT.md)** - Production deployment steps
+- **[Testing Strategies](02-GUIDES/GUIDE_TESTING.md)** - Test writing best practices
 
 ---
 
@@ -217,14 +189,24 @@ npx tsx optimize-chunk-sizes.ts analyze        # Analyze chunk sizes
 
 ---
 
-### 🔧 **06-TROUBLESHOOTING/**
+### 🔧 **06-INTEGRATIONS/**
+*Third-party integrations and platform connections*
+
+- **[WooCommerce Integration](06-INTEGRATIONS/INTEGRATION_WOOCOMMERCE.md)** - E-commerce platform integration
+- **[Shopify Integration](06-INTEGRATIONS/INTEGRATION_SHOPIFY.md)** - Shopify Admin API
+- **[Stripe Integration](06-INTEGRATIONS/INTEGRATION_STRIPE.md)** - Payment processing
+- **[OpenAI Integration](06-INTEGRATIONS/INTEGRATION_OPENAI.md)** - AI/ML services
+
+---
+
+### 🛠️ **07-TROUBLESHOOTING/**
 *Problem diagnosis and resolution*
 
-- **[Common Errors](06-TROUBLESHOOTING/common-errors.md)** - Frequent issues and fixes
-- **[Debugging Procedures](06-TROUBLESHOOTING/debugging.md)** - Step-by-step diagnosis
-- **[Database Cleanup](06-TROUBLESHOOTING/database-cleanup.md)** - Data maintenance
-- **[Performance Issues](06-TROUBLESHOOTING/performance.md)** - Slow response diagnosis
-- **[Integration Problems](06-TROUBLESHOOTING/integrations.md)** - WooCommerce, Shopify, OpenAI
+- **[Common Errors](07-TROUBLESHOOTING/common-errors.md)** - Frequent issues and fixes
+- **[Debugging Procedures](07-TROUBLESHOOTING/debugging.md)** - Step-by-step diagnosis
+- **[Database Cleanup](07-TROUBLESHOOTING/database-cleanup.md)** - Data maintenance
+- **[Performance Issues](07-TROUBLESHOOTING/performance.md)** - Slow response diagnosis
+- **[Integration Problems](07-TROUBLESHOOTING/integrations.md)** - WooCommerce, Shopify, OpenAI
 
 **Database Cleanup:**
 ```bash
@@ -235,20 +217,76 @@ npx tsx test-database-cleanup.ts clean                # Clean all
 
 ---
 
-### 📚 **07-REFERENCE/**
+### ⚡ **08-FEATURES/**
+*Feature documentation organized by domain*
+
+- **[Owned Domains](08-FEATURES/FEATURE_OWNED_DOMAINS.md)** - Domain ownership and verification
+
+#### **[Chat System](08-FEATURES/chat-system/)**
+- Real-time AI chat with context retrieval
+- Hallucination prevention mechanisms
+- Message history and conversation management
+- [Quick Reference Guide](08-FEATURES/chat-system/QUICK_REFERENCE.md)
+
+#### **[WooCommerce Integration](08-FEATURES/woocommerce/)**
+- Product catalog integration
+- Order management
+- Cart tracking and abandoned carts
+- Stock level monitoring
+
+#### **[Shopify Integration](08-FEATURES/shopify/)**
+- Product sync
+- Inventory management
+- Order processing
+
+#### **[Web Scraping](08-FEATURES/scraping/)**
+- Crawlee + Playwright implementation
+- Content extraction with Mozilla Readability
+- Background job processing with Redis
+- Incremental scraping strategies
+
+#### **[Privacy & Compliance](08-FEATURES/privacy-compliance/)**
+- GDPR data export
+- CCPA data deletion
+- User consent management
+- Data retention policies
+
+**Related Docs:**
+- `WEB_SCRAPING.md` - Scraping system overview
+- `HALLUCINATION_PREVENTION.md` - Chat quality safeguards
+- `PERFORMANCE_OPTIMIZATION.md` - Response time analysis
+
+---
+
+### 📚 **09-REFERENCE/**
 *Technical references and specifications*
 
-- **[Technology Stack](07-REFERENCE/tech-stack.md)** - Frameworks, libraries, versions
-- **[Configuration Reference](07-REFERENCE/configuration.md)** - Feature flags, settings
-- **[Database Schema](07-REFERENCE/docs/07-REFERENCE/REFERENCE_DATABASE_SCHEMA.md)** - Complete schema reference
-- **[Hallucination Prevention](HALLUCINATION_PREVENTION.md)** - Anti-hallucination safeguards
-- **[Search Architecture](SEARCH_ARCHITECTURE.md)** - Search limits and behavior
-- **[NPX Tools Guide](NPX_TOOLS_GUIDE.md)** - Monitoring and maintenance tools
+- **[Technology Stack](09-REFERENCE/tech-stack.md)** - Frameworks, libraries, versions
+- **[Configuration Reference](09-REFERENCE/configuration.md)** - Feature flags, settings
+- **[Database Schema](09-REFERENCE/REFERENCE_DATABASE_SCHEMA.md)** - Complete schema reference (31 tables, 214 indexes)
+- **[Environment Variables](09-REFERENCE/environment-variables.md)** - Configuration guide
+- **[NPX Scripts Reference](09-REFERENCE/REFERENCE_NPX_SCRIPTS.md)** - All monitoring and utility tools
+- **[Performance Optimization](09-REFERENCE/REFERENCE_PERFORMANCE_OPTIMIZATION.md)** - Comprehensive optimization guide
 
 **Critical References:**
 - `SEARCH_ARCHITECTURE.md` - **CRITICAL:** Explains actual search limits (100-200, NOT 20!)
-- `PERFORMANCE_OPTIMIZATION.md` - Response time bottlenecks and solutions
+- `REFERENCE_PERFORMANCE_OPTIMIZATION.md` - Response time bottlenecks and solutions
 - `HALLUCINATION_PREVENTION.md` - Chat quality testing and safeguards
+
+---
+
+### 📊 **10-ANALYSIS/**
+*Performance analysis, investigations, and technical debt tracking*
+
+- **[Technical Debt Tracker](10-ANALYSIS/ANALYSIS_TECHNICAL_DEBT_TRACKER.md)** - Known debt and remediation plans
+- **[WooCommerce Expansion Analysis](10-ANALYSIS/ANALYSIS_WOOCOMMERCE_EXPANSION.md)** - Platform expansion evaluation
+- **[Performance Investigations](10-ANALYSIS/)** - System performance deep dives
+- **[Shopify Provider Test Analysis](10-ANALYSIS/SHOPIFY_PROVIDER_TEST_ANALYSIS.md)** - Test architecture improvements
+
+**Key Analysis Reports:**
+- Technical debt remediation tracking (25+ items cataloged)
+- Multi-platform commerce integration analysis
+- Test architecture case studies
 
 ---
 
@@ -268,11 +306,11 @@ Quick links to frequently needed documentation:
 ### "I want to integrate a new commerce platform"
 
 1. Read **[Commerce Provider Pattern](04-DEVELOPMENT/patterns.md#commerce-providers)**
-2. Review **[WooCommerce Integration](02-FEATURES/woocommerce/)** as example
+2. Review **[WooCommerce Integration](08-FEATURES/woocommerce/)** as example
 3. Create provider in `lib/agents/providers/[platform]-provider.ts`
 4. Implement dynamic loader in `lib/[platform]-dynamic.ts`
 5. Add API routes in `app/api/[platform]/`
-6. Create feature documentation in `02-FEATURES/[platform]/`
+6. Create feature documentation in `08-FEATURES/[platform]/`
 
 ### "I want to test locally with Docker"
 
@@ -293,19 +331,19 @@ Quick links to frequently needed documentation:
 
 ### "Something broke in production"
 
-1. Start with **[Common Errors](06-TROUBLESHOOTING/common-errors.md)**
+1. Start with **[Common Errors](07-TROUBLESHOOTING/common-errors.md)**
 2. Check **[Monitoring Logs](05-DEPLOYMENT/monitoring.md)**
-3. Review **[Debugging Procedures](06-TROUBLESHOOTING/debugging.md)**
+3. Review **[Debugging Procedures](07-TROUBLESHOOTING/debugging.md)**
 4. Run health checks:
    ```bash
    npx tsx monitor-embeddings-health.ts check
    ```
-5. If database-related, see **[Database Troubleshooting](06-TROUBLESHOOTING/database-cleanup.md)**
+5. If database-related, see **[Database Troubleshooting](07-TROUBLESHOOTING/database-cleanup.md)**
 
 ### "I need to update the chat system"
 
 1. Read **[Hallucination Prevention](HALLUCINATION_PREVENTION.md)** - CRITICAL
-2. Review **[Chat System Docs](02-FEATURES/chat-system/)**
+2. Review **[Chat System Docs](08-FEATURES/chat-system/)**
 3. Make changes to `app/api/chat/route.ts`
 4. Test with: `npx tsx test-hallucination-prevention.ts`
 5. Never skip hallucination testing!
@@ -329,9 +367,9 @@ Quick links to frequently needed documentation:
 
 ### Feature-Specific
 
-- **[WooCommerce Integration](02-FEATURES/woocommerce/)** - E-commerce integration
-- **[Web Scraping](02-FEATURES/scraping/)** - Content extraction
-- **[Privacy & Compliance](02-FEATURES/privacy-compliance/)** - GDPR/CCPA
+- **[WooCommerce Integration](08-FEATURES/woocommerce/)** - E-commerce integration
+- **[Web Scraping](08-FEATURES/scraping/)** - Content extraction
+- **[Privacy & Compliance](08-FEATURES/privacy-compliance/)** - GDPR/CCPA
 
 ### Operations
 
@@ -427,7 +465,7 @@ Contains historical documentation that may be outdated but preserved for referen
 - [API Reference](03-API/reference.md)
 - [Testing Guide](04-DEVELOPMENT/testing.md)
 - [Architecture Overview](01-ARCHITECTURE/overview.md)
-- [Common Errors](06-TROUBLESHOOTING/common-errors.md)
+- [Common Errors](07-TROUBLESHOOTING/common-errors.md)
 
 ### External Resources
 - [Next.js 15 Docs](https://nextjs.org/docs)
@@ -438,7 +476,7 @@ Contains historical documentation that may be outdated but preserved for referen
 ### Project Files
 - [Main README](../README.md) - Project overview
 - [CLAUDE.md](../CLAUDE.md) - Development guidelines
-- [TECH_DEBT.md](docs/04-ANALYSIS/ANALYSIS_TECHNICAL_DEBT_TRACKER.md) - Known technical debt
+- [TECH_DEBT.md](10-ANALYSIS/ANALYSIS_TECHNICAL_DEBT_TRACKER.md) - Known technical debt
 - [CHANGELOG.md](../CHANGELOG.md) - Version history
 
 ---
@@ -459,6 +497,6 @@ Contains historical documentation that may be outdated but preserved for referen
 
 ---
 
-**Last Updated:** 2025-10-24
-**Documentation Version:** 2.0
+**Last Updated:** 2025-10-30
+**Documentation Version:** 2.1
 **Maintained By:** Omniops Team

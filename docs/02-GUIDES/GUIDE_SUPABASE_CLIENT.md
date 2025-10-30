@@ -411,6 +411,6 @@ If you're updating old code:
 ---
 
 **See Also:**
-- [Database Schema](./SUPABASE_SCHEMA.md)
+- [Database Schema](./09-REFERENCE/REFERENCE_DATABASE_SCHEMA.md)
 - [Security Model](./SECURITY_MODEL.md)
 - [CLAUDE.md](../CLAUDE.md) - Project conventions

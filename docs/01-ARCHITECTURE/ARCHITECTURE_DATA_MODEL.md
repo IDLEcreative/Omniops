@@ -372,7 +372,7 @@ WHERE c.organization_id != d.organization_id;
 
 - **Original Issue:** docs/GITHUB_ISSUES_PR4.md Issue #6
 - **Migration Report:** ISSUE_6_MIGRATION_COMPLETE.md
-- **Database Schema:** docs/SUPABASE_SCHEMA.md
+- **Database Schema:** docs/09-REFERENCE/REFERENCE_DATABASE_SCHEMA.md
 - **Type Definitions:** types/supabase.ts
 
 ---

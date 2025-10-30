@@ -3102,6 +3102,6 @@ Is production down or severely degraded?
 **Related Documentation:**
 - [Production Checklist](production-checklist.md)
 - [Performance Optimization](/docs/PERFORMANCE_OPTIMIZATION.md)
-- [Database Schema](/docs/SUPABASE_SCHEMA.md)
+- [Database Schema](/docs/09-REFERENCE/REFERENCE_DATABASE_SCHEMA.md)
 - [Docker Setup](/docs/00-GETTING-STARTED/SETUP_DOCKER_PRODUCTION.md)
 - [Search Architecture](/docs/SEARCH_ARCHITECTURE.md)

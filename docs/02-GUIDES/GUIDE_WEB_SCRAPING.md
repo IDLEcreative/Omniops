@@ -5,14 +5,14 @@
 **Last Updated:** 2025-10-29
 **Verified For:** v0.1.0
 **Dependencies:**
-- [Scraping System README](../02-FEATURES/scraping/README.md) - Main documentation
+- [Scraping System README](../08-FEATURES/scraping/README.md) - Main documentation
 **Estimated Read Time:** <1 minute
 
 ## Purpose
 Redirect file pointing to consolidated web scraping documentation with all content moved to single comprehensive guide.
 
 ## Quick Links
-- [Main Documentation](../02-FEATURES/scraping/README.md) - Complete scraping guide
+- [Main Documentation](../08-FEATURES/scraping/README.md) - Complete scraping guide
 
 ## Keywords
 redirect, deprecated, web scraping, consolidated documentation
@@ -23,7 +23,7 @@ redirect, deprecated, web scraping, consolidated documentation
 
 Please refer to the comprehensive scraping documentation at:
 
-**[docs/02-FEATURES/scraping/README.md](02-FEATURES/scraping/README.md)**
+**[docs/08-FEATURES/scraping/README.md](08-FEATURES/scraping/README.md)**
 
 ---
 
