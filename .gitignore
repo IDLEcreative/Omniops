@@ -181,3 +181,4 @@ mcp-supabase-config.json
 !/components.json
 !/jsconfig.json
 !/vercel.json
+.env-backups/
