@@ -43,7 +43,8 @@ export class ResilientRedisClient extends EventEmitter {
       () => this.isAvailable()
     );
 
-    if (shouldBypassRedis || this.redisUrl.startsWith('memory://')) {
+    // Skip Redis connection during build time or when bypassing Redis
+    if (shouldBypassRedis || this.redisUrl.startsWith('memory://') || isBuildTime) {
       this.circuitBreaker.openCircuitBreaker();
       this.isConnected = false;
       if (!isBuildTime) {
@@ -52,6 +53,7 @@ export class ResilientRedisClient extends EventEmitter {
       return;
     }
 
+    // Only connect at runtime when Redis is configured
     this.connect();
   }
 
