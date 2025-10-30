@@ -84,13 +84,16 @@ export function HeroSection({
         <div className="mx-auto max-w-5xl text-center">
           <Badge variant="secondary" className="mb-4 px-4 py-1">
             <Sparkles className="mr-1 h-3 w-3" />
-            Powered by OpenAI GPT-4
+            Powered by OpenAI GPT-5
           </Badge>
 
           <h1 className="mb-6 text-5xl font-bold tracking-tight sm:text-6xl md:text-7xl">
             Answer Customer Questions{" "}
-            <span className="bg-gradient-to-r from-primary to-primary/60 bg-clip-text text-transparent">
+            <span className="bg-gradient-to-r from-primary via-primary to-primary/80 bg-clip-text text-transparent">
               While You Sleep
+            </span>
+            <span className="inline-block ml-2 text-4xl sm:text-5xl md:text-6xl animate-pulse">
+              💤
             </span>
           </h1>
 

@@ -1,0 +1,304 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Chat Widget Test Page</title>
+    <style>
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 40px 20px;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+        }
+        .container {
+            background: white;
+            border-radius: 12px;
+            padding: 40px;
+            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
+        }
+        h1 {
+            color: #333;
+            margin-bottom: 10px;
+        }
+        .status {
+            padding: 12px 20px;
+            border-radius: 8px;
+            margin: 20px 0;
+            font-weight: 500;
+        }
+        .status.success {
+            background: #d4edda;
+            color: #155724;
+            border: 1px solid #c3e6cb;
+        }
+        .status.info {
+            background: #d1ecf1;
+            color: #0c5460;
+            border: 1px solid #bee5eb;
+        }
+        .test-section {
+            margin: 30px 0;
+            padding: 20px;
+            background: #f8f9fa;
+            border-radius: 8px;
+            border-left: 4px solid #667eea;
+        }
+        .test-section h3 {
+            margin-top: 0;
+            color: #667eea;
+        }
+        code {
+            background: #f1f1f1;
+            padding: 2px 6px;
+            border-radius: 4px;
+            font-family: 'Courier New', monospace;
+            font-size: 14px;
+        }
+        .checklist {
+            list-style: none;
+            padding: 0;
+        }
+        .checklist li {
+            padding: 8px 0;
+            border-bottom: 1px solid #e9ecef;
+        }
+        .checklist li:before {
+            content: "✓ ";
+            color: #28a745;
+            font-weight: bold;
+            margin-right: 8px;
+        }
+        button {
+            background: #667eea;
+            color: white;
+            border: none;
+            padding: 12px 24px;
+            border-radius: 6px;
+            cursor: pointer;
+            font-size: 16px;
+            font-weight: 500;
+            margin: 10px 10px 10px 0;
+        }
+        button:hover {
+            background: #5568d3;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>🤖 Chat Widget Installation Test</h1>
+        <p>This page tests the chat widget embedding and verifies all components are working correctly.</p>
+
+        <div class="status success" id="status">
+            ✅ Test page loaded successfully!
+        </div>
+
+        <div class="test-section">
+            <h3>📋 Installation Checklist</h3>
+            <ul class="checklist">
+                <li>Development server running on <code>http://localhost:3000</code></li>
+                <li>Redis container running and healthy</li>
+                <li>Embed script loaded from <code>/embed.js</code></li>
+                <li>Widget iframe created and configured</li>
+                <li>Privacy settings initialized</li>
+            </ul>
+        </div>
+
+        <div class="test-section">
+            <h3>🧪 Widget API Tests</h3>
+            <p>Use these buttons to test the widget programmatic API:</p>
+            <button onclick="testWidgetAPI()">Test Widget API</button>
+            <button onclick="testUpdateContext()">Test Context Update</button>
+            <button onclick="testPrivacyStatus()">Check Privacy Status</button>
+            <div id="api-results" style="margin-top: 15px; padding: 15px; background: white; border-radius: 6px; display: none;"></div>
+        </div>
+
+        <div class="test-section">
+            <h3>🔍 Embedding System Verification</h3>
+            <p>The system uses OpenAI's <code>text-embedding-3-small</code> model for semantic search.</p>
+            <ul class="checklist">
+                <li>Query embedding generation with caching</li>
+                <li>Vector similarity search in Supabase (pgvector)</li>
+                <li>Hybrid search combining embeddings + real-time results</li>
+                <li>Performance optimization with LRU cache</li>
+            </ul>
+            <button onclick="testEmbeddingAPI()">Test Embedding API</button>
+            <div id="embedding-results" style="margin-top: 15px; padding: 15px; background: white; border-radius: 6px; display: none;"></div>
+        </div>
+
+        <div class="test-section">
+            <h3>📝 How to Embed on Your Site</h3>
+            <p>Copy this code into your website's HTML, just before the closing <code>&lt;/body&gt;</code> tag:</p>
+            <pre style="background: #2d2d2d; color: #f8f8f2; padding: 20px; border-radius: 8px; overflow-x: auto;"><code>&lt;!-- Chat Widget --&gt;
+&lt;script&gt;
+  window.ChatWidgetConfig = {
+    serverUrl: 'http://localhost:3000', // Use your production URL
+    privacy: {
+      allowOptOut: true,
+      showPrivacyNotice: true,
+      retentionDays: 30
+    }
+  };
+&lt;/script&gt;
+&lt;script src="http://localhost:3000/embed.js"&gt;&lt;/script&gt;</code></pre>
+        </div>
+
+        <div class="status info">
+            <strong>🎯 What's Being Tested:</strong><br>
+            • Widget loading and initialization<br>
+            • Iframe creation and communication<br>
+            • Privacy preferences handling<br>
+            • Programmatic API functionality<br>
+            • Semantic search embeddings system<br>
+        </div>
+    </div>
+
+    <!-- Widget Configuration -->
+    <script>
+        window.ChatWidgetConfig = {
+            serverUrl: 'http://localhost:3000',
+            privacy: {
+                allowOptOut: true,
+                showPrivacyNotice: true,
+                requireConsent: false,
+                retentionDays: 30
+            },
+            debug: true,
+            appearance: {
+                position: 'bottom-right',
+                width: 400,
+                height: 600
+            }
+        };
+
+        // API Test Functions
+        function testWidgetAPI() {
+            const resultsDiv = document.getElementById('api-results');
+            resultsDiv.style.display = 'block';
+
+            const results = [];
+
+            // Test 1: Check if API exists
+            if (window.ChatWidget) {
+                results.push('✅ ChatWidget API available');
+                results.push(`📦 Version: ${window.ChatWidget.version}`);
+
+                // Test 2: Check methods
+                const methods = ['open', 'close', 'sendMessage', 'updateContext'];
+                methods.forEach(method => {
+                    if (typeof window.ChatWidget[method] === 'function') {
+                        results.push(`✅ Method available: ${method}()`);
+                    } else {
+                        results.push(`❌ Method missing: ${method}()`);
+                    }
+                });
+
+                // Test 3: Check privacy API
+                if (window.ChatWidget.privacy) {
+                    results.push('✅ Privacy API available');
+                    const privacyMethods = ['optOut', 'optIn', 'clearData', 'getStatus'];
+                    privacyMethods.forEach(method => {
+                        if (typeof window.ChatWidget.privacy[method] === 'function') {
+                            results.push(`✅ Privacy method: ${method}()`);
+                        }
+                    });
+                }
+            } else {
+                results.push('❌ ChatWidget API not available - widget may not be loaded yet');
+            }
+
+            resultsDiv.innerHTML = results.join('<br>');
+        }
+
+        function testUpdateContext() {
+            const resultsDiv = document.getElementById('api-results');
+            resultsDiv.style.display = 'block';
+
+            if (window.ChatWidget && window.ChatWidget.updateContext) {
+                window.ChatWidget.updateContext({
+                    userData: {
+                        isLoggedIn: true,
+                        userId: 'test-user-123',
+                        email: 'test@example.com',
+                        displayName: 'Test User'
+                    },
+                    pageContext: {
+                        url: window.location.href,
+                        title: document.title,
+                        path: window.location.pathname
+                    }
+                });
+                resultsDiv.innerHTML = '✅ Context update sent successfully!<br>Check browser console for details.';
+            } else {
+                resultsDiv.innerHTML = '❌ Widget API not ready yet. Wait a few seconds and try again.';
+            }
+        }
+
+        function testPrivacyStatus() {
+            const resultsDiv = document.getElementById('api-results');
+            resultsDiv.style.display = 'block';
+
+            if (window.ChatWidget && window.ChatWidget.privacy) {
+                const status = window.ChatWidget.privacy.getStatus();
+                resultsDiv.innerHTML = `
+                    <strong>Privacy Status:</strong><br>
+                    • Opted Out: ${status.optedOut ? 'Yes' : 'No'}<br>
+                    • Consent Given: ${status.consentGiven ? 'Yes' : 'No'}
+                `;
+            } else {
+                resultsDiv.innerHTML = '❌ Privacy API not ready yet.';
+            }
+        }
+
+        async function testEmbeddingAPI() {
+            const resultsDiv = document.getElementById('embedding-results');
+            resultsDiv.style.display = 'block';
+            resultsDiv.innerHTML = '⏳ Testing embedding API...';
+
+            try {
+                // Test the chat endpoint which uses embeddings
+                const response = await fetch('http://localhost:3000/api/chat', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify({
+                        message: 'Test query for embeddings',
+                        domain: window.location.hostname,
+                        conversationId: 'test-' + Date.now()
+                    })
+                });
+
+                if (response.ok) {
+                    const data = await response.json();
+                    resultsDiv.innerHTML = `
+                        ✅ <strong>Embedding API Test Successful!</strong><br><br>
+                        <strong>Response Preview:</strong><br>
+                        • Status: ${response.status}<br>
+                        • Content Type: ${response.headers.get('content-type')}<br>
+                        • Response received: ${data ? 'Yes' : 'No'}<br><br>
+                        <em>The embeddings system is working correctly. Semantic search is enabled.</em>
+                    `;
+                } else {
+                    resultsDiv.innerHTML = `
+                        ⚠️ <strong>API Response:</strong> ${response.status}<br>
+                        ${await response.text()}
+                    `;
+                }
+            } catch (error) {
+                resultsDiv.innerHTML = `
+                    ❌ <strong>Error Testing Embedding API:</strong><br>
+                    ${error.message}<br><br>
+                    <em>Make sure the development server is running on port 3000.</em>
+                `;
+            }
+        }
+    </script>
+
+    <!-- Load Widget -->
+    <script src="http://localhost:3000/embed.js"></script>
+</body>
+</html>

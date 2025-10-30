@@ -186,7 +186,7 @@ export function FeaturesSection() {
               <Brain className="h-12 w-12 mx-auto mb-3 text-primary" />
               <h3 className="font-semibold mb-2">Powered by OpenAI</h3>
               <p className="text-sm text-muted-foreground">
-                GPT-4 powers intelligent responses
+                GPT-5 powers intelligent responses
               </p>
             </Card>
 
