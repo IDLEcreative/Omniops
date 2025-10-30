@@ -1,0 +1,271 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Chat Widget Animation Demo</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <style>
+    /* Animation definitions (same as widget) */
+    @keyframes ping {
+      75%, 100% {
+        transform: scale(2);
+        opacity: 0;
+      }
+    }
+    .animate-ping {
+      animation: ping 3s cubic-bezier(0, 0, 0.2, 1) infinite;
+    }
+    @keyframes pulse {
+      50% {
+        opacity: .5;
+      }
+    }
+    .animate-pulse {
+      animation: pulse 2s cubic-bezier(0.4, 0, 0.6, 1) infinite;
+    }
+
+    /* Respect user preferences */
+    @media (prefers-reduced-motion: reduce) {
+      .animate-ping, .animate-pulse {
+        animation: none;
+      }
+    }
+  </style>
+</head>
+<body class="bg-gray-900 text-white p-8">
+  <div class="max-w-4xl mx-auto">
+    <h1 class="text-4xl font-bold mb-8">Chat Widget Animation Demo</h1>
+
+    <p class="text-gray-300 mb-8">
+      This page demonstrates the different animation configurations for the chat widget compact button.
+      All animations automatically respect your system's "reduce motion" setting.
+    </p>
+
+    <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8 mb-12">
+
+      <!-- Configuration 1: Full Animation (Default) -->
+      <div class="bg-gray-800 rounded-lg p-6">
+        <h2 class="text-xl font-semibold mb-4">Full Animation (Default)</h2>
+        <p class="text-sm text-gray-400 mb-6">
+          Pulse ring + notification badge<br>
+          <code class="text-green-400">showPulseAnimation: true<br>showNotificationBadge: true</code>
+        </p>
+        <div class="flex justify-center items-center h-32">
+          <div class="relative">
+            <button class="relative w-14 h-14 bg-gradient-to-br from-gray-600 to-gray-700 text-white rounded-full shadow-xl hover:shadow-2xl hover:scale-105 focus:outline-none focus:ring-2 focus:ring-white/50 transition-all duration-300 flex items-center justify-center group">
+              <!-- Pulse animation -->
+              <span class="absolute inset-0 rounded-full bg-gradient-to-br from-gray-600 to-gray-700 opacity-75 animate-ping" style="animation-duration: 3s;"></span>
+              <!-- Notification badge -->
+              <span class="absolute -top-1 -right-1 w-3 h-3 bg-green-500 rounded-full border-2 border-white shadow-lg animate-pulse"></span>
+              <!-- Icon -->
+              <svg class="relative h-6 w-6 group-hover:scale-110 transition-transform" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 12h.01M12 12h.01M16 12h.01M21 12c0 4.418-4.03 8-9 8a9.863 9.863 0 01-4.255-.949L3 20l1.395-3.72C3.512 15.042 3 13.574 3 12c0-4.418 4.03-8 9-8s9 3.582 9 8z" />
+              </svg>
+            </button>
+          </div>
+        </div>
+        <p class="text-xs text-gray-500 mt-4">
+          ✅ Best for: E-commerce, marketing sites
+        </p>
+      </div>
+
+      <!-- Configuration 2: Pulse Only -->
+      <div class="bg-gray-800 rounded-lg p-6">
+        <h2 class="text-xl font-semibold mb-4">Pulse Only</h2>
+        <p class="text-sm text-gray-400 mb-6">
+          Pulse ring, no badge<br>
+          <code class="text-green-400">showPulseAnimation: true<br>showNotificationBadge: false</code>
+        </p>
+        <div class="flex justify-center items-center h-32">
+          <div class="relative">
+            <button class="relative w-14 h-14 bg-gradient-to-br from-gray-600 to-gray-700 text-white rounded-full shadow-xl hover:shadow-2xl hover:scale-105 focus:outline-none focus:ring-2 focus:ring-white/50 transition-all duration-300 flex items-center justify-center group">
+              <!-- Pulse animation -->
+              <span class="absolute inset-0 rounded-full bg-gradient-to-br from-gray-600 to-gray-700 opacity-75 animate-ping" style="animation-duration: 3s;"></span>
+              <!-- Icon -->
+              <svg class="relative h-6 w-6 group-hover:scale-110 transition-transform" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 12h.01M12 12h.01M16 12h.01M21 12c0 4.418-4.03 8-9 8a9.863 9.863 0 01-4.255-.949L3 20l1.395-3.72C3.512 15.042 3 13.574 3 12c0-4.418 4.03-8 9-8s9 3.582 9 8z" />
+              </svg>
+            </button>
+          </div>
+        </div>
+        <p class="text-xs text-gray-500 mt-4">
+          ✅ Best for: Cleaner look with subtle animation
+        </p>
+      </div>
+
+      <!-- Configuration 3: Badge Only -->
+      <div class="bg-gray-800 rounded-lg p-6">
+        <h2 class="text-xl font-semibold mb-4">Badge Only</h2>
+        <p class="text-sm text-gray-400 mb-6">
+          Notification badge, no pulse<br>
+          <code class="text-green-400">showPulseAnimation: false<br>showNotificationBadge: true</code>
+        </p>
+        <div class="flex justify-center items-center h-32">
+          <div class="relative">
+            <button class="relative w-14 h-14 bg-gradient-to-br from-gray-600 to-gray-700 text-white rounded-full shadow-xl hover:shadow-2xl hover:scale-105 focus:outline-none focus:ring-2 focus:ring-white/50 transition-all duration-300 flex items-center justify-center group">
+              <!-- Notification badge -->
+              <span class="absolute -top-1 -right-1 w-3 h-3 bg-green-500 rounded-full border-2 border-white shadow-lg animate-pulse"></span>
+              <!-- Icon -->
+              <svg class="relative h-6 w-6 group-hover:scale-110 transition-transform" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 12h.01M12 12h.01M16 12h.01M21 12c0 4.418-4.03 8-9 8a9.863 9.863 0 01-4.255-.949L3 20l1.395-3.72C3.512 15.042 3 13.574 3 12c0-4.418 4.03-8 9-8s9 3.582 9 8z" />
+              </svg>
+            </button>
+          </div>
+        </div>
+        <p class="text-xs text-gray-500 mt-4">
+          ✅ Best for: Professional/corporate sites
+        </p>
+      </div>
+
+      <!-- Configuration 4: Minimal -->
+      <div class="bg-gray-800 rounded-lg p-6">
+        <h2 class="text-xl font-semibold mb-4">Minimal (No Animation)</h2>
+        <p class="text-sm text-gray-400 mb-6">
+          Clean button only<br>
+          <code class="text-green-400">showPulseAnimation: false<br>showNotificationBadge: false</code>
+        </p>
+        <div class="flex justify-center items-center h-32">
+          <div class="relative">
+            <button class="relative w-14 h-14 bg-gradient-to-br from-gray-600 to-gray-700 text-white rounded-full shadow-xl hover:shadow-2xl hover:scale-105 focus:outline-none focus:ring-2 focus:ring-white/50 transition-all duration-300 flex items-center justify-center group">
+              <!-- Icon -->
+              <svg class="relative h-6 w-6 group-hover:scale-110 transition-transform" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 12h.01M12 12h.01M16 12h.01M21 12c0 4.418-4.03 8-9 8a9.863 9.863 0 01-4.255-.949L3 20l1.395-3.72C3.512 15.042 3 13.574 3 12c0-4.418 4.03-8 9-8s9 3.582 9 8z" />
+              </svg>
+            </button>
+          </div>
+        </div>
+        <p class="text-xs text-gray-500 mt-4">
+          ✅ Best for: Minimalist designs, formal sites
+        </p>
+      </div>
+
+      <!-- Configuration 5: With Custom Colors -->
+      <div class="bg-gray-800 rounded-lg p-6">
+        <h2 class="text-xl font-semibold mb-4">Custom Brand Colors</h2>
+        <p class="text-sm text-gray-400 mb-6">
+          Fully customizable<br>
+          <code class="text-blue-400">Custom CSS styling</code>
+        </p>
+        <div class="flex justify-center items-center h-32">
+          <div class="relative">
+            <button class="relative w-14 h-14 bg-gradient-to-br from-blue-600 to-purple-600 text-white rounded-full shadow-xl hover:shadow-2xl hover:scale-105 focus:outline-none focus:ring-2 focus:ring-blue-400 transition-all duration-300 flex items-center justify-center group">
+              <!-- Pulse animation -->
+              <span class="absolute inset-0 rounded-full bg-gradient-to-br from-blue-600 to-purple-600 opacity-75 animate-ping" style="animation-duration: 3s;"></span>
+              <!-- Notification badge (blue) -->
+              <span class="absolute -top-1 -right-1 w-3 h-3 bg-blue-400 rounded-full border-2 border-white shadow-lg animate-pulse"></span>
+              <!-- Icon -->
+              <svg class="relative h-6 w-6 group-hover:scale-110 transition-transform" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 12h.01M12 12h.01M16 12h.01M21 12c0 4.418-4.03 8-9 8a9.863 9.863 0 01-4.255-.949L3 20l1.395-3.72C3.512 15.042 3 13.574 3 12c0-4.418 4.03-8 9-8s9 3.582 9 8z" />
+              </svg>
+            </button>
+          </div>
+        </div>
+        <p class="text-xs text-gray-500 mt-4">
+          ✅ Best for: Brand-matched experiences
+        </p>
+      </div>
+
+      <!-- Configuration 6: Mobile Optimized -->
+      <div class="bg-gray-800 rounded-lg p-6">
+        <h2 class="text-xl font-semibold mb-4">Mobile Optimized</h2>
+        <p class="text-sm text-gray-400 mb-6">
+          Larger touch target<br>
+          <code class="text-green-400">Full animation + bigger size</code>
+        </p>
+        <div class="flex justify-center items-center h-32">
+          <div class="relative">
+            <button class="relative w-16 h-16 bg-gradient-to-br from-gray-600 to-gray-700 text-white rounded-full shadow-xl hover:shadow-2xl hover:scale-105 focus:outline-none focus:ring-2 focus:ring-white/50 transition-all duration-300 flex items-center justify-center group">
+              <!-- Pulse animation -->
+              <span class="absolute inset-0 rounded-full bg-gradient-to-br from-gray-600 to-gray-700 opacity-75 animate-ping" style="animation-duration: 3s;"></span>
+              <!-- Notification badge -->
+              <span class="absolute -top-1 -right-1 w-4 h-4 bg-green-500 rounded-full border-2 border-white shadow-lg animate-pulse"></span>
+              <!-- Icon -->
+              <svg class="relative h-7 w-7 group-hover:scale-110 transition-transform" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 12h.01M12 12h.01M16 12h.01M21 12c0 4.418-4.03 8-9 8a9.863 9.863 0 01-4.255-.949L3 20l1.395-3.72C3.512 15.042 3 13.574 3 12c0-4.418 4.03-8 9-8s9 3.582 9 8z" />
+              </svg>
+            </button>
+          </div>
+        </div>
+        <p class="text-xs text-gray-500 mt-4">
+          ✅ Best for: Mobile-first experiences
+        </p>
+      </div>
+
+    </div>
+
+    <!-- Accessibility Note -->
+    <div class="bg-blue-900/30 border border-blue-500 rounded-lg p-6 mb-8">
+      <h2 class="text-xl font-semibold mb-3 flex items-center gap-2">
+        <svg class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+        </svg>
+        Accessibility Note
+      </h2>
+      <p class="text-gray-300">
+        All animations automatically disable if you have "Reduce motion" enabled in your system settings.
+        Test this by enabling reduced motion in your OS accessibility settings and refreshing this page.
+      </p>
+      <p class="text-sm text-gray-400 mt-3">
+        <strong>How to test:</strong><br>
+        • macOS: System Preferences → Accessibility → Display → Reduce motion<br>
+        • Windows: Settings → Ease of Access → Display → Show animations<br>
+        • Chrome DevTools: Cmd+Shift+P → "Emulate CSS prefers-reduced-motion"
+      </p>
+    </div>
+
+    <!-- Implementation Code -->
+    <div class="bg-gray-800 rounded-lg p-6">
+      <h2 class="text-xl font-semibold mb-4">Implementation Example</h2>
+      <pre class="bg-gray-900 p-4 rounded overflow-x-auto text-sm"><code class="text-green-400">&lt;script&gt;
+  window.ChatWidgetConfig = {
+    serverUrl: 'https://your-domain.com',
+    appearance: {
+      showPulseAnimation: true,  // Enable/disable pulse ring
+      showNotificationBadge: true, // Enable/disable green dot
+      startMinimized: true,        // Start compact or expanded
+    },
+  };
+&lt;/script&gt;
+&lt;script src="https://your-domain.com/embed.js"&gt;&lt;/script&gt;</code></pre>
+    </div>
+
+    <!-- Footer -->
+    <div class="mt-8 text-center text-gray-500 text-sm">
+      <p>Chat Widget v0.1.0 | See <a href="./GUIDE_WIDGET_ANIMATIONS.md" class="text-blue-400 hover:underline">full documentation</a></p>
+    </div>
+  </div>
+
+  <!-- Interactive Controls -->
+  <div class="fixed bottom-4 left-4 bg-gray-800 rounded-lg p-4 shadow-xl border border-gray-700">
+    <h3 class="text-sm font-semibold mb-2">Interactive Controls</h3>
+    <div class="space-y-2 text-sm">
+      <label class="flex items-center gap-2 cursor-pointer">
+        <input type="checkbox" id="toggle-pulse" checked class="rounded">
+        <span>Show pulse animation</span>
+      </label>
+      <label class="flex items-center gap-2 cursor-pointer">
+        <input type="checkbox" id="toggle-badge" checked class="rounded">
+        <span>Show notification badge</span>
+      </label>
+    </div>
+  </div>
+
+  <script>
+    // Interactive controls
+    document.getElementById('toggle-pulse').addEventListener('change', (e) => {
+      document.querySelectorAll('.animate-ping').forEach(el => {
+        el.style.display = e.target.checked ? 'block' : 'none';
+      });
+    });
+
+    document.getElementById('toggle-badge').addEventListener('change', (e) => {
+      document.querySelectorAll('[class*="bg-green-500"], [class*="bg-blue-400"]').forEach(el => {
+        if (!el.classList.contains('animate-ping')) {
+          el.style.display = e.target.checked ? 'block' : 'none';
+        }
+      });
+    });
+  </script>
+</body>
+</html>

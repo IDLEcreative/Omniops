@@ -204,16 +204,40 @@ export default function ChatWidget({
   }
 
   if (!isOpen) {
+    // Animation settings with sensible defaults
+    const showPulse = demoConfig?.appearance?.showPulseAnimation ?? true;
+    const showBadge = demoConfig?.appearance?.showNotificationBadge ?? true;
+
     return (
-      <button
-        onClick={() => setIsOpen(true)}
-        className="fixed bottom-4 right-4 sm:bottom-5 sm:right-5 w-12 h-12 sm:w-14 sm:h-14 bg-gradient-to-br from-[#3a3a3a] to-[#2a2a2a] text-white rounded-full shadow-xl hover:shadow-2xl hover:scale-105 focus:outline-none focus:ring-2 focus:ring-white/50 focus:ring-offset-2 focus:ring-offset-black transition-all duration-300 flex items-center justify-center animate-in fade-in z-50"
-        aria-label="Open chat support widget"
-        role="button"
-        tabIndex={0}
-      >
-        <MessageCircle className="h-5 w-5 sm:h-6 sm:w-6" aria-hidden="true" />
-      </button>
+      <div className="fixed bottom-4 right-4 sm:bottom-5 sm:right-5 z-50">
+        <button
+          onClick={() => setIsOpen(true)}
+          className="relative w-12 h-12 sm:w-14 sm:h-14 bg-gradient-to-br from-[#3a3a3a] to-[#2a2a2a] text-white rounded-full shadow-xl hover:shadow-2xl hover:scale-105 focus:outline-none focus:ring-2 focus:ring-white/50 focus:ring-offset-2 focus:ring-offset-black transition-all duration-300 flex items-center justify-center animate-in fade-in group"
+          aria-label="Open chat support widget"
+          role="button"
+          tabIndex={0}
+        >
+          {/* Subtle pulse animation ring - respects user preference and configuration */}
+          {showPulse && (
+            <span
+              className="absolute inset-0 rounded-full bg-gradient-to-br from-[#3a3a3a] to-[#2a2a2a] opacity-75 animate-ping motion-reduce:animate-none"
+              style={{ animationDuration: '3s' }}
+              aria-hidden="true"
+            />
+          )}
+
+          {/* Notification dot badge - can be disabled via config */}
+          {showBadge && (
+            <span
+              className="absolute -top-1 -right-1 w-3 h-3 bg-green-500 rounded-full border-2 border-white shadow-lg animate-pulse motion-reduce:animate-none"
+              aria-hidden="true"
+            />
+          )}
+
+          {/* Icon with hover scale effect */}
+          <MessageCircle className="relative h-5 w-5 sm:h-6 sm:w-6 group-hover:scale-110 transition-transform" aria-hidden="true" />
+        </button>
+      </div>
     );
   }
 

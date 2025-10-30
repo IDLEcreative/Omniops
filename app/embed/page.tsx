@@ -29,10 +29,10 @@ export default function EmbedPage() {
     };
   }, []);
 
-  // Parse URL parameters
+  // Parse URL parameters and listen for config from parent
   useEffect(() => {
     const params = new URLSearchParams(window.location.search);
-    
+
     // Check if this is a demo
     const demo = params.get('demo');
     if (demo) {
@@ -43,7 +43,7 @@ export default function EmbedPage() {
         setDemoConfig(JSON.parse(storedConfig));
       }
     }
-    
+
     // Parse privacy settings
     setPrivacySettings({
       allowOptOut: params.get('optOut') === 'true',
@@ -59,7 +59,7 @@ export default function EmbedPage() {
     } else if (params.get('open') === 'true') {
       setInitialOpen(true);
     }
-    
+
     // Hide hints on production domains OR when embedded in iframe
     const hostname = window.location.hostname;
     const isEmbedded = window.self !== window.top;
@@ -70,6 +70,20 @@ export default function EmbedPage() {
     if (isEmbedded) {
       setShowHints(false);
     }
+
+    // Listen for configuration from parent window (for embedded mode)
+    const handleMessage = (event: MessageEvent) => {
+      if (event.data?.type === 'init' && event.data?.config) {
+        // Update demo config with appearance settings from parent
+        setDemoConfig(prev => ({
+          ...prev,
+          ...event.data.config,
+        }));
+      }
+    };
+
+    window.addEventListener('message', handleMessage);
+    return () => window.removeEventListener('message', handleMessage);
   }, []);
 
   return (

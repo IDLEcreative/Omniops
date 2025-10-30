@@ -15,6 +15,11 @@ export interface ChatWidgetConfig {
     websiteScraping?: { enabled: boolean };
     woocommerce?: { enabled: boolean };
   };
+  appearance?: {
+    showPulseAnimation?: boolean; // Pulse ring animation on compact button (default: true)
+    showNotificationBadge?: boolean; // Green dot badge on compact button (default: true)
+    startMinimized?: boolean; // Start widget minimized on first load (default: true)
+  };
 }
 
 export interface UseChatStateProps {
@@ -112,7 +117,13 @@ export function useChatState({
   // Save open/close state to localStorage
   useEffect(() => {
     if (mounted && typeof window !== 'undefined') {
-      localStorage.setItem('chat_widget_open', isOpen.toString());
+      try {
+        localStorage.setItem('chat_widget_open', isOpen.toString());
+      } catch (error) {
+        // localStorage might be disabled (private mode, CSP policy, etc.)
+        console.warn('[Chat Widget] Could not save state to localStorage:', error);
+        // Widget will still function, just won't remember state on refresh
+      }
     }
   }, [isOpen, mounted]);
 
@@ -160,6 +171,11 @@ export function useChatState({
 
     // Listen for messages from parent window (for embed mode)
     const handleMessage = (event: MessageEvent) => {
+      // Debug logging (can be enabled via ChatWidgetDebug global)
+      if (typeof window !== 'undefined' && (window as any).ChatWidgetDebug) {
+        console.log('[Chat Widget] Received message:', event.data.type, 'from', event.origin);
+      }
+
       switch (event.data?.type) {
         case 'init':
           if (event.data.privacyPrefs) {
@@ -176,9 +192,15 @@ export function useChatState({
           }
           break;
         case 'open':
+          if (typeof window !== 'undefined' && (window as any).ChatWidgetDebug) {
+            console.log('[Chat Widget] Opening widget');
+          }
           setIsOpen(true);
           break;
         case 'close':
+          if (typeof window !== 'undefined' && (window as any).ChatWidgetDebug) {
+            console.log('[Chat Widget] Closing widget');
+          }
           setIsOpen(false);
           break;
         case 'message':

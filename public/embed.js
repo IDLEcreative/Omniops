@@ -30,6 +30,9 @@
       position: 'bottom-right', // Default to bottom-right corner
       width: 400,
       height: 600,
+      showPulseAnimation: true, // Show pulse animation on compact button
+      showNotificationBadge: true, // Show green notification dot
+      startMinimized: true, // Start widget minimized by default
     },
     features: {},
     behavior: {},
@@ -189,8 +192,19 @@
 
     // Handle messages from iframe
     window.addEventListener('message', function(event) {
-      // Verify origin
-      if (!event.origin.startsWith(config.serverUrl)) {
+      // Verify origin - more lenient for production environments
+      // Allow messages from the same domain (with or without www, http/https)
+      const eventOriginHost = new URL(event.origin).hostname.replace(/^www\./, '');
+      const configOriginHost = new URL(config.serverUrl).hostname.replace(/^www\./, '');
+
+      // For security, only accept messages from same domain or localhost
+      const isLocalhost = eventOriginHost === 'localhost' || eventOriginHost === '127.0.0.1';
+      const isSameDomain = eventOriginHost === configOriginHost;
+
+      if (!isLocalhost && !isSameDomain) {
+        if (config.debug || window.ChatWidgetDebug) {
+          console.warn('[Chat Widget] Rejected message from origin:', event.origin, 'Expected:', config.serverUrl);
+        }
         return;
       }
 
