@@ -1,4 +1,10 @@
-# WooCommerce API Documentation
+# WooCommerce API Integration
+
+**Purpose:** Complete TypeScript implementation of WooCommerce REST API v3 with modular architecture, type safety, and comprehensive error handling.
+
+**Integration Type:** API
+**Last Updated:** 2025-10-30
+**Status:** Active
 
 This directory contains a structured, modular implementation of the WooCommerce REST API v3 with TypeScript support, comprehensive error handling, and efficient resource management. It provides a clean abstraction layer for all WooCommerce operations.
 
@@ -583,13 +589,44 @@ interface WooCommerceConfig {
 }
 ```
 
-## Related Components
+## Troubleshooting
 
-- `/lib/woocommerce-full.ts` - Core WooCommerce client implementation
-- `/lib/woocommerce-types.ts` - TypeScript type definitions
-- `/lib/woocommerce-cache.ts` - Caching layer for API responses
-- `/lib/woocommerce-dynamic.ts` - Dynamic endpoint routing
-- `/lib/encryption.ts` - Credential encryption utilities
+### Common Issues
+
+**Issue: "Authentication failed"**
+- **Cause:** Invalid consumer key or secret
+- **Solution:** Verify credentials in `.env.local` or customer database
+- **Test:** Run `curl` with credentials to verify API access
+
+**Issue: "Rate limit exceeded"**
+- **Cause:** Too many API requests in short time
+- **Solution:** Implement request throttling or use batch operations
+- **Check:** Review WooCommerce rate limiting policies
+
+**Issue: "Product not found"**
+- **Cause:** Product ID doesn't exist or product is not published
+- **Solution:** Verify product exists in WooCommerce admin
+- **Alternative:** Search by SKU instead of ID
+
+**Issue: "Order update failed"**
+- **Cause:** Invalid status transition or missing required fields
+- **Solution:** Check valid order statuses and required fields
+- **Reference:** WooCommerce order status lifecycle documentation
+
+## Related Documentation
+
+**Internal:**
+- [lib/woocommerce-full.ts](/Users/jamesguy/Omniops/lib/woocommerce-full.ts) - Core WooCommerce client implementation
+- [lib/woocommerce-types.ts](/Users/jamesguy/Omniops/lib/woocommerce-types.ts) - TypeScript type definitions
+- [lib/woocommerce-cache.ts](/Users/jamesguy/Omniops/lib/woocommerce-cache.ts) - Caching layer for API responses
+- [lib/woocommerce-dynamic.ts](/Users/jamesguy/Omniops/lib/woocommerce-dynamic.ts) - Dynamic endpoint routing
+- [lib/encryption.ts](/Users/jamesguy/Omniops/lib/encryption.ts) - Credential encryption utilities
+- [lib/agents/providers/woocommerce-provider.ts](/Users/jamesguy/Omniops/lib/agents/providers/woocommerce-provider.ts) - WooCommerce AI agent provider
+
+**External:**
+- [WooCommerce REST API Documentation](https://woocommerce.github.io/woocommerce-rest-api-docs/)
+- [WooCommerce Authentication Guide](https://woocommerce.github.io/woocommerce-rest-api-docs/#authentication)
+- [WooCommerce Rate Limiting](https://woocommerce.github.io/woocommerce-rest-api-docs/#rate-limiting)
 
 ## Contributing
 

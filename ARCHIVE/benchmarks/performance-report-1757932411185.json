@@ -1,0 +1,202 @@
+{
+  "timestamp": "2025-09-15T10:33:31.183Z",
+  "systemInfo": {
+    "platform": "darwin",
+    "nodeVersion": "v22.11.0",
+    "memoryTotal": 34359738368
+  },
+  "tests": [
+    {
+      "testName": "Sequential Load Test",
+      "metrics": {
+        "responseTimes": [],
+        "errorCount": 50,
+        "successCount": 0,
+        "rateLimit429Count": 0,
+        "p50": 0,
+        "p95": 0,
+        "p99": 0,
+        "min": null,
+        "max": null,
+        "mean": 0,
+        "throughput": 0,
+        "totalDuration": 2983.012167
+      },
+      "errors": [
+        "HTTP 400",
+        "HTTP 400",
+        "HTTP 400",
+        "HTTP 400",
+        "HTTP 400"
+      ],
+      "memoryUsage": {
+        "rss": 120061952,
+        "heapTotal": 19906560,
+        "heapUsed": 11190944,
+        "external": 3761626,
+        "arrayBuffers": 88052
+      }
+    },
+    {
+      "testName": "Concurrent Request Test",
+      "metrics": {
+        "responseTimes": [],
+        "errorCount": 50,
+        "successCount": 0,
+        "rateLimit429Count": 0,
+        "p50": 0,
+        "p95": 0,
+        "p99": 0,
+        "min": null,
+        "max": null,
+        "mean": 0,
+        "throughput": 0,
+        "totalDuration": 4353.262834
+      },
+      "errors": [
+        "HTTP 400",
+        "HTTP 400",
+        "HTTP 400",
+        "HTTP 400",
+        "HTTP 400"
+      ],
+      "memoryUsage": {
+        "rss": 106397696,
+        "heapTotal": 12566528,
+        "heapUsed": 10526512,
+        "external": 3765668,
+        "arrayBuffers": 92086
+      }
+    },
+    {
+      "testName": "Large Data & Complex Query Test",
+      "metrics": {
+        "responseTimes": [],
+        "errorCount": 5,
+        "successCount": 0,
+        "rateLimit429Count": 0,
+        "p50": 0,
+        "p95": 0,
+        "p99": 0,
+        "min": null,
+        "max": null,
+        "mean": 0,
+        "throughput": 0,
+        "totalDuration": 5390.0691670000015
+      },
+      "errors": [
+        "Maximum length message (1000 chars): HTTP 400",
+        "Complex nested query: HTTP 400",
+        "Data-heavy response trigger: HTTP 400",
+        "Unicode and special characters: HTTP 400",
+        "SQL injection attempt (security test): HTTP 400"
+      ],
+      "memoryUsage": {
+        "rss": 107610112,
+        "heapTotal": 13877248,
+        "heapUsed": 10667888,
+        "external": 3768383,
+        "arrayBuffers": 94801
+      }
+    },
+    {
+      "testName": "Cache Effectiveness Test",
+      "metrics": {
+        "responseTimes": [],
+        "errorCount": 10,
+        "successCount": 0,
+        "rateLimit429Count": 0,
+        "p50": 0,
+        "p95": 0,
+        "p99": 0,
+        "min": null,
+        "max": null,
+        "mean": 0,
+        "throughput": 0,
+        "totalDuration": 2760.887834000001
+      },
+      "errors": [
+        "HTTP 400",
+        "HTTP 400",
+        "HTTP 400",
+        "HTTP 400",
+        "HTTP 400",
+        "HTTP 400",
+        "HTTP 400",
+        "HTTP 400",
+        "HTTP 400",
+        "HTTP 400"
+      ],
+      "memoryUsage": {
+        "rss": 108118016,
+        "heapTotal": 12828672,
+        "heapUsed": 11164536,
+        "external": 3773050,
+        "arrayBuffers": 99468
+      }
+    },
+    {
+      "testName": "Memory Leak Detection Test",
+      "metrics": {
+        "responseTimes": [],
+        "errorCount": 20,
+        "successCount": 0,
+        "rateLimit429Count": 0,
+        "p50": 0,
+        "p95": 0,
+        "p99": 0,
+        "min": null,
+        "max": null,
+        "mean": 0,
+        "throughput": 0,
+        "totalDuration": 3343.498749999999
+      },
+      "errors": [
+        "HTTP 400",
+        "HTTP 400",
+        "HTTP 400",
+        "HTTP 400",
+        "HTTP 400",
+        "HTTP 400",
+        "HTTP 400",
+        "HTTP 400",
+        "HTTP 400",
+        "HTTP 400",
+        "HTTP 400",
+        "HTTP 400",
+        "HTTP 400",
+        "HTTP 400",
+        "HTTP 400",
+        "HTTP 400",
+        "HTTP 400",
+        "HTTP 400",
+        "HTTP 400",
+        "HTTP 400"
+      ],
+      "memoryUsage": {
+        "rss": 108724224,
+        "heapTotal": 14139392,
+        "heapUsed": 11474784,
+        "external": 3773234,
+        "arrayBuffers": 99652
+      }
+    }
+  ],
+  "summary": {
+    "totalRequests": 135,
+    "totalErrors": 135,
+    "overallThroughput": 7.169132296454385,
+    "recommendations": [
+      "❌ High error rate (100.0%) in Sequential Load Test. Investigate error handling.",
+      "🐌 Low throughput (0.0 req/s) in Sequential Load Test. Consider horizontal scaling or async processing.",
+      "❌ High error rate (100.0%) in Concurrent Request Test. Investigate error handling.",
+      "🐌 Low throughput (0.0 req/s) in Concurrent Request Test. Consider horizontal scaling or async processing.",
+      "❌ High error rate (100.0%) in Large Data & Complex Query Test. Investigate error handling.",
+      "🐌 Low throughput (0.0 req/s) in Large Data & Complex Query Test. Consider horizontal scaling or async processing.",
+      "❌ High error rate (100.0%) in Cache Effectiveness Test. Investigate error handling.",
+      "🐌 Low throughput (0.0 req/s) in Cache Effectiveness Test. Consider horizontal scaling or async processing.",
+      "❌ High error rate (100.0%) in Memory Leak Detection Test. Investigate error handling.",
+      "🐌 Low throughput (0.0 req/s) in Memory Leak Detection Test. Consider horizontal scaling or async processing."
+    ]
+  }
+}

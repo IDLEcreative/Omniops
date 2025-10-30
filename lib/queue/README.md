@@ -1,4 +1,10 @@
-# Job Queue Documentation
+# Job Queue System
+
+**Purpose:** Comprehensive background job processing system built on Redis and BullMQ for scalable, reliable task execution with priority management and real-time monitoring.
+
+**Integration Type:** System
+**Last Updated:** 2025-10-30
+**Status:** Active
 
 This directory contains a comprehensive job queue management system built with Redis and BullMQ for handling background tasks, primarily focused on web scraping operations. The system provides robust job processing, monitoring, and management capabilities.
 
@@ -735,13 +741,103 @@ async function resourceIntensiveJob(job: Job) {
 }
 ```
 
-## Related Components
+## Configuration
 
-- `/lib/redis.ts` - Redis client configuration
-- `/lib/scraper-api.ts` - Web scraping functionality
-- `/lib/embeddings.ts` - Content processing and embeddings
-- `/app/api/queue/` - Queue management API endpoints
-- `/lib/monitoring/` - Queue monitoring and analytics
+### Environment Variables
+
+```bash
+# Redis Configuration
+REDIS_HOST=localhost
+REDIS_PORT=6379
+REDIS_PASSWORD=optional_password
+REDIS_DB=0
+
+# Queue Configuration
+QUEUE_CONCURRENCY_SCRAPING=5
+QUEUE_CONCURRENCY_PROCESSING=10
+QUEUE_JOB_TIMEOUT=600000  # 10 minutes
+QUEUE_MAX_RETRIES=3
+
+# Worker Configuration
+WORKER_POLL_INTERVAL=1000  # 1 second
+WORKER_STALLED_INTERVAL=30000  # 30 seconds
+```
+
+## Troubleshooting
+
+**Issue: Jobs stuck in "waiting" state**
+- **Cause:** No workers processing the queue
+- **Solution:** Start worker with `await processor.start()`
+- **Check:** Verify Redis connection is healthy
+
+**Issue: Jobs failing repeatedly**
+- **Cause:** Job logic throwing errors or timeout
+- **Solution:** Check job logs, increase timeout if needed
+- **Debug:** Review dead letter queue for failed jobs
+
+**Issue: High memory usage in worker**
+- **Cause:** Jobs not cleaning up resources properly
+- **Solution:** Implement proper cleanup in finally blocks
+- **Monitor:** Use `process.memoryUsage()` to track
+
+**Issue: Queue backlog growing**
+- **Cause:** Job processing slower than job creation
+- **Solution:** Increase worker concurrency or add more workers
+- **Scale:** Deploy additional worker instances horizontally
+
+**Issue: Jobs not retrying after failure**
+- **Cause:** Retry configuration not set correctly
+- **Solution:** Verify retry config in job options
+- **Check:** Review `isRetryable` logic in error handlers
+
+## API Reference
+
+### Queue Manager
+
+```typescript
+class QueueManager {
+  addJob(name: string, data: any, options?: JobOptions): Promise<Job>
+  addRecurringJob(name: string, cron: string, options?: JobOptions): Promise<void>
+  getJob(jobId: string): Promise<Job | null>
+  removeJob(jobId: string): Promise<void>
+}
+```
+
+### Job Processor
+
+```typescript
+class JobProcessor {
+  registerHandler(jobType: string, handler: JobHandler): void
+  start(): Promise<void>
+  stop(): Promise<void>
+}
+
+type JobHandler = (job: Job, updateProgress: ProgressCallback) => Promise<any>
+type ProgressCallback = (percentage: number, message?: string) => Promise<void>
+```
+
+### Queue Utils
+
+```typescript
+QueueUtils.getQueueStats(queueName: string): Promise<QueueStats>
+QueueUtils.getJobDetails(jobId: string): Promise<JobDetails>
+QueueUtils.getQueueHealth(): Promise<QueueHealth>
+QueueUtils.cleanupCompletedJobs(options: CleanupOptions): Promise<number>
+```
+
+## Related Documentation
+
+**Internal:**
+- [lib/redis.ts](/Users/jamesguy/Omniops/lib/redis.ts) - Redis client configuration
+- [lib/scraper-api.ts](/Users/jamesguy/Omniops/lib/scraper-api.ts) - Web scraping functionality
+- [lib/embeddings.ts](/Users/jamesguy/Omniops/lib/embeddings.ts) - Content processing and embeddings
+- [app/api/queue/](/Users/jamesguy/Omniops/app/api/queue/) - Queue management API endpoints
+- [lib/monitoring/](/Users/jamesguy/Omniops/lib/monitoring/) - Queue monitoring and analytics
+
+**External:**
+- [BullMQ Documentation](https://docs.bullmq.io/)
+- [Redis Documentation](https://redis.io/docs/)
+- [BullMQ Best Practices](https://docs.bullmq.io/guide/best-practices)
 
 ## Contributing
 

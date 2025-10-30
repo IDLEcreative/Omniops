@@ -12,7 +12,16 @@ if [ $? -ne 0 ]; then
   exit 1
 fi
 
-# 2. Type checking (disabled due to memory issues with large Next.js projects)
+# 2. Root directory clutter check
+echo "\n🗂️  Checking for misplaced files in root directory..."
+npx tsx scripts/check-root-clutter.ts --staged
+if [ $? -ne 0 ]; then
+  echo "❌ Root directory check failed. Files are in the wrong location."
+  echo "   See CLAUDE.md 'FILE PLACEMENT RULES' for correct locations."
+  exit 1
+fi
+
+# 3. Type checking (disabled due to memory issues with large Next.js projects)
 # TODO: Re-enable with incremental compilation or smaller chunks
 # echo "\n🔎 Running TypeScript type check..."
 # npx tsc --noEmit
@@ -22,7 +31,7 @@ fi
 # fi
 echo "\n🔎 TypeScript type check: SKIPPED (memory constraints)"
 
-# 3. Linting (disabled for faster commits - run manually with npm run lint)
+# 4. Linting (disabled for faster commits - run manually with npm run lint)
 # echo "\n🧹 Running ESLint..."
 # npm run lint
 # if [ $? -ne 0 ]; then
@@ -31,7 +40,7 @@ echo "\n🔎 TypeScript type check: SKIPPED (memory constraints)"
 # fi
 echo "\n🧹 ESLint: SKIPPED (run 'npm run lint' manually)"
 
-# 4. Run critical tests (disabled for faster commits - run manually with npm test)
+# 5. Run critical tests (disabled for faster commits - run manually with npm test)
 # echo "\n🧪 Running tests..."
 # npm test -- --bail --passWithNoTests
 # if [ $? -ne 0 ]; then

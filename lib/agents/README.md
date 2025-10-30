@@ -1,4 +1,10 @@
-# AI Agents Documentation
+# AI Agents System
+
+**Purpose:** Intelligent AI agent orchestration system for customer service interactions with specialized prompt engineering and provider-specific integrations.
+
+**Integration Type:** System
+**Last Updated:** 2025-10-30
+**Status:** Active
 
 This directory contains intelligent AI agents that handle customer service interactions with specialized prompt engineering and context building capabilities. The agents provide a modular, provider-agnostic approach to handling different types of customer queries.
 
@@ -227,12 +233,40 @@ expect(prompt2).toContain("Customer provided email");
 - Use lazy loading for large context
 - Profile prompt performance regularly
 
-## Related Files
+## Configuration
 
-- `/lib/woocommerce-ai-instructions.ts` - Legacy compatibility shim
-- `/app/api/chat/route.ts` - Main chat integration
-- `/lib/customer-verification.ts` - Customer verification logic
-- `/lib/embeddings.ts` - Content search integration
+**Environment Variables:**
+None - Agents use configuration from customer database records
+
+**Dependencies:**
+- OpenAI GPT-4 for chat completion
+- Customer verification system
+- WooCommerce/Shopify provider integrations
+
+## Troubleshooting
+
+**Issue:** Agent produces hallucinated information
+- **Solution:** Check that anti-hallucination guidelines are properly included in system prompt
+- **Test:** Run `npx tsx test-hallucination-prevention.ts` to verify safeguards
+
+**Issue:** Customer verification not working properly
+- **Solution:** Verify verification level is being passed correctly ('none', 'basic', 'full')
+- **Check:** Review customer-verification.ts for verification logic
+
+**Issue:** Agent not showing products before asking questions
+- **Solution:** Review Product Query Philosophy in this README - agents should always show available products first
+
+## Related Documentation
+
+**Internal:**
+- [lib/woocommerce-ai-instructions.ts](/Users/jamesguy/Omniops/lib/woocommerce-ai-instructions.ts) - Legacy compatibility shim
+- [app/api/chat/route.ts](/Users/jamesguy/Omniops/app/api/chat/route.ts) - Main chat integration
+- [lib/customer-verification.ts](/Users/jamesguy/Omniops/lib/customer-verification.ts) - Customer verification logic
+- [lib/embeddings.ts](/Users/jamesguy/Omniops/lib/embeddings.ts) - Content search integration
+- [lib/agents/providers/](/Users/jamesguy/Omniops/lib/agents/providers/) - E-commerce provider implementations
+
+**External:**
+- [OpenAI Chat Completions API](https://platform.openai.com/docs/guides/chat)
 
 ## Contributing
 

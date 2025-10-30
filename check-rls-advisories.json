@@ -1,3 +1,0 @@
-{
-  "query": "{ performance: get_advisors(type: \"performance\") { name title level detail } }"
-}

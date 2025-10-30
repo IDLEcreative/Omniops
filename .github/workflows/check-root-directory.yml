@@ -1,0 +1,84 @@
+name: Check Root Directory
+
+# Runs on every push and pull request to ensure root directory stays clean
+on:
+  push:
+    branches: [ main, develop ]
+  pull_request:
+    branches: [ main, develop ]
+
+jobs:
+  check-root-clutter:
+    name: Validate Root Directory Structure
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+          cache: 'npm'
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Check for misplaced files in root
+        run: |
+          echo "🔍 Checking root directory for misplaced files..."
+          npx tsx scripts/check-root-clutter.ts
+
+          if [ $? -ne 0 ]; then
+            echo ""
+            echo "❌ Root directory contains misplaced files!"
+            echo ""
+            echo "See CLAUDE.md 'FILE PLACEMENT RULES' section for correct locations:"
+            echo "  - Test files → __tests__/[category]/"
+            echo "  - Utility scripts → scripts/[category]/"
+            echo "  - SQL scripts → scripts/sql/[category]/"
+            echo "  - Reports → ARCHIVE/completion-reports-[date]/"
+            echo "  - Test results → ARCHIVE/test-results/"
+            echo "  - Logs → logs/[category]/"
+            echo ""
+            exit 1
+          fi
+
+          echo "✅ Root directory structure is valid!"
+
+      - name: Comment on PR (if failed)
+        if: failure() && github.event_name == 'pull_request'
+        uses: actions/github-script@v7
+        with:
+          script: |
+            github.rest.issues.createComment({
+              issue_number: context.issue.number,
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              body: `## ❌ Root Directory Check Failed
+
+              This PR contains misplaced files in the root directory.
+
+              ### 📖 File Placement Rules
+
+              Please move files to their correct locations according to [CLAUDE.md](https://github.com/${context.repo.owner}/${context.repo.repo}/blob/main/CLAUDE.md#-critical-file-placement-rules-):
+
+              | File Type | Correct Location |
+              |-----------|------------------|
+              | Test scripts | \`__tests__/[category]/\` |
+              | Utility scripts | \`scripts/[category]/\` |
+              | SQL scripts | \`scripts/sql/[category]/\` |
+              | Completion reports | \`ARCHIVE/completion-reports-[date]/\` |
+              | Test results (JSON) | \`ARCHIVE/test-results/\` |
+              | Log files | \`logs/[category]/\` |
+              | Documentation | \`docs/[category]/\` |
+
+              ### 🔧 How to Fix
+
+              1. Check which files failed: \`npx tsx scripts/check-root-clutter.ts\`
+              2. Move them to the correct location
+              3. Push the changes
+
+              Only configuration files (package.json, tsconfig.json, etc.) should be in the root directory.`
+            })

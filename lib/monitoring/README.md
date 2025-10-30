@@ -1,4 +1,10 @@
-# Monitoring Utilities Documentation
+# Monitoring and Analytics
+
+**Purpose:** Comprehensive monitoring, analytics, and observability system for tracking application performance, user behavior, and system health.
+
+**Integration Type:** Service
+**Last Updated:** 2025-10-30
+**Status:** Active
 
 This directory contains monitoring, analytics, and observability utilities that provide insights into application performance, user behavior, and system health. These tools are essential for maintaining service quality and optimizing performance.
 
@@ -555,13 +561,77 @@ const ALERT_THRESHOLDS = {
 };
 ```
 
-## Related Components
+## Configuration
 
-- `/lib/performance-monitor.ts` - System performance monitoring
-- `/lib/error-logger.ts` - Error tracking and analysis
-- `/lib/redis.ts` - Caching and queue monitoring
-- `/app/api/monitoring/` - Monitoring API endpoints
-- `/components/dashboard/` - Dashboard UI components
+### Environment Variables
+
+```bash
+# Supabase for metrics storage
+NEXT_PUBLIC_SUPABASE_URL=https://...
+SUPABASE_SERVICE_ROLE_KEY=...
+
+# Redis for caching metrics
+REDIS_URL=redis://localhost:6379
+
+# Optional: Monitoring intervals
+MONITORING_INTERVAL=30000  # 30 seconds
+METRICS_RETENTION_DAYS=90  # 90 days
+```
+
+## Troubleshooting
+
+**Issue: Dashboard showing stale data**
+- **Cause:** Caching layer not invalidating properly
+- **Solution:** Clear metrics cache with `await cache.deletePattern('metrics:*')`
+- **Check:** Verify MONITORING_INTERVAL is set correctly
+
+**Issue: High memory usage in monitoring**
+- **Cause:** Too much data being cached or held in memory
+- **Solution:** Reduce metrics retention period or implement streaming
+- **Optimize:** Use database-level aggregation instead of in-memory
+
+**Issue: Slow dashboard loading**
+- **Cause:** Inefficient database queries
+- **Solution:** Review query performance, add indexes if needed
+- **Alternative:** Pre-compute metrics and cache aggressively
+
+**Issue: Missing metrics data**
+- **Cause:** Metrics collection failing silently
+- **Solution:** Check error logs for collection failures
+- **Test:** Run `await getSystemPerformanceMetrics()` directly to test
+
+## API Reference
+
+### Dashboard Data Functions
+
+```typescript
+// Usage statistics
+getUsageStatistics(timeRange: TimeRange): Promise<UsageStats>
+getCustomerActivityMetrics(customerId?: string): Promise<ActivityMetrics>
+
+// Performance metrics
+getSystemPerformanceMetrics(): Promise<PerformanceMetrics>
+getDatabaseMetrics(): Promise<DatabaseStats>
+getAPIPerformanceMetrics(): Promise<APIMetrics>
+
+// Scraping metrics
+getScrapingPerformanceMetrics(): Promise<ScrapingMetrics>
+getErrorAnalytics(timeRange: TimeRange): Promise<ErrorAnalytics>
+```
+
+## Related Documentation
+
+**Internal:**
+- [lib/performance-monitor.ts](/Users/jamesguy/Omniops/lib/performance-monitor.ts) - System performance monitoring
+- [lib/error-logger.ts](/Users/jamesguy/Omniops/lib/error-logger.ts) - Error tracking and analysis
+- [lib/redis.ts](/Users/jamesguy/Omniops/lib/redis.ts) - Caching and queue monitoring
+- [app/api/monitoring/](/Users/jamesguy/Omniops/app/api/monitoring/) - Monitoring API endpoints
+- [components/dashboard/](/Users/jamesguy/Omniops/components/dashboard/) - Dashboard UI components
+- [lib/analytics/](/Users/jamesguy/Omniops/lib/analytics/) - Business intelligence analytics
+
+**External:**
+- [Supabase Realtime Documentation](https://supabase.com/docs/guides/realtime)
+- [Redis Monitoring Best Practices](https://redis.io/docs/management/monitoring/)
 
 ## Contributing
 

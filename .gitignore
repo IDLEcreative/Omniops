@@ -96,7 +96,14 @@ mcp-supabase-config.json
 /test-*.ts
 /test-*.js
 /test-*.html
+/test-*.tsx
 /diagnose-*.html
+
+# Heap snapshots (debugging artifacts - can regenerate)
+/*.heapsnapshot
+
+# Performance report artifacts
+/performance-report-*.html
 
 # Prevent completion reports in root (should go in docs/)
 /*_REPORT.md
@@ -138,6 +145,30 @@ mcp-supabase-config.json
 /batch-*.py
 /batch-*.ts
 
+# Prevent SQL scripts in root (should go in scripts/sql/)
+/*.sql
+# Allow Supabase migration SQL files
+!/supabase/migrations/*.sql
+
+# Prevent JSON artifacts in root (test results, benchmarks, reports)
+# Test result artifacts
+/*-results*.json
+/*-report*.json
+/test-results-*.json
+/edge-case-test-results-*.json
+/hallucination-test-report-*.json
+
+# Benchmark artifacts
+/benchmark-*.json
+/performance-report-*.json
+/docker-performance-*.json
+
+# Investigation artifacts
+/dc66-*.json
+/*-investigation-report.json
+/optimization-validation-report.json
+/check-rls-advisories.json
+
 # Allow specific essential config files
 !/middleware.ts
 !/next.config.ts
@@ -145,3 +176,8 @@ mcp-supabase-config.json
 !/postcss.config.mjs
 !/jest.config.ts
 !/tsconfig.json
+!/package.json
+!/package-lock.json
+!/components.json
+!/jsconfig.json
+!/vercel.json

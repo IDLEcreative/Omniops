@@ -1,310 +1,478 @@
 # Hooks Directory
 
-Custom React hooks and utilities for the Customer Service Agent application.
+**Purpose:** Custom React hooks for state management and API integration across the OmniOps application
+**Last Updated:** 2025-10-30
+**Related:** [Components](/components), [Lib](/lib), [Types](/types)
 
-## Current Status
+## Overview
 
-**⚠️ Directory is currently empty** - This directory is reserved for custom React hooks but does not currently contain any implemented hooks. The hooks described below are examples of what could be implemented based on the application's functionality.
+This directory contains custom React hooks that encapsulate reusable logic for dashboard data fetching, GDPR compliance, keyboard shortcuts, and real-time subscriptions. All hooks follow React best practices with proper cleanup and error handling.
 
-## Structure (Planned)
+## Directory Structure
 
 ```
 hooks/
-├── useAuth.ts          # Authentication hook (not implemented)
-├── useChat.ts          # Chat functionality (not implemented)  
-├── useWidget.ts        # Widget configuration (not implemented)
-├── useTheme.ts         # Theme management (not implemented)
-├── useDebounce.ts      # Utility hooks (not implemented)
-├── useLocalStorage.ts  # Local storage hook (not implemented)
-├── useAsync.ts         # Async operations hook (not implemented)
-└── useOnClickOutside.ts # Click outside detection (not implemented)
+├── README.md                        # This documentation
+├── use-dashboard-analytics.ts       # Dashboard analytics data fetching
+├── use-dashboard-conversations.ts   # Conversation history management
+├── use-dashboard-overview.ts        # Dashboard overview metrics
+├── use-dashboard-telemetry.ts       # Telemetry and usage data
+├── use-conversation-transcript.ts   # Individual conversation transcript
+├── use-gdpr-delete.ts              # GDPR data deletion requests
+├── use-gdpr-export.ts              # GDPR data export functionality
+├── use-keyboard-shortcuts.ts       # Global keyboard shortcut handling
+└── use-realtime-conversations.ts   # Real-time conversation updates
 ```
 
-## Potential Hooks (Examples for Future Implementation)
+## Key Hooks
 
-### useAuth
-Authentication state and methods:
+### Dashboard Data Fetching
 
+#### `use-dashboard-analytics.ts`
+Fetches and manages dashboard analytics data with configurable time ranges.
+
+**Features:**
+- Configurable time range (default: 7 days)
+- Auto-refresh capability
+- Request cancellation on unmount
+- Error handling with retry logic
+
+**Usage:**
 ```typescript
-export function useAuth() {
-  const [user, setUser] = useState(null);
-  const [loading, setLoading] = useState(true);
-  
-  const login = async (credentials) => {
-    // Login logic
-  };
-  
-  const logout = async () => {
-    // Logout logic
-  };
-  
-  return { user, loading, login, logout };
+import { useDashboardAnalytics } from '@/hooks/use-dashboard-analytics';
+
+function AnalyticsDashboard() {
+  const { data, loading, error, refresh } = useDashboardAnalytics({ days: 30 });
+
+  if (loading) return <Spinner />;
+  if (error) return <Error message={error.message} />;
+
+  return <AnalyticsChart data={data} />;
 }
-
-// Usage
-const { user, loading, login, logout } = useAuth();
 ```
 
-### useChat
-Chat functionality and state:
+#### `use-dashboard-overview.ts`
+Provides high-level dashboard metrics and KPIs.
 
+**Features:**
+- Total conversations, messages, customers
+- Response time metrics
+- Satisfaction scores
+- Auto-refresh support
+
+**Usage:**
 ```typescript
-export function useChat(config?: ChatConfig) {
-  const [messages, setMessages] = useState<Message[]>([]);
-  const [loading, setLoading] = useState(false);
-  
-  const sendMessage = async (content: string) => {
-    // Send message logic
-  };
-  
-  const clearChat = () => {
-    setMessages([]);
-  };
-  
-  return { messages, loading, sendMessage, clearChat };
+import { useDashboardOverview } from '@/hooks/use-dashboard-overview';
+
+function DashboardOverview() {
+  const { data, loading, refresh } = useDashboardOverview();
+
+  return (
+    <MetricsGrid>
+      <Metric label="Conversations" value={data?.totalConversations} />
+      <Metric label="Avg Response Time" value={data?.avgResponseTime} />
+    </MetricsGrid>
+  );
 }
-
-// Usage
-const { messages, loading, sendMessage } = useChat();
 ```
 
-### useWidget
-Widget configuration and control:
+#### `use-dashboard-conversations.ts`
+Manages conversation list with pagination, filtering, and search.
 
+**Features:**
+- Pagination support
+- Search functionality
+- Date range filtering
+- Sort by multiple fields
+- Real-time updates
+
+**Usage:**
 ```typescript
-export function useWidget() {
-  const [isOpen, setIsOpen] = useState(false);
-  const [config, setConfig] = useState<WidgetConfig>();
-  
-  const open = () => setIsOpen(true);
-  const close = () => setIsOpen(false);
-  const toggle = () => setIsOpen(prev => !prev);
-  
-  return { isOpen, config, open, close, toggle };
-}
+import { useDashboardConversations } from '@/hooks/use-dashboard-conversations';
 
-// Usage
-const { isOpen, open, close, toggle } = useWidget();
-```
-
-### useTheme
-Theme management:
-
-```typescript
-export function useTheme() {
-  const [theme, setTheme] = useState<'light' | 'dark'>('light');
-  
-  const toggleTheme = () => {
-    setTheme(prev => prev === 'light' ? 'dark' : 'light');
-  };
-  
-  useEffect(() => {
-    document.documentElement.classList.toggle('dark', theme === 'dark');
-  }, [theme]);
-  
-  return { theme, toggleTheme };
-}
-
-// Usage
-const { theme, toggleTheme } = useTheme();
-```
-
-## Utility Hooks
-
-### useDebounce
-Debounce values:
-
-```typescript
-export function useDebounce<T>(value: T, delay: number): T {
-  const [debouncedValue, setDebouncedValue] = useState(value);
-  
-  useEffect(() => {
-    const handler = setTimeout(() => {
-      setDebouncedValue(value);
-    }, delay);
-    
-    return () => clearTimeout(handler);
-  }, [value, delay]);
-  
-  return debouncedValue;
-}
-
-// Usage
-const debouncedSearch = useDebounce(searchTerm, 500);
-```
-
-### useLocalStorage
-Persist state in localStorage:
-
-```typescript
-export function useLocalStorage<T>(key: string, initialValue: T) {
-  const [storedValue, setStoredValue] = useState<T>(() => {
-    try {
-      const item = window.localStorage.getItem(key);
-      return item ? JSON.parse(item) : initialValue;
-    } catch (error) {
-      return initialValue;
-    }
+function ConversationList() {
+  const { conversations, loading, loadMore, hasMore } = useDashboardConversations({
+    pageSize: 20,
+    search: searchTerm
   });
-  
-  const setValue = (value: T | ((val: T) => T)) => {
-    try {
-      const valueToStore = value instanceof Function ? value(storedValue) : value;
-      setStoredValue(valueToStore);
-      window.localStorage.setItem(key, JSON.stringify(valueToStore));
-    } catch (error) {
-      console.error(error);
-    }
-  };
-  
-  return [storedValue, setValue] as const;
-}
 
-// Usage
-const [settings, setSettings] = useLocalStorage('settings', {});
+  return (
+    <InfiniteScroll onLoadMore={loadMore} hasMore={hasMore}>
+      {conversations.map(conv => <ConversationCard key={conv.id} {...conv} />)}
+    </InfiniteScroll>
+  );
+}
 ```
 
-### useAsync
-Handle async operations:
+#### `use-dashboard-telemetry.ts`
+Tracks and displays system telemetry data.
+
+**Features:**
+- API response times
+- Database query performance
+- Cache hit rates
+- Error tracking
+
+**Usage:**
+```typescript
+import { useDashboardTelemetry } from '@/hooks/use-dashboard-telemetry';
+
+function TelemetryMonitor() {
+  const { data, loading } = useDashboardTelemetry();
+
+  return (
+    <TelemetryChart
+      apiLatency={data?.apiLatency}
+      cacheHitRate={data?.cacheHitRate}
+    />
+  );
+}
+```
+
+### Conversation Management
+
+#### `use-conversation-transcript.ts`
+Fetches and manages individual conversation transcripts.
+
+**Features:**
+- Message-by-message loading
+- Metadata tracking
+- Source citation support
+- Real-time updates
+
+**Usage:**
+```typescript
+import { useConversationTranscript } from '@/hooks/use-conversation-transcript';
+
+function ConversationView({ conversationId }: { conversationId: string }) {
+  const { messages, loading, metadata } = useConversationTranscript(conversationId);
+
+  return (
+    <Transcript>
+      {messages.map(msg => <Message key={msg.id} {...msg} />)}
+    </Transcript>
+  );
+}
+```
+
+#### `use-realtime-conversations.ts`
+Subscribes to real-time conversation updates via Supabase Realtime.
+
+**Features:**
+- WebSocket-based updates
+- Automatic reconnection
+- Optimistic UI updates
+- Presence tracking
+
+**Usage:**
+```typescript
+import { useRealtimeConversations } from '@/hooks/use-realtime-conversations';
+
+function LiveConversations() {
+  const { conversations, onlineUsers } = useRealtimeConversations();
+
+  return (
+    <ConversationList
+      conversations={conversations}
+      onlineUsers={onlineUsers}
+    />
+  );
+}
+```
+
+### GDPR Compliance
+
+#### `use-gdpr-export.ts`
+Handles GDPR data export requests.
+
+**Features:**
+- Generates complete user data export
+- JSON format download
+- Progress tracking
+- Error handling
+
+**Usage:**
+```typescript
+import { useGDPRExport } from '@/hooks/use-gdpr-export';
+
+function PrivacySettings() {
+  const { exportData, loading, error } = useGDPRExport();
+
+  return (
+    <Button onClick={exportData} loading={loading}>
+      Download My Data
+    </Button>
+  );
+}
+```
+
+#### `use-gdpr-delete.ts`
+Manages GDPR data deletion (right to be forgotten).
+
+**Features:**
+- Complete data deletion
+- Confirmation workflow
+- Irreversible action protection
+- Audit trail
+
+**Usage:**
+```typescript
+import { useGDPRDelete } from '@/hooks/use-gdpr-delete';
+
+function DeleteAccount() {
+  const { deleteData, loading, confirmed, setConfirmed } = useGDPRDelete();
+
+  return (
+    <DangerZone>
+      <Checkbox checked={confirmed} onChange={setConfirmed}>
+        I understand this is permanent
+      </Checkbox>
+      <Button onClick={deleteData} disabled={!confirmed} variant="destructive">
+        Delete All My Data
+      </Button>
+    </DangerZone>
+  );
+}
+```
+
+### Utilities
+
+#### `use-keyboard-shortcuts.ts`
+Global keyboard shortcut management system.
+
+**Features:**
+- Multi-key combinations
+- Platform detection (Mac vs Windows)
+- Context-aware shortcuts
+- Conflict prevention
+
+**Usage:**
+```typescript
+import { useKeyboardShortcuts } from '@/hooks/use-keyboard-shortcuts';
+
+function App() {
+  useKeyboardShortcuts({
+    'cmd+k': () => openCommandPalette(),
+    'cmd+/': () => toggleHelp(),
+    'esc': () => closeModal(),
+  });
+
+  return <YourApp />;
+}
+```
+
+## Hook Patterns & Best Practices
+
+### Standard Hook Structure
+All hooks follow this consistent pattern:
 
 ```typescript
-export function useAsync<T>(asyncFunction: () => Promise<T>) {
-  const [data, setData] = useState<T | null>(null);
+import { useState, useEffect, useCallback } from 'react';
+
+interface HookOptions {
+  // Configuration options
+}
+
+interface HookResult {
+  data: DataType | null;
+  loading: boolean;
+  error: Error | null;
+  refresh: () => Promise<void>;
+}
+
+export function useCustomHook(options: HookOptions = {}): HookResult {
+  // 1. State management
+  const [data, setData] = useState<DataType | null>(null);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<Error | null>(null);
-  
-  const execute = useCallback(async () => {
+
+  // 2. Data fetching logic
+  const fetchData = useCallback(async () => {
     setLoading(true);
     setError(null);
     try {
-      const result = await asyncFunction();
+      const response = await fetch('/api/endpoint');
+      const result = await response.json();
       setData(result);
     } catch (err) {
       setError(err as Error);
     } finally {
       setLoading(false);
     }
-  }, [asyncFunction]);
-  
-  return { data, loading, error, execute };
-}
-
-// Usage
-const { data, loading, error, execute } = useAsync(fetchData);
-```
-
-### useOnClickOutside
-Detect clicks outside element:
-
-```typescript
-export function useOnClickOutside(
-  ref: RefObject<HTMLElement>,
-  handler: () => void
-) {
-  useEffect(() => {
-    const listener = (event: MouseEvent | TouchEvent) => {
-      if (!ref.current || ref.current.contains(event.target as Node)) {
-        return;
-      }
-      handler();
-    };
-    
-    document.addEventListener('mousedown', listener);
-    document.addEventListener('touchstart', listener);
-    
-    return () => {
-      document.removeEventListener('mousedown', listener);
-      document.removeEventListener('touchstart', listener);
-    };
-  }, [ref, handler]);
-}
-
-// Usage
-const ref = useRef(null);
-useOnClickOutside(ref, () => closeModal());
-```
-
-## Creating Custom Hooks
-
-### Hook Template
-```typescript
-import { useState, useEffect, useCallback } from 'react';
-
-export function useCustomHook(initialValue?: any) {
-  // State
-  const [state, setState] = useState(initialValue);
-  
-  // Effects
-  useEffect(() => {
-    // Side effects
   }, [/* dependencies */]);
-  
-  // Methods
-  const method = useCallback(() => {
-    // Logic
-  }, [/* dependencies */]);
-  
-  // Return public API
-  return {
-    state,
-    method
-  };
+
+  // 3. Initial data fetch
+  useEffect(() => {
+    fetchData();
+  }, [fetchData]);
+
+  // 4. Return public API
+  return { data, loading, error, refresh: fetchData };
 }
 ```
 
-### Best Practices
+### Common Patterns
 
-1. **Naming**: Always prefix with `use`
-2. **Single Responsibility**: One hook, one purpose
-3. **Return Consistent API**: Object with clear properties
-4. **Handle Cleanup**: Clean up effects properly
-5. **Memoization**: Use useCallback and useMemo appropriately
+**1. Request Cancellation**
+```typescript
+const abortControllerRef = useRef<AbortController | null>(null);
 
-### Testing Hooks
+useEffect(() => {
+  abortControllerRef.current?.abort();
+  const controller = new AbortController();
+  abortControllerRef.current = controller;
+
+  fetch('/api/data', { signal: controller.signal });
+
+  return () => controller.abort();
+}, [dependency]);
+```
+
+**2. Auto-Refresh**
+```typescript
+useEffect(() => {
+  if (!autoRefresh) return;
+
+  const interval = setInterval(fetchData, refreshInterval);
+  return () => clearInterval(interval);
+}, [autoRefresh, refreshInterval, fetchData]);
+```
+
+**3. Optimistic Updates**
+```typescript
+const updateItem = useCallback(async (id: string, updates: Partial<Item>) => {
+  // Optimistic update
+  setItems(prev => prev.map(item =>
+    item.id === id ? { ...item, ...updates } : item
+  ));
+
+  try {
+    await fetch(`/api/items/${id}`, { method: 'PATCH', body: JSON.stringify(updates) });
+  } catch (error) {
+    // Rollback on error
+    fetchItems();
+  }
+}, [fetchItems]);
+```
+
+**4. Pagination**
+```typescript
+const [page, setPage] = useState(1);
+const [hasMore, setHasMore] = useState(true);
+
+const loadMore = useCallback(async () => {
+  const nextPage = page + 1;
+  const newData = await fetchPage(nextPage);
+
+  setData(prev => [...prev, ...newData]);
+  setHasMore(newData.length > 0);
+  setPage(nextPage);
+}, [page]);
+```
+
+## Testing Hooks
+
+All hooks should be tested using `@testing-library/react-hooks`:
 
 ```typescript
 import { renderHook, act } from '@testing-library/react-hooks';
-import { useCounter } from './useCounter';
+import { useDashboardAnalytics } from '@/hooks/use-dashboard-analytics';
 
-describe('useCounter', () => {
-  it('should increment counter', () => {
-    const { result } = renderHook(() => useCounter());
-    
+describe('useDashboardAnalytics', () => {
+  it('should fetch analytics data', async () => {
+    const { result, waitForNextUpdate } = renderHook(() =>
+      useDashboardAnalytics({ days: 7 })
+    );
+
+    expect(result.current.loading).toBe(true);
+
+    await waitForNextUpdate();
+
+    expect(result.current.loading).toBe(false);
+    expect(result.current.data).toBeDefined();
+  });
+
+  it('should handle refresh', async () => {
+    const { result, waitForNextUpdate } = renderHook(() =>
+      useDashboardAnalytics()
+    );
+
+    await waitForNextUpdate();
+
     act(() => {
-      result.current.increment();
+      result.current.refresh();
     });
-    
-    expect(result.current.count).toBe(1);
+
+    expect(result.current.loading).toBe(true);
   });
 });
 ```
 
-## Hook Categories
-
-### State Management
-- `useAuth` - Authentication state
-- `useUser` - User profile data
-- `useConfig` - Application configuration
-
-### UI/UX
-- `useTheme` - Theme management
-- `useModal` - Modal control
-- `useToast` - Toast notifications
-
-### Data Fetching
-- `useApi` - API calls
-- `useFetch` - Generic fetching
-- `useInfiniteScroll` - Pagination
-
-### Utilities
-- `useDebounce` - Debouncing
-- `useThrottle` - Throttling
-- `useInterval` - Intervals
-- `useTimeout` - Timeouts
-
 ## Performance Considerations
 
-1. **Avoid Unnecessary Renders**: Use memo and callbacks
-2. **Clean Up Effects**: Prevent memory leaks
-3. **Lazy Initial State**: Use functions for expensive initial values
-4. **Custom Comparison**: Use custom equality functions when needed
+### Memoization
+Use `useCallback` and `useMemo` to prevent unnecessary re-renders:
+
+```typescript
+const memoizedValue = useMemo(() =>
+  expensiveComputation(data),
+  [data]
+);
+
+const memoizedCallback = useCallback(() => {
+  doSomething(data);
+}, [data]);
+```
+
+### Debouncing
+For search and user input:
+
+```typescript
+const [debouncedValue, setDebouncedValue] = useState(value);
+
+useEffect(() => {
+  const timer = setTimeout(() => setDebouncedValue(value), 300);
+  return () => clearTimeout(timer);
+}, [value]);
+```
+
+### Cleanup
+Always clean up effects to prevent memory leaks:
+
+```typescript
+useEffect(() => {
+  const subscription = someObservable.subscribe();
+  const interval = setInterval(() => {}, 1000);
+
+  return () => {
+    subscription.unsubscribe();
+    clearInterval(interval);
+  };
+}, []);
+```
+
+## Dependencies
+
+Required packages:
+- `react` - Core React library
+- `@supabase/supabase-js` - Real-time subscriptions
+- TypeScript types from `@/types`
+
+## Related Documentation
+
+- [Components Documentation](/components/README.md) - React components using these hooks
+- [API Documentation](/app/api/README.md) - API endpoints called by hooks
+- [Types Documentation](/types/README.md) - TypeScript type definitions
+- [Database Schema](/docs/07-REFERENCE/REFERENCE_DATABASE_SCHEMA.md) - Data structures
+
+## Contributing
+
+When adding new hooks:
+
+1. **Follow naming convention**: `use-<feature-name>.ts`
+2. **Include TypeScript types**: Define `Options` and `Result` interfaces
+3. **Implement cleanup**: Always clean up effects and subscriptions
+4. **Write tests**: Add corresponding test file
+5. **Document usage**: Add examples to this README
+6. **Handle errors**: Provide clear error states
+7. **Support SSR**: Ensure hooks work with Next.js SSR

@@ -1,4 +1,10 @@
-# External Integrations Documentation
+# External Integrations
+
+**Purpose:** Service orchestration layer for coordinating external APIs and complex multi-service workflows.
+
+**Integration Type:** Service
+**Last Updated:** 2025-10-30
+**Status:** Active
 
 This directory contains integrations with external services and APIs that extend the platform's capabilities. These integrations handle complex data flows, third-party service connections, and advanced business logic coordination.
 
@@ -422,13 +428,63 @@ class RateLimiter {
 - Set up alerts for failures
 - Maintain service health dashboards
 
-## Related Components
+## Configuration
 
-- `/lib/embeddings.ts` - AI embedding generation
-- `/lib/woocommerce-full.ts` - WooCommerce API integration
-- `/lib/redis.ts` - Redis caching and queuing
-- `/lib/scraper-api.ts` - Web scraping functionality
-- `/app/api/scrape/route.ts` - HTTP API endpoints
+### Environment Variables
+
+Required for external service connections:
+
+```bash
+# OpenAI Integration
+OPENAI_API_KEY=sk_...
+
+# Redis Integration
+REDIS_URL=redis://localhost:6379
+
+# Supabase Integration
+NEXT_PUBLIC_SUPABASE_URL=https://...
+SUPABASE_SERVICE_ROLE_KEY=...
+
+# WooCommerce (per-customer, stored encrypted in DB)
+# No environment variables needed
+```
+
+## Troubleshooting
+
+**Issue: "Service unavailable" errors**
+- **Cause:** External API down or unreachable
+- **Solution:** Check health monitoring, implement retry logic
+- **Test:** Use `await checkServiceHealth()` to verify connectivity
+
+**Issue: "Rate limit exceeded"**
+- **Cause:** Too many requests to external service
+- **Solution:** Implement request throttling and batching
+- **Check:** Review rate limiting configuration in integration code
+
+**Issue: "Integration timeout"**
+- **Cause:** Long-running operation exceeds timeout
+- **Solution:** Increase timeout or break into smaller operations
+- **Alternative:** Use background jobs for long-running tasks
+
+**Issue: "Data transformation failed"**
+- **Cause:** Unexpected data format from external API
+- **Solution:** Add validation and error handling for edge cases
+- **Debug:** Log raw API responses to identify format issues
+
+## Related Documentation
+
+**Internal:**
+- [lib/embeddings.ts](/Users/jamesguy/Omniops/lib/embeddings.ts) - AI embedding generation
+- [lib/woocommerce-full.ts](/Users/jamesguy/Omniops/lib/woocommerce-full.ts) - WooCommerce API integration
+- [lib/redis.ts](/Users/jamesguy/Omniops/lib/redis.ts) - Redis caching and queuing
+- [lib/scraper-api.ts](/Users/jamesguy/Omniops/lib/scraper-api.ts) - Web scraping functionality
+- [app/api/scrape/route.ts](/Users/jamesguy/Omniops/app/api/scrape/route.ts) - HTTP API endpoints
+- [lib/queue/](/Users/jamesguy/Omniops/lib/queue/) - Job queue system for background processing
+
+**External:**
+- [OpenAI API Documentation](https://platform.openai.com/docs)
+- [WooCommerce REST API](https://woocommerce.github.io/woocommerce-rest-api-docs/)
+- [Supabase Documentation](https://supabase.com/docs)
 
 ## Contributing
 
