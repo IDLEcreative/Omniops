@@ -91,3 +91,57 @@ supabase/.env.local
 mcp-supabase-config.json
 *-mcp-config.json
 .jest-cache/
+
+# Prevent test files in root (should go in __tests__/ or scripts/)
+/test-*.ts
+/test-*.js
+/test-*.html
+/diagnose-*.html
+
+# Prevent completion reports in root (should go in docs/)
+/*_REPORT.md
+/*_SUMMARY.md
+/*_COMPLETE*.md
+/*_COMPLETION*.md
+/*_VERIFICATION*.md
+/*_FIX*.md
+/*_IMPLEMENTATION*.md
+/*_TEST*.md
+/PHASE*.md
+/AGENT*.md
+/ARCHITECTURE_*.md
+/VISION_*.md
+/VISUAL_*.md
+/INTEGRATION_*.md
+/DEPLOYMENT_*.md
+/INSTALLATION_*.md
+/REFACTORING_*.md
+/PAGINATION_*.md
+/STORE_API_*.md
+/CURRENCY_*.md
+/WIDGET_*.md
+/WOOCOMMERCE_*.md
+/WORDPRESS_*.md
+/AUTOMATIC_*.md
+/FILE_LENGTH_*.md
+/FINAL_*.md
+/GPT5_*.md
+
+# Prevent utility scripts in root (should go in scripts/)
+/apply-*.ts
+/verify-*.ts
+/check-*.ts
+/migrate-*.ts
+/fix-*.ts
+/monitor-*.ts
+/benchmark-*.ts
+/batch-*.py
+/batch-*.ts
+
+# Allow specific essential config files
+!/middleware.ts
+!/next.config.ts
+!/tailwind.config.ts
+!/postcss.config.mjs
+!/jest.config.ts
+!/tsconfig.json

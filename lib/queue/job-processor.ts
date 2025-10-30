@@ -17,6 +17,11 @@ import {
   processRefreshJob,
 } from './job-processor-handlers';
 
+// Detect build time to suppress logging
+const isBuildTime = process.env.NEXT_PHASE === 'phase-production-build' ||
+                    process.env.NEXT_PHASE === 'phase-export' ||
+                    process.argv.includes('build');
+
 /**
  * Job Processor for BullMQ Queue System
  *
@@ -67,22 +72,30 @@ export class JobProcessor {
    */
   private setupEventListeners(): void {
     this.worker.on('ready', () => {
-      console.log('Job processor is ready');
+      if (!isBuildTime) {
+        console.log('Job processor is ready');
+      }
     });
 
     this.worker.on('active', (job: Job) => {
-      console.log(`Processing job ${job.id} of type ${job.data.type}`);
+      if (!isBuildTime) {
+        console.log(`Processing job ${job.id} of type ${job.data.type}`);
+      }
     });
 
     this.worker.on('completed', (job: Job, result: JobResult) => {
-      console.log(`Job ${job.id} completed in ${result.duration}ms`);
+      if (!isBuildTime) {
+        console.log(`Job ${job.id} completed in ${result.duration}ms`);
+      }
       if (this.config.enableMetrics) {
         updateMetrics(this.metrics, job, result, true);
       }
     });
 
     this.worker.on('failed', (job: Job | undefined, err: Error) => {
-      console.error(`Job ${job?.id || 'unknown'} failed:`, err.message);
+      if (!isBuildTime) {
+        console.error(`Job ${job?.id || 'unknown'} failed:`, err.message);
+      }
       if (this.config.enableMetrics && job) {
         const failResult: JobResult = {
           success: false,
@@ -94,11 +107,15 @@ export class JobProcessor {
     });
 
     this.worker.on('stalled', (jobId: string) => {
-      console.warn(`Job ${jobId} stalled`);
+      if (!isBuildTime) {
+        console.warn(`Job ${jobId} stalled`);
+      }
     });
 
     this.worker.on('error', (err: Error) => {
-      console.error('Worker error:', err);
+      if (!isBuildTime) {
+        console.error('Worker error:', err);
+      }
     });
 
     // Graceful shutdown handling

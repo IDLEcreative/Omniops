@@ -2,21 +2,30 @@ import Redis from 'ioredis';
 import { getRedisClientWithFallback, RedisClientWithFallback } from './redis-fallback';
 import { logger } from './logger';
 
+// Detect build time to suppress connection errors
+const isBuildTime = process.env.NEXT_PHASE === 'phase-production-build' ||
+                    process.env.NEXT_PHASE === 'phase-export' ||
+                    process.argv.includes('build');
+
 // Create Redis client with connection retry logic (legacy function for compatibility)
 export function createRedisClient(): Redis | RedisClientWithFallback {
   const redisUrl = process.env.REDIS_URL;
-  
+
   // If no Redis URL, return the fallback client
   if (!redisUrl) {
-    logger.info('[Redis] No REDIS_URL configured, using fallback client');
+    if (!isBuildTime) {
+      logger.info('[Redis] No REDIS_URL configured, using fallback client');
+    }
     return getRedisClientWithFallback();
   }
-  
+
   try {
     const redis = new Redis(redisUrl, {
       retryStrategy: (times) => {
         if (times > 3) {
-          logger.warn('[Redis] Connection failed, using fallback');
+          if (!isBuildTime) {
+            logger.warn('[Redis] Connection failed, using fallback');
+          }
           return null;
         }
         const delay = Math.min(times * 50, 2000);
@@ -33,19 +42,26 @@ export function createRedisClient(): Redis | RedisClientWithFallback {
       maxRetriesPerRequest: 3,
       enableReadyCheck: true,
       enableOfflineQueue: true,
+      lazyConnect: isBuildTime,
     });
 
     redis.on('error', (err) => {
-      console.error('[Redis] Connection error:', err);
+      if (!isBuildTime) {
+        console.error('[Redis] Connection error:', err);
+      }
     });
 
     redis.on('connect', () => {
-      console.log('[Redis] Connected successfully');
+      if (!isBuildTime) {
+        console.log('[Redis] Connected successfully');
+      }
     });
 
     return redis;
   } catch (error) {
-    logger.error('[Redis] Failed to create client, using fallback:', error);
+    if (!isBuildTime) {
+      logger.error('[Redis] Failed to create client, using fallback:', error);
+    }
     return getRedisClientWithFallback();
   }
 }

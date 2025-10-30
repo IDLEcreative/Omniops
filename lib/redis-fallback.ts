@@ -19,8 +19,13 @@ export class RedisClientWithFallback implements RedisOperations {
   private connectionAttempted = false;
   private cleanupInterval: NodeJS.Timeout | null = null;
   private cacheOps: RedisCacheOperations | null = null;
+  private isBuildTime = false;
 
   constructor() {
+    // Detect build time to suppress connection errors
+    this.isBuildTime = process.env.NEXT_PHASE === 'phase-production-build' ||
+                       process.env.NEXT_PHASE === 'phase-export' ||
+                       process.argv.includes('build');
     this.initializeClient();
   }
 
@@ -31,7 +36,9 @@ export class RedisClientWithFallback implements RedisOperations {
     const redisUrl = process.env.REDIS_URL;
 
     if (!redisUrl) {
-      logger.info('[Redis] No REDIS_URL configured, using in-memory fallback');
+      if (!this.isBuildTime) {
+        logger.info('[Redis] No REDIS_URL configured, using in-memory fallback');
+      }
       this.initializeFallback();
       return;
     }
@@ -40,7 +47,9 @@ export class RedisClientWithFallback implements RedisOperations {
       this.client = new Redis(redisUrl, {
         retryStrategy: (times) => {
           if (times > 3) {
-            logger.warn('[Redis] Max retries reached, switching to in-memory fallback');
+            if (!this.isBuildTime) {
+              logger.warn('[Redis] Max retries reached, switching to in-memory fallback');
+            }
             this.initializeFallback();
             return null;
           }
@@ -51,13 +60,21 @@ export class RedisClientWithFallback implements RedisOperations {
         enableReadyCheck: true,
         enableOfflineQueue: false,
         connectTimeout: 5000,
+        // Suppress ioredis internal logging during build
+        lazyConnect: this.isBuildTime,
       });
 
       this.setupEventHandlers();
-      await this.client.ping();
-      this.isRedisAvailable = true;
+
+      // Skip ping during build time
+      if (!this.isBuildTime) {
+        await this.client.ping();
+      }
+      this.isRedisAvailable = !this.isBuildTime;
     } catch (error) {
-      logger.warn('[Redis] Failed to connect, using in-memory fallback:', error as Error);
+      if (!this.isBuildTime) {
+        logger.warn('[Redis] Failed to connect, using in-memory fallback:', error as Error);
+      }
       this.initializeFallback();
     }
   }
@@ -66,19 +83,26 @@ export class RedisClientWithFallback implements RedisOperations {
     if (!this.client) return;
 
     this.client.on('error', (err) => {
-      logger.error('[Redis] Connection error:', err);
+      // Suppress error logs during build time
+      if (!this.isBuildTime) {
+        logger.error('[Redis] Connection error:', err);
+      }
       if (!this.fallback) {
         this.initializeFallback();
       }
     });
 
     this.client.on('connect', () => {
-      logger.info('[Redis] Connected successfully');
+      if (!this.isBuildTime) {
+        logger.info('[Redis] Connected successfully');
+      }
       this.isRedisAvailable = true;
     });
 
     this.client.on('close', () => {
-      logger.warn('[Redis] Connection closed');
+      if (!this.isBuildTime) {
+        logger.warn('[Redis] Connection closed');
+      }
       this.isRedisAvailable = false;
       if (!this.fallback) {
         this.initializeFallback();

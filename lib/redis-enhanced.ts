@@ -10,6 +10,11 @@ import { MemoryAwareCrawlJobManager } from './redis-enhanced-jobs';
 import { RedisCircuitBreaker } from './redis-enhanced-circuit-breaker';
 import { RedisOperations } from './redis-enhanced-operations';
 
+// Detect build time to suppress connection errors
+const isBuildTime = process.env.NEXT_PHASE === 'phase-production-build' ||
+                    process.env.NEXT_PHASE === 'phase-export' ||
+                    process.argv.includes('build');
+
 const shouldBypassRedis =
   process.env.REDIS_DISABLE === 'true' ||
   process.env.NODE_ENV === 'test' ||
@@ -41,7 +46,9 @@ export class ResilientRedisClient extends EventEmitter {
     if (shouldBypassRedis || this.redisUrl.startsWith('memory://')) {
       this.circuitBreaker.openCircuitBreaker();
       this.isConnected = false;
-      console.warn('[Redis] Using in-memory fallback storage');
+      if (!isBuildTime) {
+        console.warn('[Redis] Using in-memory fallback storage');
+      }
       return;
     }
 
@@ -76,7 +83,9 @@ export class ResilientRedisClient extends EventEmitter {
       });
 
       this.redis.on('connect', () => {
-        console.log('Redis connected successfully');
+        if (!isBuildTime) {
+          console.log('Redis connected successfully');
+        }
         this.isConnected = true;
         this.circuitBreaker.resetAttempts();
         this.circuitBreaker.closeCircuitBreaker();
@@ -84,19 +93,25 @@ export class ResilientRedisClient extends EventEmitter {
       });
 
       this.redis.on('error', (err) => {
-        console.error('Redis error:', err.message);
+        if (!isBuildTime) {
+          console.error('Redis error:', err.message);
+        }
         this.emit('error', err);
       });
 
       this.redis.on('close', () => {
-        console.log('Redis connection closed');
+        if (!isBuildTime) {
+          console.log('Redis connection closed');
+        }
         this.isConnected = false;
         this.emit('disconnected');
       });
 
       this.redis.on('reconnecting', () => {
         this.circuitBreaker.incrementAttempts();
-        console.log(`Redis reconnecting... attempt ${this.circuitBreaker.getAttempts()}`);
+        if (!isBuildTime) {
+          console.log(`Redis reconnecting... attempt ${this.circuitBreaker.getAttempts()}`);
+        }
       });
 
       // Update operations with new redis instance
@@ -107,7 +122,9 @@ export class ResilientRedisClient extends EventEmitter {
       );
 
     } catch (error) {
-      console.error('Failed to create Redis client:', error);
+      if (!isBuildTime) {
+        console.error('Failed to create Redis client:', error);
+      }
       this.circuitBreaker.openCircuitBreaker();
     }
   }

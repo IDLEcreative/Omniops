@@ -1,7 +1,7 @@
 'use client';
 
-import { memo } from 'react';
-import { FixedSizeList } from 'react-window';
+import { memo, useRef } from 'react';
+import { useVirtualizer } from '@tanstack/react-virtual';
 import { cn } from '@/lib/utils';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
@@ -52,6 +52,7 @@ const typeConfig = {
 // Performance: Virtual scrolling implemented to handle large datasets (1000+ items)
 // Only renders visible items (~8-10 at a time) instead of all items
 // Expected improvement: 10x faster rendering, 90% reduced memory usage
+// Updated to use @tanstack/react-virtual for React 19 compatibility
 export const TrainingDataList = memo(function TrainingDataList({
   trainingData,
   isLoading = false,
@@ -64,8 +65,19 @@ export const TrainingDataList = memo(function TrainingDataList({
   onStartTraining,
   onSetActiveTab
 }: TrainingDataListProps) {
+  // Parent ref for virtualization
+  const parentRef = useRef<HTMLDivElement>(null);
+
+  // Virtual scrolling setup
+  const rowVirtualizer = useVirtualizer({
+    count: trainingData.length,
+    getScrollElement: () => parentRef.current,
+    estimateSize: () => 80,
+    overscan: 5, // Render 5 extra items above/below viewport
+  });
+
   // Row renderer component - only renders visible items for optimal performance
-  const Row = memo(({ index, style }: { index: number; style: React.CSSProperties }) => {
+  const renderRow = (index: number) => {
     const item = trainingData[index];
     if (!item) return null;
 
@@ -73,7 +85,7 @@ export const TrainingDataList = memo(function TrainingDataList({
     const Icon = config.icon;
 
     return (
-      <div style={style} className="group flex items-center justify-between py-2 px-3 border-b hover:bg-muted/50 transition-colors">
+      <div className="group flex items-center justify-between py-2 px-3 border-b hover:bg-muted/50 transition-colors">
         <div className="flex items-center gap-2 flex-1 min-w-0">
           <Icon className={cn('h-3 w-3 flex-shrink-0', config.color)} />
           <p className="text-sm truncate flex-1">{item.content}</p>
@@ -101,7 +113,7 @@ export const TrainingDataList = memo(function TrainingDataList({
         </div>
       </div>
     );
-  });
+  };
 
   return (
     <Card className="shadow-sm">
@@ -169,14 +181,35 @@ export const TrainingDataList = memo(function TrainingDataList({
         ) : (
           <div className="border rounded-md">
             {/* Virtual scrolling container - renders only visible items */}
-            <FixedSizeList
-              height={500}
-              itemCount={trainingData.length}
-              itemSize={80}
-              width="100%"
+            <div
+              ref={parentRef}
+              className="overflow-auto"
+              style={{ height: '500px' }}
             >
-              {Row}
-            </FixedSizeList>
+              <div
+                style={{
+                  height: `${rowVirtualizer.getTotalSize()}px`,
+                  width: '100%',
+                  position: 'relative',
+                }}
+              >
+                {rowVirtualizer.getVirtualItems().map((virtualItem) => (
+                  <div
+                    key={virtualItem.key}
+                    style={{
+                      position: 'absolute',
+                      top: 0,
+                      left: 0,
+                      width: '100%',
+                      height: `${virtualItem.size}px`,
+                      transform: `translateY(${virtualItem.start}px)`,
+                    }}
+                  >
+                    {renderRow(virtualItem.index)}
+                  </div>
+                ))}
+              </div>
+            </div>
 
             {/* Load More button outside virtual list */}
             {hasMore && (

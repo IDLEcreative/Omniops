@@ -7,6 +7,11 @@
 import { ResilientRedisClient, MemoryAwareCrawlJobManager } from './redis-enhanced';
 import { EventEmitter } from 'events';
 
+// Detect build time to suppress connection errors
+const isBuildTime = process.env.NEXT_PHASE === 'phase-production-build' ||
+                    process.env.NEXT_PHASE === 'phase-export' ||
+                    process.argv.includes('build');
+
 // Singleton instances
 let unifiedRedisClient: ResilientRedisClient | null = null;
 let unifiedJobManager: MemoryAwareCrawlJobManager | null = null;
@@ -107,18 +112,20 @@ export function getRedisClient(): ResilientRedisClient {
       );
     }
     
-    // Set up monitoring
-    unifiedRedisClient.on('connected', () => {
-      console.log('[Redis] Connected to Redis server');
-    });
-    
-    unifiedRedisClient.on('disconnected', () => {
-      console.warn('[Redis] Disconnected from Redis server - using fallback');
-    });
-    
-    unifiedRedisClient.on('error', (err) => {
-      console.error('[Redis] Error:', err.message);
-    });
+    // Set up monitoring (suppressed during build time)
+    if (!isBuildTime) {
+      unifiedRedisClient.on('connected', () => {
+        console.log('[Redis] Connected to Redis server');
+      });
+
+      unifiedRedisClient.on('disconnected', () => {
+        console.warn('[Redis] Disconnected from Redis server - using fallback');
+      });
+
+      unifiedRedisClient.on('error', (err) => {
+        console.error('[Redis] Error:', err.message);
+      });
+    }
   }
   return unifiedRedisClient;
 }
