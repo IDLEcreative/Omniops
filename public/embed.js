@@ -160,8 +160,9 @@
       max-height: ${isMobile ? '100vh' : 'calc(100vh - 40px)'};
       z-index: 9999;
       border-radius: ${isMobile ? '0' : '12px'};
-      box-shadow: ${isMobile ? 'none' : '0 10px 40px rgba(0, 0, 0, 0.15)'};
-      background: white;
+      box-shadow: none;
+      background: transparent;
+      pointer-events: none;
     `;
     // Extra guard to avoid scrollbars on some browsers
     iframe.style.overflow = 'hidden';

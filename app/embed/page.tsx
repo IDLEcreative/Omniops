@@ -87,7 +87,7 @@ export default function EmbedPage() {
   }, []);
 
   return (
-    <div className="fixed inset-0 overflow-hidden">
+    <div className="fixed inset-0 overflow-hidden pointer-events-none">
       {false && showHints && (
         <div className="flex items-center justify-center h-dvh bg-black p-3 sm:p-4 md:p-6 overflow-y-auto">
           <div className="max-w-4xl w-full">
