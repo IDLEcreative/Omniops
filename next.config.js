@@ -81,7 +81,7 @@ const nextConfig = {
           },
           {
             key: 'Content-Security-Policy',
-            value: "frame-ancestors 'self' https://epartstaging.wpengine.com https://thompsons-eparts.com https://*.wpengine.com"
+            value: "frame-ancestors 'self' https://www.omniops.co.uk https://www.thompsonseparts.co.uk https://*.thompsonseparts.co.uk https://epartstaging.wpengine.com https://*.wpengine.com"
           },
         ],
       },

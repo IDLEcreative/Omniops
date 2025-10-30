@@ -142,16 +142,17 @@ export function useChatState({
       }
 
       try {
-        const response = await fetch(`/api/customer/config?domain=${encodeURIComponent(domain)}`);
+        // Use public widget config endpoint (no authentication required)
+        const response = await fetch(`/api/widget/config?domain=${encodeURIComponent(domain)}`);
         if (response.ok) {
           const data = await response.json();
-          if (data.config?.woocommerce_enabled) {
-            setWoocommerceEnabled(true);
+          if (data.success && data.config) {
+            setWoocommerceEnabled(data.config.woocommerce_enabled || false);
             setStoreDomain(data.config.domain || domain);
           }
         }
       } catch (error) {
-        console.log('Could not load WooCommerce config:', error);
+        console.log('Could not load widget config:', error);
       }
     };
 

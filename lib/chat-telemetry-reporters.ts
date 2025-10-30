@@ -18,10 +18,7 @@ let telemetrySupabase: any = null;
 
 function getTelemetrySupabase() {
   if (!telemetrySupabase && process.env.SUPABASE_SERVICE_ROLE_KEY) {
-    telemetrySupabase = createClient(
-      process.env.NEXT_PUBLIC_SUPABASE_URL!,
-      process.env.SUPABASE_SERVICE_ROLE_KEY!
-    );
+    telemetrySupabase = createServiceRoleClientSync();
   }
   return telemetrySupabase;
 }
