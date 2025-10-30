@@ -26,18 +26,18 @@ else
   echo "✅ No quoted API keys"
 fi
 
-# Check 2: Supabase keys are present and look valid
+# Check 2: Supabase keys are present and look valid (both old JWT and new format)
 echo ""
 echo "Checking Supabase keys..."
-if ! grep -q "NEXT_PUBLIC_SUPABASE_ANON_KEY=eyJ" "$ENV_FILE"; then
-  echo "❌ SUPABASE_ANON_KEY missing or invalid (should start with eyJ)"
+if ! grep -E "NEXT_PUBLIC_SUPABASE_ANON_KEY=(eyJ|sb_publishable_)" "$ENV_FILE" > /dev/null; then
+  echo "❌ SUPABASE_ANON_KEY missing or invalid (should start with eyJ or sb_publishable_)"
   ERRORS=$((ERRORS + 1))
 else
   echo "✅ Supabase anon key present"
 fi
 
-if ! grep -q "SUPABASE_SERVICE_ROLE_KEY=eyJ" "$ENV_FILE"; then
-  echo "❌ SUPABASE_SERVICE_ROLE_KEY missing or invalid (should start with eyJ)"
+if ! grep -E "SUPABASE_SERVICE_ROLE_KEY=(eyJ|sb_secret_)" "$ENV_FILE" > /dev/null; then
+  echo "❌ SUPABASE_SERVICE_ROLE_KEY missing or invalid (should start with eyJ or sb_secret_)"
   ERRORS=$((ERRORS + 1))
 else
   echo "✅ Supabase service role key present"

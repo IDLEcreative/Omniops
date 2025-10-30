@@ -15,6 +15,7 @@ import {
   Zap,
   MessageSquare,
   DollarSign,
+  Palette,
 } from "lucide-react";
 import { EmptyState } from "@/components/ui/empty-state";
 import type { DashboardOverview } from "@/hooks/use-dashboard-overview";
@@ -80,6 +81,12 @@ export function QuickActions({ overview }: QuickActionsProps) {
             <a href="/dashboard/training">
               <Bot className="mr-2 h-4 w-4" />
               Train Bot
+            </a>
+          </Button>
+          <Button className="w-full mt-2" size="sm" variant="outline" asChild>
+            <a href="/dashboard/customize">
+              <Palette className="mr-2 h-4 w-4" />
+              Customize Widget
             </a>
           </Button>
         </CardContent>
