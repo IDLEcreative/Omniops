@@ -98,19 +98,21 @@ export function getContrastRatio(color1: string, color2: string): number {
 
 /**
  * Generate embed code for different frameworks
+ * Uses minimal config approach - only serverUrl is required
+ * All other configuration is loaded dynamically from the server
  */
 export function generateEmbedCode(
   config: WidgetConfig,
   framework: string,
   customCSS?: string
 ): string {
-  const configString = JSON.stringify({
-    ...config,
-    appearance: {
-      ...config.appearance,
-      customCSS: customCSS || '',
-    }
-  }, null, 2);
+  // Minimal config - only serverUrl required
+  // Everything else loads dynamically from /api/widget/config
+  const minimalConfig = {
+    serverUrl: config.serverUrl
+  };
+
+  const configString = JSON.stringify(minimalConfig, null, 2);
 
   switch (framework) {
     case 'react':
@@ -246,6 +248,8 @@ window.ChatWidgetConfig = ${configString};
 
     default: // html
       return `<!-- AI Chat Widget -->
+<!-- Configuration is loaded dynamically from your dashboard -->
+<!-- Change appearance, behavior, and features without updating this code -->
 <script>
 window.ChatWidgetConfig = ${configString};
 </script>
