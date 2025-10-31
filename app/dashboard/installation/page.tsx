@@ -25,8 +25,9 @@ export default function InstallationPage() {
       try {
         setIsLoading(true);
 
-        // Set server URL (current origin)
-        const url = window.location.origin;
+        // Set server URL from environment variable (production domain)
+        // Falls back to current origin if not set
+        const url = process.env.NEXT_PUBLIC_APP_URL || window.location.origin;
         setServerUrl(url);
 
         // Automatically fetch customer config for current user's organization

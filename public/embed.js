@@ -1,21 +1,10 @@
-(function() {
+(async function() {
   'use strict';
 
   const WIDGET_VERSION = '2.0.0';
 
-  function getServerUrl() {
-    const currentScript = document.currentScript || document.querySelector('script[src*="embed.js"]');
-    if (currentScript && currentScript.src) {
-      const url = new URL(currentScript.src);
-      if (url.hostname === 'localhost' || url.hostname === '127.0.0.1') return 'http://localhost:3000';
-      return url.origin;
-    }
-    if (window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1') return 'http://localhost:3000';
-    return window.location.origin;
-  }
-
   const defaultConfig = {
-    serverUrl: getServerUrl(),
+    serverUrl: '',  // Will be set from window.ChatWidgetConfig
     appearance: {
       position: 'bottom-right',
       width: 400,
@@ -69,7 +58,13 @@
   try {
     const userConfig = window.ChatWidgetConfig || {};
     const config = { ...defaultConfig, ...userConfig };
-    if (!config.serverUrl) config.serverUrl = getServerUrl();
+
+    // serverUrl must be provided in window.ChatWidgetConfig
+    if (!config.serverUrl) {
+      console.error('[Chat Widget] serverUrl not configured. Please ensure window.ChatWidgetConfig includes a serverUrl.');
+      return;
+    }
+
     if (document.getElementById('chat-widget-iframe')) { logError('Widget already loaded'); return; }
     const privacyPrefs = getPrivacyPreferences();
     if (privacyPrefs.optedOut && config.privacy.allowOptOut) { console.log('[Chat Widget] User has opted out'); return; }
