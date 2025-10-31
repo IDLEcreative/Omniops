@@ -9,6 +9,7 @@ import {
   handleJobStatus
 } from './handlers';
 import { withCSRF } from '@/lib/middleware/csrf';
+import { checkExpensiveOpRateLimit } from '@/lib/rate-limit';
 
 export const runtime = 'nodejs';
 export const dynamic = 'force-dynamic';
@@ -23,6 +24,31 @@ async function handlePost(request: NextRequest) {
   try {
     const body = await request.json();
     const scrapeRequest = ScrapeRequestSchema.parse(body);
+
+    // Rate limit expensive scraping operations
+    const domain = new URL(scrapeRequest.url).hostname;
+    const rateLimit = checkExpensiveOpRateLimit(domain);
+
+    if (!rateLimit.allowed) {
+      const resetDate = new Date(rateLimit.resetTime);
+      return NextResponse.json(
+        {
+          error: 'Rate limit exceeded for scraping operations',
+          message: 'You have exceeded the scraping rate limit. Please try again later.',
+          resetTime: resetDate.toISOString(),
+          remaining: rateLimit.remaining
+        },
+        {
+          status: 429,
+          headers: {
+            'Retry-After': Math.ceil((rateLimit.resetTime - Date.now()) / 1000).toString(),
+            'X-RateLimit-Limit': '10',
+            'X-RateLimit-Remaining': rateLimit.remaining.toString(),
+            'X-RateLimit-Reset': resetDate.toISOString()
+          }
+        }
+      );
+    }
 
     const supabase = await createServiceRoleClient();
     const userSupabase = await createClient();

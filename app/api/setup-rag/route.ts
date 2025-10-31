@@ -1,5 +1,6 @@
 import { NextResponse } from 'next/server';
 import { createServiceRoleClient } from '@/lib/supabase/server';
+import { checkExpensiveOpRateLimit } from '@/lib/rate-limit';
 
 /**
  * DEBUG/SETUP ENDPOINT - Development use only
@@ -58,6 +59,30 @@ async function handleSetup(request: Request) {
         note: 'This is a development/testing endpoint'
       },
       { status: 400 }
+    );
+  }
+
+  // Rate limit expensive RAG setup operations
+  const rateLimit = checkExpensiveOpRateLimit(domain);
+
+  if (!rateLimit.allowed) {
+    const resetDate = new Date(rateLimit.resetTime);
+    return NextResponse.json(
+      {
+        error: 'Rate limit exceeded for RAG setup operations',
+        message: 'You have exceeded the RAG setup rate limit. Please try again later.',
+        resetTime: resetDate.toISOString(),
+        remaining: rateLimit.remaining
+      },
+      {
+        status: 429,
+        headers: {
+          'Retry-After': Math.ceil((rateLimit.resetTime - Date.now()) / 1000).toString(),
+          'X-RateLimit-Limit': '10',
+          'X-RateLimit-Remaining': rateLimit.remaining.toString(),
+          'X-RateLimit-Reset': resetDate.toISOString()
+        }
+      }
     );
   }
 

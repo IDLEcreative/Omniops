@@ -4,6 +4,7 @@ export const dynamic = 'force-dynamic'
 import { createClient, createServiceRoleClient } from '@/lib/supabase-server';
 import { logger } from '@/lib/logger';
 import { generateEmbeddings } from '@/lib/embeddings';
+import { checkExpensiveOpRateLimit } from '@/lib/rate-limit';
 
 export async function POST(request: NextRequest) {
   try {
@@ -32,9 +33,33 @@ export async function POST(request: NextRequest) {
     }
     
     const { data: { user } } = await supabase.auth.getUser();
-    
+
     if (!user) {
       return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
+    }
+
+    // Rate limit expensive training operations
+    const rateLimit = checkExpensiveOpRateLimit(`training:${user.id}`);
+
+    if (!rateLimit.allowed) {
+      const resetDate = new Date(rateLimit.resetTime);
+      return NextResponse.json(
+        {
+          error: 'Rate limit exceeded for training operations',
+          message: 'You have exceeded the training rate limit. Please try again later.',
+          resetTime: resetDate.toISOString(),
+          remaining: rateLimit.remaining
+        },
+        {
+          status: 429,
+          headers: {
+            'Retry-After': Math.ceil((rateLimit.resetTime - Date.now()) / 1000).toString(),
+            'X-RateLimit-Limit': '10',
+            'X-RateLimit-Remaining': rateLimit.remaining.toString(),
+            'X-RateLimit-Reset': resetDate.toISOString()
+          }
+        }
+      );
     }
 
     const { content } = await request.json();

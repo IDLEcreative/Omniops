@@ -6,93 +6,28 @@
 import { Queue, Worker, Job, QueueEvents } from 'bullmq';
 import Redis from 'ioredis';
 import { logger } from '../logger';
+import { JobPriority } from './types';
+import type {
+  JobType,
+  JobStatus,
+  JobData,
+  QueueManagerConfig,
+} from './types';
 
-/**
- * Job priority levels
- */
-export enum JobPriority {
-  CRITICAL = 10,
-  HIGH = 5,
-  NORMAL = 0,
-  LOW = -5,
-  DEFERRED = -10,
-}
+// Re-export types for backwards compatibility
+export type {
+  JobType,
+  JobStatus,
+  BaseJobData,
+  SinglePageJobData,
+  FullCrawlJobData,
+  RefreshJobData,
+  JobData,
+  QueueManagerConfig,
+} from './types';
 
-/**
- * Job types
- */
-export type JobType = 'single-page' | 'full-crawl' | 'refresh' | 'batch' | 'scheduled';
-
-/**
- * Job status
- */
-export type JobStatus = 'waiting' | 'active' | 'completed' | 'failed' | 'delayed' | 'paused' | 'stalled';
-
-/**
- * Base job data structure
- */
-export interface BaseJobData {
-  type: JobType;
-  customerId: string;
-  priority?: JobPriority;
-  metadata?: Record<string, any>;
-  createdAt?: string;
-  scheduledAt?: string;
-}
-
-/**
- * Single page job data
- */
-export interface SinglePageJobData extends BaseJobData {
-  type: 'single-page';
-  url: string;
-  turboMode?: boolean;
-  extractStructuredData?: boolean;
-}
-
-/**
- * Full crawl job data
- */
-export interface FullCrawlJobData extends BaseJobData {
-  type: 'full-crawl';
-  url: string;
-  maxPages: number;
-  depth?: number;
-  includePaths?: string[];
-  excludePaths?: string[];
-  respectRobotsTxt?: boolean;
-  delay?: number;
-}
-
-/**
- * Refresh job data
- */
-export interface RefreshJobData extends BaseJobData {
-  type: 'refresh';
-  urls: string[];
-  forceRefresh?: boolean;
-  compareContent?: boolean;
-}
-
-/**
- * Union type for all job data types
- */
-export type JobData = SinglePageJobData | FullCrawlJobData | RefreshJobData;
-
-/**
- * Queue manager configuration
- */
-export interface QueueManagerConfig {
-  queueName?: string;
-  redisUrl?: string;
-  maxConcurrency?: number;
-  defaultJobOptions?: {
-    attempts?: number;
-    backoffDelay?: number;
-    timeout?: number;
-  };
-  enableMetrics?: boolean;
-}
+// Re-export JobPriority enum
+export { JobPriority };
 
 /**
  * Queue Manager Class

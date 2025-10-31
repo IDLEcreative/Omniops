@@ -93,3 +93,14 @@ export function checkDomainRateLimit(domain: string) {
   const limit = limits.default; // In production, check customer tier
   return checkRateLimit(`domain:${domain}`, limit.requests, limit.window);
 }
+
+// Rate limiting for expensive operations (scraping, RAG setup, training)
+export function checkExpensiveOpRateLimit(identifier: string) {
+  // Strict limits for resource-intensive operations
+  // 10 requests per hour to prevent abuse while allowing legitimate use
+  return checkRateLimit(
+    `expensive:${identifier}`,
+    10, // max 10 requests
+    60 * 60 * 1000 // per hour
+  );
+}

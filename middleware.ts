@@ -79,6 +79,53 @@ export async function middleware(request: NextRequest) {
     return NextResponse.redirect(redirectUrl)
   }
 
+  // ========================================
+  // SECURITY: Add security headers to all responses
+  // ========================================
+  const securityHeaders = {
+    // HSTS - Force HTTPS for 1 year (including subdomains)
+    'Strict-Transport-Security': 'max-age=31536000; includeSubDomains',
+
+    // X-Frame-Options - Prevent clickjacking attacks
+    // SAMEORIGIN allows framing only by same domain (required for embed widget)
+    'X-Frame-Options': 'SAMEORIGIN',
+
+    // Content Security Policy - Mitigate XSS attacks
+    'Content-Security-Policy': [
+      "default-src 'self'",
+      "script-src 'self' 'unsafe-eval' 'unsafe-inline' https://cdn.jsdelivr.net",
+      "style-src 'self' 'unsafe-inline'",
+      "img-src 'self' data: https: blob:",
+      "font-src 'self' data:",
+      "connect-src 'self' https://*.supabase.co https://api.openai.com",
+      "frame-ancestors 'self'",
+      "base-uri 'self'",
+      "form-action 'self'"
+    ].join('; '),
+
+    // Referrer Policy - Control referrer information
+    'Referrer-Policy': 'strict-origin-when-cross-origin',
+
+    // X-Content-Type-Options - Prevent MIME type sniffing
+    'X-Content-Type-Options': 'nosniff',
+
+    // Permissions Policy - Control browser features
+    'Permissions-Policy': [
+      'camera=()',
+      'microphone=()',
+      'geolocation=()',
+      'interest-cohort=()'
+    ].join(', '),
+
+    // X-XSS-Protection - Legacy XSS filter (for older browsers)
+    'X-XSS-Protection': '1; mode=block'
+  }
+
+  // Apply all security headers to the response
+  Object.entries(securityHeaders).forEach(([key, value]) => {
+    response.headers.set(key, value)
+  })
+
   return response
 }
 
