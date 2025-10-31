@@ -124,42 +124,69 @@ export async function POST(
       );
     }
 
-    // Look up domain_id if we have a domain
+    // OPTIMIZATION: Parallel database operations to reduce latency
+    // Step 1: Domain lookup (must be first - other operations depend on domainId)
+    const perfStart = performance.now();
     const domainId = await lookupDomain(domain, adminSupabase);
+    const domainLookupTime = performance.now() - perfStart;
 
-    // Load widget configuration from database
-    const widgetConfig = await loadWidgetConfig(domainId, adminSupabase);
+    telemetry?.log('info', 'performance', 'Domain lookup completed', {
+      duration: `${domainLookupTime.toFixed(2)}ms`,
+      domainId: domainId || 'null'
+    });
+
+    // Step 2: Parallel operations that depend on domainId
+    const parallelStart = performance.now();
+    const [widgetConfig, conversationId] = await Promise.all([
+      // Load widget configuration (depends on domainId)
+      loadWidgetConfig(domainId, adminSupabase),
+      // Get or create conversation (depends on domainId)
+      getOrCreateConversation(
+        conversation_id,
+        session_id,
+        domainId,
+        adminSupabase
+      )
+    ]);
+    const parallelTime = performance.now() - parallelStart;
+
+    telemetry?.log('info', 'performance', 'Parallel operations completed', {
+      duration: `${parallelTime.toFixed(2)}ms`,
+      operations: ['loadWidgetConfig', 'getOrCreateConversation']
+    });
 
     // Log config loading for debugging
     if (widgetConfig) {
-      telemetry?.log('info', 'config', 'Widget config loaded', {
+      telemetry?.log('info', 'ai', 'Widget config loaded', {
         hasPersonality: !!widgetConfig.ai_settings?.personality,
         hasLanguage: !!widgetConfig.ai_settings?.language,
         hasCustomPrompt: !!widgetConfig.ai_settings?.customSystemPrompt,
       });
     }
 
-    // Get or create conversation
-    const conversationId = await getOrCreateConversation(
-      conversation_id,
-      session_id,
-      domainId,
+    // Step 3: Parallel operations that depend on conversationId
+    const conversationOpsStart = performance.now();
+    const [, historyData, convMetadata] = await Promise.all([
+      // Save user message (depends on conversationId)
+      saveUserMessage(conversationId, message, adminSupabase),
+      // Get conversation history (depends on conversationId)
+      getConversationHistory(conversationId, 20, adminSupabase),
+      // Load conversation metadata (depends on conversationId)
       adminSupabase
-    );
+        .from('conversations')
+        .select('metadata')
+        .eq('id', conversationId)
+        .single()
+        .then((result: { data: any }) => result.data)
+    ]);
+    const conversationOpsTime = performance.now() - conversationOpsStart;
 
-    // Save user message
-    await saveUserMessage(conversationId, message, adminSupabase);
+    telemetry?.log('info', 'performance', 'Conversation operations completed', {
+      duration: `${conversationOpsTime.toFixed(2)}ms`,
+      operations: ['saveUserMessage', 'getConversationHistory', 'loadMetadata']
+    });
 
-    // Get conversation history (increased limit for better context retention)
-    const historyData = await getConversationHistory(conversationId, 20, adminSupabase);
-
-    // Load or create metadata manager
-    const { data: convMetadata } = await adminSupabase
-      .from('conversations')
-      .select('metadata')
-      .eq('id', conversationId)
-      .single();
-
+    // Load or create metadata manager (convMetadata is now available from parallel ops)
     const metadataManager = convMetadata?.metadata
       ? ConversationMetadataManager.deserialize(JSON.stringify(convMetadata.metadata))
       : new ConversationMetadataManager();

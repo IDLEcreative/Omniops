@@ -34,16 +34,36 @@ export async function GET(request: NextRequest) {
       console.warn('Could not fetch scrape jobs:', jobsError);
     }
     
-    // Get domain statistics
-    const { data: domainStats, error: domainError } = await supabase
-      .from('scraped_pages')
-      .select('domain')
-      .not('domain', 'is', null);
-    
-    if (domainError) throw domainError;
-    
-    // Count unique domains
-    const uniqueDomains = new Set(domainStats?.map(d => d.domain) || []);
+    // Get domain statistics with pagination
+    // ✅ Optimized: Uses pagination to prevent OOM on large datasets
+    // ✅ Optimized: Only fetches domain column
+    const uniqueDomains = new Set<string>();
+    let offset = 0;
+    const batchSize = 5000;
+    let hasMore = true;
+
+    while (hasMore) {
+      const { data: domainBatch, error: domainError } = await supabase
+        .from('scraped_pages')
+        .select('domain')
+        .not('domain', 'is', null)
+        .range(offset, offset + batchSize - 1);
+
+      if (domainError) throw domainError;
+
+      if (domainBatch && domainBatch.length > 0) {
+        domainBatch.forEach(d => {
+          if (d.domain) uniqueDomains.add(d.domain);
+        });
+        offset += batchSize;
+
+        if (domainBatch.length < batchSize) {
+          hasMore = false;
+        }
+      } else {
+        hasMore = false;
+      }
+    }
     
     // Get embeddings statistics
     const { count: totalEmbeddings, error: embeddingsError } = await supabase
@@ -54,16 +74,43 @@ export async function GET(request: NextRequest) {
       console.warn('Could not fetch embeddings count:', embeddingsError);
     }
     
-    // Get content statistics
-    const { data: contentStats, error: contentError } = await supabase
-      .from('scraped_pages')
-      .select('content_length')
-      .not('content_length', 'is', null);
-    
+    // Get content statistics with pagination
+    // ✅ Optimized: Uses pagination to prevent OOM on large datasets
+    // ✅ Optimized: Only fetches content_length column
+    const contentLengths: number[] = [];
+    offset = 0;
+    hasMore = true;
+
+    while (hasMore) {
+      const { data: contentBatch, error: contentError } = await supabase
+        .from('scraped_pages')
+        .select('content_length')
+        .not('content_length', 'is', null)
+        .range(offset, offset + batchSize - 1);
+
+      if (contentError) {
+        console.warn('Could not fetch content stats:', contentError);
+        break;
+      }
+
+      if (contentBatch && contentBatch.length > 0) {
+        contentBatch.forEach(item => {
+          if (item.content_length) contentLengths.push(item.content_length);
+        });
+        offset += batchSize;
+
+        if (contentBatch.length < batchSize) {
+          hasMore = false;
+        }
+      } else {
+        hasMore = false;
+      }
+    }
+
     let avgContentLength = 0;
-    if (!contentError && contentStats && contentStats.length > 0) {
-      const totalLength = contentStats.reduce((sum, item) => sum + (item.content_length || 0), 0);
-      avgContentLength = Math.round(totalLength / contentStats.length);
+    if (contentLengths.length > 0) {
+      const totalLength = contentLengths.reduce((sum, len) => sum + len, 0);
+      avgContentLength = Math.round(totalLength / contentLengths.length);
     }
     
     const lastUpdated = lastUpdatedData && lastUpdatedData[0]

@@ -8,6 +8,7 @@ import {
   handleHealthCheck,
   handleJobStatus
 } from './handlers';
+import { withCSRF } from '@/lib/middleware/csrf';
 
 export const runtime = 'nodejs';
 export const dynamic = 'force-dynamic';
@@ -15,8 +16,10 @@ export const dynamic = 'force-dynamic';
 /**
  * POST /api/scrape
  * Scrape a single page or initiate a full website crawl
+ *
+ * CSRF PROTECTED: Requires valid CSRF token in X-CSRF-Token header
  */
-export async function POST(request: NextRequest) {
+async function handlePost(request: NextRequest) {
   try {
     const body = await request.json();
     const scrapeRequest = ScrapeRequestSchema.parse(body);
@@ -121,3 +124,6 @@ async function getOrganizationId(userSupabase: any): Promise<string | undefined>
 
   return undefined;
 }
+
+// Export POST handler with CSRF protection
+export const POST = withCSRF(handlePost);

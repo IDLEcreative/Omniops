@@ -265,3 +265,61 @@ export function decryptShopifyConfig(config: {
     access_token: config.access_token ? decrypt(config.access_token) : undefined,
   };
 }
+
+/**
+ * NEW CONSOLIDATED CREDENTIAL FUNCTIONS
+ * These functions encrypt/decrypt entire credential objects in a single JSONB column
+ */
+
+import type { EncryptedCredentials } from '@/types/encrypted-credentials';
+
+/**
+ * Encrypt credentials object for storage in encrypted_credentials JSONB column
+ * @param credentials Complete credentials object
+ * @returns Encrypted string suitable for JSONB storage
+ */
+export function encryptCredentials(credentials: EncryptedCredentials): string {
+  if (!credentials || Object.keys(credentials).length === 0) {
+    return '';
+  }
+
+  // Serialize to JSON and encrypt
+  const json = JSON.stringify(credentials);
+  return encrypt(json);
+}
+
+/**
+ * Decrypt credentials from encrypted_credentials JSONB column
+ * @param encryptedData Encrypted string from database
+ * @returns Decrypted credentials object
+ */
+export function decryptCredentials(encryptedData: string): EncryptedCredentials {
+  if (!encryptedData) {
+    return {};
+  }
+
+  try {
+    const decrypted = decrypt(encryptedData);
+    return JSON.parse(decrypted) as EncryptedCredentials;
+  } catch (error) {
+    console.error('Failed to decrypt credentials:', error);
+    return {};
+  }
+}
+
+/**
+ * Try to decrypt credentials, returning empty object if decryption fails
+ * This provides backward compatibility during migration
+ */
+export function tryDecryptCredentials(encryptedData: string | null | undefined): EncryptedCredentials {
+  if (!encryptedData) {
+    return {};
+  }
+
+  try {
+    return decryptCredentials(encryptedData);
+  } catch (error) {
+    console.warn('Failed to decrypt credentials, returning empty object:', error);
+    return {};
+  }
+}

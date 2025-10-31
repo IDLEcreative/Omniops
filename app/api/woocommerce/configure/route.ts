@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { createServiceRoleClient } from '@/lib/supabase-server';
 import { encrypt } from '@/lib/encryption';
+import { withCSRF } from '@/lib/middleware/csrf';
 
 /**
  * GET /api/woocommerce/configure?domain=xxx
@@ -62,11 +63,13 @@ export async function GET(request: NextRequest) {
  * POST /api/woocommerce/configure
  * Save WooCommerce configuration for a domain
  *
+ * CSRF PROTECTED: Requires valid CSRF token in X-CSRF-Token header
+ *
  * Body: { url, consumerKey, consumerSecret, domain? }
  *
  * Security: Encrypts consumer key and secret before storage
  */
-export async function POST(request: NextRequest) {
+async function handlePost(request: NextRequest) {
   try {
     const body = await request.json();
     const { url, consumerKey, consumerSecret, domain } = body;
@@ -188,3 +191,6 @@ export async function POST(request: NextRequest) {
     );
   }
 }
+
+// Export POST handler with CSRF protection
+export const POST = withCSRF(handlePost);

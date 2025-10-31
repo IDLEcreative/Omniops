@@ -5,6 +5,7 @@ import { createClient, createServiceRoleClient, validateSupabaseEnv } from '@/li
 import { logger } from '@/lib/logger';
 import { unstable_cache } from 'next/cache';
 import type { SupabaseClient } from '@supabase/supabase-js';
+import { withCSRF } from '@/lib/middleware/csrf';
 
 export async function GET(request: NextRequest) {
   try {
@@ -94,7 +95,13 @@ export async function GET(request: NextRequest) {
   }
 }
 
-export async function POST(request: NextRequest) {
+/**
+ * POST /api/training
+ * Create new training data entry
+ *
+ * CSRF PROTECTED: Requires valid CSRF token in X-CSRF-Token header
+ */
+async function handlePost(request: NextRequest) {
   try {
     // Validate environment configuration early for clearer errors in prod
     const hasUrl = Boolean(process.env.NEXT_PUBLIC_SUPABASE_URL);
@@ -282,3 +289,6 @@ async function processTrainingDataAsync(
       .eq('id', trainingId);
   }
 }
+
+// Export POST handler with CSRF protection
+export const POST = withCSRF(handlePost);

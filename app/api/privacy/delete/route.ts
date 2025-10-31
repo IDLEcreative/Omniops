@@ -1,7 +1,14 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { createServiceRoleClient } from '@/lib/supabase/server';
+import { withCSRF } from '@/lib/middleware/csrf';
 
-export async function POST(request: NextRequest) {
+/**
+ * POST /api/privacy/delete
+ * Delete all user data for GDPR/CCPA compliance
+ *
+ * CSRF PROTECTED: Requires valid CSRF token in X-CSRF-Token header
+ */
+async function handlePost(request: NextRequest) {
   // Initialize Supabase client inside the function
   const supabase = createClient(
     process.env.NEXT_PUBLIC_SUPABASE_URL!,
@@ -61,3 +68,6 @@ export async function POST(request: NextRequest) {
     );
   }
 }
+
+// Export POST handler with CSRF protection
+export const POST = withCSRF(handlePost);

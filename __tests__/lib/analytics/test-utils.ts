@@ -12,6 +12,7 @@ export function createMockSupabase(): jest.Mocked<SupabaseClient> {
     lte: jest.fn().mockReturnThis(),
     order: jest.fn().mockReturnThis(),
     limit: jest.fn().mockReturnThis(),
+    range: jest.fn().mockReturnThis(),
     single: jest.fn().mockReturnThis(),
     neq: jest.fn().mockReturnThis(),
     is: jest.fn().mockReturnThis(),
@@ -28,6 +29,7 @@ export function createQueryBuilder() {
     eq: jest.fn().mockReturnThis(),
     order: jest.fn().mockReturnThis(),
     limit: jest.fn().mockReturnThis(),
+    range: jest.fn().mockReturnThis(),
   };
 }
 

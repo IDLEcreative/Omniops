@@ -7,8 +7,11 @@ import {
   encryptWooCommerceConfig,
   decryptWooCommerceConfig,
   encryptShopifyConfig,
-  decryptShopifyConfig
+  decryptShopifyConfig,
+  encryptCredentials,
+  tryDecryptCredentials
 } from '@/lib/encryption';
+import type { EncryptedCredentials } from '@/types/encrypted-credentials';
 
 // Configuration schema
 const ConfigSchema = z.object({
@@ -74,21 +77,47 @@ export async function GET() {
       return NextResponse.json({ config: null });
     }
 
-    // Decrypt sensitive fields before sending to client
-    const config = {
-      domain: data.domain,
-      owned_domains: data.owned_domains || [],
-      woocommerce: decryptWooCommerceConfig({
+    // NEW: Try encrypted_credentials first, fall back to individual columns
+    let woocommerceConfig;
+    let shopifyConfig;
+
+    if (data.encrypted_credentials) {
+      // NEW FORMAT: Use consolidated encrypted credentials
+      const credentials = tryDecryptCredentials(data.encrypted_credentials);
+
+      woocommerceConfig = {
+        enabled: data.woocommerce_enabled || false,
+        url: credentials.woocommerce?.store_url || '',
+        consumer_key: credentials.woocommerce?.consumer_key || '',
+        consumer_secret: credentials.woocommerce?.consumer_secret || '',
+      };
+
+      shopifyConfig = {
+        enabled: data.shopify_enabled || false,
+        domain: credentials.shopify?.store_url || '',
+        access_token: credentials.shopify?.access_token || '',
+      };
+    } else {
+      // LEGACY FORMAT: Fall back to individual encrypted columns
+      woocommerceConfig = decryptWooCommerceConfig({
         enabled: data.woocommerce_enabled || false,
         url: data.woocommerce_url || '',
         consumer_key: data.woocommerce_consumer_key || '',
         consumer_secret: data.woocommerce_consumer_secret || '',
-      }),
-      shopify: decryptShopifyConfig({
+      });
+
+      shopifyConfig = decryptShopifyConfig({
         enabled: data.shopify_enabled || false,
         domain: data.shopify_domain || '',
         access_token: data.shopify_access_token || '',
-      }),
+      });
+    }
+
+    const config = {
+      domain: data.domain,
+      owned_domains: data.owned_domains || [],
+      woocommerce: woocommerceConfig,
+      shopify: shopifyConfig,
     };
 
     return NextResponse.json({ config });
@@ -158,15 +187,43 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    // Encrypt sensitive fields before storage
+    // NEW: Build consolidated credential object
+    const credentials: EncryptedCredentials = {};
+
+    if (validatedData.woocommerce.enabled && validatedData.woocommerce.consumer_key) {
+      credentials.woocommerce = {
+        consumer_key: validatedData.woocommerce.consumer_key,
+        consumer_secret: validatedData.woocommerce.consumer_secret || '',
+        store_url: validatedData.woocommerce.url || '',
+      };
+    }
+
+    if (validatedData.shopify.enabled && validatedData.shopify.access_token) {
+      credentials.shopify = {
+        access_token: validatedData.shopify.access_token,
+        store_url: validatedData.shopify.domain || '',
+      };
+    }
+
+    // Encrypt the consolidated credentials
+    const encryptedCredentialsJson = Object.keys(credentials).length > 0
+      ? encryptCredentials(credentials)
+      : null;
+
+    // LEGACY: Also encrypt individual fields for backward compatibility
     const encryptedWooCommerce = encryptWooCommerceConfig(validatedData.woocommerce);
     const encryptedShopify = encryptShopifyConfig(validatedData.shopify);
 
-    // Prepare data for database
+    // Prepare data for database (writes to BOTH new and legacy formats)
     const dbData = {
       organization_id: membership.organization_id,
       domain: validatedData.domain,
       owned_domains: validatedData.owned_domains,
+
+      // NEW FORMAT: Consolidated encrypted credentials
+      encrypted_credentials: encryptedCredentialsJson,
+
+      // LEGACY FORMAT: Individual columns (for backward compatibility during migration)
       woocommerce_enabled: encryptedWooCommerce.enabled,
       woocommerce_url: encryptedWooCommerce.url,
       woocommerce_consumer_key: encryptedWooCommerce.consumer_key,
@@ -174,6 +231,7 @@ export async function POST(request: NextRequest) {
       shopify_enabled: encryptedShopify.enabled,
       shopify_domain: encryptedShopify.domain,
       shopify_access_token: encryptedShopify.access_token,
+
       updated_at: new Date().toISOString(),
     };
 

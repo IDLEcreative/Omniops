@@ -2,7 +2,8 @@ import { WooCommerceAPI } from './woocommerce-api';
 import { WooCommerceStoreAPI } from './woocommerce-store-api';
 import { getCartSessionManager } from './cart-session-manager';
 import { createServiceRoleClient } from '@/lib/supabase-server';
-import { decryptWooCommerceConfig } from '@/lib/encryption';
+import { decryptWooCommerceConfig, tryDecryptCredentials } from '@/lib/encryption';
+import type { EncryptedCredentials } from '@/types/encrypted-credentials';
 
 // Product interface
 interface Product {
@@ -41,37 +42,54 @@ export async function getDynamicWooCommerceClient(domain: string): Promise<WooCo
     return null;
   }
   
-  // Fetch configuration for this domain
+  // Fetch configuration for this domain (include both new and legacy formats)
   const { data: config, error } = await supabase
     .from('customer_configs')
-    .select('woocommerce_url, woocommerce_consumer_key, woocommerce_consumer_secret')
+    .select('woocommerce_url, woocommerce_consumer_key, woocommerce_consumer_secret, encrypted_credentials')
     .eq('domain', domain)
     .single();
 
-  if (error || !config || !config.woocommerce_url) {
+  if (error || !config) {
     return null;
   }
 
-  if (!config.woocommerce_url || !config.woocommerce_consumer_key || !config.woocommerce_consumer_secret) {
-    throw new Error('WooCommerce configuration is incomplete');
+  let storeUrl: string | undefined;
+  let consumerKey: string | undefined;
+  let consumerSecret: string | undefined;
+
+  // NEW: Try encrypted_credentials first
+  if (config.encrypted_credentials) {
+    const credentials = tryDecryptCredentials(config.encrypted_credentials);
+    if (credentials.woocommerce) {
+      storeUrl = credentials.woocommerce.store_url;
+      consumerKey = credentials.woocommerce.consumer_key;
+      consumerSecret = credentials.woocommerce.consumer_secret;
+    }
   }
 
-  // Decrypt the credentials
-  const decryptedConfig = decryptWooCommerceConfig({
-    enabled: true, // If we have a URL, it's enabled
-    url: config.woocommerce_url,
-    consumer_key: config.woocommerce_consumer_key,
-    consumer_secret: config.woocommerce_consumer_secret,
-  });
+  // FALLBACK: Use legacy individual columns if new format not available
+  if (!consumerKey && config.woocommerce_consumer_key) {
+    const decryptedConfig = decryptWooCommerceConfig({
+      enabled: true,
+      url: config.woocommerce_url,
+      consumer_key: config.woocommerce_consumer_key,
+      consumer_secret: config.woocommerce_consumer_secret,
+    });
 
-  if (!decryptedConfig.consumer_key || !decryptedConfig.consumer_secret) {
-    throw new Error('Failed to decrypt WooCommerce credentials');
+    storeUrl = decryptedConfig.url;
+    consumerKey = decryptedConfig.consumer_key;
+    consumerSecret = decryptedConfig.consumer_secret;
+  }
+
+  // Validate we have all required credentials
+  if (!storeUrl || !consumerKey || !consumerSecret) {
+    return null;
   }
 
   return new WooCommerceAPI({
-    url: decryptedConfig.url!,
-    consumerKey: decryptedConfig.consumer_key,
-    consumerSecret: decryptedConfig.consumer_secret,
+    url: storeUrl,
+    consumerKey,
+    consumerSecret,
   });
 }
 

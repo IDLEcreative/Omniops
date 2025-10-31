@@ -10,6 +10,8 @@ import type { TimeRange, ConversationData, MessageData } from './business-intell
 
 /**
  * Fetch conversations with messages for journey analysis
+ * ✅ Optimized: Uses pagination to handle large datasets
+ * ✅ Optimized: Explicitly selects only needed columns
  */
 export async function fetchConversationsWithMessages(
   domain: string,
@@ -22,35 +24,55 @@ export async function fetchConversationsWithMessages(
     throw new Error('Database client unavailable');
   }
 
-  let query = client
-    .from('conversations')
-    .select(`
-      id,
-      session_id,
-      created_at,
-      metadata,
-      messages (
+  // Use pagination to prevent OOM on large conversation datasets
+  const allConversations: ConversationData[] = [];
+  let offset = 0;
+  const batchSize = 1000;
+  let hasMore = true;
+
+  while (hasMore) {
+    let query = client
+      .from('conversations')
+      .select(`
         id,
-        content,
-        role,
-        created_at
-      )
-    `)
-    .gte('created_at', timeRange.start.toISOString())
-    .lte('created_at', timeRange.end.toISOString());
+        session_id,
+        created_at,
+        metadata,
+        messages (
+          id,
+          content,
+          role,
+          created_at
+        )
+      `)
+      .gte('created_at', timeRange.start.toISOString())
+      .lte('created_at', timeRange.end.toISOString())
+      .range(offset, offset + batchSize - 1);
 
-  if (domain !== 'all') {
-    query = query.eq('domain', domain);
+    if (domain !== 'all') {
+      query = query.eq('domain', domain);
+    }
+
+    const { data, error } = await query;
+
+    if (error) {
+      logger.error('Failed to fetch conversations with messages', error);
+      throw error;
+    }
+
+    if (data && data.length > 0) {
+      allConversations.push(...(data as ConversationData[]));
+      offset += batchSize;
+
+      if (data.length < batchSize) {
+        hasMore = false;
+      }
+    } else {
+      hasMore = false;
+    }
   }
 
-  const { data, error } = await query;
-
-  if (error) {
-    logger.error('Failed to fetch conversations with messages', error);
-    throw error;
-  }
-
-  return (data as ConversationData[]) || [];
+  return allConversations;
 }
 
 /**
@@ -97,6 +119,8 @@ export async function fetchUserMessages(
 
 /**
  * Fetch messages for peak usage analysis
+ * ✅ Optimized: Uses pagination to handle large message datasets
+ * ✅ Optimized: Only fetches needed columns (created_at, metadata)
  */
 export async function fetchMessagesForUsageAnalysis(
   domain: string,
@@ -109,26 +133,46 @@ export async function fetchMessagesForUsageAnalysis(
     throw new Error('Database client unavailable');
   }
 
-  let query = client
-    .from('messages')
-    .select(`
-      created_at,
-      metadata
-    `)
-    .gte('created_at', timeRange.start.toISOString())
-    .lte('created_at', timeRange.end.toISOString())
-    .order('created_at', { ascending: true });
+  // Use pagination to prevent OOM on large message datasets
+  const allMessages: MessageData[] = [];
+  let offset = 0;
+  const batchSize = 5000;
+  let hasMore = true;
 
-  if (domain !== 'all') {
-    query = query.eq('domain', domain);
+  while (hasMore) {
+    let query = client
+      .from('messages')
+      .select(`
+        created_at,
+        metadata
+      `)
+      .gte('created_at', timeRange.start.toISOString())
+      .lte('created_at', timeRange.end.toISOString())
+      .order('created_at', { ascending: true })
+      .range(offset, offset + batchSize - 1);
+
+    if (domain !== 'all') {
+      query = query.eq('domain', domain);
+    }
+
+    const { data, error } = await query;
+
+    if (error) {
+      logger.error('Failed to fetch messages for usage analysis', error);
+      throw error;
+    }
+
+    if (data && data.length > 0) {
+      allMessages.push(...(data as MessageData[]));
+      offset += batchSize;
+
+      if (data.length < batchSize) {
+        hasMore = false;
+      }
+    } else {
+      hasMore = false;
+    }
   }
 
-  const { data, error } = await query;
-
-  if (error) {
-    logger.error('Failed to fetch messages for usage analysis', error);
-    throw error;
-  }
-
-  return (data as MessageData[]) || [];
+  return allMessages;
 }

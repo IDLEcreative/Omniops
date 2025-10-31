@@ -224,6 +224,8 @@ export async function searchEnhancedContent(
 /**
  * Migration utility to enhance existing embeddings with rich metadata
  * Run this in batches to avoid overwhelming the system
+ * ✅ Optimized: Uses cursor-based pagination instead of offset
+ * ✅ Optimized: Explicitly selects only needed columns
  */
 export async function migrateExistingEmbeddings(
   batchSize: number = 100,
@@ -231,23 +233,25 @@ export async function migrateExistingEmbeddings(
 ): Promise<{ processed: number; failed: number }> {
   const supabase = await createServiceRoleClient();
   if (!supabase) throw new Error('Database connection unavailable');
-  
+
   let processed = 0;
   let failed = 0;
   let lastId: string | null = null;
-  
+
   while (true) {
     // Fetch batch of embeddings with minimal metadata
+    // ✅ Only fetches needed columns: id, page_id, chunk_text, metadata
+    // ✅ Uses cursor pagination (gt) which is more efficient than offset
     let query = supabase
       .from('page_embeddings')
       .select('id, page_id, chunk_text, metadata')
       .limit(batchSize)
       .order('id');
-    
+
     if (lastId) {
       query = query.gt('id', lastId);
     }
-    
+
     const { data: embeddings, error } = await query;
     
     if (error) {
@@ -348,19 +352,44 @@ export async function analyzeMetadataQuality(domain?: string): Promise<{
     domainId = data?.id;
   }
   
-  // Query embeddings with metadata
-  let query = supabase
-    .from('page_embeddings')
-    .select('metadata');
-  
-  if (domainId) {
-    query = query.eq('page_id', domainId);
+  // Query embeddings with metadata using pagination
+  // ✅ Optimized: Only fetches metadata column
+  // ✅ Optimized: Uses pagination to handle large datasets
+  const embeddings: Array<{ metadata: any }> = [];
+  let offset = 0;
+  const batchSize = 5000;
+  let hasMore = true;
+
+  while (hasMore) {
+    let query = supabase
+      .from('page_embeddings')
+      .select('metadata')
+      .range(offset, offset + batchSize - 1);
+
+    if (domainId) {
+      query = query.eq('page_id', domainId);
+    }
+
+    const { data: batch, error } = await query;
+
+    if (error) {
+      throw new Error(`Failed to fetch embeddings: ${error.message}`);
+    }
+
+    if (batch && batch.length > 0) {
+      embeddings.push(...batch);
+      offset += batchSize;
+
+      if (batch.length < batchSize) {
+        hasMore = false;
+      }
+    } else {
+      hasMore = false;
+    }
   }
-  
-  const { data: embeddings, error } = await query;
-  
-  if (error || !embeddings) {
-    throw new Error(`Failed to fetch embeddings: ${error?.message}`);
+
+  if (!embeddings) {
+    throw new Error('Failed to fetch embeddings');
   }
   
   const totalEmbeddings = embeddings.length;

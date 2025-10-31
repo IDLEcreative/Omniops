@@ -13,6 +13,7 @@ import { handleGet } from './get-handler'
 import { handlePost } from './create-handler'
 import { handlePut } from './update-handler'
 import { handleDelete } from './delete-handler'
+import { withCSRF } from '@/lib/middleware/csrf'
 
 export const runtime = 'nodejs'
 export const dynamic = 'force-dynamic'
@@ -36,6 +37,8 @@ export async function GET(request: NextRequest) {
  * POST /api/customer/config
  * Create a new customer configuration and trigger automatic scraping
  *
+ * CSRF PROTECTED: Requires valid CSRF token in X-CSRF-Token header
+ *
  * Request Body:
  * {
  *   domain: string (required)
@@ -50,13 +53,13 @@ export async function GET(request: NextRequest) {
  *   metadata?: Record<string, any>
  * }
  */
-export async function POST(request: NextRequest) {
-  return handlePost(request)
-}
+export const POST = withCSRF(handlePost)
 
 /**
  * PUT /api/customer/config?id={configId}
  * Update an existing customer configuration
+ *
+ * CSRF PROTECTED: Requires valid CSRF token in X-CSRF-Token header
  *
  * Query Parameters:
  * - id: Configuration ID (required)
@@ -74,17 +77,15 @@ export async function POST(request: NextRequest) {
  *   metadata?: Record<string, any>
  * }
  */
-export async function PUT(request: NextRequest) {
-  return handlePut(request)
-}
+export const PUT = withCSRF(handlePut)
 
 /**
  * DELETE /api/customer/config?id={configId}
  * Delete a customer configuration and cancel any pending scraping
  *
+ * CSRF PROTECTED: Requires valid CSRF token in X-CSRF-Token header
+ *
  * Query Parameters:
  * - id: Configuration ID (required)
  */
-export async function DELETE(request: NextRequest) {
-  return handleDelete(request)
-}
+export const DELETE = withCSRF(handleDelete)
