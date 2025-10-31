@@ -9,9 +9,12 @@ const chatSchema = z.object({
   message: z.string().min(1).max(500)
 });
 
-const openai = new OpenAI({
-  apiKey: process.env.OPENAI_API_KEY
-});
+// Lazy initialization - only create OpenAI client when needed (avoids build-time env var requirement)
+function getOpenAIClient() {
+  return new OpenAI({
+    apiKey: process.env.OPENAI_API_KEY || ''
+  });
+}
 
 // Message rate limiting: 1 per 2 seconds
 async function checkMessageRateLimit(sessionId: string) {
@@ -80,20 +83,19 @@ export async function POST(req: NextRequest) {
 
     // Update message count in Supabase
     try {
-      const supabase = createClient(
-        process.env.NEXT_PUBLIC_SUPABASE_URL!,
-        process.env.SUPABASE_SERVICE_ROLE_KEY!
-      );
+      const supabase = await createServiceRoleClient();
 
-      await supabase
-        .from('demo_attempts')
-        .update({
-          messages_sent: sessionData.message_count,
-          last_message_at: new Date().toISOString()
-        })
-        .eq('domain', sessionData.domain)
-        .order('created_at', { ascending: false })
-        .limit(1);
+      if (supabase) {
+        await supabase
+          .from('demo_attempts')
+          .update({
+            messages_sent: sessionData.message_count,
+            last_message_at: new Date().toISOString()
+          })
+          .eq('domain', sessionData.domain)
+          .order('created_at', { ascending: false })
+          .limit(1);
+      }
     } catch (logError) {
       console.error('Failed to update message count:', logError);
     }
@@ -138,6 +140,7 @@ async function findRelevantChunks(
   embeddings: number[][]
 ): Promise<string[]> {
   // Generate query embedding
+  const openai = getOpenAIClient();
   const queryEmbedding = await openai.embeddings.create({
     model: 'text-embedding-3-small',
     input: query
@@ -190,6 +193,7 @@ async function generateDemoResponse(
 ): Promise<string> {
   const context = relevantChunks.join('\n\n');
 
+  const openai = getOpenAIClient();
   const completion = await openai.chat.completions.create({
     model: 'gpt-4',
     messages: [
