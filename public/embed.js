@@ -1,29 +1,19 @@
 (function() {
   'use strict';
 
-  // Widget version
-  const WIDGET_VERSION = '2.0.0'; // Bumped to 2.0 for standalone architecture
+  const WIDGET_VERSION = '2.0.0';
 
-  // Auto-detect server URL from script source or use current origin
   function getServerUrl() {
-    // First try to get from script tag
     const currentScript = document.currentScript || document.querySelector('script[src*="embed.js"]');
     if (currentScript && currentScript.src) {
       const url = new URL(currentScript.src);
-      // In development, always use port 3000
-      if (url.hostname === 'localhost' || url.hostname === '127.0.0.1') {
-        return `http://localhost:3000`;
-      }
+      if (url.hostname === 'localhost' || url.hostname === '127.0.0.1') return 'http://localhost:3000';
       return url.origin;
     }
-    // Fallback - in development use port 3000
-    if (window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1') {
-      return 'http://localhost:3000';
-    }
+    if (window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1') return 'http://localhost:3000';
     return window.location.origin;
   }
 
-  // Default configuration
   const defaultConfig = {
     serverUrl: getServerUrl(),
     appearance: {
@@ -51,10 +41,8 @@
     debug: false,
   };
 
-  // Privacy settings storage key
   const PRIVACY_KEY = 'chat_widget_privacy';
 
-  // Get privacy preferences from localStorage
   function getPrivacyPreferences() {
     try {
       const stored = localStorage.getItem(PRIVACY_KEY);
@@ -64,7 +52,6 @@
     }
   }
 
-  // Save privacy preferences
   function savePrivacyPreferences(prefs) {
     try {
       localStorage.setItem(PRIVACY_KEY, JSON.stringify(prefs));
@@ -73,7 +60,6 @@
     }
   }
 
-  // Error handler
   function logError(message, error) {
     if (config.debug || window.ChatWidgetDebug) {
       console.error('[Chat Widget]', message, error);
@@ -81,40 +67,43 @@
   }
 
   try {
-    // Merge user config with defaults
-    const config = window.ChatWidgetConfig ?
-      { ...defaultConfig, ...window.ChatWidgetConfig } :
-      defaultConfig;
-
-    // Ensure serverUrl is set
-    if (!config.serverUrl) {
-      config.serverUrl = getServerUrl();
-    }
-
-    // Check if already loaded
-    if (document.getElementById('chat-widget-iframe')) {
-      logError('Widget already loaded');
-      return;
-    }
-
-    // Get privacy preferences
+    const userConfig = window.ChatWidgetConfig || {};
+    const config = { ...defaultConfig, ...userConfig };
+    if (!config.serverUrl) config.serverUrl = getServerUrl();
+    if (document.getElementById('chat-widget-iframe')) { logError('Widget already loaded'); return; }
     const privacyPrefs = getPrivacyPreferences();
-
-    // Check if user has opted out
-    if (privacyPrefs.optedOut && config.privacy.allowOptOut) {
-      console.log('[Chat Widget] User has opted out of chat widget');
-      return;
-    }
-
-    // Get current domain
+    if (privacyPrefs.optedOut && config.privacy.allowOptOut) { console.log('[Chat Widget] User has opted out'); return; }
     const currentDomain = window.location.hostname;
-
-    // Check for demo mode
     const currentScript = document.currentScript || document.querySelector('script[src*="embed.js"]');
     const demoId = currentScript?.getAttribute('data-demo');
-
-    // Detect mobile device
     const isMobile = /iPhone|iPad|iPod|Android/i.test(navigator.userAgent) || window.innerWidth <= 768;
+
+    if (!userConfig.skipRemoteConfig) {
+      try {
+        const res = await fetch(`${config.serverUrl}/api/widget/config?domain=${currentDomain}`);
+        if (res.ok) {
+          const data = await res.json();
+          if (data.success && data.config) {
+            const remote = data.config;
+            ['appearance', 'behavior', 'features'].forEach(key => {
+              if (remote[key]) config[key] = { ...config[key], ...remote[key], ...userConfig[key] };
+            });
+            if (remote.branding) {
+              if (remote.branding.primary_color && !userConfig.appearance?.primaryColor) {
+                config.appearance.primaryColor = remote.branding.primary_color;
+              }
+              if (remote.branding.welcome_message && !userConfig.behavior?.welcomeMessage) {
+                config.behavior.welcomeMessage = remote.branding.welcome_message;
+              }
+            }
+            config.woocommerceEnabled = remote.woocommerce_enabled || config.woocommerceEnabled;
+            if (config.debug || window.ChatWidgetDebug) console.log('[Chat Widget] Loaded remote config:', remote);
+          }
+        }
+      } catch (e) {
+        if (config.debug || window.ChatWidgetDebug) console.warn('[Chat Widget] Remote config fetch failed:', e);
+      }
+    }
 
     // Load the standalone widget bundle
     const widgetBundleUrl = `${config.serverUrl}/widget-bundle.js`;
