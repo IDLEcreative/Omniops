@@ -1,57 +1,24 @@
 #!/usr/bin/env node
 
-import https from 'node:https';
-import { createClient  } from '@supabase/supabase-js';
+// MIGRATED: Now uses environment variables via supabase-config.js
+import { getSupabaseConfig, executeSQL as executeSQLHelper, createSupabaseClient } from './supabase-config.js';
 import dotenv from 'dotenv';
 dotenv.config({ path: '.env.local' });
 
-const PROJECT_REF = 'birugqyuqhiahxvxeyqg';
-const ACCESS_TOKEN = 'sbp_3d1fa3086b18fbca507ee9b65042aa264395e1b8';
+const config = getSupabaseConfig();
 
-const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL;
-const supabaseServiceRoleKey = process.env.SUPABASE_SERVICE_ROLE_KEY;
-
-const supabase = createClient(supabaseUrl, supabaseServiceRoleKey, {
-  auth: { autoRefreshToken: false, persistSession: false }
-});
-
+// Direct SQL execution helper
 async function executeSQL(sql) {
-  return new Promise((resolve, reject) => {
-    const postData = JSON.stringify({ query: sql });
-    
-    const options = {
-      hostname: 'api.supabase.com',
-      port: 443,
-      path: `/v1/projects/${PROJECT_REF}/database/query`,
-      method: 'POST',
-      headers: {
-        'Authorization': `Bearer ${ACCESS_TOKEN}`,
-        'Content-Type': 'application/json',
-        'Content-Length': Buffer.byteLength(postData)
-      }
-    };
-    
-    const req = https.request(options, (res) => {
-      let data = '';
-      res.on('data', (chunk) => { data += chunk; });
-      res.on('end', () => {
-        try {
-          const result = JSON.parse(data);
-          if (res.statusCode >= 200 && res.statusCode < 300) {
-            resolve(result);
-          } else {
-            reject(new Error(result.error || `HTTP ${res.statusCode}`));
-          }
-        } catch (e) {
-          reject(e);
-        }
-      });
-    });
-    
-    req.on('error', reject);
-    req.write(postData);
-    req.end();
-  });
+  return executeSQLHelper(config, sql);
+}
+
+// Create Supabase client from config
+let supabase;
+async function getSupabase() {
+  if (!supabase) {
+    supabase = await createSupabaseClient(config);
+  }
+  return supabase;
 }
 
 async function getIndexUsage() {
@@ -138,9 +105,10 @@ async function getCacheHitRatio() {
 async function benchmarkOperations() {
   console.log('\n⚡ Running Performance Benchmarks...');
   console.log('-' .repeat(60));
-  
+
+  const supabase = await getSupabase();
   const benchmarks = [];
-  
+
   // Test 1: Single page upsert (old method)
   const singleStart = performance.now();
   await supabase.from('scraped_pages').upsert({

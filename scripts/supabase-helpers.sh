@@ -3,9 +3,26 @@
 # Supabase CLI Helper Scripts
 # Usage: source ./scripts/supabase-helpers.sh
 
-# Set your Supabase access token (add to your shell profile for persistence)
-export SUPABASE_ACCESS_TOKEN=sbp_07995d9918ee19ab0b37fd1f1b0dbe5bbd6e21c9
-export SUPABASE_PROJECT_ID=birugqyuqhiahxvxeyqg
+# Check if environment variables are set
+if [ -z "$SUPABASE_MANAGEMENT_TOKEN" ]; then
+  echo "❌ SUPABASE_MANAGEMENT_TOKEN environment variable is not set"
+  echo "   Get your token from: https://supabase.com/dashboard/account/tokens"
+  echo "   Add to .env.local: SUPABASE_MANAGEMENT_TOKEN=sbp_your_token_here"
+  return 1
+fi
+
+if [ -z "$NEXT_PUBLIC_SUPABASE_PROJECT_REF" ]; then
+  echo "❌ NEXT_PUBLIC_SUPABASE_PROJECT_REF environment variable is not set"
+  echo "   Add to .env.local: NEXT_PUBLIC_SUPABASE_PROJECT_REF=your_project_ref"
+  return 1
+fi
+
+# Set variables from environment
+export SUPABASE_ACCESS_TOKEN=$SUPABASE_MANAGEMENT_TOKEN
+export SUPABASE_PROJECT_ID=$NEXT_PUBLIC_SUPABASE_PROJECT_REF
+
+echo "✅ Using Supabase configuration from environment variables"
+echo "   Project: $SUPABASE_PROJECT_ID"
 
 # Generate TypeScript types from database
 generate_types() {

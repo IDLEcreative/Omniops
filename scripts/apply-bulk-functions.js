@@ -1,9 +1,6 @@
 #!/usr/bin/env node
 
-import https from 'node:https';
-
-const PROJECT_REF = 'birugqyuqhiahxvxeyqg';
-const ACCESS_TOKEN = 'sbp_3d1fa3086b18fbca507ee9b65042aa264395e1b8';
+import { executeSQL } from './supabase-config.js';
 
 // Bulk operation functions
 const bulkFunctions = [
@@ -105,49 +102,6 @@ const bulkFunctions = [
     sql: `GRANT SELECT ON index_usage_stats TO authenticated;`
   }
 ];
-
-async function executeSQL(sql) {
-  return new Promise((resolve, reject) => {
-    const postData = JSON.stringify({ query: sql });
-    
-    const options = {
-      hostname: 'api.supabase.com',
-      port: 443,
-      path: `/v1/projects/${PROJECT_REF}/database/query`,
-      method: 'POST',
-      headers: {
-        'Authorization': `Bearer ${ACCESS_TOKEN}`,
-        'Content-Type': 'application/json',
-        'Content-Length': Buffer.byteLength(postData)
-      }
-    };
-    
-    const req = https.request(options, (res) => {
-      let data = '';
-      
-      res.on('data', (chunk) => {
-        data += chunk;
-      });
-      
-      res.on('end', () => {
-        try {
-          const result = JSON.parse(data);
-          if (res.statusCode >= 200 && res.statusCode < 300) {
-            resolve(result);
-          } else {
-            reject(new Error(result.error || `HTTP ${res.statusCode}`));
-          }
-        } catch (e) {
-          reject(e);
-        }
-      });
-    });
-    
-    req.on('error', reject);
-    req.write(postData);
-    req.end();
-  });
-}
 
 async function applyBulkFunctions() {
   console.log('🚀 Creating Bulk Operation Functions\n');

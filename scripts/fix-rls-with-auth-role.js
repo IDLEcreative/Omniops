@@ -1,48 +1,9 @@
 #!/usr/bin/env node
 
-import https from 'node:https';
+// MIGRATED: Now uses environment variables via supabase-config.js
+import { getSupabaseConfig, executeSQL } from './supabase-config.js';
 
-const PROJECT_REF = 'birugqyuqhiahxvxeyqg';
-const ACCESS_TOKEN = 'sbp_3d1fa3086b18fbca507ee9b65042aa264395e1b8';
-
-async function executeSQL(sql, description) {
-  return new Promise((resolve, reject) => {
-    const postData = JSON.stringify({ query: sql });
-    
-    const options = {
-      hostname: 'api.supabase.com',
-      port: 443,
-      path: `/v1/projects/${PROJECT_REF}/database/query`,
-      method: 'POST',
-      headers: {
-        'Authorization': `Bearer ${ACCESS_TOKEN}`,
-        'Content-Type': 'application/json',
-        'Content-Length': Buffer.byteLength(postData)
-      }
-    };
-    
-    const req = https.request(options, (res) => {
-      let data = '';
-      res.on('data', (chunk) => { data += chunk; });
-      res.on('end', () => {
-        try {
-          const result = JSON.parse(data);
-          if (res.statusCode >= 200 && res.statusCode < 300) {
-            resolve(result);
-          } else {
-            reject(new Error(result.error || result.message || `HTTP ${res.statusCode}`));
-          }
-        } catch (e) {
-          reject(e);
-        }
-      });
-    });
-    
-    req.on('error', reject);
-    req.write(postData);
-    req.end();
-  });
-}
+const config = getSupabaseConfig();
 
 const fixWithAuthRole = [
   {
@@ -130,9 +91,9 @@ async function fixRLSWithAuthRole() {
   
   for (const policy of fixWithAuthRole) {
     process.stdout.write(`⏳ ${policy.name}... `);
-    
+
     try {
-      await executeSQL(policy.sql, policy.name);
+      await executeSQL(config, policy.sql);
       console.log('✅');
       successCount++;
     } catch (error) {
@@ -140,7 +101,7 @@ async function fixRLSWithAuthRole() {
       errors.push({ step: policy.name, error: error.message });
       errorCount++;
     }
-    
+
     await new Promise(resolve => setTimeout(resolve, 300));
   }
   
@@ -167,7 +128,7 @@ async function fixRLSWithAuthRole() {
   `;
   
   try {
-    const result = await executeSQL(verifySql);
+    const result = await executeSQL(config, verifySql);
     if (result && result.length > 0) {
       console.log('\n📋 Final Policy Status:');
       let allOptimized = true;
@@ -197,7 +158,7 @@ async function fixRLSWithAuthRole() {
   `;
   
   try {
-    const explainResult = await executeSQL(testSql);
+    const explainResult = await executeSQL(config, testSql);
     if (explainResult && explainResult.length > 0) {
       const plan = explainResult[0]['QUERY PLAN'];
       if (plan && plan[0]) {

@@ -1,7 +1,8 @@
+import { getSupabaseConfig } from './supabase-config.js';
 
-// Supabase Management API configuration
-const SUPABASE_ACCESS_TOKEN = 'sbp_f30783ba26b0a6ae2bba917988553bd1d5f76d97';
-const PROJECT_REF = 'birugqyuqhiahxvxeyqg';
+// Get Supabase configuration from environment variables
+const config = getSupabaseConfig();
+const { projectRef, managementToken } = config;
 
 async function verifyCleanupResults() {
   console.log('🔍 VERIFYING INDEX CLEANUP RESULTS');
@@ -32,11 +33,11 @@ async function verifyCleanupResults() {
   
   try {
     const response = await fetch(
-      `https://api.supabase.com/v1/projects/${PROJECT_REF}/database/query`,
+      `https://api.supabase.com/v1/projects/${projectRef}/database/query`,
       {
         method: 'POST',
         headers: {
-          'Authorization': `Bearer ${SUPABASE_ACCESS_TOKEN}`,
+          'Authorization': `Bearer ${managementToken}`,
           'Content-Type': 'application/json',
         },
         body: JSON.stringify({ query: verifyQuery }),
@@ -96,11 +97,11 @@ async function verifyCleanupResults() {
     `;
     
     const checkResponse = await fetch(
-      `https://api.supabase.com/v1/projects/${PROJECT_REF}/database/query`,
+      `https://api.supabase.com/v1/projects/${projectRef}/database/query`,
       {
         method: 'POST',
         headers: {
-          'Authorization': `Bearer ${SUPABASE_ACCESS_TOKEN}`,
+          'Authorization': `Bearer ${managementToken}`,
           'Content-Type': 'application/json',
         },
         body: JSON.stringify({ query: checkDroppedQuery }),

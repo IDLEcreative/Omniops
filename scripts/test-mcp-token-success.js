@@ -7,8 +7,11 @@
 
 import https from 'node:https';
 import chalk from 'chalk';
+import { getSupabaseConfig } from './supabase-config.js';
 
-const token = 'sbp_f30783ba26b0a6ae2bba917988553bd1d5f76d97';
+// Get Supabase configuration from environment variables
+const config = getSupabaseConfig();
+const token = config.managementToken;
 
 console.log(chalk.bold.green('\n✅ SUPABASE PERSONAL ACCESS TOKEN TEST\n'));
 console.log(chalk.yellow('='.repeat(60)));

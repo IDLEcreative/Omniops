@@ -1,33 +1,15 @@
+// MIGRATED: Now uses environment variables via supabase-config.js
+import { getSupabaseConfig, executeSQL as executeSQLHelper } from './supabase-config.js';
 
-// Supabase Management API configuration
-const SUPABASE_ACCESS_TOKEN = 'sbp_f30783ba26b0a6ae2bba917988553bd1d5f76d97';
-const PROJECT_REF = 'birugqyuqhiahxvxeyqg';
+const config = getSupabaseConfig();
 
+// Wrapper function that matches the original signature and adds console output
 async function executeSQL(query, description) {
   console.log(`\n📝 ${description}...`);
-  
+
   try {
-    const response = await fetch(
-      `https://api.supabase.com/v1/projects/${PROJECT_REF}/database/query`,
-      {
-        method: 'POST',
-        headers: {
-          'Authorization': `Bearer ${SUPABASE_ACCESS_TOKEN}`,
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({ query }),
-      }
-    );
-
-    if (!response.ok) {
-      const errorText = await response.text();
-      console.error(`❌ Failed: ${response.status} - ${errorText}`);
-      return { success: false, error: errorText };
-    }
-
-    const result = await response.json();
+    const result = await executeSQLHelper(config, query);
     return { success: true, result };
-    
   } catch (error) {
     console.error(`❌ Error: ${error.message}`);
     return { success: false, error: error.message };

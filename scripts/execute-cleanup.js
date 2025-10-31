@@ -1,7 +1,7 @@
+// MIGRATED: Now uses environment variables via supabase-config.js
+import { getSupabaseConfig, executeSQL } from './supabase-config.js';
 
-// Supabase Management API configuration
-const SUPABASE_ACCESS_TOKEN = 'sbp_f30783ba26b0a6ae2bba917988553bd1d5f76d97';
-const PROJECT_REF = 'birugqyuqhiahxvxeyqg';
+const config = getSupabaseConfig();
 
 async function executeCleanupSQL() {
   console.log('🧹 EXECUTING DATABASE CLEANUP');
@@ -37,33 +37,8 @@ DROP TABLE IF EXISTS public.customers CASCADE;
 `;
 
   try {
-    // Use Supabase Management API to execute SQL
-    const response = await fetch(
-      `https://api.supabase.com/v1/projects/${PROJECT_REF}/database/query`,
-      {
-        method: 'POST',
-        headers: {
-          'Authorization': `Bearer ${SUPABASE_ACCESS_TOKEN}`,
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({
-          query: cleanupSQL
-        }),
-      }
-    );
-
-    if (!response.ok) {
-      const errorText = await response.text();
-      console.error('❌ Failed to execute SQL:', response.status, errorText);
-      
-      // Try alternative approach using direct connection
-      console.log('\n📝 Alternative: Copy and run this SQL in Supabase Dashboard:');
-      console.log('https://supabase.com/dashboard/project/birugqyuqhiahxvxeyqg/sql\n');
-      console.log(cleanupSQL);
-      return;
-    }
-
-    const result = await response.json();
+    // Use helper function from supabase-config.js
+    const result = await executeSQL(config, cleanupSQL);
     console.log('✅ Successfully dropped all unused tables!');
     console.log('\nResult:', result);
     
@@ -93,19 +68,18 @@ DROP TABLE IF EXISTS public.customers CASCADE;
   } catch (error) {
     console.error('❌ Error:', error.message);
     console.log('\n📝 Please run this SQL manually in Supabase Dashboard:');
-    console.log('https://supabase.com/dashboard/project/birugqyuqhiahxvxeyqg/sql\n');
+    console.log(`https://supabase.com/dashboard/project/${config.projectRef}/sql\n`);
     console.log(cleanupSQL);
   }
 }
 
 // Also verify the final state
 async function verifyFinalState() {
-  import { createClient  } from '@supabase/supabase-js';
-  
-  const supabaseUrl = 'https://birugqyuqhiahxvxeyqg.supabase.co';
-  const supabaseKey = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImJpcnVncXl1cWhpYWh4dnhleXFnIiwicm9sZSI6InNlcnZpY2Vfcm9sZSIsImlhdCI6MTc1NTc4NzE2NCwiZXhwIjoyMDcxMzYzMTY0fQ.5bw0QlkRgv_PA7iHrpWixvC31d7WZ5VYSR2JZnhsw8s';
-  
-  const supabase = createClient(supabaseUrl, supabaseKey);
+  const { createClient } = await import('@supabase/supabase-js');
+  const { createSupabaseClient } = await import('./supabase-config.js');
+
+  // Use helper to create client from environment variables
+  const supabase = await createSupabaseClient(config);
   
   console.log('\n🔍 VERIFYING FINAL STATE...\n');
   

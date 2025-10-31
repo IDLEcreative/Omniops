@@ -1,21 +1,23 @@
 #!/usr/bin/env node
 
 import https from 'node:https';
+import { getSupabaseConfig } from '../supabase-config.js';
 
-const PROJECT_REF = 'birugqyuqhiahxvxeyqg';
-const ACCESS_TOKEN = 'sbp_3d1fa3086b18fbca507ee9b65042aa264395e1b8';
+// Get Supabase configuration from environment variables
+const config = getSupabaseConfig();
+const { projectRef, managementToken } = config;
 
 async function executeSQL(sql) {
   return new Promise((resolve, reject) => {
     const postData = JSON.stringify({ query: sql });
-    
+
     const options = {
       hostname: 'api.supabase.com',
       port: 443,
-      path: `/v1/projects/${PROJECT_REF}/database/query`,
+      path: `/v1/projects/${projectRef}/database/query`,
       method: 'POST',
       headers: {
-        'Authorization': `Bearer ${ACCESS_TOKEN}`,
+        'Authorization': `Bearer ${managementToken}`,
         'Content-Type': 'application/json',
         'Content-Length': Buffer.byteLength(postData)
       }

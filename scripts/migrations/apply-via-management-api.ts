@@ -4,19 +4,21 @@
 
 import { config } from 'dotenv';
 import { readFileSync } from 'fs';
+import { getSupabaseConfig } from '../supabase-config.js';
 
 config({ path: '.env.local' });
 
-const SUPABASE_ACCESS_TOKEN = 'sbp_f30783ba26b0a6ae2bba917988553bd1d5f76d97';
-const PROJECT_REF = 'birugqyuqhiahxvxeyqg';
+// Get Supabase configuration from environment variables
+const supabaseConfig = getSupabaseConfig();
+const { projectRef, managementToken } = supabaseConfig;
 
 async function executeSQL(sql: string): Promise<any> {
   const response = await fetch(
-    `https://api.supabase.com/v1/projects/${PROJECT_REF}/database/query`,
+    `https://api.supabase.com/v1/projects/${projectRef}/database/query`,
     {
       method: 'POST',
       headers: {
-        'Authorization': `Bearer ${SUPABASE_ACCESS_TOKEN}`,
+        'Authorization': `Bearer ${managementToken}`,
         'Content-Type': 'application/json',
       },
       body: JSON.stringify({ query: sql })

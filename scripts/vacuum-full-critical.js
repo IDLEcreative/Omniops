@@ -1,19 +1,18 @@
+import { getSupabaseConfig } from './supabase-config.js';
 
-// Supabase Management API configuration
-const SUPABASE_ACCESS_TOKEN = 'sbp_f30783ba26b0a6ae2bba917988553bd1d5f76d97';
-const PROJECT_REF = 'birugqyuqhiahxvxeyqg';
+const config = getSupabaseConfig();
 
 async function executeSQL(query, description, timeout = 300000) {
   console.log(`\n📝 ${description}...`);
   console.log(`   Started at: ${new Date().toISOString()}`);
-  
+
   try {
     const response = await fetch(
-      `https://api.supabase.com/v1/projects/${PROJECT_REF}/database/query`,
+      `https://api.supabase.com/v1/projects/${config.PROJECT_REF}/database/query`,
       {
         method: 'POST',
         headers: {
-          'Authorization': `Bearer ${SUPABASE_ACCESS_TOKEN}`,
+          'Authorization': `Bearer ${config.ACCESS_TOKEN}`,
           'Content-Type': 'application/json',
         },
         body: JSON.stringify({ query }),
@@ -30,7 +29,7 @@ async function executeSQL(query, description, timeout = 300000) {
     const result = await response.json();
     console.log(`✅ Completed at: ${new Date().toISOString()}`);
     return { success: true, result };
-    
+
   } catch (error) {
     console.error(`❌ Error: ${error.message}`);
     return { success: false, error: error.message };
