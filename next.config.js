@@ -85,6 +85,27 @@ const nextConfig = {
           },
         ],
       },
+      {
+        source: '/(embed|widget-bundle).js',
+        headers: [
+          {
+            key: 'Access-Control-Allow-Origin',
+            value: '*',
+          },
+          {
+            key: 'Access-Control-Allow-Methods',
+            value: 'GET, OPTIONS',
+          },
+          {
+            key: 'Access-Control-Allow-Headers',
+            value: 'Content-Type, Authorization, X-Requested-With',
+          },
+          {
+            key: 'Vary',
+            value: 'Origin',
+          },
+        ],
+      },
       // Ensure Next.js static CSS is served with the correct MIME type
       {
         source: '/_next/static/css/:path*',

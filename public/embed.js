@@ -32,6 +32,14 @@
 
   const PRIVACY_KEY = 'chat_widget_privacy';
 
+  let activeConfig = {
+    ...defaultConfig,
+    appearance: { ...defaultConfig.appearance },
+    features: { ...defaultConfig.features },
+    behavior: { ...defaultConfig.behavior },
+    privacy: { ...defaultConfig.privacy },
+  };
+
   function getPrivacyPreferences() {
     try {
       const stored = localStorage.getItem(PRIVACY_KEY);
@@ -50,14 +58,23 @@
   }
 
   function logError(message, error) {
-    if (config.debug || window.ChatWidgetDebug) {
-      console.error('[Chat Widget]', message, error);
+    if ((activeConfig && activeConfig.debug) || window.ChatWidgetDebug) {
+      console.error('[Chat Widget]', message, error || '');
     }
   }
 
   try {
     const userConfig = window.ChatWidgetConfig || {};
-    const config = { ...defaultConfig, ...userConfig };
+    const config = {
+      ...defaultConfig,
+      ...userConfig,
+      appearance: { ...defaultConfig.appearance, ...userConfig.appearance },
+      features: { ...defaultConfig.features, ...userConfig.features },
+      behavior: { ...defaultConfig.behavior, ...userConfig.behavior },
+      privacy: { ...defaultConfig.privacy, ...userConfig.privacy },
+    };
+
+    activeConfig = config;
 
     // serverUrl must be provided in window.ChatWidgetConfig
     if (!config.serverUrl) {
@@ -118,62 +135,18 @@
         iframe.title = 'Customer Support Chat';
         iframe.setAttribute('scrolling', 'no');
 
-        // Create minimal HTML skeleton with widget bundle injected
-        const iframeHTML = `<!DOCTYPE html>
-<html lang="en">
-<head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Chat Widget</title>
-  <style>
-    * { margin: 0; padding: 0; box-sizing: border-box; }
-    html, body {
-      width: 100%;
-      height: 100%;
-      overflow: hidden;
-      background: transparent;
-    }
-    #widget-root {
-      width: 100%;
-      height: 100%;
-      position: fixed;
-      inset: 0;
-      overflow: hidden;
-      background: transparent;
-    }
-  </style>
-</head>
-<body>
-  <div id="widget-root"></div>
-  <script>
-    // Inject widget configuration
-    window.__WIDGET_CONFIG__ = ${JSON.stringify({
-      ...config,
-      domain: currentDomain,
-      demoId: demoId,
-      privacySettings: {
-        allowOptOut: config.privacy.allowOptOut,
-        showPrivacyNotice: config.privacy.showPrivacyNotice,
-        requireConsent: config.privacy.requireConsent,
-        consentGiven: privacyPrefs.consentGiven,
-        retentionDays: config.privacy.retentionDays,
-      },
-    })};
-
-    // Inject widget bundle code
-    ${widgetBundleCode}
-
-    // Initialize widget after bundle loads
-    if (window.OmniopsWidget && window.OmniopsWidget.initWidget) {
-      window.OmniopsWidget.initWidget('widget-root', window.__WIDGET_CONFIG__);
-    } else if (window.OmniopsWidgetBundle && window.OmniopsWidgetBundle.initWidget) {
-      window.OmniopsWidgetBundle.initWidget('widget-root', window.__WIDGET_CONFIG__);
-    } else {
-      console.error('[Chat Widget] Widget bundle did not expose initWidget function');
-    }
-  </script>
-</body>
-</html>`;
+        const iframeConfigJson = JSON.stringify({
+          ...config,
+          domain: currentDomain,
+          demoId: demoId,
+          privacySettings: { ...config.privacy, consentGiven: privacyPrefs.consentGiven },
+        });
+        const iframeHTML = [
+          '<!DOCTYPE html><html lang="en"><head><meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1.0"><title>Chat Widget</title><style>*{margin:0;padding:0;box-sizing:border-box}html,body{width:100%;height:100%;overflow:hidden;background:transparent}#widget-root{width:100%;height:100%;position:fixed;inset:0;overflow:hidden;background:transparent}</style></head><body><div id="widget-root"></div><script>',
+          `window.__WIDGET_CONFIG__=${iframeConfigJson};`,
+          widgetBundleCode,
+          'const init=window.OmniopsWidget?.initWidget||window.OmniopsWidgetBundle?.initWidget;if(!init){console.error("[Chat Widget] Widget bundle did not expose initWidget function");return;}init("widget-root",window.__WIDGET_CONFIG__);<\/script></body></html>',
+        ].join('');
 
         // Set iframe source to inline HTML
         iframe.srcdoc = iframeHTML;
@@ -199,139 +172,87 @@
         // Hide initially to prevent flash
         iframe.style.display = 'none';
 
-        // Append to body
         document.body.appendChild(iframe);
 
-        // Show iframe when loaded
-        iframe.onload = function() {
+        iframe.onload = () => {
           iframe.style.display = 'block';
-
-          // Send initial config to iframe
-          setTimeout(() => {
-            iframe.contentWindow.postMessage({
-              type: 'init',
-              config: config,
-              privacyPrefs: privacyPrefs,
-            }, '*'); // Use '*' for srcdoc iframes
-          }, 100);
+          setTimeout(() => iframe.contentWindow.postMessage({ type: 'init', config, privacyPrefs }, '*'), 100);
         };
 
-        // Handle messages from iframe
-        window.addEventListener('message', function(event) {
-          // Note: srcdoc iframes have origin 'null', so we can't validate origin
-          // Instead, validate message structure
-          if (!event.data || typeof event.data.type !== 'string') {
-            return;
-          }
+        const privacyActions = {
+          optOut: () => { savePrivacyPreferences({ ...privacyPrefs, optedOut: true }); iframe.remove(); },
+          optIn: () => { savePrivacyPreferences({ ...privacyPrefs, optedOut: false }); },
+          giveConsent: () => savePrivacyPreferences({ ...privacyPrefs, consentGiven: true }),
+          requestDataExport: data => window.open(`${config.serverUrl}/privacy/export?user=${data.userId}`, '_blank'),
+          requestDataDeletion: data => {
+            if (confirm('Are you sure you want to delete all your chat data? This cannot be undone.')) {
+              fetch(`${config.serverUrl}/api/privacy/delete`, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ userId: data.userId }),
+              });
+            }
+          },
+        };
 
-          switch (event.data.type) {
-            case 'resize':
-              iframe.style.width = event.data.width + 'px';
-              iframe.style.height = event.data.height + 'px';
-              break;
-            case 'analytics':
-              // Track analytics event if user hasn't opted out
-              if (!privacyPrefs.optedOut && typeof gtag !== 'undefined') {
-                gtag('event', event.data.event, {
-                  event_category: 'Chat Widget',
-                  event_label: event.data.label,
-                  value: event.data.value,
-                });
-              }
-              break;
-            case 'privacy':
-              // Handle privacy-related messages
-              switch (event.data.action) {
-                case 'optOut':
-                  savePrivacyPreferences({ ...privacyPrefs, optedOut: true });
-                  iframe.remove();
-                  break;
-                case 'optIn':
-                  savePrivacyPreferences({ ...privacyPrefs, optedOut: false });
-                  break;
-                case 'giveConsent':
-                  savePrivacyPreferences({ ...privacyPrefs, consentGiven: true });
-                  break;
-                case 'requestDataExport':
-                  // Trigger data export
-                  window.open(`${config.serverUrl}/privacy/export?user=${event.data.userId}`, '_blank');
-                  break;
-                case 'requestDataDeletion':
-                  // Trigger data deletion request
-                  if (confirm('Are you sure you want to delete all your chat data? This cannot be undone.')) {
-                    fetch(`${config.serverUrl}/api/privacy/delete`, {
-                      method: 'POST',
-                      headers: { 'Content-Type': 'application/json' },
-                      body: JSON.stringify({ userId: event.data.userId }),
-                    });
-                  }
-                  break;
-              }
-              break;
-            case 'ready':
-              if (config.debug || window.ChatWidgetDebug) {
-                console.log('[Chat Widget] Widget ready');
-              }
-              break;
-            case 'error':
-              logError('Widget error:', event.data.message);
-              break;
-          }
+        const messageHandlers = {
+          resize: data => {
+            iframe.style.width = data.width + 'px';
+            iframe.style.height = data.height + 'px';
+          },
+          analytics: data => {
+            if (!privacyPrefs.optedOut && typeof gtag !== 'undefined') {
+              gtag('event', data.event, {
+                event_category: 'Chat Widget',
+                event_label: data.label,
+                value: data.value,
+              });
+            }
+          },
+          privacy: data => {
+            const action = data.action && privacyActions[data.action];
+            if (action) action(data);
+          },
+          ready: () => {
+            if (config.debug || window.ChatWidgetDebug) {
+              console.log('[Chat Widget] Widget ready');
+            }
+          },
+          error: data => logError('Widget error:', data.message),
+        };
+
+        window.addEventListener('message', event => {
+          const { data } = event;
+          if (!data || typeof data.type !== 'string') return;
+          const handler = messageHandlers[data.type];
+          if (handler) handler(data);
         });
 
-        // Expose API for programmatic control
         window.ChatWidget = {
-          open: function() {
-            iframe.contentWindow.postMessage({ type: 'open' }, '*');
-          },
-          close: function() {
-            iframe.contentWindow.postMessage({ type: 'close' }, '*');
-          },
-          sendMessage: function(message) {
-            iframe.contentWindow.postMessage({ type: 'message', message: message }, '*');
-          },
-          updateContext: function(newContext) {
-            iframe.contentWindow.postMessage({
-              type: 'updateContext',
-              userData: newContext.userData,
-              cartData: newContext.cartData,
-              pageContext: newContext.pageContext,
-            }, '*');
-          },
-          // Privacy controls
+          open: () => iframe.contentWindow.postMessage({ type: 'open' }, '*'),
+          close: () => iframe.contentWindow.postMessage({ type: 'close' }, '*'),
+          sendMessage: message => iframe.contentWindow.postMessage({ type: 'message', message }, '*'),
+          updateContext: newContext => iframe.contentWindow.postMessage({
+            type: 'updateContext',
+            userData: newContext.userData,
+            cartData: newContext.cartData,
+            pageContext: newContext.pageContext,
+          }, '*'),
           privacy: {
-            optOut: function() {
-              savePrivacyPreferences({ ...privacyPrefs, optedOut: true });
-              iframe.remove();
-            },
-            optIn: function() {
-              savePrivacyPreferences({ ...privacyPrefs, optedOut: false });
-              location.reload();
-            },
-            clearData: function() {
-              localStorage.removeItem(PRIVACY_KEY);
-              sessionStorage.clear();
-            },
-            getStatus: function() {
-              return getPrivacyPreferences();
-            },
+            optOut: () => { savePrivacyPreferences({ ...privacyPrefs, optedOut: true }); iframe.remove(); },
+            optIn: () => { savePrivacyPreferences({ ...privacyPrefs, optedOut: false }); location.reload(); },
+            clearData: () => { localStorage.removeItem(PRIVACY_KEY); sessionStorage.clear(); },
+            getStatus: () => getPrivacyPreferences(),
           },
           version: WIDGET_VERSION,
         };
 
-        // Auto-delete old conversations based on retention policy
         if (config.privacy.retentionDays) {
           const lastCleanup = localStorage.getItem('chat_widget_last_cleanup');
           const now = Date.now();
-          const dayInMs = 24 * 60 * 60 * 1000;
-
-          if (!lastCleanup || now - parseInt(lastCleanup) > dayInMs) {
-            iframe.contentWindow.postMessage({
-              type: 'cleanup',
-              retentionDays: config.privacy.retentionDays,
-            }, '*');
-
-            localStorage.setItem('chat_widget_last_cleanup', now.toString());
+          if (!lastCleanup || now - Number(lastCleanup) > 24 * 60 * 60 * 1000) {
+            iframe.contentWindow.postMessage({ type: 'cleanup', retentionDays: config.privacy.retentionDays }, '*');
+            localStorage.setItem('chat_widget_last_cleanup', String(now));
           }
         }
 

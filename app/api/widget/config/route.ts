@@ -17,6 +17,18 @@ const QuerySchema = z.object({
   domain: z.string().min(1, 'Domain is required'),
 });
 
+function withCors<T>(response: NextResponse<T>) {
+  response.headers.set('Access-Control-Allow-Origin', '*');
+  response.headers.set('Access-Control-Allow-Methods', 'GET, OPTIONS');
+  response.headers.set('Access-Control-Allow-Headers', 'Content-Type, Authorization, X-Requested-With');
+  response.headers.set('Vary', 'Origin');
+  return response;
+}
+
+export async function OPTIONS() {
+  return withCors(new NextResponse(null, { status: 204 }));
+}
+
 export async function GET(request: NextRequest) {
   try {
     // Parse and validate domain parameter
@@ -59,7 +71,7 @@ export async function GET(request: NextRequest) {
       console.error('[Widget Config API] Query error:', { error, domain: validatedQuery.domain });
 
       // Domain not found or not configured - return minimal default config
-      return NextResponse.json(
+      return withCors(NextResponse.json(
         {
           success: false,
           config: {
@@ -78,7 +90,7 @@ export async function GET(request: NextRequest) {
           },
         },
         { status: 200 } // Return 200 with default config, not 404
-      );
+      ));
     }
 
     // Fetch widget_configs for enhanced customization (if exists)
@@ -124,7 +136,7 @@ export async function GET(request: NextRequest) {
     };
 
     // Return comprehensive public-safe configuration
-    return NextResponse.json({
+    return withCors(NextResponse.json({
       success: true,
       config: {
         domain: config.domain,
@@ -144,28 +156,28 @@ export async function GET(request: NextRequest) {
           shopify: { enabled: !!config.shopify_shop },
         },
       },
-    });
+    }));
 
   } catch (error) {
     console.error('[Widget Config API] Error:', error);
 
     if (error instanceof z.ZodError) {
-      return NextResponse.json(
+      return withCors(NextResponse.json(
         {
           success: false,
           error: 'Invalid domain parameter',
           details: error.errors,
         },
         { status: 400 }
-      );
+      ));
     }
 
-    return NextResponse.json(
+    return withCors(NextResponse.json(
       {
         success: false,
         error: 'Failed to fetch widget configuration',
       },
       { status: 500 }
-    );
+    ));
   }
 }
