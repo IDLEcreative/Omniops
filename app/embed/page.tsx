@@ -17,15 +17,24 @@ export default function EmbedPage() {
     retentionDays: 30,
   });
 
-  // Prevent outer (iframe/page) scrolling to avoid double scrollbars
+  // Prevent outer (iframe/page) scrolling and set transparent background
   useEffect(() => {
     const prevHtmlOverflow = document.documentElement.style.overflow;
     const prevBodyOverflow = document.body.style.overflow;
+    const prevHtmlBg = document.documentElement.style.background;
+    const prevBodyBg = document.body.style.background;
+
     document.documentElement.style.overflow = 'hidden';
     document.body.style.overflow = 'hidden';
+    // Make background transparent so iframe can be see-through
+    document.documentElement.style.background = 'transparent';
+    document.body.style.background = 'transparent';
+
     return () => {
       document.documentElement.style.overflow = prevHtmlOverflow;
       document.body.style.overflow = prevBodyOverflow;
+      document.documentElement.style.background = prevHtmlBg;
+      document.body.style.background = prevBodyBg;
     };
   }, []);
 
