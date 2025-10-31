@@ -48,8 +48,7 @@
   function savePrivacyPreferences(prefs) {
     try {
       localStorage.setItem(PRIVACY_KEY, JSON.stringify(prefs));
-    } catch (e) {
-    }
+    } catch (e) {}
   }
 
   function logError(message, error) {
@@ -61,25 +60,20 @@
   function createServerUrlCandidates(urlString) {
     const trimmed = (urlString || '').trim();
     if (!trimmed) return [];
-
+    const candidates = [];
+    const add = value => value && !candidates.includes(value) && candidates.push(value);
     try {
-      const parsed = new URL(trimmed);
-      const candidates = new Set([parsed.origin]);
-
-      if (!parsed.hostname.startsWith('www.')) {
-        const wwwVariant = new URL(parsed.href);
-        wwwVariant.hostname = `www.${parsed.hostname}`;
-        candidates.add(wwwVariant.origin);
-      } else {
-        const withoutWww = new URL(parsed.href);
-        withoutWww.hostname = parsed.hostname.replace(/^www\./, '');
-        candidates.add(withoutWww.origin);
-      }
-
-      return Array.from(candidates);
+      const url = new URL(trimmed);
+      const bareHost = url.hostname.replace(/^www\./, '');
+      if (!url.hostname.startsWith('www.')) add(`${url.protocol}//www.${bareHost}`);
+      add(url.origin);
+      if (url.hostname.startsWith('www.')) add(`${url.protocol}//${bareHost}`);
     } catch {
-      return [trimmed.replace(/\/$/, '')];
+      const stripped = trimmed.replace(/\/$/, '');
+      add(stripped);
+      if (!stripped.includes('://')) add(`https://www.${stripped.replace(/^www\./, '')}`);
     }
+    return candidates;
   }
 
   async function fetchFromCandidates(candidates, path, fetchOptions, parser) {
@@ -198,7 +192,7 @@
       '<!DOCTYPE html><html lang="en"><head><meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1.0"><title>Chat Widget</title><style>*{margin:0;padding:0;box-sizing:border-box}html,body{width:100%;height:100%;overflow:hidden;background:transparent}#widget-root{width:100%;height:100%;position:fixed;inset:0;overflow:hidden;background:transparent}</style></head><body><div id="widget-root"></div><script>',
       `window.__WIDGET_CONFIG__=${iframeConfigJson};`,
       widgetBundleCode,
-      'const init=window.OmniopsWidget?.initWidget||window.OmniopsWidgetBundle?.initWidget;if(!init){console.error("[Chat Widget] Widget bundle did not expose initWidget function");return;}init("widget-root",window.__WIDGET_CONFIG__);<\/script></body></html>',
+      'const init=window.OmniopsWidget?.initWidget||window.OmniopsWidgetBundle?.initWidget;if(!init){console.error("[Chat Widget] Widget bundle did not expose initWidget function");}else{init("widget-root",window.__WIDGET_CONFIG__);}<\/script></body></html>',
     ].join('');
 
     iframe.srcdoc = iframeHTML;
