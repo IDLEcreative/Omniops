@@ -24,6 +24,7 @@ export async function processAIConversation(params: AIProcessorParams): Promise<
     conversationMessages,
     domain,
     config,
+    widgetConfig,
     telemetry,
     openaiClient,
     useGPT5Mini,
@@ -34,6 +35,19 @@ export async function processAIConversation(params: AIProcessorParams): Promise<
 
   console.log(`[Intelligent Chat] Starting conversation with ${conversationMessages.length} messages`);
 
+  // Log widget configuration settings
+  if (widgetConfig?.integration_settings) {
+    console.log('[Intelligent Chat] Widget integration settings:', {
+      enableWebSearch: widgetConfig.integration_settings.enableWebSearch,
+      enableKnowledgeBase: widgetConfig.integration_settings.enableKnowledgeBase,
+      dataSourcePriority: widgetConfig.integration_settings.dataSourcePriority
+    });
+
+    // TODO: Implement web search tool integration
+    // When enableWebSearch is true, add external web search tools to SEARCH_TOOLS
+    // When enableWebSearch is false, only use knowledge base search
+  }
+
   // Configuration
   const maxIterations = config?.ai?.maxSearchIterations || 3;
   const searchTimeout = config?.ai?.searchTimeout || 10000;
@@ -43,7 +57,7 @@ export async function processAIConversation(params: AIProcessorParams): Promise<
   const searchLog: Array<{ tool: string; query: string; resultCount: number; source: string }> = [];
 
   // Initial AI call with tools
-  const modelConfig = getModelConfig(useGPT5Mini, false);
+  const modelConfig = getModelConfig(useGPT5Mini, false, widgetConfig);
 
   let completion = await openaiClient.chat.completions.create({
     ...modelConfig,
@@ -121,7 +135,7 @@ export async function processAIConversation(params: AIProcessorParams): Promise<
 
     // Get AI's next response
     try {
-      const iterationConfig = getModelConfig(useGPT5Mini, true);
+      const iterationConfig = getModelConfig(useGPT5Mini, true, widgetConfig);
 
       completion = await openaiClient.chat.completions.create({
         ...iterationConfig,

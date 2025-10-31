@@ -20,7 +20,8 @@ import {
   getOrCreateConversation,
   saveUserMessage,
   saveAssistantMessage,
-  getConversationHistory
+  getConversationHistory,
+  loadWidgetConfig
 } from '@/lib/chat/conversation-manager';
 import { processAIConversation } from '@/lib/chat/ai-processor';
 import { getCustomerServicePrompt, buildConversationMessages } from '@/lib/chat/system-prompts';
@@ -126,6 +127,18 @@ export async function POST(
     // Look up domain_id if we have a domain
     const domainId = await lookupDomain(domain, adminSupabase);
 
+    // Load widget configuration from database
+    const widgetConfig = await loadWidgetConfig(domainId, adminSupabase);
+
+    // Log config loading for debugging
+    if (widgetConfig) {
+      telemetry?.log('info', 'config', 'Widget config loaded', {
+        hasPersonality: !!widgetConfig.ai_settings?.personality,
+        hasLanguage: !!widgetConfig.ai_settings?.language,
+        hasCustomPrompt: !!widgetConfig.ai_settings?.customSystemPrompt,
+      });
+    }
+
     // Get or create conversation
     const conversationId = await getOrCreateConversation(
       conversation_id,
@@ -160,7 +173,7 @@ export async function POST(
     // Build conversation messages for OpenAI with enhanced system prompt
     // Metadata context is always injected for improved conversation accuracy
     const conversationMessages = buildConversationMessages(
-      getCustomerServicePrompt() + enhancedContext,
+      getCustomerServicePrompt(widgetConfig) + enhancedContext,
       historyData,
       message
     );
@@ -176,6 +189,7 @@ export async function POST(
       conversationMessages,
       domain,
       config,
+      widgetConfig, // Pass widget configuration for AI settings
       telemetry,
       openaiClient,
       useGPT5Mini,
@@ -245,13 +259,14 @@ export async function POST(
       {
         error: 'Failed to process chat message',
         message: 'An unexpected error occurred. Please try again.',
-        // TEMPORARY: Include error details for debugging production issue
-        // TODO: Remove after fixing staging domain 500 error
-        debug: {
-          message: error instanceof Error ? error.message : String(error),
-          stack: error instanceof Error ? error.stack?.split('\n').slice(0, 5) : undefined,
-          timestamp: new Date().toISOString()
-        }
+        // Only include debug info in development (SECURITY: Never expose stack traces in production)
+        ...(process.env.NODE_ENV === 'development' && {
+          debug: {
+            message: error instanceof Error ? error.message : String(error),
+            stack: error instanceof Error ? error.stack?.split('\n').slice(0, 5) : undefined,
+            timestamp: new Date().toISOString()
+          }
+        })
       },
       { status: 500 }
     );

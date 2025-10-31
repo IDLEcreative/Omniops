@@ -7,6 +7,7 @@
 import { SearchResult } from '@/types';
 import { ChatTelemetry } from '@/lib/chat-telemetry';
 import OpenAI from 'openai';
+import type { WidgetConfig } from './conversation-manager';
 
 export interface AIProcessorDependencies {
   getCommerceProvider: any;
@@ -25,6 +26,7 @@ export interface AIProcessorParams {
   conversationMessages: Array<any>;
   domain: string | undefined;
   config: any;
+  widgetConfig?: WidgetConfig | null; // Widget configuration for AI settings
   telemetry: ChatTelemetry | null;
   openaiClient: OpenAI;
   useGPT5Mini: boolean;
