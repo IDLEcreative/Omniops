@@ -75,7 +75,7 @@ export default function EmbedPage() {
     const handleMessage = (event: MessageEvent) => {
       if (event.data?.type === 'init' && event.data?.config) {
         // Update demo config with appearance settings from parent
-        setDemoConfig(prev => ({
+        setDemoConfig((prev: any) => ({
           ...prev,
           ...event.data.config,
         }));
@@ -87,7 +87,7 @@ export default function EmbedPage() {
   }, []);
 
   return (
-    <div className="fixed inset-0 overflow-hidden pointer-events-none">
+    <div className="fixed inset-0 overflow-hidden">
       {false && showHints && (
         <div className="flex items-center justify-center h-dvh bg-black p-3 sm:p-4 md:p-6 overflow-y-auto">
           <div className="max-w-4xl w-full">

@@ -162,7 +162,6 @@
       border-radius: ${isMobile ? '0' : '12px'};
       box-shadow: none;
       background: transparent;
-      pointer-events: none;
     `;
     // Extra guard to avoid scrollbars on some browsers
     iframe.style.overflow = 'hidden';
