@@ -11,6 +11,7 @@ export interface PrivacySettings {
 
 export interface ChatWidgetConfig {
   headerTitle?: string;
+  serverUrl?: string; // Omniops server URL for API calls
   features?: {
     websiteScraping?: { enabled: boolean };
     woocommerce?: { enabled: boolean };

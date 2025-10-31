@@ -119,7 +119,12 @@ export default function ChatWidget({
         ...demoConfig
       };
 
-      const response = await fetch('/api/chat', {
+      // Build API URL - use serverUrl from config if available (for embedded widgets)
+      const apiUrl = demoConfig?.serverUrl
+        ? `${demoConfig.serverUrl}/api/chat`
+        : '/api/chat';
+
+      const response = await fetch(apiUrl, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
