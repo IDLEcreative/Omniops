@@ -1,7 +1,7 @@
 import { createConfig, applyRemoteConfig } from './config';
 import { createServerUrlCandidates } from './url';
 import { fetchFromCandidates } from './network';
-import { getPrivacyPreferences, savePrivacyPreferences, PRIVACY_KEY } from './privacy';
+import { getPrivacyPreferences } from './privacy';
 import {
   createIframe,
   buildIframeHtml,
@@ -55,23 +55,30 @@ function isMobileViewport(): boolean {
 }
 
 function resolveDomain(config: WidgetConfig, userConfig: Partial<WidgetConfig>): string | null {
+  // Try 1: window.location.hostname (best source)
   const fromLocation = window.location.hostname;
-  if (fromLocation) {
+  if (fromLocation && fromLocation !== '' && fromLocation !== 'localhost') {
+    logDebug('Domain resolved from window.location.hostname', fromLocation);
     return fromLocation;
   }
 
-  if (config.storeDomain) {
-    return config.storeDomain;
-  }
-
+  // Try 2: Explicitly provided storeDomain in config
   if (userConfig.storeDomain) {
+    logDebug('Domain resolved from userConfig.storeDomain', userConfig.storeDomain);
     return userConfig.storeDomain;
   }
 
+  if (config.storeDomain) {
+    logDebug('Domain resolved from config.storeDomain', config.storeDomain);
+    return config.storeDomain;
+  }
+
+  // Try 3: document.referrer (fallback for iframes)
   try {
     if (document.referrer) {
       const refHost = new URL(document.referrer).hostname;
-      if (refHost) {
+      if (refHost && refHost !== '' && refHost !== 'localhost') {
+        logDebug('Domain resolved from document.referrer', refHost);
         return refHost;
       }
     }
@@ -79,12 +86,40 @@ function resolveDomain(config: WidgetConfig, userConfig: Partial<WidgetConfig>):
     logError('Unable to parse referrer for domain resolution', error);
   }
 
+  // Try 4: Check if we're in an iframe and get parent hostname
+  try {
+    if (window.parent && window.parent !== window) {
+      const parentHost = window.parent.location.hostname;
+      if (parentHost && parentHost !== '' && parentHost !== 'localhost') {
+        logDebug('Domain resolved from parent window', parentHost);
+        return parentHost;
+      }
+    }
+  } catch (error) {
+    // Cross-origin iframe, can't access parent location
+    logDebug('Unable to access parent window (likely cross-origin)', error);
+  }
+
+  logError('Unable to resolve domain from any source', {
+    location: window.location.hostname,
+    referrer: document.referrer,
+    configDomain: config.storeDomain,
+    userConfigDomain: userConfig.storeDomain,
+  });
+
   return null;
 }
 
 async function loadRemoteConfig(config: WidgetConfig, currentDomain: string | null, userConfig: Partial<WidgetConfig>) {
   const candidates = createServerUrlCandidates(config.serverUrl);
-  if (!candidates.length || !currentDomain) return config;
+  if (!candidates.length) {
+    logDebug('No server URL candidates available for remote config');
+    return config;
+  }
+  if (!currentDomain) {
+    logDebug('No domain resolved - skipping remote config fetch (will use defaults)');
+    return config;
+  }
 
   try {
     const query = new URLSearchParams({ domain: currentDomain });

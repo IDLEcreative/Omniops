@@ -14,7 +14,7 @@ export const runtime = 'nodejs';
 export const dynamic = 'force-dynamic';
 
 const QuerySchema = z.object({
-  domain: z.string().min(1, 'Domain is required'),
+  domain: z.string().optional(),
 });
 
 function withCors<T>(response: NextResponse<T>) {
@@ -33,12 +33,47 @@ export async function GET(request: NextRequest) {
   try {
     // Parse and validate domain parameter
     const { searchParams } = new URL(request.url);
-    const domain = searchParams.get('domain');
+    const domain = searchParams.get('domain') || '';
 
     const validatedQuery = QuerySchema.parse({ domain });
 
+    // If no domain provided, return default config
+    if (!validatedQuery.domain || validatedQuery.domain.trim() === '') {
+      console.log('[Widget Config API] No domain provided, returning default config');
+      return withCors(NextResponse.json(
+        {
+          success: false,
+          message: 'No domain provided - using default configuration',
+          config: {
+            domain: '',
+            woocommerce_enabled: false,
+            shopify_enabled: false,
+            branding: null,
+            appearance: {
+              position: 'bottom-right',
+              width: 400,
+              height: 600,
+              showPulseAnimation: true,
+              showNotificationBadge: true,
+              startMinimized: true,
+            },
+            behavior: {
+              welcomeMessage: 'Hi! How can I help you today?',
+              placeholderText: 'Type your message...',
+              botName: 'Assistant',
+            },
+          },
+        },
+        { status: 200 }
+      ));
+    }
+
     // Create Supabase client (no auth required for this endpoint)
     const supabase = await createServiceRoleClient();
+
+    if (!supabase) {
+      throw new Error('Failed to create Supabase client');
+    }
 
     // First, look up domain to get customer_config_id
     const { data: domainData } = await supabase
