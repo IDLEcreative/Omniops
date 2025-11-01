@@ -1,0 +1,33 @@
+<\!DOCTYPE html>
+<html>
+<head><title>Quick Embed Test</title></head>
+<body>
+  <h1>Embed.js Load Test</h1>
+  <div id="status">Loading...</div>
+  
+  <script>
+    console.log('1. Test page loaded');
+    
+    window.ChatWidgetConfig = {
+      serverUrl: "http://localhost:3002",
+      storeDomain: "test.example.com"
+    };
+    window.ChatWidgetDebug = true;
+    
+    console.log('2. Config set');
+  </script>
+  
+  <script src="http://localhost:3002/embed.js" 
+          onload="console.log('3. embed.js loaded successfully');document.getElementById('status').textContent='✅ Loaded';" 
+          onerror="console.error('3. embed.js FAILED to load');document.getElementById('status').textContent='❌ Failed';">
+  </script>
+  
+  <script>
+    setTimeout(() => {
+      console.log('4. Checking after 2 seconds...');
+      console.log('   window.ChatWidget:', typeof window.ChatWidget);
+      console.log('   Iframe:', document.getElementById('chat-widget-iframe'));
+    }, 2000);
+  </script>
+</body>
+</html>

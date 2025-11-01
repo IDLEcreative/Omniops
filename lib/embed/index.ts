@@ -148,6 +148,8 @@ async function loadRemoteConfig(config: WidgetConfig, currentDomain: string | nu
 
 async function loadWidgetBundle(config: WidgetConfig): Promise<{ code: string; origin: string }> {
   const bundleCandidates = createServerUrlCandidates(config.serverUrl);
+  logDebug('[Bundle Load] Candidates:', bundleCandidates);
+
   if (!bundleCandidates.length) {
     throw new Error('No server URL candidates were provided');
   }
@@ -158,8 +160,11 @@ async function loadWidgetBundle(config: WidgetConfig): Promise<{ code: string; o
     parser: response => response.text(),
   });
 
-  logDebug('Loaded widget bundle from', result.origin);
-  return result;
+  logDebug('[Bundle Load] Fetched from:', result.origin);
+  logDebug('[Bundle Load] Code length:', result.data?.length || 0);
+  logDebug('[Bundle Load] Code preview:', result.data?.substring(0, 100) || 'EMPTY');
+
+  return { code: result.data, origin: result.origin };
 }
 
 function scheduleConversationCleanup(config: WidgetConfig, iframe: HTMLIFrameElement) {
@@ -220,8 +225,15 @@ async function initialize() {
     const { code: bundleCode, origin: resolvedOrigin } = await loadWidgetBundle(config);
     config.serverUrl = resolvedOrigin;
 
+    logDebug('[Initialize] Bundle code length:', bundleCode?.length || 0);
+    logDebug('[Initialize] Creating iframe with bundle...');
+
     const iframe = createIframe(config, isMobileViewport());
     const iframeHtml = buildIframeHtml(config, privacyPrefs, bundleCode, effectiveDomain, demoId || null);
+
+    logDebug('[Initialize] Generated iframe HTML length:', iframeHtml?.length || 0);
+    logDebug('[Initialize] Bundle in HTML?', iframeHtml?.includes('OmniopsWidget') ? 'YES' : 'NO');
+
     iframe.srcdoc = iframeHtml;
 
     document.body.appendChild(iframe);

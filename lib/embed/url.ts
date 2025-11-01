@@ -12,12 +12,21 @@ export function createServerUrlCandidates(urlString: string | undefined | null):
   try {
     const url = new URL(trimmed);
     const bareHost = url.hostname.replace(/^www\./, '');
-    if (!url.hostname.startsWith('www.')) {
-      add(`${url.protocol}//www.${bareHost}`);
+    const isLocalhost = bareHost === 'localhost' || bareHost === '127.0.0.1';
+
+    // Don't add www variants for localhost
+    if (!isLocalhost && !url.hostname.startsWith('www.')) {
+      // Preserve port when creating www variant
+      const port = url.port ? `:${url.port}` : '';
+      add(`${url.protocol}//www.${bareHost}${port}`);
     }
+
     add(url.origin);
-    if (url.hostname.startsWith('www.')) {
-      add(`${url.protocol}//${bareHost}`);
+
+    if (!isLocalhost && url.hostname.startsWith('www.')) {
+      // Preserve port when removing www
+      const port = url.port ? `:${url.port}` : '';
+      add(`${url.protocol}//${bareHost}${port}`);
     }
   } catch {
     const stripped = trimmed.replace(/\/$/, '');

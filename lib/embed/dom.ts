@@ -37,6 +37,12 @@ export function createIframe(config: WidgetConfig, isMobile: boolean): HTMLIFram
 }
 
 export function buildIframeHtml(config: WidgetConfig, privacyPrefs: PrivacyPreferences, bundleCode: string, domain: string, demoId: string | null): string {
+  if ((window as any).ChatWidgetDebug || config.debug) {
+    console.debug('[buildIframeHtml] Received bundleCode length:', bundleCode?.length || 0);
+    console.debug('[buildIframeHtml] BundleCode preview:', bundleCode?.substring(0, 100) || 'EMPTY');
+    console.debug('[buildIframeHtml] Domain:', domain);
+  }
+
   const configForIframe = {
     ...config,
     domain,
@@ -57,7 +63,14 @@ export function buildIframeHtml(config: WidgetConfig, privacyPrefs: PrivacyPrefe
     'const initFn=window.OmniopsWidget?.initWidget||window.OmniopsWidgetBundle?.initWidget;if(initFn){initFn("widget-root",window.__WIDGET_CONFIG__);}else{console.error("[Chat Widget] Widget bundle did not expose initWidget function");}<\/script></body></html>',
   ];
 
-  return htmlParts.join('');
+  const html = htmlParts.join('');
+
+  if ((window as any).ChatWidgetDebug || config.debug) {
+    console.debug('[buildIframeHtml] Final HTML length:', html.length);
+    console.debug('[buildIframeHtml] Contains OmniopsWidget?', html.includes('OmniopsWidget'));
+  }
+
+  return html;
 }
 
 export function registerMessageHandlers(ctx: IframeContext): void {
