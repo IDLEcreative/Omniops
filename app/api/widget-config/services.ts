@@ -5,4 +5,4 @@
  * Multi-tenant, brand-agnostic configuration management
  */
 
-export * from './services';
+export * from './services/';
