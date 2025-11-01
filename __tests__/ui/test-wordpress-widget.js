@@ -1,5 +1,7 @@
 #!/usr/bin/env node
 
+/* eslint-disable @typescript-eslint/no-require-imports */
+
 /**
  * Comprehensive WordPress Embed Widget Test
  * Tests all components of the chat widget embed functionality

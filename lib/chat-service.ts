@@ -1,5 +1,5 @@
 import { createServiceRoleClient } from '@/lib/supabase-server';
-import type { SupabaseClient } from '@supabase/supabase-js';
+import type { SupabaseClient } from '@/types/supabase';
 
 interface ChatSession {
   id?: string;

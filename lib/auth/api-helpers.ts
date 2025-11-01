@@ -11,8 +11,7 @@
 import { NextResponse } from 'next/server';
 import { createClient } from '@/lib/supabase-server';
 import { logger } from '@/lib/logger';
-import type { User } from '@supabase/supabase-js';
-import type { SupabaseClient } from '@supabase/supabase-js';
+import type { User, SupabaseClient } from '@/types/supabase';
 
 /**
  * Organization role types

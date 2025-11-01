@@ -44,7 +44,7 @@ const testMetrics = {
 };
 
 describe('Agent 4: Correction Tracking & List References', () => {
-  let testConversations: string[] = [];
+  const testConversations: string[] = [];
 
   async function sendChatMessage(
     message: string,

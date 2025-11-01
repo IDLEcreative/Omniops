@@ -4,7 +4,7 @@ export const dynamic = 'force-dynamic'
 import { createClient, createServiceRoleClient, validateSupabaseEnv } from '@/lib/supabase-server';
 import { logger } from '@/lib/logger';
 import { unstable_cache } from 'next/cache';
-import type { SupabaseClient } from '@supabase/supabase-js';
+import type { SupabaseClient } from '@/types/supabase';
 import { withCSRF } from '@/lib/middleware/csrf';
 
 export async function GET(request: NextRequest) {

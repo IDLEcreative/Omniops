@@ -6,12 +6,13 @@
  * Priority: CRITICAL (Week 1 - Must Have)
  */
 
+import fs from 'node:fs';
+import path from 'node:path';
+import dotenv from 'dotenv';
+
 process.env.E2E_TEST = 'true';
 
 if (process.env.NODE_ENV !== 'production') {
-  const fs = require('fs');
-  const path = require('path');
-  const dotenv = require('dotenv');
 
   const envPath = path.resolve(process.cwd(), '.env.local');
   if (fs.existsSync(envPath)) {
@@ -168,7 +169,6 @@ describe('Complete Agent Flow - E2E (Metadata Tracking)', () => {
         });
 
       try {
-        let conversationId: string | undefined;
 
         const response1 = await fetch('http://localhost:3000/api/chat', {
           method: 'POST',
@@ -182,7 +182,7 @@ describe('Complete Agent Flow - E2E (Metadata Tracking)', () => {
 
         expect(response1.ok).toBe(true);
         const data1 = await response1.json();
-        conversationId = data1.conversation_id;
+        const conversationId = data1.conversation_id;
 
         const response2 = await fetch('http://localhost:3000/api/chat', {
           method: 'POST',
@@ -244,7 +244,6 @@ describe('Complete Agent Flow - E2E (Metadata Tracking)', () => {
       ]);
 
       try {
-        let conversationId: string | undefined;
 
         const response1 = await fetch('http://localhost:3000/api/chat', {
           method: 'POST',
@@ -257,7 +256,7 @@ describe('Complete Agent Flow - E2E (Metadata Tracking)', () => {
         });
 
         const data1 = await response1.json();
-        conversationId = data1.conversation_id;
+        const conversationId = data1.conversation_id;
 
         const response2 = await fetch('http://localhost:3000/api/chat', {
           method: 'POST',

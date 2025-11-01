@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { SupabaseClient } from '@supabase/supabase-js';
+import type { SupabaseClient } from '@/types/supabase';
 import { telemetryManager } from '@/lib/chat-telemetry';
 import { z } from 'zod';
 import {

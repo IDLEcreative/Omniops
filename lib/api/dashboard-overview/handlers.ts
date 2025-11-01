@@ -3,7 +3,7 @@
  * Request handling and response building logic
  */
 
-import { SupabaseClient } from '@supabase/supabase-js';
+import type { SupabaseClient } from '@/types/supabase';
 import { analyseMessages } from '@/lib/dashboard/analytics';
 import type { DashboardOverview } from './types';
 import {

@@ -1,5 +1,5 @@
 import { randomBytes } from 'crypto';
-import { SupabaseClient } from '@supabase/supabase-js';
+import type { SupabaseClient } from '@/types/supabase';
 
 /**
  * Fetch organization seat usage and limits

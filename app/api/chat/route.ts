@@ -30,6 +30,7 @@ import { ChatRequestSchema } from '@/lib/chat/request-validator';
 import { RouteDependencies, defaultDependencies } from '@/lib/chat/route-types';
 import { ConversationMetadataManager } from '@/lib/chat/conversation-metadata';
 import { parseAndTrackEntities } from '@/lib/chat/response-parser';
+import { ChatErrorHandler } from '@/lib/chat/errors/chat-error-handler';
 
 // Dependencies interface and defaults imported from route-types module
 
@@ -101,6 +102,7 @@ export async function POST(
     const { allowed, resetTime } = rateLimitFn(rateLimitDomain);
     
     if (!allowed) {
+      const retryAfterSeconds = Math.max(1, Math.ceil((resetTime - Date.now()) / 1000));
       return NextResponse.json(
         { error: 'Rate limit exceeded. Please try again later.' },
         { 
@@ -109,6 +111,7 @@ export async function POST(
             'X-RateLimit-Limit': '100',
             'X-RateLimit-Remaining': '0',
             'X-RateLimit-Reset': resetTime.toString(),
+            'Retry-After': retryAfterSeconds.toString(),
           }
         }
       );
@@ -259,43 +262,7 @@ export async function POST(
     });
 
   } catch (error) {
-    console.error('[Intelligent Chat API] Error:', error);
-
-    // DEBUG: Enhanced error logging for tests
-    if (process.env.NODE_ENV === 'test') {
-      console.error('[TEST DEBUG] Full error details:', {
-        message: error instanceof Error ? error.message : String(error),
-        stack: error instanceof Error ? error.stack : undefined,
-        type: error?.constructor?.name,
-        error
-      });
-    }
-
-    // Complete telemetry with error
-    const errorMessage = error instanceof Error ? error.message : 'Unknown error';
-    await telemetry?.complete(undefined, errorMessage);
-
-    if (error instanceof z.ZodError) {
-      return NextResponse.json(
-        { error: 'Invalid request format', details: error.errors },
-        { status: 400 }
-      );
-    }
-
-    return NextResponse.json(
-      {
-        error: 'Failed to process chat message',
-        message: 'An unexpected error occurred. Please try again.',
-        // Only include debug info in development (SECURITY: Never expose stack traces in production)
-        ...(process.env.NODE_ENV === 'development' && {
-          debug: {
-            message: error instanceof Error ? error.message : String(error),
-            stack: error instanceof Error ? error.stack?.split('\n').slice(0, 5) : undefined,
-            timestamp: new Date().toISOString()
-          }
-        })
-      },
-      { status: 500 }
-    );
+    const errorHandler = new ChatErrorHandler({ telemetry });
+    return await errorHandler.handleError(error);
   }
 }

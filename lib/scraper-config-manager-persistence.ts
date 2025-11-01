@@ -12,7 +12,7 @@
 import { ZodError } from 'zod';
 import * as fs from 'fs';
 import * as yaml from 'js-yaml';
-import type { SupabaseClient } from '@supabase/supabase-js';
+import type { SupabaseClient } from '@/types/supabase';
 import { ScraperConfigSchema, type ScraperConfig } from './scraper-config-schemas';
 
 // ============================================================================

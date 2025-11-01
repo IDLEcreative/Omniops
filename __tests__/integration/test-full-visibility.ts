@@ -14,7 +14,6 @@ async function testFullVisibility() {
   console.log(chalk.cyan('=' .repeat(70) + '\n'));
   
   const sessionId = uuidv4();
-  let conversationId: string | undefined;
   
   // Test 1: Search for all Cifa products
   console.log(chalk.yellow('1️⃣ Searching for ALL Cifa products...'));
@@ -31,7 +30,7 @@ async function testFullVisibility() {
   });
   
   const d1 = await r1.json();
-  conversationId = d1.conversation_id;
+  const conversationId = d1.conversation_id;
   
   // Extract numbers from response
   const numbers = d1.message.match(/\b\d+\b/g) || [];

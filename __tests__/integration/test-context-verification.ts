@@ -34,7 +34,6 @@ async function testConversationContext() {
   console.log(chalk.cyan('=' .repeat(70) + '\n'));
   
   const sessionId = uuidv4();
-  let conversationId: string | undefined;
   let allPassed = true;
   
   // Test 1: Establish some facts
@@ -45,7 +44,7 @@ async function testConversationContext() {
     'I have a 2019 Cifa mixer model MK28 and my budget is £5000',
     sessionId
   );
-  conversationId = r1.conversation_id;
+  const conversationId = r1.conversation_id;
   
   console.log(chalk.blue('Bot: ' + r1.message.substring(0, 150) + '...\n'));
   await new Promise(r => setTimeout(r, 1000));

@@ -12,9 +12,11 @@
  */
 
 import { describe, it, expect } from '@jest/globals';
+import fetchFallback from 'node-fetch';
 
 // Use dynamic import to get real fetch that bypasses MSW
-const fetch = (globalThis as any).fetch || require('node-fetch');
+const fetch: typeof globalThis.fetch =
+  (globalThis as any).fetch || (fetchFallback as unknown as typeof globalThis.fetch);
 
 describe('Agent Memory & State - E2E (Tests 14-17)', () => {
   const API_URL = 'http://localhost:3000/api/chat';

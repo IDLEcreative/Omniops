@@ -4,7 +4,7 @@
  */
 
 import { logger } from '@/lib/logger';
-import type { SupabaseClient } from '@supabase/supabase-js';
+import type { SupabaseClient } from '@/types/supabase';
 
 // Type imports
 import type {

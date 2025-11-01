@@ -50,10 +50,9 @@ async function runQuickDemo() {
   console.log(chalk.gray('Testing if agent remembers previous messages...'));
   
   const session1 = uuidv4();
-  let conv1: string | undefined;
-  
+
   const r1 = await sendMessage('I need a pump for my Cifa mixer', session1);
-  conv1 = r1.conversation_id;
+  const conv1 = r1.conversation_id;
   console.log(chalk.gray(`User: "I need a pump for my Cifa mixer"`));
   console.log(chalk.blue(`Bot: ${r1.message.substring(0, 100)}...`));
   
@@ -72,10 +71,9 @@ async function runQuickDemo() {
   console.log(chalk.gray('Testing topic changes and returns...'));
   
   const session2 = uuidv4();
-  let conv2: string | undefined;
-  
+
   const r3 = await sendMessage('What pumps do you have?', session2);
-  conv2 = r3.conversation_id;
+  const conv2 = r3.conversation_id;
   console.log(chalk.gray(`User: "What pumps do you have?"`));
   console.log(chalk.blue(`Bot: ${r3.message.substring(0, 100)}...`));
   
@@ -100,10 +98,9 @@ async function runQuickDemo() {
   console.log(chalk.gray('Testing if agent resolves "it" correctly...'));
   
   const session3 = uuidv4();
-  let conv3: string | undefined;
-  
+
   const r6 = await sendMessage('Do you have the A4VTG90 pump?', session3);
-  conv3 = r6.conversation_id;
+  const conv3 = r6.conversation_id;
   console.log(chalk.gray(`User: "Do you have the A4VTG90 pump?"`));
   console.log(chalk.blue(`Bot: ${r6.message.substring(0, 100)}...`));
   
@@ -124,10 +121,9 @@ async function runQuickDemo() {
   console.log(chalk.gray('Testing references to numbered items...'));
   
   const session4 = uuidv4();
-  let conv4: string | undefined;
-  
+
   const r8 = await sendMessage('List 3 pumps you have', session4);
-  conv4 = r8.conversation_id;
+  const conv4 = r8.conversation_id;
   console.log(chalk.gray(`User: "List 3 pumps you have"`));
   console.log(chalk.blue(`Bot: ${r8.message.substring(0, 100)}...`));
   

@@ -1,5 +1,6 @@
 import { createClient } from '@supabase/supabase-js'
-import * as dotenv from 'dotenv'
+import dotenv from 'dotenv'
+import fs from 'node:fs'
 
 // Load environment variables
 dotenv.config({ path: '.env.local' })
@@ -31,7 +32,6 @@ async function testPasswordReset() {
 
   // Step 2: Verify the update-password page exists
   console.log('\n2. Verifying update-password page exists...')
-  const fs = require('fs')
   const updatePageExists = fs.existsSync('./app/update-password/page.tsx')
 
   if (updatePageExists) {

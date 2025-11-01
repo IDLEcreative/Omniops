@@ -1,0 +1,315 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>External Website - Widget Test</title>
+  <style>
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+      min-height: 100vh;
+      padding: 2rem;
+    }
+
+    .page-content {
+      max-width: 800px;
+      margin: 0 auto;
+      background: white;
+      padding: 3rem;
+      border-radius: 1rem;
+      box-shadow: 0 20px 60px rgba(0,0,0,0.3);
+    }
+
+    h1 {
+      color: #333;
+      margin-bottom: 1rem;
+      font-size: 2rem;
+    }
+
+    .intro {
+      color: #666;
+      line-height: 1.8;
+      margin-bottom: 2rem;
+    }
+
+    .test-info {
+      background: #f0f9ff;
+      border-left: 4px solid #3b82f6;
+      padding: 1.5rem;
+      margin: 2rem 0;
+      border-radius: 0.5rem;
+    }
+
+    .test-info h2 {
+      color: #1e40af;
+      font-size: 1.2rem;
+      margin-bottom: 0.5rem;
+    }
+
+    .test-info p {
+      color: #1e3a8a;
+      margin: 0.5rem 0;
+    }
+
+    .console-output {
+      background: #1a1a1a;
+      color: #00ff00;
+      padding: 1.5rem;
+      border-radius: 0.5rem;
+      font-family: 'Courier New', monospace;
+      font-size: 0.9rem;
+      margin: 2rem 0;
+      max-height: 300px;
+      overflow-y: auto;
+    }
+
+    .console-output .timestamp {
+      color: #888;
+      margin-right: 0.5rem;
+    }
+
+    .console-output .error {
+      color: #ff4444;
+    }
+
+    .console-output .success {
+      color: #00ff00;
+    }
+
+    .console-output .warning {
+      color: #ffaa00;
+    }
+
+    .status-badge {
+      display: inline-block;
+      padding: 0.5rem 1rem;
+      border-radius: 2rem;
+      font-weight: 600;
+      font-size: 0.9rem;
+    }
+
+    .status-loading {
+      background: #fef3c7;
+      color: #92400e;
+    }
+
+    .status-success {
+      background: #d1fae5;
+      color: #065f46;
+    }
+
+    .status-error {
+      background: #fee2e2;
+      color: #991b1b;
+    }
+
+    .controls {
+      margin: 2rem 0;
+      display: flex;
+      gap: 1rem;
+      flex-wrap: wrap;
+    }
+
+    button {
+      padding: 0.75rem 1.5rem;
+      border: none;
+      border-radius: 0.5rem;
+      background: #3b82f6;
+      color: white;
+      font-weight: 600;
+      cursor: pointer;
+      transition: all 0.2s;
+    }
+
+    button:hover {
+      background: #2563eb;
+      transform: translateY(-2px);
+      box-shadow: 0 4px 12px rgba(59, 130, 246, 0.4);
+    }
+
+    button.secondary {
+      background: #6b7280;
+    }
+
+    button.secondary:hover {
+      background: #4b5563;
+    }
+  </style>
+</head>
+<body>
+  <div class="page-content">
+    <h1>🧪 External Website Widget Test</h1>
+
+    <p class="intro">
+      This page simulates an external website loading the Omniops chat widget.
+      It mimics exactly how a customer would integrate the widget into their site.
+    </p>
+
+    <div class="test-info">
+      <h2>Test Status</h2>
+      <p>Widget Status: <span class="status-badge status-loading" id="widget-status">Loading...</span></p>
+      <p>Domain Detection: <span id="domain-result">Checking...</span></p>
+      <p>Config Loaded: <span id="config-result">Pending...</span></p>
+      <p>Bundle Loaded: <span id="bundle-result">Pending...</span></p>
+      <p>Init Function Found: <span id="init-result">Pending...</span></p>
+    </div>
+
+    <div class="controls">
+      <button onclick="reloadWidget()">🔄 Reload Widget</button>
+      <button onclick="toggleDebug()" class="secondary">🐛 Toggle Debug Mode</button>
+      <button onclick="clearConsole()" class="secondary">🗑️ Clear Console</button>
+    </div>
+
+    <div class="test-info">
+      <h2>📊 Console Output</h2>
+      <div class="console-output" id="console-output">
+        <div class="success">[Test Page] Ready to load widget...</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- WIDGET INTEGRATION CODE (This is what customers copy-paste) -->
+  <script>
+    // Configuration
+    window.ChatWidgetConfig = {
+      serverUrl: "http://localhost:3002",
+      storeDomain: "test.example.com", // Explicit domain for testing
+      debug: true, // Enable debug logging
+    };
+
+    // Enable debug mode
+    window.ChatWidgetDebug = true;
+  </script>
+
+  <!-- Load the embed script -->
+  <script src="http://localhost:3002/embed.js" async></script>
+
+  <!-- TEST PAGE LOGGING AND MONITORING -->
+  <script>
+    const output = document.getElementById('console-output');
+    const widgetStatus = document.getElementById('widget-status');
+    const domainResult = document.getElementById('domain-result');
+    const configResult = document.getElementById('config-result');
+    const bundleResult = document.getElementById('bundle-result');
+    const initResult = document.getElementById('init-result');
+
+    // Capture console output
+    const originalConsole = {
+      log: console.log,
+      error: console.error,
+      warn: console.warn,
+    };
+
+    function logToPage(level, ...args) {
+      const timestamp = new Date().toLocaleTimeString();
+      const message = args.map(arg =>
+        typeof arg === 'object' ? JSON.stringify(arg, null, 2) : String(arg)
+      ).join(' ');
+
+      const div = document.createElement('div');
+      div.innerHTML = `<span class="timestamp">[${timestamp}]</span><span class="${level}">${message}</span>`;
+      output.appendChild(div);
+      output.scrollTop = output.scrollHeight;
+
+      // Update status indicators
+      if (message.includes('Domain resolved from')) {
+        domainResult.textContent = '✅ ' + message.split(':')[1]?.trim();
+      }
+      if (message.includes('Loaded remote widget config')) {
+        configResult.textContent = '✅ Config loaded successfully';
+      }
+      if (message.includes('Loaded widget bundle')) {
+        bundleResult.textContent = '✅ Bundle loaded';
+      }
+      if (message.includes('Initialized successfully')) {
+        initResult.textContent = '✅ Function called';
+        widgetStatus.textContent = 'Running';
+        widgetStatus.className = 'status-badge status-success';
+      }
+      if (message.includes('Widget bundle did not expose')) {
+        initResult.textContent = '❌ Not found';
+        widgetStatus.textContent = 'Error';
+        widgetStatus.className = 'status-badge status-error';
+      }
+    }
+
+    console.log = function(...args) {
+      originalConsole.log.apply(console, args);
+      logToPage('success', ...args);
+    };
+
+    console.error = function(...args) {
+      originalConsole.error.apply(console, args);
+      logToPage('error', ...args);
+    };
+
+    console.warn = function(...args) {
+      originalConsole.warn.apply(console, args);
+      logToPage('warning', ...args);
+    };
+
+    // Listen for widget messages
+    window.addEventListener('message', (event) => {
+      console.log('[Test Page] Message received:', event.data);
+
+      if (event.data?.type === 'ready') {
+        widgetStatus.textContent = 'Ready';
+        widgetStatus.className = 'status-badge status-success';
+      }
+    });
+
+    // Check if widget loaded after timeout
+    setTimeout(() => {
+      if (widgetStatus.textContent === 'Loading...') {
+        widgetStatus.textContent = 'Timeout';
+        widgetStatus.className = 'status-badge status-error';
+        console.error('[Test Page] Widget failed to initialize within 10 seconds');
+
+        // Log what we know
+        console.log('[Test Page] Checking global objects...');
+        console.log('  window.OmniopsWidget:', typeof window.OmniopsWidget);
+        console.log('  window.OmniopsWidgetBundle:', typeof window.OmniopsWidgetBundle);
+        console.log('  window.ChatWidget:', typeof window.ChatWidget);
+
+        const iframe = document.getElementById('chat-widget-iframe');
+        if (iframe) {
+          console.log('[Test Page] Widget iframe exists:', iframe);
+          try {
+            console.log('  iframe.contentWindow.OmniopsWidget:',
+              typeof iframe.contentWindow.OmniopsWidget);
+          } catch (e) {
+            console.error('  Cannot access iframe content (CORS):', e.message);
+          }
+        } else {
+          console.error('[Test Page] Widget iframe not found in DOM');
+        }
+      }
+    }, 10000);
+
+    // Helper functions
+    function reloadWidget() {
+      console.log('[Test Page] Reloading page...');
+      location.reload();
+    }
+
+    function toggleDebug() {
+      window.ChatWidgetDebug = !window.ChatWidgetDebug;
+      console.log('[Test Page] Debug mode:', window.ChatWidgetDebug);
+    }
+
+    function clearConsole() {
+      output.innerHTML = '<div class="success">[Test Page] Console cleared</div>';
+    }
+
+    console.log('[Test Page] Test environment initialized');
+    console.log('[Test Page] Waiting for embed.js to load...');
+  </script>
+</body>
+</html>

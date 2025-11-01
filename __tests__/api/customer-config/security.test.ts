@@ -12,6 +12,7 @@
  */
 
 import { describe, it, expect, beforeAll, afterAll } from '@jest/globals';
+import dotenv from 'dotenv';
 import type { SupabaseClient } from '@supabase/supabase-js';
 import { insertAsAdmin, deleteAsAdmin, createAdminClient } from '@/test-utils/rls-test-helpers';
 
@@ -22,7 +23,7 @@ process.env.E2E_TEST = 'true';
 // The Jest setup file overrides these with mocks, but security tests need real credentials
 if (!process.env.NEXT_PUBLIC_SUPABASE_URL?.includes('birugqyuqhiahxvxeyqg')) {
   // Force-load from .env.local (override=true)
-  require('dotenv').config({ path: '.env.local', override: true });
+  dotenv.config({ path: '.env.local', override: true });
 }
 
 // Test configuration

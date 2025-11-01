@@ -33,7 +33,6 @@ async function runConversation() {
   console.log(chalk.cyan('=' .repeat(70) + '\n'));
   
   const sessionId = uuidv4();
-  let conversationId: string | undefined;
   
   // Conversation 1: Initial broad search
   console.log(chalk.yellow('👤 Customer: "Hi, I need parts for my Cifa mixer"'));
@@ -41,7 +40,7 @@ async function runConversation() {
     'Hi, I need parts for my Cifa mixer',
     sessionId
   );
-  conversationId = r1.conversation_id;
+  const conversationId = r1.conversation_id;
   
   console.log(chalk.green('\n🤖 Assistant:'));
   console.log(chalk.white(r1.message.substring(0, 400)));

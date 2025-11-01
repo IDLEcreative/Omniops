@@ -41,7 +41,7 @@ const testMetrics = {
 };
 
 describe('Agent 4: Pronoun Resolution Tests', () => {
-  let testConversations: string[] = [];
+  const testConversations: string[] = [];
 
   async function sendChatMessage(
     message: string,

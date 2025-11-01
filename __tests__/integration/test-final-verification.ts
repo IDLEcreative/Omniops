@@ -9,7 +9,6 @@ const API_URL = 'http://localhost:3000/api/chat';
 
 async function quickTest() {
   const sessionId = uuidv4();
-  let conversationId: string | undefined;
   
   console.log('\n=== FINAL CONTEXT VERIFICATION ===\n');
   
@@ -25,7 +24,7 @@ async function quickTest() {
     }),
   });
   const d1 = await r1.json();
-  conversationId = d1.conversation_id;
+  const conversationId = d1.conversation_id;
   
   // Extract if it mentions a count
   const match = d1.message.match(/(\d+)\s+(results?|products?|items?|pumps?)/i);

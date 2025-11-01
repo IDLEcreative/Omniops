@@ -3,7 +3,7 @@
  * Business logic for fetching and processing dashboard data
  */
 
-import { SupabaseClient } from '@supabase/supabase-js';
+import type { SupabaseClient } from '@/types/supabase';
 import type { ConversationRecord, TelemetryRow, RecentConversationEntry } from './types';
 import { toDateKey, parseConversationMetadata } from './utils';
 

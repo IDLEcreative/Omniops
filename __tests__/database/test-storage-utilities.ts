@@ -76,7 +76,7 @@ describe('localStorage utilities', () => {
 
     test('handles SSR (typeof window === undefined)', () => {
       const originalWindow = global.window;
-      // @ts-ignore - Simulating SSR
+      // @ts-expect-error - Simulating SSR
       delete global.window;
 
       const result = getLocalStorage('test', 'default');
@@ -153,7 +153,7 @@ describe('localStorage utilities', () => {
 
     test('handles SSR gracefully', () => {
       const originalWindow = global.window;
-      // @ts-ignore
+      // @ts-expect-error - global window intentionally undefined for SSR simulation
       delete global.window;
 
       const success = setLocalStorage('test', 'value');
@@ -191,7 +191,7 @@ describe('localStorage utilities', () => {
 
     test('handles SSR', () => {
       const originalWindow = global.window;
-      // @ts-ignore
+      // @ts-expect-error - global window intentionally undefined for SSR simulation
       delete global.window;
 
       const success = removeLocalStorage('test');
@@ -226,7 +226,7 @@ describe('localStorage utilities', () => {
 
     test('handles SSR', () => {
       const originalWindow = global.window;
-      // @ts-ignore
+      // @ts-expect-error - global window intentionally undefined for SSR simulation
       delete global.window;
 
       const success = clearLocalStorage();
@@ -259,7 +259,7 @@ describe('localStorage utilities', () => {
 
     test('handles SSR', () => {
       const originalWindow = global.window;
-      // @ts-ignore
+      // @ts-expect-error - global window intentionally undefined for SSR simulation
       delete global.window;
 
       expect(isLocalStorageAvailable()).toBe(false);
@@ -303,7 +303,7 @@ describe('localStorage utilities', () => {
 
     test('sessionStorage handles SSR', () => {
       const originalWindow = global.window;
-      // @ts-ignore
+      // @ts-expect-error - global window intentionally undefined for SSR simulation
       delete global.window;
 
       expect(getSessionStorage('test', 'default')).toBe('default');

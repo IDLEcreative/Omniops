@@ -3,7 +3,7 @@ import { ContentDeduplicator } from './content-deduplicator';
 import type { Pattern } from './content-deduplicator-types';
 import * as crypto from 'crypto';
 import { isVariable } from './content-deduplicator-similarity';
-import type { SupabaseClient } from '@supabase/supabase-js';
+import type { SupabaseClient } from '@/types/supabase';
 
 // Pattern detection utilities
 export function detectTemplatePattern(contents: string[]): Pattern | null {

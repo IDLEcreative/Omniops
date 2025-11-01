@@ -29,7 +29,7 @@ interface TestResult {
   conversationId?: string;
 }
 
-let testConversations: string[] = [];
+const testConversations: string[] = [];
 
 async function sendMessage(message: string, conversationId?: string): Promise<{
   response: string;

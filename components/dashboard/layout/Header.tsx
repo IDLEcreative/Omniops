@@ -14,7 +14,7 @@ import {
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
 import { ThemeToggle } from "@/components/ui/theme-toggle";
-import { User as SupabaseUser } from "@supabase/supabase-js";
+import type { User as SupabaseUser } from "@/types/supabase";
 import { getUserInitials, getDisplayName } from "@/lib/dashboard/layout-utils";
 
 interface HeaderProps {

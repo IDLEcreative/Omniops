@@ -6,12 +6,13 @@
  * Priority: CRITICAL (Week 1 - Must Have)
  */
 
+import fs from 'node:fs';
+import path from 'node:path';
+import dotenv from 'dotenv';
+
 process.env.E2E_TEST = 'true';
 
 if (process.env.NODE_ENV !== 'production') {
-  const fs = require('fs');
-  const path = require('path');
-  const dotenv = require('dotenv');
 
   const envPath = path.resolve(process.cwd(), '.env.local');
   if (fs.existsSync(envPath)) {

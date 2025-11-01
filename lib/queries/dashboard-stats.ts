@@ -10,7 +10,7 @@
  * Fixes GitHub Issue #8: N+1 Query Problem
  */
 
-import { SupabaseClient } from '@supabase/supabase-js';
+import type { SupabaseClient } from '@/types/supabase';
 
 export interface DashboardStats {
   organization: {

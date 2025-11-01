@@ -181,11 +181,11 @@ describe('Debug Endpoint Security', () => {
 
       for (const endpoint of endpointsToTest) {
         try {
-          const module = await import(endpoint.route);
+          const endpointModule = await import(endpoint.route);
 
-          if (module.GET) {
+          if (endpointModule.GET) {
             const request = new NextRequest(new URL('http://localhost:3000/test'));
-            const response = await module.GET(request);
+            const response = await endpointModule.GET(request);
 
             // Should return 404 from endpoint itself
             expect(response.status).toBe(404);

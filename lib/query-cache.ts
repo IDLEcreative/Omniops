@@ -4,7 +4,7 @@
  */
 
 import { createHash } from 'crypto';
-import { SupabaseClient } from '@supabase/supabase-js';
+import type { SupabaseClient } from '@/types/supabase';
 
 interface CacheOptions {
   ttlSeconds?: number;

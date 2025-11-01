@@ -64,7 +64,7 @@ describe('Multi-Turn Conversation - E2E', () => {
    */
 
   let testDomainId: string;
-  let testConversations: string[] = [];
+  const testConversations: string[] = [];
   const API_BASE_URL = process.env.API_BASE_URL || 'http://localhost:3000';
 
   // Helper functions

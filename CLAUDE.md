@@ -744,6 +744,8 @@ See [REFERENCE_DATABASE_SCHEMA.md](docs/09-REFERENCE/REFERENCE_DATABASE_SCHEMA.m
 
 **CRITICAL**: Proactively orchestrate specialized agents in parallel to maximize efficiency and protect your context window.
 
+**📚 Complete Agent Hierarchy Guide**: See [.claude/AGENT_HIERARCHY.md](.claude/AGENT_HIERARCHY.md) for the three-tier agent system (Architect → Plan → Explore) and when to use each agent type.
+
 #### When to Automatically Use Agent Orchestration
 
 **Trigger Patterns - Use Agents WITHOUT User Prompting When:**

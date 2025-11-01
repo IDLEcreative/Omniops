@@ -5,7 +5,7 @@
 
 import { createServiceRoleClient } from '@/lib/supabase-server';
 import { logger } from '@/lib/logger';
-import type { SupabaseClient } from '@supabase/supabase-js';
+import type { SupabaseClient } from '@/types/supabase';
 import type { TimeRange, ConversationData, MessageData } from './business-intelligence-types';
 
 /**

@@ -434,11 +434,11 @@ async function testMultiTurnConversation(): Promise<TestResult> {
       manager
     );
 
-    let metadata1 = JSON.parse(manager.serialize());
+    const metadata1 = JSON.parse(manager.serialize());
     await supabase.from('conversations').update({ metadata: metadata1 }).eq('id', convId);
 
     // Simulate Turn 2 - Load previous metadata
-    let { data: loaded1 } = await supabase
+    const { data: loaded1 } = await supabase
       .from('conversations')
       .select('metadata')
       .eq('id', convId)
@@ -453,11 +453,11 @@ async function testMultiTurnConversation(): Promise<TestResult> {
       manager
     );
 
-    let metadata2 = JSON.parse(manager.serialize());
+    const metadata2 = JSON.parse(manager.serialize());
     await supabase.from('conversations').update({ metadata: metadata2 }).eq('id', convId);
 
     // Simulate Turn 3 - Verify context accumulation
-    let { data: loaded2 } = await supabase
+    const { data: loaded2 } = await supabase
       .from('conversations')
       .select('metadata')
       .eq('id', convId)

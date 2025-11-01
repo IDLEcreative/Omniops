@@ -14,7 +14,6 @@ async function testProductContext() {
   console.log(chalk.cyan('=' .repeat(60)));
   
   const sessionId = uuidv4();
-  let conversationId: string | undefined;
   
   // Test 1: Ask about pumps
   console.log(chalk.yellow('\n1️⃣ Asking about pumps...'));
@@ -29,7 +28,7 @@ async function testProductContext() {
   });
   
   const data1 = await response1.json();
-  conversationId = data1.conversation_id;
+  const conversationId = data1.conversation_id;
   console.log(chalk.gray('User: "Show me hydraulic pumps for Cifa mixers"'));
   console.log(chalk.blue('Bot response preview:'));
   console.log(chalk.blue(data1.message.substring(0, 300) + '...'));

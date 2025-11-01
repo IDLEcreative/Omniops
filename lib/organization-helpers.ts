@@ -2,7 +2,7 @@
  * Server-side helper functions for organization operations
  */
 
-import { SupabaseClient } from '@supabase/supabase-js';
+import type { SupabaseClient } from '@/types/supabase';
 import { OrganizationRole } from '@/types/organizations';
 
 /**

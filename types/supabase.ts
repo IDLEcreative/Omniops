@@ -1448,3 +1448,13 @@ export const Constants = {
     Enums: {},
   },
 } as const
+
+export type {
+  SupabaseClient,
+  User,
+  Session,
+  AuthError,
+  AuthResponse,
+  ApiError,
+  PostgrestSingleResponse,
+} from '@supabase/supabase-js'

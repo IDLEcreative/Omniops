@@ -15,6 +15,7 @@
  * @jest-environment node
  */
 
+import dotenv from 'dotenv';
 import {
   setupRLSTest,
   expectRLSBlocked,
@@ -35,7 +36,7 @@ process.env.E2E_TEST = 'true';
 // The Jest setup file overrides these with mocks, but RLS tests need real credentials
 if (!process.env.NEXT_PUBLIC_SUPABASE_URL?.includes('birugqyuqhiahxvxeyqg')) {
   // Force-load from .env.local (override=true)
-  require('dotenv').config({ path: '.env.local', override: true });
+  dotenv.config({ path: '.env.local', override: true });
 }
 
 // Skip if credentials not available

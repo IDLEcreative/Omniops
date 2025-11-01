@@ -13,15 +13,16 @@
  * Expected Bug Detection: 60-70% of integration issues
  */
 
+import fs from 'node:fs';
+import path from 'node:path';
+import dotenv from 'dotenv';
+
 // IMPORTANT: Override Jest's mocked env vars for E2E tests
 // Jest setup mocks these for unit tests, but E2E tests need real connections
 // Set E2E_TEST flag FIRST to prevent jest.setup.js from overriding
 process.env.E2E_TEST = 'true';
 
 if (process.env.NODE_ENV !== 'production') {
-  const fs = require('fs');
-  const path = require('path');
-  const dotenv = require('dotenv');
 
   // Load actual .env.local file
   const envPath = path.resolve(process.cwd(), '.env.local');

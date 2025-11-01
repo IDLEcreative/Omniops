@@ -2,7 +2,7 @@
  * Core processing logic for the Embeddings Reindex System
  */
 
-import { SupabaseClient } from '@supabase/supabase-js';
+import type { SupabaseClient } from '@/types/supabase';
 import OpenAI from 'openai';
 import {
   PageData,

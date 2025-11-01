@@ -82,6 +82,32 @@ export async function middleware(request: NextRequest) {
   // ========================================
   // SECURITY: Add security headers to all responses
   // ========================================
+  const isDevLikeEnvironment = process.env.NODE_ENV !== 'production';
+
+  const scriptSources = [
+    "'self'",
+    "'unsafe-eval'",
+    "'unsafe-inline'",
+    'https://cdn.jsdelivr.net',
+  ];
+
+  const connectSources = [
+    "'self'",
+    'https://*.supabase.co',
+    'https://api.openai.com',
+  ];
+
+  if (isDevLikeEnvironment) {
+    // Allow Vercel Live reload tooling in development/preview
+    scriptSources.push('https://vercel.live', 'https://*.vercel.live');
+    connectSources.push(
+      'https://vercel.live',
+      'https://*.vercel.live',
+      'wss://vercel.live',
+      'wss://*.vercel.live'
+    );
+  }
+
   const securityHeaders = {
     // HSTS - Force HTTPS for 1 year (including subdomains)
     'Strict-Transport-Security': 'max-age=31536000; includeSubDomains',
@@ -93,11 +119,11 @@ export async function middleware(request: NextRequest) {
     // Content Security Policy - Mitigate XSS attacks
     'Content-Security-Policy': [
       "default-src 'self'",
-      "script-src 'self' 'unsafe-eval' 'unsafe-inline' https://cdn.jsdelivr.net",
+      `script-src ${scriptSources.join(' ')}`,
       "style-src 'self' 'unsafe-inline'",
       "img-src 'self' data: https: blob:",
       "font-src 'self' data:",
-      "connect-src 'self' https://*.supabase.co https://api.openai.com",
+      `connect-src ${connectSources.join(' ')}`,
       "frame-ancestors 'self'",
       "base-uri 'self'",
       "form-action 'self'"

@@ -1,0 +1,46 @@
+<!--
+  Omniops Production Widget Configuration
+
+  SITE: www.thompsonseparts.co.uk
+  SERVER: www.omniops.co.uk
+
+  Add this snippet to your WordPress site to integrate the Omniops chat widget.
+
+  WHERE TO ADD:
+  - WordPress Admin → Appearance → Theme Editor → footer.php (before </body>)
+  - OR use a plugin like "Insert Headers and Footers"
+  - OR add to your theme's functions.php using wp_footer hook
+-->
+
+<!-- Configure the widget BEFORE loading the script -->
+<script>
+  window.ChatWidgetConfig = {
+    // Production Omniops server
+    serverUrl: 'https://www.omniops.co.uk',
+
+    // Your WordPress site domain (auto-detected, but can override)
+    domain: window.location.hostname,
+
+    // Optional: Customize appearance
+    appearance: {
+      position: 'bottom-right',
+      primaryColor: '#0070f3',
+      startMinimized: true,
+      showPulseAnimation: true
+    },
+
+    // Optional: Enable debug logging (remove in production)
+    debug: false
+  };
+</script>
+
+<!-- Load the widget from production server -->
+<script src="https://www.omniops.co.uk/embed.js" async></script>
+
+<!--
+  VERIFICATION:
+  1. Open browser console (F12)
+  2. Look for: "[Omniops Widget] Initialized successfully"
+  3. Check Network tab for API calls to www.omniops.co.uk
+  4. Test chat by clicking the widget
+-->

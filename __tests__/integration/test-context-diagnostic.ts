@@ -14,7 +14,6 @@ async function runDiagnostic() {
   console.log(chalk.cyan('=' .repeat(60)));
   
   const sessionId = uuidv4();
-  let conversationId: string | undefined;
   
   // Message 1: Establish context
   console.log(chalk.yellow('\n1️⃣ Establishing context...'));
@@ -29,7 +28,7 @@ async function runDiagnostic() {
   });
   
   const data1 = await response1.json();
-  conversationId = data1.conversation_id;
+  const conversationId = data1.conversation_id;
   console.log(chalk.gray('User: "My favorite color is blue and I have a dog named Max"'));
   console.log(chalk.blue(`Bot: ${data1.message.substring(0, 100)}...`));
   

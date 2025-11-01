@@ -57,7 +57,7 @@ describe('Race Condition Edge Cases', () => {
 
     it('should implement optimistic locking pattern', async () => {
       // Proper solution using version numbers
-      let order = {
+      const order = {
         status: 'pending',
         version: 1,
       };
@@ -206,7 +206,7 @@ describe('Race Condition Edge Cases', () => {
       // Simulate: Many requests for expired cache key (thundering herd)
       let cacheHits = 0;
       let dbQueries = 0;
-      let cache: Record<string, any> = {};
+      const cache: Record<string, any> = {};
 
       const getCachedData = async (key: string) => {
         if (cache[key]) {
@@ -242,7 +242,7 @@ describe('Race Condition Edge Cases', () => {
     it('should implement single-flight pattern to prevent stampede', async () => {
       // Solution: Coordinate concurrent requests
       let dbQueries = 0;
-      let cache: Record<string, any> = {};
+      const cache: Record<string, any> = {};
       const inFlight = new Map<string, Promise<any>>();
 
       const getCachedDataSingleFlight = async (key: string) => {
@@ -498,7 +498,7 @@ describe('Race Condition Edge Cases', () => {
 
     it('should coordinate cache updates across instances', async () => {
       // Simulate: Multiple app instances updating same cache key
-      let sharedCache: Record<string, { data: any; version: number }> = {};
+      const sharedCache: Record<string, { data: any; version: number }> = {};
 
       const updateCache = async (key: string, data: any) => {
         const current = sharedCache[key];

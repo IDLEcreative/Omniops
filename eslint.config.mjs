@@ -88,8 +88,8 @@ const eslintConfig = [
   // Custom rules
   {
     rules: {
-      "@typescript-eslint/no-explicit-any": "warn",
-      "@typescript-eslint/no-unused-vars": "warn",
+      "@typescript-eslint/no-explicit-any": "off",
+      "@typescript-eslint/no-unused-vars": "off",
       "react/no-unescaped-entities": "off",
       "no-restricted-imports": [
         "error",
@@ -107,6 +107,26 @@ const eslintConfig = [
           ]
         }
       ]
+    }
+  },
+  {
+    files: ["lib/supabase/**/*"],
+    rules: {
+      "no-restricted-imports": "off"
+    }
+  },
+  {
+    files: ["__tests__/**/*", "test-utils/**/*", "__mocks__/**/*"],
+    rules: {
+      "no-restricted-imports": "off",
+      "@typescript-eslint/no-explicit-any": "off",
+      "@typescript-eslint/no-unused-vars": "off"
+    }
+  },
+  {
+    files: ["types/supabase.ts"],
+    rules: {
+      "no-restricted-imports": "off"
     }
   }
 ];

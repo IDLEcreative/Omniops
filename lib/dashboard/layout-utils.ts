@@ -1,4 +1,4 @@
-import { User } from "@supabase/supabase-js";
+import type { User } from "@/types/supabase";
 import { navigation } from "./navigation-config";
 
 /**
