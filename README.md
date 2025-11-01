@@ -1,4 +1,4 @@
-**Last Updated:** 2025-10-24
+**Last Updated:** 2025-10-31
 **Verified Accurate For:** v0.1.0
 
 # OmniOps AI Customer Service Platform
@@ -25,7 +25,47 @@ OmniOps is a multi-tenant, brand-agnostic AI customer service platform that comb
 
 ---
 
-## 🚀 Quick Start
+## 💬 Widget Installation (For Customers)
+
+Install the OmniOps chat widget on your website in under 60 seconds with just 7 lines of code.
+
+### Minimal Installation
+
+```html
+<!-- Add before closing </body> tag -->
+<script>
+window.ChatWidgetConfig = {
+  "serverUrl": "https://omniops.co.uk"
+};
+</script>
+<script src="https://omniops.co.uk/embed.js" async></script>
+```
+
+**That's it!** All configuration (appearance, behavior, features) loads dynamically from your dashboard.
+
+### Why This Approach?
+
+Following SaaS industry standards (like Intercom, Drift, Segment):
+- ✅ **Install once, never update** - Make changes via dashboard
+- ✅ **7 lines instead of 50+** - Minimal integration code
+- ✅ **Instant updates** - Configuration changes apply immediately
+- ✅ **Zero maintenance** - No code changes needed for customization
+
+### Dashboard Configuration
+
+After installation, customize everything via dashboard:
+- 🎨 **Appearance** - Colors, position, welcome message
+- ⚙️ **Behavior** - Auto-open, timing, conversation persistence
+- 🛠️ **Features** - Web scraping, WooCommerce integration, FAQs
+- 🌍 **Language** - 40+ languages supported
+
+Changes apply instantly without updating your website code.
+
+**→ Installation guide:** Go to Dashboard → Installation → Copy Code
+
+---
+
+## 🚀 Development Quick Start
 
 ### Prerequisites
 - Node.js 18+
@@ -281,6 +321,12 @@ npx tsx optimize-chunk-sizes.ts analyze     # Analyze chunks
 - Automatic HTTPS and CDN
 - Environment variable management
 - **→ Guide:** [docs/PRODUCTION-DEPLOYMENT.md](docs/PRODUCTION-DEPLOYMENT.md)
+
+**Required Environment Variable:**
+```bash
+NEXT_PUBLIC_APP_URL=https://your-production-domain.com
+```
+This ensures the widget embed code uses your production domain instead of preview URLs.
 
 **Docker**
 - Full containerization
