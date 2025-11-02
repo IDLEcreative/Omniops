@@ -7,6 +7,8 @@ import type { PrivacySettings } from '../../components/ChatWidget/hooks/useChatS
 
 export function buildWidgetConfig(config: StandaloneWidgetConfig) {
   return {
+    serverUrl: config.serverUrl, // CRITICAL: Pass through for API calls
+    domain: config.domain, // Pass through detected domain for registration
     headerTitle: config.headerTitle || 'Support',
     features: config.features || {
       websiteScraping: { enabled: true },
