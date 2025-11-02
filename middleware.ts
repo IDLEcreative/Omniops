@@ -5,7 +5,7 @@ export async function middleware(request: NextRequest) {
   const { pathname } = request.nextUrl
 
   // ========================================
-  // CORS: Handle OPTIONS preflight requests immediately
+  // CORS: Handle OPTIONS preflight requests immediately (before any other processing)
   // ========================================
   if (request.method === 'OPTIONS') {
     const origin = request.headers.get('origin');
@@ -14,11 +14,28 @@ export async function middleware(request: NextRequest) {
       headers: {
         'Access-Control-Allow-Origin': origin || '*',
         'Access-Control-Allow-Methods': 'GET, POST, PUT, DELETE, OPTIONS',
-        'Access-Control-Allow-Headers': 'Content-Type, Authorization',
+        'Access-Control-Allow-Headers': 'Content-Type, Authorization, X-Requested-With',
         'Access-Control-Allow-Credentials': 'true',
         'Access-Control-Max-Age': '86400',
       },
     });
+  }
+
+  // ========================================
+  // PUBLIC API ROUTES: Skip auth checks for public endpoints
+  // ========================================
+  const publicApiRoutes = ['/api/chat', '/api/widget', '/api/scrape'];
+  const isPublicApi = publicApiRoutes.some(route => pathname.startsWith(route));
+
+  if (isPublicApi) {
+    // For public API routes, return immediately with CORS headers (skip Supabase session check)
+    const origin = request.headers.get('origin');
+    const response = NextResponse.next();
+    response.headers.set('Access-Control-Allow-Origin', origin || '*');
+    response.headers.set('Access-Control-Allow-Methods', 'GET, POST, PUT, DELETE, OPTIONS');
+    response.headers.set('Access-Control-Allow-Headers', 'Content-Type, Authorization, X-Requested-With');
+    response.headers.set('Access-Control-Allow-Credentials', 'true');
+    return response;
   }
 
   // ========================================
