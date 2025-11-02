@@ -7,6 +7,21 @@
       "NODE_ENV": "production"
     }
   },
+  "rewrites": [
+    {
+      "source": "/api/(.*)",
+      "destination": "/api/$1"
+    },
+    {
+      "source": "/embed.js",
+      "destination": "/embed.js"
+    },
+    {
+      "source": "/widget-bundle.js",
+      "destination": "/widget-bundle.js"
+    }
+  ],
+  "redirects": [],
   "headers": [
     {
       "source": "/api/(.*)",

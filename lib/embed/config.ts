@@ -6,6 +6,15 @@ import {
   RemoteWidgetConfig,
 } from './types';
 
+// Function to ensure URL uses www subdomain (fixes CORS redirect issue)
+function ensureWwwUrl(url: string): string {
+  // If URL contains omniops.co.uk without www, add www
+  if (url && url.includes('omniops.co.uk') && !url.includes('www.omniops.co.uk')) {
+    return url.replace('omniops.co.uk', 'www.omniops.co.uk');
+  }
+  return url;
+}
+
 export const DEFAULT_CONFIG: WidgetConfig = {
   serverUrl: 'https://www.omniops.co.uk',
   appearance: {
@@ -65,9 +74,15 @@ export function mergeFeatures(base: WidgetFeatures, overrides?: WidgetFeatures |
 }
 
 export function createConfig(userConfig: Partial<WidgetConfig> = {}): WidgetConfig {
+  // Fix serverUrl to use www subdomain if needed (prevents CORS redirect issues)
+  const fixedUserConfig = {
+    ...userConfig,
+    serverUrl: userConfig.serverUrl ? ensureWwwUrl(userConfig.serverUrl) : undefined,
+  };
+
   return {
     ...DEFAULT_CONFIG,
-    ...userConfig,
+    ...fixedUserConfig,
     appearance: mergeAppearance(DEFAULT_CONFIG.appearance, userConfig.appearance),
     behavior: mergeBehavior(DEFAULT_CONFIG.behavior, userConfig.behavior),
     features: mergeFeatures(DEFAULT_CONFIG.features, userConfig.features),
@@ -84,7 +99,11 @@ export function applyRemoteConfig(
   userOverrides: Partial<WidgetConfig> = {}
 ): WidgetConfig {
   if (!remote) {
-    return current;
+    // Ensure current config uses www URL
+    return {
+      ...current,
+      serverUrl: ensureWwwUrl(current.serverUrl),
+    };
   }
 
   const merged = {
@@ -119,6 +138,9 @@ export function applyRemoteConfig(
       merged.behavior.welcomeMessage = remote.branding.welcome_message || merged.behavior.welcomeMessage;
     }
   }
+
+  // Always ensure serverUrl uses www subdomain before returning
+  merged.serverUrl = ensureWwwUrl(merged.serverUrl);
 
   return merged;
 }

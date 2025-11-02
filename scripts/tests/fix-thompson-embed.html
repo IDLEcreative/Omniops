@@ -1,0 +1,60 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Thompson's Embed Fix</title>
+</head>
+<body>
+    <h1>Thompson's Parts - Widget Embed Fix</h1>
+
+    <h2>❌ OLD (Broken) Code:</h2>
+    <pre style="background: #fee; padding: 10px; border: 1px solid red;">
+&lt;script&gt;
+window.ChatWidgetConfig = {
+  serverUrl: "https://omniops.co.uk"  // WRONG - no www
+};
+&lt;/script&gt;
+&lt;script src="https://omniops.co.uk/embed.js"&gt;&lt;/script&gt;
+    </pre>
+
+    <h2>✅ NEW (Fixed) Code:</h2>
+    <pre style="background: #efe; padding: 10px; border: 1px solid green;">
+&lt;script&gt;
+window.ChatWidgetConfig = {
+  serverUrl: "https://www.omniops.co.uk"  // CORRECT - with www
+};
+&lt;/script&gt;
+&lt;script src="https://www.omniops.co.uk/embed.js?v=2"&gt;&lt;/script&gt;
+    </pre>
+
+    <h2>Instructions for Thompson's Team:</h2>
+    <ol>
+        <li>Find where you embed the Omniops chat widget in your WordPress theme/plugin</li>
+        <li>Replace ALL instances of <code>https://omniops.co.uk</code> with <code>https://www.omniops.co.uk</code></li>
+        <li>Add <code>?v=2</code> to the embed.js URL to force refresh</li>
+        <li>Clear any WordPress/WP Engine cache</li>
+        <li>Test the widget - it should work immediately!</li>
+    </ol>
+
+    <h2>Test the Fix:</h2>
+    <button onclick="testWidget()">Load Widget with Correct URL</button>
+
+    <script>
+    function testWidget() {
+        // Use the CORRECT URL
+        window.ChatWidgetConfig = {
+            serverUrl: "https://www.omniops.co.uk"
+        };
+
+        var script = document.createElement('script');
+        script.src = 'https://www.omniops.co.uk/embed.js?v=' + Date.now();
+        document.body.appendChild(script);
+
+        alert('Widget loaded with correct URL! Check if it works now.');
+    }
+    </script>
+
+    <h2>Why This Happened:</h2>
+    <p>Vercel automatically redirects non-www URLs to www. This redirect breaks CORS preflight requests.</p>
+    <p>The solution is to always use <strong>www.omniops.co.uk</strong> in all URLs.</p>
+</body>
+</html>
