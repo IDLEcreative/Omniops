@@ -264,7 +264,14 @@ async function initialize() {
     }
 
     const { code: bundleCode, origin: resolvedOrigin } = await loadWidgetBundle(config);
-    config.serverUrl = resolvedOrigin;
+    // Only update serverUrl if it wasn't explicitly configured by the user
+    // This prevents overwriting the user's intended API endpoint
+    if (!userConfig.serverUrl) {
+      config.serverUrl = resolvedOrigin;
+      logDebug('[Initialize] ServerUrl updated to bundle origin:', resolvedOrigin);
+    } else {
+      logDebug('[Initialize] Keeping user-configured serverUrl:', config.serverUrl);
+    }
 
     logDebug('[Initialize] Bundle code length:', bundleCode?.length || 0);
     logDebug('[Initialize] Creating iframe with bundle...');
