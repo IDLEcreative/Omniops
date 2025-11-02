@@ -3,12 +3,14 @@ import { updateSession } from '@/lib/supabase/middleware'
 
 export async function middleware(request: NextRequest) {
   const { pathname } = request.nextUrl
+  const origin = request.headers.get('origin');
 
   // ========================================
-  // CORS: Handle OPTIONS preflight requests immediately (before any other processing)
+  // CRITICAL: Handle ALL OPTIONS requests immediately (CORS preflight)
+  // Must be first - no redirects allowed during preflight
   // ========================================
   if (request.method === 'OPTIONS') {
-    const origin = request.headers.get('origin');
+    console.log('[Middleware] OPTIONS request for:', pathname);
     return new NextResponse(null, {
       status: 204,
       headers: {
@@ -22,14 +24,15 @@ export async function middleware(request: NextRequest) {
   }
 
   // ========================================
-  // PUBLIC API ROUTES: Skip auth checks for public endpoints
+  // PUBLIC API ROUTES: Skip ALL auth/session checks for public endpoints
+  // These routes must not trigger ANY redirects
   // ========================================
   const publicApiRoutes = ['/api/chat', '/api/widget', '/api/scrape'];
   const isPublicApi = publicApiRoutes.some(route => pathname.startsWith(route));
 
   if (isPublicApi) {
-    // For public API routes, return immediately with CORS headers (skip Supabase session check)
-    const origin = request.headers.get('origin');
+    console.log('[Middleware] Public API request for:', pathname);
+    // Skip ALL processing - return immediately with CORS headers
     const response = NextResponse.next();
     response.headers.set('Access-Control-Allow-Origin', origin || '*');
     response.headers.set('Access-Control-Allow-Methods', 'GET, POST, PUT, DELETE, OPTIONS');
