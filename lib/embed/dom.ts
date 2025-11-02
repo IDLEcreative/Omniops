@@ -149,15 +149,18 @@ export function registerApi(
   privacyPrefs: PrivacyPreferences,
   version: string
 ): void {
+  // SECURITY: Use exact origin instead of wildcard for postMessage
+  const targetOrigin = config.serverUrl || window.location.origin;
+
   window.ChatWidget = {
     open() {
-      iframe.contentWindow?.postMessage({ type: 'open' }, '*');
+      iframe.contentWindow?.postMessage({ type: 'open' }, targetOrigin);
     },
     close() {
-      iframe.contentWindow?.postMessage({ type: 'close' }, '*');
+      iframe.contentWindow?.postMessage({ type: 'close' }, targetOrigin);
     },
     sendMessage(message: string) {
-      iframe.contentWindow?.postMessage({ type: 'message', message }, '*');
+      iframe.contentWindow?.postMessage({ type: 'message', message }, targetOrigin);
     },
     updateContext(newContext: any) {
       iframe.contentWindow?.postMessage(
@@ -167,7 +170,7 @@ export function registerApi(
           cartData: newContext?.cartData,
           pageContext: newContext?.pageContext,
         },
-        '*'
+        targetOrigin
       );
     },
     privacy: {

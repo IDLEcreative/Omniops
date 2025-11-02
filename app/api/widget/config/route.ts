@@ -15,6 +15,7 @@ export const dynamic = 'force-dynamic';
 
 const QuerySchema = z.object({
   domain: z.string().optional(),
+  id: z.string().optional(), // app_id parameter
 });
 
 function withCors<T>(response: NextResponse<T>) {
@@ -31,14 +32,16 @@ export async function OPTIONS() {
 
 export async function GET(request: NextRequest) {
   try {
-    // Parse and validate domain parameter
+    // Parse and validate parameters (supports both domain and app_id)
     const { searchParams } = new URL(request.url);
     const domain = searchParams.get('domain') || '';
+    const appId = searchParams.get('id') || '';
 
-    const validatedQuery = QuerySchema.parse({ domain });
+    const validatedQuery = QuerySchema.parse({ domain, id: appId });
 
-    // If no domain provided, return default config
-    if (!validatedQuery.domain || validatedQuery.domain.trim() === '') {
+    // If neither domain nor app_id provided, return default config
+    if ((!validatedQuery.domain || validatedQuery.domain.trim() === '') &&
+        (!validatedQuery.id || validatedQuery.id.trim() === '')) {
       console.log('[Widget Config API] No domain provided, returning default config');
       return withCors(NextResponse.json(
         {
@@ -75,31 +78,68 @@ export async function GET(request: NextRequest) {
       throw new Error('Failed to create Supabase client');
     }
 
-    // First, look up domain to get customer_config_id
-    const { data: domainData } = await supabase
-      .from('domains')
-      .select('customer_config_id')
-      .eq('domain_name', validatedQuery.domain)
-      .single();
+    let config;
+    let error;
+    let domainData;
 
-    // Fetch customer config for this domain
-    // Only select PUBLIC-SAFE fields - NO credentials!
-    const { data: config, error } = await supabase
-      .from('customer_configs')
-      .select(`
-        id,
-        domain,
-        business_name,
-        primary_color,
-        welcome_message,
-        suggested_questions,
-        woocommerce_url,
-        shopify_shop,
-        active
-      `)
-      .eq('domain', validatedQuery.domain)
-      .eq('active', true)
-      .single();
+    // Prioritize app_id lookup over domain lookup (app_id is the new standard)
+    if (validatedQuery.id && validatedQuery.id.trim() !== '') {
+      // Fetch config by app_id
+      const result = await supabase
+        .from('customer_configs')
+        .select(`
+          id,
+          app_id,
+          domain,
+          business_name,
+          primary_color,
+          welcome_message,
+          suggested_questions,
+          woocommerce_url,
+          shopify_shop,
+          active
+        `)
+        .eq('app_id', validatedQuery.id)
+        .eq('active', true)
+        .single();
+
+      config = result.data;
+      error = result.error;
+
+      console.log('[Widget Config API] Lookup by app_id:', validatedQuery.id, config ? 'found' : 'not found');
+    } else {
+      // Fallback to domain-based lookup (legacy method)
+      // First, look up domain to get customer_config_id
+      domainData = (await supabase
+        .from('domains')
+        .select('customer_config_id')
+        .eq('domain_name', validatedQuery.domain)
+        .single()).data;
+
+      // Fetch customer config for this domain
+      const result = await supabase
+        .from('customer_configs')
+        .select(`
+          id,
+          app_id,
+          domain,
+          business_name,
+          primary_color,
+          welcome_message,
+          suggested_questions,
+          woocommerce_url,
+          shopify_shop,
+          active
+        `)
+        .eq('domain', validatedQuery.domain)
+        .eq('active', true)
+        .single();
+
+      config = result.data;
+      error = result.error;
+
+      console.log('[Widget Config API] Lookup by domain:', validatedQuery.domain, config ? 'found' : 'not found');
+    }
 
     if (error || !config) {
       // Log error for debugging
@@ -174,6 +214,7 @@ export async function GET(request: NextRequest) {
     return withCors(NextResponse.json({
       success: true,
       config: {
+        app_id: config.app_id, // Include app_id in response
         domain: config.domain,
         woocommerce_enabled: !!config.woocommerce_url,
         shopify_enabled: !!config.shopify_shop,

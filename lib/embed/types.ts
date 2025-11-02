@@ -76,7 +76,8 @@ export interface WidgetConfig {
   cartData: unknown;
   orderContext: unknown;
   woocommerceEnabled: boolean;
-  storeDomain: string | null;
+  domain?: string | null; // New standard property name (preferred)
+  storeDomain: string | null; // Legacy property name (still supported for backwards compatibility)
   debug: boolean;
   skipRemoteConfig?: boolean;
 }

@@ -62,10 +62,20 @@ function resolveDomain(config: WidgetConfig, userConfig: Partial<WidgetConfig>):
     return fromLocation;
   }
 
-  // Try 2: Explicitly provided storeDomain in config
+  // Try 2: Explicitly provided domain in userConfig (supports both 'domain' and 'storeDomain')
+  if (userConfig.domain) {
+    logDebug('Domain resolved from userConfig.domain', userConfig.domain);
+    return userConfig.domain;
+  }
+
   if (userConfig.storeDomain) {
     logDebug('Domain resolved from userConfig.storeDomain', userConfig.storeDomain);
     return userConfig.storeDomain;
+  }
+
+  if (config.domain) {
+    logDebug('Domain resolved from config.domain', config.domain);
+    return config.domain;
   }
 
   if (config.storeDomain) {
@@ -103,8 +113,8 @@ function resolveDomain(config: WidgetConfig, userConfig: Partial<WidgetConfig>):
   logError('Unable to resolve domain from any source', {
     location: window.location.hostname,
     referrer: document.referrer,
-    configDomain: config.storeDomain,
-    userConfigDomain: userConfig.storeDomain,
+    configDomain: config.domain || config.storeDomain,
+    userConfigDomain: userConfig.domain || userConfig.storeDomain,
   });
 
   return null;
@@ -176,7 +186,11 @@ function scheduleConversationCleanup(config: WidgetConfig, iframe: HTMLIFrameEle
   const lastCleanup = lastCleanupRaw ? Number(lastCleanupRaw) : 0;
 
   if (!lastCleanup || now - lastCleanup > dayInMs) {
-    iframe.contentWindow?.postMessage({ type: 'cleanup', retentionDays: config.privacy.retentionDays }, '*');
+    // SECURITY: Use exact origin instead of wildcard
+    iframe.contentWindow?.postMessage(
+      { type: 'cleanup', retentionDays: config.privacy.retentionDays },
+      config.serverUrl || window.location.origin
+    );
     localStorage.setItem(CLEANUP_KEY, String(now));
   }
 }
@@ -207,13 +221,40 @@ async function initialize() {
       config.storeDomain = resolvedDomain;
     }
 
-    const demoId = (document.currentScript || document.querySelector('script[src*="embed.js"]'))?.getAttribute('data-demo');
+    const scriptTag = document.currentScript || document.querySelector('script[src*="embed.js"]');
+    const demoId = scriptTag?.getAttribute('data-demo');
 
+    // Load remote config by app_id (preferred) or domain (fallback)
     if (!userConfig.skipRemoteConfig) {
-      if (resolvedDomain) {
+      const appId = (userConfig as any).appId || scriptTag?.getAttribute('data-app-id');
+
+      if (appId) {
+        // Use app_id lookup (new method)
+        logDebug('[Initialize] Loading config by app_id:', appId);
+        try {
+          const candidates = createServerUrlCandidates(config.serverUrl);
+          const { data } = await fetchFromCandidates<{ success: boolean; config?: any }>(
+            candidates,
+            `/api/widget/config?id=${encodeURIComponent(appId)}`,
+            {
+              timeoutMs: 8000,
+              retryDelaysMs: [0, 500],
+              parser: response => response.json(),
+            }
+          );
+
+          if (data?.success && data.config) {
+            config = applyRemoteConfig(config, data.config, userConfig);
+            logDebug('[Initialize] Config loaded successfully by app_id');
+          }
+        } catch (error) {
+          logError('[Initialize] Failed to load config by app_id', error);
+        }
+      } else if (resolvedDomain) {
+        // Fallback to domain-based lookup (legacy method)
         config = await loadRemoteConfig(config, resolvedDomain, userConfig);
       } else {
-        logDebug('Skipping remote config fetch; domain could not be determined');
+        logDebug('Skipping remote config fetch; neither app_id nor domain available');
       }
     }
 
@@ -241,13 +282,14 @@ async function initialize() {
     iframe.onload = () => {
       iframe.style.display = 'block';
       setTimeout(() => {
+        // SECURITY: Use exact origin instead of wildcard
         iframe.contentWindow?.postMessage(
           {
             type: 'init',
             config,
             privacyPrefs,
           },
-          '*'
+          config.serverUrl || window.location.origin
         );
       }, 100);
     };
