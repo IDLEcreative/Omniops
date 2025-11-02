@@ -5,6 +5,23 @@ export async function middleware(request: NextRequest) {
   const { pathname } = request.nextUrl
 
   // ========================================
+  // CORS: Handle OPTIONS preflight requests immediately
+  // ========================================
+  if (request.method === 'OPTIONS') {
+    const origin = request.headers.get('origin');
+    return new NextResponse(null, {
+      status: 204,
+      headers: {
+        'Access-Control-Allow-Origin': origin || '*',
+        'Access-Control-Allow-Methods': 'GET, POST, PUT, DELETE, OPTIONS',
+        'Access-Control-Allow-Headers': 'Content-Type, Authorization',
+        'Access-Control-Allow-Credentials': 'true',
+        'Access-Control-Max-Age': '86400',
+      },
+    });
+  }
+
+  // ========================================
   // SECURITY: Block debug/test endpoints in production
   // ========================================
   const isProduction = process.env.NODE_ENV === 'production'
@@ -151,6 +168,13 @@ export async function middleware(request: NextRequest) {
   Object.entries(securityHeaders).forEach(([key, value]) => {
     response.headers.set(key, value)
   })
+
+  // Add CORS headers for API routes
+  if (pathname.startsWith('/api/')) {
+    const origin = request.headers.get('origin');
+    response.headers.set('Access-Control-Allow-Origin', origin || '*');
+    response.headers.set('Access-Control-Allow-Credentials', 'true');
+  }
 
   return response
 }
