@@ -241,7 +241,7 @@ export function useChatState({
     return () => {
       window.removeEventListener('message', handleMessage);
     };
-  }, [onReady]);
+  }, [onReady, demoConfig]);
 
   // Clean up old messages
   const cleanupOldMessages = (retentionDays: number) => {

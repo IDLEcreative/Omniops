@@ -264,14 +264,11 @@ async function initialize() {
     }
 
     const { code: bundleCode, origin: resolvedOrigin } = await loadWidgetBundle(config);
-    // Only update serverUrl if it wasn't explicitly configured by the user
-    // This prevents overwriting the user's intended API endpoint
-    if (!userConfig.serverUrl) {
-      config.serverUrl = resolvedOrigin;
-      logDebug('[Initialize] ServerUrl updated to bundle origin:', resolvedOrigin);
-    } else {
-      logDebug('[Initialize] Keeping user-configured serverUrl:', config.serverUrl);
-    }
+    // IMPORTANT: Keep the configured serverUrl (either default or user-set)
+    // The bundle origin is only used for loading the bundle file, NOT for API calls
+    // API calls should always go to config.serverUrl (defaults to https://omniops.co.uk)
+    logDebug('[Initialize] Bundle loaded from:', resolvedOrigin);
+    logDebug('[Initialize] API calls will go to:', config.serverUrl);
 
     logDebug('[Initialize] Bundle code length:', bundleCode?.length || 0);
     logDebug('[Initialize] Creating iframe with bundle...');
