@@ -83,9 +83,12 @@ export const WIDGET_STYLES = `
   @keyframes slideInFromBottom { from { transform: translateY(12px); opacity: 0; } to { transform: translateY(0); opacity: 1; } }
 
   /* Dark theme widget colors */
+  .bg-\\[\\#1F2937\\] { background-color: #1F2937; }
+  .bg-\\[\\#27272a\\] { background-color: #27272a; }
+  .bg-\\[\\#3f3f46\\] { background-color: #3f3f46; }
+  .bg-\\[\\#262626\\] { background-color: #262626; }
   .bg-\\[\\#141414\\] { background-color: #141414; }
   .bg-\\[\\#1a1a1a\\] { background-color: #1a1a1a; }
-  .bg-\\[\\#262626\\] { background-color: #262626; }
   .bg-\\[\\#2a2a2a\\] { background-color: #2a2a2a; }
   .bg-\\[\\#3a3a3a\\] { background-color: #3a3a3a; }
   .bg-\\[\\#4a4a4a\\] { background-color: #4a4a4a; }
