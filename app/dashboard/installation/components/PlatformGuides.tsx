@@ -11,7 +11,7 @@ interface PlatformGuidesProps {
 
 export function PlatformGuides({ serverUrl }: PlatformGuidesProps) {
   // Always use production URL, never show localhost or placeholder
-  const embedUrl = serverUrl || "https://omniops.co.uk";
+  const embedUrl = serverUrl || "https://www.omniops.co.uk";
 
   return (
     <Card>

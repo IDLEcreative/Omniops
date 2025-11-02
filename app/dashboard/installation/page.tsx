@@ -31,7 +31,7 @@ export default function InstallationPage() {
 
         // If URL contains localhost, use production domain instead
         const productionUrl = url.includes('localhost')
-          ? 'https://omniops.co.uk'
+          ? 'https://www.omniops.co.uk'
           : url;
 
         setServerUrl(productionUrl);
