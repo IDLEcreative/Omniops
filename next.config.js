@@ -130,6 +130,10 @@ const nextConfig = {
             key: 'Vary',
             value: 'Origin',
           },
+          {
+            key: 'Cache-Control',
+            value: 'public, max-age=300, stale-while-revalidate=60', // 5 minute cache, revalidate after 1 min
+          },
         ],
       },
       // Ensure Next.js static CSS is served with the correct MIME type
