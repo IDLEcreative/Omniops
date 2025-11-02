@@ -35,7 +35,7 @@ declare global {
   }
 }
 
-const WIDGET_VERSION = '2.1.0';
+const WIDGET_VERSION = '2.1.1';
 const CLEANUP_KEY = 'chat_widget_last_cleanup';
 
 function logDebug(message: string, payload?: unknown) {
@@ -164,7 +164,7 @@ async function loadWidgetBundle(config: WidgetConfig): Promise<{ code: string; o
     throw new Error('No server URL candidates were provided');
   }
 
-  const result = await fetchFromCandidates<string>(bundleCandidates, '/widget-bundle.js', {
+  const result = await fetchFromCandidates<string>(bundleCandidates, `/widget-bundle.js?v=${WIDGET_VERSION}`, {
     timeoutMs: 8000,
     retryDelaysMs: [0, 500, 1500],
     parser: response => response.text(),
