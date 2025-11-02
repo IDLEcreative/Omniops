@@ -70,6 +70,7 @@ export const MessageContent = React.memo(({ content, className = '' }: MessageCo
         <a
           key={`link-${link.start}`}
           href={link.url.startsWith('http') ? link.url : `https://${link.url}`}
+          target="_blank"
           rel="noopener noreferrer"
           className="text-blue-400 underline hover:text-blue-300 break-words"
         >
@@ -108,6 +109,7 @@ export const MessageContent = React.memo(({ content, className = '' }: MessageCo
           <a
             key={`url-${index}`}
             href={url}
+            target="_blank"
             rel="noopener noreferrer"
             className="text-blue-400 underline hover:text-blue-300 break-words"
           >
