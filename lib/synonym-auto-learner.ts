@@ -4,6 +4,7 @@
  */
 
 import { createServiceRoleClientSync } from '@/lib/supabase/server';
+import { createClient } from '@supabase/supabase-js';
 import { synonymExpander } from './synonym-expander-dynamic';
 
 interface ExtractedTerm {

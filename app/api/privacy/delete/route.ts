@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { createServiceRoleClient } from '@/lib/supabase/server';
 import { withCSRF } from '@/lib/middleware/csrf';
+import { createClient } from '@supabase/supabase-js';
 
 /**
  * POST /api/privacy/delete

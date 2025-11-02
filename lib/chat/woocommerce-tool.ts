@@ -102,11 +102,16 @@ export async function executeWooCommerceOperation(
   try {
     // Get customer config ID for analytics
     const supabase = await createServiceRoleClient();
-    const { data: config } = await supabase
-      ?.from('customer_configs')
-      .select('id')
-      .eq('domain', domain)
-      .single();
+    let config = null;
+
+    if (supabase) {
+      const { data } = await supabase
+        .from('customer_configs')
+        .select('id')
+        .eq('domain', domain)
+        .single();
+      config = data;
+    }
 
     const wc = await getDynamicWooCommerceClient(domain);
 
@@ -274,11 +279,16 @@ export async function executeWooCommerceOperation(
 
     // Track error metrics
     const supabase = await createServiceRoleClient();
-    const { data: config } = await supabase
-      ?.from('customer_configs')
-      .select('id')
-      .eq('domain', domain)
-      .single();
+    let config = null;
+
+    if (supabase) {
+      const { data } = await supabase
+        .from('customer_configs')
+        .select('id')
+        .eq('domain', domain)
+        .single();
+      config = data;
+    }
 
     await trackOperationMetrics({
       operation,

@@ -37,12 +37,19 @@ export async function GET(request: Request) {
 
     const supabase = await createClient();
 
+    if (!supabase) {
+      return NextResponse.json(
+        { error: 'Database connection failed' },
+        { status: 500 }
+      );
+    }
+
     // Build base query
     let query = supabase
       .from('woocommerce_usage_metrics')
       .select('*')
       .order('created_at', { ascending: false })
-      .limit(params.limit);
+      .limit(params.limit || 100);
 
     // Apply filters
     if (params.domain) {

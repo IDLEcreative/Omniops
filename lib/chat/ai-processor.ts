@@ -153,9 +153,7 @@ export async function processAIConversation(params: AIProcessorParams): Promise<
         errorParam: (error as any)?.param,
         iteration,
         messageCount: conversationMessages.length,
-        hasTools: !!SEARCH_TOOLS,
-        model: (iterationConfig as any)?.model,
-        maxTokens: (iterationConfig as any)?.max_completion_tokens || (iterationConfig as any)?.max_tokens
+        hasTools: !!SEARCH_TOOLS
       });
       finalResponse = 'I found some information but encountered an error processing it. Please try again.';
       break;

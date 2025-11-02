@@ -11,9 +11,10 @@ const ChatWidget = dynamic(() => import('@/components/ChatWidget'), { ssr: false
 
 interface LivePreviewProps {
   config: SimplifiedWidgetConfig;
+  customerDomain: string | null;
 }
 
-export function LivePreview({ config }: LivePreviewProps) {
+export function LivePreview({ config, customerDomain }: LivePreviewProps) {
   // Convert SimplifiedWidgetConfig to ChatWidgetConfig format
   const widgetConfig = useMemo(() => ({
     theme_settings: {
@@ -93,7 +94,10 @@ export function LivePreview({ config }: LivePreviewProps) {
             <div className="absolute inset-0">
               <ChatWidget
                 demoId="preview"
-                demoConfig={widgetConfig}
+                demoConfig={{
+                  ...widgetConfig,
+                  domain: customerDomain, // Pass the customer's actual domain
+                }}
                 initialOpen={config.essentials.autoOpen}
                 forceClose={false}
                 privacySettings={{

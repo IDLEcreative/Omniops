@@ -38,8 +38,11 @@ export function useWidgetConfig({ toast }: UseWidgetConfigProps) {
       const response = await fetch('/api/customer/config');
       const data = await response.json();
 
-      if (data.success && data.configs) {
-        setAvailableConfigs(data.configs);
+      console.log('[useWidgetConfig] API response:', data);
+
+      if (data.success && data.data) {
+        console.log('[useWidgetConfig] Loaded configs:', data.data);
+        setAvailableConfigs(data.data);
 
         // Check if customerConfigId is in URL query params
         const params = new URLSearchParams(window.location.search);
@@ -47,9 +50,12 @@ export function useWidgetConfig({ toast }: UseWidgetConfigProps) {
 
         if (ccIdFromUrl) {
           setCustomerConfigId(ccIdFromUrl);
-        } else if (data.configs.length === 1) {
-          setCustomerConfigId(data.configs[0].id);
+        } else if (data.data.length === 1) {
+          console.log('[useWidgetConfig] Auto-selecting single config:', data.data[0]);
+          setCustomerConfigId(data.data[0].id);
         }
+      } else {
+        console.warn('[useWidgetConfig] No configs found or API error:', data);
       }
     } catch (error) {
       console.error('Error fetching customer configs:', error);
@@ -216,6 +222,10 @@ export function useWidgetConfig({ toast }: UseWidgetConfigProps) {
     }
   };
 
+  // Get the selected customer's domain
+  const selectedConfig = availableConfigs.find(c => c.id === customerConfigId);
+  const customerDomain = selectedConfig?.domain || null;
+
   return {
     config,
     customerConfigId,
@@ -224,6 +234,7 @@ export function useWidgetConfig({ toast }: UseWidgetConfigProps) {
     isLoadingConfigs,
     isSaving,
     isDirty,
+    customerDomain, // Export the domain
     updateConfig,
     resetConfig,
     saveConfiguration,

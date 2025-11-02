@@ -98,17 +98,28 @@ export default function ChatWidget({
     }
 
     try {
-      const urlParams = new URLSearchParams(window.location.search);
-      let domain = urlParams.get('domain') || window.location.hostname;
+      // First check if domain is provided via demoConfig (for dashboard preview)
+      let domain = (demoConfig as any)?.domain;
 
-      const isDemoEnvironment =
-        domain === 'localhost' ||
-        domain === '127.0.0.1';
+      console.log('[ChatWidget] Domain from demoConfig:', domain);
+      console.log('[ChatWidget] Full demoConfig:', demoConfig);
 
-      if (isDemoEnvironment) {
-        const DEMO_DOMAIN = process.env.NEXT_PUBLIC_DEMO_DOMAIN || 'demo.example.com';
-        domain = DEMO_DOMAIN;
+      // If not provided, use URL params or hostname
+      if (!domain) {
+        const urlParams = new URLSearchParams(window.location.search);
+        domain = urlParams.get('domain') || window.location.hostname;
+
+        const isDemoEnvironment =
+          domain === 'localhost' ||
+          domain === '127.0.0.1';
+
+        if (isDemoEnvironment) {
+          const DEMO_DOMAIN = process.env.NEXT_PUBLIC_DEMO_DOMAIN || 'demo.example.com';
+          domain = DEMO_DOMAIN;
+        }
       }
+
+      console.log('[ChatWidget] Final domain being used:', domain);
 
       const chatConfig = {
         features: {

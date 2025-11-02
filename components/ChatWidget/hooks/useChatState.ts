@@ -12,6 +12,7 @@ export interface PrivacySettings {
 export interface ChatWidgetConfig {
   headerTitle?: string;
   serverUrl?: string; // Omniops server URL for API calls
+  domain?: string; // Customer domain for configuration lookup
   features?: {
     websiteScraping?: { enabled: boolean };
     woocommerce?: { enabled: boolean };
@@ -141,6 +142,14 @@ export function useChatState({
 
     // Check if WooCommerce is enabled for this domain
     const checkWooCommerceConfig = async () => {
+      // CRITICAL FIX: If config already has domain from parent (embed.js), use it directly
+      // This prevents overwriting correct domain with empty string from API
+      if (demoConfig?.domain && demoConfig.domain.trim() !== '') {
+        setStoreDomain(demoConfig.domain);
+        setWoocommerceEnabled(demoConfig.features?.woocommerce?.enabled || false);
+        return; // Don't fetch from API - use parent config
+      }
+
       const urlParams = new URLSearchParams(window.location.search);
       let domain = urlParams.get('domain') || window.location.hostname;
 
@@ -160,7 +169,11 @@ export function useChatState({
           const data = await response.json();
           if (data.success && data.config) {
             setWoocommerceEnabled(data.config.woocommerce_enabled || false);
-            setStoreDomain(data.config.domain || domain);
+            // Only set storeDomain if API returns non-empty domain
+            const apiDomain = data.config.domain && data.config.domain.trim() !== ''
+              ? data.config.domain
+              : domain;
+            setStoreDomain(apiDomain);
           }
         }
       } catch (error) {

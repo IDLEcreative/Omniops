@@ -4,6 +4,7 @@
  */
 
 import { createServiceRoleClientSync } from '@/lib/supabase/server';
+import { createClient } from '@supabase/supabase-js';
 import type { EnhancedSearchOptions, EnhancedSearchResult } from './enhanced-embeddings-types';
 import { MIN_CHUNKS, MAX_CHUNKS } from './enhanced-embeddings-types';
 import { processChunks } from './enhanced-embeddings-strategies';

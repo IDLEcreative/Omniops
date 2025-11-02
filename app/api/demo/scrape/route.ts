@@ -4,6 +4,7 @@ import { quickScrape, generateDemoEmbeddings } from '@/lib/demo-scraper';
 import { getRedisClient } from '@/lib/redis';
 import { randomBytes } from 'crypto';
 import { createServiceRoleClient } from '@/lib/supabase/server';
+import { createClient } from '@supabase/supabase-js';
 
 const scrapeSchema = z.object({
   url: z.string().url()

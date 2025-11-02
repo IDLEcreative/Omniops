@@ -72,15 +72,13 @@ export function getModelConfig(
   const maxTokens = widgetConfig?.ai_settings?.maxTokens ||
     getTokensForResponseLength(widgetConfig?.ai_settings?.responseLength);
 
-  // Get temperature from widget config (default 0.7 for balanced creativity/accuracy)
-  const temperature = widgetConfig?.ai_settings?.temperature !== undefined
-    ? widgetConfig.ai_settings.temperature
-    : 0.7;
+  // NOTE: GPT-5 mini does not support temperature parameter (only default value 1)
+  // Temperature setting is ignored for this model
 
   return {
     model: 'gpt-5-mini',
     reasoning_effort: 'low',
-    max_completion_tokens: maxTokens,
-    temperature
+    max_completion_tokens: maxTokens
+    // temperature not supported by gpt-5-mini
   };
 }

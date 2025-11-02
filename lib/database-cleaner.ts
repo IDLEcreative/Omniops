@@ -1,4 +1,5 @@
 import { createServiceRoleClientSync } from '@/lib/supabase/server';
+import { createClient } from '@supabase/supabase-js';
 
 interface CleanupOptions {
   domain?: string;

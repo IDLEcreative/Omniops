@@ -9,15 +9,15 @@
     console.log('1. Test page loaded');
     
     window.ChatWidgetConfig = {
-      serverUrl: "http://localhost:3002",
-      storeDomain: "test.example.com"
+      serverUrl: "http://localhost:3000",
+      domain: "test.example.com"  // Changed from storeDomain to domain
     };
     window.ChatWidgetDebug = true;
     
     console.log('2. Config set');
   </script>
   
-  <script src="http://localhost:3002/embed.js" 
+  <script src="http://localhost:3000/embed.js" 
           onload="console.log('3. embed.js loaded successfully');document.getElementById('status').textContent='✅ Loaded';" 
           onerror="console.error('3. embed.js FAILED to load');document.getElementById('status').textContent='❌ Failed';">
   </script>

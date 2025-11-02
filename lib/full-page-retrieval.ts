@@ -175,10 +175,14 @@ export async function searchAndReturnFullPage(
       success: true,
       results: fullPageChunks,
       source: 'full_page',
-      pageInfo: {
+      pageInfo: fullPageChunks.length > 0 ? {
         url: fullPageChunks[0].url,
         title: fullPageChunks[0].title,
         totalChunks: fullPageChunks.length
+      } : {
+        url: '',
+        title: '',
+        totalChunks: 0
       }
     };
 

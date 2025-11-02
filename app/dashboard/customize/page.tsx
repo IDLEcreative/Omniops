@@ -31,6 +31,7 @@ export default function CustomizeV2Page() {
     isLoadingConfigs,
     isSaving,
     isDirty,
+    customerDomain,
     updateConfig,
     resetConfig,
     saveConfiguration,
@@ -152,7 +153,7 @@ export default function CustomizeV2Page() {
 
         {/* Live Preview */}
         <div className="lg:col-span-1">
-          <LivePreview config={config} />
+          <LivePreview config={config} customerDomain={customerDomain} />
         </div>
       </div>
     </div>

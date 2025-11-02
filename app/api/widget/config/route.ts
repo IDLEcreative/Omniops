@@ -32,8 +32,16 @@ export async function OPTIONS() {
 
 export async function GET(request: NextRequest) {
   try {
-    // Domain alias mapping for staging/test environments
-    // Maps staging domains to their production equivalents
+    // TEMPORARY WORKAROUND - Domain alias mapping for staging/test environments
+    //
+    // ⚠️ This is a WORKAROUND and should be REMOVED after proper solution is implemented.
+    //
+    // PROPER SOLUTION: Add staging domains to customer_configs table in database
+    // See: scripts/database/add-staging-domain.sql
+    // See: docs/02-GUIDES/GUIDE_MULTI_DOMAIN_SUPPORT.md
+    // See: docs/04-ANALYSIS/ANALYSIS_MULTI_DOMAIN_SOLUTION.md
+    //
+    // Once staging domains are in database, this mapping is unnecessary and should be deleted.
     const DOMAIN_ALIASES: Record<string, string> = {
       'epartstaging.wpengine.com': 'thompsonseparts.co.uk',
       'www.epartstaging.wpengine.com': 'thompsonseparts.co.uk',
@@ -59,9 +67,10 @@ export async function GET(request: NextRequest) {
       }
     }
 
-    // Apply domain alias if exists
+    // Apply domain alias if exists (TEMPORARY - see comment above)
     if (domain && DOMAIN_ALIASES[domain]) {
-      console.log(`[Widget Config API] Domain alias: ${domain} → ${DOMAIN_ALIASES[domain]}`);
+      console.log(`[Widget Config API] ⚠️ Using domain alias workaround: ${domain} → ${DOMAIN_ALIASES[domain]}`);
+      console.log(`[Widget Config API] ℹ️ Proper fix: Add ${domain} to customer_configs table`);
       domain = DOMAIN_ALIASES[domain];
     }
 

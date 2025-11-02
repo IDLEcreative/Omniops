@@ -275,6 +275,8 @@ export async function reindexEmbeddings(
   options: Partial<ReindexOptions> = {}
 ): Promise<ReindexResult> {
   const openaiKey = process.env.OPENAI_API_KEY!;
+  const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL!;
+  const supabaseKey = process.env.SUPABASE_SERVICE_ROLE_KEY!;
 
   const reindexer = new EmbeddingReindexer(supabaseUrl, supabaseKey, openaiKey);
 

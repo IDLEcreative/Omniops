@@ -4,6 +4,7 @@
  */
 
 import { createServiceRoleClientSync } from '@/lib/supabase/server';
+import { createClient } from '@supabase/supabase-js';
 import { searchSimilarContentEnhanced } from './enhanced-embeddings';
 import { smartSearch } from './search-wrapper';
 import { ContextChunk, BusinessClassification } from './chat-context-enhancer-types';

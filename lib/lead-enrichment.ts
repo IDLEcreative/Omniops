@@ -166,6 +166,11 @@ export async function enrichPendingLeads() {
   try {
     console.log('[Lead Enrichment] Starting batch enrichment...');
 
+    if (!supabase) {
+      console.error('[Lead Enrichment] Database client not available');
+      return;
+    }
+
     // Get pending leads (limit to 10 at a time to avoid rate limits)
     const { data: pendingLeads, error } = await supabase
       .from('demo_attempts')
@@ -189,6 +194,8 @@ export async function enrichPendingLeads() {
     // Enrich each lead
     for (const lead of pendingLeads) {
       const result = await enrichLead(lead.domain, lead.url);
+
+      if (!supabase) continue;
 
       // Update the record
       await supabase

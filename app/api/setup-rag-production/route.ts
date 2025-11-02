@@ -3,7 +3,8 @@ import { createServiceRoleClient } from '@/lib/supabase/server';
 
 export async function POST(request: Request) {
   // Use YOUR production database credentials
-      // This should be birugqyuqhiahxvxeyqg.supabase.co
+  const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL!;
+  // This should be birugqyuqhiahxvxeyqg.supabase.co
   console.log('Connecting to:', supabaseUrl);
 
   const supabase = await createServiceRoleClient();

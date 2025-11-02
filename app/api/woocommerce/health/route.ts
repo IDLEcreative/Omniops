@@ -23,6 +23,13 @@ export async function GET(request: Request) {
 
     const supabase = await createClient();
 
+    if (!supabase) {
+      return NextResponse.json(
+        { error: 'Database connection failed' },
+        { status: 500 }
+      );
+    }
+
     // Get customer configs with WooCommerce enabled
     let query = supabase
       .from('customer_configs')
