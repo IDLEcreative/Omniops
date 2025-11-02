@@ -66,7 +66,7 @@ export interface ErrorContext {
 export class ChatErrorHandler {
   constructor(private context: ErrorContext = {}) {}
 
-  async handleError(error: unknown): Promise<NextResponse> {
+  async handleError(error: unknown, headers?: Record<string, string>): Promise<NextResponse> {
     console.error('[Intelligent Chat API] Error:', error);
 
     // DEBUG: Enhanced error logging for tests
@@ -87,7 +87,7 @@ export class ChatErrorHandler {
     if (error && typeof error === 'object' && 'issues' in error) {
       return NextResponse.json(
         { error: 'Invalid request format', details: (error as any).issues },
-        { status: 400 }
+        { status: 400, headers }
       );
     }
 
@@ -126,9 +126,10 @@ export class ChatErrorHandler {
         },
         {
           status: responseStatus,
-          headers: openAIError.retryAfter
-            ? { 'Retry-After': openAIError.retryAfter }
-            : undefined
+          headers: {
+            ...headers,
+            ...(openAIError.retryAfter ? { 'Retry-After': openAIError.retryAfter } : {})
+          }
         }
       );
     }
@@ -147,7 +148,7 @@ export class ChatErrorHandler {
           }
         })
       },
-      { status: 500 }
+      { status: 500, headers }
     );
   }
 }

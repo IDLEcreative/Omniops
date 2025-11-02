@@ -34,11 +34,37 @@ import { ChatErrorHandler } from '@/lib/chat/errors/chat-error-handler';
 
 // Dependencies interface and defaults imported from route-types module
 
+// CORS headers for cross-origin requests (widget embedding)
+function getCorsHeaders(origin: string | null) {
+  const headers: Record<string, string> = {
+    'Access-Control-Allow-Methods': 'POST, OPTIONS',
+    'Access-Control-Allow-Headers': 'Content-Type, Authorization',
+  };
+
+  // Allow all origins for widget embedding, or restrict to specific domains
+  headers['Access-Control-Allow-Origin'] = origin || '*';
+  headers['Access-Control-Allow-Credentials'] = 'true';
+
+  return headers;
+}
+
+// Handle preflight OPTIONS requests
+export async function OPTIONS(request: NextRequest) {
+  const origin = request.headers.get('origin');
+  return new NextResponse(null, {
+    status: 204,
+    headers: getCorsHeaders(origin),
+  });
+}
 
 export async function POST(
   request: NextRequest,
   context: { params: Promise<Record<string, never>> } & { deps?: Partial<RouteDependencies> }
 ) {
+  // Get origin for CORS
+  const origin = request.headers.get('origin');
+  const corsHeaders = getCorsHeaders(origin);
+
   // Extract deps from context (defaults to defaultDependencies if not provided)
   const deps = context.deps || defaultDependencies;
 
@@ -63,7 +89,7 @@ export async function POST(
           error: 'Service temporarily unavailable',
           message: 'The chat service is currently undergoing maintenance. Please try again later.'
         },
-        { status: 503 }
+        { status: 503, headers: corsHeaders }
       );
     }
 
@@ -105,9 +131,10 @@ export async function POST(
       const retryAfterSeconds = Math.max(1, Math.ceil((resetTime - Date.now()) / 1000));
       return NextResponse.json(
         { error: 'Rate limit exceeded. Please try again later.' },
-        { 
+        {
           status: 429,
           headers: {
+            ...corsHeaders,
             'X-RateLimit-Limit': '100',
             'X-RateLimit-Remaining': '0',
             'X-RateLimit-Reset': resetTime.toString(),
@@ -123,7 +150,7 @@ export async function POST(
     if (!adminSupabase) {
       return NextResponse.json(
         { error: 'Database connection unavailable' },
-        { status: 503 }
+        { status: 503, headers: corsHeaders }
       );
     }
 
@@ -259,10 +286,10 @@ export async function POST(
         totalSearches: searchLog.length,
         searchLog: searchLog
       }
-    });
+    }, { headers: corsHeaders });
 
   } catch (error) {
     const errorHandler = new ChatErrorHandler({ telemetry });
-    return await errorHandler.handleError(error);
+    return await errorHandler.handleError(error, corsHeaders);
   }
 }
