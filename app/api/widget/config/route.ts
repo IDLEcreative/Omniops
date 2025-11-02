@@ -32,10 +32,37 @@ export async function OPTIONS() {
 
 export async function GET(request: NextRequest) {
   try {
+    // Domain alias mapping for staging/test environments
+    // Maps staging domains to their production equivalents
+    const DOMAIN_ALIASES: Record<string, string> = {
+      'epartstaging.wpengine.com': 'eparts.co.uk',
+      // Add more staging → production mappings here as needed
+    };
+
     // Parse and validate parameters (supports both domain and app_id)
     const { searchParams } = new URL(request.url);
-    const domain = searchParams.get('domain') || '';
+    let domain = searchParams.get('domain') || '';
     const appId = searchParams.get('id') || '';
+
+    // If domain is empty, try to extract from Referer header (for iframes)
+    if (!domain || domain.trim() === '') {
+      const referer = request.headers.get('referer') || request.headers.get('referrer');
+      if (referer) {
+        try {
+          const refererUrl = new URL(referer);
+          domain = refererUrl.hostname;
+          console.log(`[Widget Config API] Domain extracted from referer: ${domain}`);
+        } catch (e) {
+          console.log('[Widget Config API] Unable to parse referer:', referer);
+        }
+      }
+    }
+
+    // Apply domain alias if exists
+    if (domain && DOMAIN_ALIASES[domain]) {
+      console.log(`[Widget Config API] Domain alias: ${domain} → ${DOMAIN_ALIASES[domain]}`);
+      domain = DOMAIN_ALIASES[domain];
+    }
 
     const validatedQuery = QuerySchema.parse({ domain, id: appId });
 
