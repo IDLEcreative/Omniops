@@ -20,7 +20,7 @@ export function MessageList({
   return (
     <div
       ref={messagesContainerRef}
-      className="flex-1 min-h-0 px-2 sm:px-3 py-3 bg-transparent overflow-y-auto overflow-x-hidden overscroll-contain"
+      className="flex-1 min-h-0 px-2 sm:px-3 py-3 overflow-y-auto overflow-x-hidden overscroll-contain"
       role="log"
       aria-live="polite"
       aria-label="Chat messages"

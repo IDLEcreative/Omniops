@@ -46,7 +46,7 @@ export function InputArea({
   }, [input, textareaRef]);
 
   return (
-    <div className={`px-3 sm:px-4 py-3 ${highContrast ? 'bg-transparent border-t-2 border-white' : 'bg-transparent border-t border-white/10'}`}>
+    <div className={`px-3 sm:px-4 py-3 ${highContrast ? 'border-t-2 border-white' : 'border-t border-white/10'}`}>
       <div className="flex gap-2 items-end">
         <label htmlFor="chat-input" className="sr-only">Type your message</label>
         <textarea
