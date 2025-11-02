@@ -29,40 +29,28 @@ export async function performKeywordSearch(
   );
 
   const keywordTimer = new QueryTimer('Keyword Search', 3000);
-  const keywordResults: any[] = [];
 
   try {
-    // Search in titles
-    const { data: titleResults } = await supabase
-      .from('scraped_pages')
-      .select('url, title, content')
-      .eq('domain_id', domainId)
-      .ilike('title', `%${searchKeyword}%`)
-      .limit(Math.max(limit * 2, 200));
+    // Use the search_pages_by_keyword function that handles domain mappings
+    const { data: keywordResults, error } = await supabase
+      .rpc('search_pages_by_keyword', {
+        p_domain_id: domainId,
+        p_keyword: searchKeyword,
+        p_limit: Math.max(limit * 2, 200)
+      });
 
-    if (titleResults) keywordResults.push(...titleResults);
-
-    // Search in URLs
-    const { data: urlResults } = await supabase
-      .from('scraped_pages')
-      .select('url, title, content')
-      .eq('domain_id', domainId)
-      .ilike('url', `%${searchKeyword!.toLowerCase()}%`)
-      .limit(Math.max(limit * 2, 200));
-
-    if (urlResults) {
-      const existingUrls = new Set(keywordResults.map((r) => r.url));
-      const newResults = urlResults.filter((r) => !existingUrls.has(r.url));
-      keywordResults.push(...newResults);
+    if (error) {
+      console.log(`[HYBRID] Keyword search error: ${error.message}`);
+      return null;
     }
 
     keywordTimer.end();
-    console.log(`[HYBRID] Keyword search found ${keywordResults.length} results`);
+    console.log(`[HYBRID] Keyword search found ${keywordResults?.length || 0} results`);
 
     // Check if we have enough good results
-    if (keywordResults.length >= MIN_KEYWORD_RESULTS) {
+    if (keywordResults && keywordResults.length >= MIN_KEYWORD_RESULTS) {
       // Sort results
-      keywordResults.sort((a, b) => {
+      keywordResults.sort((a: any, b: any) => {
         const aIsProduct = a.url?.includes('/product/');
         const bIsProduct = b.url?.includes('/product/');
         if (aIsProduct && !bIsProduct) return -1;
@@ -85,7 +73,7 @@ export async function performKeywordSearch(
       }));
     }
 
-    console.log(`[HYBRID] Only ${keywordResults.length} keyword results, falling back to vector search`);
+    console.log(`[HYBRID] Only ${keywordResults?.length || 0} keyword results, falling back to vector search`);
     return null;
   } catch (error) {
     console.log(`[HYBRID] Keyword search error, falling back to vector: ${error}`);
