@@ -35,7 +35,8 @@ export async function GET(request: NextRequest) {
     // Domain alias mapping for staging/test environments
     // Maps staging domains to their production equivalents
     const DOMAIN_ALIASES: Record<string, string> = {
-      'epartstaging.wpengine.com': 'eparts.co.uk',
+      'epartstaging.wpengine.com': 'thompsonseparts.co.uk',
+      'www.epartstaging.wpengine.com': 'thompsonseparts.co.uk',
       // Add more staging → production mappings here as needed
     };
 
