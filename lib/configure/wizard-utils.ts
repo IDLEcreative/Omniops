@@ -265,10 +265,10 @@ export function getInitialConfig(): WidgetConfig {
   return {
     serverUrl: typeof window !== 'undefined' ? window.location.origin : '',
     appearance: {
-      theme: 'light',
-      primaryColor: '#4F46E5',
-      backgroundColor: '#FFFFFF',
-      textColor: '#111827',
+      theme: 'dark',
+      primaryColor: '#818CF8',
+      backgroundColor: '#1F2937',
+      textColor: '#F9FAFB',
       position: 'bottom-right',
       width: 400,
       height: 600,

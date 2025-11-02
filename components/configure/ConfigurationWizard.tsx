@@ -17,7 +17,7 @@ interface ConfigurationWizardProps {
 }
 
 export function ConfigurationWizard({ isOnboarding }: ConfigurationWizardProps) {
-  const [selectedTheme, setSelectedTheme] = useState<keyof typeof THEME_PRESETS>('light');
+  const [selectedTheme, setSelectedTheme] = useState<keyof typeof THEME_PRESETS>('dark');
   const [showAdvancedCSS, setShowAdvancedCSS] = useState(false);
   const [customCSS, setCustomCSS] = useState('');
   const [showPreview, setShowPreview] = useState(true);
