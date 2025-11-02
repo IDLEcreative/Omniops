@@ -1,5 +1,6 @@
 /**
  * Keyword-based search operations
+ * Updated: 2025-11-02 - Uses search_pages_by_keyword RPC to support domain mappings
  */
 
 import type { SupabaseClient } from '@supabase/supabase-js';
