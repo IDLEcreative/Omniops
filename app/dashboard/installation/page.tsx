@@ -25,10 +25,16 @@ export default function InstallationPage() {
       try {
         setIsLoading(true);
 
-        // Set server URL from environment variable (production domain)
-        // Falls back to current origin if not set
+        // Set server URL for embed code - always use production URL
+        // Never show localhost in embed code, even in development
         const url = process.env.NEXT_PUBLIC_APP_URL || window.location.origin;
-        setServerUrl(url);
+
+        // If URL contains localhost, use production domain instead
+        const productionUrl = url.includes('localhost')
+          ? 'https://omniops.co.uk'
+          : url;
+
+        setServerUrl(productionUrl);
 
         // Automatically fetch customer config for current user's organization
         const response = await fetch('/api/customer/config/current', {
@@ -103,6 +109,13 @@ export default function InstallationPage() {
           <p className="text-muted-foreground mt-1 text-sm sm:text-base">
             Get your embed code and add the widget to your website
           </p>
+          {typeof window !== 'undefined' && window.location.origin.includes('localhost') && (
+            <div className="mt-3 p-3 bg-amber-50 dark:bg-amber-950 border border-amber-200 dark:border-amber-800 rounded-md">
+              <p className="text-sm text-amber-800 dark:text-amber-200">
+                <strong>Development Mode:</strong> You&apos;re viewing this page locally, but the embed code below shows your production URL ({serverUrl}). This is correct - always use production URLs in your embed code.
+              </p>
+            </div>
+          )}
         </div>
       </div>
 

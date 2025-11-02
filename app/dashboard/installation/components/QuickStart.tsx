@@ -44,7 +44,7 @@ export function QuickStart({ serverUrl, domain, isLoading }: QuickStartProps) {
 
   // Create default config for embed code generation
   const defaultConfig: WidgetConfig = {
-    serverUrl: serverUrl || "https://your-domain.com",
+    serverUrl: serverUrl || "https://omniops.co.uk",
     appearance: {
       theme: "light",
       primaryColor: "#4F46E5",

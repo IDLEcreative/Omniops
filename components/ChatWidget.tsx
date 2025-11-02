@@ -120,6 +120,8 @@ export default function ChatWidget({
       }
 
       console.log('[ChatWidget] Final domain being used:', domain);
+      console.log('[ChatWidget] storeDomain value:', storeDomain);
+      console.log('[ChatWidget] About to send to API - domain:', storeDomain || domain);
 
       const chatConfig = {
         features: {

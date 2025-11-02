@@ -3,6 +3,11 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Badge } from '@/components/ui/badge';
 
 export default function InstallPage() {
+  // Always use production URL, never localhost
+  const serverUrl = process.env.NEXT_PUBLIC_APP_URL?.includes('localhost')
+    ? 'https://omniops.co.uk'
+    : (process.env.NEXT_PUBLIC_APP_URL || 'https://omniops.co.uk');
+
   const embedCode = `<!-- Chat Widget -->
 <script>
 window.ChatWidgetConfig = {
@@ -14,7 +19,7 @@ window.ChatWidgetConfig = {
   }
 };
 </script>
-<script src="https://your-domain.com/embed.js" async></script>
+<script src="${serverUrl}/embed.js" async></script>
 <!-- End Chat Widget -->`;
 
   const wordpressPlugin = `<?php
@@ -33,7 +38,7 @@ function add_chat_widget() {
         }
     };
     </script>
-    <script src="https://your-domain.com/embed.js" async></script>
+    <script src="${serverUrl}/embed.js" async></script>
     <?php
 }
 add_action('wp_footer', 'add_chat_widget');`;
@@ -232,9 +237,9 @@ export default function Layout() {
       <Script id="chat-config" strategy="beforeInteractive">
         {\`window.ChatWidgetConfig = { /* config */ };\`}
       </Script>
-      <Script 
-        src="https://your-domain.com/embed.js" 
-        strategy="afterInteractive" 
+      <Script
+        src="${serverUrl}/embed.js"
+        strategy="afterInteractive"
       />
     </>
   );

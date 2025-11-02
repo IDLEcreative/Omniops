@@ -131,6 +131,9 @@ export function useChatState({
 
   // Generate session ID on mount and check WooCommerce config
   useEffect(() => {
+    console.log('[useChatState] useEffect running, demoConfig:', demoConfig);
+    console.log('[useChatState] demoConfig.domain:', demoConfig?.domain);
+
     const storedSessionId = localStorage.getItem('chat_session_id');
     if (storedSessionId) {
       setSessionId(storedSessionId);
@@ -145,10 +148,13 @@ export function useChatState({
       // CRITICAL FIX: If config already has domain from parent (embed.js), use it directly
       // This prevents overwriting correct domain with empty string from API
       if (demoConfig?.domain && demoConfig.domain.trim() !== '') {
+        console.log('[useChatState] Using domain from demoConfig:', demoConfig.domain);
         setStoreDomain(demoConfig.domain);
         setWoocommerceEnabled(demoConfig.features?.woocommerce?.enabled || false);
         return; // Don't fetch from API - use parent config
       }
+
+      console.log('[useChatState] No domain in demoConfig, falling back to URL detection');
 
       const urlParams = new URLSearchParams(window.location.search);
       let domain = urlParams.get('domain') || window.location.hostname;
