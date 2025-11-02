@@ -272,7 +272,9 @@ export default function ChatWidget({
       aria-modal="true"
     >
       <Header
-        headerTitle={demoConfig?.headerTitle}
+        headerTitle={demoConfig?.headerTitle || demoConfig?.appearance?.headerTitle}
+        headerSubtitle={demoConfig?.appearance?.headerSubtitle}
+        primaryColor={demoConfig?.appearance?.primaryColor || '#818CF8'}
         highContrast={highContrast}
         onToggleHighContrast={() => setHighContrast(!highContrast)}
         onClose={() => setIsOpen(false)}
