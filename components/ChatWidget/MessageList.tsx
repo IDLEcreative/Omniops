@@ -51,16 +51,12 @@ export function MessageList({
             aria-label={`${message.role === 'user' ? 'You said' : 'Support agent said'}: ${message.content}`}
           >
             <div
-              className={`px-4 py-2.5 break-words overflow-wrap-anywhere overflow-visible no-scrollbar ${
+              className={`px-3 py-2.5 break-words overflow-wrap-anywhere ${
                 fontSize === 'xlarge' ? 'text-lg' : fontSize === 'large' ? 'text-base' : 'text-sm'
               } ${
                 message.role === 'user'
-                  ? highContrast
-                    ? 'bg-white text-black font-medium rounded-2xl rounded-tr-md'
-                    : 'bg-gradient-to-br from-[#4a4a4a] to-[#3a3a3a] text-white rounded-2xl rounded-tr-md shadow-md'
-                  : highContrast
-                    ? 'bg-black text-white border-2 border-white rounded-2xl rounded-tl-md'
-                    : 'bg-[#1a1a1a] text-gray-200 rounded-2xl rounded-tl-md shadow-sm'
+                  ? 'bg-[#3f3f46] text-white rounded-lg'
+                  : 'bg-[#27272a] text-gray-200 rounded-lg'
               }`}
             >
               <MessageContent content={message.content} className="leading-relaxed break-words" />
@@ -73,18 +69,14 @@ export function MessageList({
       ))}
 
       {loading && (
-        <div className="mb-3 flex justify-start" role="status" aria-live="polite">
+        <div className="mb-3 flex justify-start animate-in fade-in duration-300" role="status" aria-live="polite">
           <div className="max-w-[80%] mr-auto">
             <span className="sr-only">Support agent is typing</span>
-            <div className={`px-4 py-2.5 inline-block ${
-              highContrast
-                ? 'bg-black text-white border-2 border-white rounded-2xl rounded-tl-md'
-                : 'bg-[#1a1a1a] text-gray-200 rounded-2xl rounded-tl-md shadow-sm'
-            }`}>
-              <div className="flex gap-1 items-center" aria-hidden="true">
-                <div className={`w-2 h-2 ${highContrast ? 'bg-white' : 'bg-gray-400'} rounded-full animate-typing-bounce`} />
-                <div className={`w-2 h-2 ${highContrast ? 'bg-white' : 'bg-gray-400'} rounded-full animate-typing-bounce [animation-delay:200ms]`} />
-                <div className={`w-2 h-2 ${highContrast ? 'bg-white' : 'bg-gray-400'} rounded-full animate-typing-bounce [animation-delay:400ms]`} />
+            <div className="px-3 py-2.5 inline-block bg-[#27272a] rounded-lg">
+              <div className="flex gap-1.5 items-center" aria-hidden="true">
+                <div className="w-2 h-2 bg-gray-400 rounded-full animate-bounce [animation-delay:0ms]" />
+                <div className="w-2 h-2 bg-gray-400 rounded-full animate-bounce [animation-delay:150ms]" />
+                <div className="w-2 h-2 bg-gray-400 rounded-full animate-bounce [animation-delay:300ms]" />
               </div>
             </div>
           </div>
