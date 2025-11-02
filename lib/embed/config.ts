@@ -7,7 +7,7 @@ import {
 } from './types';
 
 export const DEFAULT_CONFIG: WidgetConfig = {
-  serverUrl: '',
+  serverUrl: 'https://omniops.co.uk',
   appearance: {
     position: 'bottom-right',
     width: 400,
