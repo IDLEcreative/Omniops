@@ -58,11 +58,18 @@ export function Header({
         <button
           onClick={onToggleHighContrast}
           style={{
-            color: highContrast ? undefined : textColor,
-            minHeight: 'auto',
-            minWidth: 'auto',
+            all: 'unset',
+            cursor: 'pointer',
+            display: 'inline-flex',
+            alignItems: 'center',
+            justifyContent: 'center',
+            color: highContrast ? '#ffffff' : textColor,
+            opacity: 1,
+            transition: 'opacity 0.2s',
           }}
-          className={`p-1 hover:opacity-70 transition-opacity bg-transparent border-0 focus:outline-none ${highContrast ? 'text-white' : ''}`}
+          onMouseEnter={(e) => (e.currentTarget.style.opacity = '0.7')}
+          onMouseLeave={(e) => (e.currentTarget.style.opacity = '1')}
+          className={highContrast ? 'text-white' : ''}
           aria-label={`Toggle high contrast mode. Currently ${highContrast ? 'on' : 'off'}`}
           title="Toggle high contrast"
         >
@@ -71,11 +78,18 @@ export function Header({
         <button
           onClick={onClose}
           style={{
-            color: highContrast ? undefined : textColor,
-            minHeight: 'auto',
-            minWidth: 'auto',
+            all: 'unset',
+            cursor: 'pointer',
+            display: 'inline-flex',
+            alignItems: 'center',
+            justifyContent: 'center',
+            color: highContrast ? '#ffffff' : textColor,
+            opacity: 1,
+            transition: 'opacity 0.2s',
           }}
-          className={`p-1 hover:opacity-70 transition-opacity bg-transparent border-0 focus:outline-none ${highContrast ? 'text-white' : ''}`}
+          onMouseEnter={(e) => (e.currentTarget.style.opacity = '0.7')}
+          onMouseLeave={(e) => (e.currentTarget.style.opacity = '1')}
+          className={highContrast ? 'text-white' : ''}
           aria-label="Close chat widget"
         >
           <X className="h-5 w-5" aria-hidden="true" />
