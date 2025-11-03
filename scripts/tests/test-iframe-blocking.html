@@ -1,0 +1,174 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Test Iframe Blocking Fix</title>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      margin: 20px;
+      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+      min-height: 100vh;
+      color: white;
+    }
+
+    .test-container {
+      max-width: 800px;
+      margin: 0 auto;
+      padding: 20px;
+    }
+
+    h1 {
+      text-align: center;
+      margin-bottom: 30px;
+    }
+
+    .test-button {
+      display: inline-block;
+      padding: 12px 24px;
+      margin: 10px;
+      background: white;
+      color: #667eea;
+      border: none;
+      border-radius: 8px;
+      cursor: pointer;
+      font-size: 16px;
+      transition: transform 0.2s, box-shadow 0.2s;
+    }
+
+    .test-button:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 4px 12px rgba(0,0,0,0.2);
+    }
+
+    .test-button:active {
+      transform: translateY(0);
+    }
+
+    .status {
+      background: rgba(255, 255, 255, 0.1);
+      border: 1px solid rgba(255, 255, 255, 0.3);
+      border-radius: 8px;
+      padding: 15px;
+      margin-top: 20px;
+    }
+
+    .click-log {
+      background: rgba(0, 0, 0, 0.2);
+      padding: 10px;
+      border-radius: 4px;
+      max-height: 200px;
+      overflow-y: auto;
+      margin-top: 10px;
+      font-family: monospace;
+      font-size: 14px;
+    }
+
+    .test-area {
+      position: fixed;
+      bottom: 20px;
+      right: 20px;
+      background: rgba(255, 255, 255, 0.9);
+      color: #333;
+      padding: 10px;
+      border-radius: 8px;
+      max-width: 200px;
+    }
+
+    .test-area button {
+      width: 100%;
+      margin: 5px 0;
+      padding: 8px;
+      background: #667eea;
+      color: white;
+      border: none;
+      border-radius: 4px;
+      cursor: pointer;
+    }
+
+    .test-area button:hover {
+      background: #764ba2;
+    }
+  </style>
+</head>
+<body>
+  <div class="test-container">
+    <h1>🧪 Widget Iframe Blocking Test</h1>
+
+    <div class="status">
+      <h2>Test Instructions:</h2>
+      <p>1. The chat widget will load in the bottom-right corner (minimized as a button)</p>
+      <p>2. Try clicking the test buttons below - they should all work</p>
+      <p>3. Try clicking the buttons in the bottom-right test area (near the widget)</p>
+      <p>4. Open the widget and then close it</p>
+      <p>5. Verify all buttons still work after opening/closing the widget</p>
+    </div>
+
+    <div style="margin-top: 30px;">
+      <h3>Click Test Area:</h3>
+      <button class="test-button" onclick="logClick('Button 1')">Test Button 1</button>
+      <button class="test-button" onclick="logClick('Button 2')">Test Button 2</button>
+      <button class="test-button" onclick="logClick('Button 3')">Test Button 3</button>
+      <button class="test-button" onclick="logClick('Button 4')">Test Button 4</button>
+    </div>
+
+    <div style="margin-top: 20px;">
+      <h3>Click Log:</h3>
+      <div class="click-log" id="clickLog">
+        Clicks will appear here...
+      </div>
+    </div>
+
+    <!-- Test area near where the widget appears -->
+    <div class="test-area">
+      <h4>Test Near Widget:</h4>
+      <p style="font-size: 12px; margin: 5px 0;">These buttons are positioned near the widget button:</p>
+      <button onclick="logClick('Near Widget 1')">Click Me 1</button>
+      <button onclick="logClick('Near Widget 2')">Click Me 2</button>
+      <button onclick="logClick('Near Widget 3')">Click Me 3</button>
+    </div>
+  </div>
+
+  <script>
+    function logClick(buttonName) {
+      const log = document.getElementById('clickLog');
+      const timestamp = new Date().toLocaleTimeString();
+      const entry = document.createElement('div');
+      entry.textContent = `[${timestamp}] Clicked: ${buttonName}`;
+      log.insertBefore(entry, log.firstChild);
+
+      // Visual feedback
+      entry.style.background = 'rgba(102, 126, 234, 0.2)';
+      entry.style.padding = '2px 5px';
+      entry.style.marginBottom = '2px';
+      entry.style.borderRadius = '2px';
+      setTimeout(() => {
+        entry.style.background = 'transparent';
+      }, 500);
+    }
+
+    // Add click logging for the entire page
+    document.addEventListener('click', function(e) {
+      if (e.target.tagName === 'BUTTON' || e.target.classList.contains('test-button')) {
+        console.log('Click detected on:', e.target.textContent);
+      }
+    });
+
+    // Widget configuration
+    window.ChatWidgetConfig = {
+      serverUrl: 'http://localhost:3000',
+      debug: true,
+      appearance: {
+        startMinimized: true,
+        position: 'bottom-right',
+        width: 400,
+        height: 600
+      }
+    };
+  </script>
+
+  <!-- Load the widget -->
+  <script src="http://localhost:3000/embed.js" async></script>
+</body>
+</html>

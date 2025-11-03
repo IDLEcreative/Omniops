@@ -110,6 +110,10 @@ export function useChatState({
   const [woocommerceEnabled, setWoocommerceEnabled] = useState(false);
   const [storeDomain, setStoreDomain] = useState<string | null>(null);
 
+  // Message loading state
+  const [loadingMessages, setLoadingMessages] = useState(false);
+  const hasLoadedMessages = useRef(false);
+
   // Set mounted state
   useEffect(() => {
     setMounted(true);
@@ -184,6 +188,12 @@ export function useChatState({
       const newSessionId = `session_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`;
       localStorage.setItem('chat_session_id', newSessionId);
       setSessionId(newSessionId);
+    }
+
+    // Restore conversation ID from localStorage
+    const storedConversationId = localStorage.getItem('chat_conversation_id');
+    if (storedConversationId) {
+      setConversationId(storedConversationId);
     }
 
     // Check if WooCommerce is enabled for this domain
@@ -292,6 +302,56 @@ export function useChatState({
     };
   }, [onReady, demoConfig]);
 
+  // Fetch previous messages from API
+  const loadPreviousMessages = async (convId: string, sessId: string) => {
+    if (!convId || !sessId || hasLoadedMessages.current) {
+      return;
+    }
+
+    setLoadingMessages(true);
+    hasLoadedMessages.current = true;
+
+    try {
+      // Build API URL - use serverUrl from config if available
+      const apiUrl = demoConfig?.serverUrl
+        ? `${demoConfig.serverUrl}/api/conversations/${convId}/messages?session_id=${sessId}`
+        : `/api/conversations/${convId}/messages?session_id=${sessId}`;
+
+      const response = await fetch(apiUrl, {
+        method: 'GET',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+      });
+
+      if (response.ok) {
+        const data = await response.json();
+
+        if (data.success && data.messages && data.messages.length > 0) {
+          console.log('[useChatState] Loaded previous messages:', data.messages.length);
+          setMessages(data.messages);
+        } else {
+          // Conversation not found or expired - clear stored ID
+          console.log('[useChatState] No messages found, clearing conversation ID');
+          localStorage.removeItem('chat_conversation_id');
+          setConversationId('');
+        }
+      } else {
+        // API error - clear stored ID to start fresh
+        console.warn('[useChatState] Failed to load messages, clearing conversation ID');
+        localStorage.removeItem('chat_conversation_id');
+        setConversationId('');
+      }
+    } catch (error) {
+      console.error('[useChatState] Error loading messages:', error);
+      // On error, clear stored conversation to allow fresh start
+      localStorage.removeItem('chat_conversation_id');
+      setConversationId('');
+    } finally {
+      setLoadingMessages(false);
+    }
+  };
+
   // Clean up old messages
   const cleanupOldMessages = (retentionDays: number) => {
     const cutoffDate = new Date();
@@ -307,13 +367,46 @@ export function useChatState({
     }
   };
 
-  // Notify parent window when widget opens/closes
+  // Persist conversation ID to localStorage when it changes
+  useEffect(() => {
+    if (mounted && conversationId) {
+      try {
+        localStorage.setItem('chat_conversation_id', conversationId);
+        console.log('[useChatState] Persisted conversation ID:', conversationId);
+      } catch (error) {
+        console.warn('[useChatState] Could not save conversation ID to localStorage:', error);
+      }
+    }
+  }, [conversationId, mounted]);
+
+  // Load previous messages when widget opens with existing conversation
+  useEffect(() => {
+    if (isOpen && mounted && conversationId && sessionId && !hasLoadedMessages.current) {
+      console.log('[useChatState] Widget opened with existing conversation, loading messages');
+      loadPreviousMessages(conversationId, sessionId);
+    }
+  }, [isOpen, mounted, conversationId, sessionId]);
+
+  // Notify parent window when widget opens/closes and request resize
   useEffect(() => {
     if (mounted && window.parent !== window) {
-      window.parent.postMessage(
-        { type: isOpen ? 'widgetOpened' : 'widgetClosed' },
-        '*'
-      );
+      if (isOpen) {
+        // Widget is open - request full size and enable pointer events
+        window.parent.postMessage({ type: 'widgetOpened' }, '*');
+        window.parent.postMessage({
+          type: 'resize',
+          width: 400,  // Full width for open widget
+          height: 580, // Full height for open widget
+        }, '*');
+      } else {
+        // Widget is closed - request minimal size for button only
+        window.parent.postMessage({ type: 'widgetClosed' }, '*');
+        window.parent.postMessage({
+          type: 'resize',
+          width: 64,  // Just enough for the button (14 * 4 + padding)
+          height: 64, // Just enough for the button
+        }, '*');
+      }
     }
   }, [isOpen, mounted]);
 
@@ -339,6 +432,7 @@ export function useChatState({
     setInput,
     loading,
     setLoading,
+    loadingMessages,
     conversationId,
     setConversationId,
     sessionId,

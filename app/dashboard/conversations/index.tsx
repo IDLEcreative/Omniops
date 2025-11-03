@@ -9,7 +9,6 @@ import { Alert, AlertDescription } from "@/components/ui/alert";
 import { useRealtimeConversations } from "@/hooks/use-realtime-conversations";
 import { ConversationMetricsCards } from "@/components/dashboard/conversations/ConversationMetricsCards";
 import { ConversationsPageHeader } from "@/components/dashboard/conversations/ConversationsPageHeader";
-import { LanguageDistributionCard } from "@/components/dashboard/conversations/LanguageDistributionCard";
 import { ConversationMainContainer } from "@/components/dashboard/conversations/ConversationMainContainer";
 import { BulkActionBar } from "@/components/dashboard/conversations/BulkActionBar";
 import { ConversationAnalytics } from "@/components/dashboard/conversations/ConversationAnalytics";
@@ -145,7 +144,7 @@ export default function ConversationsPage() {
   useKeyboardShortcuts(shortcuts);
 
   return (
-    <div className="flex-1 space-y-4 p-6">
+    <div className="flex-1 space-y-3 p-4">
       <ConversationsPageHeader
         mainView={mainView}
         onMainViewChange={setMainView}
@@ -177,43 +176,40 @@ export default function ConversationsPage() {
       )}
 
       {mainView === 'conversations' && (
-        <ConversationMetricsCards data={data} loading={loading} totalStatus={totalStatus} />
+        <ConversationMetricsCards
+          data={data ? { ...data, languages: data.languages } : null}
+          loading={loading}
+          totalStatus={totalStatus}
+        />
       )}
 
       {mainView === 'analytics' ? (
         <ConversationAnalytics days={days} />
       ) : (
-        <div className="grid grid-cols-1 lg:grid-cols-12 gap-3">
-          <LanguageDistributionCard
-            languages={data?.languages ?? []}
-            loading={loading && !data}
-          />
-
-          <ConversationMainContainer
-            searchTerm={searchTerm}
-            onSearchChange={setSearchTerm}
-            searchInputRef={searchInputRef}
-            availableLanguages={availableLanguages}
-            advancedFilters={advancedFilters}
-            onFiltersChange={setAdvancedFilters}
-            activeFilterCount={activeFilterCount}
-            activeTab={activeTab}
-            onTabChange={setActiveTab}
-            filteredConversations={filteredConversations}
-            loading={loading && !data}
-            selectedConversationId={selectedConversationId}
-            onSelectConversation={setSelectedConversationId}
-            hasMore={hasMore}
-            loadingMore={loadingMore}
-            onLoadMore={loadMore}
-            selectedConversation={selectedConversation}
-            onActionComplete={refresh}
-            isSelectionMode={selectionMode}
-            selectedIds={selectedIds}
-            onToggleSelect={toggleSelectConversation}
-            onSelectAll={(selected) => selectAllConversations(filteredConversations, selected)}
-          />
-        </div>
+        <ConversationMainContainer
+          searchTerm={searchTerm}
+          onSearchChange={setSearchTerm}
+          searchInputRef={searchInputRef}
+          availableLanguages={availableLanguages}
+          advancedFilters={advancedFilters}
+          onFiltersChange={setAdvancedFilters}
+          activeFilterCount={activeFilterCount}
+          activeTab={activeTab}
+          onTabChange={setActiveTab}
+          filteredConversations={filteredConversations}
+          loading={loading && !data}
+          selectedConversationId={selectedConversationId}
+          onSelectConversation={setSelectedConversationId}
+          hasMore={hasMore}
+          loadingMore={loadingMore}
+          onLoadMore={loadMore}
+          selectedConversation={selectedConversation}
+          onActionComplete={refresh}
+          isSelectionMode={selectionMode}
+          selectedIds={selectedIds}
+          onToggleSelect={toggleSelectConversation}
+          onSelectAll={(selected) => selectAllConversations(filteredConversations, selected)}
+        />
       )}
 
       {mainView === 'conversations' && selectedIds.size > 0 && (

@@ -53,17 +53,19 @@ export function ConversationsPageHeader({
   displayShortcuts,
 }: ConversationsPageHeaderProps) {
   return (
-    <div className="space-y-4">
-      {/* Title Section */}
-      <div>
-        <h1 className="text-3xl font-bold tracking-tight">Conversations</h1>
-        <p className="text-sm text-muted-foreground mt-1.5">
-          Monitor live conversations, recent sentiment, and language coverage.
-        </p>
+    <div className="space-y-2">
+      {/* Combined Title and Controls Section */}
+      <div className="flex items-center justify-between">
+        <div>
+          <h1 className="text-2xl font-bold tracking-tight">Conversations</h1>
+          <p className="text-xs text-muted-foreground mt-0.5">
+            Monitor live conversations and customer engagement
+          </p>
+        </div>
       </div>
 
       {/* Controls Section - Better organized with visual grouping */}
-      <div className="flex flex-wrap items-center gap-3">
+      <div className="flex flex-wrap items-center gap-2">
         {/* View Toggle */}
         <Tabs value={mainView} onValueChange={(val) => onMainViewChange(val as MainView)}>
           <TabsList className="h-9">

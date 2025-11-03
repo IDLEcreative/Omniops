@@ -58,7 +58,7 @@ export function ConversationMainContainer({
   onSelectAll,
 }: ConversationMainContainerProps) {
   return (
-    <div className="lg:col-span-8 flex flex-col border rounded-lg">
+    <div className="flex flex-col border rounded-lg">
       <SearchAndFiltersBar
         searchTerm={searchTerm}
         onSearchChange={onSearchChange}
@@ -69,8 +69,8 @@ export function ConversationMainContainer({
         activeFilterCount={activeFilterCount}
       />
 
-      <div className="flex h-[650px]">
-        <div className="w-96 border-r">
+      <div className="flex h-[580px]">
+        <div className="w-[400px] border-r">
           <ConversationTabbedList
             activeTab={activeTab}
             onTabChange={onTabChange}

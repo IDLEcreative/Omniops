@@ -13,18 +13,25 @@ export function createIframe(config: WidgetConfig, isMobile: boolean): HTMLIFram
   iframe.title = 'Customer Support Chat';
   iframe.setAttribute('scrolling', 'no');
 
+  // Check if widget should start minimized (default is true)
+  const startMinimized = config.appearance.startMinimized ?? true;
+
+  // Use smaller size if starting minimized (just for the button)
+  const initialWidth = startMinimized && !isMobile ? 64 : (config.appearance.width || 400);
+  const initialHeight = startMinimized && !isMobile ? 64 : (config.appearance.height || 600);
+
   const styles = [
     'position: fixed',
     isMobile ? 'bottom: 0' : config.appearance.position?.includes('bottom') ? 'bottom: 20px' : 'top: 20px',
     isMobile ? 'right: 0' : config.appearance.position?.includes('right') ? 'right: 20px' : 'left: 20px',
     isMobile ? 'left: 0' : '',
     'border: none',
-    `width: ${isMobile ? '100vw' : (config.appearance.width || 400) + 'px'}`,
-    `height: ${isMobile ? '100vh' : (config.appearance.height || 600) + 'px'}`,
+    `width: ${isMobile ? '100vw' : initialWidth + 'px'}`,
+    `height: ${isMobile ? '100vh' : initialHeight + 'px'}`,
     `max-width: ${isMobile ? '100vw' : 'calc(100vw - 40px)'}`,
     `max-height: ${isMobile ? '100vh' : 'calc(100vh - 40px)'}`,
     'z-index: 9999',
-    `border-radius: ${isMobile ? '0' : config.appearance.borderRadius || '12px'}`,
+    `border-radius: ${isMobile || startMinimized ? '0' : config.appearance.borderRadius || '12px'}`,
     'box-shadow: none',
     'background: transparent',
     'overflow: hidden',

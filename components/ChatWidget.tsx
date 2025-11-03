@@ -35,6 +35,7 @@ export default function ChatWidget({
     setInput,
     loading,
     setLoading,
+    loadingMessages,
     conversationId,
     setConversationId,
     sessionId,
@@ -232,7 +233,7 @@ export default function ChatWidget({
     const buttonTextColor = demoConfig?.appearance?.buttonTextColor || '#ffffff';
 
     return (
-      <div className="fixed bottom-4 right-4 sm:bottom-5 sm:right-5 z-50">
+      <div className="fixed bottom-1 right-1 z-50">
         <button
           onClick={() => setIsOpen(true)}
           style={{
@@ -303,7 +304,7 @@ export default function ChatWidget({
 
       <MessageList
         messages={messages}
-        loading={loading}
+        loading={loading || loadingMessages}
         highContrast={highContrast}
         fontSize={fontSize}
         messagesContainerRef={messagesContainerRef}

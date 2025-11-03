@@ -174,6 +174,7 @@ Sophisticated metadata tracking for human-like conversation understanding.
 - **List Navigation** - Users can reference "item 2" or "the first one" from numbered lists (100% accuracy)
 - **Pronoun Resolution** - Understands "it", "that", and contextual references (83% accuracy)
 - **Context Awareness** - Maintains conversation state across multiple turns
+- **Session Persistence** - Conversations automatically saved and restored across page refreshes and navigation
 - **Performance** - <15ms overhead per message
 - **→ Learn more:** [docs/CONVERSATION_ACCURACY_IMPROVEMENTS.md](docs/CONVERSATION_ACCURACY_IMPROVEMENTS.md)
 
