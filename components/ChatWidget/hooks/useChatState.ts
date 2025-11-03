@@ -181,6 +181,9 @@ export function useChatState({
     console.log('[useChatState] useEffect running, demoConfig:', demoConfig);
     console.log('[useChatState] demoConfig.domain:', demoConfig?.domain);
 
+    // Reset hasLoadedMessages on mount to allow loading messages for restored conversations
+    hasLoadedMessages.current = false;
+
     const storedSessionId = localStorage.getItem('chat_session_id');
     if (storedSessionId) {
       setSessionId(storedSessionId);
@@ -335,18 +338,21 @@ export function useChatState({
           console.log('[useChatState] No messages found, clearing conversation ID');
           localStorage.removeItem('chat_conversation_id');
           setConversationId('');
+          hasLoadedMessages.current = false; // Reset to allow new conversation
         }
       } else {
         // API error - clear stored ID to start fresh
         console.warn('[useChatState] Failed to load messages, clearing conversation ID');
         localStorage.removeItem('chat_conversation_id');
         setConversationId('');
+        hasLoadedMessages.current = false; // Reset to allow new conversation
       }
     } catch (error) {
       console.error('[useChatState] Error loading messages:', error);
       // On error, clear stored conversation to allow fresh start
       localStorage.removeItem('chat_conversation_id');
       setConversationId('');
+      hasLoadedMessages.current = false; // Reset to allow new conversation
     } finally {
       setLoadingMessages(false);
     }
@@ -376,6 +382,9 @@ export function useChatState({
       } catch (error) {
         console.warn('[useChatState] Could not save conversation ID to localStorage:', error);
       }
+    } else if (mounted && !conversationId) {
+      // Conversation was cleared, reset the flag to allow loading new messages
+      hasLoadedMessages.current = false;
     }
   }, [conversationId, mounted]);
 
