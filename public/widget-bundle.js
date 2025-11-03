@@ -58,6 +58,9 @@ Error generating stack: `+t.message+`
   .rounded-full { border-radius: 9999px; }
   .rounded-2xl { border-radius: 1rem; }
   .rounded-lg { border-radius: 0.5rem; }
+  .rounded-md { border-radius: 0.375rem; }
+  .rounded-bl-md { border-bottom-left-radius: 0.375rem; }
+  .rounded-br-md { border-bottom-right-radius: 0.375rem; }
   .rounded-tl-md { border-top-left-radius: 0.375rem; }
   .rounded-tr-md { border-top-right-radius: 0.375rem; }
   .border-0 { border-width: 0px; }
@@ -72,6 +75,7 @@ Error generating stack: `+t.message+`
   .bg-black { background-color: rgb(0 0 0); }
   .bg-green-500 { background-color: rgb(34 197 94); }
   .bg-gray-400 { background-color: rgb(156 163 175); }
+  .bg-gray-500 { background-color: rgb(107 114 128); }
   .bg-gray-600 { background-color: rgb(75 85 99); }
   .shadow-xl { box-shadow: 0 20px 25px -5px rgb(0 0 0 / 0.1), 0 8px 10px -6px rgb(0 0 0 / 0.1); }
   .shadow-2xl { box-shadow: 0 25px 50px -12px rgb(0 0 0 / 0.25); }
@@ -140,6 +144,7 @@ Error generating stack: `+t.message+`
   }
 
   /* Dark theme widget colors */
+  .bg-\\[\\#111111\\] { background-color: #111111; }
   .bg-\\[\\#1F2937\\] { background-color: #1F2937; }
   .bg-\\[\\#27272a\\] { background-color: #27272a; }
   .bg-\\[\\#3f3f46\\] { background-color: #3f3f46; }
@@ -161,7 +166,10 @@ Error generating stack: `+t.message+`
   .border-white { border-color: rgb(255 255 255); }
   .border-\\[\\#1a1a1a\\] { border-color: #1a1a1a; }
   .border-\\[\\#2a2a2a\\] { border-color: #2a2a2a; }
+  .border-\\[\\#3a3a3a\\] { border-color: #3a3a3a; }
+  .border-\\[\\#4a4a4a\\] { border-color: #4a4a4a; }
   .border-white\\/10 { border-color: rgb(255 255 255 / 0.1); }
+  .focus\\:border-\\[\\#4a4a4a\\]:focus { border-color: #4a4a4a; }
 
   /* Gradient backgrounds */
   .bg-gradient-to-br { background-image: linear-gradient(to bottom right, var(--tw-gradient-stops)); }
@@ -231,7 +239,10 @@ Error generating stack: `+t.message+`
   .h-3 { height: 0.75rem; }
   .w-2 { width: 0.5rem; }
   .h-2 { height: 0.5rem; }
+  .w-2\\.5 { width: 0.625rem; }
+  .h-2\\.5 { height: 0.625rem; }
   .max-w-\\[80\\%\\] { max-width: 80%; }
+  .max-w-\\[85\\%\\] { max-width: 85%; }
   .min-w-0 { min-width: 0px; }
   .min-h-0 { min-height: 0px; }
   .min-h-\\[100px\\] { min-height: 100px; }
@@ -239,6 +250,7 @@ Error generating stack: `+t.message+`
   .px-3 { padding-left: 0.75rem; padding-right: 0.75rem; }
   .px-4 { padding-left: 1rem; padding-right: 1rem; }
   .px-5 { padding-left: 1.25rem; padding-right: 1.25rem; }
+  .py-1 { padding-top: 0.25rem; padding-bottom: 0.25rem; }
   .py-2 { padding-top: 0.5rem; padding-bottom: 0.5rem; }
   .py-2\\.5 { padding-top: 0.625rem; padding-bottom: 0.625rem; }
   .py-3 { padding-top: 0.75rem; padding-bottom: 0.75rem; }
@@ -246,6 +258,7 @@ Error generating stack: `+t.message+`
   .p-5 { padding: 1.25rem; }
   .pt-2 { padding-top: 0.5rem; }
   .mb-3 { margin-bottom: 0.75rem; }
+  .mb-4 { margin-bottom: 1rem; }
   .ml-auto { margin-left: auto; }
   .mr-auto { margin-right: auto; }
   .text-xs { font-size: 0.75rem; line-height: 1rem; }
