@@ -1,27 +1,17 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { createServiceRoleClient } from '@/lib/supabase-server';
+import { createClient } from '@/lib/supabase-server';
 import { encrypt } from '@/lib/encryption';
 import { withCSRF } from '@/lib/middleware/csrf';
 
 /**
- * GET /api/woocommerce/configure?domain=xxx
- * Fetch existing WooCommerce configuration for a domain
+ * GET /api/woocommerce/configure
+ * Fetch existing WooCommerce configuration for the authenticated user's organization
  *
  * Security: Only returns URL, never returns credentials
  */
 export async function GET(request: NextRequest) {
   try {
-    const { searchParams } = new URL(request.url);
-    const domain = searchParams.get('domain');
-
-    if (!domain) {
-      return NextResponse.json(
-        { success: false, error: 'Domain parameter is required' },
-        { status: 400 }
-      );
-    }
-
-    const supabase = await createServiceRoleClient();
+    const supabase = await createClient();
 
     if (!supabase) {
       return NextResponse.json(
@@ -30,17 +20,43 @@ export async function GET(request: NextRequest) {
       );
     }
 
+    // Get authenticated user
+    const { data: { user }, error: authError } = await supabase.auth.getUser();
+
+    if (authError || !user) {
+      return NextResponse.json(
+        { success: false, error: 'Authentication required' },
+        { status: 401 }
+      );
+    }
+
+    // Get user's organization
+    const { data: membership, error: membershipError } = await supabase
+      .from('organization_members')
+      .select('organization_id')
+      .eq('user_id', user.id)
+      .maybeSingle();
+
+    if (membershipError || !membership) {
+      return NextResponse.json(
+        { success: false, error: 'No organization found' },
+        { status: 400 }
+      );
+    }
+
+    // Get configuration for organization
     const { data: config, error } = await supabase
       .from('customer_configs')
-      .select('woocommerce_url')
-      .eq('domain', domain)
-      .single();
+      .select('woocommerce_url, woocommerce_consumer_key, woocommerce_consumer_secret')
+      .eq('organization_id', membership.organization_id)
+      .maybeSingle();
 
     if (error || !config) {
       return NextResponse.json({
         success: true,
         configured: false,
         url: null,
+        hasCredentials: false,
       });
     }
 
@@ -48,7 +64,8 @@ export async function GET(request: NextRequest) {
       success: true,
       configured: !!config.woocommerce_url,
       url: config.woocommerce_url,
-      // Security: Never return consumer_key or consumer_secret
+      hasCredentials: !!(config.woocommerce_consumer_key && config.woocommerce_consumer_secret),
+      // Security: Never return actual consumer_key or consumer_secret values
     });
   } catch (error) {
     console.error('Error fetching WooCommerce configuration:', error);
@@ -61,21 +78,53 @@ export async function GET(request: NextRequest) {
 
 /**
  * POST /api/woocommerce/configure
- * Save WooCommerce configuration for a domain
+ * Save WooCommerce configuration for the authenticated user's organization
  *
  * CSRF PROTECTED: Requires valid CSRF token in X-CSRF-Token header
  *
- * Body: { url, consumerKey, consumerSecret, domain? }
+ * Body: { url, consumerKey, consumerSecret }
  *
  * Security: Encrypts consumer key and secret before storage
  */
 async function handlePost(request: NextRequest) {
   try {
-    const body = await request.json();
-    const { url, consumerKey, consumerSecret, domain } = body;
+    const supabase = await createClient();
 
-    // Get domain from request or body
-    const customerDomain = domain || request.headers.get('host') || 'localhost';
+    if (!supabase) {
+      return NextResponse.json(
+        { success: false, error: 'Database connection failed' },
+        { status: 503 }
+      );
+    }
+
+    // Get authenticated user
+    const { data: { user }, error: authError } = await supabase.auth.getUser();
+
+    if (authError || !user) {
+      return NextResponse.json(
+        { success: false, error: 'Authentication required' },
+        { status: 401 }
+      );
+    }
+
+    // Get user's organization
+    const { data: membership, error: membershipError } = await supabase
+      .from('organization_members')
+      .select('organization_id')
+      .eq('user_id', user.id)
+      .maybeSingle();
+
+    if (membershipError || !membership) {
+      return NextResponse.json(
+        { success: false, error: 'No organization found' },
+        { status: 400 }
+      );
+    }
+
+    const organizationId = membership.organization_id;
+
+    const body = await request.json();
+    const { url, consumerKey, consumerSecret } = body;
 
     // Validation
     if (!url || !consumerKey || !consumerSecret) {
@@ -121,22 +170,12 @@ async function handlePost(request: NextRequest) {
     const encryptedKey = encrypt(consumerKey);
     const encryptedSecret = encrypt(consumerSecret);
 
-    // Save to database
-    const supabase = await createServiceRoleClient();
-
-    if (!supabase) {
-      return NextResponse.json(
-        { success: false, error: 'Database connection failed' },
-        { status: 503 }
-      );
-    }
-
-    // Check if configuration exists
+    // Check if configuration exists for this organization
     const { data: existingConfig } = await supabase
       .from('customer_configs')
-      .select('id')
-      .eq('domain', customerDomain)
-      .single();
+      .select('id, domain')
+      .eq('organization_id', organizationId)
+      .maybeSingle();
 
     if (existingConfig) {
       // Update existing configuration
@@ -148,7 +187,7 @@ async function handlePost(request: NextRequest) {
           woocommerce_consumer_secret: encryptedSecret,
           updated_at: new Date().toISOString(),
         })
-        .eq('domain', customerDomain);
+        .eq('organization_id', organizationId);
 
       if (error) {
         console.error('Error updating WooCommerce configuration:', error);
@@ -158,11 +197,13 @@ async function handlePost(request: NextRequest) {
         );
       }
     } else {
-      // Create new configuration
+      // Create new configuration for organization
+      // Use organization_id as the domain for now (can be updated later)
       const { error } = await supabase
         .from('customer_configs')
         .insert({
-          domain: customerDomain,
+          organization_id: organizationId,
+          domain: organizationId, // Temporary: use org ID as domain
           woocommerce_url: url,
           woocommerce_consumer_key: encryptedKey,
           woocommerce_consumer_secret: encryptedSecret,
