@@ -46,21 +46,35 @@ export function MessageList({
           <div
             className={`max-w-[80%] ${
               message.role === 'user' ? 'ml-auto' : 'mr-auto'
-            }`}
+            } relative`}
             role="article"
             aria-label={`${message.role === 'user' ? 'You said' : 'Support agent said'}: ${message.content}`}
           >
             <div
-              className={`px-3 py-2.5 break-words overflow-wrap-anywhere ${
+              className={`px-3 py-2.5 break-words overflow-wrap-anywhere relative ${
                 fontSize === 'xlarge' ? 'text-lg' : fontSize === 'large' ? 'text-base' : 'text-sm'
               } ${
                 message.role === 'user'
-                  ? 'bg-[#3f3f46] text-white rounded-lg'
-                  : 'bg-[#27272a] text-gray-200 rounded-lg'
+                  ? 'bg-[#3f3f46] text-white rounded-lg rounded-br-sm'
+                  : 'bg-[#27272a] text-gray-200 rounded-lg rounded-bl-sm'
               }`}
             >
               <MessageContent content={message.content} className="leading-relaxed break-words" />
             </div>
+            {/* Chat bubble tail */}
+            <div
+              className={`absolute bottom-0 w-3 h-3 ${
+                message.role === 'user'
+                  ? 'right-0 bg-[#3f3f46]'
+                  : 'left-0 bg-[#27272a]'
+              }`}
+              style={{
+                clipPath: message.role === 'user'
+                  ? 'polygon(100% 0, 0 0, 100% 100%)'
+                  : 'polygon(0 0, 100% 0, 0 100%)'
+              }}
+              aria-hidden="true"
+            />
             <span className="sr-only">
               Sent at {new Date(message.created_at).toLocaleTimeString()}
             </span>
