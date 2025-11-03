@@ -52,6 +52,9 @@ export const BehaviorSettingsSchema = z.object({
   soundNotifications: z.boolean().optional(),
   persistConversation: z.boolean().optional(),
   messageDelay: z.number().min(0).max(5000).optional(),
+  animationType: z.enum(['none', 'pulse', 'bounce', 'rotate', 'fade', 'wiggle']).optional(),
+  animationSpeed: z.enum(['slow', 'normal', 'fast']).optional(),
+  animationIntensity: z.enum(['subtle', 'normal', 'strong']).optional(),
 })
 
 export const IntegrationSettingsSchema = z.object({
@@ -90,6 +93,9 @@ export const BrandingSettingsSchema = z.object({
   showPoweredBy: z.boolean().optional(),
   customBrandingText: z.string().max(100).optional(),
   customLogoUrl: z.string().url().optional().or(z.literal('')),
+  minimizedIconUrl: z.string().url().optional().or(z.literal('')),
+  minimizedIconHoverUrl: z.string().url().optional().or(z.literal('')),
+  minimizedIconActiveUrl: z.string().url().optional().or(z.literal('')),
   customFaviconUrl: z.string().url().optional().or(z.literal('')),
   brandColors: z.record(z.string()).optional(),
 })

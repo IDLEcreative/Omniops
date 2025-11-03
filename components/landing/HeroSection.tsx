@@ -98,8 +98,9 @@ export function HeroSection({
           </h1>
 
           <p className="mx-auto mb-8 max-w-2xl text-xl text-muted-foreground">
-            AI chat that knows your products, speaks 40+ languages, and handles
-            support 24/7. No training required.
+            AI chat with <span className="font-semibold text-foreground">unlimited conversations</span>,
+            speaks 40+ languages, and handles support 24/7.
+            <span className="font-semibold text-foreground">14-day free trial</span> • No training required.
           </p>
 
           {/* Instant Demo Section */}

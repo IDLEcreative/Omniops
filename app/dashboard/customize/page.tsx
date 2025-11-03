@@ -87,6 +87,7 @@ export default function CustomizeV2Page() {
               <EssentialsSection
                 settings={config.essentials}
                 onChange={(updates) => updateConfig('essentials', updates)}
+                customerConfigId={customerConfigId || undefined}
               />
             </TabsContent>
 

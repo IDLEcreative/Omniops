@@ -3,7 +3,7 @@
 import { useState, useEffect, useCallback } from 'react';
 import { SubscriptionCard } from './SubscriptionCard';
 import { InvoiceHistory } from './InvoiceHistory';
-import { PlanSelector } from './PlanSelector';
+import NewPlanSelector from './NewPlanSelector';
 
 interface Organization {
   id: string;
@@ -93,10 +93,7 @@ export default function BillingDashboard({ organizations }: BillingDashboardProp
               onUpdate={fetchSubscription}
             />
           ) : (
-            <PlanSelector
-              organizationId={selectedOrgId}
-              canManage={canManageBilling || false}
-            />
+            <NewPlanSelector />
           )}
 
           {subscription?.hasSubscription && (

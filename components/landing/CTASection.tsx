@@ -12,19 +12,22 @@ export function CTASection() {
             <h2 className="text-3xl font-bold mb-4">
               Ready to transform your customer support?
             </h2>
-            <p className="text-xl mb-8 opacity-90 max-w-2xl mx-auto">
+            <p className="text-xl mb-4 opacity-90 max-w-2xl mx-auto">
               Join thousands of companies delivering exceptional customer experiences with AI
+            </p>
+            <p className="text-lg mb-8 opacity-80 max-w-xl mx-auto">
+              Start your 14-day free trial • Unlimited conversations • No credit card required
             </p>
             <div className="flex flex-col sm:flex-row gap-4 justify-center">
               <Button size="lg" variant="secondary" asChild>
                 <Link href="/signup">
-                  Get Started
+                  Start Free Trial
                   <ArrowRight className="ml-2 h-4 w-4" />
                 </Link>
               </Button>
               <Button size="lg" variant="outline" className="bg-transparent text-primary-foreground border-primary-foreground hover:bg-primary-foreground/10" asChild>
-                <Link href="/contact">
-                  Talk to Sales
+                <Link href="/pricing/quote">
+                  Get AI Quote
                 </Link>
               </Button>
             </div>

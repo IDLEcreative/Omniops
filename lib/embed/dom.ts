@@ -110,6 +110,15 @@ export function registerMessageHandlers(ctx: IframeContext): void {
   };
 
   const handlers: Record<string, (data: any) => void> = {
+    ping: data => {
+      // Respond to heartbeat ping with pong
+      if (data?.pingTime) {
+        iframe.contentWindow?.postMessage({
+          type: 'pong',
+          pingTime: data.pingTime,
+        }, config.serverUrl || '*');
+      }
+    },
     resize: data => {
       if (typeof data?.width === 'number') iframe.style.width = `${data.width}px`;
       if (typeof data?.height === 'number') iframe.style.height = `${data.height}px`;
@@ -200,6 +209,13 @@ export function registerMessageHandlers(ctx: IframeContext): void {
   };
 
   window.addEventListener('message', event => {
+    // Security: Validate origin to prevent XSS attacks
+    const expectedOrigin = process.env.NEXT_PUBLIC_APP_URL || window.location.origin;
+    if (event.origin !== expectedOrigin && event.origin !== window.location.origin) {
+      console.warn('[ChatWidget] Blocked message from untrusted origin:', event.origin);
+      return;
+    }
+
     const data = event.data;
     if (!data || typeof data.type !== 'string') {
       return;

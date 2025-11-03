@@ -1,11 +1,27 @@
 echo "🔍 Running pre-commit checks..."
 
-# Note: File length and root clutter checks are skipped due to sandbox restrictions
-# Run manually with:
-#   npx tsx scripts/check-file-length.ts --staged --strict
-#   npx tsx scripts/check-root-clutter.ts --staged
-echo "\n📏 File length check: SKIPPED (run manually if needed)"
-echo "🗂️  Root clutter check: SKIPPED (run manually if needed)"
+# 1. File length check (300 LOC limit)
+echo "\n📏 Checking file lengths (300 LOC limit)..."
+npx tsx scripts/check-file-length.ts --staged --strict
+if [ $? -ne 0 ]; then
+  echo "❌ File length check failed. Please refactor files over 300 LOC."
+  echo "   Run 'npx tsx scripts/check-file-length.ts --fix' for suggestions."
+  exit 1
+fi
+echo "   ✅ All staged files are within 300 LOC limit"
+
+# 2. Root clutter check
+echo "\n🗂️  Checking for root clutter..."
+if [ -f scripts/check-root-clutter.ts ]; then
+  npx tsx scripts/check-root-clutter.ts --staged
+  if [ $? -ne 0 ]; then
+    echo "❌ Root clutter check failed. Files must be in proper directories."
+    exit 1
+  fi
+  echo "   ✅ No root clutter detected"
+else
+  echo "   ⚠️  Root clutter script not found, skipping..."
+fi
 
 # 3. Security check: Detect hardcoded tokens
 echo "\n🔒 Checking for hardcoded secrets..."

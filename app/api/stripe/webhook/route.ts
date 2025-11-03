@@ -48,16 +48,67 @@ export async function POST(request: NextRequest) {
       case 'checkout.session.completed': {
         const session = event.data.object as Stripe.Checkout.Session;
         const organizationId = session.metadata?.organizationId;
+        const domainId = session.metadata?.domainId;
 
-        if (organizationId && session.subscription) {
+        if (session.subscription) {
           const subscription = await stripe.subscriptions.retrieve(
             session.subscription as string
           );
 
+          // Per-domain subscription (new model)
+          if (domainId && organizationId) {
+            await supabase
+              .from('domain_subscriptions')
+              .update({
+                stripe_subscription_id: subscription.id,
+                stripe_subscription_item_id: subscription.items.data[0]?.id || null,
+                status: subscription.status,
+                current_period_start: new Date(subscription.current_period_start * 1000).toISOString(),
+                current_period_end: new Date(subscription.current_period_end * 1000).toISOString(),
+                cancel_at_period_end: subscription.cancel_at_period_end,
+              })
+              .eq('domain_id', domainId);
+          }
+          // Legacy organization subscription (old model - fallback)
+          else if (organizationId) {
+            await supabase
+              .from('organizations')
+              .update({
+                stripe_subscription_id: subscription.id,
+                subscription_status: subscription.status,
+                current_period_start: new Date(subscription.current_period_start * 1000).toISOString(),
+                current_period_end: new Date(subscription.current_period_end * 1000).toISOString(),
+                cancel_at_period_end: subscription.cancel_at_period_end,
+              })
+              .eq('id', organizationId);
+          }
+        }
+        break;
+      }
+
+      case 'customer.subscription.updated': {
+        const subscription = event.data.object as Stripe.Subscription;
+        const domainId = subscription.metadata?.domainId;
+        const organizationId = subscription.metadata?.organizationId;
+
+        // Per-domain subscription update
+        if (domainId) {
+          await supabase
+            .from('domain_subscriptions')
+            .update({
+              status: subscription.status,
+              current_period_start: new Date(subscription.current_period_start * 1000).toISOString(),
+              current_period_end: new Date(subscription.current_period_end * 1000).toISOString(),
+              cancel_at_period_end: subscription.cancel_at_period_end,
+              updated_at: new Date().toISOString(),
+            })
+            .eq('stripe_subscription_id', subscription.id);
+        }
+        // Legacy organization subscription
+        else if (organizationId) {
           await supabase
             .from('organizations')
             .update({
-              stripe_subscription_id: subscription.id,
               subscription_status: subscription.status,
               current_period_start: new Date(subscription.current_period_start * 1000).toISOString(),
               current_period_end: new Date(subscription.current_period_end * 1000).toISOString(),
@@ -68,19 +119,27 @@ export async function POST(request: NextRequest) {
         break;
       }
 
-      case 'customer.subscription.updated':
       case 'customer.subscription.deleted': {
         const subscription = event.data.object as Stripe.Subscription;
+        const domainId = subscription.metadata?.domainId;
         const organizationId = subscription.metadata?.organizationId;
 
-        if (organizationId) {
+        // Per-domain subscription cancellation
+        if (domainId) {
+          await supabase
+            .from('domain_subscriptions')
+            .update({
+              status: 'canceled',
+              updated_at: new Date().toISOString(),
+            })
+            .eq('stripe_subscription_id', subscription.id);
+        }
+        // Legacy organization subscription
+        else if (organizationId) {
           await supabase
             .from('organizations')
             .update({
-              subscription_status: subscription.status,
-              current_period_start: new Date(subscription.current_period_start * 1000).toISOString(),
-              current_period_end: new Date(subscription.current_period_end * 1000).toISOString(),
-              cancel_at_period_end: subscription.cancel_at_period_end,
+              subscription_status: 'canceled',
             })
             .eq('id', organizationId);
         }
@@ -91,17 +150,37 @@ export async function POST(request: NextRequest) {
       case 'invoice.payment_failed': {
         const invoice = event.data.object as Stripe.Invoice;
         const customerId = invoice.customer as string;
+        const subscriptionId = invoice.subscription as string;
 
-        // Find organization by customer ID
-        const { data: org } = await supabase
-          .from('organizations')
-          .select('id')
-          .eq('stripe_customer_id', customerId)
-          .single();
+        let organizationId: string | null = null;
 
-        if (org) {
+        // Try to find organization via subscription (per-domain or legacy)
+        if (subscriptionId) {
+          const { data: domainSub } = await supabase
+            .from('domain_subscriptions')
+            .select('organization_id')
+            .eq('stripe_subscription_id', subscriptionId)
+            .single();
+
+          if (domainSub) {
+            organizationId = domainSub.organization_id;
+          }
+        }
+
+        // Fallback: find organization by customer ID
+        if (!organizationId && customerId) {
+          const { data: org } = await supabase
+            .from('organizations')
+            .select('id')
+            .eq('stripe_customer_id', customerId)
+            .single();
+
+          organizationId = org?.id || null;
+        }
+
+        if (organizationId) {
           await supabase.from('invoices').insert({
-            organization_id: org.id,
+            organization_id: organizationId,
             stripe_invoice_id: invoice.id,
             amount_due: invoice.amount_due,
             amount_paid: invoice.amount_paid,

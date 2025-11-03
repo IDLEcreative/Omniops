@@ -1,0 +1,208 @@
+'use client';
+
+import { PricingTierCard } from './PricingTierCard';
+
+const PRICING_TIERS = [
+  {
+    name: 'Small Business',
+    price: 500,
+    period: '/month',
+    description: 'Great for startups and growing businesses',
+    repsReplaced: 'Replaces 1 part-time CS rep',
+    savings: '£1,177/month',
+    savingsPercent: 70,
+    conversationsPerMonth: 2500,
+    features: [
+      { name: '2,500 completed conversations/month', included: true },
+      { name: 'Unlimited team seats', included: true },
+      { name: 'Unlimited website scraping', included: true },
+      { name: 'WooCommerce integration', included: true },
+      { name: 'Shopify integration', included: true },
+      { name: 'Email support', included: true },
+      { name: 'Advanced analytics', included: true },
+      { name: 'Mobile responsive widget', included: true },
+      { name: 'Custom branding', included: false },
+      { name: 'API access', included: false },
+      { name: 'Priority support', included: false },
+    ],
+    overage: '£0.12 per additional conversation',
+    cta: 'Start Free Trial',
+    featured: false,
+    perfectFor: [
+      'Growing online shops',
+      'Local businesses',
+      'Service businesses',
+      '5-15 employees',
+      '20k-100k monthly visitors',
+    ],
+    testimonial: {
+      quote: 'Cut our support costs by 65% in the first month',
+      author: 'Sarah Thompson',
+      company: 'Thompson\'s E-Parts',
+    },
+  },
+  {
+    name: 'SME',
+    price: 1000,
+    period: '/month',
+    description: 'Perfect for established businesses',
+    repsReplaced: 'Replaces 2 full-time CS reps',
+    savings: '£5,708/month',
+    savingsPercent: 85,
+    conversationsPerMonth: 5000,
+    features: [
+      { name: '5,000 completed conversations/month', included: true },
+      { name: 'Unlimited team seats', included: true },
+      { name: 'Unlimited website scraping', included: true },
+      { name: 'WooCommerce integration', included: true },
+      { name: 'Shopify integration', included: true },
+      { name: 'Priority support (< 2 hour response)', included: true },
+      { name: 'Advanced analytics dashboard', included: true },
+      { name: 'Custom branding', included: true },
+      { name: 'API access', included: true },
+      { name: 'Conversation history export', included: true },
+      { name: 'Dedicated account manager', included: false },
+    ],
+    overage: '£0.10 per additional conversation',
+    cta: 'Start Free Trial',
+    featured: true,
+    perfectFor: [
+      'Established e-commerce',
+      'B2B businesses',
+      'Multi-location companies',
+      '15-50 employees',
+      '100k-500k monthly visitors',
+    ],
+    testimonial: {
+      quote:
+        'Handles 3,000+ conversations monthly. Our CS team now focuses on complex issues only.',
+      author: 'Mike Johnson',
+      company: 'Industrial Parts Ltd',
+    },
+  },
+  {
+    name: 'Mid-Market',
+    price: 5000,
+    period: '/month',
+    description: 'For growing enterprises',
+    repsReplaced: 'Replaces 5-10 CS reps',
+    savings: '£11,770/month',
+    savingsPercent: 70,
+    conversationsPerMonth: 25000,
+    features: [
+      { name: '25,000 completed conversations/month', included: true },
+      { name: 'Unlimited team seats', included: true },
+      { name: 'Unlimited website scraping', included: true },
+      { name: 'WooCommerce integration', included: true },
+      { name: 'Shopify integration', included: true },
+      { name: 'Custom branding', included: true },
+      { name: 'API access', included: true },
+      { name: 'Dedicated account manager', included: true },
+      { name: 'Custom integrations', included: true },
+      { name: 'SLA guarantees (99.9% uptime)', included: true },
+      { name: 'Onboarding assistance', included: true },
+    ],
+    overage: '£0.08 per additional conversation',
+    cta: 'Talk to Sales',
+    featured: false,
+    perfectFor: [
+      'Large e-commerce operations',
+      'Multi-brand retailers',
+      'B2B suppliers',
+      '50-250 employees',
+      '500k-2M monthly visitors',
+    ],
+    testimonial: {
+      quote:
+        'Reduced CS costs by £140k annually while improving response times by 80%',
+      author: 'David Jenkins',
+      company: 'Regional Retailer',
+    },
+  },
+  {
+    name: 'Enterprise',
+    price: 10000,
+    period: '/month',
+    description: 'For enterprise-scale operations',
+    repsReplaced: 'Replaces 15-30 CS reps',
+    savings: '£23,540/month',
+    savingsPercent: 70,
+    conversationsPerMonth: 100000,
+    features: [
+      { name: '100,000 completed conversations/month', included: true },
+      { name: 'Unlimited team seats', included: true },
+      { name: 'Unlimited website scraping', included: true },
+      { name: 'White-label capability', included: true },
+      { name: 'On-premise deployment option', included: true },
+      { name: 'Custom AI model training', included: true },
+      { name: '24/7 dedicated support', included: true },
+      { name: 'Custom contract terms', included: true },
+      { name: 'Volume discounts available', included: true },
+      { name: 'SLA guarantees (99.99% uptime)', included: true },
+      { name: 'Quarterly strategy reviews', included: true },
+    ],
+    overage: '£0.05 per additional conversation',
+    cta: 'Contact Sales Team',
+    featured: false,
+    perfectFor: [
+      'Enterprise e-commerce',
+      'Multi-national brands',
+      'Franchise systems',
+      '250+ employees',
+      '2M+ monthly visitors',
+    ],
+    testimonial: {
+      quote:
+        'Handles 75k+ conversations monthly across 5 brands. ROI in 3 months.',
+      author: 'Enterprise Customer',
+      company: 'Multi-Brand Organization',
+    },
+  },
+];
+
+export function PricingTiers() {
+  return (
+    <section className="py-20 bg-slate-50">
+      <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
+        {/* Section header */}
+        <div className="text-center mb-16">
+          <h2 className="text-4xl sm:text-5xl font-bold text-slate-900 mb-4">
+            Simple Per-Domain Pricing
+          </h2>
+          <p className="text-xl text-slate-600 max-w-3xl mx-auto">
+            Everything Unlimited. Pay for Outcomes, Not Seats. Each domain gets unlimited usage,
+            unlimited seats, and unlimited features. You only pay more when you're succeeding
+            (with overage conversations).
+          </p>
+        </div>
+
+        {/* Pricing cards grid */}
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8 items-end">
+          {PRICING_TIERS.map((tier, index) => (
+            <PricingTierCard key={index} {...tier} />
+          ))}
+        </div>
+
+        {/* Annual discount callout */}
+        <div className="mt-16 p-8 bg-gradient-to-r from-blue-50 to-purple-50 rounded-lg border border-blue-200">
+          <div className="flex flex-col sm:flex-row items-center justify-between">
+            <div>
+              <h3 className="text-lg font-semibold text-slate-900 mb-2">
+                💰 Save 15% with Annual Billing
+              </h3>
+              <p className="text-slate-600">
+                Pay yearly and get one month free. All plans available on annual terms.
+              </p>
+            </div>
+            <div className="mt-4 sm:mt-0 text-right">
+              <p className="text-sm text-slate-600 mb-2">Example Annual Pricing:</p>
+              <p className="font-semibold text-slate-900">
+                SME: £10,200/year (£850/month)
+              </p>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+  );
+}
