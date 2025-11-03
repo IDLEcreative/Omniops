@@ -1,0 +1,569 @@
+{
+  "totalClasses": 94,
+  "categories": {
+    "layout": [
+      "flex",
+      "flex-1",
+      "flex-col",
+      "items-center",
+      "items-end",
+      "justify-center",
+      "justify-start"
+    ],
+    "spacing": [
+      "gap-1",
+      "gap-1.5",
+      "gap-2",
+      "gap-3",
+      "px-2",
+      "px-3",
+      "py-2.5",
+      "py-3"
+    ],
+    "typography": [
+      "font-semibold",
+      "leading-normal",
+      "leading-relaxed",
+      "leading-tight"
+    ],
+    "colors": [
+      "bg-[#1F2937]",
+      "bg-[#262626]",
+      "bg-[#27272a]",
+      "bg-[#3f3f46]",
+      "bg-gradient-to-br",
+      "bg-gray-400",
+      "bg-green-500",
+      "text-blue-400",
+      "text-sm",
+      "text-white"
+    ],
+    "borders": [
+      "border-2",
+      "border-white",
+      "rounded-full",
+      "rounded-lg"
+    ],
+    "effects": [
+      "opacity-75",
+      "opacity-90",
+      "shadow-lg",
+      "shadow-xl"
+    ],
+    "animations": [
+      "animate-bounce",
+      "animate-in",
+      "animate-ping",
+      "animate-pulse",
+      "duration-200",
+      "duration-300",
+      "transition-all",
+      "transition-transform"
+    ],
+    "responsive": [
+      "sm:h-[580px]",
+      "sm:max-h-[calc(100vh-40px)]",
+      "sm:w-[400px]"
+    ],
+    "states": [],
+    "other": [
+      "-right-1",
+      "-top-1",
+      "===",
+      "absolute",
+      "bottom-4",
+      "break-words",
+      "fade-in",
+      "fixed",
+      "fontSize",
+      "from-[#3a3a3a]",
+      "group",
+      "h-12",
+      "h-2",
+      "h-3",
+      "h-4",
+      "h-5",
+      "h-8",
+      "inline-block",
+      "inset-0",
+      "isOpen",
+      "max-w-[80%]",
+      "mb-3",
+      "message.role",
+      "min-h-0",
+      "min-h-[100px]",
+      "min-w-0",
+      "mr-auto",
+      "overflow-hidden",
+      "overflow-x-hidden",
+      "overflow-y-auto",
+      "overscroll-contain",
+      "relative",
+      "right-4",
+      "slide-in-from-bottom-2",
+      "sr-only",
+      "to-[#2a2a2a]",
+      "underline",
+      "w-12",
+      "w-2",
+      "w-3",
+      "w-4",
+      "w-5",
+      "w-8",
+      "whitespace-pre-wrap",
+      "z-50",
+      "}"
+    ]
+  },
+  "allClassesSorted": [
+    "-right-1",
+    "-top-1",
+    "===",
+    "absolute",
+    "animate-bounce",
+    "animate-in",
+    "animate-ping",
+    "animate-pulse",
+    "bg-[#1F2937]",
+    "bg-[#262626]",
+    "bg-[#27272a]",
+    "bg-[#3f3f46]",
+    "bg-gradient-to-br",
+    "bg-gray-400",
+    "bg-green-500",
+    "border-2",
+    "border-white",
+    "bottom-4",
+    "break-words",
+    "duration-200",
+    "duration-300",
+    "fade-in",
+    "fixed",
+    "flex",
+    "flex-1",
+    "flex-col",
+    "font-semibold",
+    "fontSize",
+    "from-[#3a3a3a]",
+    "gap-1",
+    "gap-1.5",
+    "gap-2",
+    "gap-3",
+    "group",
+    "h-12",
+    "h-2",
+    "h-3",
+    "h-4",
+    "h-5",
+    "h-8",
+    "inline-block",
+    "inset-0",
+    "isOpen",
+    "items-center",
+    "items-end",
+    "justify-center",
+    "justify-start",
+    "leading-normal",
+    "leading-relaxed",
+    "leading-tight",
+    "max-w-[80%]",
+    "mb-3",
+    "message.role",
+    "min-h-0",
+    "min-h-[100px]",
+    "min-w-0",
+    "mr-auto",
+    "opacity-75",
+    "opacity-90",
+    "overflow-hidden",
+    "overflow-x-hidden",
+    "overflow-y-auto",
+    "overscroll-contain",
+    "px-2",
+    "px-3",
+    "py-2.5",
+    "py-3",
+    "relative",
+    "right-4",
+    "rounded-full",
+    "rounded-lg",
+    "shadow-lg",
+    "shadow-xl",
+    "slide-in-from-bottom-2",
+    "sm:h-[580px]",
+    "sm:max-h-[calc(100vh-40px)]",
+    "sm:w-[400px]",
+    "sr-only",
+    "text-blue-400",
+    "text-sm",
+    "text-white",
+    "to-[#2a2a2a]",
+    "transition-all",
+    "transition-transform",
+    "underline",
+    "w-12",
+    "w-2",
+    "w-3",
+    "w-4",
+    "w-5",
+    "w-8",
+    "whitespace-pre-wrap",
+    "z-50",
+    "}"
+  ],
+  "usage": {
+    "fixed": [
+      "components/ChatWidget.tsx"
+    ],
+    "bottom-4": [
+      "components/ChatWidget.tsx"
+    ],
+    "right-4": [
+      "components/ChatWidget.tsx"
+    ],
+    "z-50": [
+      "components/ChatWidget.tsx",
+      "components/ChatWidget.tsx"
+    ],
+    "relative": [
+      "components/ChatWidget.tsx",
+      "components/ChatWidget.tsx"
+    ],
+    "w-12": [
+      "components/ChatWidget.tsx"
+    ],
+    "h-12": [
+      "components/ChatWidget.tsx"
+    ],
+    "bg-gradient-to-br": [
+      "components/ChatWidget.tsx",
+      "components/ChatWidget.tsx"
+    ],
+    "from-[#3a3a3a]": [
+      "components/ChatWidget.tsx",
+      "components/ChatWidget.tsx"
+    ],
+    "to-[#2a2a2a]": [
+      "components/ChatWidget.tsx",
+      "components/ChatWidget.tsx"
+    ],
+    "text-white": [
+      "components/ChatWidget.tsx",
+      "components/ChatWidget/Header.tsx",
+      "components/ChatWidget/Header.tsx",
+      "components/ChatWidget/Header.tsx",
+      "components/ChatWidget/Header.tsx"
+    ],
+    "rounded-full": [
+      "components/ChatWidget.tsx",
+      "components/ChatWidget.tsx",
+      "components/ChatWidget.tsx",
+      "components/ChatWidget/Header.tsx",
+      "components/ChatWidget/Header.tsx",
+      "components/ChatWidget/MessageList.tsx",
+      "components/ChatWidget/MessageList.tsx",
+      "components/ChatWidget/MessageList.tsx"
+    ],
+    "shadow-xl": [
+      "components/ChatWidget.tsx"
+    ],
+    "transition-all": [
+      "components/ChatWidget.tsx",
+      "components/ChatWidget.tsx",
+      "components/ChatWidget/Header.tsx",
+      "components/ChatWidget/Header.tsx",
+      "components/ChatWidget/InputArea.tsx",
+      "components/ChatWidget/InputArea.tsx",
+      "components/ChatWidget/InputArea.tsx"
+    ],
+    "duration-300": [
+      "components/ChatWidget.tsx",
+      "components/ChatWidget/MessageList.tsx",
+      "components/ChatWidget/MessageList.tsx"
+    ],
+    "flex": [
+      "components/ChatWidget.tsx",
+      "components/ChatWidget.tsx",
+      "components/ChatWidget/Header.tsx",
+      "components/ChatWidget/Header.tsx",
+      "components/ChatWidget/Header.tsx",
+      "components/ChatWidget/Header.tsx",
+      "components/ChatWidget/MessageList.tsx",
+      "components/ChatWidget/MessageList.tsx",
+      "components/ChatWidget/MessageList.tsx",
+      "components/ChatWidget/InputArea.tsx"
+    ],
+    "items-center": [
+      "components/ChatWidget.tsx",
+      "components/ChatWidget/Header.tsx",
+      "components/ChatWidget/Header.tsx",
+      "components/ChatWidget/Header.tsx",
+      "components/ChatWidget/Header.tsx",
+      "components/ChatWidget/MessageList.tsx",
+      "components/ChatWidget/MessageList.tsx"
+    ],
+    "justify-center": [
+      "components/ChatWidget.tsx",
+      "components/ChatWidget/Header.tsx",
+      "components/ChatWidget/Header.tsx",
+      "components/ChatWidget/MessageList.tsx"
+    ],
+    "animate-in": [
+      "components/ChatWidget.tsx",
+      "components/ChatWidget/MessageList.tsx",
+      "components/ChatWidget/MessageList.tsx"
+    ],
+    "fade-in": [
+      "components/ChatWidget.tsx",
+      "components/ChatWidget/MessageList.tsx"
+    ],
+    "group": [
+      "components/ChatWidget.tsx"
+    ],
+    "absolute": [
+      "components/ChatWidget.tsx",
+      "components/ChatWidget.tsx"
+    ],
+    "inset-0": [
+      "components/ChatWidget.tsx"
+    ],
+    "opacity-75": [
+      "components/ChatWidget.tsx"
+    ],
+    "animate-ping": [
+      "components/ChatWidget.tsx"
+    ],
+    "-top-1": [
+      "components/ChatWidget.tsx"
+    ],
+    "-right-1": [
+      "components/ChatWidget.tsx"
+    ],
+    "w-3": [
+      "components/ChatWidget.tsx"
+    ],
+    "h-3": [
+      "components/ChatWidget.tsx"
+    ],
+    "bg-green-500": [
+      "components/ChatWidget.tsx"
+    ],
+    "border-2": [
+      "components/ChatWidget.tsx"
+    ],
+    "border-white": [
+      "components/ChatWidget.tsx"
+    ],
+    "shadow-lg": [
+      "components/ChatWidget.tsx",
+      "components/ChatWidget.tsx"
+    ],
+    "animate-pulse": [
+      "components/ChatWidget.tsx"
+    ],
+    "h-5": [
+      "components/ChatWidget.tsx",
+      "components/ChatWidget/Header.tsx"
+    ],
+    "w-5": [
+      "components/ChatWidget.tsx",
+      "components/ChatWidget/Header.tsx"
+    ],
+    "transition-transform": [
+      "components/ChatWidget.tsx"
+    ],
+    "}": [
+      "components/ChatWidget.tsx",
+      "components/ChatWidget/Header.tsx",
+      "components/ChatWidget/MessageList.tsx",
+      "components/ChatWidget/MessageList.tsx",
+      "components/ChatWidget/MessageList.tsx",
+      "components/ChatWidget/MessageList.tsx",
+      "components/ChatWidget/InputArea.tsx",
+      "components/ChatWidget/InputArea.tsx",
+      "components/ChatWidget/InputArea.tsx",
+      "components/ChatWidget/InputArea.tsx"
+    ],
+    "rounded-lg": [
+      "components/ChatWidget.tsx",
+      "components/ChatWidget/MessageList.tsx"
+    ],
+    "flex-col": [
+      "components/ChatWidget.tsx"
+    ],
+    "overflow-hidden": [
+      "components/ChatWidget.tsx"
+    ],
+    "duration-200": [
+      "components/ChatWidget.tsx",
+      "components/ChatWidget/Header.tsx",
+      "components/ChatWidget/Header.tsx",
+      "components/ChatWidget/InputArea.tsx",
+      "components/ChatWidget/InputArea.tsx",
+      "components/ChatWidget/InputArea.tsx"
+    ],
+    "isOpen": [
+      "components/ChatWidget.tsx"
+    ],
+    "gap-3": [
+      "components/ChatWidget/Header.tsx"
+    ],
+    "flex-1": [
+      "components/ChatWidget/Header.tsx",
+      "components/ChatWidget/Header.tsx",
+      "components/ChatWidget/MessageList.tsx"
+    ],
+    "min-w-0": [
+      "components/ChatWidget/Header.tsx",
+      "components/ChatWidget/Header.tsx"
+    ],
+    "font-semibold": [
+      "components/ChatWidget/Header.tsx"
+    ],
+    "text-sm": [
+      "components/ChatWidget/Header.tsx",
+      "components/ChatWidget/Header.tsx"
+    ],
+    "leading-tight": [
+      "components/ChatWidget/Header.tsx"
+    ],
+    "opacity-90": [
+      "components/ChatWidget/Header.tsx"
+    ],
+    "gap-1": [
+      "components/ChatWidget/Header.tsx"
+    ],
+    "w-8": [
+      "components/ChatWidget/Header.tsx",
+      "components/ChatWidget/Header.tsx"
+    ],
+    "h-8": [
+      "components/ChatWidget/Header.tsx",
+      "components/ChatWidget/Header.tsx"
+    ],
+    "h-4": [
+      "components/ChatWidget/Header.tsx",
+      "components/ChatWidget/InputArea.tsx",
+      "components/ChatWidget/InputArea.tsx"
+    ],
+    "w-4": [
+      "components/ChatWidget/Header.tsx",
+      "components/ChatWidget/InputArea.tsx",
+      "components/ChatWidget/InputArea.tsx"
+    ],
+    "min-h-0": [
+      "components/ChatWidget/MessageList.tsx"
+    ],
+    "px-2": [
+      "components/ChatWidget/MessageList.tsx"
+    ],
+    "py-3": [
+      "components/ChatWidget/MessageList.tsx"
+    ],
+    "overflow-y-auto": [
+      "components/ChatWidget/MessageList.tsx"
+    ],
+    "overflow-x-hidden": [
+      "components/ChatWidget/MessageList.tsx"
+    ],
+    "overscroll-contain": [
+      "components/ChatWidget/MessageList.tsx"
+    ],
+    "min-h-[100px]": [
+      "components/ChatWidget/MessageList.tsx"
+    ],
+    "fontSize": [
+      "components/ChatWidget/MessageList.tsx"
+    ],
+    "===": [
+      "components/ChatWidget/MessageList.tsx",
+      "components/ChatWidget/MessageList.tsx"
+    ],
+    "slide-in-from-bottom-2": [
+      "components/ChatWidget/MessageList.tsx"
+    ],
+    "message.role": [
+      "components/ChatWidget/MessageList.tsx"
+    ],
+    "leading-relaxed": [
+      "components/ChatWidget/MessageList.tsx"
+    ],
+    "break-words": [
+      "components/ChatWidget/MessageList.tsx",
+      "components/chat/MessageContent.tsx",
+      "components/chat/MessageContent.tsx"
+    ],
+    "sr-only": [
+      "components/ChatWidget/MessageList.tsx",
+      "components/ChatWidget/MessageList.tsx",
+      "components/ChatWidget/InputArea.tsx"
+    ],
+    "mb-3": [
+      "components/ChatWidget/MessageList.tsx"
+    ],
+    "justify-start": [
+      "components/ChatWidget/MessageList.tsx"
+    ],
+    "max-w-[80%]": [
+      "components/ChatWidget/MessageList.tsx"
+    ],
+    "mr-auto": [
+      "components/ChatWidget/MessageList.tsx"
+    ],
+    "px-3": [
+      "components/ChatWidget/MessageList.tsx"
+    ],
+    "py-2.5": [
+      "components/ChatWidget/MessageList.tsx"
+    ],
+    "inline-block": [
+      "components/ChatWidget/MessageList.tsx"
+    ],
+    "bg-[#27272a]": [
+      "components/ChatWidget/MessageList.tsx"
+    ],
+    "gap-1.5": [
+      "components/ChatWidget/MessageList.tsx"
+    ],
+    "w-2": [
+      "components/ChatWidget/MessageList.tsx",
+      "components/ChatWidget/MessageList.tsx",
+      "components/ChatWidget/MessageList.tsx"
+    ],
+    "h-2": [
+      "components/ChatWidget/MessageList.tsx",
+      "components/ChatWidget/MessageList.tsx",
+      "components/ChatWidget/MessageList.tsx"
+    ],
+    "bg-gray-400": [
+      "components/ChatWidget/MessageList.tsx",
+      "components/ChatWidget/MessageList.tsx",
+      "components/ChatWidget/MessageList.tsx"
+    ],
+    "animate-bounce": [
+      "components/ChatWidget/MessageList.tsx",
+      "components/ChatWidget/MessageList.tsx",
+      "components/ChatWidget/MessageList.tsx"
+    ],
+    "gap-2": [
+      "components/ChatWidget/InputArea.tsx"
+    ],
+    "items-end": [
+      "components/ChatWidget/InputArea.tsx"
+    ],
+    "leading-normal": [
+      "components/ChatWidget/InputArea.tsx"
+    ],
+    "text-blue-400": [
+      "components/chat/MessageContent.tsx",
+      "components/chat/MessageContent.tsx"
+    ],
+    "underline": [
+      "components/chat/MessageContent.tsx",
+      "components/chat/MessageContent.tsx"
+    ],
+    "whitespace-pre-wrap": [
+      "components/chat/MessageContent.tsx"
+    ]
+  }
+}

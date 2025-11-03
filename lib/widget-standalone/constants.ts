@@ -83,12 +83,14 @@ export const WIDGET_STYLES = `
   .slide-in-from-bottom-3 { animation: slideInFromBottom 200ms ease-out; }
   /* Combined widget open animation - scale + slide + fade */
   .animate-in.slide-in-from-bottom-3.fade-in {
-    animation: widgetOpen 200ms cubic-bezier(0.16, 1, 0.3, 1);
+    animation: widgetOpen 300ms cubic-bezier(0.34, 1.56, 0.64, 1);
+    transform-origin: bottom right;
   }
   .slide-out-to-bottom-3 { animation: slideOutToBottom 200ms ease-in; }
   /* Combined widget close animation - scale + slide + fade */
   .animate-out.slide-out-to-bottom-3.fade-out {
-    animation: widgetClose 200ms cubic-bezier(0.4, 0, 1, 1);
+    animation: widgetClose 200ms cubic-bezier(0.4, 0, 0.6, 1);
+    transform-origin: bottom right;
   }
   .fade-out { animation: fadeOut 200ms ease-in; }
 
@@ -102,23 +104,27 @@ export const WIDGET_STYLES = `
   @keyframes exit { from { opacity: 1; transform: scale(1); } to { opacity: 0; transform: scale(0.95); } }
   @keyframes fadeOut { from { opacity: 1; } to { opacity: 0; } }
   @keyframes widgetOpen {
-    from {
+    0% {
       opacity: 0;
-      transform: translateY(12px) scale(0.95);
+      transform: scale(0.3) translateY(20px);
+      transform-origin: bottom right;
     }
-    to {
+    100% {
       opacity: 1;
-      transform: translateY(0) scale(1);
+      transform: scale(1) translateY(0);
+      transform-origin: bottom right;
     }
   }
   @keyframes widgetClose {
-    from {
+    0% {
       opacity: 1;
-      transform: translateY(0) scale(1);
+      transform: scale(1) translateY(0);
+      transform-origin: bottom right;
     }
-    to {
+    100% {
       opacity: 0;
-      transform: translateY(12px) scale(0.95);
+      transform: scale(0.3) translateY(20px);
+      transform-origin: bottom right;
     }
   }
 
