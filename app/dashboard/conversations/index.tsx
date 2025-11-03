@@ -145,7 +145,7 @@ export default function ConversationsPage() {
   useKeyboardShortcuts(shortcuts);
 
   return (
-    <div className="flex-1 space-y-6 p-6">
+    <div className="flex-1 space-y-4 p-6">
       <ConversationsPageHeader
         mainView={mainView}
         onMainViewChange={setMainView}
@@ -183,7 +183,7 @@ export default function ConversationsPage() {
       {mainView === 'analytics' ? (
         <ConversationAnalytics days={days} />
       ) : (
-        <div className="grid grid-cols-1 lg:grid-cols-12 gap-4">
+        <div className="grid grid-cols-1 lg:grid-cols-12 gap-3">
           <LanguageDistributionCard
             languages={data?.languages ?? []}
             loading={loading && !data}
