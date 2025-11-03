@@ -94,13 +94,13 @@ export function InputArea({
             color: highContrast ? undefined : inputTextColor,
             borderRadius: `${borderRadius}px`,
           }}
-          className={`flex-1 px-4 py-2.5 resize-none overflow-hidden border ${
+          className={`flex-1 px-4 py-2.5 resize-none overflow-hidden border font-sans ${
             fontSize === 'xlarge' ? 'text-lg' : fontSize === 'large' ? 'text-base' : 'text-sm'
           } ${
             highContrast
               ? 'bg-black border-2 border-white text-white placeholder:text-gray-300 focus:border-yellow-400'
               : 'placeholder:text-gray-500'
-          } focus:outline-none transition-all duration-200 leading-normal`}
+          } focus:outline-none transition-all duration-200 leading-relaxed`}
           onFocus={(e) => {
             if (!highContrast) {
               e.target.style.borderColor = inputFocusBorderColor;
