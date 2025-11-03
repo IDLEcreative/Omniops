@@ -17,6 +17,28 @@ interface EssentialsSettings {
   autoOpen: boolean;
   autoOpenDelay: number;
   soundNotifications: boolean;
+  // Advanced color customization (config-driven widget)
+  advancedColors?: {
+    widgetBackgroundColor?: string;
+    widgetBorderColor?: string;
+    headerBackgroundColor?: string;
+    headerBorderColor?: string;
+    headerTextColor?: string;
+    messageAreaBackgroundColor?: string;
+    userMessageBackgroundColor?: string;
+    userMessageTextColor?: string;
+    botMessageTextColor?: string;
+    inputAreaBackgroundColor?: string;
+    inputAreaBorderColor?: string;
+    inputBackgroundColor?: string;
+    inputBorderColor?: string;
+    inputFocusBorderColor?: string;
+    inputTextColor?: string;
+    inputPlaceholderColor?: string;
+    buttonGradientStart?: string;
+    buttonGradientEnd?: string;
+    buttonTextColor?: string;
+  };
 }
 
 interface EssentialsSectionProps {
@@ -238,6 +260,425 @@ export function EssentialsSection({ settings, onChange }: EssentialsSectionProps
                 onCheckedChange={(checked) => onChange({ soundNotifications: checked })}
               />
             </div>
+        </CardContent>
+      </Card>
+
+      {/* Advanced Colors */}
+      <Card>
+        <CardHeader>
+          <CardTitle className="flex items-center justify-between">
+            <span className="flex items-center">
+              <Palette className="h-5 w-5 mr-2" />
+              Advanced Colors
+            </span>
+            <Badge variant="outline">Config-Driven</Badge>
+          </CardTitle>
+          <CardDescription>
+            Fine-tune every color in your widget. Changes apply instantly without code deployment.
+          </CardDescription>
+        </CardHeader>
+        <CardContent className="space-y-6">
+          {/* Widget Container */}
+          <div className="space-y-4 p-4 border rounded-lg bg-slate-50">
+            <h4 className="font-medium text-sm">Widget Container</h4>
+            <div className="grid grid-cols-2 gap-4">
+              <div className="space-y-2">
+                <Label className="text-xs">Background Color</Label>
+                <div className="flex items-center space-x-2">
+                  <Input
+                    type="color"
+                    value={settings.advancedColors?.widgetBackgroundColor || '#111111'}
+                    onChange={(e) => onChange({
+                      advancedColors: { ...settings.advancedColors, widgetBackgroundColor: e.target.value }
+                    })}
+                    className="w-12 h-8 p-1 border cursor-pointer"
+                  />
+                  <Input
+                    value={settings.advancedColors?.widgetBackgroundColor || '#111111'}
+                    onChange={(e) => onChange({
+                      advancedColors: { ...settings.advancedColors, widgetBackgroundColor: e.target.value }
+                    })}
+                    className="font-mono text-xs"
+                  />
+                </div>
+              </div>
+              <div className="space-y-2">
+                <Label className="text-xs">Border Color</Label>
+                <div className="flex items-center space-x-2">
+                  <Input
+                    type="color"
+                    value={settings.advancedColors?.widgetBorderColor || '#2a2a2a'}
+                    onChange={(e) => onChange({
+                      advancedColors: { ...settings.advancedColors, widgetBorderColor: e.target.value }
+                    })}
+                    className="w-12 h-8 p-1 border cursor-pointer"
+                  />
+                  <Input
+                    value={settings.advancedColors?.widgetBorderColor || '#2a2a2a'}
+                    onChange={(e) => onChange({
+                      advancedColors: { ...settings.advancedColors, widgetBorderColor: e.target.value }
+                    })}
+                    className="font-mono text-xs"
+                  />
+                </div>
+              </div>
+            </div>
+          </div>
+
+          {/* Header */}
+          <div className="space-y-4 p-4 border rounded-lg bg-blue-50">
+            <h4 className="font-medium text-sm">Header</h4>
+            <div className="grid grid-cols-2 gap-4">
+              <div className="space-y-2">
+                <Label className="text-xs">Background</Label>
+                <div className="flex items-center space-x-2">
+                  <Input
+                    type="color"
+                    value={settings.advancedColors?.headerBackgroundColor || '#111111'}
+                    onChange={(e) => onChange({
+                      advancedColors: { ...settings.advancedColors, headerBackgroundColor: e.target.value }
+                    })}
+                    className="w-12 h-8 p-1 border cursor-pointer"
+                  />
+                  <Input
+                    value={settings.advancedColors?.headerBackgroundColor || '#111111'}
+                    onChange={(e) => onChange({
+                      advancedColors: { ...settings.advancedColors, headerBackgroundColor: e.target.value }
+                    })}
+                    className="font-mono text-xs"
+                  />
+                </div>
+              </div>
+              <div className="space-y-2">
+                <Label className="text-xs">Border</Label>
+                <div className="flex items-center space-x-2">
+                  <Input
+                    type="color"
+                    value={settings.advancedColors?.headerBorderColor || '#2a2a2a'}
+                    onChange={(e) => onChange({
+                      advancedColors: { ...settings.advancedColors, headerBorderColor: e.target.value }
+                    })}
+                    className="w-12 h-8 p-1 border cursor-pointer"
+                  />
+                  <Input
+                    value={settings.advancedColors?.headerBorderColor || '#2a2a2a'}
+                    onChange={(e) => onChange({
+                      advancedColors: { ...settings.advancedColors, headerBorderColor: e.target.value }
+                    })}
+                    className="font-mono text-xs"
+                  />
+                </div>
+              </div>
+              <div className="space-y-2 col-span-2">
+                <Label className="text-xs">Text Color</Label>
+                <div className="flex items-center space-x-2">
+                  <Input
+                    type="color"
+                    value={settings.advancedColors?.headerTextColor || '#ffffff'}
+                    onChange={(e) => onChange({
+                      advancedColors: { ...settings.advancedColors, headerTextColor: e.target.value }
+                    })}
+                    className="w-12 h-8 p-1 border cursor-pointer"
+                  />
+                  <Input
+                    value={settings.advancedColors?.headerTextColor || '#ffffff'}
+                    onChange={(e) => onChange({
+                      advancedColors: { ...settings.advancedColors, headerTextColor: e.target.value }
+                    })}
+                    className="font-mono text-xs"
+                  />
+                </div>
+              </div>
+            </div>
+          </div>
+
+          {/* Messages */}
+          <div className="space-y-4 p-4 border rounded-lg bg-purple-50">
+            <h4 className="font-medium text-sm">Messages</h4>
+            <div className="grid grid-cols-2 gap-4">
+              <div className="space-y-2 col-span-2">
+                <Label className="text-xs">Message Area Background</Label>
+                <div className="flex items-center space-x-2">
+                  <Input
+                    type="color"
+                    value={settings.advancedColors?.messageAreaBackgroundColor || '#111111'}
+                    onChange={(e) => onChange({
+                      advancedColors: { ...settings.advancedColors, messageAreaBackgroundColor: e.target.value }
+                    })}
+                    className="w-12 h-8 p-1 border cursor-pointer"
+                  />
+                  <Input
+                    value={settings.advancedColors?.messageAreaBackgroundColor || '#111111'}
+                    onChange={(e) => onChange({
+                      advancedColors: { ...settings.advancedColors, messageAreaBackgroundColor: e.target.value }
+                    })}
+                    className="font-mono text-xs"
+                  />
+                </div>
+              </div>
+              <div className="space-y-2">
+                <Label className="text-xs">User Bubble Background</Label>
+                <div className="flex items-center space-x-2">
+                  <Input
+                    type="color"
+                    value={settings.advancedColors?.userMessageBackgroundColor || '#3f3f46'}
+                    onChange={(e) => onChange({
+                      advancedColors: { ...settings.advancedColors, userMessageBackgroundColor: e.target.value }
+                    })}
+                    className="w-12 h-8 p-1 border cursor-pointer"
+                  />
+                  <Input
+                    value={settings.advancedColors?.userMessageBackgroundColor || '#3f3f46'}
+                    onChange={(e) => onChange({
+                      advancedColors: { ...settings.advancedColors, userMessageBackgroundColor: e.target.value }
+                    })}
+                    className="font-mono text-xs"
+                  />
+                </div>
+              </div>
+              <div className="space-y-2">
+                <Label className="text-xs">User Text Color</Label>
+                <div className="flex items-center space-x-2">
+                  <Input
+                    type="color"
+                    value={settings.advancedColors?.userMessageTextColor || '#ffffff'}
+                    onChange={(e) => onChange({
+                      advancedColors: { ...settings.advancedColors, userMessageTextColor: e.target.value }
+                    })}
+                    className="w-12 h-8 p-1 border cursor-pointer"
+                  />
+                  <Input
+                    value={settings.advancedColors?.userMessageTextColor || '#ffffff'}
+                    onChange={(e) => onChange({
+                      advancedColors: { ...settings.advancedColors, userMessageTextColor: e.target.value }
+                    })}
+                    className="font-mono text-xs"
+                  />
+                </div>
+              </div>
+              <div className="space-y-2 col-span-2">
+                <Label className="text-xs">Bot Text Color</Label>
+                <div className="flex items-center space-x-2">
+                  <Input
+                    type="color"
+                    value={settings.advancedColors?.botMessageTextColor || '#ffffff'}
+                    onChange={(e) => onChange({
+                      advancedColors: { ...settings.advancedColors, botMessageTextColor: e.target.value }
+                    })}
+                    className="w-12 h-8 p-1 border cursor-pointer"
+                  />
+                  <Input
+                    value={settings.advancedColors?.botMessageTextColor || '#ffffff'}
+                    onChange={(e) => onChange({
+                      advancedColors: { ...settings.advancedColors, botMessageTextColor: e.target.value }
+                    })}
+                    className="font-mono text-xs"
+                  />
+                </div>
+              </div>
+            </div>
+          </div>
+
+          {/* Input Area */}
+          <div className="space-y-4 p-4 border rounded-lg bg-green-50">
+            <h4 className="font-medium text-sm">Input Area</h4>
+            <div className="grid grid-cols-2 gap-4">
+              <div className="space-y-2">
+                <Label className="text-xs">Area Background</Label>
+                <div className="flex items-center space-x-2">
+                  <Input
+                    type="color"
+                    value={settings.advancedColors?.inputAreaBackgroundColor || '#111111'}
+                    onChange={(e) => onChange({
+                      advancedColors: { ...settings.advancedColors, inputAreaBackgroundColor: e.target.value }
+                    })}
+                    className="w-12 h-8 p-1 border cursor-pointer"
+                  />
+                  <Input
+                    value={settings.advancedColors?.inputAreaBackgroundColor || '#111111'}
+                    onChange={(e) => onChange({
+                      advancedColors: { ...settings.advancedColors, inputAreaBackgroundColor: e.target.value }
+                    })}
+                    className="font-mono text-xs"
+                  />
+                </div>
+              </div>
+              <div className="space-y-2">
+                <Label className="text-xs">Area Border</Label>
+                <div className="flex items-center space-x-2">
+                  <Input
+                    type="color"
+                    value={settings.advancedColors?.inputAreaBorderColor || '#2a2a2a'}
+                    onChange={(e) => onChange({
+                      advancedColors: { ...settings.advancedColors, inputAreaBorderColor: e.target.value }
+                    })}
+                    className="w-12 h-8 p-1 border cursor-pointer"
+                  />
+                  <Input
+                    value={settings.advancedColors?.inputAreaBorderColor || '#2a2a2a'}
+                    onChange={(e) => onChange({
+                      advancedColors: { ...settings.advancedColors, inputAreaBorderColor: e.target.value }
+                    })}
+                    className="font-mono text-xs"
+                  />
+                </div>
+              </div>
+              <div className="space-y-2">
+                <Label className="text-xs">Input Background</Label>
+                <div className="flex items-center space-x-2">
+                  <Input
+                    type="color"
+                    value={settings.advancedColors?.inputBackgroundColor || '#2a2a2a'}
+                    onChange={(e) => onChange({
+                      advancedColors: { ...settings.advancedColors, inputBackgroundColor: e.target.value }
+                    })}
+                    className="w-12 h-8 p-1 border cursor-pointer"
+                  />
+                  <Input
+                    value={settings.advancedColors?.inputBackgroundColor || '#2a2a2a'}
+                    onChange={(e) => onChange({
+                      advancedColors: { ...settings.advancedColors, inputBackgroundColor: e.target.value }
+                    })}
+                    className="font-mono text-xs"
+                  />
+                </div>
+              </div>
+              <div className="space-y-2">
+                <Label className="text-xs">Input Border</Label>
+                <div className="flex items-center space-x-2">
+                  <Input
+                    type="color"
+                    value={settings.advancedColors?.inputBorderColor || '#3a3a3a'}
+                    onChange={(e) => onChange({
+                      advancedColors: { ...settings.advancedColors, inputBorderColor: e.target.value }
+                    })}
+                    className="w-12 h-8 p-1 border cursor-pointer"
+                  />
+                  <Input
+                    value={settings.advancedColors?.inputBorderColor || '#3a3a3a'}
+                    onChange={(e) => onChange({
+                      advancedColors: { ...settings.advancedColors, inputBorderColor: e.target.value }
+                    })}
+                    className="font-mono text-xs"
+                  />
+                </div>
+              </div>
+              <div className="space-y-2">
+                <Label className="text-xs">Input Focus Border</Label>
+                <div className="flex items-center space-x-2">
+                  <Input
+                    type="color"
+                    value={settings.advancedColors?.inputFocusBorderColor || '#4a4a4a'}
+                    onChange={(e) => onChange({
+                      advancedColors: { ...settings.advancedColors, inputFocusBorderColor: e.target.value }
+                    })}
+                    className="w-12 h-8 p-1 border cursor-pointer"
+                  />
+                  <Input
+                    value={settings.advancedColors?.inputFocusBorderColor || '#4a4a4a'}
+                    onChange={(e) => onChange({
+                      advancedColors: { ...settings.advancedColors, inputFocusBorderColor: e.target.value }
+                    })}
+                    className="font-mono text-xs"
+                  />
+                </div>
+              </div>
+              <div className="space-y-2">
+                <Label className="text-xs">Input Text</Label>
+                <div className="flex items-center space-x-2">
+                  <Input
+                    type="color"
+                    value={settings.advancedColors?.inputTextColor || '#ffffff'}
+                    onChange={(e) => onChange({
+                      advancedColors: { ...settings.advancedColors, inputTextColor: e.target.value }
+                    })}
+                    className="w-12 h-8 p-1 border cursor-pointer"
+                  />
+                  <Input
+                    value={settings.advancedColors?.inputTextColor || '#ffffff'}
+                    onChange={(e) => onChange({
+                      advancedColors: { ...settings.advancedColors, inputTextColor: e.target.value }
+                    })}
+                    className="font-mono text-xs"
+                  />
+                </div>
+              </div>
+            </div>
+          </div>
+
+          {/* Floating Button */}
+          <div className="space-y-4 p-4 border rounded-lg bg-orange-50">
+            <h4 className="font-medium text-sm">Floating Button</h4>
+            <div className="grid grid-cols-2 gap-4">
+              <div className="space-y-2">
+                <Label className="text-xs">Gradient Start</Label>
+                <div className="flex items-center space-x-2">
+                  <Input
+                    type="color"
+                    value={settings.advancedColors?.buttonGradientStart || '#3a3a3a'}
+                    onChange={(e) => onChange({
+                      advancedColors: { ...settings.advancedColors, buttonGradientStart: e.target.value }
+                    })}
+                    className="w-12 h-8 p-1 border cursor-pointer"
+                  />
+                  <Input
+                    value={settings.advancedColors?.buttonGradientStart || '#3a3a3a'}
+                    onChange={(e) => onChange({
+                      advancedColors: { ...settings.advancedColors, buttonGradientStart: e.target.value }
+                    })}
+                    className="font-mono text-xs"
+                  />
+                </div>
+              </div>
+              <div className="space-y-2">
+                <Label className="text-xs">Gradient End</Label>
+                <div className="flex items-center space-x-2">
+                  <Input
+                    type="color"
+                    value={settings.advancedColors?.buttonGradientEnd || '#2a2a2a'}
+                    onChange={(e) => onChange({
+                      advancedColors: { ...settings.advancedColors, buttonGradientEnd: e.target.value }
+                    })}
+                    className="w-12 h-8 p-1 border cursor-pointer"
+                  />
+                  <Input
+                    value={settings.advancedColors?.buttonGradientEnd || '#2a2a2a'}
+                    onChange={(e) => onChange({
+                      advancedColors: { ...settings.advancedColors, buttonGradientEnd: e.target.value }
+                    })}
+                    className="font-mono text-xs"
+                  />
+                </div>
+              </div>
+              <div className="space-y-2 col-span-2">
+                <Label className="text-xs">Icon Color</Label>
+                <div className="flex items-center space-x-2">
+                  <Input
+                    type="color"
+                    value={settings.advancedColors?.buttonTextColor || '#ffffff'}
+                    onChange={(e) => onChange({
+                      advancedColors: { ...settings.advancedColors, buttonTextColor: e.target.value }
+                    })}
+                    className="w-12 h-8 p-1 border cursor-pointer"
+                  />
+                  <Input
+                    value={settings.advancedColors?.buttonTextColor || '#ffffff'}
+                    onChange={(e) => onChange({
+                      advancedColors: { ...settings.advancedColors, buttonTextColor: e.target.value }
+                    })}
+                    className="font-mono text-xs"
+                  />
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <div className="p-4 bg-blue-50 border border-blue-200 rounded-lg">
+            <p className="text-xs text-blue-800">
+              <strong>💡 Pro Tip:</strong> All color changes apply instantly without code deployment.
+              Your widget will automatically pick up these changes on next page load.
+            </p>
+          </div>
         </CardContent>
       </Card>
     </div>

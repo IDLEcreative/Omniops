@@ -10,6 +10,17 @@ export interface InputAreaProps {
   onInputChange: (value: string) => void;
   onSend: () => void;
   onFontSizeChange: () => void;
+  // Configuration-driven styling props
+  appearance?: {
+    inputAreaBackgroundColor?: string;
+    inputAreaBorderColor?: string;
+    inputBackgroundColor?: string;
+    inputBorderColor?: string;
+    inputFocusBorderColor?: string;
+    inputTextColor?: string;
+    inputPlaceholderColor?: string;
+    borderRadius?: string;
+  };
 }
 
 export function InputArea({
@@ -21,7 +32,16 @@ export function InputArea({
   onInputChange,
   onSend,
   onFontSizeChange,
+  appearance,
 }: InputAreaProps) {
+  // Use config-driven colors with fallbacks to current hardcoded values
+  const inputAreaBgColor = appearance?.inputAreaBackgroundColor || '#111111';
+  const inputAreaBorderColor = appearance?.inputAreaBorderColor || '#2a2a2a';
+  const inputBgColor = appearance?.inputBackgroundColor || '#2a2a2a';
+  const inputBorderColor = appearance?.inputBorderColor || '#3a3a3a';
+  const inputFocusBorderColor = appearance?.inputFocusBorderColor || '#4a4a4a';
+  const inputTextColor = appearance?.inputTextColor || '#ffffff';
+  const borderRadius = appearance?.borderRadius || '8';
   const handleTextareaChange = (e: React.ChangeEvent<HTMLTextAreaElement>) => {
     onInputChange(e.target.value);
     if (textareaRef.current) {
@@ -46,7 +66,13 @@ export function InputArea({
   }, [input, textareaRef]);
 
   return (
-    <div className={`px-3 sm:px-4 py-3 ${highContrast ? 'border-t-2 border-white bg-black' : 'border-t border-[#2a2a2a] bg-[#111111]'}`}>
+    <div
+      style={{
+        backgroundColor: highContrast ? undefined : inputAreaBgColor,
+        borderColor: highContrast ? undefined : inputAreaBorderColor,
+      }}
+      className={`px-3 sm:px-4 py-3 border-t ${highContrast ? 'border-t-2 border-white bg-black' : ''}`}
+    >
       <div className="flex gap-2 items-end">
         <label htmlFor="chat-input" className="sr-only">Type your message</label>
         <textarea
@@ -59,14 +85,32 @@ export function InputArea({
           disabled={loading}
           aria-label="Message input"
           rows={1}
-          style={{ height: '40px', minHeight: '40px', maxHeight: '120px' }}
-          className={`flex-1 px-4 py-2.5 resize-none overflow-hidden ${
+          style={{
+            height: '40px',
+            minHeight: '40px',
+            maxHeight: '120px',
+            backgroundColor: highContrast ? undefined : inputBgColor,
+            borderColor: highContrast ? undefined : inputBorderColor,
+            color: highContrast ? undefined : inputTextColor,
+            borderRadius: `${borderRadius}px`,
+          }}
+          className={`flex-1 px-4 py-2.5 resize-none overflow-hidden border ${
             fontSize === 'xlarge' ? 'text-lg' : fontSize === 'large' ? 'text-base' : 'text-sm'
           } ${
             highContrast
-              ? 'bg-black border-2 border-white text-white placeholder:text-gray-300 focus:border-yellow-400 rounded-full'
-              : 'bg-[#2a2a2a] border border-[#3a3a3a] text-white placeholder:text-gray-500 focus:border-[#4a4a4a] rounded-full'
+              ? 'bg-black border-2 border-white text-white placeholder:text-gray-300 focus:border-yellow-400'
+              : 'placeholder:text-gray-500'
           } focus:outline-none transition-all duration-200 leading-normal`}
+          onFocus={(e) => {
+            if (!highContrast) {
+              e.target.style.borderColor = inputFocusBorderColor;
+            }
+          }}
+          onBlur={(e) => {
+            if (!highContrast) {
+              e.target.style.borderColor = inputBorderColor;
+            }
+          }}
         />
         <button
           onClick={onFontSizeChange}

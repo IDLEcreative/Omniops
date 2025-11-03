@@ -18,12 +18,52 @@ export interface ChatWidgetConfig {
     woocommerce?: { enabled: boolean };
   };
   appearance?: {
+    // Behavioral settings
     showPulseAnimation?: boolean; // Pulse ring animation on compact button (default: true)
     showNotificationBadge?: boolean; // Green dot badge on compact button (default: true)
     startMinimized?: boolean; // Start widget minimized on first load (default: true)
+
+    // Text content
     headerTitle?: string; // Header title text
     headerSubtitle?: string; // Header subtitle text
+
+    // Primary branding
     primaryColor?: string; // Primary color for header (hex)
+
+    // Widget container colors
+    widgetBackgroundColor?: string; // Main widget background
+    widgetBorderColor?: string; // Main widget border
+
+    // Header colors
+    headerBackgroundColor?: string; // Header background
+    headerBorderColor?: string; // Header border
+    headerTextColor?: string; // Header text color
+
+    // Message area colors
+    messageAreaBackgroundColor?: string; // Message list background
+    userMessageBackgroundColor?: string; // User message bubble background
+    userMessageTextColor?: string; // User message text color
+    botMessageTextColor?: string; // Bot message text color
+
+    // Input area colors
+    inputAreaBackgroundColor?: string; // Input area background
+    inputAreaBorderColor?: string; // Input area border
+    inputBackgroundColor?: string; // Input field background
+    inputBorderColor?: string; // Input field border
+    inputFocusBorderColor?: string; // Input field border on focus
+    inputTextColor?: string; // Input text color
+    inputPlaceholderColor?: string; // Input placeholder color
+
+    // Button colors
+    buttonGradientStart?: string; // Floating button gradient start
+    buttonGradientEnd?: string; // Floating button gradient end
+    buttonTextColor?: string; // Floating button icon color
+    buttonHoverBackgroundColor?: string; // Button hover background
+
+    // Typography
+    fontFamily?: string; // Font family
+    fontSize?: string; // Font size
+    borderRadius?: string; // Border radius
   };
 }
 

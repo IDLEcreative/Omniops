@@ -64,50 +64,6 @@ export default function CustomizeV2Page() {
         </div>
       </div>
 
-      {/* Customer Config Selector */}
-      <Card>
-        <CardContent className="pt-6">
-          <div className="flex items-center gap-4">
-            <div className="flex-1">
-              <label className="text-sm font-medium mb-2 block">
-                Select Website to Customize
-              </label>
-              <Select
-                value={customerConfigId || ''}
-                onValueChange={(value) => {
-                  setCustomerConfigId(value);
-                }}
-                disabled={isLoadingConfigs || availableConfigs.length === 0}
-              >
-                <SelectTrigger>
-                  <SelectValue placeholder="Choose a website..." />
-                </SelectTrigger>
-                <SelectContent>
-                  {availableConfigs.map(config => (
-                    <SelectItem key={config.id} value={config.id}>
-                      {config.domain} {config.business_name && `(${config.business_name})`}
-                    </SelectItem>
-                  ))}
-                </SelectContent>
-              </Select>
-            </div>
-            {availableConfigs.length === 0 && !isLoadingConfigs && (
-              <div className="flex-1 text-sm text-muted-foreground">
-                No websites configured yet.
-                <a href="/dashboard/installation" className="text-primary underline ml-1">
-                  Set up your first website
-                </a>
-              </div>
-            )}
-            {isLoadingConfigs && (
-              <div className="flex-1 text-sm text-muted-foreground">
-                Loading configurations...
-              </div>
-            )}
-          </div>
-        </CardContent>
-      </Card>
-
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
         {/* Configuration Panel */}
         <div className="lg:col-span-2">

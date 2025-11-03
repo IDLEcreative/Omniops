@@ -226,11 +226,20 @@ export default function ChatWidget({
     const showPulse = demoConfig?.appearance?.showPulseAnimation ?? true;
     const showBadge = demoConfig?.appearance?.showNotificationBadge ?? true;
 
+    // Config-driven button colors
+    const buttonGradientStart = demoConfig?.appearance?.buttonGradientStart || '#3a3a3a';
+    const buttonGradientEnd = demoConfig?.appearance?.buttonGradientEnd || '#2a2a2a';
+    const buttonTextColor = demoConfig?.appearance?.buttonTextColor || '#ffffff';
+
     return (
       <div className="fixed bottom-4 right-4 sm:bottom-5 sm:right-5 z-50">
         <button
           onClick={() => setIsOpen(true)}
-          className="relative w-12 h-12 sm:w-14 sm:h-14 bg-gradient-to-br from-[#3a3a3a] to-[#2a2a2a] text-white rounded-full shadow-xl hover:shadow-2xl hover:scale-105 focus:outline-none focus:ring-2 focus:ring-white/50 focus:ring-offset-2 focus:ring-offset-black transition-all duration-300 flex items-center justify-center animate-in fade-in group"
+          style={{
+            backgroundImage: `linear-gradient(to bottom right, ${buttonGradientStart}, ${buttonGradientEnd})`,
+            color: buttonTextColor,
+          }}
+          className="relative w-12 h-12 sm:w-14 sm:h-14 text-white rounded-full shadow-xl hover:shadow-2xl hover:scale-105 focus:outline-none focus:ring-2 focus:ring-white/50 focus:ring-offset-2 focus:ring-offset-black transition-all duration-300 flex items-center justify-center animate-in fade-in group"
           aria-label="Open chat support widget"
           role="button"
           tabIndex={0}
@@ -238,8 +247,11 @@ export default function ChatWidget({
           {/* Subtle pulse animation ring - respects user preference and configuration */}
           {showPulse && (
             <span
-              className="absolute inset-0 rounded-full bg-gradient-to-br from-[#3a3a3a] to-[#2a2a2a] opacity-75 animate-ping motion-reduce:animate-none"
-              style={{ animationDuration: '3s' }}
+              style={{
+                backgroundImage: `linear-gradient(to bottom right, ${buttonGradientStart}, ${buttonGradientEnd})`,
+                animationDuration: '3s',
+              }}
+              className="absolute inset-0 rounded-full opacity-75 animate-ping motion-reduce:animate-none"
               aria-hidden="true"
             />
           )}
@@ -259,11 +271,19 @@ export default function ChatWidget({
     );
   }
 
+  // Config-driven widget container colors
+  const widgetBgColor = demoConfig?.appearance?.widgetBackgroundColor || '#111111';
+  const widgetBorderColor = demoConfig?.appearance?.widgetBorderColor || '#2a2a2a';
+
   return (
     <div
+      style={{
+        backgroundColor: highContrast ? undefined : widgetBgColor,
+        borderColor: highContrast ? undefined : widgetBorderColor,
+      }}
       className={`fixed bottom-0 right-0 w-full h-full
       sm:bottom-5 sm:w-[400px] sm:h-[580px] sm:max-h-[calc(100vh-40px)] sm:right-5 sm:mx-0
-      ${highContrast ? 'bg-black border-2 border-white' : 'bg-[#111111]'}
+      ${highContrast ? 'bg-black border-2 border-white' : 'border'}
       rounded-lg shadow-lg flex flex-col overflow-hidden transition-all duration-200 z-50 ${
       isOpen ? 'animate-in slide-in-from-bottom-3 fade-in' : 'animate-out slide-out-to-bottom-3 fade-out'
     }`}
@@ -278,6 +298,7 @@ export default function ChatWidget({
         highContrast={highContrast}
         onToggleHighContrast={() => setHighContrast(!highContrast)}
         onClose={() => setIsOpen(false)}
+        appearance={demoConfig?.appearance}
       />
 
       <MessageList
@@ -286,6 +307,7 @@ export default function ChatWidget({
         highContrast={highContrast}
         fontSize={fontSize}
         messagesContainerRef={messagesContainerRef}
+        appearance={demoConfig?.appearance}
       />
 
       <InputArea
@@ -297,6 +319,7 @@ export default function ChatWidget({
         onInputChange={setInput}
         onSend={sendMessage}
         onFontSizeChange={handleFontSizeChange}
+        appearance={demoConfig?.appearance}
       />
     </div>
   );

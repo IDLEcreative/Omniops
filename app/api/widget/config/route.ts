@@ -30,6 +30,42 @@ export async function OPTIONS() {
   return withCors(new NextResponse(null, { status: 204 }));
 }
 
+// Helper function for default appearance configuration
+function getDefaultAppearance() {
+  return {
+    position: 'bottom-right',
+    width: 400,
+    height: 600,
+    showPulseAnimation: true,
+    showNotificationBadge: true,
+    startMinimized: true,
+    // Default colors matching current widget
+    widgetBackgroundColor: '#111111',
+    widgetBorderColor: '#2a2a2a',
+    headerBackgroundColor: '#111111',
+    headerBorderColor: '#2a2a2a',
+    headerTextColor: '#ffffff',
+    messageAreaBackgroundColor: '#111111',
+    userMessageBackgroundColor: '#3f3f46',
+    userMessageTextColor: '#ffffff',
+    botMessageTextColor: '#ffffff',
+    inputAreaBackgroundColor: '#111111',
+    inputAreaBorderColor: '#2a2a2a',
+    inputBackgroundColor: '#2a2a2a',
+    inputBorderColor: '#3a3a3a',
+    inputFocusBorderColor: '#4a4a4a',
+    inputTextColor: '#ffffff',
+    inputPlaceholderColor: '#9ca3af',
+    buttonGradientStart: '#3a3a3a',
+    buttonGradientEnd: '#2a2a2a',
+    buttonTextColor: '#ffffff',
+    buttonHoverBackgroundColor: '#1a1a1a',
+    fontFamily: 'system-ui',
+    fontSize: '14',
+    borderRadius: '8',
+  };
+}
+
 export async function GET(request: NextRequest) {
   try {
     // TEMPORARY WORKAROUND - Domain alias mapping for staging/test environments
@@ -68,10 +104,11 @@ export async function GET(request: NextRequest) {
     }
 
     // Apply domain alias if exists (TEMPORARY - see comment above)
-    if (domain && DOMAIN_ALIASES[domain]) {
-      console.log(`[Widget Config API] ⚠️ Using domain alias workaround: ${domain} → ${DOMAIN_ALIASES[domain]}`);
+    const aliasedDomain = domain && DOMAIN_ALIASES[domain];
+    if (aliasedDomain) {
+      console.log(`[Widget Config API] ⚠️ Using domain alias workaround: ${domain} → ${aliasedDomain}`);
       console.log(`[Widget Config API] ℹ️ Proper fix: Add ${domain} to customer_configs table`);
-      domain = DOMAIN_ALIASES[domain];
+      domain = aliasedDomain;
     }
 
     const validatedQuery = QuerySchema.parse({ domain, id: appId });
@@ -89,14 +126,7 @@ export async function GET(request: NextRequest) {
             woocommerce_enabled: false,
             shopify_enabled: false,
             branding: null,
-            appearance: {
-              position: 'bottom-right',
-              width: 400,
-              height: 600,
-              showPulseAnimation: true,
-              showNotificationBadge: true,
-              startMinimized: true,
-            },
+            appearance: getDefaultAppearance(),
             behavior: {
               welcomeMessage: 'Hi! How can I help you today?',
               placeholderText: 'Type your message...',
@@ -191,14 +221,7 @@ export async function GET(request: NextRequest) {
             woocommerce_enabled: false,
             shopify_enabled: false,
             branding: null,
-            appearance: {
-              position: 'bottom-right',
-              width: 400,
-              height: 600,
-              showPulseAnimation: true,
-              showNotificationBadge: true,
-              startMinimized: true,
-            },
+            appearance: getDefaultAppearance(),
           },
         },
         { status: 200 } // Return 200 with default config, not 404
@@ -214,20 +237,62 @@ export async function GET(request: NextRequest) {
       .eq('is_active', true)
       .single();
 
-    // Build appearance settings from widget_configs if available
+    // Extract primary color first (used as fallback for buttons/accents)
+    const primaryColor = widgetConfig?.theme_settings?.primaryColor || config.primary_color || '#3b82f6';
+
+    // Build comprehensive appearance settings from widget_configs if available
+    // All styling properties needed for fully configuration-driven widget
     const appearance = {
+      // Position & Size
       position: widgetConfig?.position_settings?.position || 'bottom-right',
       width: widgetConfig?.position_settings?.width || 400,
       height: widgetConfig?.position_settings?.height || 600,
       showPulseAnimation: widgetConfig?.behavior_settings?.showAvatar ?? true,
       showNotificationBadge: true,
       startMinimized: !widgetConfig?.behavior_settings?.autoOpen,
-      primaryColor: widgetConfig?.theme_settings?.primaryColor || config.primary_color || '#3b82f6',
+
+      // Primary Branding Color (set by customize page)
+      primaryColor,
+
+      // Widget Container Colors
+      widgetBackgroundColor: widgetConfig?.theme_settings?.widgetBackgroundColor || '#111111',
+      widgetBorderColor: widgetConfig?.theme_settings?.widgetBorderColor || '#2a2a2a',
+
+      // Header Colors - Use primaryColor for background if not explicitly set
+      headerBackgroundColor: widgetConfig?.theme_settings?.headerBackgroundColor || primaryColor,
+      headerBorderColor: widgetConfig?.theme_settings?.headerBorderColor || '#2a2a2a',
+      headerTextColor: widgetConfig?.theme_settings?.headerTextColor || '#ffffff',
+      headerSubtitle: config.welcome_message || 'Online - We typically reply instantly',
+
+      // Message Area Colors
+      messageAreaBackgroundColor: widgetConfig?.theme_settings?.messageAreaBackgroundColor || '#111111',
+      userMessageBackgroundColor: widgetConfig?.theme_settings?.userMessageBackgroundColor || '#3f3f46',
+      userMessageTextColor: widgetConfig?.theme_settings?.userMessageTextColor || '#ffffff',
+      botMessageTextColor: widgetConfig?.theme_settings?.botMessageTextColor || '#ffffff',
+
+      // Input Area Colors
+      inputAreaBackgroundColor: widgetConfig?.theme_settings?.inputAreaBackgroundColor || '#111111',
+      inputAreaBorderColor: widgetConfig?.theme_settings?.inputAreaBorderColor || '#2a2a2a',
+      inputBackgroundColor: widgetConfig?.theme_settings?.inputBackgroundColor || '#2a2a2a',
+      inputBorderColor: widgetConfig?.theme_settings?.inputBorderColor || '#3a3a3a',
+      inputFocusBorderColor: widgetConfig?.theme_settings?.inputFocusBorderColor || primaryColor,
+      inputTextColor: widgetConfig?.theme_settings?.inputTextColor || '#ffffff',
+      inputPlaceholderColor: widgetConfig?.theme_settings?.inputPlaceholderColor || '#9ca3af',
+
+      // Button Colors - Use primaryColor for gradients if not explicitly set
+      buttonGradientStart: widgetConfig?.theme_settings?.buttonGradientStart || primaryColor,
+      buttonGradientEnd: widgetConfig?.theme_settings?.buttonGradientEnd || primaryColor,
+      buttonTextColor: widgetConfig?.theme_settings?.buttonTextColor || '#ffffff',
+      buttonHoverBackgroundColor: widgetConfig?.theme_settings?.buttonHoverBackgroundColor || primaryColor,
+
+      // Typography
+      fontFamily: widgetConfig?.theme_settings?.fontFamily || 'system-ui',
+      fontSize: widgetConfig?.theme_settings?.fontSize || '14',
+      borderRadius: widgetConfig?.theme_settings?.borderRadius || '8',
+
+      // Legacy/Compatibility (for widgets not yet using new properties)
       backgroundColor: widgetConfig?.theme_settings?.backgroundColor || '#ffffff',
       textColor: widgetConfig?.theme_settings?.textColor || '#1f2937',
-      borderRadius: widgetConfig?.theme_settings?.borderRadius || '8',
-      fontSize: widgetConfig?.theme_settings?.fontSize || '14',
-      fontFamily: widgetConfig?.theme_settings?.fontFamily || 'system-ui',
       darkMode: widgetConfig?.theme_settings?.darkMode || false,
     };
 
