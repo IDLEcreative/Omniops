@@ -26,17 +26,6 @@ export const MessageContent = React.memo(({ content, className = '' }: MessageCo
   
   // Memoized function to convert URLs in text to clickable links
   const renderContentWithLinks = useMemo(() => (text: string) => {
-    // Regex patterns for different URL formats
-    const patterns = [
-      // [text](url) markdown style
-      /\[([^\]]+)\]\(([^)]+)\)/g,
-      // Plain URLs with http/https
-      /(https?:\/\/[^\s]+)/g,
-      // URLs without protocol (example.com/page)
-      /(?<!\S)((?:www\.)?[a-zA-Z0-9-]+\.[a-zA-Z]{2,}(?:\/[^\s]*)?)/g
-    ];
-
-    const processedText = text;
     const elements: React.ReactNode[] = [];
     let lastIndex = 0;
 
@@ -70,6 +59,8 @@ export const MessageContent = React.memo(({ content, className = '' }: MessageCo
         <a
           key={`link-${link.start}`}
           href={link.url.startsWith('http') ? link.url : `https://${link.url}`}
+          target="_parent"
+          rel="noopener noreferrer"
           className="text-blue-400 underline hover:text-blue-300 break-words"
         >
           {link.text}
@@ -107,6 +98,8 @@ export const MessageContent = React.memo(({ content, className = '' }: MessageCo
           <a
             key={`url-${index}`}
             href={url}
+            target="_parent"
+            rel="noopener noreferrer"
             className="text-blue-400 underline hover:text-blue-300 break-words"
           >
             {part}
