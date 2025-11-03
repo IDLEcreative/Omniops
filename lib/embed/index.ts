@@ -35,7 +35,9 @@ declare global {
   }
 }
 
-const WIDGET_VERSION = "2.2.3";
+// Version is auto-generated at build time to force cache invalidation
+// @ts-ignore - This will be replaced at build time
+const WIDGET_VERSION = __WIDGET_VERSION__;
 const CLEANUP_KEY = 'chat_widget_last_cleanup';
 
 function logDebug(message: string, payload?: unknown) {

@@ -9,7 +9,12 @@ const esbuild = require('esbuild');
 
 async function buildEmbed() {
   const start = Date.now();
+
+  // Generate unique version using timestamp to force cache invalidation
+  const version = `2.2.${Math.floor(Date.now() / 1000)}`;
+
   console.log('\n🧩 Building embed loader...\n');
+  console.log(`📦 Version: ${version}\n`);
 
   try {
     await esbuild.build({
@@ -26,6 +31,7 @@ async function buildEmbed() {
       legalComments: 'none',
       define: {
         'process.env.NODE_ENV': '"production"',
+        '__WIDGET_VERSION__': `"${version}"`,
       },
     });
 
