@@ -87,16 +87,19 @@ function ConversationListItemComponent({
   return (
     <button
       type="button"
-      className={`w-full border-b px-4 py-3 text-left transition hover:bg-muted focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 ${
-        isSelected ? "bg-muted border-l-2 border-l-primary" : ""
+      className={`
+        w-full border-b px-4 py-3.5 text-left transition-all duration-200
+        hover:bg-accent/50 focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2
+        ${
+        isSelected ? "bg-accent/70 border-l-2 border-l-primary shadow-sm" : "hover:shadow-sm"
       }`}
       onClick={handleClick}
       aria-selected={isSelected}
       aria-label={`Conversation with ${conversation.customerName || "customer"}, ${formatRelativeTime(conversation.timestamp)}, status: ${STATUS_LABELS[conversation.status]}`}
     >
-      <div className="flex items-start gap-3">
+      <div className="flex items-start gap-3.5">
         {isSelectionMode && onToggleSelect && (
-          <div className="pt-0.5">
+          <div className="pt-1">
             <Checkbox
               checked={isChecked}
               onCheckedChange={onToggleSelect}
@@ -105,17 +108,17 @@ function ConversationListItemComponent({
             />
           </div>
         )}
-        <div className="flex-1 min-w-0">
-          <div className="flex items-center justify-between text-xs text-muted-foreground">
+        <div className="flex-1 min-w-0 space-y-2">
+          <div className="flex items-center justify-between gap-2">
             <span>{formatRelativeTime(conversation.timestamp)}</span>
-            <Badge variant={statusBadgeVariant(conversation.status)}>
+            <Badge variant={statusBadgeVariant(conversation.status)} className="text-xs">
               {STATUS_LABELS[conversation.status]}
             </Badge>
           </div>
-          <p className="mt-1 text-sm font-medium">
+          <p className="text-sm font-semibold truncate">
             {conversation.customerName ?? "Customer"}
           </p>
-          <p className="mt-1 line-clamp-2 text-sm text-muted-foreground">
+          <p className="line-clamp-2 text-sm text-muted-foreground leading-relaxed">
             {conversation.message}
           </p>
         </div>
