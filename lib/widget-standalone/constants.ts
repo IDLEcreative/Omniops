@@ -76,12 +76,20 @@ export const WIDGET_STYLES = `
   .animate-ping { animation: ping 1s cubic-bezier(0, 0, 0.2, 1) infinite; }
   .animate-pulse { animation: pulse 2s cubic-bezier(0.4, 0, 0.6, 1) infinite; }
   .animate-bounce { animation: bounce 1s infinite; }
-  .animate-in { animation: enter 200ms ease-out; }
+  /* REMOVED: .animate-in conflicts with other animations */
   .animate-out { animation: exit 200ms ease-in; }
-  .fade-in { animation: fadeIn 200ms ease-out; }
+  /* REMOVED: .fade-in conflicts with other animations */
   .slide-in-from-bottom-2 { animation: slideInFromBottom 150ms ease-out; }
   .slide-in-from-bottom-3 { animation: slideInFromBottom 200ms ease-out; }
+  /* Combined widget open animation - scale + slide + fade */
+  .animate-in.slide-in-from-bottom-3.fade-in {
+    animation: widgetOpen 200ms cubic-bezier(0.16, 1, 0.3, 1);
+  }
   .slide-out-to-bottom-3 { animation: slideOutToBottom 200ms ease-in; }
+  /* Combined widget close animation - scale + slide + fade */
+  .animate-out.slide-out-to-bottom-3.fade-out {
+    animation: widgetClose 200ms cubic-bezier(0.4, 0, 1, 1);
+  }
   .fade-out { animation: fadeOut 200ms ease-in; }
 
   @keyframes ping { 75%, 100% { transform: scale(2); opacity: 0; } }
@@ -93,6 +101,26 @@ export const WIDGET_STYLES = `
   @keyframes slideOutToBottom { from { transform: translateY(0); opacity: 1; } to { transform: translateY(12px); opacity: 0; } }
   @keyframes exit { from { opacity: 1; transform: scale(1); } to { opacity: 0; transform: scale(0.95); } }
   @keyframes fadeOut { from { opacity: 1; } to { opacity: 0; } }
+  @keyframes widgetOpen {
+    from {
+      opacity: 0;
+      transform: translateY(12px) scale(0.95);
+    }
+    to {
+      opacity: 1;
+      transform: translateY(0) scale(1);
+    }
+  }
+  @keyframes widgetClose {
+    from {
+      opacity: 1;
+      transform: translateY(0) scale(1);
+    }
+    to {
+      opacity: 0;
+      transform: translateY(12px) scale(0.95);
+    }
+  }
 
   /* Dark theme widget colors */
   .bg-\\[\\#1F2937\\] { background-color: #1F2937; }
@@ -148,6 +176,9 @@ export const WIDGET_STYLES = `
   /* Disabled states */
   .disabled\\:opacity-30:disabled { opacity: 0.3; }
   .disabled\\:bg-gray-600:disabled { background-color: rgb(75 85 99); }
+
+  /* Transform origin for animations */
+  .transform-origin-bottom { transform-origin: bottom; }
 
   /* Responsive */
   @media (min-width: 640px) {
