@@ -57,8 +57,13 @@ export function Header({
       <div className="flex items-center gap-3">
         <button
           onClick={onToggleHighContrast}
-          style={{ color: highContrast ? undefined : textColor }}
-          className={`p-1 flex items-center justify-center hover:opacity-70 transition-opacity duration-200 focus:outline-none bg-transparent border-0 ${highContrast ? 'text-white' : ''}`}
+          style={{
+            color: highContrast ? undefined : textColor,
+            background: 'transparent',
+            border: 'none',
+            padding: '4px',
+          }}
+          className={`flex items-center justify-center hover:opacity-70 transition-opacity duration-200 focus:outline-none ${highContrast ? 'text-white' : ''}`}
           aria-label={`Toggle high contrast mode. Currently ${highContrast ? 'on' : 'off'}`}
           title="Toggle high contrast"
         >
@@ -66,8 +71,13 @@ export function Header({
         </button>
         <button
           onClick={onClose}
-          style={{ color: highContrast ? undefined : textColor }}
-          className={`p-1 flex items-center justify-center hover:opacity-70 transition-opacity duration-200 focus:outline-none bg-transparent border-0 ${highContrast ? 'text-white' : ''}`}
+          style={{
+            color: highContrast ? undefined : textColor,
+            background: 'transparent',
+            border: 'none',
+            padding: '4px',
+          }}
+          className={`flex items-center justify-center hover:opacity-70 transition-opacity duration-200 focus:outline-none ${highContrast ? 'text-white' : ''}`}
           aria-label="Close chat widget"
         >
           <X className="h-5 w-5" aria-hidden="true" />
