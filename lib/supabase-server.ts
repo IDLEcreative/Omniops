@@ -1,8 +1,9 @@
-// Server-side Supabase exports only  
+// Server-side Supabase exports only
 // This file should only be imported in server components and API routes
-export { 
+export {
   createClient,
   createServiceRoleClient,
+  createServiceRoleClientSync,
   requireClient,
   requireServiceRoleClient,
   validateSupabaseEnv

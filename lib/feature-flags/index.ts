@@ -165,6 +165,7 @@ export class FeatureFlagManager {
   private async getCustomerOverride(customerId: string): Promise<ChatWidgetFeatureFlags | null> {
     try {
       const supabase = createServiceRoleClientSync();
+      if (!supabase) return null;
 
       const { data, error } = await supabase
         .from('customer_feature_flags')
@@ -191,6 +192,7 @@ export class FeatureFlagManager {
   ): Promise<ChatWidgetFeatureFlags | null> {
     try {
       const supabase = createServiceRoleClientSync();
+      if (!supabase) return null;
 
       const { data, error } = await supabase
         .from('organization_feature_flags')
@@ -249,6 +251,9 @@ export class FeatureFlagManager {
   ): Promise<{ success: boolean; error?: string }> {
     try {
       const supabase = createServiceRoleClientSync();
+      if (!supabase) {
+        return { success: false, error: 'Database service unavailable' };
+      }
 
       // Get current flags for change tracking
       const current = await this.getFlags({ customerId });
@@ -298,6 +303,9 @@ export class FeatureFlagManager {
   ): Promise<{ success: boolean; error?: string }> {
     try {
       const supabase = createServiceRoleClientSync();
+      if (!supabase) {
+        return { success: false, error: 'Database service unavailable' };
+      }
 
       // Get current flags for change tracking
       const current = await this.getFlags({ organizationId });
@@ -354,6 +362,7 @@ export class FeatureFlagManager {
       if (changes.length === 0) return;
 
       const supabase = createServiceRoleClientSync();
+      if (!supabase) return;
 
       const events: FlagChangeEvent[] = changes.map(change => ({
         ...context,

@@ -97,6 +97,7 @@ export class PilotRolloutManager {
   async getRolloutConfig(featureName: string): Promise<RolloutConfig | null> {
     try {
       const supabase = createServiceRoleClientSync();
+      if (!supabase) return null;
 
       const { data, error } = await supabase
         .from('feature_rollouts')
@@ -219,6 +220,10 @@ export class PilotRolloutManager {
 
       // Update configuration
       const supabase = createServiceRoleClientSync();
+      if (!supabase) {
+        return { success: false, error: 'Database service unavailable' };
+      }
+
       const { error } = await supabase
         .from('feature_rollouts')
         .update({
@@ -286,6 +291,9 @@ export class PilotRolloutManager {
   ): Promise<{ success: boolean; error?: string }> {
     try {
       const supabase = createServiceRoleClientSync();
+      if (!supabase) {
+        return { success: false, error: 'Database service unavailable' };
+      }
 
       // Update status to rolled back
       const { error } = await supabase
@@ -326,6 +334,15 @@ export class PilotRolloutManager {
   async getRolloutStats(featureName: string): Promise<RolloutStats> {
     try {
       const supabase = createServiceRoleClientSync();
+      if (!supabase) {
+        return {
+          totalCustomers: 0,
+          enabledCustomers: 0,
+          errorCount: 0,
+          successRate: 0,
+          errorRate: 0,
+        };
+      }
 
       // Get total customers
       const { count: totalCustomers } = await supabase
@@ -377,6 +394,7 @@ export class PilotRolloutManager {
   async recordEvent(event: RolloutEvent): Promise<void> {
     try {
       const supabase = createServiceRoleClientSync();
+      if (!supabase) return;
 
       await supabase.from('rollout_events').insert({
         feature_name: event.featureName,
@@ -412,6 +430,9 @@ export class PilotRolloutManager {
   }): Promise<{ success: boolean; error?: string }> {
     try {
       const supabase = createServiceRoleClientSync();
+      if (!supabase) {
+        return { success: false, error: 'Database service unavailable' };
+      }
 
       const { error } = await supabase.from('feature_rollouts').insert({
         feature_name: config.featureName,
@@ -451,6 +472,9 @@ export class PilotRolloutManager {
   }> {
     try {
       const supabase = createServiceRoleClientSync();
+      if (!supabase) {
+        return { success: false, error: 'Database service unavailable' };
+      }
 
       const { error } = await supabase
         .from('feature_rollouts')

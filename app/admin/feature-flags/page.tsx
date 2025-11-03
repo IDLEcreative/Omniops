@@ -1,4 +1,4 @@
-import FeatureFlagManager from '@/components/admin/FeatureFlagManager';
+import { FeatureFlagManager } from '@/components/admin/FeatureFlagManager';
 
 export default function FeatureFlagsPage() {
   return (

@@ -3,7 +3,7 @@
  * Handles job creation, deduplication, and queue management for web scraping operations
  */
 
-import { ScrapeQueueManager } from './manager';
+import { ScrapeQueueManager } from './manager/index';
 
 /**
  * Export singleton getter function
