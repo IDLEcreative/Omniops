@@ -35,10 +35,10 @@ export function Header({
           </p>
         </div>
       </div>
-      <div className="flex items-center gap-1">
+      <div className="flex items-center gap-3">
         <button
           onClick={onToggleHighContrast}
-          className="w-8 h-8 flex items-center justify-center text-white hover:opacity-70 transition-opacity duration-200 focus:outline-none"
+          className="p-1 flex items-center justify-center text-white hover:opacity-70 transition-opacity duration-200 focus:outline-none bg-transparent border-0"
           aria-label={`Toggle high contrast mode. Currently ${highContrast ? 'on' : 'off'}`}
           title="Toggle high contrast"
         >
@@ -46,7 +46,7 @@ export function Header({
         </button>
         <button
           onClick={onClose}
-          className="w-8 h-8 flex items-center justify-center text-white hover:opacity-70 transition-opacity duration-200 focus:outline-none"
+          className="p-1 flex items-center justify-center text-white hover:opacity-70 transition-opacity duration-200 focus:outline-none bg-transparent border-0"
           aria-label="Close chat widget"
         >
           <X className="h-5 w-5" aria-hidden="true" />
