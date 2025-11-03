@@ -1,5 +1,6 @@
 import { useState, useEffect, useRef } from 'react';
 import { Message } from '@/types';
+import { parentStorage } from '@/lib/chat-widget/parent-storage';
 
 export interface PrivacySettings {
   allowOptOut: boolean;
@@ -150,27 +151,29 @@ export function useChatState({
     }
   }, [demoId, demoConfig, propPrivacySettings, initialOpen, forceClose]);
 
-  // Check localStorage for saved state after mount
+  // Check storage for saved state after mount
   useEffect(() => {
     if (!mounted) return;
 
     const params = new URLSearchParams(window.location.search);
     if (params.get('open') === 'true' || params.get('forceClose') === 'true' || initialOpen || forceClose) return;
 
-    const savedState = localStorage.getItem('chat_widget_open');
-    if (savedState === 'true') {
-      setIsOpen(true);
-    }
+    // Use async to get from parent storage
+    parentStorage.getItem('widget_open').then(savedState => {
+      if (savedState === 'true') {
+        setIsOpen(true);
+      }
+    });
   }, [mounted, initialOpen, forceClose]);
 
-  // Save open/close state to localStorage
+  // Save open/close state to storage
   useEffect(() => {
     if (mounted && typeof window !== 'undefined') {
       try {
-        localStorage.setItem('chat_widget_open', isOpen.toString());
+        parentStorage.setItem('widget_open', isOpen.toString());
       } catch (error) {
-        // localStorage might be disabled (private mode, CSP policy, etc.)
-        console.warn('[Chat Widget] Could not save state to localStorage:', error);
+        // Storage might be disabled (private mode, CSP policy, etc.)
+        console.warn('[Chat Widget] Could not save state to storage:', error);
         // Widget will still function, just won't remember state on refresh
       }
     }
@@ -184,20 +187,41 @@ export function useChatState({
     // Reset hasLoadedMessages on mount to allow loading messages for restored conversations
     hasLoadedMessages.current = false;
 
-    const storedSessionId = localStorage.getItem('chat_session_id');
-    if (storedSessionId) {
-      setSessionId(storedSessionId);
-    } else {
-      const newSessionId = `session_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`;
-      localStorage.setItem('chat_session_id', newSessionId);
-      setSessionId(newSessionId);
-    }
+    // Use async function to handle parent storage
+    const initializeStorage = async () => {
+      // Debug: Log what's in localStorage at mount
+      const [storedSessionId, storedConversationId, storedWidgetOpen] = await Promise.all([
+        parentStorage.getItem('session_id'),
+        parentStorage.getItem('conversation_id'),
+        parentStorage.getItem('widget_open')
+      ]);
 
-    // Restore conversation ID from localStorage
-    const storedConversationId = localStorage.getItem('chat_conversation_id');
-    if (storedConversationId) {
-      setConversationId(storedConversationId);
-    }
+      console.log('[useChatState] Mount - storage contents:', {
+        session_id: storedSessionId,
+        conversation_id: storedConversationId,
+        widget_open: storedWidgetOpen
+      });
+
+      if (storedSessionId) {
+        console.log('[useChatState] Restoring session ID:', storedSessionId);
+        setSessionId(storedSessionId);
+      } else {
+        const newSessionId = `session_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`;
+        console.log('[useChatState] Creating new session ID:', newSessionId);
+        parentStorage.setItem('session_id', newSessionId);
+        setSessionId(newSessionId);
+      }
+
+      // Restore conversation ID from storage
+      if (storedConversationId) {
+        console.log('[useChatState] Restoring conversation ID:', storedConversationId);
+        setConversationId(storedConversationId);
+      } else {
+        console.log('[useChatState] No stored conversation ID found');
+      }
+    };
+
+    initializeStorage();
 
     // Check if WooCommerce is enabled for this domain
     const checkWooCommerceConfig = async () => {
@@ -265,6 +289,25 @@ export function useChatState({
           }
           if (event.data.storeDomain) {
             setStoreDomain(event.data.storeDomain);
+          }
+          // Handle stored data from parent window
+          if (event.data.storedData) {
+            const { sessionId: storedSessionId, conversationId: storedConversationId, widgetOpen } = event.data.storedData;
+
+            if (storedSessionId && !sessionId) {
+              console.log('[Chat Widget] Received stored session ID from parent:', storedSessionId);
+              setSessionId(storedSessionId);
+            }
+
+            if (storedConversationId && !conversationId) {
+              console.log('[Chat Widget] Received stored conversation ID from parent:', storedConversationId);
+              setConversationId(storedConversationId);
+            }
+
+            if (widgetOpen && !isOpen) {
+              console.log('[Chat Widget] Widget was open, restoring state');
+              setIsOpen(true);
+            }
           }
           break;
         case 'open':
@@ -336,21 +379,21 @@ export function useChatState({
         } else {
           // Conversation not found or expired - clear stored ID
           console.log('[useChatState] No messages found, clearing conversation ID');
-          localStorage.removeItem('chat_conversation_id');
+          parentStorage.removeItem('conversation_id');
           setConversationId('');
           hasLoadedMessages.current = false; // Reset to allow new conversation
         }
       } else {
         // API error - clear stored ID to start fresh
         console.warn('[useChatState] Failed to load messages, clearing conversation ID');
-        localStorage.removeItem('chat_conversation_id');
+        parentStorage.removeItem('conversation_id');
         setConversationId('');
         hasLoadedMessages.current = false; // Reset to allow new conversation
       }
     } catch (error) {
       console.error('[useChatState] Error loading messages:', error);
       // On error, clear stored conversation to allow fresh start
-      localStorage.removeItem('chat_conversation_id');
+      parentStorage.removeItem('conversation_id');
       setConversationId('');
       hasLoadedMessages.current = false; // Reset to allow new conversation
     } finally {
@@ -373,14 +416,14 @@ export function useChatState({
     }
   };
 
-  // Persist conversation ID to localStorage when it changes
+  // Persist conversation ID to storage when it changes
   useEffect(() => {
     if (mounted && conversationId) {
       try {
-        localStorage.setItem('chat_conversation_id', conversationId);
+        parentStorage.setItem('conversation_id', conversationId);
         console.log('[useChatState] Persisted conversation ID:', conversationId);
       } catch (error) {
-        console.warn('[useChatState] Could not save conversation ID to localStorage:', error);
+        console.warn('[useChatState] Could not save conversation ID to storage:', error);
       }
     } else if (mounted && !conversationId) {
       // Conversation was cleared, reset the flag to allow loading new messages

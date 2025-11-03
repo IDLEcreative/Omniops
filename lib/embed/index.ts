@@ -288,12 +288,30 @@ async function initialize() {
     iframe.onload = () => {
       iframe.style.display = 'block';
       setTimeout(() => {
+        // Retrieve stored conversation data from parent localStorage
+        const storedSessionId = localStorage.getItem('chat_widget_session_id');
+        const storedConversationId = localStorage.getItem('chat_widget_conversation_id');
+        const storedWidgetOpen = localStorage.getItem('chat_widget_widget_open');
+
+        if (config.debug || (window as any).ChatWidgetDebug) {
+          console.log('[Chat Widget] Initializing with stored data:', {
+            session_id: storedSessionId,
+            conversation_id: storedConversationId,
+            widget_open: storedWidgetOpen
+          });
+        }
+
         // SECURITY: Use exact origin instead of wildcard
         iframe.contentWindow?.postMessage(
           {
             type: 'init',
             config,
             privacyPrefs,
+            storedData: {
+              sessionId: storedSessionId,
+              conversationId: storedConversationId,
+              widgetOpen: storedWidgetOpen === 'true'
+            }
           },
           config.serverUrl || window.location.origin
         );

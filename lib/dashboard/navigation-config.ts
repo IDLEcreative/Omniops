@@ -4,7 +4,6 @@ import {
   Users,
   Settings,
   BarChart3,
-  Server,
   Code2,
   Shield,
   Bot,
@@ -42,8 +41,7 @@ export const navigation: NavigationSection[] = [
         name: "Conversations",
         href: "/dashboard/conversations",
         icon: MessageSquare,
-        badge: "12",
-        badgeVariant: "default",
+        badge: null,
       },
       {
         name: "Shop",
@@ -72,8 +70,7 @@ export const navigation: NavigationSection[] = [
         name: "Bot Training",
         href: "/dashboard/training",
         icon: Bot,
-        badge: "New",
-        badgeVariant: "secondary",
+        badge: null,
       },
       {
         name: "Team",

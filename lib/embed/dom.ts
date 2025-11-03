@@ -120,6 +120,58 @@ export function registerMessageHandlers(ctx: IframeContext): void {
     widgetClosed: () => {
       iframe.style.pointerEvents = 'none';
     },
+    // Handle conversation persistence in parent window
+    saveToParentStorage: data => {
+      if (data?.key && data?.value !== undefined) {
+        try {
+          localStorage.setItem(`chat_widget_${data.key}`, data.value);
+          if (config.debug || (window as any).ChatWidgetDebug) {
+            console.log('[Chat Widget] Saved to parent localStorage:', data.key, data.value);
+          }
+        } catch (error) {
+          console.error('[Chat Widget] Failed to save to parent localStorage:', error);
+        }
+      }
+    },
+    getFromParentStorage: data => {
+      if (data?.key && data?.requestId) {
+        try {
+          const value = localStorage.getItem(`chat_widget_${data.key}`);
+          // Send value back to iframe
+          iframe.contentWindow?.postMessage({
+            type: 'storageResponse',
+            requestId: data.requestId,
+            key: data.key,
+            value: value,
+          }, config.serverUrl || '*');
+
+          if (config.debug || (window as any).ChatWidgetDebug) {
+            console.log('[Chat Widget] Retrieved from parent localStorage:', data.key, value);
+          }
+        } catch (error) {
+          console.error('[Chat Widget] Failed to read from parent localStorage:', error);
+          // Send null value on error
+          iframe.contentWindow?.postMessage({
+            type: 'storageResponse',
+            requestId: data.requestId,
+            key: data.key,
+            value: null,
+          }, config.serverUrl || '*');
+        }
+      }
+    },
+    removeFromParentStorage: data => {
+      if (data?.key) {
+        try {
+          localStorage.removeItem(`chat_widget_${data.key}`);
+          if (config.debug || (window as any).ChatWidgetDebug) {
+            console.log('[Chat Widget] Removed from parent localStorage:', data.key);
+          }
+        } catch (error) {
+          console.error('[Chat Widget] Failed to remove from parent localStorage:', error);
+        }
+      }
+    },
     analytics: data => {
       if (!privacyPrefs.optedOut && typeof window.gtag === 'function' && data?.event) {
         window.gtag('event', data.event, {
