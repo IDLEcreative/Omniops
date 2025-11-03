@@ -88,7 +88,7 @@ function ConversationListItemComponent({
     <button
       type="button"
       className={`
-        w-full border-b px-4 py-3.5 text-left transition-all duration-200
+        w-full border-b px-3 py-2 text-left transition-all duration-200
         hover:bg-accent/50 focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2
         ${
         isSelected ? "bg-accent/70 border-l-2 border-l-primary shadow-sm" : "hover:shadow-sm"
@@ -97,29 +97,34 @@ function ConversationListItemComponent({
       aria-selected={isSelected}
       aria-label={`Conversation with ${conversation.customerName || "customer"}, ${formatRelativeTime(conversation.timestamp)}, status: ${STATUS_LABELS[conversation.status]}`}
     >
-      <div className="flex items-start gap-3.5">
+      <div className="flex items-start gap-2.5">
         {isSelectionMode && onToggleSelect && (
-          <div className="pt-1">
+          <div className="pt-0.5">
             <Checkbox
               checked={isChecked}
               onCheckedChange={onToggleSelect}
               onClick={(e) => e.stopPropagation()}
               aria-label={`Select conversation with ${conversation.customerName || "customer"}`}
+              className="h-4 w-4"
             />
           </div>
         )}
-        <div className="flex-1 min-w-0 space-y-2">
+        <div className="flex-1 min-w-0 space-y-1">
           <div className="flex items-center justify-between gap-2">
-            <span>{formatRelativeTime(conversation.timestamp)}</span>
-            <Badge variant={statusBadgeVariant(conversation.status)} className="text-xs">
-              {STATUS_LABELS[conversation.status]}
-            </Badge>
+            <p className="text-sm font-medium truncate">
+              {conversation.customerName ?? "Customer"}
+            </p>
+            <div className="flex items-center gap-2">
+              <span className="text-xs text-muted-foreground">{formatRelativeTime(conversation.timestamp)}</span>
+              <Badge variant={statusBadgeVariant(conversation.status)} className="text-xs px-1.5 py-0">
+                {STATUS_LABELS[conversation.status]}
+              </Badge>
+            </div>
           </div>
-          <p className="text-sm font-semibold truncate">
-            {conversation.customerName ?? "Customer"}
-          </p>
-          <p className="line-clamp-2 text-sm text-muted-foreground leading-relaxed">
-            {conversation.message}
+          <p className="line-clamp-1 text-xs text-muted-foreground">
+            {conversation.message.length > 60
+              ? conversation.message.substring(0, 60) + "..."
+              : conversation.message}
           </p>
         </div>
       </div>

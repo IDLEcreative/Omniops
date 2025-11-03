@@ -23,12 +23,12 @@ export function SearchAndFiltersBar({
   activeFilterCount,
 }: SearchAndFiltersBarProps) {
   return (
-    <div className="p-4 border-b flex items-center gap-2">
+    <div className="p-3 border-b flex items-center gap-2">
       <div className="relative flex-1">
-        <Search className="absolute left-2.5 top-2.5 h-4 w-4 text-muted-foreground" aria-hidden="true" />
+        <Search className="absolute left-2.5 top-2 h-4 w-4 text-muted-foreground" aria-hidden="true" />
         <Input
           ref={searchInputRef}
-          className="pl-8"
+          className="pl-8 h-9"
           placeholder="Search conversations… (Press / to focus)"
           value={searchTerm}
           onChange={(event) => onSearchChange(event.target.value)}

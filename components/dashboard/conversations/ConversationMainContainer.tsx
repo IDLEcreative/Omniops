@@ -69,8 +69,8 @@ export function ConversationMainContainer({
         activeFilterCount={activeFilterCount}
       />
 
-      <div className="flex h-[600px]">
-        <div className="w-80 border-r">
+      <div className="flex h-[650px]">
+        <div className="w-96 border-r">
           <ConversationTabbedList
             activeTab={activeTab}
             onTabChange={onTabChange}

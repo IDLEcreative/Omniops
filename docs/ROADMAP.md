@@ -164,6 +164,75 @@ CREATE TABLE admin_audit_log (
 
 ## 🔮 Future (3-6 Months)
 
+### Context-Aware Widget Enhancements
+**Timeline:** 2-3 weeks
+**Priority:** MEDIUM
+
+**Objectives:**
+- Make chat widget aware of parent page context
+- Provide page-specific assistance
+- Improve user experience with contextual responses
+
+**Features:**
+- [ ] **Include Page URL in Chat Messages**
+  - Capture parent page URL from `document.referrer`
+  - Send page context with every chat message
+  - Enable AI to provide page-specific answers
+
+- [ ] **Page-Aware Welcome Messages**
+  - Show "I see you're looking at [Product Name]" when widget opens
+  - Extract product/page information from URL
+  - Personalized greeting based on current page
+
+- [ ] **Page-Specific Quick Actions**
+  - Product pages: "Add to cart", "Check stock", "Compare"
+  - Contact pages: "Schedule a call", "Email us"
+  - FAQ pages: "Search help articles"
+  - Dynamic quick action buttons based on page type
+
+- [ ] **Navigation Context Tracking**
+  - Track user journey across pages (with consent)
+  - Understand browsing behavior
+  - Provide better recommendations
+
+- [ ] **URL Parameter Detection**
+  - Detect UTM parameters, referral codes, campaigns
+  - Customize widget behavior per marketing source
+  - Track conversion attribution
+
+**Technical Implementation:**
+```typescript
+// Widget captures parent context
+interface PageContext {
+  url: string;
+  title?: string;
+  referrer?: string;
+  utmParams?: Record<string, string>;
+  pageType?: 'product' | 'category' | 'cart' | 'checkout' | 'other';
+}
+
+// Send with every message
+{
+  message: "Do you have this in stock?",
+  pageContext: {
+    url: "https://example.com/product/hydraulic-pump",
+    pageType: "product"
+  }
+}
+```
+
+**Benefits:**
+- ✅ More contextual AI responses
+- ✅ Reduced need for customers to explain what page they're on
+- ✅ Higher conversion rates with page-specific actions
+- ✅ Better understanding of customer journey
+- ✅ Privacy-compliant (uses public URL only)
+
+**Dependencies:**
+- None (uses existing `document.referrer` API)
+
+---
+
 ### Phase 3: Full Role-Based Access Control (RBAC)
 **Timeline:** 3-4 weeks
 **Priority:** MEDIUM
@@ -322,6 +391,10 @@ These items have been considered and explicitly decided against:
 ---
 
 ## 📝 Change Log
+
+### 2025-11-03 (Update 2)
+- Added Context-Aware Widget Enhancements to Future roadmap
+- Includes page URL tracking, page-aware messages, and quick actions
 
 ### 2025-11-03
 - Created initial roadmap

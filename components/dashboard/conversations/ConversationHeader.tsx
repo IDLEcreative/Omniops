@@ -109,20 +109,20 @@ function ConversationHeaderComponent({ conversation, onActionComplete }: Convers
   }, [conversation.id, onActionComplete]);
 
   return (
-    <div className="border-b p-4">
+    <div className="border-b p-3">
       <div className="flex items-center justify-between">
-        <div className="flex items-center space-x-3">
-          <Avatar>
-            <AvatarFallback>
+        <div className="flex items-center space-x-2.5">
+          <Avatar className="h-8 w-8">
+            <AvatarFallback className="text-xs">
               {(conversation.customerName?.charAt(0) ?? "C").toUpperCase()}
             </AvatarFallback>
           </Avatar>
           <div>
             <div className="flex items-center space-x-2">
-              <h3 className="font-semibold">
+              <h3 className="font-semibold text-sm">
                 {conversation.customerName ?? "Customer"}
               </h3>
-              <Badge variant={statusBadgeVariant(conversation.status)}>
+              <Badge variant={statusBadgeVariant(conversation.status)} className="text-xs">
                 {STATUS_LABELS[conversation.status]}
               </Badge>
             </div>

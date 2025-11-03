@@ -55,7 +55,7 @@ export function ConversationListWithPagination({
   onToggleSelect,
   onSelectAll,
 }: ConversationListProps) {
-  const ITEMS_PER_PAGE = 8;
+  const ITEMS_PER_PAGE = 12;
   const [currentPage, setCurrentPage] = useState(1);
 
   // Reset to page 1 when conversations change (e.g., tab change, search)
@@ -129,7 +129,7 @@ export function ConversationListWithPagination({
         )}
       </ScrollArea>
       {!loading && conversations.length > 0 && totalPages > 1 && (
-        <div className="p-3 border-t bg-background">
+        <div className="p-2 border-t bg-background">
           <div className="flex items-center justify-between gap-2">
             <Button
               variant="outline"
@@ -137,12 +137,12 @@ export function ConversationListWithPagination({
               onClick={handlePreviousPage}
               disabled={currentPage === 1}
               aria-label="Previous page"
-              className="gap-1"
+              className="gap-1 h-7 text-xs"
             >
-              <ChevronLeft className="h-4 w-4" />
-              Previous
+              <ChevronLeft className="h-3 w-3" />
+              Prev
             </Button>
-            <span className="text-sm text-muted-foreground">
+            <span className="text-xs text-muted-foreground">
               Page {currentPage} of {totalPages}
             </span>
             <Button
@@ -151,10 +151,10 @@ export function ConversationListWithPagination({
               onClick={handleNextPage}
               disabled={currentPage === totalPages}
               aria-label="Next page"
-              className="gap-1"
+              className="gap-1 h-7 text-xs"
             >
               Next
-              <ChevronRight className="h-4 w-4" />
+              <ChevronRight className="h-3 w-3" />
             </Button>
           </div>
         </div>
