@@ -49,6 +49,7 @@ export const WIDGET_STYLES = `
   .rounded-lg { border-radius: 0.5rem; }
   .rounded-tl-md { border-top-left-radius: 0.375rem; }
   .rounded-tr-md { border-top-right-radius: 0.375rem; }
+  .border-0 { border-width: 0px; }
   .border { border-width: 1px; }
   .border-2 { border-width: 2px; }
   .border-b { border-bottom-width: 1px; }
@@ -59,6 +60,7 @@ export const WIDGET_STYLES = `
   .bg-white { background-color: rgb(255 255 255); }
   .bg-black { background-color: rgb(0 0 0); }
   .bg-green-500 { background-color: rgb(34 197 94); }
+  .bg-gray-400 { background-color: rgb(156 163 175); }
   .bg-gray-600 { background-color: rgb(75 85 99); }
   .shadow-xl { box-shadow: 0 20px 25px -5px rgb(0 0 0 / 0.1), 0 8px 10px -6px rgb(0 0 0 / 0.1); }
   .shadow-2xl { box-shadow: 0 25px 50px -12px rgb(0 0 0 / 0.25); }
@@ -77,6 +79,7 @@ export const WIDGET_STYLES = `
   .animate-in { animation: enter 200ms ease-out; }
   .animate-out { animation: exit 200ms ease-in; }
   .fade-in { animation: fadeIn 200ms ease-out; }
+  .slide-in-from-bottom-2 { animation: slideInFromBottom 150ms ease-out; }
   .slide-in-from-bottom-3 { animation: slideInFromBottom 200ms ease-out; }
   .slide-out-to-bottom-3 { animation: slideOutToBottom 200ms ease-in; }
   .fade-out { animation: fadeOut 200ms ease-in; }
@@ -148,6 +151,7 @@ export const WIDGET_STYLES = `
 
   /* Responsive */
   @media (min-width: 640px) {
+    .sm\:mx-0 { margin-left: 0px; margin-right: 0px; }
     .sm\\:bottom-5 { bottom: 1.25rem; }
     .sm\\:right-5 { right: 1.25rem; }
     .sm\\:w-\\[400px\\] { width: 400px; }
@@ -244,5 +248,6 @@ export const WIDGET_STYLES = `
   .\\[animation-delay\\:400ms\\] { animation-delay: 400ms; }
 
   /* Group hover for button icons */
+  .group { position: relative; }
   .group:hover .group-hover\\:scale-110 { transform: scale(1.1); }
 `;
