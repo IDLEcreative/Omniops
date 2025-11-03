@@ -32,6 +32,7 @@ export function createIframe(config: WidgetConfig, isMobile: boolean): HTMLIFram
 
   iframe.style.cssText = `${styles.join('; ')};`;
   iframe.style.display = 'none';
+  iframe.style.pointerEvents = 'none'; // Start with pointer-events none (widget starts minimized)
 
   return iframe;
 }
@@ -105,6 +106,12 @@ export function registerMessageHandlers(ctx: IframeContext): void {
     resize: data => {
       if (typeof data?.width === 'number') iframe.style.width = `${data.width}px`;
       if (typeof data?.height === 'number') iframe.style.height = `${data.height}px`;
+    },
+    widgetOpened: () => {
+      iframe.style.pointerEvents = 'auto';
+    },
+    widgetClosed: () => {
+      iframe.style.pointerEvents = 'none';
     },
     analytics: data => {
       if (!privacyPrefs.optedOut && typeof window.gtag === 'function' && data?.event) {

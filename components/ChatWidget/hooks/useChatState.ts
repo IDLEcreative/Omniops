@@ -307,6 +307,16 @@ export function useChatState({
     }
   };
 
+  // Notify parent window when widget opens/closes
+  useEffect(() => {
+    if (mounted && window.parent !== window) {
+      window.parent.postMessage(
+        { type: isOpen ? 'widgetOpened' : 'widgetClosed' },
+        '*'
+      );
+    }
+  }, [isOpen, mounted]);
+
   // Auto-scroll to bottom
   useEffect(() => {
     if (messagesContainerRef.current) {
