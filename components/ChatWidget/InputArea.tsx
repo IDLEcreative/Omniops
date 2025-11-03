@@ -73,7 +73,7 @@ export function InputArea({
       }}
       className={`px-3 sm:px-4 py-3 border-t ${highContrast ? 'border-t-2 border-white bg-black' : ''}`}
     >
-      <div className="flex gap-2 items-end">
+      <div className="flex gap-2 items-center">
         <label htmlFor="chat-input" className="sr-only">Type your message</label>
         <textarea
           ref={textareaRef}
@@ -114,7 +114,7 @@ export function InputArea({
         />
         <button
           onClick={onFontSizeChange}
-          className="p-1 flex items-center justify-center flex-shrink-0 text-gray-400 hover:text-white transition-colors duration-200 focus:outline-none bg-transparent border-0"
+          className="p-2 flex items-center justify-center flex-shrink-0 text-gray-400 hover:text-white transition-colors duration-200 focus:outline-none bg-transparent border-0 rounded-md hover:bg-gray-800/50"
           aria-label={`Change text size. Current: ${fontSize}`}
           title="Change text size"
         >
@@ -124,7 +124,7 @@ export function InputArea({
           onClick={onSend}
           disabled={!input.trim() || loading}
           aria-label="Send message"
-          className="p-1 flex items-center justify-center flex-shrink-0 text-gray-400 hover:text-white disabled:opacity-30 transition-colors duration-200 focus:outline-none bg-transparent border-0"
+          className="p-2 flex items-center justify-center flex-shrink-0 text-gray-400 hover:text-white disabled:opacity-30 transition-colors duration-200 focus:outline-none bg-transparent border-0 rounded-md hover:bg-gray-800/50 disabled:hover:bg-transparent"
         >
           <Send className="h-5 w-5" aria-hidden="true" />
         </button>
