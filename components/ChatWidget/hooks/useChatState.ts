@@ -21,6 +21,9 @@ export interface ChatWidgetConfig {
     showPulseAnimation?: boolean; // Pulse ring animation on compact button (default: true)
     showNotificationBadge?: boolean; // Green dot badge on compact button (default: true)
     startMinimized?: boolean; // Start widget minimized on first load (default: true)
+    headerTitle?: string; // Header title text
+    headerSubtitle?: string; // Header subtitle text
+    primaryColor?: string; // Primary color for header (hex)
   };
 }
 

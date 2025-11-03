@@ -263,7 +263,7 @@ export default function ChatWidget({
     <div
       className={`fixed bottom-0 right-0 w-full h-full
       sm:bottom-5 sm:w-[400px] sm:h-[580px] sm:max-h-[calc(100vh-40px)] sm:right-5 sm:mx-0
-      ${highContrast ? 'bg-black border-2 border-white' : 'bg-[#1F2937]'}
+      ${highContrast ? 'bg-black border-2 border-white' : 'bg-[#111111]'}
       rounded-lg shadow-lg flex flex-col overflow-hidden transition-all duration-200 z-50 ${
       isOpen ? 'animate-in slide-in-from-bottom-3 fade-in' : 'animate-out slide-out-to-bottom-3 fade-out'
     }`}
@@ -272,7 +272,7 @@ export default function ChatWidget({
       aria-modal="true"
     >
       <Header
-        headerTitle={demoConfig?.headerTitle || demoConfig?.appearance?.headerTitle}
+        headerTitle={demoConfig?.appearance?.headerTitle || demoConfig?.headerTitle}
         headerSubtitle={demoConfig?.appearance?.headerSubtitle}
         primaryColor={demoConfig?.appearance?.primaryColor || '#818CF8'}
         highContrast={highContrast}

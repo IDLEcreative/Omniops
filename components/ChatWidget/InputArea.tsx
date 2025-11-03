@@ -46,7 +46,7 @@ export function InputArea({
   }, [input, textareaRef]);
 
   return (
-    <div className={`px-3 sm:px-4 py-3 ${highContrast ? 'border-t-2 border-white' : 'border-t border-white/10'}`}>
+    <div className={`px-3 sm:px-4 py-3 ${highContrast ? 'border-t-2 border-white bg-black' : 'border-t border-[#2a2a2a] bg-[#111111]'}`}>
       <div className="flex gap-2 items-end">
         <label htmlFor="chat-input" className="sr-only">Type your message</label>
         <textarea
@@ -60,29 +60,29 @@ export function InputArea({
           aria-label="Message input"
           rows={1}
           style={{ height: '40px', minHeight: '40px', maxHeight: '120px' }}
-          className={`flex-1 px-4 py-2 resize-none overflow-hidden ${
+          className={`flex-1 px-4 py-2.5 resize-none overflow-hidden ${
             fontSize === 'xlarge' ? 'text-lg' : fontSize === 'large' ? 'text-base' : 'text-sm'
           } ${
             highContrast
-              ? 'bg-black border-2 border-white text-white placeholder:text-gray-300 focus:border-yellow-400 rounded-2xl'
-              : 'bg-[#262626] border-0 text-white placeholder:text-gray-400 focus:ring-2 focus:ring-white/20 rounded-2xl'
+              ? 'bg-black border-2 border-white text-white placeholder:text-gray-300 focus:border-yellow-400 rounded-full'
+              : 'bg-[#2a2a2a] border border-[#3a3a3a] text-white placeholder:text-gray-500 focus:border-[#4a4a4a] rounded-full'
           } focus:outline-none transition-all duration-200 leading-normal`}
         />
         <button
           onClick={onFontSizeChange}
-          className="h-10 w-10 flex items-center justify-center flex-shrink-0 text-white hover:opacity-70 transition-opacity duration-200 focus:outline-none"
+          className="h-10 w-10 flex items-center justify-center flex-shrink-0 text-gray-400 hover:text-white transition-colors duration-200 focus:outline-none"
           aria-label={`Change text size. Current: ${fontSize}`}
           title="Change text size"
         >
-          <Type className="h-4 w-4" aria-hidden="true" />
+          <Type className="h-5 w-5" aria-hidden="true" />
         </button>
         <button
           onClick={onSend}
           disabled={!input.trim() || loading}
           aria-label="Send message"
-          className="h-10 w-10 flex items-center justify-center flex-shrink-0 text-white hover:opacity-70 disabled:opacity-30 transition-opacity duration-200 focus:outline-none"
+          className="h-10 w-10 flex items-center justify-center flex-shrink-0 text-gray-400 hover:text-white disabled:opacity-30 transition-colors duration-200 focus:outline-none"
         >
-          <Send className="h-4 w-4" aria-hidden="true" />
+          <Send className="h-5 w-5" aria-hidden="true" />
         </button>
       </div>
     </div>

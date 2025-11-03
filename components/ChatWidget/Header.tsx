@@ -11,7 +11,7 @@ export interface HeaderProps {
 
 export function Header({
   headerTitle = 'Support',
-  headerSubtitle = "We're here to help!",
+  headerSubtitle = 'Online - We typically reply instantly',
   primaryColor = '#818CF8',
   highContrast,
   onToggleHighContrast,
@@ -19,17 +19,18 @@ export function Header({
 }: HeaderProps) {
   return (
     <div
-      className={`px-4 py-3 flex items-center justify-between ${highContrast ? 'border-b-2 border-white' : ''}`}
-      style={{
-        backgroundColor: highContrast ? 'transparent' : primaryColor
-      }}
+      className={`px-4 py-3 flex items-center justify-between border-b ${
+        highContrast ? 'border-white' : 'border-[#2a2a2a] bg-[#111111]'
+      }`}
     >
       <div className="flex items-center gap-3 flex-1 min-w-0">
+        {/* Online status indicator */}
+        <div className="w-2.5 h-2.5 bg-green-500 rounded-full flex-shrink-0" aria-label="Online" />
         <div className="min-w-0 flex-1">
-          <h3 className="font-semibold text-white text-sm leading-tight">
+          <h3 className="font-semibold text-white text-base leading-tight">
             {headerTitle}
           </h3>
-          <p className="text-sm text-white opacity-90">
+          <p className="text-sm text-gray-400 opacity-90">
             {headerSubtitle}
           </p>
         </div>
