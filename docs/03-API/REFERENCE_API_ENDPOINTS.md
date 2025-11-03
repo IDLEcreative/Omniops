@@ -143,6 +143,91 @@ curl -X POST https://api.example.com/api/chat \
   }'
 ```
 
+#### GET /api/conversations/[conversationId]/messages
+Retrieve message history for a conversation (used for session persistence).
+
+**Path Parameters:**
+- `conversationId` (required): UUID of the conversation
+
+**Query Parameters:**
+- `session_id` (optional): Session ID for security verification
+- `limit` (optional): Maximum messages to return (default: 50, max: 100)
+
+**Request Headers:**
+```
+Content-Type: application/json
+```
+
+**Response (Success):**
+```json
+{
+  "success": true,
+  "conversation": {
+    "id": "550e8400-e29b-41d4-a716-446655440000",
+    "created_at": "2025-11-03T10:00:00Z"
+  },
+  "messages": [
+    {
+      "id": "msg_001",
+      "role": "user",
+      "content": "What are your business hours?",
+      "created_at": "2025-11-03T10:00:00Z"
+    },
+    {
+      "id": "msg_002",
+      "role": "assistant",
+      "content": "We're open Monday-Friday 9am-5pm EST.",
+      "created_at": "2025-11-03T10:00:05Z"
+    }
+  ],
+  "count": 2
+}
+```
+
+**Response (Not Found):**
+```json
+{
+  "success": false,
+  "messages": [],
+  "conversation": null
+}
+```
+
+**Response (Error):**
+```json
+{
+  "success": false,
+  "messages": [],
+  "error": "Failed to retrieve messages"
+}
+```
+
+**Status Codes:**
+- `200 OK`: Success (even if conversation not found - returns empty messages)
+- `500 Internal Server Error`: Server error retrieving messages
+
+**Example:**
+```bash
+curl -X GET "https://api.example.com/api/conversations/550e8400-e29b-41d4-a716-446655440000/messages?session_id=session_123&limit=50" \
+  -H "Content-Type: application/json"
+```
+
+**Security Notes:**
+- Conversation ID is public but session_id acts as verification
+- Returns empty result if session_id doesn't match (prevents unauthorized access)
+- No authentication header required (widget uses CORS)
+- Cross-origin requests supported for embedded widgets
+
+**Use Cases:**
+- Widget session persistence (restore conversation on page refresh)
+- Conversation history export
+- Admin dashboard conversation review
+- Analytics and conversation analysis
+
+**Related Documentation:**
+- [Widget Session Persistence Guide](../02-GUIDES/GUIDE_WIDGET_SESSION_PERSISTENCE.md)
+- [Chat API Documentation](./CHAT_API.md)
+
 ### Analytics API
 
 #### GET /api/analytics/intelligence

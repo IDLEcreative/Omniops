@@ -24,11 +24,13 @@ advanced, api, authentication, best, chat, codes, documentation, endpoint, error
 
 The Chat API provides AI-powered conversational capabilities with Retrieval-Augmented Generation (RAG) for contextual responses.
 
-## Endpoint
+## Endpoints
 
-```
-POST /api/chat
-```
+### POST /api/chat
+Send a message and receive AI response
+
+### GET /api/conversations/[conversationId]/messages
+Retrieve conversation history (for session persistence)
 
 ## Overview
 
@@ -193,13 +195,16 @@ Automatically detects and responds in 40+ languages:
 - Portuguese, Italian, Dutch
 - And many more...
 
-### Conversation History
+### Conversation History & Persistence
 
-Maintains context across messages:
+Maintains context across messages with automatic session persistence:
 - Remembers previous questions
 - Understands follow-up queries
 - Tracks conversation flow
 - Provides coherent multi-turn dialogues
+- **Automatic session persistence** - Conversations saved and restored across page refreshes
+- **Cross-page continuity** - Resume conversations when navigating between pages
+- **See:** [Widget Session Persistence Guide](../02-GUIDES/GUIDE_WIDGET_SESSION_PERSISTENCE.md)
 
 ## Rate Limiting
 
@@ -446,8 +451,58 @@ export function ChatInterface() {
 }
 ```
 
+## Conversation Messages Endpoint
+
+### GET /api/conversations/[conversationId]/messages
+
+Retrieve message history for a conversation. This endpoint is used by the widget for session persistence.
+
+**Parameters:**
+- `conversationId` (path): UUID of the conversation
+- `session_id` (query, optional): Session ID for verification
+- `limit` (query, optional): Max messages (default: 50, max: 100)
+
+**Example Request:**
+```bash
+curl "https://api.example.com/api/conversations/550e8400-e29b-41d4-a716-446655440000/messages?session_id=session_123&limit=50"
+```
+
+**Example Response:**
+```json
+{
+  "success": true,
+  "conversation": {
+    "id": "550e8400-e29b-41d4-a716-446655440000",
+    "created_at": "2025-11-03T10:00:00Z"
+  },
+  "messages": [
+    {
+      "id": "msg_001",
+      "role": "user",
+      "content": "What are your business hours?",
+      "created_at": "2025-11-03T10:00:00Z"
+    },
+    {
+      "id": "msg_002",
+      "role": "assistant",
+      "content": "We're open Monday-Friday 9am-5pm EST.",
+      "created_at": "2025-11-03T10:00:05Z"
+    }
+  ],
+  "count": 2
+}
+```
+
+**Security:**
+- Session ID verification prevents unauthorized access
+- Returns empty result if conversation not found or session mismatch
+- CORS enabled for embedded widget use
+
+**See:** [Widget Session Persistence Guide](../02-GUIDES/GUIDE_WIDGET_SESSION_PERSISTENCE.md) for implementation details.
+
 ## Related Documentation
 
+- [Widget Session Persistence Guide](../02-GUIDES/GUIDE_WIDGET_SESSION_PERSISTENCE.md)
 - [Chat System Documentation](../CHAT_SYSTEM_DOCUMENTATION.md)
 - [Search Architecture](../SEARCH_ARCHITECTURE.md)
 - [Hallucination Prevention](../HALLUCINATION_PREVENTION.md)
