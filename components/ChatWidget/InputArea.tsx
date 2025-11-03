@@ -61,6 +61,8 @@ export function InputArea({
           rows={1}
           style={{ height: '40px', minHeight: '40px', maxHeight: '120px' }}
           className={`flex-1 px-4 py-2 resize-none overflow-hidden ${
+            fontSize === 'xlarge' ? 'text-lg' : fontSize === 'large' ? 'text-base' : 'text-sm'
+          } ${
             highContrast
               ? 'bg-black border-2 border-white text-white placeholder:text-gray-300 focus:border-yellow-400 rounded-2xl'
               : 'bg-[#262626] border-0 text-white placeholder:text-gray-400 focus:ring-2 focus:ring-white/20 rounded-2xl'

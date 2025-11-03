@@ -73,7 +73,7 @@ export function MessageList({
           <div className="max-w-[80%] mr-auto">
             <span className="sr-only">Support agent is typing</span>
             <div className="px-3 py-2.5 inline-block bg-[#27272a] rounded-lg">
-              <div className="flex gap-1.5 items-center" aria-hidden="true">
+              <div className="flex gap-2 items-center" aria-hidden="true">
                 <div className="w-2 h-2 bg-gray-400 rounded-full animate-bounce [animation-delay:0ms]" />
                 <div className="w-2 h-2 bg-gray-400 rounded-full animate-bounce [animation-delay:150ms]" />
                 <div className="w-2 h-2 bg-gray-400 rounded-full animate-bounce [animation-delay:300ms]" />
