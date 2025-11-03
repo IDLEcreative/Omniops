@@ -57,12 +57,6 @@ export const navigation: NavigationSection[] = [
         icon: BarChart3,
         badge: null,
       },
-      {
-        name: "Telemetry",
-        href: "/dashboard/telemetry",
-        icon: Server,
-        badge: null,
-      },
     ],
   },
   {

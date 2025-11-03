@@ -82,6 +82,26 @@ export async function middleware(request: NextRequest) {
   // Get user from session
   const { data: { user } } = await supabase.auth.getUser()
 
+  // Owner routes - Platform owner only access
+  const isOwnerPath = pathname.startsWith('/owner')
+
+  // Check if user is platform owner (via email in env var)
+  const isPlatformOwner = user && process.env.PLATFORM_OWNER_EMAIL &&
+    user.email === process.env.PLATFORM_OWNER_EMAIL
+
+  // Redirect non-owners away from owner routes
+  if (isOwnerPath && !isPlatformOwner) {
+    const redirectUrl = new URL('/dashboard', request.url)
+    return NextResponse.redirect(redirectUrl)
+  }
+
+  // Redirect to login if accessing owner path without auth
+  if (isOwnerPath && !user) {
+    const redirectUrl = new URL('/login', request.url)
+    redirectUrl.searchParams.set('redirect', request.nextUrl.pathname)
+    return NextResponse.redirect(redirectUrl)
+  }
+
   // Protected routes that require organization membership
   const protectedPaths = ['/dashboard', '/admin']
   const isProtectedPath = protectedPaths.some(path =>

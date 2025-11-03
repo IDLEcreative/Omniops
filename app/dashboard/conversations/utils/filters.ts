@@ -4,21 +4,14 @@
 
 import { useMemo } from 'react';
 import type { AdvancedFilterState } from '@/components/dashboard/conversations/AdvancedFilters';
-
-interface ConversationItem {
-  id: string;
-  status: string;
-  message: string;
-  customerName?: string;
-  metadata?: { language?: string };
-}
+import type { DashboardConversation, DashboardConversationsData } from '@/types/dashboard';
 
 export function useFilteredConversations(
-  data: { recent: ConversationItem[] } | null,
+  data: DashboardConversationsData | null,
   searchTerm: string,
   activeTab: string,
   advancedFilters: AdvancedFilterState
-) {
+): DashboardConversation[] {
   return useMemo(() => {
     if (!data) return [];
     let filtered = data.recent;
