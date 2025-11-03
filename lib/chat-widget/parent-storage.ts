@@ -47,11 +47,12 @@ export class ParentStorageAdapter {
       const requestId = `request_${++this.requestCounter}_${Date.now()}`;
       this.pendingRequests.set(requestId, resolve);
 
+      const targetOrigin = process.env.NEXT_PUBLIC_APP_URL || window.location.origin;
       window.parent.postMessage({
         type: 'getFromParentStorage',
         key,
         requestId
-      }, '*');
+      }, targetOrigin);
 
       // Timeout after 500ms
       setTimeout(() => {
@@ -78,11 +79,12 @@ export class ParentStorageAdapter {
     }
 
     // In iframe, send to parent
+    const targetOrigin = process.env.NEXT_PUBLIC_APP_URL || window.location.origin;
     window.parent.postMessage({
       type: 'saveToParentStorage',
       key,
       value
-    }, '*');
+    }, targetOrigin);
   }
 
   /**
@@ -100,10 +102,11 @@ export class ParentStorageAdapter {
     }
 
     // In iframe, send to parent
+    const targetOrigin = process.env.NEXT_PUBLIC_APP_URL || window.location.origin;
     window.parent.postMessage({
       type: 'removeFromParentStorage',
       key
-    }, '*');
+    }, targetOrigin);
   }
 
   /**
@@ -120,5 +123,7 @@ export class ParentStorageAdapter {
   }
 }
 
-// Create singleton instance
-export const parentStorage = new ParentStorageAdapter();
+// Create singleton instance (only in browser)
+export const parentStorage = typeof window !== 'undefined'
+  ? new ParentStorageAdapter()
+  : ({ getItem: async () => null, setItem: () => {}, removeItem: () => {}, getItemSync: () => null } as any as ParentStorageAdapter);
