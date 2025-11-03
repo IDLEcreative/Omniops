@@ -70,7 +70,7 @@ export function InputArea({
         />
         <button
           onClick={onFontSizeChange}
-          className={`h-10 w-10 flex items-center justify-center flex-shrink-0 ${highContrast ? 'text-white hover:bg-white hover:text-black border border-white rounded-full' : 'text-white hover:opacity-70'} transition-all duration-200 focus:outline-none`}
+          className="h-10 w-10 flex items-center justify-center flex-shrink-0 text-white hover:opacity-70 transition-opacity duration-200 focus:outline-none"
           aria-label={`Change text size. Current: ${fontSize}`}
           title="Change text size"
         >
@@ -80,11 +80,7 @@ export function InputArea({
           onClick={onSend}
           disabled={!input.trim() || loading}
           aria-label="Send message"
-          className={`h-10 w-10 flex items-center justify-center rounded-full flex-shrink-0 ${
-            highContrast
-              ? 'bg-white text-black hover:bg-gray-200 disabled:bg-gray-600'
-              : 'bg-gradient-to-br from-[#4a4a4a] to-[#3a3a3a] hover:from-[#5a5a5a] hover:to-[#4a4a4a] text-white disabled:opacity-30 shadow-md hover:shadow-lg'
-          } transition-all duration-200 focus:outline-none focus:ring-2 focus:ring-white/50`}
+          className="h-10 w-10 flex items-center justify-center flex-shrink-0 text-white hover:opacity-70 disabled:opacity-30 transition-opacity duration-200 focus:outline-none"
         >
           <Send className="h-4 w-4" aria-hidden="true" />
         </button>
