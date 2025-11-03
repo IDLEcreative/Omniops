@@ -35,7 +35,7 @@ declare global {
   }
 }
 
-const WIDGET_VERSION = '2.1.4';
+const WIDGET_VERSION = "2.1.5";
 const CLEANUP_KEY = 'chat_widget_last_cleanup';
 
 function logDebug(message: string, payload?: unknown) {
