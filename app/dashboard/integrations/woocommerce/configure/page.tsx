@@ -19,6 +19,7 @@ export default function WooCommerceConfigurePage() {
     details?: any;
   } | null>(null);
   const [loading, setLoading] = useState(false);
+  const [credentialsFetched, setCredentialsFetched] = useState(false);
 
   useEffect(() => {
     loadConfiguration();
@@ -31,10 +32,50 @@ export default function WooCommerceConfigurePage() {
 
       if (result.success && result.configured) {
         setStoreUrl(result.url || "");
-        // Security: Don't populate keys - require re-entry to make changes
+
+        // If credentials exist, show placeholder values
+        if (result.hasCredentials) {
+          setConsumerKey("ck_••••••••••••••••••••••••••••••••••••••••");
+          setConsumerSecret("cs_••••••••••••••••••••••••••••••••••••••••");
+        }
       }
     } catch (error) {
       console.error("Failed to load configuration:", error);
+    }
+  };
+
+  const fetchActualCredentials = async () => {
+    if (credentialsFetched) return; // Already fetched
+
+    try {
+      const response = await fetch(`/api/woocommerce/credentials?domain=${window.location.hostname}`);
+      const result = await response.json();
+
+      if (result.success) {
+        setConsumerKey(result.consumerKey);
+        setConsumerSecret(result.consumerSecret);
+        setCredentialsFetched(true);
+      }
+    } catch (error) {
+      console.error("Failed to fetch credentials:", error);
+    }
+  };
+
+  const handleConsumerKeyChange = (value: string) => {
+    // If user is editing placeholder, fetch real credentials first
+    if (!credentialsFetched && consumerKey.includes('••••')) {
+      fetchActualCredentials();
+    } else {
+      setConsumerKey(value);
+    }
+  };
+
+  const handleConsumerSecretChange = (value: string) => {
+    // If user is editing placeholder, fetch real credentials first
+    if (!credentialsFetched && consumerSecret.includes('••••')) {
+      fetchActualCredentials();
+    } else {
+      setConsumerSecret(value);
     }
   };
 
@@ -51,38 +92,43 @@ export default function WooCommerceConfigurePage() {
     setTestResult(null);
 
     try {
-      // Step 1: Save configuration
-      const saveResponse = await fetch("/api/woocommerce/configure", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-          url: storeUrl,
-          consumerKey,
-          consumerSecret,
-        }),
-      });
+      // Check if using placeholder credentials (existing config)
+      const isPlaceholder = consumerKey.includes('••••') || consumerSecret.includes('••••');
 
-      const saveResult = await saveResponse.json();
-
-      if (!saveResult.success) {
-        setTestResult({
-          success: false,
-          message: saveResult.error || "Failed to save configuration",
+      if (!isPlaceholder) {
+        // Step 1: Save new configuration
+        const saveResponse = await fetch("/api/woocommerce/configure", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({
+            url: storeUrl,
+            consumerKey,
+            consumerSecret,
+          }),
         });
-        setLoading(false);
-        return;
+
+        const saveResult = await saveResponse.json();
+
+        if (!saveResult.success) {
+          setTestResult({
+            success: false,
+            message: saveResult.error || "Failed to save configuration",
+          });
+          setLoading(false);
+          return;
+        }
       }
 
-      // Step 2: Test connection
+      // Step 2: Test connection using dynamic mode (database credentials)
       const testResponse = await fetch(
-        `/api/woocommerce/test?domain=${window.location.hostname}`
+        `/api/woocommerce/test?mode=dynamic&domain=${window.location.hostname}`
       );
       const testData = await testResponse.json();
 
-      if (testData.success && testData.configured) {
+      if (testData.success) {
         setTestResult({
           success: true,
-          message: `✓ Successfully connected to ${testData.storeName || "your store"}!`,
+          message: `✓ Successfully connected to your store!`,
           details: testData,
         });
       } else {
@@ -107,6 +153,22 @@ export default function WooCommerceConfigurePage() {
         success: false,
         message: "Please fill in all required fields",
       });
+      return;
+    }
+
+    // Check if using placeholder credentials
+    const isPlaceholder = consumerKey.includes('••••') || consumerSecret.includes('••••');
+
+    if (isPlaceholder) {
+      // Configuration already exists, just redirect
+      setTestResult({
+        success: true,
+        message: "✓ Configuration is already saved!",
+      });
+
+      setTimeout(() => {
+        router.push("/dashboard/integrations");
+      }, 1500);
       return;
     }
 
@@ -214,8 +276,8 @@ export default function WooCommerceConfigurePage() {
           consumerKey={consumerKey}
           consumerSecret={consumerSecret}
           onStoreUrlChange={setStoreUrl}
-          onConsumerKeyChange={setConsumerKey}
-          onConsumerSecretChange={setConsumerSecret}
+          onConsumerKeyChange={handleConsumerKeyChange}
+          onConsumerSecretChange={handleConsumerSecretChange}
         />
 
         <Card>

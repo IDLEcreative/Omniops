@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { IntegrationCard } from "@/components/dashboard/integrations/IntegrationCard";
 import { IntegrationsList } from "@/components/dashboard/integrations/IntegrationsList";
 import { IntegrationsStatsOverview } from "@/components/dashboard/integrations/IntegrationsStatsOverview";
@@ -17,10 +17,60 @@ import {
 export default function IntegrationsPage() {
   const [selectedCategory, setSelectedCategory] = useState<string>('all');
   const [searchQuery, setSearchQuery] = useState('');
+  const [integrations, setIntegrations] = useState(integrationsData);
 
-  const categories = getCategoriesData(integrationsData);
-  const filteredIntegrations = filterIntegrations(integrationsData, selectedCategory, searchQuery);
-  const { connectedCount, availableCount } = getIntegrationStats(integrationsData);
+  // Dynamically check integration statuses
+  useEffect(() => {
+    async function checkIntegrationStatuses() {
+      const domain = typeof window !== 'undefined' ? window.location.hostname : 'localhost';
+
+      // Check WooCommerce status
+      try {
+        const wooResponse = await fetch(`/api/woocommerce/configure?domain=${domain}`);
+        const wooData = await wooResponse.json();
+
+        // Check Shopify status (if endpoint exists)
+        let shopifyData = { configured: false };
+        try {
+          const shopifyResponse = await fetch(`/api/shopify/configure?domain=${domain}`);
+          shopifyData = await shopifyResponse.json();
+        } catch (e) {
+          // Shopify endpoint might not exist yet
+        }
+
+        setIntegrations(prev => prev.map(integration => {
+          if (integration.id === 'woocommerce') {
+            return {
+              ...integration,
+              status: wooData.configured ? 'connected' : 'disconnected'
+            };
+          }
+          if (integration.id === 'shopify') {
+            return {
+              ...integration,
+              status: shopifyData.configured ? 'connected' : 'disconnected'
+            };
+          }
+          return integration;
+        }));
+      } catch (error) {
+        console.error('Failed to check integration statuses:', error);
+        // Set to disconnected on error
+        setIntegrations(prev => prev.map(integration => {
+          if (integration.id === 'woocommerce' || integration.id === 'shopify') {
+            return { ...integration, status: 'disconnected' };
+          }
+          return integration;
+        }));
+      }
+    }
+
+    checkIntegrationStatuses();
+  }, []);
+
+  const categories = getCategoriesData(integrations);
+  const filteredIntegrations = filterIntegrations(integrations, selectedCategory, searchQuery);
+  const { connectedCount, availableCount } = getIntegrationStats(integrations);
 
   return (
     <div className="flex-1 space-y-8 p-8 pt-6">
@@ -34,7 +84,7 @@ export default function IntegrationsPage() {
 
       {/* Stats Overview */}
       <IntegrationsStatsOverview
-        totalCount={integrationsData.length}
+        totalCount={integrations.length}
         connectedCount={connectedCount}
         availableCount={availableCount}
       />

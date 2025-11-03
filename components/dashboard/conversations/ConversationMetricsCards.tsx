@@ -1,6 +1,6 @@
 import type { ComponentProps } from "react";
 import { Badge } from "@/components/ui/badge";
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
+import { Card, CardContent, CardDescription, CardHeader } from "@/components/ui/card";
 import { EmptyState } from "@/components/ui/empty-state";
 import { Clock } from "lucide-react";
 
@@ -69,38 +69,55 @@ export function ConversationMetricsCards({
   totalStatus,
 }: ConversationMetricsCardsProps) {
   return (
-    <div className="grid grid-cols-1 lg:grid-cols-3 gap-4">
-      <Card>
-        <CardHeader>
-          <CardTitle>Total Conversations</CardTitle>
-          <CardDescription>Count and change vs previous period</CardDescription>
+    <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+      <Card className="border-border/50 shadow-sm hover:shadow-md transition-shadow">
+        <CardHeader className="pb-3">
+          <CardDescription className="text-xs uppercase tracking-wider font-medium">
+            Total Conversations
+          </CardDescription>
         </CardHeader>
-        <CardContent className="space-y-2">
-          <div className="text-3xl font-bold">
+        <CardContent className="space-y-3">
+          <div className="text-4xl font-bold tracking-tight">
             {loading && !data ? <SkeletonBar /> : data?.total.toLocaleString() ?? "—"}
           </div>
-          <div className="text-sm text-muted-foreground">
-            Change: {loading && !data ? "—" : `${(data?.change ?? 0).toFixed(1)}%`}
+          <div className="flex items-center gap-2 text-sm">
+            <span className="text-muted-foreground">vs previous period:</span>
+            <span className={`font-semibold ${
+              (data?.change ?? 0) > 0 ? 'text-green-600 dark:text-green-400' :
+              (data?.change ?? 0) < 0 ? 'text-red-600 dark:text-red-400' :
+              'text-muted-foreground'
+            }`}>
+              {loading && !data ? "—" : `${(data?.change ?? 0) > 0 ? '+' : ''}${(data?.change ?? 0).toFixed(1)}%`}
+            </span>
           </div>
         </CardContent>
       </Card>
 
-      <Card>
-        <CardHeader>
-          <CardTitle>Status Breakdown</CardTitle>
-          <CardDescription>Active vs waiting vs resolved conversations</CardDescription>
+      <Card className="border-border/50 shadow-sm hover:shadow-md transition-shadow">
+        <CardHeader className="pb-3">
+          <CardDescription className="text-xs uppercase tracking-wider font-medium">
+            Status Breakdown
+          </CardDescription>
         </CardHeader>
-        <CardContent className="space-y-3">
+        <CardContent className="space-y-4">
           {(["active", "waiting", "resolved"] as const).map((status) => {
             const count = data?.statusCounts[status] ?? 0;
             const percentage = totalStatus > 0 ? Math.round((count / totalStatus) * 100) : 0;
             return (
-              <div key={status} className="flex items-center justify-between">
-                <div className="flex items-center space-x-2">
-                  <Badge variant={statusBadgeVariant(status)}>{STATUS_LABELS[status]}</Badge>
+              <div key={status} className="flex items-center justify-between group">
+                <div className="flex items-center space-x-2.5">
+                  <Badge variant={statusBadgeVariant(status)} className="min-w-[80px] justify-center">
+                    {STATUS_LABELS[status]}
+                  </Badge>
                 </div>
-                <div className="text-sm font-medium">
-                  {loading && !data ? "—" : `${count.toLocaleString()} · ${percentage}%`}
+                <div className="text-sm font-semibold tabular-nums">
+                  {loading && !data ? "—" : (
+                    <>
+                      <span className="text-foreground">{count.toLocaleString()}</span>
+                      <span className="text-muted-foreground ml-1.5">·</span>
+                      <span className="text-muted-foreground ml-1.5">{percentage}%</span>
+                    </>
+                  )}
                 </div>
               </div>
             );
@@ -108,19 +125,29 @@ export function ConversationMetricsCards({
         </CardContent>
       </Card>
 
-      <Card>
-        <CardHeader>
-          <CardTitle>Peak Hours</CardTitle>
-          <CardDescription>Highest-volume times in this range</CardDescription>
+      <Card className="border-border/50 shadow-sm hover:shadow-md transition-shadow">
+        <CardHeader className="pb-3">
+          <CardDescription className="text-xs uppercase tracking-wider font-medium">
+            Peak Hours
+          </CardDescription>
         </CardHeader>
-        <CardContent className="space-y-2">
+        <CardContent className="space-y-3">
           {loading && !data ? (
             <SkeletonList count={3} />
           ) : data && data.peakHours.length > 0 ? (
-            data.peakHours.map((entry) => (
-              <div key={entry.hour} className="flex items-center justify-between text-sm">
-                <span>{entry.label}</span>
-                <Badge variant={levelVariant[entry.level] ?? "outline"}>{entry.count}</Badge>
+            data.peakHours.map((entry, index) => (
+              <div key={entry.hour} className="flex items-center justify-between text-sm group">
+                <div className="flex items-center gap-2">
+                  <div className={`w-1 h-8 rounded-full ${
+                    index === 0 ? 'bg-blue-500' :
+                    index === 1 ? 'bg-blue-400' :
+                    'bg-blue-300'
+                  }`} />
+                  <span className="text-foreground font-medium">{entry.label}</span>
+                </div>
+                <Badge variant={levelVariant[entry.level] ?? "outline"} className="min-w-[50px] justify-center font-semibold">
+                  {entry.count}
+                </Badge>
               </div>
             ))
           ) : (

@@ -53,28 +53,37 @@ export function ConversationsPageHeader({
   displayShortcuts,
 }: ConversationsPageHeaderProps) {
   return (
-    <div className="flex flex-wrap items-center justify-between gap-4">
+    <div className="space-y-4">
+      {/* Title Section */}
       <div>
-        <h1 className="text-3xl font-bold">Conversations</h1>
-        <p className="text-muted-foreground">
+        <h1 className="text-3xl font-bold tracking-tight">Conversations</h1>
+        <p className="text-sm text-muted-foreground mt-1.5">
           Monitor live conversations, recent sentiment, and language coverage.
         </p>
       </div>
-      <div className="flex items-center space-x-3">
+
+      {/* Controls Section - Better organized with visual grouping */}
+      <div className="flex flex-wrap items-center gap-3">
+        {/* View Toggle */}
         <Tabs value={mainView} onValueChange={(val) => onMainViewChange(val as MainView)}>
-          <TabsList>
-            <TabsTrigger value="conversations">
-              <MessageCircle className="h-4 w-4 mr-2" />
-              Conversations
+          <TabsList className="h-9">
+            <TabsTrigger value="conversations" className="gap-2">
+              <MessageCircle className="h-4 w-4" />
+              <span className="hidden sm:inline">Conversations</span>
             </TabsTrigger>
-            <TabsTrigger value="analytics">
-              <BarChart3 className="h-4 w-4 mr-2" />
-              Analytics
+            <TabsTrigger value="analytics" className="gap-2">
+              <BarChart3 className="h-4 w-4" />
+              <span className="hidden sm:inline">Analytics</span>
             </TabsTrigger>
           </TabsList>
         </Tabs>
+
+        {/* Separator */}
+        <div className="h-6 w-px bg-border hidden md:block" />
+
+        {/* Date Range Selector */}
         <Select value={selectedRange} onValueChange={(value) => onRangeChange(value as DateRangeValue)}>
-          <SelectTrigger className="w-34">
+          <SelectTrigger className="w-[160px] h-9">
             <Calendar className="h-4 w-4 mr-2" />
             <SelectValue placeholder="Select range" />
           </SelectTrigger>
@@ -85,6 +94,8 @@ export function ConversationsPageHeader({
             <SelectItem value="90d">Last 90 days</SelectItem>
           </SelectContent>
         </Select>
+
+        {/* Live Status */}
         <LiveStatusIndicator
           isLive={isLive}
           onToggle={onToggleLive}
@@ -92,34 +103,46 @@ export function ConversationsPageHeader({
           newCount={newCount}
           onAcknowledge={onAcknowledgeNew}
         />
-        <Button
-          variant="outline"
-          size="icon"
-          onClick={onRefresh}
-          disabled={loading || refreshing}
-          aria-label="Refresh conversations"
-          aria-busy={refreshing}
-        >
-          <RefreshCw className={`h-4 w-4 ${refreshing ? "animate-spin" : ""}`} />
-        </Button>
-        <Button
-          variant={selectionMode ? "default" : "outline"}
-          size="icon"
-          onClick={onToggleSelectionMode}
-          aria-label={selectionMode ? "Exit selection mode" : "Enter selection mode"}
-          title={selectionMode ? "Exit selection mode" : "Select multiple conversations"}
-        >
-          <CheckSquare className="h-4 w-4" />
-        </Button>
-        <ExportDialog
-          selectedIds={selectedIds.size > 0 ? Array.from(selectedIds) : undefined}
-          currentFilters={{
-            status: activeTab,
-            dateRange: dateRangeForExport,
-            searchTerm: searchTerm.trim() || undefined,
-          }}
-        />
-        <KeyboardShortcutsModal shortcuts={displayShortcuts} />
+
+        {/* Spacer to push action buttons to the right on larger screens */}
+        <div className="flex-1 min-w-0 hidden lg:block" />
+
+        {/* Action Buttons Group */}
+        <div className="flex items-center gap-2">
+          <Button
+            variant="outline"
+            size="icon"
+            onClick={onRefresh}
+            disabled={loading || refreshing}
+            aria-label="Refresh conversations"
+            aria-busy={refreshing}
+            className="h-9 w-9"
+          >
+            <RefreshCw className={`h-4 w-4 ${refreshing ? "animate-spin" : ""}`} />
+          </Button>
+
+          <Button
+            variant={selectionMode ? "default" : "outline"}
+            size="icon"
+            onClick={onToggleSelectionMode}
+            aria-label={selectionMode ? "Exit selection mode" : "Enter selection mode"}
+            title={selectionMode ? "Exit selection mode" : "Select multiple conversations"}
+            className="h-9 w-9"
+          >
+            <CheckSquare className="h-4 w-4" />
+          </Button>
+
+          <ExportDialog
+            selectedIds={selectedIds.size > 0 ? Array.from(selectedIds) : undefined}
+            currentFilters={{
+              status: activeTab,
+              dateRange: dateRangeForExport,
+              searchTerm: searchTerm.trim() || undefined,
+            }}
+          />
+
+          <KeyboardShortcutsModal shortcuts={displayShortcuts} />
+        </div>
       </div>
     </div>
   );

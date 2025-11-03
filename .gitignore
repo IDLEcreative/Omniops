@@ -182,3 +182,7 @@ mcp-supabase-config.json
 !/jsconfig.json
 !/vercel.json
 .env-backups/
+
+# Backup bundles and patches
+omniops_commits_*.bundle
+omniops_patches_*.patch

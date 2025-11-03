@@ -14,13 +14,14 @@ import {
 import { Integration } from "@/components/dashboard/integrations/IntegrationCard";
 import { Category } from "@/components/dashboard/integrations/IntegrationsCategorySidebar";
 
+// Note: Status will be dynamically updated by useEffect in the page component
 export const integrationsData: Integration[] = [
   {
     id: 'woocommerce',
     name: 'WooCommerce',
     description: 'Sync products, orders, and customer data from your WooCommerce store',
     icon: <ShoppingCart className="h-5 w-5" />,
-    status: 'disconnected',
+    status: 'loading', // Will be updated dynamically
     category: 'ecommerce',
   },
   {
@@ -28,7 +29,7 @@ export const integrationsData: Integration[] = [
     name: 'Shopify',
     description: 'Import products and handle customer inquiries about Shopify orders',
     icon: <Package className="h-5 w-5" />,
-    status: 'disconnected',
+    status: 'loading', // Will be updated dynamically
     category: 'ecommerce',
   },
   {
