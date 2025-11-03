@@ -70,7 +70,7 @@ export function InputArea({
         />
         <button
           onClick={onFontSizeChange}
-          className={`h-10 w-10 flex items-center justify-center rounded-full flex-shrink-0 ${highContrast ? 'text-white hover:bg-white hover:text-black border border-white' : 'text-white hover:opacity-70'} transition-all duration-200 focus:outline-none focus:ring-2 focus:ring-white/50`}
+          className={`h-10 w-10 flex items-center justify-center flex-shrink-0 ${highContrast ? 'text-white hover:bg-white hover:text-black border border-white rounded-full' : 'text-white hover:opacity-70'} transition-all duration-200 focus:outline-none`}
           aria-label={`Change text size. Current: ${fontSize}`}
           title="Change text size"
         >
