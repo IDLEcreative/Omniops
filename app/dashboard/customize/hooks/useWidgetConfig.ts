@@ -82,6 +82,9 @@ export function useWidgetConfig({ toast }: UseWidgetConfigProps) {
           essentials: {
             primaryColor: fullConfig.theme_settings?.primaryColor || defaultConfig.essentials.primaryColor,
             logoUrl: fullConfig.branding_settings?.customLogoUrl || "",
+            minimizedIconUrl: fullConfig.branding_settings?.minimizedIconUrl || "",
+            minimizedIconHoverUrl: fullConfig.branding_settings?.minimizedIconHoverUrl || "",
+            minimizedIconActiveUrl: fullConfig.branding_settings?.minimizedIconActiveUrl || "",
             position: fullConfig.position_settings?.position || "bottom-right",
             botName: fullConfig.behavior_settings?.botName || "Assistant",
             welcomeMessage: fullConfig.behavior_settings?.welcomeMessage || defaultConfig.essentials.welcomeMessage,
@@ -90,6 +93,9 @@ export function useWidgetConfig({ toast }: UseWidgetConfigProps) {
             autoOpen: fullConfig.behavior_settings?.autoOpen ?? false,
             autoOpenDelay: fullConfig.behavior_settings?.openDelay || 3000,
             soundNotifications: fullConfig.behavior_settings?.soundNotifications ?? false,
+            animationType: fullConfig.behavior_settings?.animationType || defaultConfig.essentials.animationType,
+            animationSpeed: fullConfig.behavior_settings?.animationSpeed || defaultConfig.essentials.animationSpeed,
+            animationIntensity: fullConfig.behavior_settings?.animationIntensity || defaultConfig.essentials.animationIntensity,
           },
           intelligence: {
             personality: mapToSimplePersonality(fullConfig.ai_settings?.personality),
@@ -165,6 +171,9 @@ export function useWidgetConfig({ toast }: UseWidgetConfigProps) {
           autoOpen: config.essentials.autoOpen,
           openDelay: config.essentials.autoOpenDelay,
           soundNotifications: config.essentials.soundNotifications,
+          animationType: config.essentials.animationType,
+          animationSpeed: config.essentials.animationSpeed,
+          animationIntensity: config.essentials.animationIntensity,
         },
         aiSettings: {
           personality: config.intelligence.personality,
@@ -183,6 +192,9 @@ export function useWidgetConfig({ toast }: UseWidgetConfigProps) {
         },
         brandingSettings: {
           customLogoUrl: config.essentials.logoUrl,
+          minimizedIconUrl: config.essentials.minimizedIconUrl,
+          minimizedIconHoverUrl: config.essentials.minimizedIconHoverUrl,
+          minimizedIconActiveUrl: config.essentials.minimizedIconActiveUrl,
         },
       };
 

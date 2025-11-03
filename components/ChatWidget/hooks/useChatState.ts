@@ -1,6 +1,8 @@
 import { useState, useEffect, useRef } from 'react';
 import { Message } from '@/types';
 import { parentStorage } from '@/lib/chat-widget/parent-storage';
+import { enhancedParentStorage, EnhancedParentStorageAdapter } from '@/lib/chat-widget/parent-storage-enhanced';
+import type { ConnectionState } from '@/lib/chat-widget/connection-monitor';
 
 export interface PrivacySettings {
   allowOptOut: boolean;
@@ -65,6 +67,23 @@ export interface ChatWidgetConfig {
     fontFamily?: string; // Font family
     fontSize?: string; // Font size
     borderRadius?: string; // Border radius
+
+    // Minimized widget icon
+    minimizedIconUrl?: string; // Custom icon URL for minimized widget button
+    minimizedIconHoverUrl?: string; // Custom icon URL for hover state
+    minimizedIconActiveUrl?: string; // Custom icon URL for active/clicked state
+  };
+  behavior?: {
+    // Animation settings
+    animationType?: 'none' | 'pulse' | 'bounce' | 'rotate' | 'fade' | 'wiggle';
+    animationSpeed?: 'slow' | 'normal' | 'fast';
+    animationIntensity?: 'subtle' | 'normal' | 'strong';
+  };
+  branding?: {
+    minimizedIconUrl?: string; // Custom icon URL for minimized widget button
+    minimizedIconHoverUrl?: string; // Custom icon URL for hover state
+    minimizedIconActiveUrl?: string; // Custom icon URL for active/clicked state
+    customLogoUrl?: string; // Logo URL for header
   };
 }
 
@@ -76,6 +95,7 @@ export interface UseChatStateProps {
   privacySettings?: Partial<PrivacySettings>;
   onReady?: () => void;
   onMessage?: (message: Message) => void;
+  useEnhancedStorage?: boolean; // Enable enhanced storage with reliability features
 }
 
 export function useChatState({
@@ -86,6 +106,7 @@ export function useChatState({
   privacySettings: propPrivacySettings,
   onReady,
   onMessage,
+  useEnhancedStorage = false,
 }: UseChatStateProps) {
   const [messages, setMessages] = useState<Message[]>([]);
   const [input, setInput] = useState('');
@@ -107,6 +128,13 @@ export function useChatState({
   });
   const messagesContainerRef = useRef<HTMLDivElement>(null);
 
+  // Connection state for enhanced storage
+  const [connectionState, setConnectionState] = useState<ConnectionState>('connecting');
+
+  // Choose storage adapter based on feature flag
+  // Use non-null assertion since we know we're in browser when this runs
+  const storage = useEnhancedStorage ? (enhancedParentStorage || parentStorage) : parentStorage;
+
   // WooCommerce settings
   const [woocommerceEnabled, setWoocommerceEnabled] = useState(false);
   const [storeDomain, setStoreDomain] = useState<string | null>(null);
@@ -115,10 +143,30 @@ export function useChatState({
   const [loadingMessages, setLoadingMessages] = useState(false);
   const hasLoadedMessages = useRef(false);
 
-  // Set mounted state
+  // Set mounted state and monitor connection if using enhanced storage
   useEffect(() => {
     setMounted(true);
-  }, []);
+
+    // Monitor connection state if using enhanced storage
+    if (useEnhancedStorage && enhancedParentStorage) {
+      import('@/lib/chat-widget/connection-monitor').then(({ connectionMonitor }) => {
+        if (connectionMonitor) {
+          const unsubscribe = connectionMonitor.addListener((state) => {
+            setConnectionState(state);
+          });
+
+          // Set initial state
+          if (enhancedParentStorage) {
+            setConnectionState(enhancedParentStorage.getConnectionState());
+          }
+
+          return () => {
+            unsubscribe();
+          };
+        }
+      });
+    }
+  }, [useEnhancedStorage]);
 
   // Parse privacy settings from URL params if in embed mode
   useEffect(() => {
@@ -159,25 +207,25 @@ export function useChatState({
     if (params.get('open') === 'true' || params.get('forceClose') === 'true' || initialOpen || forceClose) return;
 
     // Use async to get from parent storage
-    parentStorage.getItem('widget_open').then(savedState => {
+    storage.getItem('widget_open').then(savedState => {
       if (savedState === 'true') {
         setIsOpen(true);
       }
     });
-  }, [mounted, initialOpen, forceClose]);
+  }, [mounted, initialOpen, forceClose, storage]);
 
   // Save open/close state to storage
   useEffect(() => {
     if (mounted && typeof window !== 'undefined') {
       try {
-        parentStorage.setItem('widget_open', isOpen.toString());
+        storage.setItem('widget_open', isOpen.toString());
       } catch (error) {
         // Storage might be disabled (private mode, CSP policy, etc.)
         console.warn('[Chat Widget] Could not save state to storage:', error);
         // Widget will still function, just won't remember state on refresh
       }
     }
-  }, [isOpen, mounted]);
+  }, [isOpen, mounted, storage]);
 
   // Generate session ID on mount and check WooCommerce config
   useEffect(() => {
@@ -191,9 +239,9 @@ export function useChatState({
     const initializeStorage = async () => {
       // Debug: Log what's in localStorage at mount
       const [storedSessionId, storedConversationId, storedWidgetOpen] = await Promise.all([
-        parentStorage.getItem('session_id'),
-        parentStorage.getItem('conversation_id'),
-        parentStorage.getItem('widget_open')
+        storage.getItem('session_id'),
+        storage.getItem('conversation_id'),
+        storage.getItem('widget_open')
       ]);
 
       console.log('[useChatState] Mount - storage contents:', {
@@ -208,7 +256,7 @@ export function useChatState({
       } else {
         const newSessionId = `session_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`;
         console.log('[useChatState] Creating new session ID:', newSessionId);
-        parentStorage.setItem('session_id', newSessionId);
+        storage.setItem('session_id', newSessionId);
         setSessionId(newSessionId);
       }
 
@@ -336,7 +384,8 @@ export function useChatState({
     window.addEventListener('message', handleMessage);
 
     if (window.parent !== window) {
-      window.parent.postMessage({ type: 'ready' }, '*');
+      const targetOrigin = process.env.NEXT_PUBLIC_APP_URL || window.location.origin;
+      window.parent.postMessage({ type: 'ready' }, targetOrigin);
     }
 
     if (onReady) {
@@ -379,21 +428,21 @@ export function useChatState({
         } else {
           // Conversation not found or expired - clear stored ID
           console.log('[useChatState] No messages found, clearing conversation ID');
-          parentStorage.removeItem('conversation_id');
+          storage.removeItem('conversation_id');
           setConversationId('');
           hasLoadedMessages.current = false; // Reset to allow new conversation
         }
       } else {
         // API error - clear stored ID to start fresh
         console.warn('[useChatState] Failed to load messages, clearing conversation ID');
-        parentStorage.removeItem('conversation_id');
+        storage.removeItem('conversation_id');
         setConversationId('');
         hasLoadedMessages.current = false; // Reset to allow new conversation
       }
     } catch (error) {
       console.error('[useChatState] Error loading messages:', error);
       // On error, clear stored conversation to allow fresh start
-      parentStorage.removeItem('conversation_id');
+      storage.removeItem('conversation_id');
       setConversationId('');
       hasLoadedMessages.current = false; // Reset to allow new conversation
     } finally {
@@ -420,7 +469,7 @@ export function useChatState({
   useEffect(() => {
     if (mounted && conversationId) {
       try {
-        parentStorage.setItem('conversation_id', conversationId);
+        storage.setItem('conversation_id', conversationId);
         console.log('[useChatState] Persisted conversation ID:', conversationId);
       } catch (error) {
         console.warn('[useChatState] Could not save conversation ID to storage:', error);
@@ -429,7 +478,7 @@ export function useChatState({
       // Conversation was cleared, reset the flag to allow loading new messages
       hasLoadedMessages.current = false;
     }
-  }, [conversationId, mounted]);
+  }, [conversationId, mounted, storage]);
 
   // Load previous messages when widget opens with existing conversation
   useEffect(() => {
@@ -442,22 +491,23 @@ export function useChatState({
   // Notify parent window when widget opens/closes and request resize
   useEffect(() => {
     if (mounted && window.parent !== window) {
+      const targetOrigin = process.env.NEXT_PUBLIC_APP_URL || window.location.origin;
       if (isOpen) {
         // Widget is open - request full size and enable pointer events
-        window.parent.postMessage({ type: 'widgetOpened' }, '*');
+        window.parent.postMessage({ type: 'widgetOpened' }, targetOrigin);
         window.parent.postMessage({
           type: 'resize',
           width: 400,  // Full width for open widget
           height: 580, // Full height for open widget
-        }, '*');
+        }, targetOrigin);
       } else {
         // Widget is closed - request minimal size for button only
-        window.parent.postMessage({ type: 'widgetClosed' }, '*');
+        window.parent.postMessage({ type: 'widgetClosed' }, targetOrigin);
         window.parent.postMessage({
           type: 'resize',
           width: 64,  // Just enough for the button (14 * 4 + padding)
           height: 64, // Just enough for the button
-        }, '*');
+        }, targetOrigin);
       }
     }
   }, [isOpen, mounted]);
@@ -471,10 +521,11 @@ export function useChatState({
 
   const handleConsent = () => {
     setPrivacySettings(prev => ({ ...prev, consentGiven: true }));
+    const targetOrigin = process.env.NEXT_PUBLIC_APP_URL || window.location.origin;
     window.parent.postMessage({
       type: 'privacy',
       action: 'giveConsent',
-    }, '*');
+    }, targetOrigin);
   };
 
   return {
@@ -502,5 +553,6 @@ export function useChatState({
     storeDomain,
     handleConsent,
     onMessage,
+    connectionState, // Connection state for reliability monitoring
   };
 }

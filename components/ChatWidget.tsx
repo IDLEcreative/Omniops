@@ -1,6 +1,6 @@
 'use client';
 
-import { useCallback } from 'react';
+import { useCallback, useState } from 'react';
 import { MessageCircle } from 'lucide-react';
 import { Message } from '@/types';
 import { useChatState, ChatWidgetConfig, PrivacySettings } from './ChatWidget/hooks/useChatState';
@@ -8,6 +8,7 @@ import { Header } from './ChatWidget/Header';
 import { MessageList } from './ChatWidget/MessageList';
 import { InputArea } from './ChatWidget/InputArea';
 import { PrivacyBanner } from './ChatWidget/PrivacyBanner';
+import { AnimationStyles, getAnimationClassName } from '@/app/dashboard/customize/components/AnimationStyles';
 
 interface ChatWidgetProps {
   demoId?: string;
@@ -28,6 +29,9 @@ export default function ChatWidget({
   onReady,
   onMessage: onMessageCallback
 }: ChatWidgetProps) {
+  // Icon state management for hover and active states
+  const [iconState, setIconState] = useState<'normal' | 'hover' | 'active'>('normal');
+
   const {
     messages,
     setMessages,
@@ -208,6 +212,22 @@ export default function ChatWidget({
     setFontSize(sizes[(currentIndex + 1) % sizes.length] || 'normal');
   }, [fontSize, setFontSize]);
 
+  // Get the appropriate icon URL based on current state
+  const getIconUrl = useCallback(() => {
+    const normalIcon = demoConfig?.branding?.minimizedIconUrl || demoConfig?.appearance?.minimizedIconUrl;
+    const hoverIcon = demoConfig?.branding?.minimizedIconHoverUrl || demoConfig?.appearance?.minimizedIconHoverUrl;
+    const activeIcon = demoConfig?.branding?.minimizedIconActiveUrl || demoConfig?.appearance?.minimizedIconActiveUrl;
+
+    switch (iconState) {
+      case 'hover':
+        return hoverIcon || normalIcon;
+      case 'active':
+        return activeIcon || normalIcon;
+      default:
+        return normalIcon;
+    }
+  }, [iconState, demoConfig]);
+
   if (!mounted) {
     return null;
   }
@@ -224,29 +244,46 @@ export default function ChatWidget({
 
   if (!isOpen) {
     // Animation settings with sensible defaults
-    const showPulse = demoConfig?.appearance?.showPulseAnimation ?? true;
+    const animationType = demoConfig?.behavior?.animationType || 'pulse';
+    const animationSpeed = demoConfig?.behavior?.animationSpeed || 'normal';
+    const animationIntensity = demoConfig?.behavior?.animationIntensity || 'normal';
     const showBadge = demoConfig?.appearance?.showNotificationBadge ?? true;
 
-    // Config-driven button colors
+    // Config-driven button colors and icon
     const buttonGradientStart = demoConfig?.appearance?.buttonGradientStart || '#3a3a3a';
     const buttonGradientEnd = demoConfig?.appearance?.buttonGradientEnd || '#2a2a2a';
     const buttonTextColor = demoConfig?.appearance?.buttonTextColor || '#ffffff';
+    const minimizedIconUrl = getIconUrl();
 
     return (
       <div className="fixed bottom-1 right-1 z-50">
+        {/* Inject animation styles if animation is enabled */}
+        {animationType !== 'none' && (
+          <AnimationStyles
+            animationType={animationType}
+            animationSpeed={animationSpeed}
+            animationIntensity={animationIntensity}
+          />
+        )}
         <button
           onClick={() => setIsOpen(true)}
+          onMouseEnter={() => setIconState('hover')}
+          onMouseLeave={() => setIconState('normal')}
+          onMouseDown={() => setIconState('active')}
+          onMouseUp={() => setIconState('hover')}
+          onTouchStart={() => setIconState('active')}
+          onTouchEnd={() => setIconState('normal')}
           style={{
             backgroundImage: `linear-gradient(to bottom right, ${buttonGradientStart}, ${buttonGradientEnd})`,
             color: buttonTextColor,
           }}
-          className="relative w-12 h-12 sm:w-14 sm:h-14 text-white rounded-full shadow-xl hover:shadow-2xl hover:scale-105 focus:outline-none focus:ring-2 focus:ring-white/50 focus:ring-offset-2 focus:ring-offset-black transition-all duration-300 flex items-center justify-center animate-in fade-in group"
+          className={`relative w-12 h-12 sm:w-14 sm:h-14 text-white rounded-full shadow-xl hover:shadow-2xl hover:scale-105 focus:outline-none focus:ring-2 focus:ring-white/50 focus:ring-offset-2 focus:ring-offset-black transition-all duration-300 flex items-center justify-center animate-in fade-in group ${getAnimationClassName(animationType)}`}
           aria-label="Open chat support widget"
           role="button"
           tabIndex={0}
         >
-          {/* Subtle pulse animation ring - respects user preference and configuration */}
-          {showPulse && (
+          {/* Legacy pulse ring - only show if animationType is 'none' for backwards compatibility */}
+          {animationType === 'none' && (
             <span
               style={{
                 backgroundImage: `linear-gradient(to bottom right, ${buttonGradientStart}, ${buttonGradientEnd})`,
@@ -265,8 +302,47 @@ export default function ChatWidget({
             />
           )}
 
-          {/* Icon with hover scale effect */}
-          <MessageCircle className="relative h-5 w-5 sm:h-6 sm:w-6 group-hover:scale-110 transition-transform" aria-hidden="true" />
+          {/* Icon with hover scale effect and smooth state transitions */}
+          {minimizedIconUrl ? (
+            <picture
+              key={iconState}
+              className="relative h-5 w-5 sm:h-6 sm:w-6 group-hover:scale-110 transition-all duration-200 ease-in-out block"
+            >
+              {/* WebP version for modern browsers (better compression) */}
+              <source
+                srcSet={minimizedIconUrl.replace(/\.(png|jpg|jpeg)$/i, '.webp')}
+                type="image/webp"
+              />
+              {/* PNG fallback for older browsers */}
+              <img
+                src={minimizedIconUrl.replace(/\.webp$/i, '.png')}
+                alt="Chat"
+                className="h-full w-full object-contain transition-opacity duration-200"
+                width="24"
+                height="24"
+                loading="lazy"
+                aria-hidden="true"
+                style={{
+                  opacity: iconState === 'active' ? 0.8 : 1,
+                }}
+                onError={(e) => {
+                  // Fallback to default MessageCircle icon on error
+                  const picture = e.currentTarget.closest('picture');
+                  if (picture) {
+                    picture.style.display = 'none';
+                  }
+                  const button = picture?.parentElement;
+                  if (button) {
+                    const fallbackIcon = document.createElement('div');
+                    fallbackIcon.innerHTML = '<svg class="relative h-5 w-5 sm:h-6 sm:w-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 12h.01M12 12h.01M16 12h.01M21 12c0 4.418-4.03 8-9 8a9.863 9.863 0 01-4.255-.949L3 20l1.395-3.72C3.512 15.042 3 13.574 3 12c0-4.418 4.03-8 9-8s9 3.582 9 8z"></path></svg>';
+                    button.appendChild(fallbackIcon.firstChild as Node);
+                  }
+                }}
+              />
+            </picture>
+          ) : (
+            <MessageCircle className="relative h-5 w-5 sm:h-6 sm:w-6 group-hover:scale-110 transition-transform" aria-hidden="true" />
+          )}
         </button>
       </div>
     );

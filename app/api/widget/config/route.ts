@@ -232,7 +232,7 @@ export async function GET(request: NextRequest) {
     const customerConfigId = domainData?.customer_config_id || config.id;
     const { data: widgetConfig } = await supabase
       .from('widget_configs')
-      .select('theme_settings, position_settings, behavior_settings')
+      .select('theme_settings, position_settings, behavior_settings, branding_settings')
       .eq('customer_config_id', customerConfigId)
       .eq('is_active', true)
       .single();
@@ -310,6 +310,9 @@ export async function GET(request: NextRequest) {
       soundNotifications: widgetConfig?.behavior_settings?.soundNotifications || false,
       persistConversation: widgetConfig?.behavior_settings?.persistConversation ?? true,
       messageDelay: widgetConfig?.behavior_settings?.messageDelay || 500,
+      animationType: widgetConfig?.behavior_settings?.animationType || 'pulse',
+      animationSpeed: widgetConfig?.behavior_settings?.animationSpeed || 'normal',
+      animationIntensity: widgetConfig?.behavior_settings?.animationIntensity || 'normal',
     };
 
     // Return comprehensive public-safe configuration
@@ -325,6 +328,9 @@ export async function GET(request: NextRequest) {
           primary_color: appearance.primaryColor,
           welcome_message: behavior.welcomeMessage,
           suggested_questions: config.suggested_questions || [],
+          minimizedIconUrl: widgetConfig?.branding_settings?.minimizedIconUrl || '',
+          minimizedIconHoverUrl: widgetConfig?.branding_settings?.minimizedIconHoverUrl || '',
+          minimizedIconActiveUrl: widgetConfig?.branding_settings?.minimizedIconActiveUrl || '',
         },
         appearance,
         behavior,

@@ -4,7 +4,7 @@ import { useMemo } from "react";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Eye } from "lucide-react";
 import dynamic from "next/dynamic";
-import type { SimplifiedWidgetConfig } from "../page";
+import type { SimplifiedWidgetConfig } from "../types";
 
 // Dynamically import ChatWidget to avoid SSR issues
 const ChatWidget = dynamic(() => import('@/components/ChatWidget'), { ssr: false });
@@ -41,6 +41,7 @@ export function LivePreview({ config, customerDomain }: LivePreviewProps) {
     },
     branding_settings: {
       customLogoUrl: config.essentials.logoUrl,
+      minimizedIconUrl: config.essentials.minimizedIconUrl,
     },
     integration_settings: {
       enableWooCommerce: config.connect.enableWooCommerce,
@@ -96,7 +97,7 @@ export function LivePreview({ config, customerDomain }: LivePreviewProps) {
                 demoId="preview"
                 demoConfig={{
                   ...widgetConfig,
-                  domain: customerDomain, // Pass the customer's actual domain
+                  domain: customerDomain || undefined, // Pass the customer's actual domain
                 }}
                 initialOpen={config.essentials.autoOpen}
                 forceClose={false}

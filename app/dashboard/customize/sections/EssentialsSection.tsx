@@ -4,12 +4,25 @@ import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { Switch } from "@/components/ui/switch";
 import { Badge } from "@/components/ui/badge";
-import { Palette, MessageSquare, Settings2, Upload } from "lucide-react";
+import { Palette, MessageSquare, Settings2, Upload, Loader2, X, Sparkles } from "lucide-react";
 import { PositionPicker } from "../components/PositionPicker";
+import { AnimationStyles } from "../components/AnimationStyles";
+import { useState, useRef } from "react";
+import { useToast } from "@/components/ui/use-toast";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
 
 interface EssentialsSettings {
   primaryColor: string;
   logoUrl: string;
+  minimizedIconUrl: string;
+  minimizedIconHoverUrl: string;
+  minimizedIconActiveUrl: string;
   position: 'bottom-right' | 'bottom-left' | 'top-right' | 'top-left';
   botName: string;
   welcomeMessage: string;
@@ -18,6 +31,9 @@ interface EssentialsSettings {
   autoOpen: boolean;
   autoOpenDelay: number;
   soundNotifications: boolean;
+  animationType: 'none' | 'pulse' | 'bounce' | 'rotate' | 'fade' | 'wiggle';
+  animationSpeed: 'slow' | 'normal' | 'fast';
+  animationIntensity: 'subtle' | 'normal' | 'strong';
   // Advanced color customization (config-driven widget)
   advancedColors?: {
     widgetBackgroundColor?: string;
@@ -45,6 +61,7 @@ interface EssentialsSettings {
 interface EssentialsSectionProps {
   settings: EssentialsSettings;
   onChange: (updates: Partial<EssentialsSettings>) => void;
+  customerConfigId?: string;
 }
 
 const colorPresets = [
@@ -56,7 +73,129 @@ const colorPresets = [
   { name: "Pink", color: "#ec4899" },
 ];
 
-export function EssentialsSection({ settings, onChange }: EssentialsSectionProps) {
+export function EssentialsSection({ settings, onChange, customerConfigId }: EssentialsSectionProps) {
+  const [isUploadingIcon, setIsUploadingIcon] = useState(false);
+  const [isUploadingHoverIcon, setIsUploadingHoverIcon] = useState(false);
+  const [isUploadingActiveIcon, setIsUploadingActiveIcon] = useState(false);
+  const fileInputRef = useRef<HTMLInputElement>(null);
+  const hoverFileInputRef = useRef<HTMLInputElement>(null);
+  const activeFileInputRef = useRef<HTMLInputElement>(null);
+  const { toast } = useToast();
+
+  const handleIconUpload = async (file: File, iconType: 'normal' | 'hover' | 'active' = 'normal') => {
+    if (!file) return;
+
+    // Validate file type
+    if (!file.type.startsWith('image/')) {
+      toast({
+        title: "Invalid file",
+        description: "Please select an image file",
+        variant: "destructive",
+      });
+      return;
+    }
+
+    // Validate file size (max 2MB)
+    if (file.size > 2 * 1024 * 1024) {
+      toast({
+        title: "File too large",
+        description: "Please select an image smaller than 2MB",
+        variant: "destructive",
+      });
+      return;
+    }
+
+    // Set appropriate loading state
+    if (iconType === 'hover') {
+      setIsUploadingHoverIcon(true);
+    } else if (iconType === 'active') {
+      setIsUploadingActiveIcon(true);
+    } else {
+      setIsUploadingIcon(true);
+    }
+
+    try {
+      const formData = new FormData();
+      formData.append('file', file);
+      formData.append('type', `minimized-icon-${iconType}`);
+
+      if (!customerConfigId) {
+        toast({
+          title: "Configuration error",
+          description: "Please select a website configuration first",
+          variant: "destructive",
+        });
+        return;
+      }
+
+      formData.append('customerConfigId', customerConfigId);
+
+      const response = await fetch('/api/widget-assets/upload', {
+        method: 'POST',
+        body: formData,
+      });
+
+      const data = await response.json();
+
+      if (data.success) {
+        // Use WebP URL as primary (will fallback to PNG automatically in the component)
+        const iconUrl = data.data.webpUrl || data.data.pngUrl || data.data.url;
+
+        // Update the correct field based on icon type
+        if (iconType === 'hover') {
+          onChange({ minimizedIconHoverUrl: iconUrl });
+        } else if (iconType === 'active') {
+          onChange({ minimizedIconActiveUrl: iconUrl });
+        } else {
+          onChange({ minimizedIconUrl: iconUrl });
+        }
+
+        // Calculate compression percentage for user feedback
+        const compressionPercent = data.data.originalSize && data.data.optimizedSize?.webp
+          ? Math.round((1 - data.data.optimizedSize.webp / data.data.originalSize) * 100)
+          : 0;
+
+        const sizeInfo = compressionPercent > 0
+          ? ` (${compressionPercent}% smaller)`
+          : '';
+
+        const iconLabel = iconType === 'hover' ? 'hover' : iconType === 'active' ? 'active' : 'minimized widget';
+
+        toast({
+          title: "Icon uploaded",
+          description: `Your ${iconLabel} icon has been uploaded and optimized${sizeInfo}`,
+        });
+      } else {
+        throw new Error(data.error || 'Upload failed');
+      }
+    } catch (error) {
+      console.error('Upload error:', error);
+      toast({
+        title: "Upload failed",
+        description: "Failed to upload icon. Please try again.",
+        variant: "destructive",
+      });
+    } finally {
+      // Clear appropriate loading state
+      if (iconType === 'hover') {
+        setIsUploadingHoverIcon(false);
+        if (hoverFileInputRef.current) {
+          hoverFileInputRef.current.value = '';
+        }
+      } else if (iconType === 'active') {
+        setIsUploadingActiveIcon(false);
+        if (activeFileInputRef.current) {
+          activeFileInputRef.current.value = '';
+        }
+      } else {
+        setIsUploadingIcon(false);
+        if (fileInputRef.current) {
+          fileInputRef.current.value = '';
+        }
+      }
+    }
+  };
+
   return (
     <div className="space-y-6">
       {/* Appearance */}
@@ -128,6 +267,223 @@ export function EssentialsSection({ settings, onChange }: EssentialsSectionProps
                       e.currentTarget.style.display = 'none';
                     }}
                   />
+                </div>
+              )}
+            </div>
+
+            {/* Minimized Widget Icon Upload */}
+            <div className="space-y-4">
+              <div className="space-y-2">
+                <Label>Minimized Widget Icon - Normal State (Optional)</Label>
+                <p className="text-xs text-muted-foreground mb-2">
+                  Custom icon shown when widget is minimized. Defaults to message bubble if not set.
+                </p>
+                <div className="flex items-center space-x-3">
+                  <Input
+                    type="url"
+                    value={settings.minimizedIconUrl}
+                    onChange={(e) => onChange({ minimizedIconUrl: e.target.value })}
+                    placeholder="https://example.com/icon.png or upload file"
+                    className="flex-1"
+                  />
+                  <input
+                    ref={fileInputRef}
+                    type="file"
+                    accept="image/*"
+                    className="hidden"
+                    onChange={(e) => {
+                      const file = e.target.files?.[0];
+                      if (file) {
+                        handleIconUpload(file, 'normal');
+                      }
+                    }}
+                  />
+                  <button
+                    onClick={() => fileInputRef.current?.click()}
+                    disabled={isUploadingIcon}
+                    className="px-4 py-2 border rounded-md hover:bg-gray-50 transition-colors flex items-center space-x-2 disabled:opacity-50 disabled:cursor-not-allowed"
+                  >
+                    {isUploadingIcon ? (
+                      <>
+                        <Loader2 className="h-4 w-4 animate-spin" />
+                        <span>Uploading...</span>
+                      </>
+                    ) : (
+                      <>
+                        <Upload className="h-4 w-4" />
+                        <span>Upload</span>
+                      </>
+                    )}
+                  </button>
+                </div>
+              </div>
+
+              {/* Hover State Icon */}
+              <div className="space-y-2 pl-4 border-l-2 border-blue-200">
+                <Label>Hover State Icon (Optional)</Label>
+                <p className="text-xs text-muted-foreground mb-2">
+                  Icon shown when user hovers over the widget button. Falls back to normal state if not set.
+                </p>
+                <div className="flex items-center space-x-3">
+                  <Input
+                    type="url"
+                    value={settings.minimizedIconHoverUrl}
+                    onChange={(e) => onChange({ minimizedIconHoverUrl: e.target.value })}
+                    placeholder="https://example.com/icon-hover.png or upload file"
+                    className="flex-1"
+                  />
+                  <input
+                    ref={hoverFileInputRef}
+                    type="file"
+                    accept="image/*"
+                    className="hidden"
+                    onChange={(e) => {
+                      const file = e.target.files?.[0];
+                      if (file) {
+                        handleIconUpload(file, 'hover');
+                      }
+                    }}
+                  />
+                  <button
+                    onClick={() => hoverFileInputRef.current?.click()}
+                    disabled={isUploadingHoverIcon}
+                    className="px-4 py-2 border rounded-md hover:bg-gray-50 transition-colors flex items-center space-x-2 disabled:opacity-50 disabled:cursor-not-allowed"
+                  >
+                    {isUploadingHoverIcon ? (
+                      <>
+                        <Loader2 className="h-4 w-4 animate-spin" />
+                        <span>Uploading...</span>
+                      </>
+                    ) : (
+                      <>
+                        <Upload className="h-4 w-4" />
+                        <span>Upload</span>
+                      </>
+                    )}
+                  </button>
+                </div>
+              </div>
+
+              {/* Active State Icon */}
+              <div className="space-y-2 pl-4 border-l-2 border-green-200">
+                <Label>Active/Clicked State Icon (Optional)</Label>
+                <p className="text-xs text-muted-foreground mb-2">
+                  Icon shown when user clicks the widget button. Falls back to normal state if not set.
+                </p>
+                <div className="flex items-center space-x-3">
+                  <Input
+                    type="url"
+                    value={settings.minimizedIconActiveUrl}
+                    onChange={(e) => onChange({ minimizedIconActiveUrl: e.target.value })}
+                    placeholder="https://example.com/icon-active.png or upload file"
+                    className="flex-1"
+                  />
+                  <input
+                    ref={activeFileInputRef}
+                    type="file"
+                    accept="image/*"
+                    className="hidden"
+                    onChange={(e) => {
+                      const file = e.target.files?.[0];
+                      if (file) {
+                        handleIconUpload(file, 'active');
+                      }
+                    }}
+                  />
+                  <button
+                    onClick={() => activeFileInputRef.current?.click()}
+                    disabled={isUploadingActiveIcon}
+                    className="px-4 py-2 border rounded-md hover:bg-gray-50 transition-colors flex items-center space-x-2 disabled:opacity-50 disabled:cursor-not-allowed"
+                  >
+                    {isUploadingActiveIcon ? (
+                      <>
+                        <Loader2 className="h-4 w-4 animate-spin" />
+                        <span>Uploading...</span>
+                      </>
+                    ) : (
+                      <>
+                        <Upload className="h-4 w-4" />
+                        <span>Upload</span>
+                      </>
+                    )}
+                  </button>
+                </div>
+              </div>
+
+              {/* Preview of all three states side by side */}
+              {(settings.minimizedIconUrl || settings.minimizedIconHoverUrl || settings.minimizedIconActiveUrl) && (
+                <div className="mt-2 p-4 border rounded-lg bg-gray-50">
+                  <p className="text-xs text-muted-foreground mb-3 font-medium">Icon State Previews:</p>
+                  <div className="flex items-start space-x-6">
+                    {/* Normal State Preview */}
+                    {settings.minimizedIconUrl && (
+                      <div className="flex flex-col items-center space-y-2">
+                        <div className="w-12 h-12 rounded-full bg-gradient-to-br from-gray-700 to-gray-800 flex items-center justify-center">
+                          <img
+                            src={settings.minimizedIconUrl}
+                            alt="Normal state preview"
+                            className="w-6 h-6 object-contain"
+                            onError={(e) => {
+                              e.currentTarget.style.display = 'none';
+                            }}
+                          />
+                        </div>
+                        <span className="text-xs text-gray-600">Normal</span>
+                        <button
+                          onClick={() => onChange({ minimizedIconUrl: '' })}
+                          className="text-xs text-red-600 hover:text-red-700"
+                        >
+                          Remove
+                        </button>
+                      </div>
+                    )}
+
+                    {/* Hover State Preview */}
+                    {settings.minimizedIconHoverUrl && (
+                      <div className="flex flex-col items-center space-y-2">
+                        <div className="w-12 h-12 rounded-full bg-gradient-to-br from-blue-600 to-blue-700 flex items-center justify-center">
+                          <img
+                            src={settings.minimizedIconHoverUrl}
+                            alt="Hover state preview"
+                            className="w-6 h-6 object-contain"
+                            onError={(e) => {
+                              e.currentTarget.style.display = 'none';
+                            }}
+                          />
+                        </div>
+                        <span className="text-xs text-blue-600">Hover</span>
+                        <button
+                          onClick={() => onChange({ minimizedIconHoverUrl: '' })}
+                          className="text-xs text-red-600 hover:text-red-700"
+                        >
+                          Remove
+                        </button>
+                      </div>
+                    )}
+
+                    {/* Active State Preview */}
+                    {settings.minimizedIconActiveUrl && (
+                      <div className="flex flex-col items-center space-y-2">
+                        <div className="w-12 h-12 rounded-full bg-gradient-to-br from-green-600 to-green-700 flex items-center justify-center">
+                          <img
+                            src={settings.minimizedIconActiveUrl}
+                            alt="Active state preview"
+                            className="w-6 h-6 object-contain"
+                            onError={(e) => {
+                              e.currentTarget.style.display = 'none';
+                            }}
+                          />
+                        </div>
+                        <span className="text-xs text-green-600">Active</span>
+                        <button
+                          onClick={() => onChange({ minimizedIconActiveUrl: '' })}
+                          className="text-xs text-red-600 hover:text-red-700"
+                        >
+                          Remove
+                        </button>
+                      </div>
+                    )}
+                  </div>
                 </div>
               )}
             </div>
@@ -261,6 +617,119 @@ export function EssentialsSection({ settings, onChange }: EssentialsSectionProps
                 onCheckedChange={(checked) => onChange({ soundNotifications: checked })}
               />
             </div>
+        </CardContent>
+      </Card>
+
+      {/* Animations */}
+      <Card>
+        <CardHeader>
+          <CardTitle className="flex items-center">
+            <Sparkles className="h-5 w-5 mr-2" />
+            Widget Icon Animation
+          </CardTitle>
+          <CardDescription>
+            Add eye-catching animations to your minimized widget icon
+          </CardDescription>
+        </CardHeader>
+        <CardContent className="space-y-6">
+          {/* Animation Type */}
+          <div className="space-y-2">
+            <Label htmlFor="animationType">Animation Type</Label>
+            <Select
+              value={settings.animationType}
+              onValueChange={(value: any) => onChange({ animationType: value })}
+            >
+              <SelectTrigger id="animationType">
+                <SelectValue placeholder="Select animation" />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="none">None</SelectItem>
+                <SelectItem value="pulse">Pulse - Subtle scale and fade effect</SelectItem>
+                <SelectItem value="bounce">Bounce - Vertical bouncing motion</SelectItem>
+                <SelectItem value="rotate">Rotate - Continuous rotation</SelectItem>
+                <SelectItem value="fade">Fade - Opacity pulsing effect</SelectItem>
+                <SelectItem value="wiggle">Wiggle - Gentle side-to-side rotation</SelectItem>
+              </SelectContent>
+            </Select>
+          </div>
+
+          {/* Animation Speed */}
+          {settings.animationType !== 'none' && (
+            <div className="space-y-3">
+              <Label>Animation Speed</Label>
+              <div className="grid grid-cols-3 gap-3">
+                {(['slow', 'normal', 'fast'] as const).map((speed) => (
+                  <button
+                    key={speed}
+                    onClick={() => onChange({ animationSpeed: speed })}
+                    className={`px-4 py-3 border-2 rounded-lg text-sm font-medium transition-all ${
+                      settings.animationSpeed === speed
+                        ? 'border-blue-500 bg-blue-50 text-blue-700'
+                        : 'border-gray-200 hover:border-gray-300 hover:bg-gray-50'
+                    }`}
+                  >
+                    {speed === 'slow' ? '4s' : speed === 'fast' ? '1s' : '2s'}
+                    <br />
+                    <span className="text-xs opacity-70 capitalize">{speed}</span>
+                  </button>
+                ))}
+              </div>
+            </div>
+          )}
+
+          {/* Animation Intensity */}
+          {settings.animationType !== 'none' && (
+            <div className="space-y-3">
+              <Label>Animation Intensity</Label>
+              <div className="grid grid-cols-3 gap-3">
+                {(['subtle', 'normal', 'strong'] as const).map((intensity) => (
+                  <button
+                    key={intensity}
+                    onClick={() => onChange({ animationIntensity: intensity })}
+                    className={`px-4 py-3 border-2 rounded-lg text-sm font-medium transition-all ${
+                      settings.animationIntensity === intensity
+                        ? 'border-green-500 bg-green-50 text-green-700'
+                        : 'border-gray-200 hover:border-gray-300 hover:bg-gray-50'
+                    }`}
+                  >
+                    {intensity === 'subtle' ? '50%' : intensity === 'strong' ? '150%' : '100%'}
+                    <br />
+                    <span className="text-xs opacity-70 capitalize">{intensity}</span>
+                  </button>
+                ))}
+              </div>
+            </div>
+          )}
+
+          {/* Live Preview */}
+          {settings.animationType !== 'none' && (
+            <div className="p-6 border-2 border-dashed rounded-lg bg-gray-50 flex flex-col items-center space-y-4">
+              <Label className="text-sm font-medium">Live Preview</Label>
+              <AnimationStyles
+                animationType={settings.animationType}
+                animationSpeed={settings.animationSpeed}
+                animationIntensity={settings.animationIntensity}
+              />
+              <div
+                className="w-14 h-14 rounded-full bg-gradient-to-br from-blue-600 to-blue-700 flex items-center justify-center text-white shadow-lg widget-icon-animated"
+                style={{
+                  backgroundImage: `linear-gradient(to bottom right, ${settings.advancedColors?.buttonGradientStart || '#3a3a3a'}, ${settings.advancedColors?.buttonGradientEnd || '#2a2a2a'})`,
+                }}
+              >
+                <MessageSquare className="h-6 w-6" />
+              </div>
+              <p className="text-xs text-muted-foreground text-center">
+                Animation: {settings.animationType} • Speed: {settings.animationSpeed} • Intensity: {settings.animationIntensity}
+              </p>
+            </div>
+          )}
+
+          {/* Accessibility Note */}
+          <div className="p-4 bg-blue-50 border border-blue-200 rounded-lg">
+            <p className="text-xs text-blue-800">
+              <strong>♿ Accessibility:</strong> Animations automatically respect user&apos;s &quot;prefers-reduced-motion&quot; setting for better accessibility.
+            </p>
+          </div>
         </CardContent>
       </Card>
 

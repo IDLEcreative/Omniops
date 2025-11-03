@@ -7,6 +7,9 @@ export interface SimplifiedWidgetConfig {
   essentials: {
     primaryColor: string;
     logoUrl: string;
+    minimizedIconUrl: string; // Custom icon for minimized widget button
+    minimizedIconHoverUrl: string; // Custom icon for hover state
+    minimizedIconActiveUrl: string; // Custom icon for active/clicked state
     position: 'bottom-right' | 'bottom-left' | 'top-right' | 'top-left';
     botName: string;
     welcomeMessage: string;
@@ -15,6 +18,9 @@ export interface SimplifiedWidgetConfig {
     autoOpen: boolean;
     autoOpenDelay: number;
     soundNotifications: boolean;
+    animationType: 'none' | 'pulse' | 'bounce' | 'rotate' | 'fade' | 'wiggle';
+    animationSpeed: 'slow' | 'normal' | 'fast';
+    animationIntensity: 'subtle' | 'normal' | 'strong';
   };
 
   // Intelligence
@@ -41,6 +47,9 @@ export const defaultConfig: SimplifiedWidgetConfig = {
   essentials: {
     primaryColor: "#3b82f6",
     logoUrl: "",
+    minimizedIconUrl: "", // Default to empty, will use MessageCircle icon if not set
+    minimizedIconHoverUrl: "", // Default to empty, will fallback to normal state
+    minimizedIconActiveUrl: "", // Default to empty, will fallback to normal state
     position: "bottom-right",
     botName: "Assistant",
     welcomeMessage: "Hi! How can I help you today?",
@@ -49,6 +58,9 @@ export const defaultConfig: SimplifiedWidgetConfig = {
     autoOpen: false,
     autoOpenDelay: 3000,
     soundNotifications: false,
+    animationType: "pulse",
+    animationSpeed: "normal",
+    animationIntensity: "normal",
   },
   intelligence: {
     personality: "friendly",
