@@ -2,7 +2,7 @@
 
 /**
  * Chat System Response Tester
- * 
+ *
  * Tests the chat API with specific user queries from feedback and analyzes responses for:
  * - Response length issues
  * - External links (non-same-domain)
@@ -11,7 +11,7 @@
  * - Amazon/manufacturer site suggestions
  */
 
-const fetch = (...args) => import('node-fetch').then(({default: fetch}) => fetch(...args));
+// fetch is available globally in Node.js 18+
 
 const TEST_QUERIES = [
   "Need a pump for my Cifa mixer",

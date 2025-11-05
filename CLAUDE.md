@@ -744,7 +744,15 @@ See [REFERENCE_DATABASE_SCHEMA.md](docs/09-REFERENCE/REFERENCE_DATABASE_SCHEMA.m
 
 **CRITICAL**: Proactively orchestrate specialized agents in parallel to maximize efficiency and protect your context window.
 
-**📚 Complete Agent Hierarchy Guide**: See [.claude/AGENT_HIERARCHY.md](.claude/AGENT_HIERARCHY.md) for the three-tier agent system (Architect → Plan → Explore) and when to use each agent type.
+**📚 Comprehensive Guides:**
+- **[Parallel Agent Orchestration Analysis](docs/10-ANALYSIS/ANALYSIS_PARALLEL_AGENT_ORCHESTRATION.md)** ⭐ **MUST READ** - Complete orchestration playbook from 4-week execution (1,400+ lines)
+  - Proven patterns that achieved 45% time savings
+  - Week-by-week breakdown with agent prompts
+  - Communication protocols & structured reporting
+  - Verification strategies & lessons learned
+  - 3 reusable agent prompt templates
+  - **Update this document** after each parallel agent deployment with new findings, improved prompts, and delegation tactics
+- **[Agent Hierarchy Guide](.claude/AGENT_HIERARCHY.md)** - Three-tier agent system (Architect → Plan → Explore) and when to use each type
 
 #### When to Automatically Use Agent Orchestration
 

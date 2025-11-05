@@ -15,16 +15,25 @@ class EmbeddingCache {
   private cache: Map<string, CacheEntry>;
   private maxSize: number;
   private ttl: number; // Time to live in milliseconds
+  private enabled: boolean;
   private stats = {
     hits: 0,
     misses: 0,
     evictions: 0,
   };
 
-  constructor(maxSize: number = 1000, ttlMinutes: number = 60) {
+  constructor(maxSize?: number, ttlMinutes?: number) {
     this.cache = new Map();
-    this.maxSize = maxSize;
-    this.ttl = ttlMinutes * 60 * 1000;
+    // Read from environment variables with defaults
+    this.enabled = process.env.EMBEDDING_CACHE_ENABLED !== 'false'; // Default: true
+    this.maxSize = maxSize || parseInt(process.env.EMBEDDING_CACHE_MAX_SIZE || '1000');
+    this.ttl = (ttlMinutes || parseInt(process.env.EMBEDDING_CACHE_TTL_MINUTES || '60')) * 60 * 1000;
+
+    if (!this.enabled) {
+      console.log('[EmbeddingCache] Cache is disabled via environment variable');
+    } else {
+      console.log(`[EmbeddingCache] Initialized with maxSize=${this.maxSize}, ttl=${this.ttl / 60000} minutes`);
+    }
   }
 
   /**
@@ -38,6 +47,10 @@ class EmbeddingCache {
    * Get embedding from cache
    */
   get(text: string): number[] | null {
+    if (!this.enabled) {
+      return null;
+    }
+
     const key = this.generateKey(text);
     const entry = this.cache.get(key);
 
@@ -57,7 +70,7 @@ class EmbeddingCache {
     this.cache.delete(key);
     entry.hits++;
     this.cache.set(key, entry);
-    
+
     this.stats.hits++;
     return entry.embedding;
   }
@@ -66,6 +79,10 @@ class EmbeddingCache {
    * Set embedding in cache
    */
   set(text: string, embedding: number[]): void {
+    if (!this.enabled) {
+      return;
+    }
+
     const key = this.generateKey(text);
 
     // Check if we need to evict
@@ -133,6 +150,8 @@ class EmbeddingCache {
       size: this.cache.size,
       maxSize: this.maxSize,
       hitRate: (hitRate * 100).toFixed(2) + '%',
+      ttlMinutes: this.ttl / 60000,
+      enabled: this.enabled,
     };
   }
 

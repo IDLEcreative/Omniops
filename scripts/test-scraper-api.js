@@ -4,7 +4,6 @@
  * Test the scraper API endpoint for Thompson's Parts website
  */
 
-
 async function testScraperAPI() {
   const url = 'https://www.thompsonseparts.co.uk/';
   const apiUrl = 'http://localhost:3000/api/scrape';
@@ -100,18 +99,8 @@ async function testScraperAPI() {
   }
 }
 
-// Check if fetch is available
-if (typeof fetch === 'undefined') {
-  console.log('Installing node-fetch...');
-  import { execSync  } from 'node:child_process';
-  try {
-    execSync('npm install node-fetch@2', { stdio: 'inherit' });
-    console.log('node-fetch installed successfully\n');
-  } catch (e) {
-    console.error('Failed to install node-fetch. Please run: npm install node-fetch@2');
-    process.exit(1);
-  }
-}
+// Note: fetch is available globally in Node.js 18+
+// No additional setup needed
 
 // Run the test
 testScraperAPI().then(() => {

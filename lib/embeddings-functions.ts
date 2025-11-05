@@ -6,6 +6,7 @@
 
 import OpenAI from 'openai';
 import { createServiceRoleClient } from '@/lib/supabase/server';
+import { embeddingCache } from '@/lib/embedding-cache';
 
 // Lazy load OpenAI client
 let openai: OpenAI | null = null;
@@ -59,7 +60,7 @@ export function splitIntoChunks(text: string, maxChunkSize: number = 1000): stri
 }
 
 /**
- * Generate embedding vectors for multiple text chunks
+ * Generate embedding vectors for multiple text chunks with caching
  * @param chunks Array of text chunks
  * @returns Array of embedding vectors
  */
@@ -69,12 +70,48 @@ export async function generateEmbeddingVectors(chunks: string[]): Promise<number
   }
 
   try {
+    // Check cache for all chunks
+    const { cached, missing } = embeddingCache.getMultiple(chunks);
+
+    // If all chunks are cached, return immediately
+    if (missing.length === 0) {
+      console.log(`[Performance] All ${chunks.length} embeddings from cache`);
+      const results: number[][] = [];
+      for (let i = 0; i < chunks.length; i++) {
+        const embedding = cached.get(i);
+        if (embedding) {
+          results.push(embedding);
+        }
+      }
+      return results;
+    }
+
+    // Generate embeddings only for missing chunks
+    const missingChunks = missing.map(index => chunks[index]);
+    console.log(`[Performance] Generating ${missingChunks.length}/${chunks.length} embeddings (${cached.size} from cache)`);
+
     const response = await getOpenAIClient().embeddings.create({
       model: 'text-embedding-3-small',
-      input: chunks,
+      input: missingChunks,
     });
 
-    return response.data.map(item => item.embedding);
+    const newEmbeddings = response.data.map(item => item.embedding);
+
+    // Cache the new embeddings
+    embeddingCache.setMultiple(missingChunks, newEmbeddings);
+
+    // Combine cached and new embeddings in correct order
+    const results: number[][] = [];
+    let newEmbeddingIndex = 0;
+    for (let i = 0; i < chunks.length; i++) {
+      if (cached.has(i)) {
+        results.push(cached.get(i)!);
+      } else {
+        results.push(newEmbeddings[newEmbeddingIndex++]);
+      }
+    }
+
+    return results;
   } catch (error) {
     console.error('Error generating embedding vectors:', error);
     throw error;

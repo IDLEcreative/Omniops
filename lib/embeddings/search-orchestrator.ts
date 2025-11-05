@@ -11,6 +11,7 @@ import { performVectorSearch } from './vector-search';
 import { performFallbackSearch } from './fallback-search';
 import { DEFAULT_SEARCH_LIMIT, DEFAULT_SIMILARITY_THRESHOLD, DEFAULT_TIMEOUT_MS, TIMEOUTS } from './constants';
 import type { SearchResult } from './types';
+import { trackDomainLookup } from '@/lib/telemetry/search-telemetry';
 
 export async function searchSimilarContentOptimized(
   query: string,
@@ -43,9 +44,13 @@ export async function searchSimilarContentOptimized(
 
   try {
     // Domain lookup with caching and comprehensive fallback
+    const domainLookupStartTime = Date.now();
     const domainTimer = new QueryTimer('Domain Lookup (Cached)', TIMEOUTS.DOMAIN_LOOKUP);
     const searchDomain = domain.replace('www.', '');
     const cacheStats = domainCache.getStats();
+    let lookupMethod: 'cache-hit' | 'cache-alternative' | 'direct-db-fuzzy' | 'failed' = 'failed';
+    let attemptsBeforeSuccess = 0;
+    const alternativesAttempted: string[] = [];
 
     console.log('[Search] Domain lookup started', {
       originalDomain: domain,
@@ -56,6 +61,7 @@ export async function searchSimilarContentOptimized(
 
     // Step 1: Try standard cache lookup
     let domainId = await domainCache.getDomainId(searchDomain);
+    attemptsBeforeSuccess++;
 
     if (!domainId) {
       console.log('[Search] Cache lookup failed for:', searchDomain);
@@ -76,10 +82,14 @@ export async function searchSimilarContentOptimized(
       for (let i = 0; i < alternativeDomains.length && !domainId; i++) {
         const altDomain = alternativeDomains[i];
         if (!altDomain) continue; // Skip undefined entries
+        alternativesAttempted.push(altDomain);
+        attemptsBeforeSuccess++;
+
         console.log('[Search] Trying alternative:', altDomain, { attempt: `${i + 1}/${alternativeDomains.length}` });
         domainId = await domainCache.getDomainId(altDomain);
 
         if (domainId) {
+          lookupMethod = 'cache-alternative';
           console.log('[Search] Domain found with alternative format:', {
             altDomain,
             domainId,
@@ -91,6 +101,7 @@ export async function searchSimilarContentOptimized(
       // Step 3: Last resort - direct database query with ILIKE for fuzzy matching
       if (!domainId) {
         console.log('[Search] Cache exhausted, trying direct database lookup with fuzzy matching');
+        attemptsBeforeSuccess++;
 
         try {
           const { data, error } = await supabase
@@ -107,6 +118,7 @@ export async function searchSimilarContentOptimized(
             }
           } else if (data?.id) {
             domainId = data.id;
+            lookupMethod = 'direct-db-fuzzy';
             console.log('[Search] Domain found via direct database lookup:', {
               domainId,
               matchedDomain: data.domain,
@@ -123,6 +135,7 @@ export async function searchSimilarContentOptimized(
         }
       }
     } else {
+      lookupMethod = 'cache-hit';
       console.log('[Search] Domain lookup succeeded', {
         domainId,
         method: 'cache-hit'
@@ -130,6 +143,18 @@ export async function searchSimilarContentOptimized(
     }
 
     domainTimer.end();
+
+    // Track domain lookup telemetry
+    const domainLookupDuration = Date.now() - domainLookupStartTime;
+    await trackDomainLookup({
+      domain: searchDomain,
+      method: lookupMethod,
+      success: !!domainId,
+      duration_ms: domainLookupDuration,
+      attempts_before_success: attemptsBeforeSuccess,
+      alternative_domains_tried: alternativesAttempted.length > 0 ? alternativesAttempted : undefined,
+      timestamp: new Date(),
+    });
 
     if (!domainId) {
       console.log('[Search] Domain lookup failed after exhausting all options:', {
