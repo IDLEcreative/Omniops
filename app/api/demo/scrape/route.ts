@@ -161,11 +161,16 @@ export async function POST(req: NextRequest) {
         );
       }
 
-      // Check for specific production errors
-      if (error.message.includes('OPENAI_API_KEY')) {
-        console.error('[CRITICAL] Missing OPENAI_API_KEY in production');
+      // Check for OpenAI-related errors (API key, embeddings, etc.)
+      if (
+        error.message.includes('OPENAI_API_KEY') ||
+        error.message.includes('Failed to generate embeddings') ||
+        error.message.includes('401') || // OpenAI unauthorized
+        error.message.includes('API key')
+      ) {
+        console.error('[CRITICAL] OpenAI service error:', error.message);
         return NextResponse.json(
-          { error: 'Service temporarily unavailable. Please try again later.' },
+          { error: 'AI service temporarily unavailable. Please try again later.' },
           { status: 503 }
         );
       }

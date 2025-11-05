@@ -288,6 +288,11 @@ function scoreSitemapPages(urls: string[], baseUrl: string): string[] {
  * Generates embeddings for demo content (in-memory only)
  */
 export async function generateDemoEmbeddings(pages: ScrapedPage[]) {
+  // Validate OpenAI API key first
+  if (!process.env.OPENAI_API_KEY) {
+    throw new Error('OPENAI_API_KEY is not configured');
+  }
+
   const chunks: string[] = [];
   const chunkMetadata: Array<{ url: string; title: string; chunkIndex: number }> = [];
 
@@ -304,23 +309,31 @@ export async function generateDemoEmbeddings(pages: ScrapedPage[]) {
     });
   }
 
-  // Generate embeddings using OpenAI
-  const openai = new OpenAI({
-    apiKey: process.env.OPENAI_API_KEY
-  });
+  try {
+    // Generate embeddings using OpenAI
+    const openai = new OpenAI({
+      apiKey: process.env.OPENAI_API_KEY
+    });
 
-  const response = await openai.embeddings.create({
-    model: 'text-embedding-3-small',
-    input: chunks
-  });
+    const response = await openai.embeddings.create({
+      model: 'text-embedding-3-small',
+      input: chunks
+    });
 
-  const embeddings = response.data.map((item: { embedding: number[] }) => item.embedding);
+    const embeddings = response.data.map((item: { embedding: number[] }) => item.embedding);
 
-  return {
-    chunks,
-    embeddings,
-    metadata: chunkMetadata
-  };
+    return {
+      chunks,
+      embeddings,
+      metadata: chunkMetadata
+    };
+  } catch (error) {
+    console.error('OpenAI embeddings generation failed:', error);
+    // Re-throw with more context for better error handling upstream
+    throw new Error(
+      `Failed to generate embeddings: ${error instanceof Error ? error.message : 'Unknown error'}`
+    );
+  }
 }
 
 /**
