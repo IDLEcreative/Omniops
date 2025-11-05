@@ -28,7 +28,7 @@ export async function POST(request: NextRequest) {
 
     // Rate limiting
     const domain = request.headers.get('host') || 'unknown';
-    const { allowed, resetTime } = checkDomainRateLimit(domain); // Use default domain rate limit
+    const { allowed, resetTime } = await checkDomainRateLimit(domain); // Use default domain rate limit
 
     if (!allowed) {
       return NextResponse.json(

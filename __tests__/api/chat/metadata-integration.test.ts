@@ -214,9 +214,9 @@ describe('Chat Route Metadata Integration', () => {
       const manager = new ConversationMetadataManager();
       manager.incrementTurn();
 
-      const userMessage = 'Show me pumps';
+      const userMessage = 'Show me products';
       const aiResponse = `
-Here are the available pumps:
+Here are the available products:
 1. [Product A](https://example.com/product-a)
 2. [Product B](https://example.com/product-b)
       `.trim();
@@ -226,7 +226,7 @@ Here are the available pumps:
 
       // Verify entities were tracked
       const listItem = manager.resolveListItem(1);
-      expect(listItem?.name).toBe('ZF4 Pump');
+      expect(listItem?.name).toBe('Product A'); // First item in the numbered list
 
       const productRef = manager.resolveReference('it');
       expect(productRef).toBeTruthy();
@@ -402,7 +402,7 @@ Here are the available pumps:
 
       // 4. Simulate AI response
       const aiResponse = '[Test Product](https://example.com/test)';
-      const userMessage = 'Show me pumps';
+      const userMessage = 'Show me products';
 
       // 5. Parse and track entities
       await parseAndTrackEntities(aiResponse, userMessage, metadataManager);
