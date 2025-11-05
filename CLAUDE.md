@@ -940,6 +940,91 @@ Return findings in structured format.
 
 **Reference**: See [ANALYSIS_TECHNICAL_DEBT_TRACKER.md](docs/10-ANALYSIS/ANALYSIS_TECHNICAL_DEBT_TRACKER.md) Item 9 completion (Oct 2025) for example of successful agent orchestration with full documentation.
 
+#### Preventing Agent Hallucination & Extrapolation
+
+**Problem:** Agents often extrapolate beyond their sources, adding "helpful" details from training data that aren't accurate.
+
+**Example:** Asked to document an article about MCP, an agent might add:
+- Specific technologies not mentioned (Docker, gVisor, Firecracker)
+- ROI calculations not in the source
+- Implementation estimates without basis
+- "Best practices" from general knowledge
+
+**Why This Happens:**
+1. **Broad prompts** - "Create comprehensive documentation" invites gap-filling
+2. **No source constraints** - Agent doesn't know to stay strictly faithful
+3. **Optimization for helpfulness** - AI tries to be useful by adding context
+4. **Pattern matching** - Recognizes doc type, applies standard patterns
+
+**Prevention Strategy: Use Standardized Templates**
+
+**📚 Agent Prompt Templates**: See [.claude/AGENT_PROMPT_TEMPLATES.md](.claude/AGENT_PROMPT_TEMPLATES.md) for complete templates with built-in safeguards.
+
+**Key Templates:**
+1. **Faithful Documentation** - For documenting external sources
+2. **Codebase Analysis** - For analyzing code with evidence requirements
+3. **Implementation Research** - For researching with source attribution
+4. **Two-Agent Verification** - For high-stakes tasks requiring validation
+5. **ROI/Impact Analysis** - For business calculations with measured data
+
+**Core Safeguards in Templates:**
+
+```markdown
+### Critical Requirements
+- ✅ ONLY include information explicitly stated in the source
+- ✅ Mark inferences clearly as [INFERRED: reasoning]
+- ✅ If source doesn't cover topic, write "Not covered in source"
+- ❌ DO NOT add information from training data without marking it
+- ❌ DO NOT extrapolate implementation details not in source
+
+### Verification Checklist
+- [ ] Every claim has corresponding section in source
+- [ ] No implementation details added from general knowledge
+- [ ] No ROI calculations unless source provides them
+- [ ] All inferences marked with [INFERRED: ]
+```
+
+**Two-Agent Verification Pattern (High-Stakes Tasks):**
+
+```typescript
+// Agent 1: Does the work
+const documentationAgent = {
+  mission: "Document [SOURCE] using Template 1",
+  output: "docs/path/to/doc.md"
+};
+
+// Agent 2: Verifies against source
+const verificationAgent = {
+  mission: "Re-fetch [SOURCE], verify every claim in Agent 1's doc",
+  checks: [
+    "Every section exists in source?",
+    "Any extrapolations found?",
+    "Any unsupported claims?"
+  ],
+  output: "✅ APPROVED / ⚠️ NEEDS REVISION / ❌ REJECTED"
+};
+```
+
+**When to Use Verification:**
+- Documenting external articles/APIs
+- Migration/refactoring tasks
+- Business impact analysis
+- Implementation research
+- Any task where accuracy > speed
+
+**Red Flags Indicating Need for Templates:**
+- Agent adding technologies not in source
+- Claims without file/line citations
+- Performance numbers appearing without measurement
+- "Best practices" without attribution
+- Implementation complexity estimates without basis
+
+**Lesson Learned:**
+> "Comprehensive documentation" prompts invite extrapolation.
+> "Document ONLY what's in [SOURCE]" enforces fidelity.
+
+**Reference**: See [AGENT_PROMPT_TEMPLATES.md](.claude/AGENT_PROMPT_TEMPLATES.md) for complete implementation.
+
 ---
 
 ### TESTING & CODE QUALITY PHILOSOPHY
@@ -1277,6 +1362,13 @@ The cleanup system uses CASCADE foreign keys for safe deletion:
 
 ### ACTIVE CONTRIBUTORS
 - This section contains critical guidelines that must be followed
+
+### Issue Tracking
+**When you discover bugs, technical debt, or problems:**
+- Add them to [docs/ISSUES.md](docs/ISSUES.md) immediately
+- Include: severity, location (file:line), description, impact
+- Mark status: Open, In Progress, Resolved
+- This is the single source of truth for all project issues
 
 ### Hallucination Prevention
 - **CRITICAL**: The chat system has strict anti-hallucination measures in place

@@ -108,5 +108,5 @@ code, development, directory, documentation, index, navigation, order, patterns,
 ## Related Documentation
 - [Architecture Overview](../01-ARCHITECTURE/ARCHITECTURE_OVERVIEW.md) - System design
 - [Dependency Injection](../01-ARCHITECTURE/ARCHITECTURE_DEPENDENCY_INJECTION.md) - Testability pattern
-- [Technical Debt](../04-ANALYSIS/ANALYSIS_TECHNICAL_DEBT_TRACKER.md) - Quality tracking
+- [Project Issues Tracker](../ISSUES.md) - Quality tracking
 - [API Reference](../03-API/) - API development

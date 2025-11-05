@@ -6,7 +6,7 @@
 **Verified For:** v0.1.0
 **Dependencies:**
 - [Testing Strategy Guide](../04-DEVELOPMENT/testing/GUIDE_TESTING_STRATEGY.md) - Unit testing approach
-- [Technical Debt Tracker](../04-ANALYSIS/ANALYSIS_TECHNICAL_DEBT_TRACKER.md) - Testability improvements
+- [Project Issues Tracker](../ISSUES.md) - Testability improvements
 **Estimated Read Time:** 22 minutes
 
 ## Purpose

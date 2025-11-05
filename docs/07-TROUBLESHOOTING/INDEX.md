@@ -247,4 +247,4 @@ npx tsx test-shopify-integration.ts
 - [Monitoring Setup](../05-DEPLOYMENT/GUIDE_MONITORING_SETUP.md) - Observability
 - [Database Schema](../07-REFERENCE/REFERENCE_DATABASE_SCHEMA.md) - Data model
 - [NPX Scripts Reference](../07-REFERENCE/REFERENCE_NPX_SCRIPTS.md) - Maintenance tools
-- [Technical Debt Tracker](../04-ANALYSIS/ANALYSIS_TECHNICAL_DEBT_TRACKER.md) - Known issues
+- [Project Issues Tracker](../ISSUES.md) - Known issues

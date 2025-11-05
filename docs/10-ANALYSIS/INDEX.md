@@ -7,7 +7,7 @@
 **Estimated Read Time:** 4 minutes
 
 ## Purpose
-1. [ANALYSIS_TECHNICAL_DEBT_TRACKER.md](ANALYSIS_TECHNICAL_DEBT_TRACKER.md) - What's been fixed, what remains 2. [ANALYSIS_CONVERSATION_ACCURACY.md](ANALYSIS_CONVERSATION_ACCURACY.md) - AI quality metrics 3. [ANALYSIS_WOOCOMMERCE_ARCHITECTURE.md](ANALYSIS_WOOCOMMERCE_ARCHITECTURE.md) - E-commerce integration status
+1. [Project Issues Tracker](../ISSUES.md) - What's been fixed, what remains 2. [ANALYSIS_CONVERSATION_ACCURACY.md](ANALYSIS_CONVERSATION_ACCURACY.md) - AI quality metrics 3. [ANALYSIS_WOOCOMMERCE_ARCHITECTURE.md](ANALYSIS_WOOCOMMERCE_ARCHITECTURE.md) - E-commerce integration status
 
 ## Quick Links
 - [Quick Navigation](#quick-navigation)
@@ -36,7 +36,7 @@ analysis, directory, documentation, files, index, navigation, order, quick, read
 ## Files in This Directory
 
 ### Technical Debt & Code Quality
-- **[ANALYSIS_TECHNICAL_DEBT_TRACKER.md](ANALYSIS_TECHNICAL_DEBT_TRACKER.md)** - Authoritative technical debt tracker (99 files refactored, RLS testing complete)
+- **[Project Issues Tracker](../ISSUES.md)** - Authoritative issues tracker (99 files refactored, RLS testing complete)
 - **[ANALYSIS_CODE_QUALITY.md](ANALYSIS_CODE_QUALITY.md)** - Code quality metrics and improvements
 
 ### WooCommerce Analysis
@@ -61,7 +61,7 @@ analysis, directory, documentation, files, index, navigation, order, quick, read
 ## Recommended Reading Order
 
 ### For Understanding Current State
-1. [ANALYSIS_TECHNICAL_DEBT_TRACKER.md](ANALYSIS_TECHNICAL_DEBT_TRACKER.md) - What's been fixed, what remains
+1. [Project Issues Tracker](../ISSUES.md) - What's been fixed, what remains
 2. [ANALYSIS_CONVERSATION_ACCURACY.md](ANALYSIS_CONVERSATION_ACCURACY.md) - AI quality metrics
 3. [ANALYSIS_WOOCOMMERCE_ARCHITECTURE.md](ANALYSIS_WOOCOMMERCE_ARCHITECTURE.md) - E-commerce integration status
 
@@ -87,7 +87,7 @@ analysis, directory, documentation, files, index, navigation, order, quick, read
 ---
 
 ## Related Documentation
-- [Technical Debt Tracker](ANALYSIS_TECHNICAL_DEBT_TRACKER.md) - Primary tracking document
+- [Project Issues Tracker](../ISSUES.md) - Primary tracking document
 - [Architecture Decisions](../01-ARCHITECTURE/decisions.md) - ADRs
 - [Testing Strategy](../04-DEVELOPMENT/testing/GUIDE_TESTING_STRATEGY.md) - Quality assurance
 - [Performance Reference](../07-REFERENCE/REFERENCE_PERFORMANCE_OPTIMIZATION.md) - Optimization guide

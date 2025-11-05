@@ -278,7 +278,7 @@ npx tsx test-database-cleanup.ts clean                # Clean all
 ### 📊 **10-ANALYSIS/**
 *Performance analysis, investigations, and technical debt tracking*
 
-- **[Technical Debt Tracker](10-ANALYSIS/ANALYSIS_TECHNICAL_DEBT_TRACKER.md)** - Known debt and remediation plans
+- **[Project Issues Tracker](ISSUES.md)** - Known debt and remediation plans
 - **[WooCommerce Expansion Analysis](10-ANALYSIS/ANALYSIS_WOOCOMMERCE_EXPANSION.md)** - Platform expansion evaluation
 - **[Performance Investigations](10-ANALYSIS/)** - System performance deep dives
 - **[Shopify Provider Test Analysis](10-ANALYSIS/SHOPIFY_PROVIDER_TEST_ANALYSIS.md)** - Test architecture improvements
@@ -476,7 +476,7 @@ Contains historical documentation that may be outdated but preserved for referen
 ### Project Files
 - [Main README](../README.md) - Project overview
 - [CLAUDE.md](../CLAUDE.md) - Development guidelines
-- [TECH_DEBT.md](10-ANALYSIS/ANALYSIS_TECHNICAL_DEBT_TRACKER.md) - Known technical debt
+- [Issues Tracker](ISSUES.md) - Known technical debt
 - [CHANGELOG.md](../CHANGELOG.md) - Version history
 
 ---

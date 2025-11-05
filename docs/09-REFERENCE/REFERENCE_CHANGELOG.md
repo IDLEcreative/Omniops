@@ -73,7 +73,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   - `docs/COMMERCE_PROVIDER_TEST_ANALYSIS.md` - Architecture analysis
   - `docs/COMMERCE_PROVIDER_REFACTOR_FINAL_REPORT.md` - Production readiness
   - `docs/TEST_TIMEOUT_INVESTIGATION.md` - MSW performance root cause
-  - `docs/ISSUE_MSW_TEST_PERFORMANCE.md` - Issue tracking and solutions
+  - `docs/ISSUES.md` - Issue tracking and solutions
   - `docs/TEST_PERFORMANCE_METRICS.md` - Before/after benchmarks
   - `docs/INVESTIGATION_COMPLETE_SUMMARY.md` - Executive summary
 
