@@ -101,34 +101,39 @@ async function scrapePage(url: string, timeout: number): Promise<ScrapedPage | n
 
     const html = await response.text();
 
-    // Try JSDOM first (works in Node.js)
-    try {
-      const { JSDOM } = await import('jsdom');
-      const { Readability } = await import('@mozilla/readability');
+    // Use lightweight fallback in production (Vercel serverless has JSDOM issues)
+    // Only try JSDOM in development for richer content extraction
+    const useJSDOM = process.env.NODE_ENV === 'development';
 
-      const dom = new JSDOM(html, { url });
-      const reader = new Readability(dom.window.document);
-      const article = reader.parse();
+    if (useJSDOM) {
+      try {
+        const { JSDOM } = await import('jsdom');
+        const { Readability } = await import('@mozilla/readability');
 
-      if (article) {
-        const cleanContent = (article.textContent || '')
-          .replace(/\s+/g, ' ')
-          .trim()
-          .slice(0, 50000); // Max 50KB per page
+        const dom = new JSDOM(html, { url });
+        const reader = new Readability(dom.window.document);
+        const article = reader.parse();
 
-        return {
-          url,
-          title: article.title || 'Untitled',
-          content: cleanContent,
-          contentLength: cleanContent.length
-        };
+        if (article) {
+          const cleanContent = (article.textContent || '')
+            .replace(/\s+/g, ' ')
+            .trim()
+            .slice(0, 50000); // Max 50KB per page
+
+          return {
+            url,
+            title: article.title || 'Untitled',
+            content: cleanContent,
+            contentLength: cleanContent.length
+          };
+        }
+      } catch (jsdomError) {
+        console.warn(`JSDOM failed for ${url}, using fallback:`, jsdomError);
+        // Fall through to basic extraction
       }
-    } catch (jsdomError) {
-      console.warn(`JSDOM failed for ${url}, using fallback:`, jsdomError);
-      // Fall through to basic extraction
     }
 
-    // Fallback: Basic HTML parsing without JSDOM
+    // Fallback: Basic HTML parsing without JSDOM (production default)
     const title = extractTitle(html);
     const content = extractTextContent(html);
 

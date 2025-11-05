@@ -3,7 +3,7 @@ import { z } from 'zod';
 import { quickScrape, generateDemoEmbeddings } from '@/lib/demo-scraper';
 import { getRedisClient } from '@/lib/redis';
 import { randomBytes } from 'crypto';
-import { createClient } from '@supabase/supabase-js';
+import { createServiceRoleClient } from '@/lib/supabase/server';
 
 const scrapeSchema = z.object({
   url: z.string().url()
@@ -80,10 +80,18 @@ export async function POST(req: NextRequest) {
 
     // Log to Supabase for lead tracking
     try {
-      const supabase = createClient(
-        process.env.NEXT_PUBLIC_SUPABASE_URL!,
-        process.env.SUPABASE_SERVICE_ROLE_KEY!
-      );
+      const supabase = await createServiceRoleClient();
+      if (!supabase) {
+        console.warn('Supabase client unavailable, skipping demo attempt logging');
+        return NextResponse.json({
+          session_id: sessionId,
+          pages_scraped: scrapeResult.totalPages,
+          content_chunks: chunks.length,
+          scrape_time_ms: scrapeResult.scrapeDuration,
+          domain,
+          ready: true
+        });
+      }
 
       const ip = req.headers.get('x-forwarded-for') || req.headers.get('x-real-ip') || 'unknown';
 
