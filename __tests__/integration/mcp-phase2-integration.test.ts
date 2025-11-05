@@ -1,10 +1,10 @@
 /**
  * MCP Phase 2 Integration Tests
  *
- * Purpose: Comprehensive integration testing for all 5 MCP tools across 3 categories
+ * Purpose: Comprehensive integration testing for all 6 MCP tools across 3 categories
  * Tools Tested:
  *   - search: searchProducts, searchByCategory
- *   - commerce: lookupOrder, getProductDetails
+ *   - commerce: lookupOrder, getProductDetails, woocommerceOperations
  *   - content: getCompletePageDetails
  *
  * Test Strategy:
@@ -21,6 +21,7 @@ import { searchProducts } from '../../servers/search/searchProducts';
 import { searchByCategory } from '../../servers/search/searchByCategory';
 import { lookupOrder } from '../../servers/commerce/lookupOrder';
 import { getProductDetails } from '../../servers/commerce/getProductDetails';
+import { woocommerceOperations } from '../../servers/commerce/woocommerceOperations';
 import { getCompletePageDetails } from '../../servers/content/getCompletePageDetails';
 import type { ExecutionContext } from '../../servers/shared/types';
 
@@ -46,7 +47,7 @@ describe('MCP Phase 2 Integration Tests', () => {
     });
 
     it('should have correct tools in commerce category', () => {
-      expect(serverRegistry.commerce.tools).toEqual(['lookupOrder', 'getProductDetails']);
+      expect(serverRegistry.commerce.tools).toEqual(['lookupOrder', 'getProductDetails', 'woocommerceOperations']);
       expect(serverRegistry.commerce.description).toContain('Order management');
     });
 
@@ -60,6 +61,7 @@ describe('MCP Phase 2 Integration Tests', () => {
       expect(typeof searchByCategory).toBe('function');
       expect(typeof lookupOrder).toBe('function');
       expect(typeof getProductDetails).toBe('function');
+      expect(typeof woocommerceOperations).toBe('function');
       expect(typeof getCompletePageDetails).toBe('function');
     });
   });

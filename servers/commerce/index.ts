@@ -13,9 +13,12 @@ export type { LookupOrderInput, LookupOrderOutput } from "./lookupOrder";
 export { getProductDetails, metadata as getProductDetailsMetadata } from "./getProductDetails";
 export type { GetProductDetailsInput, GetProductDetailsOutput } from "./getProductDetails";
 
+export { woocommerceOperations, metadata as woocommerceOperationsMetadata } from "./woocommerceOperations";
+export type { WoocommerceOperationsInput, WoocommerceOperationsOutput } from "./woocommerceOperations";
+
 export const categoryMetadata = {
   name: "commerce",
   description: "Order management, product operations, and e-commerce integrations for WooCommerce and Shopify",
   version: "1.0.0",
-  tools: ["lookupOrder", "getProductDetails"]
+  tools: ["lookupOrder", "getProductDetails", "woocommerceOperations"]
 };

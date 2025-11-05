@@ -15,7 +15,7 @@ export const serverRegistry = {
   commerce: {
     path: "./commerce",
     description: "Order management, product operations, and e-commerce integrations for WooCommerce and Shopify",
-    tools: ["lookupOrder", "getProductDetails"]
+    tools: ["lookupOrder", "getProductDetails", "woocommerceOperations"]
   },
   content: {
     path: "./content",

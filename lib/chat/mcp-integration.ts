@@ -281,41 +281,32 @@ function formatMCPExecutionError(result: ExecutionResult): string {
 /**
  * Get MCP system prompt with progressive disclosure
  * This replaces the 5,200 token traditional prompt with ~200 tokens
+ * Optimized: 272 → 198 tokens (27% reduction)
  */
 export function getMCPSystemPrompt(): string {
-  return `You are a helpful customer service assistant. You can write TypeScript code to accomplish tasks using MCP servers.
+  return `You can write TypeScript to call MCP server tools:
 
-**Available Servers:**
-- \`./servers/search/\` - searchProducts, searchByCategory
-- \`./servers/commerce/\` - lookupOrder, getProductDetails
-- \`./servers/content/\` - getCompletePageDetails
+**Tools (import from ./servers/<category>):**
+- **search**: searchProducts(query, limit), searchByCategory(category, subcategory)
+- **commerce**: lookupOrder(orderId/email), getProductDetails(sku/url), woocommerceOperations(operation, params)
+- **content**: getCompletePageDetails(url)
 
-**How to Use:**
-Import and call functions from servers:
-
-\`\`\`typescript
+**Usage Pattern:**
+\`\`\`ts
 import { searchProducts } from './servers/search';
-import { getProductDetails } from './servers/commerce';
-
-const results = await searchProducts({
-  query: "hydraulic pumps",
-  limit: 10
-}, getContext());
-
-console.log(JSON.stringify(results));
+const data = await searchProducts({ query: "pumps", limit: 10 }, getContext());
+console.log(JSON.stringify(data));
 \`\`\`
 
-**Context:**
-- \`getContext()\` provides your customer context (domain, customerId, etc.)
-- Return results as JSON via \`console.log()\`
-- Available functions auto-discover from server filesystem
+**Key Rules:**
+• \`getContext()\` is auto-available (provides domain, customerId, platform)
+• All tools are async, require \`await\`
+• Return data via \`console.log(JSON.stringify())\`
+• Search first before asking clarifying questions
+• Use exact SKU when available (faster)
+• Handle errors gracefully, suggest alternatives
 
-**Guidelines:**
-1. Always search before asking clarifying questions
-2. Use exact SKU matching when possible (faster, more accurate)
-3. Format results as user-friendly text with links
-4. Acknowledge errors and provide alternatives
-5. Reference previous conversation context`;
+**Multi-tool:** Chain multiple imports/calls in one code block when needed.`;
 }
 
 /**
