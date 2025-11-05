@@ -139,31 +139,26 @@ export async function middleware(request: NextRequest) {
   // ========================================
   // SECURITY: Add security headers to all responses
   // ========================================
-  const isDevLikeEnvironment = process.env.NODE_ENV !== 'production';
-
   const scriptSources = [
     "'self'",
     "'unsafe-eval'",
     "'unsafe-inline'",
     'https://cdn.jsdelivr.net',
+    // CRITICAL: Always allow Vercel tooling (it detects environment automatically)
+    'https://vercel.live',
+    'https://*.vercel.live',
   ];
 
   const connectSources = [
     "'self'",
     'https://*.supabase.co',
     'https://api.openai.com',
+    // CRITICAL: Always allow Vercel tooling
+    'https://vercel.live',
+    'https://*.vercel.live',
+    'wss://vercel.live',
+    'wss://*.vercel.live',
   ];
-
-  if (isDevLikeEnvironment) {
-    // Allow Vercel Live reload tooling in development/preview
-    scriptSources.push('https://vercel.live', 'https://*.vercel.live');
-    connectSources.push(
-      'https://vercel.live',
-      'https://*.vercel.live',
-      'wss://vercel.live',
-      'wss://*.vercel.live'
-    );
-  }
 
   const securityHeaders = {
     // HSTS - Force HTTPS for 1 year (including subdomains)
