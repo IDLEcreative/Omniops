@@ -160,6 +160,13 @@ export async function middleware(request: NextRequest) {
     'wss://*.vercel.live',
   ];
 
+  const frameSources = [
+    "'self'",
+    // CRITICAL: Allow Vercel feedback widget iframes
+    'https://vercel.live',
+    'https://*.vercel.live',
+  ];
+
   const securityHeaders = {
     // HSTS - Force HTTPS for 1 year (including subdomains)
     'Strict-Transport-Security': 'max-age=31536000; includeSubDomains',
@@ -176,6 +183,7 @@ export async function middleware(request: NextRequest) {
       "img-src 'self' data: https: blob:",
       "font-src 'self' data:",
       `connect-src ${connectSources.join(' ')}`,
+      `frame-src ${frameSources.join(' ')}`,
       "frame-ancestors 'self'",
       "base-uri 'self'",
       "form-action 'self'"
