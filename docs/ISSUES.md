@@ -7,14 +7,14 @@
 
 ## Quick Reference
 
-**Total Issues:** 15
+**Total Issues:** 20
 - 🔴 Critical: 2
 - 🟠 High: 5
-- 🟡 Medium: 5
-- 🟢 Low: 3
+- 🟡 Medium: 7
+- 🟢 Low: 6
 
 **Status Breakdown:**
-- Open: 15
+- Open: 20
 - In Progress: 0
 - Resolved: 0
 
@@ -673,6 +673,139 @@ Update test expectations or improve mock configurations to return expected value
 
 ---
 
+### 🟢 [LOW] Web Search Tool Integration {#issue-016}
+
+**Status:** Open
+**Severity:** Low
+**Category:** Feature Request
+**Location:** `lib/chat/ai-processor.ts:46`
+**Discovered:** 2025-11-05 (from code scan)
+**Effort:** 1-2 weeks
+
+**Description:**
+TODO comment indicates planned web search tool integration for the AI chat processor.
+
+**Impact:**
+- Missing feature: Can't search web in real-time during conversations
+- Could enhance answer accuracy with current information
+- Currently using only scraped/cached data
+
+**Proposed Solution:**
+Implement web search tool that integrates with the AI processor's tool system.
+
+**Related Issues:** None
+
+---
+
+### 🟡 [MEDIUM] Database-Driven Synonym Loading {#issue-017}
+
+**Status:** Open
+**Severity:** Medium
+**Category:** Feature Request
+**Location:** `lib/synonym-auto-learner.ts:226`
+**Discovered:** 2025-11-05 (from code scan)
+**Effort:** 3-5 days
+
+**Description:**
+TODO comment indicates need to implement database-driven synonym loading instead of hardcoded synonyms.
+
+**Impact:**
+- Currently using hardcoded synonym mappings
+- Can't update synonyms without code deployment
+- No customer-specific synonym customization
+- Harder to maintain and test synonym quality
+
+**Proposed Solution:**
+Create database table for synonyms and load them dynamically:
+1. Create `synonyms` table (word, synonym, organization_id)
+2. Load from database instead of hardcoded arrays
+3. Add admin interface for managing synonyms
+4. Cache loaded synonyms for performance
+
+**Related Issues:** None
+
+---
+
+### 🟡 [MEDIUM] Modify search_embeddings RPC for page_id {#issue-018}
+
+**Status:** Open
+**Severity:** Medium
+**Category:** Feature Request
+**Location:** `lib/full-page-retrieval.ts:210`
+**Discovered:** 2025-11-05 (from code scan)
+**Effort:** 1-2 days
+
+**Description:**
+TODO comment indicates search_embeddings RPC function needs to include page_id in results for full-page retrieval.
+
+**Impact:**
+- Can't efficiently retrieve full pages after embedding search
+- May require additional queries to get page_id
+- Performance impact on search results
+
+**Proposed Solution:**
+Modify the `search_embeddings` RPC function in Supabase to return page_id along with embedding results.
+
+**Related Issues:** None
+
+---
+
+### 🟢 [LOW] Deduplication Tracking in Queue Stats {#issue-019}
+
+**Status:** Open
+**Severity:** Low
+**Category:** Feature Request
+**Location:** `lib/queue/queue-manager/stats.ts:33`
+**Discovered:** 2025-11-05 (from code scan)
+**Effort:** 1-2 days
+
+**Description:**
+TODO comment indicates need to implement actual deduplication tracking in queue stats.
+
+**Impact:**
+- Can't track how many duplicate jobs are being deduplicated
+- Missing visibility into queue efficiency
+- No metrics for deduplication effectiveness
+
+**Proposed Solution:**
+Implement tracking for:
+1. Number of jobs deduplicated
+2. Deduplication rate (%)
+3. Top deduplicated job types
+4. Save metrics to database or logs
+
+**Related Issues:** None
+
+---
+
+### 🟢 [LOW] Feedback Notification System {#issue-020}
+
+**Status:** Open
+**Severity:** Low
+**Category:** Feature Request
+**Location:** `app/api/feedback/route.ts:201`
+**Discovered:** 2025-11-05 (from code scan)
+**Effort:** 2-3 days
+
+**Description:**
+TODO comment indicates need to implement notification system for feedback (email, Slack, etc.).
+
+**Impact:**
+- Feedback submissions not notified to team
+- Manual checking required to see new feedback
+- Slower response time to user feedback
+
+**Proposed Solution:**
+Implement notification system:
+1. Email notifications to configured address
+2. Optional Slack webhook integration
+3. Configurable notification preferences per organization
+4. Include feedback details and link to admin panel
+
+**Related Issues:** None
+
+---
+
 ## In Progress Issues
 
 <!-- Issues currently being worked on -->
@@ -711,6 +844,7 @@ Update test expectations or improve mock configurations to return expected value
 - Tech Debt: 5 issues
 - Testing: 4 issues
 - Code Quality: 4 issues
+- Feature Request: 5 issues (new)
 - Architecture: 1 issue
 - Performance: 2 issues
 
@@ -718,12 +852,13 @@ Update test expectations or improve mock configurations to return expected value
 - Testing infrastructure: 5 issues (#001, #003, #004, #005, #007)
 - Agent files: 3 issues (#009, #010, #011)
 - API routes: 3 issues (#001, #012, #013)
+- Missing features: 5 issues (#016, #017, #018, #019, #020)
 
 **Average Effort:**
 - Critical: 2-3 weeks
 - High: 3-8 days
-- Medium: 1-7 days
-- Low: 30 minutes
+- Medium: 1-5 days
+- Low: 1-3 days
 
 ---
 

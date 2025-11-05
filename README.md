@@ -379,6 +379,20 @@ We welcome contributions! Here's how to get started:
 - Use conventional commits
 - Document new features
 
+### Reporting Issues
+
+Found a bug or have a feature request?
+
+**Internal Contributors:**
+- Add issues directly to [docs/ISSUES.md](docs/ISSUES.md)
+- Follow the issue template (severity, location, description, impact)
+- See 20 tracked issues: 2 critical, 5 high, 7 medium, 6 low
+
+**External Contributors:**
+- Open a [GitHub Issue](https://github.com/yourusername/omniops/issues)
+- Provide steps to reproduce
+- Include error messages and environment details
+
 **→ Contributing guide:** [docs/04-DEVELOPMENT/code-patterns/](docs/04-DEVELOPMENT/code-patterns/)
 
 ---
