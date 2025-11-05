@@ -4,9 +4,9 @@
 
 import type { ParsedPrice } from './types';
 
-export function parseMultiplePrices(prices: (string | null | undefined)[]): ParsedPrice[] {
+export async function parseMultiplePrices(prices: (string | null | undefined)[]): Promise<ParsedPrice[]> {
   // Import here to avoid circular dependency
-  const { PriceParser } = require('./index');
+  const { PriceParser } = await import('./index');
   return prices
     .filter(p => p)
     .map(price => PriceParser.parse(price));

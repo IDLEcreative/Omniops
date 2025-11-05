@@ -3,6 +3,7 @@ import { createClient, createServiceRoleClient } from '@/lib/supabase-server';
 import { getDynamicWooCommerceClient } from '@/lib/woocommerce-dynamic';
 import { embeddingCache } from '@/lib/embedding-cache';
 import { getSearchCacheManager } from '@/lib/search-cache';
+import { domainIdCache } from '@/lib/domain-id-cache';
 
 // Performance monitoring
 class QueryTimer {
@@ -113,24 +114,35 @@ export async function searchSimilarContentOptimized(
   }
 
   try {
-    // Get domain_id with timeout
-    const domainTimer = new QueryTimer('Domain Lookup', 1000);
+    // OPTIMIZATION 1: Check domain ID cache first
     const searchDomain = domain.replace('www.', '');
-    
-    const { data: domainData } = await supabase
-      .from('domains')
-      .select('id')
-      .eq('domain', searchDomain)
-      .single();
-    
-    domainTimer.end();
-    
-    if (!domainData?.id) {
-      console.log(`No domain found for "${domain}"`);
-      return [];
+    let domainId = domainIdCache.get(searchDomain);
+
+    if (!domainId) {
+      // Cache miss - fetch from database
+      const domainTimer = new QueryTimer('Domain Lookup (Cache Miss)', 1000);
+
+      const { data: domainData } = await supabase
+        .from('domains')
+        .select('id')
+        .eq('domain', searchDomain)
+        .single();
+
+      domainTimer.end();
+
+      if (!domainData?.id) {
+        console.log(`No domain found for "${domain}"`);
+        return [];
+      }
+
+      domainId = domainData.id;
+
+      // Cache the result for future requests
+      domainIdCache.set(searchDomain, domainId);
+      console.log(`[Performance] Domain ID cached for "${searchDomain}"`);
+    } else {
+      console.log(`[Performance] Domain ID from cache for "${searchDomain}"`);
     }
-    
-    const domainId = domainData.id;
     
     // SHORT QUERY OPTIMIZATION - for 1-2 word queries, use fast keyword search
     const queryWords = query.trim().split(/\s+/);

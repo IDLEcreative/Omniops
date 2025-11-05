@@ -41,7 +41,7 @@ export interface WooCommerceClientFactory {
    * @param credentials - WooCommerce store credentials
    * @returns Configured WooCommerce API client
    */
-  createClient(credentials: WooCommerceCredentials): WooCommerceAPI;
+  createClient(credentials: WooCommerceCredentials): Promise<WooCommerceAPI>;
 
   /**
    * Decrypt WooCommerce credentials from encrypted format
@@ -80,9 +80,9 @@ export class ProductionWooCommerceFactory implements WooCommerceClientFactory {
     return config;
   }
 
-  createClient(credentials: WooCommerceCredentials): WooCommerceAPI {
+  async createClient(credentials: WooCommerceCredentials): Promise<WooCommerceAPI> {
     // Dynamic import to avoid circular dependencies
-    const { WooCommerceAPI } = require('./index');
+    const { WooCommerceAPI } = await import('./index');
 
     return new WooCommerceAPI({
       url: credentials.url,

@@ -40,7 +40,7 @@ export interface ShopifyClientFactory {
    * @param credentials - Shopify store credentials
    * @returns Configured Shopify API client
    */
-  createClient(credentials: ShopifyCredentials): ShopifyAPI;
+  createClient(credentials: ShopifyCredentials): Promise<ShopifyAPI>;
 
   /**
    * Decrypt Shopify credentials from encrypted format
@@ -79,9 +79,9 @@ export class ProductionShopifyFactory implements ShopifyClientFactory {
     return config;
   }
 
-  createClient(credentials: ShopifyCredentials): ShopifyAPI {
+  async createClient(credentials: ShopifyCredentials): Promise<ShopifyAPI> {
     // Dynamic import to avoid circular dependencies
-    const { ShopifyAPI } = require('../shopify-api');
+    const { ShopifyAPI } = await import('../shopify-api');
 
     return new ShopifyAPI({
       shop: credentials.shop,
