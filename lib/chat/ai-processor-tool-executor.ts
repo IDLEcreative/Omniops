@@ -197,44 +197,52 @@ export function formatToolResultsForAI(
   return toolExecutionResults.map(({ toolCall, toolName, toolArgs, result }) => {
     let toolResponse = '';
 
+    // CRITICAL: Surface errorMessage prominently when present
+    // This ensures AI explicitly communicates errors (e.g., "Product X not found") to users
+    if (!result.success && result.errorMessage) {
+      toolResponse = `⚠️ ERROR: ${result.errorMessage}\n\n`;
+      console.log(`[Tool Executor] Surfacing error to AI: ${result.errorMessage}`);
+    }
+
     if (result.success && result.results.length > 0) {
-      toolResponse = `Found ${result.results.length} results from ${result.source}:\n\n`;
+      toolResponse += `Found ${result.results.length} results from ${result.source}:\n\n`;
       result.results.forEach((item, index) => {
         toolResponse += `${index + 1}. ${item.title}\n`;
         toolResponse += `   URL: ${item.url}\n`;
         toolResponse += `   Content: ${item.content.substring(0, 200)}${item.content.length > 200 ? '...' : ''}\n`;
         toolResponse += `   Relevance: ${(item.similarity * 100).toFixed(1)}%\n\n`;
       });
-    } else {
+    } else if (!result.errorMessage) {
+      // Only provide generic fallback messages if no explicit errorMessage was set
       // Provide contextual error messages based on tool type
       const queryTerm = toolArgs.query || toolArgs.category || toolArgs.productQuery || toolArgs.orderId || 'this search';
 
       if (result.source === 'invalid-arguments') {
         switch (toolName) {
           case 'search_products':
-            toolResponse = 'I want to search our inventory for you, but I need a product name or keywords to look up. Could you share what you are looking for?';
+            toolResponse += 'I want to search our inventory for you, but I need a product name or keywords to look up. Could you share what you are looking for?';
             break;
           case 'search_by_category':
-            toolResponse = 'I can browse our categories once I know which topic you want—shipping, returns, installation, etc. Let me know and I will pull it up.';
+            toolResponse += 'I can browse our categories once I know which topic you want—shipping, returns, installation, etc. Let me know and I will pull it up.';
             break;
           case 'get_product_details':
-            toolResponse = 'To grab detailed specifications I need the product or part number you are checking on. Share that and I will verify the details.';
+            toolResponse += 'To grab detailed specifications I need the product or part number you are checking on. Share that and I will verify the details.';
             break;
           case 'get_complete_page_details':
-            toolResponse = 'I need to know which specific page or item you want complete details for. Let me know what you are interested in and I will retrieve all available information about it.';
+            toolResponse += 'I need to know which specific page or item you want complete details for. Let me know what you are interested in and I will retrieve all available information about it.';
             break;
           case 'lookup_order':
-            toolResponse = 'I can check an order status once I have the order number. Please provide it and I will look it up right away.';
+            toolResponse += 'I can check an order status once I have the order number. Please provide it and I will look it up right away.';
             break;
           default:
-            toolResponse = 'I need a little more detail to continue. Could you clarify what you want me to look up?';
+            toolResponse += 'I need a little more detail to continue. Could you clarify what you want me to look up?';
         }
       } else if (result.source === 'invalid-domain') {
-        toolResponse = `Cannot perform search - domain not configured properly.`;
+        toolResponse += `Cannot perform search - domain not configured properly.`;
       } else if (toolName === 'lookup_order') {
-        toolResponse = `I couldn't find any information about order ${queryTerm}. The order number might be incorrect, or it hasn't been entered into the system yet. Please ask the customer to double-check the order number.`;
+        toolResponse += `I couldn't find any information about order ${queryTerm}. The order number might be incorrect, or it hasn't been entered into the system yet. Please ask the customer to double-check the order number.`;
       } else {
-        toolResponse = `I couldn't find any information about "${queryTerm}". This might mean:
+        toolResponse += `I couldn't find any information about "${queryTerm}". This might mean:
 - The search term needs to be more specific or spelled differently
 - The item might not be in the current inventory
 - Try using alternative terms or checking the spelling
@@ -243,9 +251,12 @@ Please let me know if you'd like to search for something else or need assistance
       }
     }
 
+    // Ensure we always return some content (even if just the error message)
+    const finalContent = toolResponse.trim() || 'Search completed with no results.';
+
     return {
       tool_call_id: toolCall.id,
-      content: toolResponse
+      content: finalContent
     };
   });
 }

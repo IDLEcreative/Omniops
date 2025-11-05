@@ -1,5 +1,4 @@
 import { createServiceRoleClientSync } from '@/lib/supabase/server';
-import { createClient } from '@supabase/supabase-js';
 import OpenAI from 'openai';
 import { z } from 'zod';
 
@@ -35,11 +34,16 @@ const ProductDataSchema = z.object({
 type ProductData = z.infer<typeof ProductDataSchema>;
 
 export class ProductExtractor {
-  private supabase: ReturnType<typeof createClient>;
+  private supabase: NonNullable<ReturnType<typeof createServiceRoleClientSync>>;
   private openai: OpenAI;
 
   constructor(supabaseUrl: string, supabaseKey: string, openaiKey: string) {
-    this.supabase = createServiceRoleClientSync();
+    // Ignore legacy parameters, always use the project abstraction
+    const client = createServiceRoleClientSync();
+    if (!client) {
+      throw new Error('Supabase client initialization failed - check environment variables');
+    }
+    this.supabase = client;
     this.openai = new OpenAI({ apiKey: openaiKey });
   }
 

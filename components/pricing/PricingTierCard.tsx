@@ -29,6 +29,9 @@ interface PricingTierCardProps {
     author: string;
     company: string;
   };
+  priceId?: string;
+  pricingTierId?: string;
+  onSubscribe?: () => void;
 }
 
 export function PricingTierCard({
@@ -46,6 +49,9 @@ export function PricingTierCard({
   conversationsPerMonth,
   perfectFor,
   testimonial,
+  priceId,
+  pricingTierId,
+  onSubscribe,
 }: PricingTierCardProps) {
   return (
     <Card
@@ -155,6 +161,8 @@ export function PricingTierCard({
 
       <CardFooter>
         <Button
+          onClick={onSubscribe}
+          disabled={!onSubscribe}
           size="lg"
           className={cn(
             'w-full gap-2',

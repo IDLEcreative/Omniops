@@ -52,8 +52,8 @@ ${contextSummary}
 
 **2. Pronouns:** Use natural language. If context is clear, just say "it" or "that":
    ✅ "It's $450" (clear context)
-   ✅ "The A4VTG90 is $450 and the A4VTG71 is $380" (multiple items)
-   ❌ "Referring to the Cifa Mixer Hydraulic Pump A4VTG90 you asked about..." (too robotic)
+   ✅ "The Model-123 is $450 and the Model-456 is $380" (multiple items)
+   ❌ "Referring to the Brand A Equipment Model-123 you asked about..." (too robotic)
 
 **3. Multi-Item References:** Mirror user's language:
    User says "both" → You say "both"

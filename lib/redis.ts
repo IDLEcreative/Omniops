@@ -87,16 +87,28 @@ export class CrawlJobManager {
     if (!existing) {
       throw new Error(`Job ${jobId} not found`);
     }
-    
-    const jobData = JSON.parse(existing);
-    const updated = { ...jobData, ...updates };
-    await this.redis.setex(key, this.JOB_TTL, JSON.stringify(updated));
+
+    try {
+      const jobData = JSON.parse(existing);
+      const updated = { ...jobData, ...updates };
+      await this.redis.setex(key, this.JOB_TTL, JSON.stringify(updated));
+    } catch (error) {
+      console.error(`[Redis] Failed to parse job data for ${jobId}:`, error);
+      throw new Error(`Invalid job data format for ${jobId}`);
+    }
   }
 
   async getJob(jobId: string): Promise<any | null> {
     const key = `crawl:job:${jobId}`;
     const data = await this.redis.get(key);
-    return data ? JSON.parse(data) : null;
+    if (!data) return null;
+
+    try {
+      return JSON.parse(data);
+    } catch (error) {
+      console.error(`[Redis] Failed to parse job data for ${jobId}:`, error);
+      return null;
+    }
   }
 
   async addJobResult(jobId: string, page: any): Promise<void> {
@@ -108,7 +120,14 @@ export class CrawlJobManager {
   async getJobResults(jobId: string): Promise<any[]> {
     const key = `crawl:results:${jobId}`;
     const results = await this.redis.lrange(key, 0, -1);
-    return results.map(r => JSON.parse(r));
+    return results.map(r => {
+      try {
+        return JSON.parse(r);
+      } catch (error) {
+        console.error(`[Redis] Failed to parse job result for ${jobId}:`, error);
+        return null;
+      }
+    }).filter(Boolean); // Remove any null results from parse failures
   }
 
   async deleteJob(jobId: string): Promise<void> {

@@ -4,9 +4,12 @@
 
 import { CommerceProvider, OrderInfo } from '../commerce-provider';
 import type { WooCommerceAPI } from '@/lib/woocommerce-api';
+import { findSimilarSkus } from '@/lib/fuzzy-matching/sku-matcher';
 
 export class WooCommerceProvider implements CommerceProvider {
   readonly platform = 'woocommerce';
+  private skuCache: { skus: string[], timestamp: number } | null = null;
+  private SKU_CACHE_TTL = 5 * 60 * 1000; // 5 minutes
 
   constructor(private client: WooCommerceAPI) {}
 
@@ -110,6 +113,22 @@ export class WooCommerceProvider implements CommerceProvider {
     }
   }
 
+  /**
+   * Get available SKUs from catalog with caching for performance
+   * @private
+   */
+  private async getAvailableSkus(): Promise<string[]> {
+    if (this.skuCache && Date.now() - this.skuCache.timestamp < this.SKU_CACHE_TTL) {
+      return this.skuCache.skus;
+    }
+
+    const products = await this.client.getProducts({ per_page: 100 });
+    const skus = products.map(p => p.sku).filter((sku): sku is string => !!sku);
+
+    this.skuCache = { skus, timestamp: Date.now() };
+    return skus;
+  }
+
   async getProductDetails(productId: string): Promise<any> {
     try {
       // First try exact SKU match (fast and precise if user provides SKU)
@@ -122,6 +141,8 @@ export class WooCommerceProvider implements CommerceProvider {
         return skuResults[0];
       }
 
+      console.log(`[WooCommerce Provider] SKU "${productId}" not found in catalog, trying name search fallback`);
+
       // Fallback: Search by product name/description if SKU search fails
       // This handles cases where user asks about "10mtr extension cables" (name) not SKU
       const searchResults = await this.client.getProducts({
@@ -132,6 +153,19 @@ export class WooCommerceProvider implements CommerceProvider {
 
       if (searchResults && searchResults.length > 0) {
         return searchResults[0];
+      }
+
+      console.log(`[WooCommerce Provider] Product "${productId}" not found via SKU or name search`);
+
+      // Fuzzy matching: Suggest similar SKUs if exact match and name search both failed
+      const availableSkus = await this.getAvailableSkus();
+      const suggestions = findSimilarSkus(productId, availableSkus, 2, 3);
+
+      if (suggestions.length > 0) {
+        console.log(`[WooCommerce Provider] Similar SKUs found: ${suggestions.map(s => s.sku).join(', ')}`);
+        return {
+          suggestions: suggestions.map(s => s.sku)
+        };
       }
 
       return null;

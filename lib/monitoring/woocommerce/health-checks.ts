@@ -62,10 +62,13 @@ export async function checkWooCommerceCredentials(): Promise<HealthStatus> {
   }
 
   try {
+    // Use configured test domain or first available domain
+    const testDomain = process.env.TEST_DOMAIN || process.env.PRIMARY_DOMAIN;
+
     const { data, error } = await supabase
       .from('customer_configs')
       .select('domain, woocommerce_url, woocommerce_consumer_key')
-      .eq('domain', 'thompsonseparts.co.uk')
+      .eq('domain', testDomain)
       .single();
 
     if (error) {
@@ -103,8 +106,9 @@ export async function checkWooCommerceCredentials(): Promise<HealthStatus> {
 
 export async function checkWooCommerceAPI(): Promise<HealthStatus> {
   try {
+    const testDomain = process.env.TEST_DOMAIN || process.env.PRIMARY_DOMAIN || 'example.com';
     const { result: wc, duration: clientDuration } = await measureResponseTime(() =>
-      getDynamicWooCommerceClient('thompsonseparts.co.uk')
+      getDynamicWooCommerceClient(testDomain)
     );
 
     if (!wc) {
@@ -159,7 +163,8 @@ export async function checkWooCommerceAPI(): Promise<HealthStatus> {
 
 export async function checkProductSearch(): Promise<HealthStatus> {
   try {
-    const wc = await getDynamicWooCommerceClient('thompsonseparts.co.uk');
+    const testDomain = process.env.TEST_DOMAIN || process.env.PRIMARY_DOMAIN || 'example.com';
+    const wc = await getDynamicWooCommerceClient(testDomain);
     if (!wc) {
       return {
         component: 'Product Search',

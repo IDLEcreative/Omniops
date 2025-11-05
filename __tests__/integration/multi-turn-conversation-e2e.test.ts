@@ -152,9 +152,9 @@ describe('Multi-Turn Conversation - E2E', () => {
       /**
        * Test Flow (3 turns):
        * Turn 1:
-       *   User: "Do you have hydraulic pumps?"
-       *   AI: [Lists 3 pumps: Pump A, Pump B, Pump C]
-       *   Metadata: Should track all 3 pumps as "products_mentioned"
+       *   User: "Do you have industrial products?"
+       *   AI: [Lists 3 products: Product A, Product B, Product C]
+       *   Metadata: Should track all 3 products as "products_mentioned"
        *
        * Turn 2:
        *   User: "What's the price of the first one?"
@@ -235,10 +235,10 @@ describe('Multi-Turn Conversation - E2E', () => {
        *   Metadata: products_mentioned = ["ZF5 Pump A", "ZF5 Pump B"]
        *
        * Turn 2:
-       *   User: "Sorry, I meant ZF4 not ZF5"
+       *   User: "Sorry, I meant Model-4 not Model-5"
        *   Expected AI Behavior:
        *     - Recognize correction pattern
-       *     - Acknowledge mistake: "No problem! Let me show you ZF4 pumps instead."
+       *     - Acknowledge mistake: "No problem! Let me show you Model-4 products instead."
        *     - Execute new search for ZF4
        *     - Clear old ZF5 metadata, replace with ZF4
        *

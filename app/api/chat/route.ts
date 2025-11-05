@@ -31,6 +31,14 @@ import { RouteDependencies, defaultDependencies } from '@/lib/chat/route-types';
 import { ConversationMetadataManager } from '@/lib/chat/conversation-metadata';
 import { parseAndTrackEntities } from '@/lib/chat/response-parser';
 import { ChatErrorHandler } from '@/lib/chat/errors/chat-error-handler';
+import {
+  isMCPExecutionEnabled,
+  detectMCPCodeExecution,
+  extractMCPCode,
+  buildMCPExecutionContext,
+  executeMCPCode,
+  calculateTokenSavings
+} from '@/lib/chat/mcp-integration';
 
 // Dependencies interface and defaults imported from route-types module
 
@@ -125,7 +133,7 @@ export async function POST(
 
     // Check rate limit
     const rateLimitDomain = domain || request.headers.get('host') || 'unknown';
-    const { allowed, resetTime } = rateLimitFn(rateLimitDomain);
+    const { allowed, resetTime } = await rateLimitFn(rateLimitDomain);
     
     if (!allowed) {
       const retryAfterSeconds = Math.max(1, Math.ceil((resetTime - Date.now()) / 1000));
@@ -167,7 +175,7 @@ export async function POST(
 
     // Step 2: Parallel operations that depend on domainId
     const parallelStart = performance.now();
-    const [widgetConfig, conversationId] = await Promise.all([
+    const results = await Promise.allSettled([
       // Load widget configuration (depends on domainId)
       loadWidgetConfig(domainId, adminSupabase),
       // Get or create conversation (depends on domainId)
@@ -179,6 +187,24 @@ export async function POST(
       )
     ]);
     const parallelTime = performance.now() - parallelStart;
+
+    // Extract results with fallbacks for partial failures
+    const widgetConfig = results[0].status === 'fulfilled' ? results[0].value : null;
+    const conversationId = results[1].status === 'fulfilled' ? results[1].value : null;
+
+    // Log any failures but continue with defaults
+    if (results[0].status === 'rejected') {
+      telemetry?.log('error', 'config', 'Failed to load widget config, using defaults', {
+        error: results[0].reason?.message
+      });
+    }
+    if (results[1].status === 'rejected') {
+      telemetry?.log('error', 'conversation', 'Failed to get/create conversation', {
+        error: results[1].reason?.message
+      });
+      // Conversation is critical - cannot proceed without it
+      throw new Error('Failed to initialize conversation');
+    }
 
     telemetry?.log('info', 'performance', 'Parallel operations completed', {
       duration: `${parallelTime.toFixed(2)}ms`,
@@ -196,11 +222,11 @@ export async function POST(
 
     // Step 3: Parallel operations that depend on conversationId
     const conversationOpsStart = performance.now();
-    const [, historyData, convMetadata] = await Promise.all([
+    const conversationOpsResults = await Promise.allSettled([
       // Save user message (depends on conversationId)
-      saveUserMessage(conversationId, message, adminSupabase),
+      saveUserMessage(conversationId!, message, adminSupabase),
       // Get conversation history (depends on conversationId)
-      getConversationHistory(conversationId, 20, adminSupabase),
+      getConversationHistory(conversationId!, 20, adminSupabase),
       // Load conversation metadata (depends on conversationId)
       adminSupabase
         .from('conversations')
@@ -211,9 +237,33 @@ export async function POST(
     ]);
     const conversationOpsTime = performance.now() - conversationOpsStart;
 
+    // Extract results with fallbacks
+    const historyData = conversationOpsResults[1].status === 'fulfilled' ? conversationOpsResults[1].value : [];
+    const convMetadata = conversationOpsResults[2].status === 'fulfilled' ? conversationOpsResults[2].value : null;
+
+    // Log any failures
+    if (conversationOpsResults[0].status === 'rejected') {
+      telemetry?.log('error', 'conversation', 'Failed to save user message', {
+        error: conversationOpsResults[0].reason?.message
+      });
+      // User message save is critical
+      throw new Error('Failed to save user message');
+    }
+    if (conversationOpsResults[1].status === 'rejected') {
+      telemetry?.log('warn', 'conversation', 'Failed to load history, using empty', {
+        error: conversationOpsResults[1].reason?.message
+      });
+    }
+    if (conversationOpsResults[2].status === 'rejected') {
+      telemetry?.log('warn', 'conversation', 'Failed to load metadata, creating new', {
+        error: conversationOpsResults[2].reason?.message
+      });
+    }
+
     telemetry?.log('info', 'performance', 'Conversation operations completed', {
       duration: `${conversationOpsTime.toFixed(2)}ms`,
-      operations: ['saveUserMessage', 'getConversationHistory', 'loadMetadata']
+      operations: ['saveUserMessage', 'getConversationHistory', 'loadMetadata'],
+      successCount: conversationOpsResults.filter(r => r.status === 'fulfilled').length
     });
 
     // Load or create metadata manager (convMetadata is now available from parallel ops)
@@ -242,7 +292,7 @@ export async function POST(
     }
 
     // Process AI conversation with ReAct loop and tool execution
-    const { finalResponse, allSearchResults, searchLog, iteration } = await processAIConversation({
+    const { finalResponse: aiResponse, allSearchResults, searchLog, iteration } = await processAIConversation({
       conversationMessages,
       domain,
       config,
@@ -257,35 +307,96 @@ export async function POST(
       }
     });
 
+    // MCP CODE EXECUTION: Check if AI response contains executable code
+    let finalResponse = aiResponse;
+    let mcpExecutionMetadata: { executionTime?: number; tokensSaved?: number } | undefined;
+
+    if (isMCPExecutionEnabled() && detectMCPCodeExecution(aiResponse)) {
+      const code = extractMCPCode(aiResponse);
+
+      if (code) {
+        telemetry?.log('info', 'mcp', 'Detected MCP code execution request', {
+          codeLength: code.length,
+          domain,
+          conversationId
+        });
+
+        // Build execution context
+        const execContext = buildMCPExecutionContext(
+          domain,
+          domainId ?? undefined,
+          conversationId ?? null,
+          session_id
+        );
+
+        // Execute code
+        const mcpResult = await executeMCPCode(code, execContext, {
+          timeout: 30000,
+          allowedCategories: ['search']
+        });
+
+        if (mcpResult.success) {
+          // Replace AI response with MCP execution result
+          finalResponse = mcpResult.response;
+          mcpExecutionMetadata = mcpResult.metadata;
+
+          telemetry?.log('info', 'mcp', 'MCP execution successful', {
+            executionTime: mcpResult.metadata?.executionTime,
+            tokensSaved: mcpResult.metadata?.tokensSaved || calculateTokenSavings(),
+            responseLength: finalResponse.length
+          });
+        } else {
+          // Use error response from MCP
+          finalResponse = mcpResult.response;
+
+          telemetry?.log('error', 'mcp', 'MCP execution failed, using error response', {
+            executionTime: mcpResult.metadata?.executionTime
+          });
+        }
+      }
+    }
+
     // Save assistant response
-    await saveAssistantMessage(conversationId, finalResponse, adminSupabase);
+    await saveAssistantMessage(conversationId!, finalResponse, adminSupabase);
 
     // Parse and track entities from this conversation turn
     await parseAndTrackEntities(finalResponse, message, metadataManager);
 
     // Save metadata back to database
-    await adminSupabase
-      .from('conversations')
-      .update({ metadata: JSON.parse(metadataManager.serialize()) })
-      .eq('id', conversationId);
+    try {
+      await adminSupabase
+        .from('conversations')
+        .update({ metadata: JSON.parse(metadataManager.serialize()) })
+        .eq('id', conversationId);
+    } catch (error) {
+      console.error('[Chat] Failed to save metadata:', error);
+      // Continue even if metadata save fails - not critical
+    }
 
     // Complete telemetry with success
     await telemetry?.complete(finalResponse);
 
     // Return response with search metadata
-    return NextResponse.json<ChatResponse & { searchMetadata?: any }>({
+    return NextResponse.json<ChatResponse & { searchMetadata?: any; mcpMetadata?: any }>({
       message: finalResponse,
       conversation_id: conversationId!,
-      sources: allSearchResults.slice(0, 10).map(r => ({
+      sources: (allSearchResults || []).slice(0, 10).map(r => ({
         url: r.url,
         title: r.title,
         relevance: r.similarity
       })),
       searchMetadata: {
         iterations: iteration,
-        totalSearches: searchLog.length,
-        searchLog: searchLog
-      }
+        totalSearches: (searchLog || []).length,
+        searchLog: searchLog || []
+      },
+      ...(mcpExecutionMetadata && {
+        mcpMetadata: {
+          executed: true,
+          executionTime: mcpExecutionMetadata.executionTime,
+          tokensSaved: mcpExecutionMetadata.tokensSaved
+        }
+      })
     }, { headers: corsHeaders });
 
   } catch (error) {

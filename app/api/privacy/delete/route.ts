@@ -1,7 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { createServiceRoleClient } from '@/lib/supabase/server';
 import { withCSRF } from '@/lib/middleware/csrf';
-import { createClient } from '@supabase/supabase-js';
 
 /**
  * POST /api/privacy/delete
@@ -11,11 +10,14 @@ import { createClient } from '@supabase/supabase-js';
  */
 async function handlePost(request: NextRequest) {
   // Initialize Supabase client inside the function
-  const supabase = createClient(
-    process.env.NEXT_PUBLIC_SUPABASE_URL!,
-    process.env.SUPABASE_SERVICE_ROLE_KEY!
-  );
-  
+  const supabase = await createServiceRoleClient();
+
+  if (!supabase) {
+    return NextResponse.json({
+      error: 'Database service is currently unavailable'
+    }, { status: 503 });
+  }
+
   try {
     const { userId } = await request.json();
 

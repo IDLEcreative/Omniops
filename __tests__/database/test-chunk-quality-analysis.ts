@@ -71,7 +71,7 @@ const TEST_QUERIES: TestQuery[] = [
   }
 ];
 
-const TEST_DOMAIN = 'thompsonseparts.co.uk';
+const TEST_DOMAIN = 'test-domain.example.com';
 
 async function analyzeChunkMetadata(domain: string) {
   console.log('\n=== CHUNK METADATA ANALYSIS ===\n');
@@ -387,7 +387,7 @@ async function testChunkIndexImpact() {
 async function main() {
   console.log('╔════════════════════════════════════════════════════════════╗');
   console.log('║   Agent 3: Chunk Quality & Semantic Search Analysis       ║');
-  console.log('║   Test Domain: thompsonseparts.co.uk                       ║');
+  console.log('║   Test Domain: test-domain.example.com                     ║');
   console.log('╚════════════════════════════════════════════════════════════╝\n');
 
   try {

@@ -475,6 +475,8 @@ export type Database = {
           id: string
           primary_color: string | null
           rate_limit: number | null
+          shopify_access_token: string | null
+          shopify_shop: string | null
           suggested_questions: Json | null
           updated_at: string | null
           welcome_message: string | null
@@ -494,6 +496,8 @@ export type Database = {
           id?: string
           primary_color?: string | null
           rate_limit?: number | null
+          shopify_access_token?: string | null
+          shopify_shop?: string | null
           suggested_questions?: Json | null
           updated_at?: string | null
           welcome_message?: string | null
@@ -513,6 +517,8 @@ export type Database = {
           id?: string
           primary_color?: string | null
           rate_limit?: number | null
+          shopify_access_token?: string | null
+          shopify_shop?: string | null
           suggested_questions?: Json | null
           updated_at?: string | null
           welcome_message?: string | null
@@ -824,6 +830,50 @@ export type Database = {
             columns: ["page_id"]
             isOneToOne: false
             referencedRelation: "scraped_pages"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      query_cache: {
+        Row: {
+          created_at: string | null
+          domain_id: string | null
+          expires_at: string
+          hit_count: number
+          id: string
+          query_hash: string
+          query_text: string | null
+          results: Json
+          updated_at: string | null
+        }
+        Insert: {
+          created_at?: string | null
+          domain_id?: string | null
+          expires_at: string
+          hit_count?: number
+          id?: string
+          query_hash: string
+          query_text?: string | null
+          results: Json
+          updated_at?: string | null
+        }
+        Update: {
+          created_at?: string | null
+          domain_id?: string | null
+          expires_at?: string
+          hit_count?: number
+          id?: string
+          query_hash?: string
+          query_text?: string | null
+          results?: Json
+          updated_at?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "query_cache_domain_id_fkey"
+            columns: ["domain_id"]
+            isOneToOne: false
+            referencedRelation: "domains"
             referencedColumns: ["id"]
           },
         ]
@@ -1455,6 +1505,5 @@ export type {
   Session,
   AuthError,
   AuthResponse,
-  ApiError,
   PostgrestSingleResponse,
 } from '@supabase/supabase-js'

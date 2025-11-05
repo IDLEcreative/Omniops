@@ -1,9 +1,9 @@
 'use client';
 
 import { useRef } from 'react';
+import dynamic from 'next/dynamic';
 import {
   PricingHero,
-  AIQuoteWidget,
   PricingTiers,
   FeatureComparisonTable,
   MultiDomainCalculator,
@@ -12,6 +12,12 @@ import {
   PricingFAQ,
   FinalCTA,
 } from '@/components/pricing';
+
+// Dynamically import AIQuoteWidget to avoid SSR issues
+const AIQuoteWidget = dynamic(
+  () => import('@/components/pricing/AIQuoteWidget').then(mod => ({ default: mod.AIQuoteWidget })),
+  { ssr: false, loading: () => <div className="min-h-[400px] flex items-center justify-center">Loading...</div> }
+);
 
 export default function PricingPage() {
   const quoteWidgetRef = useRef<HTMLDivElement>(null);

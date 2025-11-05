@@ -12,7 +12,7 @@ import {
 } from '@/__tests__/setup/isolated-test-setup'
 
 // Mock dependencies
-jest.mock('@/lib/supabase-server')
+jest.mock('@/lib/supabase/server')
 jest.mock('@/lib/rate-limit')
 jest.mock('openai')
 jest.mock('@/lib/embeddings')
@@ -71,7 +71,7 @@ describe('/api/chat - Basic Functionality', () => {
     mockOpenAIInstance.chat.completions.create.mockClear()
     configureDefaultOpenAIResponse(mockOpenAIInstance)
 
-    const supabaseModule = jest.requireMock('@/lib/supabase-server')
+    const supabaseModule = jest.requireMock('@/lib/supabase/server')
     const mockSupabase = createFreshSupabaseMock()
     supabaseModule.createClient.mockResolvedValue(mockSupabase)
     supabaseModule.createServiceRoleClient.mockResolvedValue(mockSupabase)

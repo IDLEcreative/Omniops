@@ -1,0 +1,30 @@
+{
+  "compilerOptions": {
+    "jsx": "react-jsx",
+    "jsxImportSource": "react",
+    "lib": ["deno.window", "deno.unstable"],
+    "strict": true,
+    "allowJs": true
+  },
+  "imports": {
+    "@/": "./",
+    "@/lib/": "./lib/",
+    "@/types": "./types/index.ts",
+    "@/app/": "./app/",
+    "@/components/": "./components/",
+    "@/hooks/": "./hooks/",
+    "react": "npm:react@19.1.0",
+    "react-dom": "npm:react-dom@19.1.0",
+    "zod": "npm:zod@3"
+  },
+  "tasks": {
+    "test-mcp": "deno run --allow-read=. --allow-net --allow-env test-mcp-execution.ts"
+  },
+  "fmt": {
+    "useTabs": false,
+    "lineWidth": 120,
+    "indentWidth": 2,
+    "semiColons": true,
+    "singleQuote": true
+  }
+}

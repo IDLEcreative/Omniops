@@ -2,8 +2,11 @@ import { WooCommerceAPI } from './woocommerce-api';
 import { WooCommerceStoreAPI } from './woocommerce-store-api';
 import { getCartSessionManager } from './cart-session-manager';
 import { createServiceRoleClient } from '@/lib/supabase-server';
-import { decryptWooCommerceConfig, tryDecryptCredentials } from '@/lib/encryption';
 import type { EncryptedCredentials } from '@/types/encrypted-credentials';
+import {
+  WooCommerceClientFactory,
+  defaultWooCommerceFactory,
+} from './woocommerce-api/factory';
 
 // Product interface
 interface Product {
@@ -34,63 +37,49 @@ interface Product {
   variations?: number[];
 }
 
-// Get WooCommerce client with dynamic configuration
-export async function getDynamicWooCommerceClient(domain: string): Promise<WooCommerceAPI | null> {
-  const supabase = await createServiceRoleClient();
-  
-  if (!supabase) {
-    return null;
-  }
-  
-  // Fetch configuration for this domain (include both new and legacy formats)
-  const { data: config, error } = await supabase
-    .from('customer_configs')
-    .select('woocommerce_url, woocommerce_consumer_key, woocommerce_consumer_secret, encrypted_credentials')
-    .eq('domain', domain)
-    .single();
-
-  if (error || !config) {
-    return null;
-  }
-
-  let storeUrl: string | undefined;
-  let consumerKey: string | undefined;
-  let consumerSecret: string | undefined;
-
-  // NEW: Try encrypted_credentials first
-  if (config.encrypted_credentials) {
-    const credentials = tryDecryptCredentials(config.encrypted_credentials);
-    if (credentials.woocommerce) {
-      storeUrl = credentials.woocommerce.store_url;
-      consumerKey = credentials.woocommerce.consumer_key;
-      consumerSecret = credentials.woocommerce.consumer_secret;
+/**
+ * Get WooCommerce client with dynamic configuration
+ *
+ * @param domain - Customer domain
+ * @param factory - Optional factory for dependency injection (defaults to production)
+ * @returns WooCommerce API client or null if configuration not found
+ *
+ * @example
+ * // Production usage (uses real database)
+ * const client = await getDynamicWooCommerceClient('example.com');
+ *
+ * @example
+ * // Testing usage (uses mock factory)
+ * const mockFactory = createMockWooCommerceFactory({ hasConfig: true });
+ * const client = await getDynamicWooCommerceClient('example.com', mockFactory);
+ */
+export async function getDynamicWooCommerceClient(
+  domain: string,
+  factory: WooCommerceClientFactory = defaultWooCommerceFactory
+): Promise<WooCommerceAPI | null> {
+  try {
+    // Get config using factory (allows test injection)
+    const config = await factory.getConfigForDomain(domain);
+    if (!config) {
+      console.log(`No configuration found for domain: ${domain}`);
+      return null;
     }
-  }
 
-  // FALLBACK: Use legacy individual columns if new format not available
-  if (!consumerKey && config.woocommerce_consumer_key) {
-    const decryptedConfig = decryptWooCommerceConfig({
-      enabled: true,
-      url: config.woocommerce_url,
-      consumer_key: config.woocommerce_consumer_key,
-      consumer_secret: config.woocommerce_consumer_secret,
-    });
+    // Decrypt credentials using factory (allows test injection)
+    const credentials = await factory.decryptCredentials(config);
+    if (!credentials) {
+      console.log(`No WooCommerce credentials found for domain: ${domain}`);
+      return null;
+    }
 
-    storeUrl = decryptedConfig.url;
-    consumerKey = decryptedConfig.consumer_key;
-    consumerSecret = decryptedConfig.consumer_secret;
-  }
+    // Create client using factory (allows test injection)
+    const client = factory.createClient(credentials);
 
-  // Validate we have all required credentials
-  if (!storeUrl || !consumerKey || !consumerSecret) {
+    return client;
+  } catch (error) {
+    console.error('Error creating WooCommerce client:', error);
     return null;
   }
-
-  return new WooCommerceAPI({
-    url: storeUrl,
-    consumerKey,
-    consumerSecret,
-  });
 }
 
 // Dynamic search products function

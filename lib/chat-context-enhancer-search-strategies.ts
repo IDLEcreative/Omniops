@@ -4,7 +4,6 @@
  */
 
 import { createServiceRoleClientSync } from '@/lib/supabase/server';
-import { createClient } from '@supabase/supabase-js';
 import { searchSimilarContentEnhanced } from './enhanced-embeddings';
 import { smartSearch } from './search-wrapper';
 import { ContextChunk, BusinessClassification } from './chat-context-enhancer-types';
@@ -19,10 +18,12 @@ export async function executeHybridSearch(
   domainId: string,
   maxChunks: number
 ): Promise<ContextChunk[]> {
-  const supabase = createClient(
-    process.env.NEXT_PUBLIC_SUPABASE_URL!,
-    process.env.SUPABASE_SERVICE_ROLE_KEY!
-  );
+  const supabase = createServiceRoleClientSync();
+
+  if (!supabase) {
+    console.error('[Context Enhancer] Failed to create Supabase client for hybrid search');
+    return [];
+  }
 
   console.log(`[Context Enhancer] Trying hybrid search for maximum accuracy...`);
 
@@ -114,10 +115,12 @@ export async function executeSmartSearch(
  * Get business classification for domain
  */
 export async function getBusinessClassification(domainId: string): Promise<BusinessClassification | null> {
-  const supabase = createClient(
-    process.env.NEXT_PUBLIC_SUPABASE_URL!,
-    process.env.SUPABASE_SERVICE_ROLE_KEY!
-  );
+  const supabase = createServiceRoleClientSync();
+
+  if (!supabase) {
+    console.error('[Context Enhancer] Failed to create Supabase client for business classification');
+    return null;
+  }
 
   const { data: classification } = await supabase
     .from('business_classifications')

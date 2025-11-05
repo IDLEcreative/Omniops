@@ -12,4 +12,4 @@ export {
   validateCoupon,
   getPaymentMethods,
   getShippingMethods,
-} from './store-operations/';
+} from './store-operations/index';

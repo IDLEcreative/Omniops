@@ -27,7 +27,7 @@ async function handlePost(request: NextRequest) {
 
     // Rate limit expensive scraping operations
     const domain = new URL(scrapeRequest.url).hostname;
-    const rateLimit = checkExpensiveOpRateLimit(domain);
+    const rateLimit = await checkExpensiveOpRateLimit(domain);
 
     if (!rateLimit.allowed) {
       const resetDate = new Date(rateLimit.resetTime);

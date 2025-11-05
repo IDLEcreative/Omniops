@@ -14,4 +14,5 @@ export type ToolResult = {
   results: SearchResult[];
   source: string;
   pageInfo?: any;
+  errorMessage?: string;
 };

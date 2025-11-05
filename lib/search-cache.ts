@@ -20,4 +20,4 @@ export {
 
   // Singleton
   getSearchCacheManager,
-} from './search-cache/'
+} from './search-cache/index'

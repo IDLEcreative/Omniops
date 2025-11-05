@@ -60,9 +60,9 @@ Respond with JSON only:
 }
 
 For example:
-- "do you sell hydaulics" → searchTerms: ["hydraulics", "hydraulic products"]
+- "do you sell equipment" → searchTerms: ["equipment", "products"]
 - "its for agriculture" → searchTerms: ["agricultural", "agriculture equipment"]
-- "show me pumps" → searchTerms: ["pump", "pumps"]
+- "show me products" → searchTerms: ["product", "products"]
 - "hello" → searchTerms: [], intent: "greeting"`;
 
       const response = await this.openai.chat.completions.create({

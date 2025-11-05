@@ -1,4 +1,4 @@
-import React, { useMemo } from 'react';
+import React, { useMemo, useCallback } from 'react';
 
 interface MessageContentProps {
   content: string;
@@ -8,24 +8,52 @@ interface MessageContentProps {
 // Memoized component to prevent unnecessary re-renders
 export const MessageContent = React.memo(({ content, className = '' }: MessageContentProps) => {
   // Format markdown content for better display - simplified to preserve formatting
-  const formatMarkdown = useMemo(() => (text: string): string => {
+  const formatMarkdown = useCallback((text: string): string => {
     // DON'T modify the text much - preserve the original formatting
     // The AI is already providing proper formatting with line breaks
-    
+
     let formatted = text;
-    
+
     // Just normalize line endings
     formatted = formatted.replace(/\r\n/g, '\n');
     formatted = formatted.replace(/\r/g, '\n');
-    
+
     // Trim only
     formatted = formatted.trim();
-    
+
     return formatted;
   }, []);
   
+  // Helper function to process plain URLs in text (hoisted before useMemo)
+  const processPlainUrlsCallback = useCallback((text: string): React.ReactNode => {
+    const urlRegex = /(https?:\/\/[^\s]+)|((?:www\.)?[a-zA-Z0-9-]+\.[a-zA-Z]{2,}(?:\/[^\s]*)?)/g;
+    const parts = text.split(urlRegex);
+
+    return parts.map((part, index) => {
+      if (!part) return null;
+
+      // Check if this part is a URL
+      if (urlRegex.test(part)) {
+        const url = part.startsWith('http') ? part : `https://${part}`;
+        return (
+          <a
+            key={`url-${index}`}
+            href={url}
+            target="_top"
+            rel="noopener noreferrer"
+            className="text-blue-400 underline hover:text-blue-300 break-words"
+          >
+            {part}
+          </a>
+        );
+      }
+
+      return part;
+    });
+  }, []);
+
   // Memoized function to convert URLs in text to clickable links
-  const renderContentWithLinks = useMemo(() => (text: string) => {
+  const renderContentWithLinks = useCallback((text: string) => {
     const elements: React.ReactNode[] = [];
     let lastIndex = 0;
 
@@ -51,7 +79,7 @@ export const MessageContent = React.memo(({ content, className = '' }: MessageCo
       // Add text before the link
       if (link.start > lastIndex) {
         const textBefore = text.substring(lastIndex, link.start);
-        elements.push(processPlainUrls(textBefore));
+        elements.push(processPlainUrlsCallback(textBefore));
       }
 
       // Add the link
@@ -72,44 +100,16 @@ export const MessageContent = React.memo(({ content, className = '' }: MessageCo
 
     // Add remaining text
     if (lastIndex < text.length) {
-      elements.push(processPlainUrls(text.substring(lastIndex)));
+      elements.push(processPlainUrlsCallback(text.substring(lastIndex)));
     }
 
     // If no markdown links were found, just process plain URLs
     if (elements.length === 0) {
-      return processPlainUrls(text);
+      return processPlainUrlsCallback(text);
     }
 
     return elements;
-  }, []);
-
-  // Function to process plain URLs in text
-  const processPlainUrls = useMemo(() => (text: string): React.ReactNode => {
-    const urlRegex = /(https?:\/\/[^\s]+)|((?:www\.)?[a-zA-Z0-9-]+\.[a-zA-Z]{2,}(?:\/[^\s]*)?)/g;
-    const parts = text.split(urlRegex);
-    
-    return parts.map((part, index) => {
-      if (!part) return null;
-      
-      // Check if this part is a URL
-      if (urlRegex.test(part)) {
-        const url = part.startsWith('http') ? part : `https://${part}`;
-        return (
-          <a
-            key={`url-${index}`}
-            href={url}
-            target="_top"
-            rel="noopener noreferrer"
-            className="text-blue-400 underline hover:text-blue-300 break-words"
-          >
-            {part}
-          </a>
-        );
-      }
-      
-      return part;
-    });
-  }, []);
+  }, [processPlainUrlsCallback]);
 
   // Memoize the rendered content - first format markdown, then process links
   const renderedContent = useMemo(() => {

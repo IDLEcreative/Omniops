@@ -1,0 +1,22 @@
+# Telemetry Cleanup Cron Schedule
+#
+# Schedules the cleanup-telemetry edge function to run automatically.
+# Uses standard cron syntax for scheduling.
+#
+# Schedule: Every Sunday at 2:00 AM UTC
+# Format: minute hour day-of-month month day-of-week
+#
+# Common schedules:
+#   "0 2 * * 0"   - Every Sunday at 2 AM (weekly)
+#   "0 2 1 * *"   - First day of every month at 2 AM (monthly)
+#   "0 2 * * 1"   - Every Monday at 2 AM
+#   "0 */6 * * *" - Every 6 hours
+#
+# Timezone: All times are in UTC
+
+- name: "cleanup-old-telemetry-data"
+  description: "Delete telemetry records older than 90 days to prevent unbounded growth"
+  schedule: "0 2 * * 0"  # Every Sunday at 2:00 AM UTC
+  function: "cleanup-telemetry"
+  # Optional: Specify timeout in seconds (default is 10s for cron jobs)
+  timeout: 30

@@ -29,7 +29,13 @@ export const ChatRequestSchema = z.object({
       websiteScraping: z.object({ enabled: z.boolean() }).optional(),
     }).optional(),
     ai: z.object({
-      maxSearchIterations: z.number().min(1).max(5).optional().default(3),
+      /**
+       * Maximum number of AI search iterations before fallback
+       * Increased from 3 to 5 to prevent legitimate product/order lookups from timing out.
+       * Allows for: initial search, semantic fallback, category refinement, alternative strategies, and verification.
+       * @default 5
+       */
+      maxSearchIterations: z.number().min(1).max(5).optional().default(5),
       searchTimeout: z.number().min(1000).max(30000).optional().default(10000),
     }).optional(),
   }).optional(),

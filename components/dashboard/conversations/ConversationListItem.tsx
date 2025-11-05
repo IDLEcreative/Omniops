@@ -94,7 +94,6 @@ function ConversationListItemComponent({
         isSelected ? "bg-accent/70 border-l-2 border-l-primary shadow-sm" : "hover:shadow-sm"
       }`}
       onClick={handleClick}
-      aria-selected={isSelected}
       aria-label={`Conversation with ${conversation.customerName || "customer"}, ${formatRelativeTime(conversation.timestamp)}, status: ${STATUS_LABELS[conversation.status]}`}
     >
       <div className="flex items-start gap-2.5">

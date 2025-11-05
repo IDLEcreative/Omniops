@@ -4,7 +4,6 @@
  */
 
 import { createServiceRoleClientSync } from '@/lib/supabase/server';
-import { createClient } from '@supabase/supabase-js';
 import { ContextChunk, BusinessClassification } from './chat-context-enhancer-types';
 
 /**
@@ -14,10 +13,12 @@ export async function extractProductsFromScrapedPages(
   searchQuery: string,
   domainId: string
 ): Promise<ContextChunk[]> {
-  const supabase = createClient(
-    process.env.NEXT_PUBLIC_SUPABASE_URL!,
-    process.env.SUPABASE_SERVICE_ROLE_KEY!
-  );
+  const supabase = createServiceRoleClientSync();
+
+  if (!supabase) {
+    console.error('[Context Enhancer] Failed to create Supabase client for scraped pages extraction');
+    return [];
+  }
 
   const searchTerms = searchQuery.toLowerCase().split(/\s+/).filter(term => term.length > 2);
   const searchConditions = [];
@@ -86,10 +87,12 @@ export async function extractProductsFromStructuredData(
   searchQuery: string,
   domainId: string
 ): Promise<ContextChunk[]> {
-  const supabase = createClient(
-    process.env.NEXT_PUBLIC_SUPABASE_URL!,
-    process.env.SUPABASE_SERVICE_ROLE_KEY!
-  );
+  const supabase = createServiceRoleClientSync();
+
+  if (!supabase) {
+    console.error('[Context Enhancer] Failed to create Supabase client for structured data extraction');
+    return [];
+  }
 
   const { data: structuredProducts, error: structuredError } = await supabase
     .from('structured_extractions')
@@ -153,10 +156,12 @@ export async function extractProductsFromWebsiteContent(
   searchQuery: string,
   domainId: string
 ): Promise<ContextChunk[]> {
-  const supabase = createClient(
-    process.env.NEXT_PUBLIC_SUPABASE_URL!,
-    process.env.SUPABASE_SERVICE_ROLE_KEY!
-  );
+  const supabase = createServiceRoleClientSync();
+
+  if (!supabase) {
+    console.error('[Context Enhancer] Failed to create Supabase client for website content extraction');
+    return [];
+  }
 
   const { data: websiteContent, error: websiteContentError } = await supabase
     .from('website_content')
@@ -198,10 +203,12 @@ export async function extractEntitiesFromCatalog(
   domainId: string,
   classification: BusinessClassification | null
 ): Promise<ContextChunk[]> {
-  const supabase = createClient(
-    process.env.NEXT_PUBLIC_SUPABASE_URL!,
-    process.env.SUPABASE_SERVICE_ROLE_KEY!
-  );
+  const supabase = createServiceRoleClientSync();
+
+  if (!supabase) {
+    console.error('[Context Enhancer] Failed to create Supabase client for catalog extraction');
+    return [];
+  }
 
   const { data: entities, error: entityError } = await supabase
     .from('entity_catalog')

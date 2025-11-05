@@ -7,4 +7,4 @@
  * @deprecated Import from '@/lib/encryption' directory instead
  */
 
-export * from './encryption/';
+export * from './encryption/index';

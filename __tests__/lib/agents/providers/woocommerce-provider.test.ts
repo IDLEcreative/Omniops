@@ -357,8 +357,8 @@ describe('WooCommerceProvider', () => {
 
       const result = await provider.getProductDetails('NONEXISTENT');
 
-      // Should try both searches
-      expect(mockClient.getProducts).toHaveBeenCalledTimes(2);
+      // Should try SKU search, name search, and catalog fetch for fuzzy matching
+      expect(mockClient.getProducts).toHaveBeenCalledTimes(3);
       expect(result).toBeNull();
     });
 

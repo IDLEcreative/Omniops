@@ -1,9 +1,13 @@
 'use client';
 
+import { useState } from 'react';
+import { useAuth } from '@/components/auth/auth-provider';
+import { createClient } from '@/lib/supabase-client';
 import { PricingTierCard } from './PricingTierCard';
 
 const PRICING_TIERS = [
   {
+    id: 'small-business',
     name: 'Small Business',
     price: 500,
     period: '/month',
@@ -12,6 +16,7 @@ const PRICING_TIERS = [
     savings: '£1,177/month',
     savingsPercent: 70,
     conversationsPerMonth: 2500,
+    stripePriceId: 'price_small_business', // Replace with actual Stripe price ID
     features: [
       { name: '2,500 completed conversations/month', included: true },
       { name: 'Unlimited team seats', included: true },
@@ -42,6 +47,7 @@ const PRICING_TIERS = [
     },
   },
   {
+    id: 'sme',
     name: 'SME',
     price: 1000,
     period: '/month',
@@ -50,6 +56,7 @@ const PRICING_TIERS = [
     savings: '£5,708/month',
     savingsPercent: 85,
     conversationsPerMonth: 5000,
+    stripePriceId: 'price_sme', // Replace with actual Stripe price ID
     features: [
       { name: '5,000 completed conversations/month', included: true },
       { name: 'Unlimited team seats', included: true },
@@ -81,6 +88,7 @@ const PRICING_TIERS = [
     },
   },
   {
+    id: 'mid-market',
     name: 'Mid-Market',
     price: 5000,
     period: '/month',
@@ -89,6 +97,7 @@ const PRICING_TIERS = [
     savings: '£11,770/month',
     savingsPercent: 70,
     conversationsPerMonth: 25000,
+    stripePriceId: 'price_mid_market', // Replace with actual Stripe price ID
     features: [
       { name: '25,000 completed conversations/month', included: true },
       { name: 'Unlimited team seats', included: true },
@@ -120,6 +129,7 @@ const PRICING_TIERS = [
     },
   },
   {
+    id: 'enterprise',
     name: 'Enterprise',
     price: 10000,
     period: '/month',
@@ -128,6 +138,7 @@ const PRICING_TIERS = [
     savings: '£23,540/month',
     savingsPercent: 70,
     conversationsPerMonth: 100000,
+    stripePriceId: 'price_enterprise', // Replace with actual Stripe price ID
     features: [
       { name: '100,000 completed conversations/month', included: true },
       { name: 'Unlimited team seats', included: true },
@@ -161,6 +172,69 @@ const PRICING_TIERS = [
 ];
 
 export function PricingTiers() {
+  const { user, loading: authLoading } = useAuth();
+  const [loadingTierId, setLoadingTierId] = useState<string | null>(null);
+  const [error, setError] = useState<string | null>(null);
+
+  const handleSubscribe = async (priceId: string, tierId: string) => {
+    try {
+      setError(null);
+      setLoadingTierId(tierId);
+
+      // If user is not logged in, redirect to login
+      if (!user) {
+        // Store the pricing tier in sessionStorage for later redirect
+        sessionStorage.setItem('intendedPricingTier', tierId);
+        window.location.href = '/auth/login';
+        return;
+      }
+
+      // Get user's organization
+      const supabase = await createClient();
+      if (!supabase) {
+        throw new Error('Database service unavailable');
+      }
+
+      // Get the current user's organization
+      const { data: org } = await supabase
+        .from('organization_members')
+        .select('organization_id')
+        .eq('user_id', user.id)
+        .order('created_at', { ascending: false })
+        .limit(1)
+        .single();
+
+      if (!org) {
+        throw new Error('No organization found. Please create an organization first.');
+      }
+
+      // Call checkout API
+      const response = await fetch('/api/stripe/checkout', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          priceId,
+          organizationId: org.organization_id,
+        }),
+      });
+
+      if (!response.ok) {
+        const errorData = await response.json();
+        throw new Error(errorData.error || 'Checkout failed');
+      }
+
+      const { sessionUrl } = await response.json();
+      if (sessionUrl) {
+        window.location.href = sessionUrl;
+      }
+    } catch (err) {
+      console.error('Checkout error:', err);
+      setError(err instanceof Error ? err.message : 'Failed to initiate checkout');
+    } finally {
+      setLoadingTierId(null);
+    }
+  };
+
   return (
     <section className="py-20 bg-slate-50">
       <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
@@ -176,10 +250,23 @@ export function PricingTiers() {
           </p>
         </div>
 
+        {/* Error message */}
+        {error && (
+          <div className="mb-8 p-4 bg-red-50 border border-red-200 rounded-lg max-w-2xl mx-auto">
+            <p className="text-red-800">{error}</p>
+          </div>
+        )}
+
         {/* Pricing cards grid */}
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8 items-end">
-          {PRICING_TIERS.map((tier, index) => (
-            <PricingTierCard key={index} {...tier} />
+          {PRICING_TIERS.map((tier) => (
+            <PricingTierCard
+              key={tier.id}
+              {...tier}
+              priceId={tier.stripePriceId}
+              pricingTierId={tier.id}
+              onSubscribe={() => handleSubscribe(tier.stripePriceId, tier.id)}
+            />
           ))}
         </div>
 

@@ -63,7 +63,7 @@ async function handleSetup(request: Request) {
   }
 
   // Rate limit expensive RAG setup operations
-  const rateLimit = checkExpensiveOpRateLimit(domain);
+  const rateLimit = await checkExpensiveOpRateLimit(domain);
 
   if (!rateLimit.allowed) {
     const resetDate = new Date(rateLimit.resetTime);

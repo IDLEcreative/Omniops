@@ -75,7 +75,7 @@ export async function GET(request: NextRequest) {
       body: JSON.stringify({
         message: query,
         session_id: 'test-' + Date.now(),
-        domain: 'thompsonseparts.co.uk',
+        domain: process.env.TEST_DOMAIN || 'example.com', // Load from env
         config: {
           features: {
             websiteScraping: { enabled: true }

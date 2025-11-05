@@ -1,6 +1,10 @@
 /**
  * Database Connection Pool
  * Manages Supabase client connections with LRU eviction and automatic cleanup
+ *
+ * NOTE: This pool still uses createClient from @supabase/supabase-js directly
+ * because it manages multiple connections with different credentials.
+ * This is a legitimate use case for direct client creation.
  */
 
 import { createClient as createSupabaseClient } from '@supabase/supabase-js';

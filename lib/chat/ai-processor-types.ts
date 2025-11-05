@@ -8,6 +8,7 @@ import { SearchResult } from '@/types';
 import { ChatTelemetry } from '@/lib/chat-telemetry';
 import OpenAI from 'openai';
 import type { WidgetConfig } from './conversation-manager';
+import type { ToolResult } from './tool-handlers/types';
 
 export interface AIProcessorDependencies {
   getCommerceProvider: any;
@@ -37,7 +38,7 @@ export interface ToolExecutionResult {
   toolCall: any;
   toolName: string;
   toolArgs: Record<string, any>;
-  result: { success: boolean; results: SearchResult[]; source: string };
+  result: ToolResult;
   executionTime: number;
 }
 

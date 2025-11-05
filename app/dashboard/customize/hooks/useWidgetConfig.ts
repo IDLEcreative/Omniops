@@ -3,7 +3,7 @@
  * Handles fetching, loading, and saving widget configurations
  */
 
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useCallback } from 'react';
 import type { CustomerConfig } from '@/types/database';
 import type { SimplifiedWidgetConfig } from '../types';
 import { defaultConfig } from '../types';
@@ -20,19 +20,7 @@ export function useWidgetConfig({ toast }: UseWidgetConfigProps) {
   const [isSaving, setIsSaving] = useState(false);
   const [isDirty, setIsDirty] = useState(false);
 
-  // Fetch customer configs on mount
-  useEffect(() => {
-    fetchCustomerConfigs();
-  }, []);
-
-  // Load configuration when customerConfigId changes
-  useEffect(() => {
-    if (customerConfigId) {
-      loadConfiguration(customerConfigId);
-    }
-  }, [customerConfigId]);
-
-  const fetchCustomerConfigs = async () => {
+  const fetchCustomerConfigs = useCallback(async () => {
     setIsLoadingConfigs(true);
     try {
       const response = await fetch('/api/customer/config');
@@ -67,9 +55,9 @@ export function useWidgetConfig({ toast }: UseWidgetConfigProps) {
     } finally {
       setIsLoadingConfigs(false);
     }
-  };
+  }, [toast]);
 
-  const loadConfiguration = async (configId: string) => {
+  const loadConfiguration = useCallback(async (configId: string) => {
     try {
       if (!configId) return;
 
@@ -122,7 +110,19 @@ export function useWidgetConfig({ toast }: UseWidgetConfigProps) {
         variant: "destructive",
       });
     }
-  };
+  }, [toast]);
+
+  // Fetch customer configs on mount
+  useEffect(() => {
+    fetchCustomerConfigs();
+  }, [fetchCustomerConfigs]);
+
+  // Load configuration when customerConfigId changes
+  useEffect(() => {
+    if (customerConfigId) {
+      loadConfiguration(customerConfigId);
+    }
+  }, [customerConfigId, loadConfiguration]);
 
   const mapToSimplePersonality = (fullPersonality?: string): 'professional' | 'friendly' | 'concise' => {
     if (fullPersonality === 'professional') return 'professional';

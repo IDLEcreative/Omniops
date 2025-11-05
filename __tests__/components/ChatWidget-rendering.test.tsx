@@ -26,7 +26,7 @@ describe('ChatWidget - Rendering', () => {
         const url = new URL(request.url);
         const domain = url.searchParams.get('domain');
 
-        if (domain === 'thompsonseparts.co.uk' || domain === 'localhost') {
+        if (domain === 'test-domain.example.com' || domain === 'localhost') {
           return HttpResponse.json({
             config: {
               domain: domain,
@@ -202,7 +202,7 @@ describe('ChatWidget - Rendering', () => {
       // Note: We can't easily verify fetch calls in this setup, but the component does call it
     });
 
-    it('should use thompsonseparts.co.uk domain for localhost', async () => {
+    it('should use test-domain.example.com domain for localhost', async () => {
       Object.defineProperty(window, 'location', {
         value: {
           hostname: 'localhost',
@@ -218,7 +218,7 @@ describe('ChatWidget - Rendering', () => {
         expect(mockLocalStorage.getItem).toHaveBeenCalled();
       });
 
-      // Component should check config for thompsonseparts.co.uk
+      // Component should check config for test-domain.example.com
     });
   });
 

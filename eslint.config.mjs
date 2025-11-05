@@ -106,6 +106,13 @@ const eslintConfig = [
             }
           ]
         }
+      ],
+      "no-restricted-syntax": [
+        "error",
+        {
+          "selector": "Literal[value=/thompsonseparts|cifa|hydraulic pump/i]",
+          "message": "Do not use specific company/brand names or industry-specific product types in production code. Use generic terms like 'Brand A', 'Model-123', 'product', 'equipment' or make configurable via database. Tests in __tests__/ are exempt (see CLAUDE.md)."
+        }
       ]
     }
   },
@@ -119,6 +126,7 @@ const eslintConfig = [
     files: ["__tests__/**/*", "test-utils/**/*", "__mocks__/**/*"],
     rules: {
       "no-restricted-imports": "off",
+      "no-restricted-syntax": "off",
       "@typescript-eslint/no-explicit-any": "off",
       "@typescript-eslint/no-unused-vars": "off"
     }

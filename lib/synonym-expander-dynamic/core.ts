@@ -2,7 +2,7 @@
  * Dynamic Synonym Expansion - Core Logic
  */
 
-import { createClient } from '@supabase/supabase-js';
+import { createServiceRoleClientSync } from '@/lib/supabase/server';
 
 export class DynamicSynonymExpanderCore {
   private supabase: any = null;
@@ -16,13 +16,10 @@ export class DynamicSynonymExpanderCore {
    */
   private initializeSupabase(): void {
     if (!this.supabase) {
-      const url = process.env.NEXT_PUBLIC_SUPABASE_URL;
-      const key = process.env.SUPABASE_SERVICE_ROLE_KEY;
+      this.supabase = createServiceRoleClientSync();
 
-      if (url && key) {
-        this.supabase = createClient(url, key);
-      } else {
-        console.warn('[SynonymExpander] Supabase credentials not found, synonyms disabled');
+      if (!this.supabase) {
+        console.warn('[SynonymExpander] Database service unavailable, synonyms disabled');
       }
     }
   }

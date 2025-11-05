@@ -46,7 +46,16 @@ export async function POST(req: NextRequest) {
       );
     }
 
-    const sessionData = JSON.parse(sessionDataStr);
+    let sessionData;
+    try {
+      sessionData = JSON.parse(sessionDataStr);
+    } catch (error) {
+      console.error('[Demo Chat] Failed to parse session data:', error);
+      return NextResponse.json(
+        { error: 'Invalid session data. Please start a new demo.' },
+        { status: 400 }
+      );
+    }
 
     // Check message count
     if (sessionData.message_count >= sessionData.max_messages) {

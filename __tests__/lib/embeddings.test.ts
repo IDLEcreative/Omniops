@@ -1,24 +1,25 @@
 import { describe, it, expect, jest, beforeEach } from '@jest/globals'
-import { 
-  splitIntoChunks, 
-  generateEmbeddingVectors, 
+import {
+  splitIntoChunks,
+  generateEmbeddingVectors,
   generateEmbedding,
   storeEmbeddings,
   searchSimilar
 } from '@/lib/embeddings'
 import OpenAI from 'openai'
-import { createServiceRoleClient } from '@/lib/supabase-server'
+import { createServiceRoleClient } from '@/lib/supabase/server'
+import { createServiceRoleMockClient } from '@/test-utils/supabase-test-helpers'
 
 // Mock dependencies
 jest.mock('openai')
-jest.mock('@/lib/supabase-server')
+jest.mock('@/lib/supabase/server')
 
 // Mock environment variables
 process.env.OPENAI_API_KEY = 'test-api-key'
 
 describe('Embeddings Service', () => {
   let mockOpenAIInstance: jest.Mocked<OpenAI>
-  let mockSupabaseClient: ReturnType<typeof createServiceRoleClient>
+  let mockSupabaseClient: ReturnType<typeof createServiceRoleMockClient>
 
   beforeEach(() => {
     jest.clearAllMocks()
@@ -33,35 +34,37 @@ describe('Embeddings Service', () => {
           ]
         })
       }
-    }
+    } as any
 
     // Mock OpenAI constructor
     const MockedOpenAI = OpenAI as jest.MockedClass<typeof OpenAI>
     MockedOpenAI.mockClear()
     MockedOpenAI.mockImplementation(() => mockOpenAIInstance)
 
-    // Mock Supabase client
-    mockSupabaseClient = {
-      from: jest.fn(() => ({
-        insert: jest.fn().mockReturnThis(),
-        select: jest.fn().mockReturnThis(),
-        eq: jest.fn().mockReturnThis(),
-        single: jest.fn().mockResolvedValue({ data: { id: 'test-id' }, error: null }),
-        update: jest.fn().mockReturnThis(),
-        delete: jest.fn().mockResolvedValue({ error: null })
-      })),
-      rpc: jest.fn().mockResolvedValue({ 
-        data: [
-          {
-            id: 'chunk-1',
-            chunk_text: 'Relevant content',
-            page_id: 'page-1',
-            similarity: 0.85
-          }
-        ], 
-        error: null 
-      })
-    }
+    // Mock Supabase client with test helpers
+    mockSupabaseClient = createServiceRoleMockClient()
+
+    // Override specific mock behaviors for embeddings tests
+    mockSupabaseClient.from = jest.fn(() => ({
+      insert: jest.fn().mockReturnThis(),
+      select: jest.fn().mockReturnThis(),
+      eq: jest.fn().mockReturnThis(),
+      single: jest.fn().mockResolvedValue({ data: { id: 'test-id' }, error: null }),
+      update: jest.fn().mockReturnThis(),
+      delete: jest.fn().mockResolvedValue({ error: null })
+    })) as any
+
+    mockSupabaseClient.rpc = jest.fn().mockResolvedValue({
+      data: [
+        {
+          id: 'chunk-1',
+          chunk_text: 'Relevant content',
+          page_id: 'page-1',
+          similarity: 0.85
+        }
+      ],
+      error: null
+    })
 
     ;(createServiceRoleClient as jest.Mock).mockResolvedValue(mockSupabaseClient)
   })

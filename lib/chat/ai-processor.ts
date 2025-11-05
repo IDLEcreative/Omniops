@@ -49,7 +49,13 @@ export async function processAIConversation(params: AIProcessorParams): Promise<
   }
 
   // Configuration
-  const maxIterations = config?.ai?.maxSearchIterations || 3;
+  // Default to 5 iterations to allow for:
+  // 1. Initial product/order search
+  // 2. Fallback to semantic search if direct search fails
+  // 3. Category refinement based on initial results
+  // 4. Alternative search strategies or related items
+  // 5. Final verification and response composition
+  const maxIterations = config?.ai?.maxSearchIterations || 5;
   const searchTimeout = config?.ai?.searchTimeout || 10000;
 
   let iteration = 0;
@@ -118,6 +124,21 @@ export async function processAIConversation(params: AIProcessorParams): Promise<
     // Format results for AI
     const toolResults = formatToolResultsForAI(toolExecutionResults);
 
+    // Log error messages being sent to AI for telemetry and debugging
+    toolResults.forEach(result => {
+      if (result.content.includes('⚠️ ERROR:')) {
+        console.log('[Intelligent Chat] Error message sent to AI:', {
+          errorContent: result.content.substring(0, 200), // First 200 chars
+          iteration,
+          toolCallId: result.tool_call_id
+        });
+
+        telemetry?.log('warn', 'ai', 'Error message sent to AI', {
+          errorPreview: result.content.substring(0, 200)
+        });
+      }
+    });
+
     // Add tool results to conversation
     conversationMessages.push({
       role: 'assistant' as const,
@@ -163,8 +184,36 @@ export async function processAIConversation(params: AIProcessorParams): Promise<
   // If we hit max iterations, use last completion's content (avoid redundant API call)
   if (iteration >= maxIterations && shouldContinue) {
     console.log('[Intelligent Chat] Max iterations reached, using last response');
+
+    // Extract search context from the conversation to make fallback message helpful
+    let searchContext = '';
+    const lastToolCalls = completion.choices[0]?.message?.tool_calls;
+    if (lastToolCalls && lastToolCalls.length > 0) {
+      const queries: string[] = [];
+      for (const tc of lastToolCalls) {
+        try {
+          const args = JSON.parse(tc.function.arguments);
+          const query = args.query || args.productQuery || args.orderId || args.category || '';
+          if (query) queries.push(query);
+        } catch {
+          // Ignore parse errors
+        }
+      }
+      if (queries.length > 0) {
+        searchContext = ` for "${queries[0]}"`;
+      }
+    }
+
     finalResponse = completion.choices[0]?.message?.content ||
-      'I apologize, but I need more time to gather all the information. Please try asking more specifically.';
+      `I'm having trouble finding complete information${searchContext}. This could be due to:\n\n` +
+      `- The item might not be in our current catalog\n` +
+      `- There might be a temporary connection issue\n` +
+      `- The search is taking longer than expected\n\n` +
+      `To help you faster, please provide:\n` +
+      `- The exact product name or description, OR\n` +
+      `- A link to the product page, OR\n` +
+      `- A photo of the product or label\n\n` +
+      `Would any of these alternatives work for you?`;
   }
 
   // If no final response yet, get it from the last completion
@@ -178,11 +227,18 @@ export async function processAIConversation(params: AIProcessorParams): Promise<
   // Log search activity
   console.log('[Intelligent Chat] Search Summary:', {
     totalIterations: iteration,
+    maxIterations,
+    iterationUtilization: `${Math.round((iteration / maxIterations) * 100)}%`,
     totalSearches: searchLog.length,
     totalResults: allSearchResults.length,
     searchBreakdown: searchLog,
     uniqueUrlsFound: Array.from(new Set(allSearchResults.map(r => r.url))).length
   });
+
+  // Add warning if close to limit
+  if (iteration >= maxIterations - 1) {
+    console.warn(`[Intelligent Chat] Nearly hit iteration limit (${iteration}/${maxIterations}). Consider increasing maxIterations if queries frequently timeout.`);
+  }
 
   return {
     finalResponse,

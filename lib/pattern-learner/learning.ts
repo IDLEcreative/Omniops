@@ -2,25 +2,25 @@
  * Pattern Learning Logic
  */
 
-import { createClient } from '@supabase/supabase-js';
+import { createServiceRoleClientSync } from '@/lib/supabase/server';
 import { NormalizedProduct } from '../product-normalizer';
 import { ExtractedPattern, DomainPatterns } from './types';
 
 export class PatternLearning {
-  private static getSupabaseClient() {
-    const url = process.env.NEXT_PUBLIC_SUPABASE_URL;
-    const key = process.env.SUPABASE_SERVICE_ROLE_KEY;
-
-    if (!url || !key) {
-      throw new Error('Supabase credentials not found. Please set NEXT_PUBLIC_SUPABASE_URL and SUPABASE_SERVICE_ROLE_KEY environment variables.');
+  private static get supabase() {
+    const client = createServiceRoleClientSync();
+    if (!client) {
+      throw new Error('Database service is currently unavailable');
     }
-
-    const client = createClient(url, key);
     return client;
   }
 
-  private static get supabase() {
-    return this.getSupabaseClient();
+  /**
+   * Get Supabase client for internal use
+   * @internal
+   */
+  static getSupabaseClient() {
+    return this.supabase;
   }
 
   /**

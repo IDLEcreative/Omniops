@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useState, useEffect, useCallback } from "react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Alert, AlertDescription } from "@/components/ui/alert";
@@ -35,17 +35,12 @@ export default function TeamPage() {
   const [inviteError, setInviteError] = useState<string | null>(null);
   const [isInviting, setIsInviting] = useState(false);
 
-  const supabase = createClient();
-
-  useEffect(() => {
-    loadOrganizationData();
-  }, []);
-
-  const loadOrganizationData = async () => {
+  const loadOrganizationData = useCallback(async () => {
     try {
       setLoading(true);
       setError(null);
 
+      const supabase = createClient();
       const { data: { user } } = await supabase.auth.getUser();
       if (!user) {
         setError("Please log in to view team members");
@@ -113,7 +108,11 @@ export default function TeamPage() {
     } finally {
       setLoading(false);
     }
-  };
+  }, []);
+
+  useEffect(() => {
+    loadOrganizationData();
+  }, [loadOrganizationData]);
 
   const handleInviteMember = async () => {
     if (!organizationId) return;

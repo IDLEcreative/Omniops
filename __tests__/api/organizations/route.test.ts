@@ -6,9 +6,14 @@
 import { describe, it, expect, beforeEach, jest } from '@jest/globals';
 import { NextRequest } from 'next/server';
 import { GET, POST } from '@/app/api/organizations/route';
-import { createClient } from '@/lib/supabase/server';
-import { mockSupabaseClient, createMockOrganization, createMockUser } from '@/test-utils/api-test-helpers';
+import {
+  createAuthenticatedMockClient,
+  createUnauthenticatedMockClient,
+  createMockSupabaseClient,
+} from '@/test-utils/supabase-test-helpers';
+import { createMockOrganization, createMockUser } from '@/test-utils/api-test-helpers';
 
+// Mock the module
 jest.mock('@/lib/supabase/server', () => ({
   createClient: jest.fn(),
 }));
@@ -26,11 +31,10 @@ describe('GET /api/organizations', () => {
   });
 
   it('should return 401 if user is not authenticated', async () => {
-    const mockClient = mockSupabaseClient({
-      authError: new Error('Unauthorized'),
-    });
+    const { createClient } = jest.requireMock('@/lib/supabase/server');
+    const mockClient = createUnauthenticatedMockClient();
 
-    (createClient as jest.Mock).mockResolvedValue(mockClient);
+    createClient.mockResolvedValue(mockClient);
 
     const response = await GET();
     const data = await response.json();
@@ -40,23 +44,30 @@ describe('GET /api/organizations', () => {
   });
 
   it('should handle database errors gracefully', async () => {
+    const { createClient } = jest.requireMock('@/lib/supabase/server');
     const mockUser = createMockUser();
+    const mockClient = createAuthenticatedMockClient(mockUser.id, mockUser.email);
 
-    const mockClient = mockSupabaseClient({
-      user: mockUser,
-      tables: {
-        organization_members: {
+    // Override from() to return error for organization_members table
+    mockClient.from = jest.fn((table: string) => {
+      if (table === 'organization_members') {
+        return {
           select: jest.fn().mockReturnThis(),
           eq: jest.fn().mockReturnThis(),
           order: jest.fn().mockResolvedValue({
             data: null,
             error: new Error('Database error'),
           }),
-        },
-      },
+        };
+      }
+      return {
+        select: jest.fn().mockReturnThis(),
+        eq: jest.fn().mockReturnThis(),
+        order: jest.fn().mockResolvedValue({ data: [], error: null }),
+      };
     });
 
-    (createClient as jest.Mock).mockResolvedValue(mockClient);
+    createClient.mockResolvedValue(mockClient);
 
     const response = await GET();
     const data = await response.json();
@@ -72,11 +83,10 @@ describe('POST /api/organizations', () => {
   });
 
   it('should return 401 if user is not authenticated', async () => {
-    const mockClient = mockSupabaseClient({
-      authError: new Error('Unauthorized'),
-    });
+    const { createClient } = jest.requireMock('@/lib/supabase/server');
+    const mockClient = createUnauthenticatedMockClient();
 
-    (createClient as jest.Mock).mockResolvedValue(mockClient);
+    createClient.mockResolvedValue(mockClient);
 
     const request = buildRequest({ name: 'Test Org' });
     const response = await POST(request);
@@ -87,8 +97,9 @@ describe('POST /api/organizations', () => {
   });
 
   it('should validate request body - name too short', async () => {
-    const mockClient = mockSupabaseClient();
-    (createClient as jest.Mock).mockResolvedValue(mockClient);
+    const { createClient } = jest.requireMock('@/lib/supabase/server');
+    const mockClient = createAuthenticatedMockClient();
+    createClient.mockResolvedValue(mockClient);
 
     const request = buildRequest({ name: 'A' });
     const response = await POST(request);
@@ -99,8 +110,9 @@ describe('POST /api/organizations', () => {
   });
 
   it('should reject invalid slug format', async () => {
-    const mockClient = mockSupabaseClient();
-    (createClient as jest.Mock).mockResolvedValue(mockClient);
+    const { createClient } = jest.requireMock('@/lib/supabase/server');
+    const mockClient = createAuthenticatedMockClient();
+    createClient.mockResolvedValue(mockClient);
 
     const request = buildRequest({
       name: 'Test Org',
@@ -114,12 +126,14 @@ describe('POST /api/organizations', () => {
   });
 
   it('should reject duplicate slugs', async () => {
+    const { createClient } = jest.requireMock('@/lib/supabase/server');
     const mockUser = createMockUser();
+    const mockClient = createAuthenticatedMockClient(mockUser.id, mockUser.email);
 
-    const mockClient = mockSupabaseClient({
-      user: mockUser,
-      tables: {
-        organizations: {
+    // Override from() to return existing slug for organizations table
+    mockClient.from = jest.fn((table: string) => {
+      if (table === 'organizations') {
+        return {
           select: jest.fn().mockReturnValue({
             eq: jest.fn().mockReturnValue({
               maybeSingle: jest.fn().mockResolvedValue({
@@ -128,11 +142,16 @@ describe('POST /api/organizations', () => {
               }),
             }),
           }),
-        },
-      },
+        };
+      }
+      return {
+        select: jest.fn().mockReturnThis(),
+        eq: jest.fn().mockReturnThis(),
+        maybeSingle: jest.fn().mockResolvedValue({ data: null, error: null }),
+      };
     });
 
-    (createClient as jest.Mock).mockResolvedValue(mockClient);
+    createClient.mockResolvedValue(mockClient);
 
     const request = buildRequest({ name: 'Test Org', slug: 'test-org' });
     const response = await POST(request);

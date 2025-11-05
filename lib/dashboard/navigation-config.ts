@@ -11,6 +11,7 @@ import {
   UserPlus,
   Download,
   ShoppingBag,
+  Activity,
   type LucideIcon
 } from "lucide-react";
 
@@ -53,6 +54,12 @@ export const navigation: NavigationSection[] = [
         name: "Analytics",
         href: "/dashboard/analytics",
         icon: BarChart3,
+        badge: null,
+      },
+      {
+        name: "Telemetry",
+        href: "/dashboard/telemetry",
+        icon: Activity,
         badge: null,
       },
     ],

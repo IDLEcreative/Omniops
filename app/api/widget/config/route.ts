@@ -78,11 +78,11 @@ export async function GET(request: NextRequest) {
     // See: docs/04-ANALYSIS/ANALYSIS_MULTI_DOMAIN_SOLUTION.md
     //
     // Once staging domains are in database, this mapping is unnecessary and should be deleted.
-    const DOMAIN_ALIASES: Record<string, string> = {
-      'epartstaging.wpengine.com': 'thompsonseparts.co.uk',
-      'www.epartstaging.wpengine.com': 'thompsonseparts.co.uk',
-      // Add more staging → production mappings here as needed
-    };
+    // Load from environment variable for multi-tenant architecture
+    const DOMAIN_ALIASES: Record<string, string> = process.env.DOMAIN_ALIASES
+      ? JSON.parse(process.env.DOMAIN_ALIASES)
+      : {};
+    // Example: DOMAIN_ALIASES='{"staging.example.com":"example.com"}'
 
     // Parse and validate parameters (supports both domain and app_id)
     const { searchParams } = new URL(request.url);

@@ -7,7 +7,7 @@
 import { generateQueryEmbedding } from '@/lib/embeddings';
 import { createServiceRoleClient } from '@/lib/supabase-server';
 
-const TEST_DOMAIN = 'thompsonseparts.co.uk';
+const TEST_DOMAIN = 'test-domain.example.com';
 
 interface SearchResult {
   id: string;

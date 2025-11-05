@@ -1,19 +1,12 @@
 import type { Metadata, Viewport } from "next";
-import { Geist, Geist_Mono } from "next/font/google";
 import { AuthProvider } from "@/components/auth/auth-provider";
 import { ThemeProvider } from "@/components/theme-provider";
 import { Toaster } from "sonner";
 import "./globals.css";
 
-const geistSans = Geist({
-  variable: "--font-geist-sans",
-  subsets: ["latin"],
-});
-
-const geistMono = Geist_Mono({
-  variable: "--font-geist-mono",
-  subsets: ["latin"],
-});
+// Using system fonts only (no external font loading due to network restrictions)
+// This provides excellent performance and works offline
+const fontVariables = "--font-sans --font-mono";
 
 export const metadata: Metadata = {
   title: "Omniops - AI Customer Service Platform",
@@ -34,7 +27,10 @@ export default function RootLayout({
   return (
     <html lang="en" className="h-full" suppressHydrationWarning>
       <body
-        className={`${geistSans.variable} ${geistMono.variable} antialiased h-full min-h-screen bg-background font-sans`}
+        className="antialiased h-full min-h-screen bg-background font-sans"
+        style={{
+          fontFamily: "system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif"
+        }}
       >
         <ThemeProvider
           attribute="class"

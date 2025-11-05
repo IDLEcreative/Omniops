@@ -4,7 +4,6 @@
  */
 
 import { createServiceRoleClientSync } from '@/lib/supabase/server';
-import { createClient } from '@supabase/supabase-js';
 import type { EnhancedSearchOptions, EnhancedSearchResult } from './enhanced-embeddings-types';
 import { MIN_CHUNKS, MAX_CHUNKS } from './enhanced-embeddings-types';
 import { processChunks } from './enhanced-embeddings-strategies';
@@ -36,10 +35,17 @@ export async function searchWithEnhancedContext(
   } = options;
 
   // Create Supabase client
-  const supabase = createClient(
-    process.env.NEXT_PUBLIC_SUPABASE_URL!,
-    process.env.SUPABASE_SERVICE_ROLE_KEY!
-  );
+  const supabase = createServiceRoleClientSync();
+
+  if (!supabase) {
+    console.error('[Enhanced Embeddings] Supabase client not available');
+    return {
+      chunks: [],
+      groupedContext: new Map(),
+      totalRetrieved: 0,
+      averageSimilarity: 0
+    };
+  }
 
   try {
     // First, generate embedding for the query

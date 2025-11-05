@@ -64,10 +64,15 @@ export async function POST(request: NextRequest) {
       }
 
       // Parse the verified body
-      payload = JSON.parse(body)
-      logger.info('Webhook signature verified', {
-        type: payload.type || payload.event
-      })
+      try {
+        payload = JSON.parse(body)
+        logger.info('Webhook signature verified', {
+          type: payload.type || payload.event
+        })
+      } catch (error) {
+        logger.error('Failed to parse webhook payload', { error })
+        return NextResponse.json({ error: 'Invalid JSON payload' }, { status: 400 })
+      }
     } else {
       // No signature verification required
       payload = await request.json()

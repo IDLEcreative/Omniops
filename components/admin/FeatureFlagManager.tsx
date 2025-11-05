@@ -17,7 +17,7 @@
 
 'use client';
 
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 import { Card, CardHeader, CardTitle, CardContent } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
@@ -48,11 +48,7 @@ export function FeatureFlagManager({ organizationId, customerId }: FeatureFlagMa
   const [error, setError] = useState<string | null>(null);
   const [saving, setSaving] = useState(false);
 
-  useEffect(() => {
-    loadFeatures();
-  }, [organizationId, customerId]);
-
-  const loadFeatures = async () => {
+  const loadFeatures = useCallback(async () => {
     try {
       setLoading(true);
       const params = new URLSearchParams();
@@ -72,9 +68,9 @@ export function FeatureFlagManager({ organizationId, customerId }: FeatureFlagMa
     } finally {
       setLoading(false);
     }
-  };
+  }, [organizationId, customerId]);
 
-  const toggleFeature = async (featureName: string, enabled: boolean) => {
+  const toggleFeature = useCallback(async (featureName: string, enabled: boolean) => {
     try {
       setSaving(true);
       const response = await fetch('/api/admin/feature-flags', {
@@ -99,9 +95,9 @@ export function FeatureFlagManager({ organizationId, customerId }: FeatureFlagMa
     } finally {
       setSaving(false);
     }
-  };
+  }, [organizationId, customerId, loadFeatures]);
 
-  const advanceRollout = async (featureName: string) => {
+  const advanceRollout = useCallback(async (featureName: string) => {
     try {
       setSaving(true);
       const response = await fetch('/api/admin/rollout/advance', {
@@ -121,9 +117,9 @@ export function FeatureFlagManager({ organizationId, customerId }: FeatureFlagMa
     } finally {
       setSaving(false);
     }
-  };
+  }, [loadFeatures]);
 
-  const rollbackFeature = async (featureName: string) => {
+  const rollbackFeature = useCallback(async (featureName: string) => {
     if (!confirm('Are you sure you want to rollback this feature? This will disable it for all customers.')) {
       return;
     }
@@ -150,7 +146,11 @@ export function FeatureFlagManager({ organizationId, customerId }: FeatureFlagMa
     } finally {
       setSaving(false);
     }
-  };
+  }, [loadFeatures]);
+
+  useEffect(() => {
+    loadFeatures();
+  }, [loadFeatures]);
 
   if (loading) {
     return (

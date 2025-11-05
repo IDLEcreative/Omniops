@@ -7,7 +7,7 @@
 
 "use client";
 
-import React, { createContext, useContext, useState, useEffect, useMemo, useCallback } from 'react';
+import React, { createContext, useContext, useState, useEffect, useMemo, useCallback, useRef } from 'react';
 import { createClientComponentClient } from '@supabase/auth-helpers-nextjs';
 import type { Database } from '@/types/supabase';
 import type { Organization, OrganizationContextType } from '../organization-types';
@@ -20,6 +20,7 @@ const OrganizationContext = createContext<OrganizationContextType | undefined>(u
 export function OrganizationProvider({ children }: { children: React.ReactNode }) {
   const supabase = createClientComponentClient<Database>();
   const cache = useMemo(() => new CacheManager<any>(), []);
+  const hasInitializedRef = useRef(false);
 
   const [currentOrganization, setCurrentOrganization] = useState<Organization | null>(null);
   const [currentUserRole, setCurrentUserRole] = useState<string | null>(null);
@@ -61,17 +62,20 @@ export function OrganizationProvider({ children }: { children: React.ReactNode }
     return refreshSeatUsageAction(currentOrganization);
   }, [currentOrganization, refreshSeatUsageAction]);
 
-  // Initial load
+  // Initial load - runs only once on mount via useRef flag
   useEffect(() => {
-    loadUserOrganizations().then(orgs => {
+    if (hasInitializedRef.current) return;
+    hasInitializedRef.current = true;
+
+    loadUserOrganizations().then((orgs: Organization[]) => {
       const savedOrgId = localStorage.getItem('current-organization-id');
-      if (savedOrgId && orgs.some(o => o.id === savedOrgId)) {
+      if (savedOrgId && orgs.some((o: Organization) => o.id === savedOrgId)) {
         switchOrganization(savedOrgId);
       } else if (!currentOrganization && orgs.length > 0 && orgs[0]) {
         switchOrganization(orgs[0].id);
       }
     });
-  }, []);
+  }, [currentOrganization, loadUserOrganizations, switchOrganization]);
 
   // Real-time subscriptions
   useEffect(() => {

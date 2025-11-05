@@ -7,7 +7,7 @@ import { executeWooCommerceOperation } from './lib/chat/woocommerce-tool';
 async function testStockQuantity() {
   console.log('🧪 Testing New Stock Quantity Operation\n');
 
-  // Test with a real product from Thompson's
+  // Test with generic test products
   const testProducts = [
     { sku: 'SAG115', name: 'Sealey 115mm Angle Grinder' },
     { sku: 'RE9810-PRK', name: 'Body Repair Kit' }
@@ -21,7 +21,7 @@ async function testStockQuantity() {
       const result = await executeWooCommerceOperation(
         'get_stock_quantity',
         { productId: product.sku },
-        'thompsonseparts.co.uk'
+        'test-domain.example.com'
       );
 
       if (result.success) {

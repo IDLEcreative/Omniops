@@ -4,7 +4,6 @@
  */
 
 import { createServiceRoleClientSync } from '@/lib/supabase/server';
-import { createClient } from '@supabase/supabase-js';
 import { synonymExpander } from './synonym-expander-dynamic';
 
 interface ExtractedTerm {
@@ -16,14 +15,9 @@ interface ExtractedTerm {
 
 export class SynonymAutoLearner {
   private supabase: any;
-  
+
   constructor() {
-    const url = process.env.NEXT_PUBLIC_SUPABASE_URL;
-    const key = process.env.SUPABASE_SERVICE_ROLE_KEY;
-    
-    if (url && key) {
-      this.supabase = createClient(url, key);
-    }
+    this.supabase = createServiceRoleClientSync();
   }
 
   /**
@@ -86,7 +80,7 @@ export class SynonymAutoLearner {
       // Technical compounds: heavy-duty, anti-freeze
       compound: /\b[a-z]+[-][a-z]+\b/gi,
       
-      // Bracketed variations: pump (hydraulic), tank (fuel)
+      // Bracketed variations: product (type), item (category)
       bracketed: /\b(\w+)\s*\(([^)]+)\)/g,
       
       // Slash alternatives: loader/crane, indoor/outdoor

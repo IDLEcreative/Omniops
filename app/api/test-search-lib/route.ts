@@ -4,8 +4,8 @@ import { searchSimilarContent } from '@/lib/embeddings';
 export async function GET(request: NextRequest) {
   try {
     const { searchParams } = new URL(request.url);
-    const q = searchParams.get('q') || 'What tipper sheet systems do you offer?';
-    const d = searchParams.get('d') || 'thompsonseparts.co.uk';
+    const q = searchParams.get('q') || 'What products do you offer?';
+    const d = searchParams.get('d') || process.env.TEST_DOMAIN || 'example.com'; // Load from env
     // Test the searchSimilarContent function directly
     const results = await searchSimilarContent(q, d, 5, 0.3);
     

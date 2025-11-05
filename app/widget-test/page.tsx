@@ -45,8 +45,8 @@ export default function WidgetTestPage() {
           <div className="bg-blue-50 border-l-4 border-blue-500 p-4 mb-6">
             <p className="font-semibold text-blue-700">Test Information:</p>
             <ul className="mt-2 text-sm text-blue-600">
-              <li>• Domain: localhost (mapped to thompsonseparts.co.uk)</li>
-              <li>• RAG Status: Enabled with Thompson's E Parts content</li>
+              <li>• Domain: localhost (mapped to configured test domain)</li>
+              <li>• RAG Status: Enabled with customer content</li>
               <li>• Expected: Product information from scraped website</li>
             </ul>
           </div>
@@ -56,9 +56,9 @@ export default function WidgetTestPage() {
             <div className="grid gap-2">
               {[
                 "What products do you sell?",
-                "Do you have hydraulic pumps?",
-                "Tell me about tipper safety equipment",
-                "What crane parts are available?",
+                "Do you have equipment available?",
+                "Tell me about safety products",
+                "What parts are available?",
                 "How can I contact you?"
               ].map((question, i) => (
                 <button

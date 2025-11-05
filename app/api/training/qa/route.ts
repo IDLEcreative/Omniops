@@ -39,7 +39,7 @@ export async function POST(request: NextRequest) {
     }
 
     // Rate limit expensive training operations
-    const rateLimit = checkExpensiveOpRateLimit(`training:${user.id}`);
+    const rateLimit = await checkExpensiveOpRateLimit(`training:${user.id}`);
 
     if (!rateLimit.allowed) {
       const resetDate = new Date(rateLimit.resetTime);

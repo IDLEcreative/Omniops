@@ -4,7 +4,7 @@
  */
 
 export type LogLevel = 'debug' | 'info' | 'warn' | 'error';
-export type LogCategory = 'search' | 'ai' | 'tool' | 'performance' | 'error';
+export type LogCategory = 'search' | 'ai' | 'tool' | 'performance' | 'error' | 'mcp' | 'config' | 'conversation';
 
 export interface SearchOperation {
   tool: string;

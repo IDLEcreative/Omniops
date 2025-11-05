@@ -12,9 +12,9 @@ export const CACHE_TTL = {
 } as const;
 
 export const COMMON_WC_QUERIES = [
-  { operation: 'search_products', params: { query: 'pump', limit: 20 } },
+  { operation: 'search_products', params: { query: 'product', limit: 20 } },
   { operation: 'search_products', params: { query: 'brake', limit: 20 } },
-  { operation: 'search_products', params: { query: 'hydraulic', limit: 20 } },
+  { operation: 'search_products', params: { query: 'equipment', limit: 20 } },
   { operation: 'search_products', params: { query: 'filter', limit: 20 } },
   { operation: 'get_categories', params: {} },
   { operation: 'get_shipping_options', params: {} }

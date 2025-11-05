@@ -27,8 +27,6 @@ const customJestConfig = {
     '^@/lib/woocommerce-dynamic$': '<rootDir>/__mocks__/@/lib/woocommerce-dynamic.ts',
     '^@/lib/shopify-dynamic$': '<rootDir>/__mocks__/@/lib/shopify-dynamic.ts',
     '^@/lib/embeddings$': '<rootDir>/__mocks__/@/lib/embeddings.ts',
-    // Removed rate-limit from moduleNameMapper - let jest.mock() handle it
-    // '^@/lib/rate-limit$': '<rootDir>/__mocks__/@/lib/rate-limit.ts',
     // Catch-all pattern - MUST be last
     '^@/(.*)$': '<rootDir>/$1',
   },

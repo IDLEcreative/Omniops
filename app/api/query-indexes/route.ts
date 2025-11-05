@@ -1,19 +1,15 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { createServiceRoleClient } from '@/lib/supabase/server';
-import { createClient } from '@supabase/supabase-js';
 
 export async function GET() {
   try {
-    const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL;
-    const serviceRoleKey = process.env.SUPABASE_SERVICE_ROLE_KEY;
+    const supabase = await createServiceRoleClient();
 
-    if (!supabaseUrl || !serviceRoleKey) {
-      return NextResponse.json({ 
-        error: 'Missing Supabase environment variables' 
-      }, { status: 500 });
+    if (!supabase) {
+      return NextResponse.json({
+        error: 'Database service is currently unavailable'
+      }, { status: 503 });
     }
-
-    const supabase = createClient(supabaseUrl, serviceRoleKey);
     
     // Try using the v_index_usage view from the migration
     const { data: indexUsage, error: indexUsageError } = await supabase

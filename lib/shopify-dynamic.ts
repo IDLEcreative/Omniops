@@ -4,65 +4,34 @@
  */
 
 import { ShopifyAPI, ShopifyProduct } from './shopify-api';
-import { createServiceRoleClient } from '@/lib/supabase-server';
-import { decrypt, tryDecryptCredentials } from '@/lib/encryption';
-import type { EncryptedCredentials } from '@/types/encrypted-credentials';
+import { ShopifyClientFactory, defaultShopifyFactory } from './shopify-api/factory';
 
 /**
  * Get Shopify client with dynamic configuration from database
  * @param domain - The customer domain
+ * @param factory - Optional factory for dependency injection (testing)
  * @returns ShopifyAPI instance or null if not configured
  */
-export async function getDynamicShopifyClient(domain: string): Promise<ShopifyAPI | null> {
-  const supabase = await createServiceRoleClient();
-
-  if (!supabase) {
-    return null;
-  }
-
-  // Fetch configuration for this domain (include both new and legacy formats)
-  const { data: config, error } = await supabase
-    .from('customer_configs')
-    .select('shopify_shop, shopify_access_token, encrypted_credentials')
-    .eq('domain', domain)
-    .single();
-
-  if (error || !config) {
-    return null;
-  }
-
-  let shopUrl: string | undefined;
-  let accessToken: string | undefined;
-
-  // NEW: Try encrypted_credentials first
-  if (config.encrypted_credentials) {
-    const credentials = tryDecryptCredentials(config.encrypted_credentials);
-    if (credentials.shopify) {
-      shopUrl = credentials.shopify.store_url;
-      accessToken = credentials.shopify.access_token;
-    }
-  }
-
-  // FALLBACK: Use legacy individual columns if new format not available
-  if (!accessToken && config.shopify_access_token) {
-    try {
-      shopUrl = config.shopify_shop;
-      accessToken = decrypt(config.shopify_access_token);
-    } catch (error) {
-      console.error('Failed to decrypt legacy Shopify credentials:', error);
+export async function getDynamicShopifyClient(
+  domain: string,
+  factory: ShopifyClientFactory = defaultShopifyFactory
+): Promise<ShopifyAPI | null> {
+  try {
+    const config = await factory.getConfigForDomain(domain);
+    if (!config) {
       return null;
     }
-  }
 
-  // Validate we have all required credentials
-  if (!shopUrl || !accessToken) {
+    const credentials = await factory.decryptCredentials(config);
+    if (!credentials) {
+      return null;
+    }
+
+    return factory.createClient(credentials);
+  } catch (error) {
+    console.error('Error creating Shopify client:', error);
     return null;
   }
-
-  return new ShopifyAPI({
-    shop: shopUrl,
-    accessToken,
-  });
 }
 
 /**

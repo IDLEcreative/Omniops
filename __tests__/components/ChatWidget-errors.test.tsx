@@ -26,7 +26,7 @@ describe('ChatWidget - Error Handling', () => {
         const url = new URL(request.url);
         const domain = url.searchParams.get('domain');
 
-        if (domain === 'thompsonseparts.co.uk' || domain === 'localhost') {
+        if (domain === 'test-domain.example.com' || domain === 'localhost') {
           return HttpResponse.json({
             config: {
               domain: domain,

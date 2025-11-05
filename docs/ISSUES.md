@@ -7,14 +7,14 @@
 
 ## Quick Reference
 
-**Total Issues:** 20
-- 🔴 Critical: 2
+**Total Issues:** 21
+- 🔴 Critical: 3
 - 🟠 High: 5
 - 🟡 Medium: 7
 - 🟢 Low: 6
 
 **Status Breakdown:**
-- Open: 20
+- Open: 21
 - In Progress: 0
 - Resolved: 0
 
@@ -806,6 +806,122 @@ Implement notification system:
 
 ---
 
+### 🔴 [CRITICAL] Search Inconsistency - First Attempt Fails, Second Succeeds {#issue-021}
+
+**Status:** Open
+**Severity:** Critical
+**Category:** Bug
+**Location:** `lib/chat/tool-handlers/search-products.ts`, `lib/agents/commerce-provider.ts`, `lib/embeddings/search-orchestrator.ts`
+**Discovered:** 2025-11-05
+**Effort:** 3-5 days
+**Analysis:** [ANALYSIS_SEARCH_INCONSISTENCY_BUG.md](../10-ANALYSIS/ANALYSIS_SEARCH_INCONSISTENCY_BUG.md)
+
+**Description:**
+Chat system fails to find products on first search attempt ("didn't find any products matching 'gloves'") but succeeds on second attempt with same/similar query, finding 3 products. This violates anti-hallucination principles and creates poor user experience.
+
+**Impact:**
+- Users receive incorrect "no products found" messages when products exist
+- Forces users to rephrase queries multiple times for same information
+- Damages trust in system accuracy and reliability
+- Violates anti-hallucination safeguards (claiming products don't exist when they do)
+- Affects all search-dependent features (product search, order lookup, content retrieval)
+
+**Root Cause Analysis:**
+
+1. **Provider Initialization Race Condition** (`commerce-provider.ts:169-191`):
+   - First request: Provider resolution takes time (DB query + credential decryption + client setup)
+   - Any transient failure (DB timeout, network blip) returns `null` with no retry
+   - Second request succeeds because provider is cached or transient issue resolved
+
+2. **Semantic Search Domain Lookup Failure** (`search-orchestrator.ts:44-55`):
+   - If `domainId` not found in cache/database, immediately returns `[]`
+   - No fallback attempts with alternative domain formats
+   - No direct database lookup when cache fails
+
+3. **Error Swallowing** (`search-products.ts:50-68`):
+   - Provider search errors logged but swallowed
+   - No retry logic when provider fails
+   - Falls through to semantic search (which may also fail)
+
+**Steps to Reproduce:**
+1. Send chat message: "do you sell gloves"
+2. Observe: System responds "didn't find any products matching 'gloves'"
+3. Immediately send: "any gloves"
+4. Observe: System finds and lists 3 glove products
+5. Result: Inconsistent behavior with same/similar queries
+
+**Proposed Solution (Priority Order):**
+
+**Priority 1 - Provider Retry Logic:**
+```typescript
+async function resolveProviderWithRetry(
+  domain: string,
+  maxRetries: number = 2
+): Promise<CommerceProvider | null> {
+  // Implement exponential backoff retry
+  // Log retry attempts
+  // Return provider or null after exhausting retries
+}
+```
+
+**Priority 2 - Domain Lookup Fallback:**
+```typescript
+// Try alternative domain formats before giving up
+const alternatives = [domain, searchDomain, domain.replace('www.', ''), `www.${searchDomain}`];
+// Try direct database lookup without cache
+// Only return [] after exhausting all options
+```
+
+**Priority 3 - Surface Provider Errors:**
+```typescript
+// Pass error context to semantic search for better fallback
+const errorContext = {
+  providerFailed: true,
+  providerPlatform: provider.platform,
+  errorMessage: error.message
+};
+```
+
+**Priority 4 - Circuit Breaker Pattern:**
+- Prevent cascading failures in provider resolution
+- Track failure rate and open circuit after threshold
+- Auto-recover after timeout period
+
+**Diagnostic Logging Needed:**
+```typescript
+// Provider resolution timeline
+console.log('[Provider] Resolution started/completed', { duration, hasProvider });
+
+// Domain lookup diagnostics
+console.log('[Search] Domain lookup result', { searchDomain, domainId, cacheHit });
+
+// Search result chain tracking
+console.log('[Search] Provider result', { resultCount, source, fallbackUsed });
+```
+
+**Testing Strategy:**
+1. Integration test for search consistency across multiple requests
+2. Unit test for provider retry logic
+3. Unit test for domain lookup fallback
+4. Telemetry tracking for search failure rate
+
+**Monitoring & Alerts:**
+- Search failure rate > 5% (alert)
+- Provider resolution failures > 10/hour (alert)
+- Domain lookup failures > 5% (alert)
+- Track retry success rate (target > 90%)
+
+**Related Issues:** #issue-003 (Dynamic Imports), #issue-004 (Supabase Client Inconsistency)
+
+**Why This Is Critical:**
+- Directly affects user experience with incorrect information
+- Violates core anti-hallucination principle
+- Affects all customers using product search
+- No workaround for users except manual retry
+- Creates appearance of broken system
+
+---
+
 ## In Progress Issues
 
 <!-- Issues currently being worked on -->
@@ -844,12 +960,14 @@ Implement notification system:
 - Tech Debt: 5 issues
 - Testing: 4 issues
 - Code Quality: 4 issues
-- Feature Request: 5 issues (new)
+- Feature Request: 5 issues
+- Bug: 2 issues
 - Architecture: 1 issue
 - Performance: 2 issues
 
 **Most Affected Areas:**
 - Testing infrastructure: 5 issues (#001, #003, #004, #005, #007)
+- Search system: 1 issue (#021)
 - Agent files: 3 issues (#009, #010, #011)
 - API routes: 3 issues (#001, #012, #013)
 - Missing features: 5 issues (#016, #017, #018, #019, #020)

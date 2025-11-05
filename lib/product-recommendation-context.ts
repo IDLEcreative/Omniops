@@ -46,7 +46,7 @@ When customers ask about products or parts:
       'buy', 'purchase', 'order', 'get', 'need', 'want',
       'looking for', 'search for', 'find',
       'recommend', 'suggestion', 'suggest', 'advice',
-      'pump', 'mixer', 'engine', 'filter', 'seal', 'filler', 'fillers', 'stopper', 'stoppers', 'body filler',
+      'equipment', 'device', 'engine', 'filter', 'seal', 'component', 'accessory',
       'compatible', 'fits', 'works with',
       'best', 'good', 'suitable', 'right'
     ];

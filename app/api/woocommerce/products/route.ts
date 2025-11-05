@@ -66,8 +66,8 @@ export async function POST(request: NextRequest) {
     // Fetch products
     const products = await wc.getProducts(queryParams);
 
-    // Transform products to include key information
-    const transformedProducts = products.map((product: any) => ({
+    // Transform products to include key information (with null safety)
+    const transformedProducts = (products || []).map((product: any) => ({
       id: product.id,
       name: product.name,
       sku: product.sku,

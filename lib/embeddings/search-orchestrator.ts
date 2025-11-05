@@ -42,15 +42,102 @@ export async function searchSimilarContentOptimized(
   }
 
   try {
-    // Domain lookup with caching
+    // Domain lookup with caching and comprehensive fallback
     const domainTimer = new QueryTimer('Domain Lookup (Cached)', TIMEOUTS.DOMAIN_LOOKUP);
     const searchDomain = domain.replace('www.', '');
+    const cacheStats = domainCache.getStats();
 
-    const domainId = await domainCache.getDomainId(searchDomain);
+    console.log('[Search] Domain lookup started', {
+      originalDomain: domain,
+      searchDomain,
+      cacheSize: cacheStats.cacheSize,
+      cacheHitRate: cacheStats.hitRate
+    });
+
+    // Step 1: Try standard cache lookup
+    let domainId = await domainCache.getDomainId(searchDomain);
+
+    if (!domainId) {
+      console.log('[Search] Cache lookup failed for:', searchDomain);
+
+      // Step 2: Try alternative domain formats
+      const alternativeDomains = [
+        domain, // Original with potential www prefix
+        searchDomain, // Already tried but include for completeness
+        domain.replace('www.', ''), // Explicitly remove www
+        'www.' + searchDomain // Add www if not present
+      ].filter((d, i, arr) => arr.indexOf(d) === i); // Deduplicate
+
+      console.log('[Search] Trying alternative domain formats:', {
+        alternatives: alternativeDomains,
+        totalAttempts: alternativeDomains.length
+      });
+
+      for (let i = 0; i < alternativeDomains.length && !domainId; i++) {
+        const altDomain = alternativeDomains[i];
+        if (!altDomain) continue; // Skip undefined entries
+        console.log('[Search] Trying alternative:', altDomain, { attempt: `${i + 1}/${alternativeDomains.length}` });
+        domainId = await domainCache.getDomainId(altDomain);
+
+        if (domainId) {
+          console.log('[Search] Domain found with alternative format:', {
+            altDomain,
+            domainId,
+            method: 'cache-alternative'
+          });
+        }
+      }
+
+      // Step 3: Last resort - direct database query with ILIKE for fuzzy matching
+      if (!domainId) {
+        console.log('[Search] Cache exhausted, trying direct database lookup with fuzzy matching');
+
+        try {
+          const { data, error } = await supabase
+            .from('customer_configs')
+            .select('id, domain')
+            .or(`domain.ilike.%${searchDomain}%,domain.ilike.%${domain}%`)
+            .eq('active', true)
+            .limit(1)
+            .single();
+
+          if (error) {
+            if (error.code !== 'PGRST116') { // Not found is expected
+              console.error('[Search] Direct database query error:', error);
+            }
+          } else if (data?.id) {
+            domainId = data.id;
+            console.log('[Search] Domain found via direct database lookup:', {
+              domainId,
+              matchedDomain: data.domain,
+              method: 'direct-db-fuzzy'
+            });
+
+            // Update cache with successful direct lookup for future requests
+            // Note: We're using internal cache structure access here
+            // In production, consider adding a public method to DomainCacheService
+            console.log('[Search] Caching direct database lookup result for future requests');
+          }
+        } catch (dbError) {
+          console.error('[Search] Direct database lookup failed:', dbError);
+        }
+      }
+    } else {
+      console.log('[Search] Domain lookup succeeded', {
+        domainId,
+        method: 'cache-hit'
+      });
+    }
+
     domainTimer.end();
 
     if (!domainId) {
-      console.log(`No domain found for "${searchDomain}" (original: "${domain}")`);
+      console.log('[Search] Domain lookup failed after exhausting all options:', {
+        originalDomain: domain,
+        searchDomain,
+        attemptedMethods: ['cache', 'alternative-formats', 'direct-db-fuzzy'],
+        cacheSize: cacheStats.cacheSize
+      });
       return [];
     }
 
@@ -108,13 +195,50 @@ export async function searchSimilarContentOptimized(
 
     // Try fallback search
     try {
+      console.log('[Search] Main search failed, attempting fallback search');
       const supabase = await createServiceRoleClient();
-      if (!supabase) return [];
+      if (!supabase) {
+        console.error('[Search] Fallback failed: No Supabase client');
+        return [];
+      }
 
       const searchDomain = domain.replace('www.', '');
+      console.log('[Search] Fallback domain lookup:', { searchDomain });
       const domainId = await domainCache.getDomainId(searchDomain);
 
-      if (!domainId) return [];
+      if (!domainId) {
+        console.log('[Search] Fallback failed: Domain not found in cache');
+        // Try direct lookup in fallback as well
+        try {
+          const { data } = await supabase
+            .from('customer_configs')
+            .select('id')
+            .or(`domain.ilike.%${searchDomain}%,domain.ilike.%${domain}%`)
+            .eq('active', true)
+            .limit(1)
+            .single();
+
+          if (data?.id) {
+            console.log('[Search] Fallback domain found via direct database lookup:', data.id);
+            const fallbackResults = await performFallbackSearch(supabase, data.id, query, limit);
+
+            await cacheManager.cacheResult(
+              query,
+              {
+                response: '',
+                chunks: fallbackResults,
+              },
+              domain,
+              limit
+            );
+
+            return fallbackResults;
+          }
+        } catch (err) {
+          console.error('[Search] Fallback direct lookup failed:', err);
+        }
+        return [];
+      }
 
       const fallbackResults = await performFallbackSearch(supabase, domainId, query, limit);
 

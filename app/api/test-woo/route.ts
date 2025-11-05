@@ -5,8 +5,8 @@ import { getDynamicWooCommerceClient } from '@/lib/woocommerce-dynamic';
 import { createServiceRoleClient } from '@/lib/supabase-server';
 
 export async function GET(request: NextRequest) {
-  const domain = request.nextUrl.searchParams.get('domain') || 'thompsonseparts.co.uk';
-  
+  const domain = request.nextUrl.searchParams.get('domain') || process.env.TEST_DOMAIN || 'example.com';
+
   console.log('🧪 Testing WooCommerce connection for domain:', domain);
   
   // First check if config exists

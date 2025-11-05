@@ -153,16 +153,150 @@ const detectWooCommerce: ProviderDetector = async ({ domain, config }) => {
 
 const providerDetectors: ProviderDetector[] = [detectShopify, detectWooCommerce];
 
+/**
+ * Resolves a commerce provider for a domain with comprehensive diagnostics
+ * @returns Provider instance or null if none found
+ */
 async function resolveProvider(domain: string): Promise<CommerceProvider | null> {
+  const startTime = Date.now();
+  console.log('[Provider] Resolution started', {
+    domain,
+    timestamp: startTime,
+    cacheHit: false,
+  });
+
   const config = await loadCustomerConfig(domain);
 
   for (const detector of providerDetectors) {
-    const provider = await detector({ domain, config });
-    if (provider) {
-      return provider;
+    const detectorName = detector === detectShopify ? 'shopify' : 'woocommerce';
+    console.log(`[Provider] Trying detector: ${detectorName}`, { domain });
+
+    try {
+      const provider = await detector({ domain, config });
+      if (provider) {
+        const duration = Date.now() - startTime;
+        console.log('[Provider] Resolution completed', {
+          domain,
+          hasProvider: true,
+          platform: provider.platform,
+          duration,
+          totalAttempts: 1,
+        });
+        return provider;
+      }
+      console.log(`[Provider] Detector returned null: ${detectorName}`, { domain });
+    } catch (error) {
+      console.error(`[Provider] Detector failed: ${detectorName}`, {
+        domain,
+        error: error instanceof Error ? error.message : 'unknown error',
+        willRetry: false,
+      });
     }
   }
 
+  const duration = Date.now() - startTime;
+  console.log('[Provider] Resolution completed', {
+    domain,
+    hasProvider: false,
+    platform: null,
+    duration,
+    totalAttempts: 1,
+  });
+  return null;
+}
+
+/**
+ * Resolves a commerce provider with exponential backoff retry logic
+ * Retries up to 2 times with delays: 100ms, 200ms
+ * @returns Provider instance or null if all attempts fail
+ */
+async function resolveProviderWithRetry(
+  domain: string,
+  maxRetries = 2
+): Promise<CommerceProvider | null> {
+  const startTime = Date.now();
+  const delays = [100, 200]; // Exponential backoff delays in ms
+
+  for (let attempt = 1; attempt <= maxRetries + 1; attempt++) {
+    try {
+      console.log('[Provider] Resolution attempt', {
+        domain,
+        attempt,
+        maxAttempts: maxRetries + 1,
+        timestamp: Date.now(),
+      });
+
+      const config = await loadCustomerConfig(domain);
+
+      for (const detector of providerDetectors) {
+        const detectorName = detector === detectShopify ? 'shopify' : 'woocommerce';
+        console.log(`[Provider] Trying detector: ${detectorName}`, { domain, attempt });
+
+        try {
+          const provider = await detector({ domain, config });
+          if (provider) {
+            const duration = Date.now() - startTime;
+            console.log('[Provider] Resolution completed', {
+              domain,
+              hasProvider: true,
+              platform: provider.platform,
+              duration,
+              totalAttempts: attempt,
+            });
+            return provider;
+          }
+          console.log(`[Provider] Detector returned null: ${detectorName}`, {
+            domain,
+            attempt,
+          });
+        } catch (error) {
+          const willRetry = attempt < maxRetries + 1;
+          console.error(`[Provider] Detector failed: ${detectorName}`, {
+            domain,
+            error: error instanceof Error ? error.message : 'unknown error',
+            attempt,
+            willRetry,
+          });
+
+          // If this detector failed but we have more retries, continue to next detector
+          // The outer retry loop will retry all detectors
+        }
+      }
+
+      // No provider found in this attempt
+      if (attempt < maxRetries + 1) {
+        const backoffMs = delays[attempt - 1] || 200;
+        console.log(`[Provider] Retry attempt ${attempt + 1}/${maxRetries + 1}`, {
+          domain,
+          backoffMs,
+          timestamp: Date.now(),
+        });
+        await new Promise((resolve) => setTimeout(resolve, backoffMs));
+      }
+    } catch (error) {
+      const willRetry = attempt < maxRetries + 1;
+      console.error('[Provider] Resolution attempt failed', {
+        domain,
+        attempt,
+        error: error instanceof Error ? error.message : 'unknown error',
+        willRetry,
+      });
+
+      if (attempt < maxRetries + 1) {
+        const backoffMs = delays[attempt - 1] || 200;
+        await new Promise((resolve) => setTimeout(resolve, backoffMs));
+      }
+    }
+  }
+
+  const duration = Date.now() - startTime;
+  console.log('[Provider] Resolution completed', {
+    domain,
+    hasProvider: false,
+    platform: null,
+    duration,
+    totalAttempts: maxRetries + 1,
+  });
   return null;
 }
 
@@ -170,6 +304,10 @@ export async function getCommerceProvider(domain: string): Promise<CommerceProvi
   const normalizedDomain = normalizeDomain(domain || '');
 
   if (!normalizedDomain || /localhost|127\.0\.0\.1/.test(normalizedDomain)) {
+    console.log('[Provider] Skipping provider resolution', {
+      domain: normalizedDomain,
+      reason: 'localhost or invalid domain',
+    });
     return null;
   }
 
@@ -177,14 +315,38 @@ export async function getCommerceProvider(domain: string): Promise<CommerceProvi
   const now = Date.now();
 
   if (cached && cached.expiresAt > now) {
+    console.log('[Provider] Cache hit', {
+      domain: normalizedDomain,
+      platform: cached.provider?.platform || null,
+      expiresIn: cached.expiresAt - now,
+    });
     return cached.provider;
   }
 
-  const provider = await resolveProvider(normalizedDomain);
+  if (cached) {
+    console.log('[Provider] Cache expired', {
+      domain: normalizedDomain,
+      expiredAgo: now - cached.expiresAt,
+    });
+  } else {
+    console.log('[Provider] Cache miss', {
+      domain: normalizedDomain,
+    });
+  }
+
+  // Use retry logic to resolve provider
+  const provider = await resolveProviderWithRetry(normalizedDomain);
 
   providerCache.set(normalizedDomain, {
     provider,
     expiresAt: now + PROVIDER_CACHE_TTL_MS,
+  });
+
+  console.log('[Provider] Cache updated', {
+    domain: normalizedDomain,
+    hasProvider: !!provider,
+    platform: provider?.platform || null,
+    ttlMs: PROVIDER_CACHE_TTL_MS,
   });
 
   return provider;

@@ -1,6 +1,6 @@
 'use client';
 
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useState, useCallback } from 'react';
 import { OrganizationMember } from '@/types/organizations';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
@@ -35,11 +35,7 @@ export function TeamMembersList({ organizationId, userRole }: TeamMembersListPro
 
   const canManageMembers = ['owner', 'admin'].includes(userRole);
 
-  useEffect(() => {
-    fetchMembers();
-  }, [organizationId]);
-
-  async function fetchMembers() {
+  const fetchMembers = useCallback(async () => {
     setIsLoading(true);
     setError(null);
 
@@ -70,7 +66,11 @@ export function TeamMembersList({ organizationId, userRole }: TeamMembersListPro
     } finally {
       setIsLoading(false);
     }
-  }
+  }, [organizationId]);
+
+  useEffect(() => {
+    fetchMembers();
+  }, [fetchMembers]);
 
   async function handleRemoveMember(userId: string) {
     if (!confirm('Are you sure you want to remove this member?')) {

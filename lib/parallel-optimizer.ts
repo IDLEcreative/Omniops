@@ -149,13 +149,13 @@ PARALLEL EXECUTION PATTERNS:
 - Multiple questions → Answer all in PARALLEL
 
 EXAMPLES:
-Query: "Find pumps and check BP-001 stock"
-Action: Call search_products("pumps") AND woocommerce_agent("check_stock", {sku: "BP-001"}) SIMULTANEOUSLY
+Query: "Find products and check SKU-001 stock"
+Action: Call search_products("products") AND woocommerce_agent("check_stock", {sku: "SKU-001"}) SIMULTANEOUSLY
 
 Query: "Check orders and show categories"
 Action: Call order_lookup() AND woocommerce_agent("get_categories") SIMULTANEOUSLY
 
-Query: "Search for brake pads, hydraulic pumps, and filters"
+Query: "Search for brake pads, equipment, and filters"
 Action: Call search_products THREE times in PARALLEL for each item
 
 REMEMBER: Parallel execution is 3x faster. Use it aggressively!`;

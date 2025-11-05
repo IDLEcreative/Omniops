@@ -18,14 +18,14 @@ export class SynonymExpander {
     "forest equipment": ["forest loader", "forestry", "logging equipment", "timber equipment", "woodland machinery"],
     "forest": ["forestry", "woodland", "timber", "logging"],
     "loader": ["loading equipment", "crane", "lift", "hoist"],
-    
-    // Components and parts
-    "tank": ["reservoir", "container", "vessel", "storage", "fuel tank", "hydraulic tank"],
-    "hydraulic": ["hyd", "hydraulics", "fluid power", "hydraulic system"],
-    "pump": ["hydraulic pump", "fluid pump", "pumping unit"],
-    "valve": ["control valve", "hydraulic valve", "flow control"],
-    "cylinder": ["hydraulic cylinder", "actuator", "ram"],
-    "hose": ["hydraulic hose", "fluid line", "pipe", "tubing"],
+
+    // Components and parts - Generic examples (load from database per customer)
+    "tank": ["reservoir", "container", "vessel", "storage"],
+    "fluid": ["liquid", "fluid system"],
+    "product": ["equipment", "device", "item"],
+    "valve": ["control valve", "flow control"],
+    "cylinder": ["actuator", "component"],
+    "hose": ["line", "pipe", "tubing"],
     
     // Tools and equipment
     "chainsaw": ["chain saw", "saw", "cutting tool", "timber saw"],

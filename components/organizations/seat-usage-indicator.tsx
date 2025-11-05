@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useEffect, useState, useCallback } from "react";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Progress } from "@/components/ui/progress";
 import { Button } from "@/components/ui/button";
@@ -67,14 +67,7 @@ export function SeatUsageIndicator({
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
 
-  useEffect(() => {
-    fetchSeatUsage();
-    // Refresh every 30 seconds to keep data current
-    const interval = setInterval(fetchSeatUsage, 30000);
-    return () => clearInterval(interval);
-  }, [organizationId]);
-
-  const fetchSeatUsage = async () => {
+  const fetchSeatUsage = useCallback(async () => {
     try {
       const response = await fetch(`/api/organizations/${organizationId}/invitations`);
       if (!response.ok) throw new Error('Failed to fetch seat usage');
@@ -88,7 +81,14 @@ export function SeatUsageIndicator({
     } finally {
       setLoading(false);
     }
-  };
+  }, [organizationId]);
+
+  useEffect(() => {
+    fetchSeatUsage();
+    // Refresh every 30 seconds to keep data current
+    const interval = setInterval(fetchSeatUsage, 30000);
+    return () => clearInterval(interval);
+  }, [fetchSeatUsage]);
 
   if (loading) {
     return (

@@ -13,7 +13,7 @@
  * Used by: Admin dashboard
  */
 
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useCallback } from 'react';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
@@ -71,11 +71,7 @@ export default function FeedbackDashboard({ domain }: FeedbackDashboardProps) {
   const [loading, setLoading] = useState(true);
   const [filter, setFilter] = useState<'all' | 'urgent' | 'negative'>('all');
 
-  useEffect(() => {
-    loadFeedback();
-  }, [domain, filter]);
-
-  const loadFeedback = async () => {
+  const loadFeedback = useCallback(async () => {
     try {
       setLoading(true);
 
@@ -95,7 +91,11 @@ export default function FeedbackDashboard({ domain }: FeedbackDashboardProps) {
     } finally {
       setLoading(false);
     }
-  };
+  }, [domain, filter]);
+
+  useEffect(() => {
+    loadFeedback();
+  }, [loadFeedback]);
 
   const getSentimentIcon = (sentiment: string) => {
     switch (sentiment) {

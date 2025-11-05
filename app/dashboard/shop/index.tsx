@@ -28,11 +28,7 @@ export default function UnifiedShopPage() {
     loadShopifyData
   } = useShopData();
 
-  useEffect(() => {
-    loadAllPlatforms();
-  }, []);
-
-  const loadAllPlatforms = async (forceRefresh = false) => {
+  const loadAllPlatforms = useCallback(async (forceRefresh = false) => {
     setIsLoading(true);
     await loadWooCommerceData(forceRefresh);
     if (forceRefresh === false) {
@@ -40,7 +36,11 @@ export default function UnifiedShopPage() {
     }
     await loadShopifyData();
     setIsLoading(false);
-  };
+  }, [loadWooCommerceData, loadWooCommerceAnalytics, loadShopifyData]);
+
+  useEffect(() => {
+    loadAllPlatforms();
+  }, [loadAllPlatforms]);
 
   const handleRefresh = async () => {
     setIsRefreshing(true);

@@ -1,5 +1,4 @@
 import { createServiceRoleClientSync } from '@/lib/supabase/server';
-import { createClient } from '@supabase/supabase-js';
 import Redis from 'ioredis';
 import { LRUCache, MinHash } from './content-deduplicator-similarity';
 import { detectTemplatePattern } from './content-deduplicator-utils';
@@ -42,7 +41,8 @@ export class ContentDeduplicator {
       references: new Map()
     };
 
-    const supabase = (supabaseUrl && supabaseKey) ? createClient(supabaseUrl, supabaseKey) : null;
+    // Ignore legacy parameters, always use the project abstraction
+    const supabase = createServiceRoleClientSync();
     const redis = redisUrl ? new Redis(redisUrl) : null;
     this.storageManager = new DeduplicationStorage(supabase, redis, this.storage);
   }

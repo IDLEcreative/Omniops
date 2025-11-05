@@ -48,7 +48,8 @@ function buildReverseSynonyms(): Map<string, string> {
 export const REVERSE_SYNONYMS = buildReverseSynonyms();
 
 // Performance optimization: Use Sets for O(1) lookups
+// Note: These are generic examples. In production, load from database configuration per customer.
 export const BRANDS = new Set(['bosch', 'makita', 'dewalt', 'milwaukee', 'ryobi', 'ford', 'toyota', 'honda', 'bmw', 'mercedes']);
-export const PRODUCTS = new Set(['motor', 'engine', 'battery', 'filter', 'pump', 'sensor', 'belt', 'brake', 'clutch']);
+export const PRODUCTS = new Set(['motor', 'engine', 'battery', 'filter', 'product', 'sensor', 'belt', 'brake', 'clutch']);
 export const ISSUES = new Set(['broken', 'not working', 'failed', 'error', 'problem', 'issue', 'damaged', 'worn']);
 export const ACTIONS = new Set(['install', 'replace', 'repair', 'fix', 'troubleshoot', 'maintain', 'upgrade']);

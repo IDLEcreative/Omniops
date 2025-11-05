@@ -1,5 +1,4 @@
 import { createServiceRoleClientSync } from '@/lib/supabase/server';
-import { createClient } from '@supabase/supabase-js';
 
 interface CleanupOptions {
   domain?: string;
@@ -27,14 +26,12 @@ export class DatabaseCleaner {
   private supabase: any;
 
   constructor(supabaseUrl?: string, supabaseKey?: string) {
-    const url = supabaseUrl || process.env.NEXT_PUBLIC_SUPABASE_URL!;
-    const key = supabaseKey || process.env.SUPABASE_SERVICE_ROLE_KEY!;
-    
-    if (!url || !key) {
-      throw new Error('Supabase credentials not provided');
+    // Ignore legacy parameters, always use the project abstraction
+    this.supabase = createServiceRoleClientSync();
+
+    if (!this.supabase) {
+      throw new Error('Supabase client initialization failed - check environment variables');
     }
-    
-    this.supabase = createClient(url, key);
   }
 
   async cleanAllScrapedData(options: CleanupOptions = {}): Promise<CleanupResult> {

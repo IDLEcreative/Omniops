@@ -1,4 +1,4 @@
-import { useState, useEffect, useRef } from 'react';
+import { useState, useEffect, useRef, useCallback } from 'react';
 import { Message } from '@/types';
 import { parentStorage } from '@/lib/chat-widget/parent-storage';
 import { enhancedParentStorage, EnhancedParentStorageAdapter } from '@/lib/chat-widget/parent-storage-enhanced';
@@ -227,6 +227,71 @@ export function useChatState({
     }
   }, [isOpen, mounted, storage]);
 
+  // Create memoized message handler to handle parent communication
+  // Includes all state used in the handler to prevent stale closures
+  const handleMessage = useCallback((event: MessageEvent) => {
+    // Debug logging (can be enabled via ChatWidgetDebug global)
+    if (typeof window !== 'undefined' && (window as any).ChatWidgetDebug) {
+      console.log('[Chat Widget] Received message:', event.data.type, 'from', event.origin);
+    }
+
+    switch (event.data?.type) {
+      case 'init':
+        if (event.data.privacyPrefs) {
+          setPrivacySettings(prev => ({
+            ...prev,
+            consentGiven: event.data.privacyPrefs.consentGiven,
+          }));
+        }
+        if (event.data.woocommerceEnabled !== undefined) {
+          setWoocommerceEnabled(event.data.woocommerceEnabled);
+        }
+        if (event.data.storeDomain) {
+          setStoreDomain(event.data.storeDomain);
+        }
+        // Handle stored data from parent window
+        if (event.data.storedData) {
+          const { sessionId: storedSessionId, conversationId: storedConversationId, widgetOpen } = event.data.storedData;
+
+          if (storedSessionId && !sessionId) {
+            console.log('[Chat Widget] Received stored session ID from parent:', storedSessionId);
+            setSessionId(storedSessionId);
+          }
+
+          if (storedConversationId && !conversationId) {
+            console.log('[Chat Widget] Received stored conversation ID from parent:', storedConversationId);
+            setConversationId(storedConversationId);
+          }
+
+          if (widgetOpen && !isOpen) {
+            console.log('[Chat Widget] Widget was open, restoring state');
+            setIsOpen(true);
+          }
+        }
+        break;
+      case 'open':
+        if (typeof window !== 'undefined' && (window as any).ChatWidgetDebug) {
+          console.log('[Chat Widget] Opening widget');
+        }
+        setIsOpen(true);
+        break;
+      case 'close':
+        if (typeof window !== 'undefined' && (window as any).ChatWidgetDebug) {
+          console.log('[Chat Widget] Closing widget');
+        }
+        setIsOpen(false);
+        break;
+      case 'message':
+        if (event.data.message) {
+          setInput(event.data.message);
+        }
+        break;
+      case 'cleanup':
+        cleanupOldMessages(event.data.retentionDays);
+        break;
+    }
+  }, [conversationId, isOpen, sessionId]);
+
   // Generate session ID on mount and check WooCommerce config
   useEffect(() => {
     console.log('[useChatState] useEffect running, demoConfig:', demoConfig);
@@ -317,70 +382,6 @@ export function useChatState({
 
     checkWooCommerceConfig();
 
-    // Listen for messages from parent window (for embed mode)
-    const handleMessage = (event: MessageEvent) => {
-      // Debug logging (can be enabled via ChatWidgetDebug global)
-      if (typeof window !== 'undefined' && (window as any).ChatWidgetDebug) {
-        console.log('[Chat Widget] Received message:', event.data.type, 'from', event.origin);
-      }
-
-      switch (event.data?.type) {
-        case 'init':
-          if (event.data.privacyPrefs) {
-            setPrivacySettings(prev => ({
-              ...prev,
-              consentGiven: event.data.privacyPrefs.consentGiven,
-            }));
-          }
-          if (event.data.woocommerceEnabled !== undefined) {
-            setWoocommerceEnabled(event.data.woocommerceEnabled);
-          }
-          if (event.data.storeDomain) {
-            setStoreDomain(event.data.storeDomain);
-          }
-          // Handle stored data from parent window
-          if (event.data.storedData) {
-            const { sessionId: storedSessionId, conversationId: storedConversationId, widgetOpen } = event.data.storedData;
-
-            if (storedSessionId && !sessionId) {
-              console.log('[Chat Widget] Received stored session ID from parent:', storedSessionId);
-              setSessionId(storedSessionId);
-            }
-
-            if (storedConversationId && !conversationId) {
-              console.log('[Chat Widget] Received stored conversation ID from parent:', storedConversationId);
-              setConversationId(storedConversationId);
-            }
-
-            if (widgetOpen && !isOpen) {
-              console.log('[Chat Widget] Widget was open, restoring state');
-              setIsOpen(true);
-            }
-          }
-          break;
-        case 'open':
-          if (typeof window !== 'undefined' && (window as any).ChatWidgetDebug) {
-            console.log('[Chat Widget] Opening widget');
-          }
-          setIsOpen(true);
-          break;
-        case 'close':
-          if (typeof window !== 'undefined' && (window as any).ChatWidgetDebug) {
-            console.log('[Chat Widget] Closing widget');
-          }
-          setIsOpen(false);
-          break;
-        case 'message':
-          if (event.data.message) {
-            setInput(event.data.message);
-          }
-          break;
-        case 'cleanup':
-          cleanupOldMessages(event.data.retentionDays);
-          break;
-      }
-    };
-
     window.addEventListener('message', handleMessage);
 
     if (window.parent !== window) {
@@ -395,10 +396,10 @@ export function useChatState({
     return () => {
       window.removeEventListener('message', handleMessage);
     };
-  }, [onReady, demoConfig]);
+  }, [onReady, demoConfig, handleMessage, storage]);
 
   // Fetch previous messages from API
-  const loadPreviousMessages = async (convId: string, sessId: string) => {
+  const loadPreviousMessages = useCallback(async (convId: string, sessId: string) => {
     if (!convId || !sessId || hasLoadedMessages.current) {
       return;
     }
@@ -448,7 +449,7 @@ export function useChatState({
     } finally {
       setLoadingMessages(false);
     }
-  };
+  }, [demoConfig, storage]);
 
   // Clean up old messages
   const cleanupOldMessages = (retentionDays: number) => {
@@ -486,7 +487,7 @@ export function useChatState({
       console.log('[useChatState] Widget opened with existing conversation, loading messages');
       loadPreviousMessages(conversationId, sessionId);
     }
-  }, [isOpen, mounted, conversationId, sessionId]);
+  }, [isOpen, mounted, conversationId, sessionId, loadPreviousMessages]);
 
   // Notify parent window when widget opens/closes and request resize
   useEffect(() => {

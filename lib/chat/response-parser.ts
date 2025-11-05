@@ -24,11 +24,11 @@ export class ResponseParser {
    *
    * @example
    * const result = ResponseParser.parseResponse(
-   *   "Sorry I meant ZF4 not ZF5",
-   *   "Got it, looking at ZF4 instead...",
+   *   "Sorry I meant Model-4 not Model-5",
+   *   "Got it, looking at Model-4 instead...",
    *   3
    * );
-   * // result.corrections = [{ original: "ZF5", corrected: "ZF4" }]
+   * // result.corrections = [{ original: "Model-5", corrected: "Model-4" }]
    */
   static parseResponse(
     userMessage: string,
@@ -206,8 +206,8 @@ export class ResponseParser {
  *
  * @example
  * await parseAndTrackEntities(
- *   "Here's the [ZF4 Pump](https://example.com/zf4)",
- *   "Show me pumps",
+ *   "Here's the [Model-4 Product](https://example.com/model4)",
+ *   "Show me products",
  *   metadataManager
  * );
  */

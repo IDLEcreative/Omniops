@@ -24,7 +24,7 @@ async function finalVerification() {
   console.log(`${c.bold}${c.cyan}╚════════════════════════════════════════════════════════════╝${c.reset}\n`);
 
   const testQuery = '10mtr extension cables for all TS Camera systems';
-  const testDomain = 'thompsonseparts.co.uk';
+  const testDomain = 'test-domain.example.com';
 
   console.log(`${c.blue}Query:${c.reset} "${testQuery}"`);
   console.log(`${c.blue}Domain:${c.reset} ${testDomain}`);
