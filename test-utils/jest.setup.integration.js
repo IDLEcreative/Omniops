@@ -58,11 +58,7 @@ if (typeof global.MessagePort === 'undefined') {
   }
 }
 
-// Polyfill fetch for Node.js environment using node-fetch
-import fetch from 'node-fetch'
-if (!globalThis.fetch) {
-  globalThis.fetch = fetch
-}
+// Note: fetch is available globally in Node.js 18+ (no polyfill needed)
 
 // Learn more: https://github.com/testing-library/jest-dom
 import '@testing-library/jest-dom'

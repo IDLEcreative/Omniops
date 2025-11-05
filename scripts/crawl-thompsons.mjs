@@ -6,8 +6,6 @@
  * for the AI agent to understand the entire website context
  */
 
-import fetch from 'node-fetch';
-
 const API_URL = 'http://localhost:3001/api/scrape';
 const WEBSITE_URL = 'https://www.thompsonseparts.co.uk/';
 

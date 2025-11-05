@@ -13,12 +13,12 @@
 
 import { describe, it, expect, beforeAll, afterAll } from '@jest/globals';
 import { createServiceRoleClient } from '@/lib/supabase-server';
-import nodeFetch from 'node-fetch';
 
 const API_BASE_URL = process.env.API_BASE_URL || 'http://localhost:3000';
 const TEST_DOMAIN = 'test-agent4-corrections.local';
 
-const realFetch = nodeFetch as any;
+// Use native fetch available in Node.js 18+
+const realFetch = globalThis.fetch;
 
 interface ChatResponse {
   response: string;

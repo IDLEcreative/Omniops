@@ -3,13 +3,16 @@
  */
 
 import { useState, useCallback } from 'react';
-import { createClientComponentClient } from '@supabase/auth-helpers-nextjs';
+import { createBrowserClient } from '@supabase/ssr';
 import type { Database } from '@/types/supabase';
 import type { Organization, SeatUsage } from '../../organization-types';
 import { CacheManager, CACHE_CONFIG } from '../../organization-cache';
 
 export function useOrganizationData(cache: CacheManager<any>) {
-  const supabase = createClientComponentClient<Database>();
+  const supabase = createBrowserClient<Database>(
+    process.env.NEXT_PUBLIC_SUPABASE_URL!,
+    process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!
+  );
   const [userOrganizations, setUserOrganizations] = useState<Organization[]>([]);
   const [isLoadingOrganizations, setIsLoadingOrganizations] = useState(true);
   const [seatUsage, setSeatUsage] = useState<SeatUsage | null>(null);

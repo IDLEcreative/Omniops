@@ -8,7 +8,7 @@
 "use client";
 
 import React, { createContext, useContext, useState, useEffect, useMemo, useCallback, useRef } from 'react';
-import { createClientComponentClient } from '@supabase/auth-helpers-nextjs';
+import { createBrowserClient } from '@supabase/ssr';
 import type { Database } from '@/types/supabase';
 import type { Organization, OrganizationContextType } from '../organization-types';
 import { CacheManager, CACHE_CONFIG } from '../organization-cache';
@@ -18,7 +18,10 @@ import { useComputedPermissions } from './utils';
 const OrganizationContext = createContext<OrganizationContextType | undefined>(undefined);
 
 export function OrganizationProvider({ children }: { children: React.ReactNode }) {
-  const supabase = createClientComponentClient<Database>();
+  const supabase = createBrowserClient<Database>(
+    process.env.NEXT_PUBLIC_SUPABASE_URL!,
+    process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!
+  );
   const cache = useMemo(() => new CacheManager<any>(), []);
   const hasInitializedRef = useRef(false);
 

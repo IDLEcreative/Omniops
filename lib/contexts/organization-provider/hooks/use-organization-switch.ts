@@ -3,7 +3,7 @@
  */
 
 import { useCallback } from 'react';
-import { createClientComponentClient } from '@supabase/auth-helpers-nextjs';
+import { createBrowserClient } from '@supabase/ssr';
 import type { Database } from '@/types/supabase';
 import type { Organization } from '../../organization-types';
 import { CacheManager, CACHE_CONFIG } from '../../organization-cache';
@@ -15,7 +15,10 @@ export function useOrganizationSwitch(
   setCurrentUserRole: (role: string | null) => void,
   loadSeatUsage: (organizationId: string, forceRefresh?: boolean) => Promise<any>
 ) {
-  const supabase = createClientComponentClient<Database>();
+  const supabase = createBrowserClient<Database>(
+    process.env.NEXT_PUBLIC_SUPABASE_URL!,
+    process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!
+  );
 
   const switchOrganization = useCallback(async (organizationId: string) => {
     try {

@@ -7,8 +7,6 @@
  * Run: npx tsx test-multi-domain-chat.ts
  */
 
-import { createClientComponentClient } from '@supabase/auth-helpers-nextjs';
-
 interface DomainTestResult {
   domain: string;
   businessType: string;

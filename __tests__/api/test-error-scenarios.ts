@@ -12,8 +12,6 @@
  * 5. Resilience (retry logic, timeout handling, graceful degradation)
  */
 
-import fetch from 'node-fetch';
-
 // Test configuration
 const TEST_CONFIG = {
   apiBase: process.env.API_BASE || 'http://localhost:3000',

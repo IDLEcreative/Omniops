@@ -1,7 +1,7 @@
 /**
  * Agent Memory & State - E2E Integration Tests (Tests 14-17)
  *
- * IMPORTANT: These tests use node-fetch to bypass MSW and hit the real dev server.
+ * IMPORTANT: These tests use native fetch to bypass MSW and hit the real dev server.
  * Requires: npm run dev to be running on port 3000
  *
  * Tests:
@@ -12,11 +12,9 @@
  */
 
 import { describe, it, expect } from '@jest/globals';
-import fetchFallback from 'node-fetch';
 
-// Use dynamic import to get real fetch that bypasses MSW
-const fetch: typeof globalThis.fetch =
-  (globalThis as any).fetch || (fetchFallback as unknown as typeof globalThis.fetch);
+// Use native fetch available in Node.js 18+
+const fetch: typeof globalThis.fetch = globalThis.fetch;
 
 describe('Agent Memory & State - E2E (Tests 14-17)', () => {
   const API_URL = 'http://localhost:3000/api/chat';
