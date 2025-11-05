@@ -3,7 +3,6 @@ import { z } from 'zod';
 import { quickScrape, generateDemoEmbeddings } from '@/lib/demo-scraper';
 import { getRedisClient } from '@/lib/redis';
 import { randomBytes } from 'crypto';
-import { createServiceRoleClient } from '@/lib/supabase/server';
 import { createClient } from '@supabase/supabase-js';
 
 const scrapeSchema = z.object({
@@ -12,7 +11,7 @@ const scrapeSchema = z.object({
 
 // Rate limiting: 3 demos per IP per hour
 async function checkDemoRateLimit(req: NextRequest) {
-  const redis = await getRedisClient();
+  const redis = getRedisClient();
   const ip = req.headers.get('x-forwarded-for') || req.headers.get('x-real-ip') || 'unknown';
   const key = `demo:ratelimit:${ip}`;
 
@@ -59,7 +58,7 @@ export async function POST(req: NextRequest) {
     const { chunks, embeddings, metadata } = await generateDemoEmbeddings(scrapeResult.pages);
 
     // Store in Redis with 10-minute TTL
-    const redis = await getRedisClient();
+    const redis = getRedisClient();
     const sessionData = {
       url,
       domain,
@@ -125,12 +124,20 @@ export async function POST(req: NextRequest) {
     });
 
   } catch (error) {
-    console.error('Demo scrape error:', {
+    // Enhanced error logging for production debugging
+    const errorDetails = {
       error,
       message: error instanceof Error ? error.message : 'Unknown error',
       stack: error instanceof Error ? error.stack : undefined,
-      type: error?.constructor?.name
-    });
+      type: error?.constructor?.name,
+      // Environment diagnostics
+      hasOpenAI: !!process.env.OPENAI_API_KEY,
+      hasRedis: !!process.env.REDIS_URL,
+      nodeVersion: process.version,
+      platform: process.platform
+    };
+
+    console.error('Demo scrape error:', errorDetails);
 
     if (error instanceof Error) {
       if (error.message.includes('rate limit')) {
@@ -145,12 +152,31 @@ export async function POST(req: NextRequest) {
           { status: 400 }
         );
       }
+
+      // Check for specific production errors
+      if (error.message.includes('OPENAI_API_KEY')) {
+        console.error('[CRITICAL] Missing OPENAI_API_KEY in production');
+        return NextResponse.json(
+          { error: 'Service temporarily unavailable. Please try again later.' },
+          { status: 503 }
+        );
+      }
+
+      if (error.message.includes('JSDOM') || error.message.includes('canvas')) {
+        console.error('[CRITICAL] JSDOM/canvas error in serverless environment');
+        return NextResponse.json(
+          { error: 'Service temporarily unavailable. Please try again later.' },
+          { status: 503 }
+        );
+      }
     }
 
     return NextResponse.json(
       {
         error: 'Failed to analyze website. Please try again.',
-        details: error instanceof Error ? error.message : 'Unknown error'
+        details: process.env.NODE_ENV === 'development'
+          ? (error instanceof Error ? error.message : 'Unknown error')
+          : 'Internal server error'
       },
       { status: 500 }
     );

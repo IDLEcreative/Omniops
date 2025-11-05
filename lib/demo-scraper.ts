@@ -79,7 +79,7 @@ export async function quickScrape(
 }
 
 /**
- * Scrapes a single page using Mozilla Readability
+ * Scrapes a single page using Mozilla Readability with fallback
  */
 async function scrapePage(url: string, timeout: number): Promise<ScrapedPage | null> {
   try {
@@ -101,35 +101,84 @@ async function scrapePage(url: string, timeout: number): Promise<ScrapedPage | n
 
     const html = await response.text();
 
-    // Use Readability to extract clean content
-    const { JSDOM } = await import('jsdom');
-    const { Readability } = await import('@mozilla/readability');
+    // Try JSDOM first (works in Node.js)
+    try {
+      const { JSDOM } = await import('jsdom');
+      const { Readability } = await import('@mozilla/readability');
 
-    const dom = new JSDOM(html, { url });
-    const reader = new Readability(dom.window.document);
-    const article = reader.parse();
+      const dom = new JSDOM(html, { url });
+      const reader = new Readability(dom.window.document);
+      const article = reader.parse();
 
-    if (!article) {
-      return null;
+      if (article) {
+        const cleanContent = (article.textContent || '')
+          .replace(/\s+/g, ' ')
+          .trim()
+          .slice(0, 50000); // Max 50KB per page
+
+        return {
+          url,
+          title: article.title || 'Untitled',
+          content: cleanContent,
+          contentLength: cleanContent.length
+        };
+      }
+    } catch (jsdomError) {
+      console.warn(`JSDOM failed for ${url}, using fallback:`, jsdomError);
+      // Fall through to basic extraction
     }
 
-    // Clean and truncate content
-    const cleanContent = (article.textContent || '')
-      .replace(/\s+/g, ' ')
-      .trim()
-      .slice(0, 50000); // Max 50KB per page
+    // Fallback: Basic HTML parsing without JSDOM
+    const title = extractTitle(html);
+    const content = extractTextContent(html);
 
     return {
       url,
-      title: article.title || 'Untitled',
-      content: cleanContent,
-      contentLength: cleanContent.length
+      title: title || 'Untitled',
+      content,
+      contentLength: content.length
     };
 
   } catch (error) {
     console.error(`Failed to scrape ${url}:`, error);
     return null;
   }
+}
+
+/**
+ * Extract title from HTML without DOM parsing
+ */
+function extractTitle(html: string): string {
+  const titleMatch = html.match(/<title[^>]*>([^<]+)<\/title>/i);
+  if (titleMatch) {
+    return titleMatch[1].trim();
+  }
+
+  const ogTitleMatch = html.match(/<meta[^>]*property=["']og:title["'][^>]*content=["']([^"']+)["']/i);
+  if (ogTitleMatch) {
+    return ogTitleMatch[1].trim();
+  }
+
+  return '';
+}
+
+/**
+ * Extract text content from HTML without DOM parsing
+ * Simple but effective for demo purposes
+ */
+function extractTextContent(html: string): string {
+  // Remove scripts and styles
+  let text = html
+    .replace(/<script\b[^<]*(?:(?!<\/script>)<[^<]*)*<\/script>/gi, ' ')
+    .replace(/<style\b[^<]*(?:(?!<\/style>)<[^<]*)*<\/style>/gi, ' ')
+    .replace(/<[^>]+>/g, ' ') // Remove all HTML tags
+    .replace(/&nbsp;/g, ' ')
+    .replace(/&[a-z]+;/gi, ' ') // Remove HTML entities
+    .replace(/\s+/g, ' ') // Normalize whitespace
+    .trim();
+
+  // Truncate to max size
+  return text.slice(0, 50000);
 }
 
 /**
