@@ -30,13 +30,12 @@ export interface AggregatedMetrics {
 export class PerformanceTracker {
   private static instance: PerformanceTracker;
   private metrics: Map<string, PerformanceMetric[]> = new Map();
-  private aggregationInterval: NodeJS.Timeout | null = null;
+  private lastCleanupTimestamp: Date | null = null;
   private readonly MAX_METRICS_PER_OP = 1000; // Keep last 1000 metrics per operation
-  private readonly AGGREGATION_WINDOW = 60000; // 1 minute
+  private readonly CLEANUP_INTERVAL = 60000; // Clean every minute (used for lazy evaluation)
 
   private constructor() {
-    // Start aggregation timer
-    this.startAggregation();
+    // No automatic cleanup - using lazy evaluation for serverless compatibility
   }
 
   static getInstance(): PerformanceTracker {
@@ -118,9 +117,12 @@ export class PerformanceTracker {
   }
 
   /**
-   * Get aggregated metrics for an operation
+   * Get aggregated metrics for an operation (with lazy cleanup)
    */
   getMetrics(operationName?: string): AggregatedMetrics[] {
+    // Lazy cleanup: Clean old metrics if enough time has passed
+    this.lazyCleanupOldMetrics();
+
     const results: AggregatedMetrics[] = [];
 
     const operationsToProcess = operationName
@@ -161,7 +163,7 @@ export class PerformanceTracker {
   }
 
   /**
-   * Get real-time performance snapshot
+   * Get real-time performance snapshot (with lazy cleanup)
    */
   getSnapshot(): {
     totalOperations: number;
@@ -169,6 +171,9 @@ export class PerformanceTracker {
     recentMetrics: PerformanceMetric[];
     aggregated: AggregatedMetrics[];
   } {
+    // Lazy cleanup: Clean old metrics if enough time has passed
+    this.lazyCleanupOldMetrics();
+
     const allMetrics = Array.from(this.metrics.values()).flat();
     const recentMetrics = allMetrics
       .sort((a, b) => b.timestamp.getTime() - a.timestamp.getTime())
@@ -230,35 +235,45 @@ export class PerformanceTracker {
     return sortedArray[Math.max(0, index)] || 0;
   }
 
-  private startAggregation(): void {
-    // Clean old metrics every minute
-    this.aggregationInterval = setInterval(() => {
-      this.cleanOldMetrics();
+  /**
+   * Lazy cleanup of old metrics (only if enough time has passed)
+   * Called automatically by getMetrics() and getSnapshot()
+   */
+  private lazyCleanupOldMetrics(): void {
+    const now = new Date();
+    const shouldCleanup = !this.lastCleanupTimestamp ||
+      now.getTime() - this.lastCleanupTimestamp.getTime() >= this.CLEANUP_INTERVAL;
 
-      // Log summary metrics
-      const snapshot = this.getSnapshot();
-      if (snapshot.aggregated.length > 0) {
-        logger.info('Performance metrics summary', {
-          operationTypes: snapshot.operationTypes,
-          totalOperations: snapshot.totalOperations,
-          topSlowOperations: snapshot.aggregated
-            .sort((a, b) => b.p95 - a.p95)
-            .slice(0, 5)
-            .map(m => ({
-              operation: m.operation,
-              p95: `${m.p95.toFixed(2)}ms`,
-              errorRate: `${m.errorRate.toFixed(2)}%`
-            }))
-        });
+    if (shouldCleanup) {
+      this.cleanOldMetrics();
+      this.lastCleanupTimestamp = now;
+
+      // Optionally log summary metrics (only in development)
+      if (process.env.NODE_ENV === 'development') {
+        const totalMetrics = Array.from(this.metrics.values()).reduce((sum, arr) => sum + arr.length, 0);
+        if (totalMetrics > 0) {
+          logger.info('Performance metrics cleaned', {
+            operationTypes: this.metrics.size,
+            totalMetrics,
+          });
+        }
       }
-    }, this.AGGREGATION_WINDOW);
+    }
   }
 
+  private startAggregation_DEPRECATED(): void {
+    // DEPRECATED: Replaced with lazy cleanup for serverless compatibility
+    // This method is no longer called but kept for reference
+    // Old implementation used setInterval which is incompatible with serverless
+    logger.warn('startAggregation() is deprecated and does nothing in serverless mode');
+  }
+
+  /**
+   * Destroy is no longer needed with lazy cleanup
+   * @deprecated No automatic intervals to clean up in serverless mode
+   */
   destroy(): void {
-    if (this.aggregationInterval) {
-      clearInterval(this.aggregationInterval);
-      this.aggregationInterval = null;
-    }
+    // No-op in serverless mode (no intervals to clear)
   }
 }
 

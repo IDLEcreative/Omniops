@@ -85,10 +85,12 @@ export class AlertingSystem {
     timestamp?: Date;
   } = {};
 
+  private lastCheckTimestamp: Date | null = null;
+
   private constructor(config?: Partial<AlertingConfig>) {
     this.config = {
       enabled: true,
-      checkIntervalMs: 60000, // Check every minute
+      checkIntervalMs: 60000, // Check every minute (used for lazy evaluation)
       thresholds: {
         persistence: {
           successRate: 95,
@@ -119,8 +121,9 @@ export class AlertingSystem {
       ...config,
     };
 
+    // Capture baseline on initialization (no automatic monitoring)
     if (this.config.enabled) {
-      this.startMonitoring();
+      this.captureBaseline();
     }
   }
 
@@ -132,36 +135,24 @@ export class AlertingSystem {
   }
 
   /**
-   * Start automatic monitoring
+   * Check thresholds lazily (only if enough time has passed since last check)
+   * This is called automatically by getAlerts() for serverless compatibility
    */
-  startMonitoring(): void {
-    if (this.checkInterval) return;
+  private lazyCheckThresholds(): void {
+    if (!this.config.enabled) return;
 
-    // Take baseline
-    this.captureBaseline();
+    const now = new Date();
+    const shouldCheck = !this.lastCheckTimestamp ||
+      now.getTime() - this.lastCheckTimestamp.getTime() >= this.config.checkIntervalMs;
 
-    this.checkInterval = setInterval(() => {
+    if (shouldCheck) {
       this.checkThresholds();
-    }, this.config.checkIntervalMs);
-
-    logger.info('Alerting system started', {
-      checkInterval: `${this.config.checkIntervalMs}ms`,
-      channels: this.config.channels,
-    });
-  }
-
-  /**
-   * Stop automatic monitoring
-   */
-  stopMonitoring(): void {
-    if (this.checkInterval) {
-      clearInterval(this.checkInterval);
-      this.checkInterval = null;
+      this.lastCheckTimestamp = now;
     }
   }
 
   /**
-   * Manually trigger threshold check
+   * Manually trigger threshold check (for on-demand evaluation)
    */
   checkThresholds(): void {
     const persistenceStats = getPersistenceStats(300000); // Last 5 minutes
@@ -517,7 +508,7 @@ export class AlertingSystem {
   }
 
   /**
-   * Get all alerts
+   * Get all alerts (with lazy threshold checking)
    */
   getAlerts(options?: {
     severity?: AlertSeverity;
@@ -525,6 +516,9 @@ export class AlertingSystem {
     resolved?: boolean;
     limit?: number;
   }): Alert[] {
+    // Lazy evaluation: Check thresholds if enough time has passed
+    this.lazyCheckThresholds();
+
     let filtered = [...this.alerts];
 
     if (options?.severity) {

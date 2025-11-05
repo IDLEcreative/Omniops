@@ -20,13 +20,12 @@ class ErrorLogger {
   private static instance: ErrorLogger;
   private isDevelopment = process.env.NODE_ENV === 'development';
   private errorBuffer: ErrorLog[] = [];
-  private flushInterval: NodeJS.Timeout | null = null;
+  private lastFlushTimestamp: Date | null = null;
   private maxBufferSize = 10;
+  private readonly FLUSH_INTERVAL_MS = 30000; // Flush every 30 seconds (used for lazy evaluation)
 
   private constructor() {
-    this.flushInterval = setInterval(() => {
-      this.flushBuffer();
-    }, 30000);
+    // No automatic flushing - using lazy evaluation for serverless compatibility
   }
 
   public static getInstance(): ErrorLogger {
@@ -66,9 +65,22 @@ class ErrorLogger {
 
       this.errorBuffer.push(errorLog);
 
+      // Eager flushing: Flush when buffer is full or error is CRITICAL
       if (this.errorBuffer.length >= this.maxBufferSize ||
           errorLog.severity === ErrorSeverity.CRITICAL) {
         await this.flushBuffer();
+        this.lastFlushTimestamp = new Date();
+      }
+      // Lazy flushing: Flush if enough time has passed since last flush
+      else {
+        const now = new Date();
+        const shouldFlush = !this.lastFlushTimestamp ||
+          now.getTime() - this.lastFlushTimestamp.getTime() >= this.FLUSH_INTERVAL_MS;
+
+        if (shouldFlush && this.errorBuffer.length > 0) {
+          await this.flushBuffer();
+          this.lastFlushTimestamp = now;
+        }
       }
 
       if (errorLog.severity === ErrorSeverity.CRITICAL) {

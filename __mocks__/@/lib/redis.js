@@ -25,8 +25,6 @@ const createMockPipeline = () => {
       const currentValue = entry ? parseInt(entry.value, 10) : 0;
       const newValue = currentValue + 1;
 
-      console.log(`[Mock.pipeline.exec] key=${pipelineKey}, old=${currentValue}, new=${newValue}, mapSize=${mockRedisData.size}`);
-
       // Update storage
       mockRedisData.set(pipelineKey, {
         value: String(newValue),
@@ -94,9 +92,13 @@ const mockRedis = {
   }
 };
 
-const getRedisClient = () => mockRedis;
+const getRedisClient = () => {
+  return mockRedis;
+};
 
-const createRedisClient = () => mockRedis;
+const createRedisClient = () => {
+  return mockRedis;
+};
 
 const clearMockRedisData = () => { mockRedisData.clear(); };
 

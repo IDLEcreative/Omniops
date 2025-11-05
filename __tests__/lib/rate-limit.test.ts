@@ -1,16 +1,10 @@
 import { describe, it, expect, jest, beforeEach, afterEach } from '@jest/globals'
 
-// Load actual mock implementation
-const actualMock = require('../../__mocks__/@/lib/redis.js');
+// Use the auto-discovered mock from __mocks__/@/lib/redis.js
+jest.mock('@/lib/redis');
 
-// Mock redis with our actual implementation
-jest.mock('@/lib/redis', () => actualMock);
-
-// Import the actual functions we're testing
-import { checkRateLimit, checkDomainRateLimit } from '@/lib/rate-limit'
-
-// Get the mock reference for calling clear
-const redisMock = actualMock;
+// Import the functions we're testing
+import { checkRateLimit, checkDomainRateLimit } from '@/lib/rate-limit';
 
 describe('Rate Limiting', () => {
   // Store original Date.now
@@ -21,9 +15,6 @@ describe('Rate Limiting', () => {
   beforeEach(() => {
     // Increment test ID to ensure unique identifiers per test
     testId++
-
-    // Clear mock Redis data between tests
-    redisMock.clearMockRedisData()
 
     // Mock Date.now for consistent testing
     originalDateNow = Date.now
