@@ -11,6 +11,7 @@ import {
   getTelemetryStats,
 } from '@/lib/telemetry/search-telemetry';
 import { NextRequest } from 'next/server';
+import * as supabaseModule from '@/lib/supabase-server';
 
 // Mock Supabase client
 jest.mock('@/lib/supabase-server', () => ({
@@ -25,7 +26,6 @@ describe('Search Telemetry API', () => {
     jest.clearAllMocks();
 
     // Get the mock function
-    const supabaseModule = require('@/lib/supabase-server');
     createServiceRoleClientMock = supabaseModule.createServiceRoleClient;
 
     // Mock Supabase client with chaining

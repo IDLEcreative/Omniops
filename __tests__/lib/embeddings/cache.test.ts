@@ -5,6 +5,7 @@
 
 import { embeddingCache } from '@/lib/embedding-cache';
 import { generateEmbeddingVectors } from '@/lib/embeddings-functions';
+import OpenAI from 'openai';
 
 // Mock OpenAI
 jest.mock('openai', () => {
@@ -170,7 +171,7 @@ describe('Embedding Cache', () => {
       const firstResult = await generateEmbeddingVectors(chunks);
 
       // Clear mock call history
-      const mockCreate = require('openai').default().embeddings.create;
+      const mockCreate = (OpenAI as jest.MockedClass<typeof OpenAI>).mock.results[0].value.embeddings.create;
       mockCreate.mockClear();
 
       // Second call - should use cache

@@ -22,6 +22,12 @@ jest.mock('@/servers/shared/utils/logger', () => ({
   }))
 }));
 
+// Import mocked modules
+import * as embeddingsOptimized from '@/lib/embeddings-optimized';
+import * as commerceProvider from '@/lib/agents/commerce-provider';
+import * as exactMatchSearchModule from '@/lib/search/exact-match-search';
+import * as productFormatters from '@/lib/chat/product-formatters';
+
 describe('MCP Search Integration Tests', () => {
   const mockContext: ExecutionContext = {
     customerId: 'integration-test-customer',
@@ -35,9 +41,9 @@ describe('MCP Search Integration Tests', () => {
 
   describe('searchProducts Integration', () => {
     it('should execute searchProducts successfully with minimal input', async () => {
-      const { searchSimilarContent } = require('@/lib/embeddings-optimized');
-      const { getCommerceProvider } = require('@/lib/agents/commerce-provider');
-      const { isSkuPattern } = require('@/lib/search/exact-match-search');
+      const { searchSimilarContent } = embeddingsOptimized;
+      const { getCommerceProvider } = commerceProvider;
+      const { isSkuPattern } = exactMatchSearchModule;
 
       isSkuPattern.mockReturnValue(false);
       getCommerceProvider.mockResolvedValue(null);
@@ -62,7 +68,7 @@ describe('MCP Search Integration Tests', () => {
     });
 
     it('should handle SKU search workflow', async () => {
-      const { isSkuPattern, exactMatchSearch } = require('@/lib/search/exact-match-search');
+      const { isSkuPattern, exactMatchSearch } = exactMatchSearchModule;
 
       isSkuPattern.mockReturnValue(true);
       exactMatchSearch.mockResolvedValue([
@@ -87,9 +93,9 @@ describe('MCP Search Integration Tests', () => {
     });
 
     it('should handle WooCommerce provider workflow', async () => {
-      const { getCommerceProvider } = require('@/lib/agents/commerce-provider');
-      const { formatProviderProducts } = require('@/lib/chat/product-formatters');
-      const { isSkuPattern } = require('@/lib/search/exact-match-search');
+      const { getCommerceProvider } = commerceProvider;
+      const { formatProviderProducts } = productFormatters;
+      const { isSkuPattern } = exactMatchSearchModule;
 
       const mockProvider = {
         platform: 'woocommerce',
@@ -125,9 +131,9 @@ describe('MCP Search Integration Tests', () => {
     });
 
     it('should handle multi-strategy fallback correctly', async () => {
-      const { isSkuPattern, exactMatchSearch } = require('@/lib/search/exact-match-search');
-      const { getCommerceProvider } = require('@/lib/agents/commerce-provider');
-      const { searchSimilarContent } = require('@/lib/embeddings-optimized');
+      const { isSkuPattern, exactMatchSearch } = exactMatchSearchModule;
+      const { getCommerceProvider } = commerceProvider;
+      const { searchSimilarContent } = embeddingsOptimized;
 
       // SKU detected but no exact match
       isSkuPattern.mockReturnValue(true);
@@ -163,9 +169,9 @@ describe('MCP Search Integration Tests', () => {
     });
 
     it('should apply adaptive limit optimization', async () => {
-      const { searchSimilarContent } = require('@/lib/embeddings-optimized');
-      const { getCommerceProvider } = require('@/lib/agents/commerce-provider');
-      const { isSkuPattern } = require('@/lib/search/exact-match-search');
+      const { searchSimilarContent } = embeddingsOptimized;
+      const { getCommerceProvider } = commerceProvider;
+      const { isSkuPattern } = exactMatchSearchModule;
 
       isSkuPattern.mockReturnValue(false);
       getCommerceProvider.mockResolvedValue(null);
@@ -213,9 +219,9 @@ describe('MCP Search Integration Tests', () => {
     });
 
     it('should handle errors gracefully and return error result', async () => {
-      const { searchSimilarContent } = require('@/lib/embeddings-optimized');
-      const { getCommerceProvider } = require('@/lib/agents/commerce-provider');
-      const { isSkuPattern } = require('@/lib/search/exact-match-search');
+      const { searchSimilarContent } = embeddingsOptimized;
+      const { getCommerceProvider } = commerceProvider;
+      const { isSkuPattern } = exactMatchSearchModule;
 
       isSkuPattern.mockReturnValue(false);
       getCommerceProvider.mockRejectedValue(new Error('Database connection failed'));
@@ -234,9 +240,9 @@ describe('MCP Search Integration Tests', () => {
 
   describe('Performance Characteristics', () => {
     it('should complete search within reasonable time', async () => {
-      const { searchSimilarContent } = require('@/lib/embeddings-optimized');
-      const { getCommerceProvider } = require('@/lib/agents/commerce-provider');
-      const { isSkuPattern } = require('@/lib/search/exact-match-search');
+      const { searchSimilarContent } = embeddingsOptimized;
+      const { getCommerceProvider } = commerceProvider;
+      const { isSkuPattern } = exactMatchSearchModule;
 
       isSkuPattern.mockReturnValue(false);
       getCommerceProvider.mockResolvedValue(null);
@@ -256,9 +262,9 @@ describe('MCP Search Integration Tests', () => {
     });
 
     it('should track execution time in metadata', async () => {
-      const { searchSimilarContent } = require('@/lib/embeddings-optimized');
-      const { getCommerceProvider } = require('@/lib/agents/commerce-provider');
-      const { isSkuPattern } = require('@/lib/search/exact-match-search');
+      const { searchSimilarContent } = embeddingsOptimized;
+      const { getCommerceProvider } = commerceProvider;
+      const { isSkuPattern } = exactMatchSearchModule;
 
       isSkuPattern.mockReturnValue(false);
       getCommerceProvider.mockResolvedValue(null);
@@ -277,9 +283,9 @@ describe('MCP Search Integration Tests', () => {
 
   describe('Result Structure Validation', () => {
     it('should return consistent result structure across all strategies', async () => {
-      const { searchSimilarContent } = require('@/lib/embeddings-optimized');
-      const { getCommerceProvider } = require('@/lib/agents/commerce-provider');
-      const { isSkuPattern } = require('@/lib/search/exact-match-search');
+      const { searchSimilarContent } = embeddingsOptimized;
+      const { getCommerceProvider } = commerceProvider;
+      const { isSkuPattern } = exactMatchSearchModule;
 
       isSkuPattern.mockReturnValue(false);
       getCommerceProvider.mockResolvedValue(null);
