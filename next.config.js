@@ -106,6 +106,10 @@ const nextConfig = {
             value: 'nosniff'
           },
           {
+            key: 'X-Frame-Options',
+            value: 'SAMEORIGIN'
+          },
+          {
             key: 'Content-Security-Policy',
             value: "frame-ancestors 'self' https://www.omniops.co.uk https://www.thompsonseparts.co.uk https://*.thompsonseparts.co.uk https://epartstaging.wpengine.com https://*.wpengine.com"
           },

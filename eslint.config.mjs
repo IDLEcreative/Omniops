@@ -117,13 +117,20 @@ const eslintConfig = [
     }
   },
   {
-    files: ["lib/supabase/**/*"],
+    files: ["lib/supabase/**/*", "lib/db-optimization/**/*"],
     rules: {
       "no-restricted-imports": "off"
     }
   },
   {
-    files: ["__tests__/**/*", "test-utils/**/*", "__mocks__/**/*"],
+    files: [
+      "__tests__/**/*",
+      "**/__tests__/**/*",
+      "test-utils/**/*",
+      "**/test-utils/**/*",
+      "__mocks__/**/*",
+      "**/__mocks__/**/*"
+    ],
     rules: {
       "no-restricted-imports": "off",
       "no-restricted-syntax": "off",
