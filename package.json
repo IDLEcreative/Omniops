@@ -4,8 +4,10 @@
   "private": true,
   "scripts": {
     "dev": "NODE_OPTIONS='--max-old-space-size=4096' next dev",
+    "dev:ws": "NODE_OPTIONS='--max-old-space-size=4096' tsx server.ts",
     "prebuild": "ls -la lib/supabase/ && echo 'Supabase files found'",
     "build": "NODE_OPTIONS='--max-old-space-size=4096' next build",
+    "start:ws": "NODE_ENV=production tsx server.ts",
     "build:widget": "node scripts/build-widget.js",
     "build:widget:analyze": "node scripts/build-widget.js --analyze",
     "build:widget:lazy": "node scripts/build-widget-lazy.js",

@@ -115,18 +115,23 @@ export async function saveAssistantMessage(
   conversationId: string,
   response: string,
   supabase: any
-): Promise<void> {
-  const { error } = await supabase
+): Promise<string | null> {
+  const { data, error } = await supabase
     .from('messages')
     .insert({
       conversation_id: conversationId,
       role: 'assistant',
       content: response,
-    });
+    })
+    .select('id')
+    .single();
 
   if (error) {
     console.error('[ConversationManager] Failed to save assistant message:', error);
+    return null;
   }
+
+  return data?.id || null;
 }
 
 /**

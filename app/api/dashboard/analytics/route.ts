@@ -3,6 +3,7 @@ import { createServiceRoleClient } from '@/lib/supabase-server';
 import { analyseMessages } from '@/lib/dashboard/analytics';
 import { requireAuth } from '@/lib/middleware/auth';
 import { checkAnalyticsRateLimit, addRateLimitHeaders } from '@/lib/middleware/analytics-rate-limit';
+import { checkThresholds } from '@/lib/alerts/threshold-checker';
 
 export async function GET(request: NextRequest) {
   try {
@@ -71,6 +72,21 @@ export async function GET(request: NextRequest) {
     if (messagesError) throw messagesError;
 
     const analytics = analyseMessages(messages || [], { days });
+
+    // 7. Check alert thresholds and trigger notifications if needed
+    const metrics = {
+      response_time: analytics.avgResponseTimeSeconds,
+      error_rate: 0, // Calculate from analytics if available
+      sentiment_score: analytics.satisfactionScore,
+      conversion_rate: 0, // Calculate from analytics if available
+      resolution_rate: analytics.resolutionRate,
+      message_volume: analytics.totalMessages,
+    };
+
+    // Run threshold checking asynchronously (don't block response)
+    checkThresholds(membership.organization_id, metrics).catch((error) => {
+      console.error('[Dashboard] Error checking alert thresholds:', error);
+    });
 
     const response = NextResponse.json({
       responseTime: analytics.avgResponseTimeSeconds,

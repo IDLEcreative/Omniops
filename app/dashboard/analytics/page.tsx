@@ -1,189 +1,306 @@
-"use client";
+'use client';
 
-import { useMemo, useState } from "react";
-import { Alert, AlertDescription } from "@/components/ui/alert";
-import { MessageSquare, TrendingUp, Users, Clock } from "lucide-react";
-import { useDashboardAnalytics } from "@/hooks/use-dashboard-analytics";
-import { DateRangePicker, DateRangeValue } from "@/components/dashboard/analytics/DateRangePicker";
-import { MetricsOverview, MetricCard } from "@/components/dashboard/analytics/MetricsOverview";
-import { ChartGrid } from "@/components/dashboard/analytics/ChartGrid";
-import { ExportButton } from "@/components/dashboard/analytics/ExportButton";
+import { useState, useEffect, useMemo } from 'react';
+import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
+import { Button } from '@/components/ui/button';
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
+import { Switch } from '@/components/ui/switch';
+import { Label } from '@/components/ui/label';
+import { Alert, AlertDescription } from '@/components/ui/alert';
+import { RefreshCw, AlertCircle, TrendingUp, BarChart3 } from 'lucide-react';
 
-const RANGE_TO_DAYS: Record<DateRangeValue, number> = {
-  "24h": 1,
-  "7d": 7,
-  "30d": 30,
-  "90d": 90,
-  custom: 30,
-};
+import { useDashboardAnalytics } from '@/hooks/use-dashboard-analytics';
+import { useBusinessIntelligence } from '@/hooks/use-business-intelligence';
+import { useRealtimeAnalytics } from '@/hooks/use-realtime-analytics';
 
-const formatNumber = (value: number | undefined) =>
-  value !== undefined ? value.toLocaleString() : "—";
-
-const formatSeconds = (seconds: number | undefined) => {
-  if (seconds === undefined) return "—";
-  if (seconds >= 60) {
-    const mins = Math.floor(seconds / 60);
-    const secs = Math.round(seconds % 60);
-    return `${mins}m ${secs}s`;
-  }
-  return `${seconds.toFixed(1)}s`;
-};
-
-const formatScore = (score: number | undefined) =>
-  score !== undefined ? `${score.toFixed(2)}/5` : "—";
-
-const formatRate = (rate: number | undefined) =>
-  rate !== undefined ? `${rate.toFixed(1)}%` : "—";
+import { MetricsOverview } from '@/components/analytics/MetricsOverview';
+import { ResponseTimeChart } from '@/components/analytics/ResponseTimeChart';
+import { MessageVolumeChart } from '@/components/analytics/MessageVolumeChart';
+import { SentimentChart } from '@/components/analytics/SentimentChart';
+import { PeakUsageChart } from '@/components/analytics/PeakUsageChart';
+import { CustomerJourneyFlow } from '@/components/analytics/CustomerJourneyFlow';
+import { ConversionFunnelChart } from '@/components/analytics/ConversionFunnelChart';
 
 export default function AnalyticsPage() {
-  const [dateRange, setDateRange] = useState<DateRangeValue>("7d");
-  const [isRefreshing, setIsRefreshing] = useState(false);
+  const [timeRange, setTimeRange] = useState<number>(7);
+  const [autoRefresh, setAutoRefresh] = useState<boolean>(false);
+  const [activeTab, setActiveTab] = useState<string>('overview');
 
-  const days = RANGE_TO_DAYS[dateRange] ?? 7;
-  const { data: analytics, loading, error, refresh } = useDashboardAnalytics({ days });
+  const {
+    data: analyticsData,
+    loading: analyticsLoading,
+    error: analyticsError,
+    refresh: refreshAnalytics
+  } = useDashboardAnalytics({ days: timeRange });
 
-  const metricsCards: MetricCard[] = useMemo(() => {
-    return [
-      {
-        title: "Total Messages",
-        icon: MessageSquare,
-        value: formatNumber(analytics?.metrics.totalMessages),
-        descriptor: `${formatNumber(analytics?.metrics.userMessages)} from customers`,
-      },
-      {
-        title: "Avg Response Time",
-        icon: Clock,
-        value: formatSeconds(analytics?.responseTime),
-        descriptor: "Median turnaround per message",
-      },
-      {
-        title: "Satisfaction Score",
-        icon: Users,
-        value: formatScore(analytics?.satisfactionScore),
-        descriptor: `${formatNumber(analytics?.metrics.positiveMessages)} positive interactions`,
-      },
-      {
-        title: "Resolution Rate",
-        icon: TrendingUp,
-        value: formatRate(analytics?.resolutionRate),
-        descriptor: `${formatNumber(analytics?.metrics.avgMessagesPerDay)} msgs/day on average`,
-      },
-    ];
-  }, [analytics]);
+  const {
+    data: biData,
+    loading: biLoading,
+    error: biError,
+    refresh: refreshBI
+  } = useBusinessIntelligence({
+    days: timeRange,
+    metric: 'all',
+    disabled: activeTab !== 'intelligence'
+  });
 
-  const sentimentSummary = useMemo(() => {
-    const positive = analytics?.metrics.positiveMessages ?? 0;
-    const negative = analytics?.metrics.negativeMessages ?? 0;
-    const total = analytics?.metrics.userMessages ?? 0;
-    const positiveRate = total > 0 ? Math.round((positive / total) * 100) : 0;
-    const negativeRate = total > 0 ? Math.round((negative / total) * 100) : 0;
-    return { positive, negative, total, positiveRate, negativeRate };
-  }, [analytics]);
+  const organizationId = analyticsData?.metrics ? '1' : null;
 
-  const insights = useMemo(() => {
-    if (!analytics) return [];
-    const items: Array<{ title: string; body: string; tone: "positive" | "neutral" | "caution" }> = [];
+  const { isConnected, latestUpdate } = useRealtimeAnalytics({
+    organizationId,
+    enabled: true,
+  });
 
-    if (analytics.responseTime > 5) {
-      items.push({
-        title: "Response time opportunity",
-        body: `Average response time is ${formatSeconds(analytics.responseTime)}. Consider reviewing escalation rules for your busiest period.`,
-        tone: "caution",
-      });
-    } else if (analytics.responseTime) {
-      items.push({
-        title: "Fast responses",
-        body: `Agents respond in ${formatSeconds(analytics.responseTime)} on average—keep the current shift coverage.`,
-        tone: "positive",
-      });
+  useEffect(() => {
+    if (latestUpdate) {
+      if (activeTab === 'overview') {
+        refreshAnalytics();
+      } else {
+        refreshBI();
+      }
     }
+  }, [latestUpdate, activeTab, refreshAnalytics, refreshBI]);
 
-    if (analytics.failedSearches.length > 0) {
-      items.push({
-        title: "Knowledge gaps detected",
-        body: `Customers recently searched for "${analytics.failedSearches[0]}" without success. Add supporting content or train the model on this topic.`,
-        tone: "caution",
-      });
-    }
+  useEffect(() => {
+    if (!autoRefresh) return;
 
-    const topQuery = analytics.topQueries[0];
-    if (topQuery) {
-      items.push({
-        title: "Trending topic",
-        body: `"${topQuery.query}" accounts for ${topQuery.percentage}% of recent questions. Prepare snippets or macros to respond faster.`,
-        tone: "neutral",
-      });
-    }
+    const interval = setInterval(() => {
+      if (activeTab === 'overview') {
+        refreshAnalytics();
+      } else {
+        refreshBI();
+      }
+    }, 5 * 60 * 1000);
 
-    if (!items.length) {
-      items.push({
-        title: "Stable performance",
-        body: "Analytics show consistent behaviour across all monitored metrics. Continue monitoring for emerging trends.",
-        tone: "positive",
-      });
-    }
-
-    return items;
-  }, [analytics]);
+    return () => clearInterval(interval);
+  }, [autoRefresh, activeTab, refreshAnalytics, refreshBI]);
 
   const handleRefresh = async () => {
-    setIsRefreshing(true);
-    try {
-      await refresh();
-    } finally {
-      setIsRefreshing(false);
+    if (activeTab === 'overview') {
+      await refreshAnalytics();
+    } else {
+      await refreshBI();
     }
   };
 
+  const isLoading = activeTab === 'overview' ? analyticsLoading : biLoading;
+  const hasError = activeTab === 'overview' ? analyticsError : biError;
+
   return (
-    <div className="p-8 space-y-6">
-      <div className="flex items-center justify-between flex-wrap gap-4">
+    <div className="container mx-auto py-8 px-4 space-y-6">
+      <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
         <div>
-          <h1 className="text-3xl font-bold">Analytics Dashboard</h1>
+          <div className="flex items-center gap-3">
+            <h1 className="text-3xl font-bold">Analytics Dashboard</h1>
+            <div className="flex items-center gap-2 text-sm">
+              <div
+                className={`w-2 h-2 rounded-full ${
+                  isConnected ? 'bg-green-500 animate-pulse' : 'bg-red-500'
+                }`}
+                title={isConnected ? 'Live updates enabled' : 'Offline'}
+              />
+              <span className="text-muted-foreground">
+                {isConnected ? 'Live' : 'Offline'}
+              </span>
+            </div>
+          </div>
           <p className="text-muted-foreground">
-            Track agent throughput, satisfaction, and trending topics across the selected period.
+            Comprehensive insights into your chat performance and customer behavior
           </p>
         </div>
-        <div className="flex items-center space-x-3">
-          <DateRangePicker
-            value={dateRange}
-            onChange={setDateRange}
-            onRefresh={handleRefresh}
-            isRefreshing={isRefreshing}
-            isLoading={loading}
-          />
-          <ExportButton />
+
+        <div className="flex items-center gap-3">
+          <Select
+            value={timeRange.toString()}
+            onValueChange={(value) => setTimeRange(parseInt(value))}
+          >
+            <SelectTrigger className="w-[140px]">
+              <SelectValue />
+            </SelectTrigger>
+            <SelectContent>
+              <SelectItem value="7">Last 7 days</SelectItem>
+              <SelectItem value="30">Last 30 days</SelectItem>
+              <SelectItem value="90">Last 90 days</SelectItem>
+            </SelectContent>
+          </Select>
+
+          <Button
+            variant="outline"
+            size="icon"
+            onClick={handleRefresh}
+            disabled={isLoading}
+          >
+            <RefreshCw className={`h-4 w-4 ${isLoading ? 'animate-spin' : ''}`} />
+          </Button>
         </div>
       </div>
 
-      {error && (
+      <div className="flex items-center gap-2">
+        <Switch
+          id="auto-refresh"
+          checked={autoRefresh}
+          onCheckedChange={setAutoRefresh}
+        />
+        <Label htmlFor="auto-refresh" className="text-sm text-muted-foreground">
+          Auto-refresh every 5 minutes
+        </Label>
+      </div>
+
+      {hasError && (
         <Alert variant="destructive">
-          <AlertDescription>We couldn't load analytics. Try refreshing or adjust the range.</AlertDescription>
+          <AlertCircle className="h-4 w-4" />
+          <AlertDescription>
+            {hasError.message || 'Failed to load analytics data. Please try again.'}
+          </AlertDescription>
         </Alert>
       )}
 
-      <MetricsOverview metrics={metricsCards} isLoading={loading && !analytics} />
+      <Tabs value={activeTab} onValueChange={setActiveTab} className="space-y-6">
+        <TabsList className="grid w-full grid-cols-2 lg:w-[400px]">
+          <TabsTrigger value="overview" className="flex items-center gap-2">
+            <BarChart3 className="h-4 w-4" />
+            Overview
+          </TabsTrigger>
+          <TabsTrigger value="intelligence" className="flex items-center gap-2">
+            <TrendingUp className="h-4 w-4" />
+            Business Intelligence
+          </TabsTrigger>
+        </TabsList>
 
-      <ChartGrid
-        dailySentiment={analytics?.dailySentiment ?? []}
-        topQueries={analytics?.topQueries ?? []}
-        languageDistribution={analytics?.languageDistribution ?? []}
-        failedSearches={analytics?.failedSearches ?? []}
-        sentimentSummary={sentimentSummary}
-        insights={insights}
-        metrics={analytics ? {
-          responseTime: analytics.responseTime,
-          satisfactionScore: analytics.satisfactionScore,
-          resolutionRate: analytics.resolutionRate,
-          totalMessages: analytics.metrics.totalMessages,
-          userMessages: analytics.metrics.userMessages,
-          positiveMessages: analytics.metrics.positiveMessages,
-          negativeMessages: analytics.metrics.negativeMessages,
-          avgMessagesPerDay: analytics.metrics.avgMessagesPerDay,
-        } : undefined}
-        isLoading={loading && !analytics}
-      />
+        <TabsContent value="overview" className="space-y-6">
+          {isLoading && !analyticsData ? (
+            <div className="flex items-center justify-center h-64">
+              <RefreshCw className="h-8 w-8 animate-spin text-muted-foreground" />
+            </div>
+          ) : analyticsData ? (
+            <>
+              <MetricsOverview data={analyticsData} />
+
+              <div className="grid gap-6 md:grid-cols-2">
+                <ResponseTimeChart data={analyticsData} />
+                <MessageVolumeChart data={analyticsData} />
+              </div>
+
+              <div className="grid gap-6 md:grid-cols-2">
+                <SentimentChart data={analyticsData} />
+                <div className="space-y-4">
+                  <h3 className="text-lg font-semibold">Top User Queries</h3>
+                  <div className="space-y-2">
+                    {analyticsData.topQueries.slice(0, 5).map((query, index) => (
+                      <div
+                        key={index}
+                        className="flex justify-between items-center p-3 bg-muted rounded-lg"
+                      >
+                        <span className="text-sm">{query.query}</span>
+                        <div className="flex items-center gap-2">
+                          <span className="text-xs text-muted-foreground">
+                            {query.count} times
+                          </span>
+                          <span className="text-xs font-medium">
+                            {query.percentage.toFixed(1)}%
+                          </span>
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+                </div>
+              </div>
+
+              {analyticsData.failedSearches.length > 0 && (
+                <div className="space-y-4">
+                  <h3 className="text-lg font-semibold flex items-center gap-2">
+                    <AlertCircle className="h-5 w-5 text-red-500" />
+                    Failed Searches
+                  </h3>
+                  <div className="grid gap-2 md:grid-cols-2 lg:grid-cols-3">
+                    {analyticsData.failedSearches.slice(0, 6).map((search, index) => (
+                      <div
+                        key={index}
+                        className="p-3 bg-red-50 dark:bg-red-950/20 rounded-lg border border-red-200 dark:border-red-800"
+                      >
+                        <span className="text-sm">{search}</span>
+                      </div>
+                    ))}
+                  </div>
+                </div>
+              )}
+            </>
+          ) : null}
+        </TabsContent>
+
+        <TabsContent value="intelligence" className="space-y-6">
+          {isLoading && !biData ? (
+            <div className="flex items-center justify-center h-64">
+              <RefreshCw className="h-8 w-8 animate-spin text-muted-foreground" />
+            </div>
+          ) : biData ? (
+            <>
+              {biData.summary && biData.summary.insights.length > 0 && (
+                <div className="space-y-4">
+                  <h3 className="text-lg font-semibold flex items-center gap-2">
+                    <TrendingUp className="h-5 w-5" />
+                    Key Insights
+                  </h3>
+                  <div className="grid gap-3 md:grid-cols-2">
+                    {biData.summary.insights.slice(0, 4).map((insight, index) => (
+                      <Alert
+                        key={index}
+                        variant={insight.type === 'warning' ? 'destructive' : 'default'}
+                      >
+                        <AlertCircle className="h-4 w-4" />
+                        <AlertDescription>
+                          <div className="font-medium mb-1">{insight.metric}</div>
+                          <div className="text-sm">{insight.message}</div>
+                        </AlertDescription>
+                      </Alert>
+                    ))}
+                  </div>
+                </div>
+              )}
+
+              {biData.customerJourney && (
+                <CustomerJourneyFlow data={biData.customerJourney} />
+              )}
+
+              {biData.conversionFunnel && (
+                <ConversionFunnelChart data={biData.conversionFunnel} />
+              )}
+
+              {biData.peakUsage && (
+                <PeakUsageChart data={biData.peakUsage} />
+              )}
+
+              {biData.contentGaps && biData.contentGaps.unansweredQueries.length > 0 && (
+                <div className="space-y-4">
+                  <h3 className="text-lg font-semibold">Content Gaps</h3>
+                  <div className="p-4 bg-muted rounded-lg">
+                    <div className="mb-3">
+                      <span className="text-sm font-medium">Coverage Score: </span>
+                      <span className="text-lg font-bold">
+                        {biData.contentGaps.coverageScore.toFixed(1)}%
+                      </span>
+                    </div>
+                    <div className="space-y-2">
+                      {biData.contentGaps.unansweredQueries.slice(0, 5).map((query, index) => (
+                        <div
+                          key={index}
+                          className="flex justify-between items-center p-2 bg-background rounded"
+                        >
+                          <span className="text-sm">{query.query}</span>
+                          <div className="flex gap-2 text-xs text-muted-foreground">
+                            <span>{query.frequency} times</span>
+                            <span>{(query.avgConfidence * 100).toFixed(0)}% confidence</span>
+                          </div>
+                        </div>
+                      ))}
+                    </div>
+                  </div>
+                </div>
+              )}
+            </>
+          ) : null}
+        </TabsContent>
+      </Tabs>
     </div>
   );
 }
