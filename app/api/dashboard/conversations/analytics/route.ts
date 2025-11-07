@@ -1,5 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { createServiceRoleClient } from '@/lib/supabase-server';
+import { z } from 'zod';
+import { ApiLogger } from '@/lib/logging/api-logger';
 
 interface ResponseTimeTrend {
   date: string;
@@ -30,17 +32,39 @@ interface AnalyticsResponse {
   messageLengthDist: MessageLengthDist[];
 }
 
+// Input validation schema
+const AnalyticsQuerySchema = z.object({
+  days: z.coerce.number().int().min(1).max(365).optional().default(30),
+});
+
 /**
  * GET /api/dashboard/conversations/analytics
  *
  * Returns time-series analytics data for conversation visualizations.
  * Query params:
- *   - days: Number of days to look back (default: 30)
+ *   - days: Number of days to look back (default: 30, max: 365)
  */
 export async function GET(request: NextRequest) {
+  const requestId = await ApiLogger.logRequest(request, 'analytics.timeseries');
+  const startTime = Date.now();
+
   try {
+    // Validate query parameters
     const searchParams = request.nextUrl.searchParams;
-    const days = parseInt(searchParams.get('days') || '30');
+    const queryValidation = AnalyticsQuerySchema.safeParse({
+      days: searchParams.get('days'),
+    });
+
+    if (!queryValidation.success) {
+      ApiLogger.logValidationError(requestId, queryValidation.error.errors);
+      ApiLogger.logResponse(requestId, 400, Date.now() - startTime, false, 'VALIDATION_ERROR');
+      return NextResponse.json({
+        error: 'Invalid query parameters',
+        details: queryValidation.error.errors,
+      }, { status: 400 });
+    }
+
+    const { days } = queryValidation.data;
     const startDate = new Date();
     startDate.setDate(startDate.getDate() - days);
 
@@ -67,10 +91,13 @@ export async function GET(request: NextRequest) {
     }
 
     // 2. Volume by Hour - Conversation count by hour of day (0-23)
+    // FIXED: Add limit to prevent unbounded query (max 5000 conversations)
     const volumeResult = await supabase
       .from('conversations')
       .select('started_at')
-      .gte('started_at', startDate.toISOString());
+      .gte('started_at', startDate.toISOString())
+      .order('started_at', { ascending: false })
+      .limit(5000);
 
     let volumeByHour: VolumeByHour[] = [];
     if (volumeResult.data) {
@@ -82,6 +109,11 @@ export async function GET(request: NextRequest) {
         }
       });
       volumeByHour = hourCounts.map((count, hour) => ({ hour, count }));
+
+      // Log warning if we hit the limit
+      if (volumeResult.data.length === 5000) {
+        console.warn('[Analytics] Volume by hour hit limit of 5000 conversations, results may be incomplete');
+      }
     } else {
       volumeByHour = generateMockVolumeByHour();
     }
@@ -104,13 +136,16 @@ export async function GET(request: NextRequest) {
     }
 
     // 4. Message Length Distribution - Conversations grouped by message count
+    // FIXED: Add limit to prevent unbounded query (max 5000 conversations)
     const messageCountResult = await supabase
       .from('conversations')
       .select(`
         id,
         messages:messages(count)
       `)
-      .gte('started_at', startDate.toISOString());
+      .gte('started_at', startDate.toISOString())
+      .order('started_at', { ascending: false })
+      .limit(5000);
 
     let messageLengthDist: MessageLengthDist[] = [];
     if (messageCountResult.data) {
@@ -133,6 +168,11 @@ export async function GET(request: NextRequest) {
         range,
         count,
       }));
+
+      // Log warning if we hit the limit
+      if (messageCountResult.data.length === 5000) {
+        console.warn('[Analytics] Message length distribution hit limit of 5000 conversations, results may be incomplete');
+      }
     } else {
       messageLengthDist = generateMockMessageLengthDist();
     }
@@ -144,8 +184,11 @@ export async function GET(request: NextRequest) {
       messageLengthDist,
     };
 
+    ApiLogger.logResponse(requestId, 200, Date.now() - startTime);
     return NextResponse.json(response);
   } catch (error) {
+    ApiLogger.logError(requestId, error as Error, 'analytics.timeseries');
+    ApiLogger.logResponse(requestId, 500, Date.now() - startTime, false, 'INTERNAL_ERROR');
     console.error('[Analytics] Error:', error);
     // Return mock data as fallback for development
     return NextResponse.json({

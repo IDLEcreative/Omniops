@@ -54,17 +54,17 @@ export function ConversationMetricsCards({
   const topLanguages = data?.languages?.slice(0, 2) ?? [];
 
   return (
-    <div className="grid grid-cols-2 lg:grid-cols-4 gap-2">
+    <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-2">
       <Card className="border-border/50 shadow-sm">
         <CardContent className="p-2.5">
-          <div className="text-[10px] uppercase tracking-wider text-muted-foreground">
+          <h3 className="text-xs font-semibold uppercase tracking-wider text-foreground">
             Total Conversations
-          </div>
+          </h3>
           <div className="flex items-baseline gap-1.5 mt-1">
             <span className="text-xl font-bold">
               {loading && !data ? "—" : data?.total.toLocaleString() ?? "—"}
             </span>
-            <span className={`text-[11px] font-semibold ${
+            <span className={`text-xs font-semibold ${
               (data?.change ?? 0) > 0 ? 'text-green-600 dark:text-green-400' :
               (data?.change ?? 0) < 0 ? 'text-red-600 dark:text-red-400' :
               'text-muted-foreground'
@@ -77,15 +77,15 @@ export function ConversationMetricsCards({
 
       <Card className="border-border/50 shadow-sm">
         <CardContent className="p-2.5">
-          <div className="text-[10px] uppercase tracking-wider text-muted-foreground">
+          <h3 className="text-xs font-semibold uppercase tracking-wider text-foreground">
             Status Distribution
-          </div>
+          </h3>
           <div className="flex items-center gap-2 mt-1">
             {(["active", "waiting", "resolved"] as const).map((status) => {
               const count = data?.statusCounts[status] ?? 0;
               return (
                 <div key={status} className="flex items-center gap-1">
-                  <Badge variant={statusBadgeVariant(status)} className="h-4 px-1 text-[9px]">
+                  <Badge variant={statusBadgeVariant(status)} className="h-4 px-1.5 text-xs" aria-label={`${STATUS_LABELS[status]} conversations`}>
                     {status.charAt(0).toUpperCase()}
                   </Badge>
                   <span className="text-xs font-semibold">
@@ -100,25 +100,25 @@ export function ConversationMetricsCards({
 
       <Card className="border-border/50 shadow-sm">
         <CardContent className="p-2.5">
-          <div className="text-[10px] uppercase tracking-wider text-muted-foreground">
+          <h3 className="text-xs font-semibold uppercase tracking-wider text-foreground">
             Peak Activity
-          </div>
+          </h3>
           <div className="flex items-center gap-2 mt-1">
             {loading && !data ? (
               <span className="text-xs">—</span>
             ) : data && data.peakHours.length > 0 ? (
               <>
-                <span className="text-[11px] text-muted-foreground">{data.peakHours[0].label}:</span>
-                <span className="text-xs font-semibold">{data.peakHours[0].count}</span>
+                <span className="text-xs text-muted-foreground">{data.peakHours[0]?.label ?? 'N/A'}:</span>
+                <span className="text-xs font-semibold">{data.peakHours[0]?.count ?? 0}</span>
                 {data.peakHours[1] && (
                   <>
-                    <span className="text-[11px] text-muted-foreground ml-1">{data.peakHours[1].label}:</span>
-                    <span className="text-xs font-semibold">{data.peakHours[1].count}</span>
+                    <span className="text-xs text-muted-foreground ml-1">{data.peakHours[1]?.label ?? 'N/A'}:</span>
+                    <span className="text-xs font-semibold">{data.peakHours[1]?.count ?? 0}</span>
                   </>
                 )}
               </>
             ) : (
-              <span className="text-[11px] text-muted-foreground">No data</span>
+              <span className="text-xs text-muted-foreground">No data</span>
             )}
           </div>
         </CardContent>
@@ -126,22 +126,22 @@ export function ConversationMetricsCards({
 
       <Card className="border-border/50 shadow-sm">
         <CardContent className="p-2.5">
-          <div className="text-[10px] uppercase tracking-wider text-muted-foreground">
+          <h3 className="text-xs font-semibold uppercase tracking-wider text-foreground">
             Languages
-          </div>
+          </h3>
           <div className="flex items-center gap-2 mt-1">
             {loading && !data ? (
               <span className="text-xs">—</span>
             ) : topLanguages.length > 0 ? (
               topLanguages.map((lang, idx) => (
                 <div key={lang.language} className="flex items-center gap-1">
-                  <div className={`w-1 h-3 rounded-full ${idx === 0 ? 'bg-purple-500' : 'bg-purple-400'}`} />
-                  <span className="text-[11px]">{lang.language}:</span>
+                  <div className={`w-1 h-3 rounded-full ${idx === 0 ? 'bg-primary' : 'bg-primary/70'}`} aria-hidden="true" />
+                  <span className="text-xs">{lang.language}:</span>
                   <span className="text-xs font-semibold">{lang.percentage}%</span>
                 </div>
               ))
             ) : (
-              <span className="text-[11px] text-muted-foreground">No data</span>
+              <span className="text-xs text-muted-foreground">No data</span>
             )}
           </div>
         </CardContent>

@@ -91,9 +91,9 @@ export async function GET(request: NextRequest) {
       const cacheKey = `analytics:bi:\${domain}:\${metricName}:\${params.days}:\${hourTimestamp}`;
       try {
         const cached = await cacheManager.getCachedResult(cacheKey);
-        if (cached && cached.results) {
+        if (cached) {
           logger.info(`[BI Analytics] Cache hit for \${metricName}`);
-          return cached.results as T;
+          return cached as unknown as T;
         }
       } catch (error) {
         logger.error(`[BI Analytics] Cache read error for \${metricName}:`, error);
@@ -101,7 +101,7 @@ export async function GET(request: NextRequest) {
       logger.info(`[BI Analytics] Cache miss for \${metricName}, fetching from database`);
       const result = await fetchFn();
       try {
-        await cacheManager.cacheResult(cacheKey, { results: result, query: cacheKey, count: 1 });
+        await cacheManager.cacheResult(cacheKey, result as any);
         logger.info(`[BI Analytics] Cached result for \${metricName}`);
       } catch (error) {
         logger.error(`[BI Analytics] Cache write error for \${metricName}:`, error);

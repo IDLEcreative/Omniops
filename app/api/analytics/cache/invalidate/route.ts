@@ -67,7 +67,7 @@ export async function POST(request: NextRequest) {
 
     const cacheManager = getSearchCacheManager();
     const redis = getRedisClient();
-    const results: Record<string, number> = {
+    const results = {
       deletedKeys: 0,
       errors: 0
     };

@@ -30,6 +30,7 @@ export function LiveStatusIndicator({
           size="sm"
           onClick={onAcknowledge}
           className="animate-pulse border-green-500 text-green-600 hover:bg-green-50"
+          aria-label={`Load ${newCount} new conversation${newCount !== 1 ? 's' : ''}`}
         >
           {newCount} new conversation{newCount !== 1 ? 's' : ''}
         </Button>
@@ -43,6 +44,7 @@ export function LiveStatusIndicator({
               size="sm"
               onClick={onToggle}
               className="gap-2"
+              aria-label={isLive ? "Disable live updates" : "Enable live updates"}
             >
               {isLive ? (
                 <>

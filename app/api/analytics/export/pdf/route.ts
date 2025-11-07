@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { createServerClient } from '@/lib/supabase-server';
+import { createServiceRoleClient } from '@/lib/supabase-server';
 import { generatePDFBlob } from '@/lib/analytics/export-pdf';
 
 /**
@@ -9,7 +9,11 @@ import { generatePDFBlob } from '@/lib/analytics/export-pdf';
 export async function GET(request: NextRequest) {
   try {
     // Verify authentication
-    const supabase = await createServerClient();
+    const supabase = await createServiceRoleClient();
+    if (!supabase) {
+      return NextResponse.json({ error: 'Database unavailable' }, { status: 503 });
+    }
+
     const {
       data: { user },
       error: authError,
@@ -34,8 +38,8 @@ export async function GET(request: NextRequest) {
       const start = new Date();
       start.setDate(start.getDate() - days);
       dateRange = {
-        start: start.toISOString().split('T')[0],
-        end: end.toISOString().split('T')[0],
+        start: start.toISOString().split('T')[0] || '',
+        end: end.toISOString().split('T')[0] || '',
       };
     }
 

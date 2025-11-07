@@ -1,18 +1,46 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { createServiceRoleClient } from '@/lib/supabase-server';
 import type { DashboardConversation } from '@/types/dashboard';
+import { ConversationCache } from '@/lib/cache/conversation-cache';
+import { checkDashboardRateLimit } from '@/lib/middleware/dashboard-rate-limit';
+import { z } from 'zod';
+
+// Input validation schema
+const ConversationsQuerySchema = z.object({
+  days: z.coerce.number().int().min(1).max(365).optional().default(7),
+  limit: z.coerce.number().int().min(1).max(100).optional().default(20),
+  cursor: z.string().datetime().optional(),
+});
 
 export async function GET(request: NextRequest) {
+  const performanceStart = Date.now();
+
   try {
-    // Get date range from query params (default to last 7 days)
+    // Apply rate limiting (using anonymous identifier for now - in production, use authenticated user)
+    const userId = 'anonymous'; // TODO: Extract from authenticated user
+    const rateLimitResponse = await checkDashboardRateLimit(userId, 'dashboard');
+    if (rateLimitResponse) {
+      return rateLimitResponse; // Rate limit exceeded
+    }
+
+    // Validate query parameters
     const searchParams = request.nextUrl.searchParams;
-    const days = parseInt(searchParams.get('days') || '7');
+    const queryValidation = ConversationsQuerySchema.safeParse({
+      days: searchParams.get('days'),
+      limit: searchParams.get('limit'),
+      cursor: searchParams.get('cursor'),
+    });
+
+    if (!queryValidation.success) {
+      return NextResponse.json({
+        error: 'Invalid query parameters',
+        details: queryValidation.error.errors,
+      }, { status: 400 });
+    }
+
+    const { days, limit, cursor } = queryValidation.data;
     const startDate = new Date();
     startDate.setDate(startDate.getDate() - days);
-
-    // Get pagination params
-    const limit = parseInt(searchParams.get('limit') || '20');
-    const cursor = searchParams.get('cursor'); // ISO timestamp for cursor-based pagination
 
     // Create previous period date for comparison
     const previousStartDate = new Date();
@@ -24,7 +52,25 @@ export async function GET(request: NextRequest) {
       change: 0,
       recent: []
     };
-    
+
+    // Try cache first (use default domainId for now - in production, extract from auth)
+    const domainId = 'default'; // TODO: Extract from authenticated user's domain
+    const cacheFilters = { days, cursor, limit };
+
+    const cached = await ConversationCache.getConversationsList(domainId, cacheFilters);
+    if (cached) {
+      const duration = Date.now() - performanceStart;
+      console.log(`[Dashboard] Cache hit - served in ${duration}ms`);
+
+      return NextResponse.json({
+        ...cached,
+        _cached: true,
+        _responseTime: duration
+      });
+    }
+
+    console.log('[Dashboard] Cache miss - fetching from database');
+
     // Try to create Supabase client
     let supabase;
     try {
@@ -262,8 +308,8 @@ export async function GET(request: NextRequest) {
       : null;
     const hasMore = nextCursor !== null;
 
-    // Return the response with whatever data we managed to collect
-    return NextResponse.json({
+    // Build response object
+    const responseData = {
       total: currentCount,
       change: Math.round(change * 10) / 10,
       statusCounts,
@@ -275,6 +321,20 @@ export async function GET(request: NextRequest) {
         hasMore,
         limit
       }
+    };
+
+    // Cache the response (fire and forget - don't wait)
+    ConversationCache.setConversationsList(domainId, cacheFilters, responseData)
+      .catch(err => console.error('[Dashboard] Failed to cache response:', err));
+
+    const duration = Date.now() - performanceStart;
+    console.log(`[Dashboard] Database query completed in ${duration}ms`);
+
+    // Return the response with whatever data we managed to collect
+    return NextResponse.json({
+      ...responseData,
+      _cached: false,
+      _responseTime: duration
     });
     
   } catch (error) {

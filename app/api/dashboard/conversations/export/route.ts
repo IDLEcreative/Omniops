@@ -6,14 +6,14 @@ import { z } from 'zod';
 
 const ExportRequestSchema = z.object({
   format: z.enum(['csv', 'json']),
-  conversationIds: z.array(z.string().uuid()).optional(),
+  conversationIds: z.array(z.string().uuid()).max(1000).optional(),
   filters: z.object({
     status: z.enum(['all', 'active', 'waiting', 'resolved']).optional(),
     dateRange: z.object({
-      start: z.string(),
-      end: z.string()
+      start: z.string().datetime(),
+      end: z.string().datetime()
     }).optional(),
-    searchTerm: z.string().optional(),
+    searchTerm: z.string().max(100).optional(),
   }).optional(),
 });
 
@@ -85,6 +85,15 @@ export async function POST(request: NextRequest) {
       query = query.contains('metadata', { status: filters.status });
     }
 
+    // FIXED: Apply search term filter at database level, not in-memory
+    // Use PostgreSQL's ILIKE for case-insensitive pattern matching
+    if (filters?.searchTerm && filters.searchTerm.trim()) {
+      const term = filters.searchTerm.trim();
+      // Search in messages content using inner join
+      // This filters at the database level instead of fetching all data then filtering
+      query = query.or(`messages.content.ilike.%${term}%`);
+    }
+
     // Execute query with limit
     const { data: conversations, error: fetchError } = await query
       .order('created_at', { ascending: false })
@@ -99,18 +108,8 @@ export async function POST(request: NextRequest) {
       return NextResponse.json({ error: 'No conversations found' }, { status: 404 });
     }
 
-    // Apply search term filter in-memory (can't do this efficiently in Postgres)
-    let filteredConversations: ConversationWithMessages[] = conversations;
-    if (filters?.searchTerm && filters.searchTerm.trim()) {
-      const term = filters.searchTerm.toLowerCase();
-      filteredConversations = conversations.filter((conv) => {
-        const customerName = (conv.metadata?.customer_name as string || '').toLowerCase();
-        const hasMessageMatch = conv.messages?.some(
-          (msg) => msg.content.toLowerCase().includes(term)
-        );
-        return customerName.includes(term) || hasMessageMatch;
-      });
-    }
+    // All filtering done at database level - no in-memory filtering needed
+    const filteredConversations: ConversationWithMessages[] = conversations;
 
     // Format and return based on requested format
     if (format === 'csv') {

@@ -67,13 +67,13 @@ export function BulkActionBar({
   };
 
   return (
-    <div className="fixed bottom-6 left-1/2 transform -translate-x-1/2 z-50">
-      <div className="bg-background border rounded-lg shadow-lg p-4 flex items-center gap-4">
-        <span className="text-sm font-medium">
+    <div className="sm:fixed sm:bottom-6 sm:left-1/2 sm:transform sm:-translate-x-1/2 relative mx-auto mb-4 sm:mb-0 z-50 w-full sm:w-auto max-w-2xl px-4 sm:px-0">
+      <div className="bg-background border rounded-lg shadow-lg p-3 sm:p-4 flex flex-col sm:flex-row items-stretch sm:items-center gap-3 sm:gap-4">
+        <span className="text-sm font-medium text-center sm:text-left">
           {selectedCount} conversation{selectedCount !== 1 ? 's' : ''} selected
         </span>
 
-        <div className="flex items-center gap-2">
+        <div className="flex items-center gap-2 flex-wrap justify-center sm:justify-start">
           <Button
             variant="outline"
             size="sm"

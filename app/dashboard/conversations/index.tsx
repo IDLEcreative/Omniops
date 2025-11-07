@@ -145,6 +145,37 @@ export default function ConversationsPage() {
 
   return (
     <div className="flex-1 space-y-3 p-4">
+      {/* Skip Navigation - Visible on focus */}
+      <a
+        href="#main-content"
+        className="sr-only focus:not-sr-only focus:absolute focus:top-4 focus:left-4 focus:z-50 focus:px-4 focus:py-2 focus:bg-primary focus:text-primary-foreground focus:rounded-md focus:outline-none focus:ring-2 focus:ring-ring"
+      >
+        Skip to conversations
+      </a>
+
+      {/* Live region for new conversations - Screen reader only */}
+      <div
+        role="status"
+        aria-live="polite"
+        aria-atomic="true"
+        className="sr-only"
+      >
+        {newConversationsCount > 0 && (
+          `${newConversationsCount} new conversation${newConversationsCount > 1 ? 's' : ''} available. Press Enter to load.`
+        )}
+      </div>
+
+      {/* Live region for bulk actions - Screen reader only */}
+      <div
+        role="status"
+        aria-live="assertive"
+        className="sr-only"
+      >
+        {selectedIds.size > 0 && (
+          `${selectedIds.size} conversation${selectedIds.size > 1 ? 's' : ''} selected for bulk action.`
+        )}
+      </div>
+
       <ConversationsPageHeader
         mainView={mainView}
         onMainViewChange={setMainView}
@@ -184,9 +215,12 @@ export default function ConversationsPage() {
       )}
 
       {mainView === 'analytics' ? (
-        <ConversationAnalytics days={days} />
+        <main id="main-content" tabIndex={-1}>
+          <ConversationAnalytics days={days} />
+        </main>
       ) : (
-        <ConversationMainContainer
+        <main id="main-content" tabIndex={-1}>
+          <ConversationMainContainer
           searchTerm={searchTerm}
           onSearchChange={setSearchTerm}
           searchInputRef={searchInputRef}
@@ -210,6 +244,7 @@ export default function ConversationsPage() {
           onToggleSelect={toggleSelectConversation}
           onSelectAll={(selected) => selectAllConversations(filteredConversations, selected)}
         />
+        </main>
       )}
 
       {mainView === 'conversations' && selectedIds.size > 0 && (

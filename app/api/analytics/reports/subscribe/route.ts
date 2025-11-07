@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { createServerClient } from '@/lib/supabase-server';
+import { createServiceRoleClient } from '@/lib/supabase-server';
 import { z } from 'zod';
 
 const subscriptionSchema = z.object({
@@ -14,7 +14,11 @@ const subscriptionSchema = z.object({
 export async function POST(request: NextRequest) {
   try {
     // Verify authentication
-    const supabase = await createServerClient();
+    const supabase = await createServiceRoleClient();
+    if (!supabase) {
+      return NextResponse.json({ error: 'Database unavailable' }, { status: 503 });
+    }
+
     const {
       data: { user },
       error: authError,
@@ -87,7 +91,11 @@ export async function POST(request: NextRequest) {
 export async function GET(request: NextRequest) {
   try {
     // Verify authentication
-    const supabase = await createServerClient();
+    const supabase = await createServiceRoleClient();
+    if (!supabase) {
+      return NextResponse.json({ error: 'Database unavailable' }, { status: 503 });
+    }
+
     const {
       data: { user },
       error: authError,
@@ -132,7 +140,11 @@ export async function GET(request: NextRequest) {
 export async function DELETE(request: NextRequest) {
   try {
     // Verify authentication
-    const supabase = await createServerClient();
+    const supabase = await createServiceRoleClient();
+    if (!supabase) {
+      return NextResponse.json({ error: 'Database unavailable' }, { status: 503 });
+    }
+
     const {
       data: { user },
       error: authError,

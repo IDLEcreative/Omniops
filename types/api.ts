@@ -134,8 +134,49 @@ export const SupportTicketRequestSchema = z.object({
 
 export type SupportTicketRequest = z.infer<typeof SupportTicketRequestSchema>;
 
-// Error Response
+// Standard API Response Format
+export interface ApiResponse<T> {
+  success: boolean;
+  data?: T;
+  error?: {
+    code: string;
+    message: string;
+    details?: any;
+  };
+  meta?: {
+    page?: number;
+    limit?: number;
+    total?: number;
+    cached?: boolean;
+    duration?: number;
+    timestamp?: string;
+  };
+}
+
+export interface ApiListResponse<T> extends ApiResponse<T[]> {
+  pagination?: {
+    hasMore: boolean;
+    nextCursor?: string;
+    page?: number;
+    limit?: number;
+    total?: number;
+  };
+}
+
+// Error Response (kept for backward compatibility)
 export interface ErrorResponse {
   error: string;
   details?: Record<string, unknown> | string | unknown[];
+}
+
+// Standard error codes
+export enum ApiErrorCode {
+  UNAUTHORIZED = 'UNAUTHORIZED',
+  FORBIDDEN = 'FORBIDDEN',
+  NOT_FOUND = 'NOT_FOUND',
+  VALIDATION_ERROR = 'VALIDATION_ERROR',
+  DATABASE_ERROR = 'DATABASE_ERROR',
+  INTERNAL_ERROR = 'INTERNAL_ERROR',
+  RATE_LIMIT_EXCEEDED = 'RATE_LIMIT_EXCEEDED',
+  SERVICE_UNAVAILABLE = 'SERVICE_UNAVAILABLE',
 }

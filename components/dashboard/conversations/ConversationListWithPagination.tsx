@@ -88,6 +88,18 @@ export function ConversationListWithPagination({
 
   return (
     <div className="h-full flex flex-col">
+      {/* Live region for pagination announcements - Screen reader only */}
+      <div
+        role="status"
+        aria-live="polite"
+        aria-atomic="true"
+        className="sr-only"
+      >
+        {!loading && conversations.length > 0 && (
+          `Showing page ${currentPage} of ${totalPages}, ${conversations.length} total conversations`
+        )}
+      </div>
+
       {isSelectionMode && onSelectAll && paginatedConversations.length > 0 && !loading && (
         <div className="border-b px-4 py-2 bg-muted/50 flex items-center gap-2">
           <Checkbox
@@ -136,24 +148,24 @@ export function ConversationListWithPagination({
               size="sm"
               onClick={handlePreviousPage}
               disabled={currentPage === 1}
-              aria-label="Previous page"
+              aria-label={`Go to previous page (page ${currentPage - 1})`}
               className="gap-1 h-7 text-xs"
             >
               <ChevronLeft className="h-3 w-3" />
-              Prev
+              <span className="hidden sm:inline">Prev</span>
             </Button>
-            <span className="text-xs text-muted-foreground">
-              Page {currentPage} of {totalPages}
+            <span className="text-xs text-muted-foreground" aria-label={`Page ${currentPage} of ${totalPages}`}>
+              <span className="hidden sm:inline">Page </span>{currentPage}<span className="hidden sm:inline"> of {totalPages}</span><span className="sm:hidden">/{totalPages}</span>
             </span>
             <Button
               variant="outline"
               size="sm"
               onClick={handleNextPage}
               disabled={currentPage === totalPages}
-              aria-label="Next page"
+              aria-label={`Go to next page (page ${currentPage + 1})`}
               className="gap-1 h-7 text-xs"
             >
-              Next
+              <span className="hidden sm:inline">Next</span>
               <ChevronRight className="h-3 w-3" />
             </Button>
           </div>

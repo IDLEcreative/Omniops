@@ -1,6 +1,9 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { createClient, createServiceRoleClient } from '@/lib/supabase-server';
 import { z } from 'zod';
+import pLimit from 'p-limit';
+import { ConversationCache } from '@/lib/cache/conversation-cache';
+import { checkDashboardRateLimit } from '@/lib/middleware/dashboard-rate-limit';
 
 const BulkActionSchema = z.object({
   action: z.enum(['assign_human', 'close', 'mark_resolved', 'delete']),
@@ -30,6 +33,12 @@ export async function POST(request: NextRequest) {
         { error: 'Unauthorized' },
         { status: 401 }
       );
+    }
+
+    // Apply rate limiting for bulk actions
+    const rateLimitResponse = await checkDashboardRateLimit(user, 'bulkActions');
+    if (rateLimitResponse) {
+      return rateLimitResponse; // Rate limit exceeded
     }
 
     // Parse and validate request body
@@ -99,12 +108,15 @@ export async function POST(request: NextRequest) {
     }
 
     try {
+      // FIXED: Add concurrency limiting to prevent overwhelming database
+      const limit = pLimit(10); // Limit to 10 concurrent operations
+
       if (action === 'assign_human') {
-        // Use Promise.allSettled to handle individual conversation metadata updates
-        // This is necessary because metadata structure varies per conversation
+        // Use Promise.allSettled with concurrency limiting
+        // This prevents overwhelming the database with 100 concurrent updates
         const assignmentTimestamp = new Date().toISOString();
 
-        const updatePromises = validConversationIds.map(async (id) => {
+        const updatePromises = validConversationIds.map((id) => limit(async () => {
           const conv = foundConversations.get(id)!;
           const updatedMetadata = {
             ...(conv.metadata as Record<string, unknown> || {}),
@@ -119,7 +131,7 @@ export async function POST(request: NextRequest) {
             .eq('id', id);
 
           return { id, error };
-        });
+        }));
 
         const updateResults = await Promise.allSettled(updatePromises);
 
@@ -142,9 +154,9 @@ export async function POST(request: NextRequest) {
         // Batch update all conversations to resolved status
         const timestamp = new Date().toISOString();
 
-        // Use Promise.allSettled to handle individual conversation metadata updates
-        // This is necessary because metadata structure varies per conversation
-        const updatePromises = validConversationIds.map(async (id) => {
+        // Use Promise.allSettled with concurrency limiting
+        // This prevents overwhelming the database with 100 concurrent updates
+        const updatePromises = validConversationIds.map((id) => limit(async () => {
           const conv = foundConversations.get(id)!;
           const updatedMetadata = {
             ...(conv.metadata as Record<string, unknown> || {}),
@@ -160,7 +172,7 @@ export async function POST(request: NextRequest) {
             .eq('id', id);
 
           return { id, error };
-        });
+        }));
 
         const updateResults = await Promise.allSettled(updatePromises);
 
@@ -231,6 +243,18 @@ export async function POST(request: NextRequest) {
 
     const successCount = results.filter(r => r.success).length;
     const failureCount = results.length - successCount;
+
+    // Invalidate caches for all affected conversations
+    // Extract domain ID from first conversation (they should all be same domain)
+    if (validConversationIds.length > 0 && conversations && conversations.length > 0) {
+      const domainId = conversations[0]?.domain_id || 'default';
+
+      // Invalidate caches asynchronously (don't wait)
+      ConversationCache.invalidateConversations(validConversationIds, domainId)
+        .catch(err => console.error('[BulkActions] Failed to invalidate caches:', err));
+
+      console.log('[BulkActions] Invalidated caches for domain:', domainId, 'conversations:', validConversationIds.length);
+    }
 
     return NextResponse.json({
       success: true,
