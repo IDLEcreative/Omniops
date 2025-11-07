@@ -25,10 +25,10 @@ export async function checkRateLimit(
 
   try {
     // Check if this is a real Redis client (has pipeline method)
-    // @ts-ignore - pipeline may not exist on fallback client
+    // @ts-expect-error - pipeline may not exist on fallback client
     if (typeof redis.pipeline === 'function') {
       // Use Redis transaction for atomic operations
-      // @ts-ignore - we checked above
+      // @ts-expect-error - we checked above
       const pipeline = redis.pipeline();
 
       // Get current count
@@ -50,7 +50,7 @@ export async function checkRateLimit(
       // Check if rate limit exceeded
       if (currentCount > maxRequests) {
         // Get actual TTL for accurate resetTime
-        // @ts-ignore - pttl may not exist on fallback
+        // @ts-expect-error - pttl may not exist on fallback
         const ttl = typeof redis.pttl === 'function' ? await redis.pttl(key) : -1;
         const actualResetTime = ttl > 0 ? now + ttl : resetTime;
 
@@ -165,7 +165,7 @@ export async function getRateLimitStatus(
     const currentCount = await redis.get(key);
     const count = currentCount ? parseInt(currentCount, 10) : 0;
 
-    // @ts-ignore - pttl may not exist on fallback client
+    // @ts-expect-error - pttl may not exist on fallback client
     const ttl = typeof redis.pttl === 'function' ? await redis.pttl(key) : -1;
     const resetTime = ttl > 0 ? now + ttl : now + windowMs;
 
