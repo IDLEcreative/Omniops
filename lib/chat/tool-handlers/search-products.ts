@@ -1,12 +1,13 @@
 /**
  * Search for products using commerce provider or semantic search fallback
- * Includes exact-match SKU search optimization for improved accuracy
+ * Includes exact-match SKU search optimization and zero-results recovery
  */
 
 import { SearchResult } from '@/types';
 import { formatProviderProducts } from '../product-formatters';
 import { normalizeDomain } from './domain-utils';
 import { isSkuPattern, exactMatchSearch } from '@/lib/search/exact-match-search';
+import { handleZeroResults } from '@/lib/embeddings';
 import type { ToolDependencies, ToolResult } from './types';
 
 export async function executeSearchProducts(
@@ -17,9 +18,10 @@ export async function executeSearchProducts(
 ): Promise<ToolResult> {
   const { getCommerceProvider: getProviderFn, searchSimilarContent: searchFn } = deps;
 
-  // Adaptive limit: reduce for targeted queries to improve speed
+  // Adaptive limit: slightly reduce for very targeted queries
+  // Note: Increased from 50 to 100 to ensure we don't miss results
   const queryWords = query.trim().split(/\s+/).length;
-  const adaptiveLimit = queryWords > 3 ? Math.min(50, limit) : limit;
+  const adaptiveLimit = queryWords > 5 ? Math.min(100, limit) : limit;
   console.log(`[Function Call] search_products: "${query}" (limit: ${adaptiveLimit}, original: ${limit}, words: ${queryWords})`);
 
   try {
@@ -104,6 +106,39 @@ export async function executeSearchProducts(
     const semanticSearchDuration = Date.now() - semanticSearchStart;
 
     console.log(`[Function Call] Semantic search returned ${searchResults.length} results { source: "semantic", duration: ${semanticSearchDuration}ms, fallbackUsed: ${!!errorContext} }`);
+
+    // ZERO-RESULTS RECOVERY: If semantic search returns nothing, try recovery strategies
+    if (searchResults.length === 0) {
+      console.log('[Function Call] Zero results from semantic search, activating recovery system');
+
+      const recoveryStart = Date.now();
+      const { results: recoveryResults, strategy, suggestion } = await handleZeroResults(
+        query,
+        browseDomain,
+        adaptiveLimit
+      );
+      const recoveryDuration = Date.now() - recoveryStart;
+
+      if (recoveryResults.length > 0) {
+        console.log(`[Function Call] RECOVERY SUCCESS: Found ${recoveryResults.length} results using strategy "${strategy}" { duration: ${recoveryDuration}ms }`);
+
+        return {
+          success: true,
+          results: recoveryResults,
+          source: `recovery_${strategy}`,
+          errorMessage: suggestion
+        };
+      } else {
+        console.log(`[Function Call] RECOVERY EXHAUSTED: No results found after all recovery attempts { duration: ${recoveryDuration}ms }`);
+
+        return {
+          success: false,
+          results: [],
+          source: 'recovery_exhausted',
+          errorMessage: suggestion || 'No results found. Try different search terms or contact support for assistance.'
+        };
+      }
+    }
 
     return {
       success: true,

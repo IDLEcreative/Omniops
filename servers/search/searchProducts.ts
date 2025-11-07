@@ -150,9 +150,10 @@ export async function searchProducts(
       };
     }
 
-    // Adaptive limit: reduce for targeted queries to improve speed
+    // Adaptive limit: slightly reduce for very targeted queries
+    // Note: Increased from 50 to 100 and threshold from >3 to >5 to ensure comprehensive results
     const queryWords = validatedInput.query.trim().split(/\s+/).length;
-    const adaptiveLimit = queryWords > 3 ? Math.min(50, validatedInput.limit) : validatedInput.limit;
+    const adaptiveLimit = queryWords > 5 ? Math.min(100, validatedInput.limit) : validatedInput.limit;
 
     console.log(
       `[MCP searchProducts] Query: "${validatedInput.query}" | ` +

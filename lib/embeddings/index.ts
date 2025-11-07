@@ -15,6 +15,10 @@ export { generateQueryEmbedding } from './query-embedding';
 export { QueryTimer } from './timer';
 export { getOpenAIClient } from './openai-client';
 
+// Export zero-results recovery
+export { handleZeroResults, shouldTriggerRecovery } from './zero-results-recovery';
+export type { RecoveryResult } from './zero-results-recovery';
+
 // Re-export functions from embeddings-functions.ts
 export {
   generateEmbeddings,

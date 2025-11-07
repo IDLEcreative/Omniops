@@ -17,7 +17,7 @@ export const COMMON_WORDS = [
 
 // Search thresholds and limits
 export const MIN_KEYWORD_RESULTS = 3;
-export const DEFAULT_SEARCH_LIMIT = 5;
+export const DEFAULT_SEARCH_LIMIT = 100; // Increased from 5 to ensure comprehensive results
 export const DEFAULT_SIMILARITY_THRESHOLD = 0.15;
 export const DEFAULT_TIMEOUT_MS = 10000;
 
