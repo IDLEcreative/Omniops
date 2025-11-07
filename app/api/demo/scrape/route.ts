@@ -4,6 +4,7 @@ import { quickScrape, generateDemoEmbeddings } from '@/lib/demo-scraper';
 import { getRedisClient } from '@/lib/redis';
 import { randomBytes } from 'crypto';
 import { createServiceRoleClient } from '@/lib/supabase/server';
+import { saveDemoSession, DemoSessionData } from '@/lib/demo-session-store';
 
 const scrapeSchema = z.object({
   url: z.string().url()
@@ -11,6 +12,10 @@ const scrapeSchema = z.object({
 
 // Rate limiting: 3 demos per IP per hour
 async function checkDemoRateLimit(req: NextRequest) {
+  if (!process.env.REDIS_URL) {
+    return;
+  }
+
   const redis = getRedisClient();
   const ip = req.headers.get('x-forwarded-for') || req.headers.get('x-real-ip') || 'unknown';
   const key = `demo:ratelimit:${ip}`;
@@ -58,8 +63,7 @@ export async function POST(req: NextRequest) {
     const { chunks, embeddings, metadata } = await generateDemoEmbeddings(scrapeResult.pages);
 
     // Store in Redis with 10-minute TTL
-    const redis = getRedisClient();
-    const sessionData = {
+    const sessionData: DemoSessionData = {
       url,
       domain,
       pages: scrapeResult.pages,
@@ -72,11 +76,7 @@ export async function POST(req: NextRequest) {
       max_messages: 20
     };
 
-    await redis.setex(
-      `demo:${sessionId}:data`,
-      600, // 10 minutes
-      JSON.stringify(sessionData)
-    );
+    await saveDemoSession(sessionId, sessionData);
 
     // Log to Supabase for lead tracking
     try {

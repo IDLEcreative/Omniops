@@ -3,6 +3,7 @@ import { z } from 'zod';
 import { getRedisClient } from '@/lib/redis';
 import OpenAI from 'openai';
 import { createServiceRoleClient } from '@/lib/supabase/server';
+import { getDemoSession, saveDemoSession } from '@/lib/demo-session-store';
 
 const chatSchema = z.object({
   session_id: z.string(),
@@ -18,6 +19,10 @@ function getOpenAIClient() {
 
 // Message rate limiting: 1 per 2 seconds
 async function checkMessageRateLimit(sessionId: string) {
+  if (!process.env.REDIS_URL) {
+    return;
+  }
+
   const redis = await getRedisClient();
   const key = `demo:${sessionId}:msg_ratelimit`;
 
@@ -36,24 +41,12 @@ export async function POST(req: NextRequest) {
     const { session_id, message } = chatSchema.parse(body);
 
     // Retrieve session data from Redis
-    const redis = await getRedisClient();
-    const sessionDataStr = await redis.get(`demo:${session_id}:data`);
+    const sessionData = await getDemoSession(session_id);
 
-    if (!sessionDataStr) {
+    if (!sessionData) {
       return NextResponse.json(
         { error: 'Demo session expired. Please start a new demo.' },
         { status: 404 }
-      );
-    }
-
-    let sessionData;
-    try {
-      sessionData = JSON.parse(sessionDataStr);
-    } catch (error) {
-      console.error('[Demo Chat] Failed to parse session data:', error);
-      return NextResponse.json(
-        { error: 'Invalid session data. Please start a new demo.' },
-        { status: 400 }
       );
     }
 
@@ -84,11 +77,7 @@ export async function POST(req: NextRequest) {
 
     // Update message count
     sessionData.message_count += 1;
-    await redis.setex(
-      `demo:${session_id}:data`,
-      600, // Keep same TTL
-      JSON.stringify(sessionData)
-    );
+    await saveDemoSession(session_id, sessionData);
 
     // Update message count in Supabase
     try {

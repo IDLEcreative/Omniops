@@ -1,3 +1,4 @@
+/* eslint-disable no-restricted-imports -- Documentation intentionally shows incorrect import usage */
 // ❌ BEFORE (Current Code - Has Issues)
 
 import { NextRequest, NextResponse } from 'next/server';

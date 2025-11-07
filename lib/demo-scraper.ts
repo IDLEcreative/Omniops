@@ -173,7 +173,7 @@ function extractTitle(html: string): string {
  */
 function extractTextContent(html: string): string {
   // Remove scripts and styles
-  let text = html
+  const text = html
     .replace(/<script\b[^<]*(?:(?!<\/script>)<[^<]*)*<\/script>/gi, ' ')
     .replace(/<style\b[^<]*(?:(?!<\/style>)<[^<]*)*<\/style>/gi, ' ')
     .replace(/<[^>]+>/g, ' ') // Remove all HTML tags
