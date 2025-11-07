@@ -5,7 +5,7 @@
  * Displays real-time metrics for provider health, retry patterns, and domain lookup effectiveness
  */
 
-import { useEffect, useState } from 'react';
+import { useCallback, useEffect, useState } from 'react';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Alert, AlertDescription } from '@/components/ui/alert';
 import { Badge } from '@/components/ui/badge';
@@ -60,7 +60,7 @@ export function SearchTelemetryDashboard({
   const [error, setError] = useState<string | null>(null);
   const [lastRefresh, setLastRefresh] = useState<Date | null>(null);
 
-  const fetchTelemetry = async () => {
+  const fetchTelemetry = useCallback(async () => {
     try {
       setLoading(true);
       setError(null);
@@ -82,16 +82,18 @@ export function SearchTelemetryDashboard({
     } finally {
       setLoading(false);
     }
-  };
+  }, [timePeriodHours]);
 
   useEffect(() => {
     fetchTelemetry();
 
     // Set up auto-refresh
-    const interval = setInterval(fetchTelemetry, autoRefreshSeconds * 1000);
+    const interval = setInterval(() => {
+      fetchTelemetry();
+    }, autoRefreshSeconds * 1000);
 
     return () => clearInterval(interval);
-  }, [timePeriodHours, autoRefreshSeconds]);
+  }, [autoRefreshSeconds, fetchTelemetry]);
 
   const formatPercentage = (value: number) => `${(value * 100).toFixed(1)}%`;
   const formatDuration = (ms: number) => `${ms.toFixed(0)}ms`;

@@ -1,32 +1,78 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { createServiceRoleClient } from '@/lib/supabase-server';
 import { analyseMessages } from '@/lib/dashboard/analytics';
+import { requireAuth } from '@/lib/middleware/auth';
+import { checkAnalyticsRateLimit, addRateLimitHeaders } from '@/lib/middleware/analytics-rate-limit';
 
 export async function GET(request: NextRequest) {
   try {
-    const supabase = await createServiceRoleClient();
-    if (!supabase) {
-      throw new Error('Failed to create Supabase client');
+    // 1. Authentication: Require valid user session
+    const authResult = await requireAuth();
+    if (authResult instanceof NextResponse) {
+      return authResult; // Return 401 error
     }
-    
-    // Get date range from query params
+    const { user, supabase } = authResult;
+
+    // 2. Rate Limiting: 20 requests per minute for dashboard
+    const rateLimitError = await checkAnalyticsRateLimit(user, 'dashboard');
+    if (rateLimitError) {
+      return rateLimitError; // Return 429 error
+    }
+
+    // 3. Get user's organization
+    const { data: membership, error: memberError } = await supabase
+      .from('organization_members')
+      .select('organization_id, role')
+      .eq('user_id', user.id)
+      .single();
+
+    if (memberError || !membership) {
+      return NextResponse.json({ error: 'No organization found for user' }, { status: 404 });
+    }
+
+    // 4. Get organization's domains for multi-tenant filtering
+    const { data: configs, error: configError } = await supabase
+      .from('customer_configs')
+      .select('domain')
+      .eq('organization_id', membership.organization_id);
+
+    if (configError) {
+      return NextResponse.json({ error: 'Failed to fetch organization domains' }, { status: 500 });
+    }
+
+    const allowedDomains = configs?.map(c => c.domain) || [];
+
+    // 5. Get date range from query params
     const searchParams = request.nextUrl.searchParams;
     const days = parseInt(searchParams.get('days') || '7');
     const startDate = new Date();
     startDate.setDate(startDate.getDate() - days);
-    
-    // Fetch messages for analysis
-    const { data: messages, error: messagesError } = await supabase
+
+    // 6. Fetch messages for user's organization only (multi-tenant security)
+    const serviceSupabase = await createServiceRoleClient();
+    if (!serviceSupabase) {
+      throw new Error('Failed to create Supabase client');
+    }
+
+    // Build query with domain filtering
+    let query = serviceSupabase
       .from('messages')
-      .select('content, role, created_at, metadata')
+      .select('content, role, created_at, metadata, conversations!inner(domain)')
       .gte('created_at', startDate.toISOString())
       .order('created_at', { ascending: false });
-    
+
+    // Filter by allowed domains
+    if (allowedDomains.length > 0) {
+      query = query.in('conversations.domain', allowedDomains);
+    }
+
+    const { data: messages, error: messagesError } = await query;
+
     if (messagesError) throw messagesError;
-    
+
     const analytics = analyseMessages(messages || [], { days });
-    
-    return NextResponse.json({
+
+    const response = NextResponse.json({
       responseTime: analytics.avgResponseTimeSeconds,
       satisfactionScore: analytics.satisfactionScore,
       resolutionRate: analytics.resolutionRate,
@@ -59,11 +105,15 @@ export async function GET(request: NextRequest) {
         negativeMessages: analytics.negativeUserMessages
       }
     });
-    
+
+    // Add rate limit headers
+    await addRateLimitHeaders(response, user, 'dashboard');
+    return response;
+
   } catch (error) {
     console.error('[Dashboard] Error fetching analytics:', error);
     return NextResponse.json(
-      { 
+      {
         responseTime: 2.5,
         satisfactionScore: 4.0,
         resolutionRate: 85,
@@ -73,7 +123,7 @@ export async function GET(request: NextRequest) {
         dailySentiment: [],
         metrics: { totalMessages: 0, userMessages: 0, avgMessagesPerDay: 0, positiveMessages: 0, negativeMessages: 0 }
       },
-      { status: 200 } // Return defaults instead of error
+      { status: 200 }
     );
   }
 }

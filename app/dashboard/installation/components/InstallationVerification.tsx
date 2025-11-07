@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useState, useEffect, useCallback } from "react";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
 import { Button } from "@/components/ui/button";
@@ -41,12 +41,7 @@ export function InstallationVerification({ domain, onVerificationComplete }: Pro
   const [result, setResult] = useState<VerificationResult | null>(null);
   const [error, setError] = useState<string | null>(null);
 
-  // Auto-run verification on component mount
-  useEffect(() => {
-    runVerification();
-  }, [domain]);
-
-  const runVerification = async () => {
+  const runVerification = useCallback(async () => {
     setIsVerifying(true);
     setError(null);
     setResult(null);
@@ -74,7 +69,12 @@ export function InstallationVerification({ domain, onVerificationComplete }: Pro
     } finally {
       setIsVerifying(false);
     }
-  };
+  }, [domain, onVerificationComplete]);
+
+  // Auto-run verification on component mount
+  useEffect(() => {
+    runVerification();
+  }, [runVerification]);
 
   const getStatusIcon = (status: string) => {
     switch (status) {

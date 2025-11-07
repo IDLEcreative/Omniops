@@ -1,3 +1,4 @@
+import Image from "next/image";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Label } from "@/components/ui/label";
 import { Input } from "@/components/ui/input";
@@ -128,11 +129,16 @@ export function EssentialsSection({ settings, onChange, customerConfigId }: Esse
             </div>
             {settings.logoUrl && (
               <div className="mt-2 p-2 border rounded-lg bg-gray-50">
-                <img
+                <Image
                   src={settings.logoUrl}
                   alt="Logo preview"
-                  className="h-12 object-contain"
-                  onError={(e) => { e.currentTarget.style.display = 'none'; }}
+                  width={160}
+                  height={48}
+                  className="h-12 object-contain w-auto"
+                  unoptimized
+                  onError={(event) => {
+                    event.currentTarget.style.display = 'none';
+                  }}
                 />
               </div>
             )}
