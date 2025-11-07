@@ -8,7 +8,12 @@
 export { analyseMessages } from './message-analyzer';
 
 // Utility functions
-export { classifySentiment, calculateDailySentiment } from './sentiment';
+export {
+  classifySentiment,
+  classifySentimentAsync,
+  classifySentimentKeyword,
+  calculateDailySentiment,
+} from './sentiment';
 export { detectLanguage, clamp, normaliseContent, containsPhrase } from './utilities';
 
 // Constants
@@ -22,4 +27,5 @@ export type {
   DailySentimentStat,
   MessageAnalytics,
   SupabaseResponse,
+  SentimentResult,
 } from './types';

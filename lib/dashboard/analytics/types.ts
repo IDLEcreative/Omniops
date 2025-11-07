@@ -34,6 +34,11 @@ export interface DailySentimentStat {
   satisfactionScore: number;
 }
 
+export interface SentimentResult {
+  score: -1 | 0 | 1;
+  confidence: number | null; // 0-1 scale, null if using keyword-based
+}
+
 export interface MessageAnalytics {
   avgResponseTimeSeconds: number;
   satisfactionScore: number;
