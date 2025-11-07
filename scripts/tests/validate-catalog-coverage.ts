@@ -44,12 +44,25 @@ interface CoverageResult {
 async function fetchAllProducts(domain: string): Promise<Product[]> {
   log('blue', `Fetching all products for domain: ${domain}`);
 
-  // This query fetches products from scraped_pages with extracted product info
+  // Step 1: Get domain_id from domains table
+  const { data: domainData, error: domainError } = await supabase
+    .from('domains')
+    .select('id')
+    .eq('domain', domain)
+    .single();
+
+  if (domainError || !domainData) {
+    throw new Error(`Domain not found: ${domain}. Error: ${domainError?.message || 'Unknown'}`);
+  }
+
+  const domainId = domainData.id;
+  log('blue', `  Domain ID: ${domainId}`);
+
+  // Step 2: Fetch all scraped pages for this domain
   const { data, error } = await supabase
     .from('scraped_pages')
     .select('id, title, url, metadata')
-    .eq('domain', domain)
-    .eq('type', 'product')
+    .eq('domain_id', domainId)
     .limit(1000);
 
   if (error) {
@@ -57,19 +70,47 @@ async function fetchAllProducts(domain: string): Promise<Product[]> {
   }
 
   if (!data || data.length === 0) {
-    throw new Error(`No products found for domain: ${domain}. Is the catalog indexed?`);
+    throw new Error(`No content found for domain: ${domain}. Is the catalog indexed?`);
   }
 
   // Extract products from scraped pages
-  const products: Product[] = data.map((page) => {
-    const metadata = page.metadata as any || {};
-    return {
-      id: page.id,
-      name: page.title || 'Unnamed Product',
-      sku: metadata.sku || metadata.id || undefined,
-      category: metadata.category || undefined
-    };
-  });
+  // Products typically have SKU/price in metadata or contain "product" keywords
+  const products: Product[] = data
+    .filter(page => {
+      const metadata = page.metadata as any || {};
+      const hasProductIndicators =
+        metadata.sku ||
+        metadata.price ||
+        metadata.product_id ||
+        page.url?.includes('/product') ||
+        page.url?.includes('/shop');
+      return hasProductIndicators;
+    })
+    .map((page) => {
+      const metadata = page.metadata as any || {};
+      return {
+        id: page.id,
+        name: page.title || 'Unnamed Product',
+        sku: metadata.sku || metadata.product_id || metadata.id || undefined,
+        category: metadata.category || metadata.product_type || undefined
+      };
+    });
+
+  if (products.length === 0) {
+    log('yellow', `  Warning: Found ${data.length} pages but 0 products. Catalog may not be indexed with product metadata.`);
+    log('yellow', `  Falling back to using all scraped pages as products...`);
+
+    // Fallback: treat all pages as potential products
+    return data.slice(0, 50).map((page) => {
+      const metadata = page.metadata as any || {};
+      return {
+        id: page.id,
+        name: page.title || 'Unnamed Content',
+        sku: metadata.sku || undefined,
+        category: metadata.category || undefined
+      };
+    });
+  }
 
   log('green', `✅ Found ${products.length} products in catalog`);
   return products;
