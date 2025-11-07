@@ -2,11 +2,11 @@
  * Organization Switching Hook
  */
 
-import { useCallback } from 'react';
-import { createBrowserClient } from '@supabase/ssr';
+import { useCallback, useMemo } from 'react';
 import type { Database } from '@/types/supabase';
 import type { Organization } from '../../organization-types';
 import { CacheManager, CACHE_CONFIG } from '../../organization-cache';
+import { createClient as createSupabaseClient } from '@/lib/supabase/client';
 
 export function useOrganizationSwitch(
   cache: CacheManager<any>,
@@ -15,10 +15,7 @@ export function useOrganizationSwitch(
   setCurrentUserRole: (role: string | null) => void,
   loadSeatUsage: (organizationId: string, forceRefresh?: boolean) => Promise<any>
 ) {
-  const supabase = createBrowserClient<Database>(
-    process.env.NEXT_PUBLIC_SUPABASE_URL!,
-    process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!
-  );
+  const supabase = useMemo(() => createSupabaseClient<Database>(), []);
 
   const switchOrganization = useCallback(async (organizationId: string) => {
     try {

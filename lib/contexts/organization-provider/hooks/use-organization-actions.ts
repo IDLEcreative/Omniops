@@ -3,8 +3,6 @@
  */
 
 import { useCallback } from 'react';
-import { createBrowserClient } from '@supabase/ssr';
-import type { Database } from '@/types/supabase';
 import type { Organization } from '../../organization-types';
 import { CacheManager } from '../../organization-cache';
 
@@ -13,10 +11,6 @@ export function useOrganizationActions(
   loadUserOrganizations: (forceRefresh?: boolean) => Promise<Organization[]>,
   loadSeatUsage: (organizationId: string, forceRefresh?: boolean) => Promise<any>
 ) {
-  const supabase = createBrowserClient<Database>(
-    process.env.NEXT_PUBLIC_SUPABASE_URL!,
-    process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!
-  );
 
   const createOrganization = useCallback(async (name: string): Promise<Organization> => {
     const response = await fetch('/api/organizations', {

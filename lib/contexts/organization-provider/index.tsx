@@ -8,20 +8,17 @@
 "use client";
 
 import React, { createContext, useContext, useState, useEffect, useMemo, useCallback, useRef } from 'react';
-import { createBrowserClient } from '@supabase/ssr';
 import type { Database } from '@/types/supabase';
 import type { Organization, OrganizationContextType } from '../organization-types';
 import { CacheManager, CACHE_CONFIG } from '../organization-cache';
 import { useOrganizationData, useOrganizationActions, useOrganizationSwitch } from './hooks';
 import { useComputedPermissions } from './utils';
+import { createClient as createSupabaseClient } from '@/lib/supabase/client';
 
 const OrganizationContext = createContext<OrganizationContextType | undefined>(undefined);
 
 export function OrganizationProvider({ children }: { children: React.ReactNode }) {
-  const supabase = createBrowserClient<Database>(
-    process.env.NEXT_PUBLIC_SUPABASE_URL!,
-    process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!
-  );
+  const supabase = useMemo(() => createSupabaseClient<Database>(), []);
   const cache = useMemo(() => new CacheManager<any>(), []);
   const hasInitializedRef = useRef(false);
 
