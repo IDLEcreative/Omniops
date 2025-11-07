@@ -4,7 +4,7 @@
  * Purpose: Retrieve comprehensive product details using multi-strategy lookup
  * Category: commerce
  * Version: 1.0.0
- * Last Updated: 2025-11-05
+ * Last Updated: 2025-11-07
  *
  * This tool provides multi-strategy product retrieval:
  * 1. Commerce provider lookup (WooCommerce/Shopify native APIs)
@@ -21,13 +21,20 @@ import { z } from 'zod';
 import { SearchResult } from '@/types';
 import { ExecutionContext, ToolResult, ToolMetadata } from '../shared/types';
 import { validateInput } from '../shared/validation';
-import { logToolExecution, PerformanceTimer } from '../shared/utils/logger';
-import { getCommerceProvider } from '@/lib/agents/commerce-provider';
-import { formatProviderProduct } from '@/lib/chat/product-formatters';
+import { PerformanceTimer } from '../shared/utils/logger';
 import { normalizeDomain } from '@/lib/chat/tool-handlers/domain-utils';
-import { isSkuPattern, exactMatchSearch } from '@/lib/search/exact-match-search';
-import { searchSimilarContent } from '@/lib/embeddings-optimized';
-import { trackLookupFailure } from '@/lib/telemetry/lookup-failures';
+import {
+  tryProviderStrategy,
+  tryExactMatchStrategy,
+  trySemanticStrategy,
+  StrategyResult
+} from './utils/product-strategies';
+import {
+  buildSuccessResult,
+  buildNotFoundResult,
+  buildErrorResult,
+  buildInvalidDomainResult
+} from './utils/product-results';
 
 // =====================================================
 // SECTION 1: Type Definitions
@@ -49,10 +56,6 @@ export interface GetProductDetailsOutput {
   executionTime: number;
   errorMessage?: string;
   suggestions?: string[];
-}
-
-interface FuzzyMatchResult {
-  suggestions: string[];
 }
 
 // =====================================================
@@ -97,46 +100,18 @@ export const metadata: ToolMetadata = {
     avgLatency: '250ms',
     maxLatency: '2s',
     tokenUsage: {
-      input: 20, // Semantic search embedding
-      output: 150 // Multiple chunks with product details
+      input: 20,
+      output: 150
     }
   }
 };
 
 // =====================================================
-// SECTION 3: Helper Functions
-// =====================================================
-
-/**
- * Check if a result contains fuzzy match suggestions
- */
-function isFuzzyMatchResult(result: any): result is FuzzyMatchResult {
-  return result && 'suggestions' in result && Array.isArray(result.suggestions);
-}
-
-/**
- * Determine query type for telemetry
- */
-function getQueryType(query: string): 'sku' | 'product_name' {
-  return /^[A-Z0-9-]{6,}$/i.test(query) ? 'sku' : 'product_name';
-}
-
-// =====================================================
-// SECTION 4: Tool Implementation
+// SECTION 3: Tool Implementation
 // =====================================================
 
 /**
  * Get product details using multi-strategy approach
- *
- * Strategy priority:
- * 1. Commerce provider (WooCommerce/Shopify) - fastest, most accurate
- * 2. Exact SKU match (if SKU pattern detected and provider fails/unavailable)
- * 3. Semantic search fallback (embeddings-based)
- *
- * The tool intelligently selects the best strategy based on:
- * - Query pattern (SKU vs product name)
- * - Provider availability
- * - Previous strategy success/failure
  */
 export async function getProductDetails(
   input: GetProductDetailsInput,
@@ -145,10 +120,8 @@ export async function getProductDetails(
   const timer = new PerformanceTimer();
 
   try {
-    // Validate input
     const validatedInput = validateInput(getProductDetailsInputSchema, input);
 
-    // Check required context
     if (!context.domain) {
       throw new Error('Missing required context: domain');
     }
@@ -159,388 +132,88 @@ export async function getProductDetails(
       `Domain: ${context.domain}`
     );
 
-    // Normalize domain
+    // Normalize and validate domain
     const normalizedDomain = normalizeDomain(context.domain);
     if (!normalizedDomain) {
-      const executionTime = timer.elapsed();
-
-      await logToolExecution({
-        tool: 'getProductDetails',
-        category: 'commerce',
-        customerId: context.customerId || 'unknown',
-        status: 'error',
-        error: 'Invalid or localhost domain',
-        executionTime,
-        timestamp: new Date().toISOString()
+      return buildInvalidDomainResult({
+        customerId: context.customerId,
+        executionTime: timer.elapsed()
       });
-
-      return {
-        success: false,
-        data: {
-          success: false,
-          results: [],
-          source: 'invalid-domain',
-          executionTime
-        },
-        error: {
-          code: 'INVALID_DOMAIN',
-          message: 'Invalid or localhost domain - cannot retrieve product details without valid domain'
-        },
-        metadata: {
-          executionTime
-        }
-      };
     }
+
+    const query = validatedInput.productQuery;
+    let result: StrategyResult | null = null;
 
     // STRATEGY 1: Try commerce provider first
-    const provider = await getCommerceProvider(normalizedDomain);
+    try {
+      result = await tryProviderStrategy(query, normalizedDomain);
 
-    if (provider) {
-      console.log(`[MCP getProductDetails] Using commerce provider "${provider.platform}"`);
-
-      try {
-        const details = await provider.getProductDetails(validatedInput.productQuery.trim());
-
-        if (details) {
-          // Check for fuzzy match result (product not found, but suggestions available)
-          if (isFuzzyMatchResult(details)) {
-            let errorMessage = `Product "${validatedInput.productQuery}" not found in catalog`;
-            if (details.suggestions.length > 0) {
-              errorMessage += `\n\nDid you mean one of these?\n${details.suggestions.map(s => `- ${s}`).join('\n')}`;
-            }
-
-            console.log(
-              `[MCP getProductDetails] ${provider.platform} product not found, but similar SKUs suggested: ${details.suggestions.join(', ')}`
-            );
-
-            // Track for telemetry
-            await trackLookupFailure({
-              query: validatedInput.productQuery,
-              queryType: getQueryType(validatedInput.productQuery),
-              errorType: 'not_found',
-              platform: provider.platform,
-              suggestions: details.suggestions,
-              timestamp: new Date(),
-            });
-
-            const executionTime = timer.elapsed();
-
-            return {
-              success: false,
-              data: {
-                success: false,
-                results: [],
-                source: `${provider.platform}-not-found` as any,
-                executionTime,
-                errorMessage,
-                suggestions: details.suggestions
-              },
-              error: {
-                code: 'PRODUCT_NOT_FOUND',
-                message: errorMessage,
-                details: { suggestions: details.suggestions }
-              },
-              metadata: {
-                executionTime,
-                source: provider.platform
-              }
-            };
-          }
-
-          // Normal product result - format and return
-          const result = formatProviderProduct(provider.platform, details, normalizedDomain);
-          if (result) {
-            const executionTime = timer.elapsed();
-
-            console.log(`[MCP getProductDetails] Product found via ${provider.platform}`);
-
-            await logToolExecution({
-              tool: 'getProductDetails',
-              category: 'commerce',
-              customerId: context.customerId || 'unknown',
-              status: 'success',
-              resultCount: 1,
-              executionTime,
-              timestamp: new Date().toISOString()
-            });
-
-            return {
-              success: true,
-              data: {
-                success: true,
-                results: [result],
-                source: `${provider.platform}-detail` as any,
-                executionTime
-              },
-              metadata: {
-                executionTime,
-                cached: false,
-                source: provider.platform
-              }
-            };
-          }
-        } else {
-          // Product not found in commerce platform
-          console.log(`[MCP getProductDetails] ${provider.platform} product not found: "${validatedInput.productQuery}"`);
-
-          // STRATEGY 2A: Try exact match if it's a SKU pattern (after provider miss)
-          if (isSkuPattern(validatedInput.productQuery)) {
-            console.log(`[MCP getProductDetails] Trying exact SKU match after provider miss`);
-
-            const exactResults = await exactMatchSearch(validatedInput.productQuery, normalizedDomain, 5);
-            if (exactResults.length > 0) {
-              const executionTime = timer.elapsed();
-
-              console.log(`[MCP getProductDetails] Exact match found ${exactResults.length} results after provider miss`);
-
-              await logToolExecution({
-                tool: 'getProductDetails',
-                category: 'commerce',
-                customerId: context.customerId || 'unknown',
-                status: 'success',
-                resultCount: exactResults.length,
-                executionTime,
-                timestamp: new Date().toISOString()
-              });
-
-              return {
-                success: true,
-                data: {
-                  success: true,
-                  results: exactResults,
-                  source: 'exact-match-after-provider',
-                  executionTime
-                },
-                metadata: {
-                  executionTime,
-                  cached: false,
-                  source: 'exact-match'
-                }
-              };
-            }
-          }
-
-          // Track not found for telemetry
-          await trackLookupFailure({
-            query: validatedInput.productQuery,
-            queryType: getQueryType(validatedInput.productQuery),
-            errorType: 'not_found',
-            platform: provider.platform,
-            timestamp: new Date(),
-          });
-
-          const executionTime = timer.elapsed();
-
-          return {
-            success: false,
-            data: {
-              success: false,
-              results: [],
-              source: `${provider.platform}-not-found` as any,
-              executionTime,
-              errorMessage: `Product "${validatedInput.productQuery}" not found in catalog`
-            },
-            error: {
-              code: 'PRODUCT_NOT_FOUND',
-              message: `Product "${validatedInput.productQuery}" not found in catalog`
-            },
-            metadata: {
-              executionTime,
-              source: provider.platform
-            }
-          };
-        }
-      } catch (providerError) {
-        console.error(`[MCP getProductDetails] ${provider.platform} detail error:`, providerError);
-
-        // STRATEGY 2B: Try exact match on provider error if it's a SKU pattern
-        if (isSkuPattern(validatedInput.productQuery)) {
-          console.log(`[MCP getProductDetails] Trying exact SKU match after provider error`);
-
-          const exactResults = await exactMatchSearch(validatedInput.productQuery, normalizedDomain, 5);
-          if (exactResults.length > 0) {
-            const executionTime = timer.elapsed();
-
-            console.log(`[MCP getProductDetails] Exact match found ${exactResults.length} results after provider error`);
-
-            await logToolExecution({
-              tool: 'getProductDetails',
-              category: 'commerce',
-              customerId: context.customerId || 'unknown',
-              status: 'success',
-              resultCount: exactResults.length,
-              executionTime,
-              timestamp: new Date().toISOString()
-            });
-
-            return {
-              success: true,
-              data: {
-                success: true,
-                results: exactResults,
-                source: 'exact-match-after-error',
-                executionTime
-              },
-              metadata: {
-                executionTime,
-                cached: false,
-                source: 'exact-match'
-              }
-            };
-          }
-        }
-
-        // Track API errors for telemetry
-        await trackLookupFailure({
-          query: validatedInput.productQuery,
-          queryType: getQueryType(validatedInput.productQuery),
-          errorType: 'api_error',
-          platform: provider.platform,
-          timestamp: new Date(),
+      if (result?.success) {
+        return buildSuccessResult(result, {
+          customerId: context.customerId,
+          executionTime: timer.elapsed()
         });
+      }
 
-        const executionTime = timer.elapsed();
-        const errorMessage = `Error looking up product: ${providerError instanceof Error ? providerError.message : 'Unknown error'}`;
+      if (result && !result.success) {
+        // Provider found product not found, try exact match for SKUs
+        const exactMatch = await tryExactMatchStrategy(query, normalizedDomain);
+        if (exactMatch?.success) {
+          return buildSuccessResult(exactMatch, {
+            customerId: context.customerId,
+            executionTime: timer.elapsed()
+          }, 'exact-match-after-provider');
+        }
 
-        return {
-          success: false,
-          data: {
-            success: false,
-            results: [],
-            source: 'error',
-            executionTime,
-            errorMessage
-          },
-          error: {
-            code: 'PROVIDER_ERROR',
-            message: errorMessage,
-            details: providerError
-          },
-          metadata: {
-            executionTime,
-            source: provider.platform
-          }
-        };
+        // Return provider's not-found result with suggestions
+        return buildNotFoundResult(result, {
+          customerId: context.customerId,
+          executionTime: timer.elapsed()
+        });
+      }
+    } catch (providerError) {
+      console.log(`[MCP getProductDetails] Provider error, trying fallback strategies`);
+
+      // STRATEGY 2: Try exact match on provider error
+      const exactMatch = await tryExactMatchStrategy(query, normalizedDomain);
+      if (exactMatch?.success) {
+        return buildSuccessResult(exactMatch, {
+          customerId: context.customerId,
+          executionTime: timer.elapsed()
+        }, 'exact-match-after-error');
       }
     }
 
-    // STRATEGY 2C: If no provider, try exact match first for SKU patterns
-    if (isSkuPattern(validatedInput.productQuery)) {
-      console.log(`[MCP getProductDetails] No provider available, trying exact SKU match`);
-
-      const exactResults = await exactMatchSearch(validatedInput.productQuery, normalizedDomain, 5);
-      if (exactResults.length > 0) {
-        const executionTime = timer.elapsed();
-
-        console.log(`[MCP getProductDetails] Exact match found ${exactResults.length} results (no provider)`);
-
-        await logToolExecution({
-          tool: 'getProductDetails',
-          category: 'commerce',
-          customerId: context.customerId || 'unknown',
-          status: 'success',
-          resultCount: exactResults.length,
-          executionTime,
-          timestamp: new Date().toISOString()
-        });
-
-        return {
-          success: true,
-          data: {
-            success: true,
-            results: exactResults,
-            source: 'exact-match-no-provider',
-            executionTime
-          },
-          metadata: {
-            executionTime,
-            cached: false,
-            source: 'exact-match'
-          }
-        };
+    // STRATEGY 2: No provider available - try exact match for SKUs
+    if (!result) {
+      const exactMatch = await tryExactMatchStrategy(query, normalizedDomain);
+      if (exactMatch?.success) {
+        return buildSuccessResult(exactMatch, {
+          customerId: context.customerId,
+          executionTime: timer.elapsed()
+        }, 'exact-match-no-provider');
       }
-
-      console.log(`[MCP getProductDetails] No exact match found, falling back to semantic search`);
     }
 
     // STRATEGY 3: Semantic search fallback
-    console.log(`[MCP getProductDetails] Using semantic search fallback`);
-
-    // Enhanced query for detailed product information
-    let enhancedQuery = validatedInput.productQuery;
-    if (validatedInput.includeSpecs) {
-      enhancedQuery = `${validatedInput.productQuery} specifications technical details features`;
-    }
-
-    // Return more chunks (15 instead of 5) to ensure AI gets complete information
-    const semanticResults = await searchSimilarContent(
-      enhancedQuery,
+    const semanticResult = await trySemanticStrategy(
+      query,
       normalizedDomain,
-      15,
-      0.3 // Minimum similarity threshold
+      validatedInput.includeSpecs
     );
 
-    const executionTime = timer.elapsed();
-
-    console.log(`[MCP getProductDetails] Semantic search returned ${semanticResults.length} results`);
-
-    await logToolExecution({
-      tool: 'getProductDetails',
-      category: 'commerce',
-      customerId: context.customerId || 'unknown',
-      status: 'success',
-      resultCount: semanticResults.length,
-      executionTime,
-      timestamp: new Date().toISOString()
+    return buildSuccessResult(semanticResult, {
+      customerId: context.customerId,
+      executionTime: timer.elapsed()
     });
-
-    return {
-      success: true,
-      data: {
-        success: true,
-        results: semanticResults,
-        source: 'semantic',
-        executionTime
-      },
-      metadata: {
-        executionTime,
-        cached: false,
-        source: 'semantic'
-      }
-    };
 
   } catch (error) {
-    const executionTime = timer.elapsed();
-
     console.error('[MCP getProductDetails] Error:', error);
 
-    await logToolExecution({
-      tool: 'getProductDetails',
-      category: 'commerce',
-      customerId: context.customerId || 'unknown',
-      status: 'error',
-      error: error instanceof Error ? error.message : 'Unknown error',
-      executionTime,
-      timestamp: new Date().toISOString()
+    return buildErrorResult(error, {
+      customerId: context.customerId,
+      executionTime: timer.elapsed()
     });
-
-    return {
-      success: false,
-      data: {
-        success: false,
-        results: [],
-        source: 'error',
-        executionTime
-      },
-      error: {
-        code: 'GET_PRODUCT_DETAILS_ERROR',
-        message: error instanceof Error ? error.message : 'Unknown error occurred while retrieving product details',
-        details: error
-      },
-      metadata: {
-        executionTime
-      }
-    };
   }
 }
 
