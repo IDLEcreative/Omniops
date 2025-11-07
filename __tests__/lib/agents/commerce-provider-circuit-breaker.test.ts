@@ -7,9 +7,11 @@
 
 import { describe, it, beforeEach, expect, jest, afterEach } from '@jest/globals';
 
+type ImmediateCallback = (...args: any[]) => void;
+
 // Mock setImmediate for Jest environment
 if (typeof setImmediate === 'undefined') {
-  (global as any).setImmediate = (fn: Function, ...args: any[]) => setTimeout(fn, 0, ...args);
+  (global as any).setImmediate = (fn: ImmediateCallback, ...args: any[]) => setTimeout(fn, 0, ...args);
 }
 
 // Create mock functions for dependencies

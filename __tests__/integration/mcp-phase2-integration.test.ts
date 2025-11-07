@@ -270,9 +270,9 @@ describe('MCP Phase 2 Integration Tests', () => {
       ];
 
       for (const toolName of tools) {
-        const module = await import(`../../servers/${serverRegistry.search.tools.includes(toolName) ? 'search' : serverRegistry.commerce.tools.includes(toolName) ? 'commerce' : 'content'}/${toolName}`);
+        const toolModule = await import(`../../servers/${serverRegistry.search.tools.includes(toolName) ? 'search' : serverRegistry.commerce.tools.includes(toolName) ? 'commerce' : 'content'}/${toolName}`);
 
-        const version = module.metadata.version;
+        const version = toolModule.metadata.version;
         expect(version).toMatch(/^\d+\.\d+\.\d+$/);
       }
     });

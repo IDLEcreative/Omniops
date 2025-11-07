@@ -341,7 +341,7 @@ export function cleanupTestEnv() {
   jest.resetModules();
 }
 
-export default {
+const mockHelpers = {
   mockSupabaseClient,
   mockWooCommerceClient,
   mockNextRequest,
@@ -352,3 +352,5 @@ export default {
   setupTestEnv,
   cleanupTestEnv,
 };
+
+export default mockHelpers;
