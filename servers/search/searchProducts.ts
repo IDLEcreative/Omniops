@@ -64,14 +64,14 @@ export const metadata: ToolMetadata = {
 
   examples: [
     {
-      description: 'Search for hydraulic pumps',
-      input: { query: 'hydraulic pumps', limit: 10 },
-      expectedOutput: 'Array of 10 pump products with relevance scores from semantic search'
+      description: 'Search for featured equipment',
+      input: { query: 'featured equipment', limit: 10 },
+      expectedOutput: 'Array of 10 highlighted products with relevance scores from semantic search'
     },
     {
       description: 'Exact SKU lookup',
-      input: { query: 'MU110667601', limit: 5 },
-      expectedOutput: 'Exact match results for SKU MU110667601 with 1.0 similarity'
+      input: { query: 'SKU-001234', limit: 5 },
+      expectedOutput: 'Exact match results for SKU SKU-001234 with 1.0 similarity'
     },
     {
       description: 'Broad product search',

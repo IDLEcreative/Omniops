@@ -70,14 +70,14 @@ import { getCompletePageDetails } from './servers/content';
 // Get complete product page
 const result = await getCompletePageDetails(
   {
-    pageQuery: 'hydraulic pump A4VTG90',
+    pageQuery: 'modular drive unit AX-90',
     fallbackChunkLimit: 15,
     similarityThreshold: 0.3,
     includeMetadata: true
   },
   {
     customerId: '8dccd788-1ec1-43c2-af56-78aa3366bad3',
-    domain: 'thompsonseparts.co.uk'
+    domain: 'example.com'
   }
 );
 

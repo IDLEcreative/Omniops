@@ -152,7 +152,7 @@ export const metadata: ToolSchema = {
       description: 'Search for products',
       input: {
         operation: 'search_products',
-        query: 'hydraulic pump',
+        query: 'featured equipment',
         limit: 10
       },
       expectedOutput: 'Array of products matching query'

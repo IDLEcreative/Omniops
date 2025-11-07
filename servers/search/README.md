@@ -25,7 +25,7 @@ const context: ExecutionContext = {
 };
 
 const results = await searchProducts(
-  { query: 'hydraulic pumps', limit: 15 },
+  { query: 'featured equipment', limit: 15 },
   context
 );
 ```
@@ -53,7 +53,7 @@ Search for products within a specific category using semantic embeddings.
 ```typescript
 import { searchByCategory } from './servers/search';
 const result = await searchByCategory(
-  { category: 'hydraulic-pumps', limit: 20, threshold: 0.15 },
+  { category: 'featured-collection', limit: 20, threshold: 0.15 },
   context
 );
 ```

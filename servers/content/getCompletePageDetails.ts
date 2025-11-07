@@ -79,12 +79,12 @@ export const metadata: ToolMetadata = {
   examples: [
     {
       description: 'Get complete product page details',
-      input: { pageQuery: 'hydraulic pump A4VTG90', fallbackChunkLimit: 15, similarityThreshold: 0.3 },
+      input: { pageQuery: 'modular drive unit AX-90', fallbackChunkLimit: 15, similarityThreshold: 0.3 },
       expectedOutput: 'All chunks from the best matching product page with complete information'
     },
     {
       description: 'Get documentation page',
-      input: { pageQuery: 'installation guide for pumps', fallbackChunkLimit: 20, similarityThreshold: 0.25 },
+      input: { pageQuery: 'installation guide for premium equipment', fallbackChunkLimit: 20, similarityThreshold: 0.25 },
       expectedOutput: 'Complete installation guide page with all sections'
     },
     {

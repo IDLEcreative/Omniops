@@ -63,9 +63,9 @@ export const metadata: ToolMetadata = {
 
   examples: [
     {
-      description: 'Search within hydraulic pumps category',
-      input: { category: 'hydraulic-pumps', limit: 20 },
-      expectedOutput: 'Up to 20 products in the hydraulic-pumps category with relevance scores'
+      description: 'Search within featured equipment category',
+      input: { category: 'featured-equipment', limit: 20 },
+      expectedOutput: 'Up to 20 inventory items in the featured-equipment category with relevance scores'
     },
     {
       description: 'Search category with custom threshold',

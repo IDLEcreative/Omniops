@@ -310,7 +310,7 @@ if (result.success && result.data?.results.length > 0) {
 // Lookup by product name without specs
 const result2 = await getProductDetails(
   {
-    productQuery: 'hydraulic pump',
+    productQuery: 'premium equipment',
     includeSpecs: false
   },
   { customerId, domain }
@@ -527,14 +527,14 @@ if (!result.success && result.data?.suggestions) {
 }
 ```
 
-#### 4. Technical Specs: "I need specs for hydraulic pump"
+#### 4. Technical Specs: "I need specs for premium equipment"
 ```typescript
 const result = await getProductDetails(
-  { productQuery: 'hydraulic pump', includeSpecs: true },
+  { productQuery: 'premium equipment', includeSpecs: true },
   { customerId, domain }
 );
 
-// Enhanced query: "hydraulic pump specifications technical details features"
+// Enhanced query: "premium equipment specifications technical details features"
 // Returns 15 chunks with complete specifications
 ```
 
