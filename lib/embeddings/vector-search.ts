@@ -2,7 +2,7 @@
  * Vector-based semantic search operations
  */
 
-import type { SupabaseClient } from '@supabase/supabase-js';
+import type { SupabaseClient } from '@/types/supabase';
 import { generateQueryEmbedding } from './query-embedding';
 import { QueryTimer } from './timer';
 import { TIMEOUTS } from './constants';

@@ -2,7 +2,7 @@
  * Fallback search when vector search fails
  */
 
-import type { SupabaseClient } from '@supabase/supabase-js';
+import type { SupabaseClient } from '@/types/supabase';
 import { QueryTimer } from './timer';
 import { TIMEOUTS } from './constants';
 import type { SearchResult } from './types';
