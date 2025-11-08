@@ -2,8 +2,6 @@ const path = require('path');
 
 /** @type {import('next').NextConfig} */
 const nextConfig = {
-  // Set the correct workspace root for Vercel
-  outputFileTracingRoot: path.join(__dirname),
   // Suppress hydration warnings in development
   reactStrictMode: true,
   // Optionally disable powered by header
@@ -16,7 +14,7 @@ const nextConfig = {
     ignoreDuringBuilds: true
   },
   typescript: {
-    // Skip TypeScript checking during Docker build
+    // Skip TypeScript checking during builds
     ignoreBuildErrors: true
   },
   
