@@ -17,7 +17,7 @@ const testimonials = [
       'Setup took 2 minutes. Within a week, 70% of our customer inquiries were handled automatically. Our team now focuses only on complex issues.',
     author: 'Sarah Thompson',
     role: 'Founder',
-    company: "Thompson's E-Parts (5-15 employees)",
+    company: 'Growing Online Business (5-15 employees)',
     plan: 'Small Business Plan',
     image: '🚀',
   },

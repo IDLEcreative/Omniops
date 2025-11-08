@@ -20,12 +20,12 @@ export const MAX_RELATED_QUERIES = 3;
 
 // Performance optimization: Use Map for O(1) lookups
 export const SYNONYM_MAP = new Map([
-  ['motor', ['engine', 'drive', 'power unit']],
+  ['device', ['equipment', 'unit', 'element']],
   ['broken', ['faulty', 'damaged', 'not working', 'defective']],
   ['install', ['setup', 'mount', 'fit', 'installation']],
   ['warranty', ['guarantee', 'coverage', 'protection']],
   ['replace', ['replacement', 'substitute', 'swap']],
-  ['part', ['component', 'spare', 'piece']],
+  ['item', ['element', 'piece']],
   ['manual', ['guide', 'instructions', 'documentation']],
   ['fix', ['repair', 'mend', 'resolve']],
   ['cheap', ['affordable', 'budget', 'inexpensive']],
@@ -49,7 +49,7 @@ export const REVERSE_SYNONYMS = buildReverseSynonyms();
 
 // Performance optimization: Use Sets for O(1) lookups
 // Note: These are generic examples. In production, load from database configuration per customer.
-export const BRANDS = new Set(['bosch', 'makita', 'dewalt', 'milwaukee', 'ryobi', 'ford', 'toyota', 'honda', 'bmw', 'mercedes']);
-export const PRODUCTS = new Set(['motor', 'engine', 'battery', 'filter', 'product', 'sensor', 'belt', 'brake', 'clutch']);
+export const BRANDS = new Set(['samsung', 'apple', 'sony', 'lg', 'bosch']);
+export const PRODUCTS = new Set(['device', 'equipment', 'battery', 'filter', 'product', 'sensor', 'accessory']);
 export const ISSUES = new Set(['broken', 'not working', 'failed', 'error', 'problem', 'issue', 'damaged', 'worn']);
 export const ACTIONS = new Set(['install', 'replace', 'repair', 'fix', 'troubleshoot', 'maintain', 'upgrade']);

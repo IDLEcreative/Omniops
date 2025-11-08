@@ -7,6 +7,7 @@ import dynamic from "next/dynamic";
 import type { SimplifiedWidgetConfig } from "../types";
 
 // Dynamically import ChatWidget to avoid SSR issues
+// eslint-disable-next-line no-restricted-syntax -- React component path, not product reference
 const ChatWidget = dynamic(() => import('@/components/ChatWidget'), { ssr: false });
 
 interface LivePreviewProps {
@@ -91,7 +92,7 @@ export function LivePreview({ config, customerDomain }: LivePreviewProps) {
               <div className="h-24 bg-gray-100 rounded"></div>
             </div>
 
-            {/* REAL ChatWidget Component */}
+            {/* REAL ChatWidget */}
             <div className="absolute inset-0">
               <ChatWidget
                 demoId="preview"

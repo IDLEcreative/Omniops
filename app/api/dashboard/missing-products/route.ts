@@ -10,7 +10,7 @@ interface MissingProduct {
 
 interface ProductCategory {
   tools: string[];
-  parts: string[];
+  components: string[];
   equipment: string[];
   other: string[];
 }
@@ -43,7 +43,7 @@ export async function GET(request: NextRequest) {
       /do you have (.+?)(?:\?|$)/gi,
       /need (?:a |an |some )?(.+?)(?:\.|,|$)/gi,
       /searching for (.+?)(?:\.|,|$)/gi,
-      /(.+?) (?:products?|items?|parts?)/gi,
+      /(.+?) (?:products?|items?)/gi,
       /show me (.+?)(?:\.|,|$)/gi,
       /where (?:is|are) (?:the )?(.+?)(?:\?|$)/gi,
     ];
@@ -122,7 +122,7 @@ export async function GET(request: NextRequest) {
     // Categorize missing products
     const categories = {
       tools: [] as string[],
-      parts: [] as string[],
+      components: [] as string[],
       equipment: [] as string[],
       other: [] as string[]
     };
@@ -131,9 +131,9 @@ export async function GET(request: NextRequest) {
       const name = product.name.toLowerCase();
       if (name.includes('tool') || name.includes('wrench') || name.includes('hammer') || name.includes('drill')) {
         categories.tools.push(product.name);
-      } else if (name.includes('part') || name.includes('filter') || name.includes('belt') || name.includes('bearing')) {
-        categories.parts.push(product.name);
-      } else if (name.includes('pump') || name.includes('motor') || name.includes('compressor') || name.includes('generator')) {
+      } else if (name.includes('accessory') || name.includes('filter') || name.includes('belt') || name.includes('bearing')) {
+        categories.components.push(product.name);
+      } else if (name.includes('motor') || name.includes('compressor') || name.includes('generator')) {
         categories.equipment.push(product.name);
       } else {
         categories.other.push(product.name);
@@ -152,7 +152,7 @@ export async function GET(request: NextRequest) {
       },
       categories: {
         tools: categories.tools.slice(0, 5),
-        parts: categories.parts.slice(0, 5),
+        components: categories.components.slice(0, 5),
         equipment: categories.equipment.slice(0, 5),
         other: categories.other.slice(0, 5)
       } as ProductCategory,
@@ -172,7 +172,7 @@ export async function GET(request: NextRequest) {
         },
         categories: {
           tools: [],
-          parts: [],
+          components: [],
           equipment: [],
           other: []
         } satisfies ProductCategory,

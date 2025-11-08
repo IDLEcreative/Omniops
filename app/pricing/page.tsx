@@ -15,6 +15,7 @@ import {
 
 // Dynamically import AIQuoteWidget to avoid SSR issues
 const AIQuoteWidget = dynamic(
+  // eslint-disable-next-line no-restricted-syntax -- React component path, not product reference
   () => import('@/components/pricing/AIQuoteWidget').then(mod => ({ default: mod.AIQuoteWidget })),
   { ssr: false, loading: () => <div className="min-h-[400px] flex items-center justify-center">Loading...</div> }
 );

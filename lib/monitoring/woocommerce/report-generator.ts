@@ -53,7 +53,7 @@ export async function generateReport(): Promise<MonitoringReport> {
 
   // Generate recommendations
   if (overallStatus === 'down') {
-    recommendations.push('🚨 CRITICAL: One or more components are down. Immediate action required.');
+    recommendations.push('🚨 CRITICAL: One or more modules are down. Immediate action required.');
   }
 
   if (metrics.apiResponseTime > 2000) {
@@ -61,7 +61,7 @@ export async function generateReport(): Promise<MonitoringReport> {
   }
 
   if (degradedCount > 0) {
-    recommendations.push('⚠️  Some components are degraded. Monitor closely and investigate issues.');
+    recommendations.push('⚠️  Some modules are degraded. Monitor closely and investigate issues.');
   }
 
   if (overallStatus === 'healthy') {

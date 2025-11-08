@@ -110,8 +110,8 @@ const eslintConfig = [
       "no-restricted-syntax": [
         "error",
         {
-          "selector": "Literal[value=/thompsonseparts|cifa|hydraulic pump/i]",
-          "message": "Do not use specific company/brand names or industry-specific product types in production code. Use generic terms like 'Brand A', 'Model-123', 'product', 'equipment' or make configurable via database. Tests in __tests__/ are exempt (see CLAUDE.md)."
+          "selector": "Literal[value=/thompsonseparts|cifa|hydraulic pump|\\bpumps?\\b|\\bparts?\\b|machinery|components?|gloves?/i]:not(ImportDeclaration *)",
+          "message": "Do not use specific company/brand names or industry-specific product types in production code (including system prompts and examples). Use generic terms like 'items', 'products', 'services', 'Brand A', 'Model-123' or make configurable via database. Tests in __tests__/ are exempt (see CLAUDE.md)."
         }
       ]
     }

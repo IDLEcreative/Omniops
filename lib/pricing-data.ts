@@ -56,7 +56,7 @@ export const PRICING_TIERS: PricingTier[] = [
     price: 500,
     period: '/month',
     description: 'Great for startups and growing businesses',
-    repsReplaced: 'Replaces 1 part-time CS rep',
+    repsReplaced: 'Replaces 1 CS representative',
     savings: '£1,177/month',
     savingsPercent: 70,
     conversationsPerMonth: 2500,
@@ -87,7 +87,7 @@ export const PRICING_TIERS: PricingTier[] = [
     testimonial: {
       quote: 'Cut our support costs by 65% in the first month',
       author: 'Sarah Thompson',
-      company: 'Thompson\'s E-Parts',
+      company: 'E-Commerce Business',
     },
   },
   {
@@ -128,7 +128,7 @@ export const PRICING_TIERS: PricingTier[] = [
       quote:
         'Handles 3,000+ conversations monthly. Our CS team now focuses on complex issues only.',
       author: 'Mike Johnson',
-      company: 'Industrial Parts Ltd',
+      company: 'Industrial Supplier',
     },
   },
   {

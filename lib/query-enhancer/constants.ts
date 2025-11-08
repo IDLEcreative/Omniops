@@ -9,13 +9,13 @@ import type { QueryIntent } from './types';
  * Domain-specific synonym mappings for query expansion
  */
 export const SYNONYM_MAP: Record<string, string[]> = {
-  // Automotive/parts domain
-  'motor': ['engine', 'drive', 'power unit', 'motor unit'],
+  // Generic product domain
+  'device': ['equipment', 'unit', 'element'],
   'broken': ['faulty', 'damaged', 'not working', 'defective', 'malfunctioning', 'failed'],
   'install': ['setup', 'mount', 'fit', 'attach', 'installation', 'fitting'],
   'warranty': ['guarantee', 'coverage', 'protection', 'warrantee'],
   'replace': ['replacement', 'substitute', 'swap', 'change'],
-  'part': ['component', 'spare', 'piece', 'item'],
+  'item': ['element', 'piece', 'product'],
   'manual': ['guide', 'instructions', 'documentation', 'handbook'],
   'fix': ['repair', 'mend', 'resolve', 'troubleshoot'],
 

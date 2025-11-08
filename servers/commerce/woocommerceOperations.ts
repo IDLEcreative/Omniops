@@ -193,7 +193,7 @@ export const metadata = {
     },
     {
       description: 'Search products',
-      input: { operation: 'search_products', query: 'pump', limit: 10 },
+      input: { operation: 'search_products', query: 'featured items', limit: 10 },
       expectedOutput: 'List of matching products with details'
     },
     {

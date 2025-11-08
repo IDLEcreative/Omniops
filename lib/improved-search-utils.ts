@@ -26,12 +26,12 @@ export function combineProductChunks(chunks: any[]): string {
     // Prioritize complete product information
     if (textLower.includes('sku:') && textLower.includes('description')) {
       sections.description = text + '\n' + sections.description;
-    } else if (textLower.includes('sku:') || textLower.includes('part number')) {
+    } else if (textLower.includes('sku:') || textLower.includes('item number')) {
       sections.sku += text + '\n';
     } else if (textLower.includes('specification') ||
-               textLower.includes('cm3/rev') ||
-               textLower.includes('bar') ||
-               textLower.includes('iso')) {
+               textLower.includes('capacity') ||
+               textLower.includes('pressure') ||
+               textLower.includes('standard')) {
       sections.specifications += text + '\n';
     } else if (textLower.includes('£') || textLower.includes('price')) {
       sections.price += text + '\n';

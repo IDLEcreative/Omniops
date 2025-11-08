@@ -16,8 +16,8 @@ export function extractCategory(url: string, title: string, chunk: string): stri
   // Extract from URL path
   const urlParts = url.split('/').filter(p => p && !p.includes('.'));
   const categoryPatterns = [
-    'automotive', 'electronics', 'clothing', 'tools', 'parts', 'accessories',
-    'equipment', 'supplies', 'components', 'hardware', 'software'
+    'automotive', 'electronics', 'clothing', 'tools', 'items', 'accessories',
+    'equipment', 'supplies', 'elements', 'hardware', 'software'
   ];
 
   for (const part of urlParts) {

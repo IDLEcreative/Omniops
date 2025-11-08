@@ -86,7 +86,7 @@ export const metadata: ToolMetadata = {
     },
     {
       description: 'Get product details by name',
-      input: { productQuery: 'hydraulic pump A4VTG90', includeSpecs: true },
+      input: { productQuery: 'equipment model A4VTG90', includeSpecs: true },
       expectedOutput: 'Product details with specifications from semantic search'
     },
     {

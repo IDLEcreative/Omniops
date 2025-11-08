@@ -78,7 +78,7 @@ export class ErrorBoundary extends Component<Props, State> {
           userAgent: typeof navigator !== 'undefined' ? navigator.userAgent : 'unknown',
           url: typeof window !== 'undefined' ? window.location.href : 'unknown',
           severity: errorCount > 2 ? 'critical' : 'high',
-          category: 'react_component'
+          category: 'react_error'
         }),
       });
     } catch (loggingError) {
@@ -183,7 +183,7 @@ export class ErrorBoundary extends Component<Props, State> {
   }
 }
 
-// Hook for using error boundary in functional components
+// Hook for using error boundary in functional React code
 export function useErrorHandler() {
   return (error: Error, errorInfo?: React.ErrorInfo) => {
     if (process.env.NODE_ENV === "development") {

@@ -21,6 +21,7 @@ import {
   deleteTrainingData
 } from '@/lib/dashboard/training-utils';
 
+// eslint-disable-next-line no-restricted-syntax -- React component path, not product reference
 const ChatWidget = dynamic(() => import('@/components/ChatWidget'), {
   ssr: false,
   loading: () => null

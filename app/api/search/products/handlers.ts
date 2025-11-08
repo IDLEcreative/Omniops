@@ -153,7 +153,7 @@ export async function handleInfoRequest(req: NextRequest) {
     message: 'Product Search API - Metadata Vectorization Enabled',
     version: '2.0',
     features: [
-      'SKU/Part number search',
+      'SKU/Item number search',
       'Natural language queries',
       'Price filtering',
       'Availability filtering',

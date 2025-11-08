@@ -63,14 +63,14 @@ export const metadata: ToolMetadata = {
 
   examples: [
     {
-      description: 'Search within featured equipment category',
-      input: { category: 'featured-equipment', limit: 20 },
-      expectedOutput: 'Up to 20 inventory items in the featured-equipment category with relevance scores'
+      description: 'Search within featured products category',
+      input: { category: 'featured-products', limit: 20 },
+      expectedOutput: 'Up to 20 inventory items in the featured-products category with relevance scores'
     },
     {
       description: 'Search category with custom threshold',
-      input: { category: 'spare parts', limit: 50, threshold: 0.2 },
-      expectedOutput: 'Products in spare parts category with minimum 0.2 similarity'
+      input: { category: 'accessories', limit: 50, threshold: 0.2 },
+      expectedOutput: 'Products in accessories category with minimum 0.2 similarity'
     },
     {
       description: 'Broad category search',

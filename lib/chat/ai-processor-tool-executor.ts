@@ -226,7 +226,7 @@ export function formatToolResultsForAI(
             toolResponse += 'I can browse our categories once I know which topic you want—shipping, returns, installation, etc. Let me know and I will pull it up.';
             break;
           case 'get_product_details':
-            toolResponse += 'To grab detailed specifications I need the product or part number you are checking on. Share that and I will verify the details.';
+            toolResponse += 'To grab detailed specifications I need the product or item number you are checking on. Share that and I will verify the details.';
             break;
           case 'get_complete_page_details':
             toolResponse += 'I need to know which specific page or item you want complete details for. Let me know what you are interested in and I will retrieve all available information about it.';

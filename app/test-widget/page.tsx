@@ -3,7 +3,8 @@
 import { useEffect, useState } from 'react';
 import dynamic from 'next/dynamic';
 
-// Dynamically import the ChatWidget component to avoid SSR issues
+// Dynamically import the ChatWidget to avoid SSR issues
+// eslint-disable-next-line no-restricted-syntax -- React component path, not product reference
 const ChatWidget = dynamic(() => import('@/components/ChatWidget'), { 
   ssr: false,
   loading: () => null 

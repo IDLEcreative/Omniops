@@ -21,7 +21,7 @@ async function fetchAnalyticsForReport(
 ): Promise<{ data: DashboardAnalyticsData; dateRange: { start: string; end: string } }> {
   const now = new Date();
   let startDate: Date;
-  let endDate: Date = now;
+  const endDate: Date = now;
 
   switch (period) {
     case 'daily':

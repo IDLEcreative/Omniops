@@ -8,75 +8,63 @@ export class SynonymExpander {
   // Note: This static map should eventually be replaced with database-driven
   // domain-specific synonyms loaded from the customer_configs table
   private static synonymMap: Record<string, string[]> = {
-    // Weather and environmental terms
-    "tough": ["extreme", "harsh", "severe", "difficult", "challenging", "rugged"],
-    "weather": ["climatic conditions", "climate", "environmental", "outdoor", "elements"],
-    "extreme": ["tough", "harsh", "severe", "heavy duty", "industrial"],
-    "conditions": ["weather", "environment", "climate", "circumstances"],
-    
-    // Equipment categories
-    "forest equipment": ["forest loader", "forestry", "logging equipment", "timber equipment", "woodland machinery"],
-    "forest": ["forestry", "woodland", "timber", "logging"],
-    "loader": ["loading equipment", "crane", "lift", "hoist"],
+    // Quality and condition terms
+    "tough": ["durable", "sturdy", "robust", "reliable", "heavy duty"],
+    "conditions": ["environment", "circumstances", "requirements"],
+    "extreme": ["intense", "severe", "heavy duty", "industrial"],
 
-    // Components and parts - Generic examples (load from database per customer)
-    "tank": ["reservoir", "container", "vessel", "storage"],
-    "fluid": ["liquid", "fluid system"],
+    // Generic equipment categories
+    "equipment": ["device", "apparatus", "system"],
+    "loader": ["handler", "system", "mechanism"],
+
+    // Generic elements - Generic examples (load from database per customer)
+    "container": ["reservoir", "vessel", "storage"],
+    "fluid": ["liquid", "substance"],
     "product": ["equipment", "device", "item"],
-    "valve": ["control valve", "flow control"],
-    "cylinder": ["actuator", "component"],
-    "hose": ["line", "pipe", "tubing"],
-    
-    // Tools and equipment
-    "chainsaw": ["chain saw", "saw", "cutting tool", "timber saw"],
-    "blade": ["cutting blade", "saw blade", "cutter"],
-    "chain": ["saw chain", "cutting chain", "chainsaw chain"],
-    "bar": ["guide bar", "chainsaw bar", "cutting bar"],
-    
-    // Vehicle and machinery terms
-    "tractor": ["agricultural tractor", "farm tractor", "machinery"],
-    "excavator": ["digger", "earthmover", "excavating machine"],
-    "truck": ["lorry", "vehicle", "transport"],
-    "engine": ["motor", "power unit", "powerplant"],
-    "transmission": ["gearbox", "drivetrain", "drive system"],
+    "regulator": ["controller", "control"],
+    "element": ["unit", "piece"],
+    "connection": ["link", "interface", "coupling"],
+
+    // Tools and equipment (generic)
+    "tool": ["implement", "device", "instrument"],
+    "edge": ["side", "border"],
+    "accessory": ["attachment", "add-on"],
+    "unit": ["element", "piece"],
+
+    // Generic machinery terms
+    "machine": ["equipment", "apparatus", "system"],
+    "vehicle": ["transport", "conveyance"],
+    "device": ["unit", "equipment", "apparatus"],
+    "system": ["assembly", "mechanism", "setup"],
     
     // Maintenance and service
     "maintenance": ["service", "upkeep", "repair", "servicing"],
     "repair": ["fix", "mend", "restore", "service"],
     "replace": ["change", "swap", "substitute", "renew"],
-    "filter": ["strainer", "screen", "filtration"],
-    "oil": ["lubricant", "fluid", "hydraulic oil", "engine oil"],
-    
+    "filter": ["strainer", "screen", "purifier"],
+
     // Size and specifications
     "size": ["dimension", "measurement", "spec", "specification"],
-    "diameter": ["width", "bore", "size"],
-    "pressure": ["psi", "bar", "hydraulic pressure"],
-    "flow": ["flow rate", "gpm", "lpm", "fluid flow"],
-    
-    // Brand variations (common misspellings and variations)
-    "cat": ["caterpillar", "cat equipment"],
-    "jd": ["john deere", "deere"],
-    "komatsu": ["komatsu equipment"],
-    "volvo": ["volvo equipment", "volvo machinery"],
-    
+    "diameter": ["width", "size"],
+    "pressure": ["force", "intensity"],
+    "flow": ["rate", "throughput"],
+
+    // Generic brand terms (examples only - load from database per customer)
+    "standard": ["regular", "common", "typical"],
+    "premium": ["high-end", "advanced", "superior"],
+    "professional": ["commercial", "industrial", "trade"],
+
     // Action words
     "buy": ["purchase", "order", "get", "acquire"],
     "need": ["require", "want", "looking for"],
     "find": ["search", "locate", "looking for"],
     "compatible": ["fits", "works with", "suitable for", "matches"],
-    
-    // Part conditions
-    "new": ["brand new", "unused", "factory new"],
-    "used": ["second hand", "pre-owned", "refurbished"],
-    "oem": ["original", "genuine", "manufacturer", "factory"],
-    "aftermarket": ["replacement", "alternative", "non-oem"],
-    
-    // Technical abbreviations
-    "hp": ["horsepower", "power"],
-    "rpm": ["revolutions per minute", "speed"],
-    "psi": ["pounds per square inch", "pressure"],
-    "gpm": ["gallons per minute", "flow rate"],
-    "lpm": ["liters per minute", "litres per minute", "flow rate"]
+
+    // Condition terms
+    "new": ["brand new", "unused", "fresh"],
+    "used": ["pre-owned", "refurbished", "reconditioned"],
+    "original": ["genuine", "authentic", "standard"],
+    "alternative": ["replacement", "substitute", "equivalent"]
   };
 
   // Bidirectional mapping for comprehensive coverage

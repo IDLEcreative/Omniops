@@ -64,8 +64,8 @@ export const metadata: ToolMetadata = {
 
   examples: [
     {
-      description: 'Search for featured equipment',
-      input: { query: 'featured equipment', limit: 10 },
+      description: 'Search for featured products',
+      input: { query: 'featured products', limit: 10 },
       expectedOutput: 'Array of 10 highlighted products with relevance scores from semantic search'
     },
     {
@@ -75,8 +75,8 @@ export const metadata: ToolMetadata = {
     },
     {
       description: 'Broad product search',
-      input: { query: 'spare parts', limit: 50 },
-      expectedOutput: 'Up to 50 spare parts from commerce provider or semantic search'
+      input: { query: 'accessories', limit: 50 },
+      expectedOutput: 'Up to 50 products from commerce provider or semantic search'
     }
   ],
 

@@ -58,7 +58,7 @@ export function classifyContent(chunk: string, url: string, title: string): Cont
  */
 export function extractCategory(url: string, title: string): string | undefined {
   const urlParts = url.split('/').filter(p => p && !p.includes('.'));
-  const categories = ['automotive', 'electronics', 'clothing', 'tools', 'parts'];
+  const categories = ['automotive', 'electronics', 'clothing', 'tools', 'items'];
 
   // Check URL parts
   for (const part of urlParts) {

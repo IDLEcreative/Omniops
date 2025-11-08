@@ -25,16 +25,16 @@ export function extractEntities(query: string): EnhancedQuery['entities'] {
     entities.skus = skuMatches.map(s => s.toUpperCase());
   }
 
-  // Common automotive brands
-  const brands = ['bosch', 'makita', 'dewalt', 'milwaukee', 'ryobi', 'ford', 'toyota', 'honda', 'bmw', 'mercedes'];
+  // Common brands (generic examples)
+  const brands = ['samsung', 'apple', 'sony', 'lg', 'bosch'];
   for (const brand of brands) {
     if (query.includes(brand)) {
       entities.brands.push(brand.charAt(0).toUpperCase() + brand.slice(1));
     }
   }
 
-  // Product types
-  const products = ['motor', 'engine', 'battery', 'filter', 'pump', 'sensor', 'belt', 'brake', 'clutch'];
+  // Product types (generic examples)
+  const products = ['device', 'equipment', 'battery', 'filter', 'item', 'sensor', 'accessory'];
   for (const product of products) {
     if (query.includes(product)) {
       entities.products.push(product);

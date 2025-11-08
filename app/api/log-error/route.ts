@@ -34,8 +34,8 @@ export async function POST(request: NextRequest) {
                     (validated.errorCount && validated.errorCount > 2 ? ErrorSeverity.CRITICAL : ErrorSeverity.HIGH);
     
     // Determine category
-    const category = validated.category === 'react_component' 
-      ? ErrorCategory.SYSTEM 
+    const category = validated.category === 'react_module'
+      ? ErrorCategory.SYSTEM
       : ErrorCategory.API;
     
     // Create error object

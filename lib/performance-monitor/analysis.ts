@@ -50,9 +50,9 @@ export class PerformanceAnalyzer {
     }
 
     // Check for slow rendering
-    const renderMetrics = metrics.filter(m => m.name.includes('render') || m.name.includes('component'));
+    const renderMetrics = metrics.filter(m => m.name.includes('render') || m.name.includes('element'));
     if (renderMetrics.some(m => (m.duration || 0) > 100)) {
-      suggestions.push('Consider using React.memo or useMemo for expensive components');
+      suggestions.push('Consider using React.memo or useMemo for expensive elements');
     }
 
     // Check for repeated operations

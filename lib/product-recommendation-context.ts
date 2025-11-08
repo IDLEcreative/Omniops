@@ -10,10 +10,10 @@ export class ProductRecommendationContext {
   static getProductGuidelines(): string {
     return `
 PRODUCT RECOMMENDATION GUIDELINES:
-When customers ask about products or parts:
+When customers ask about products or items:
 1. Keep It Concise: 1 line per option, max 3 options, and 1 category link.
 2. In‑House Only: Only link to our domain. Never link to external sites.
-3. Always Include Category: If the request maps to a product category (e.g. "Body Fillers & Stoppers"), include a clear "Browse the category" link so the customer can shop themselves.
+3. Always Include Category: If the request maps to a product category (e.g. "Featured Items"), include a clear "Browse the category" link so the customer can shop themselves.
 4. Ask One Clarifying Question: If the request is non‑specific or could mean multiple items, ask a single follow‑up question to narrow choice (e.g. size, brand, material, colour/finish, kit vs single, usage).
 5. Structure:
    - Start with the best/most popular option
@@ -42,11 +42,11 @@ When customers ask about products or parts:
     
     // Product-related keywords that indicate recommendation requests
     const productKeywords = [
-      'product', 'part', 'parts', 'item', 'items',
+      'product', 'item', 'items',
       'buy', 'purchase', 'order', 'get', 'need', 'want',
       'looking for', 'search for', 'find',
       'recommend', 'suggestion', 'suggest', 'advice',
-      'equipment', 'device', 'engine', 'filter', 'seal', 'component', 'accessory',
+      'equipment', 'device', 'element', 'accessory',
       'compatible', 'fits', 'works with',
       'best', 'good', 'suitable', 'right'
     ];
@@ -58,8 +58,8 @@ When customers ask about products or parts:
       /which.*should i/,
       /what.*best for/,
       /need.*for my/,
-      /looking for.*part/,
-      /part.*for/,
+      /looking for.*item/,
+      /item.*for/,
       /compatible.*with/
     ];
     

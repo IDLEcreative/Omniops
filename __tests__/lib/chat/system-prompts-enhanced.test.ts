@@ -18,14 +18,15 @@ describe('System Prompts - Enhanced Features', () => {
   });
 
   describe('Prompt Size and Performance', () => {
-    test('base prompt should be reasonable size (<10KB)', () => {
+    test('base prompt should be reasonable size (<20KB)', () => {
       const prompt = getCustomerServicePrompt();
       const sizeInKB = new Blob([prompt]).size / 1024;
 
-      expect(sizeInKB).toBeLessThan(10);
+      // Updated limit to accommodate comprehensive WooCommerce and Shopify workflow documentation
+      expect(sizeInKB).toBeLessThan(20);
     });
 
-    test('enhanced prompt with complex data should be <15KB', () => {
+    test('enhanced prompt with complex data should be <25KB', () => {
       // Add complex metadata
       for (let i = 0; i < 10; i++) {
         manager.incrementTurn();
@@ -49,7 +50,8 @@ describe('System Prompts - Enhanced Features', () => {
       const enhanced = getEnhancedCustomerServicePrompt(manager);
       const sizeInKB = new Blob([enhanced]).size / 1024;
 
-      expect(sizeInKB).toBeLessThan(15);
+      // Updated limit to accommodate base prompt growth (WooCommerce + Shopify workflows)
+      expect(sizeInKB).toBeLessThan(25);
     });
 
     test('prompt generation should be fast (<5ms)', () => {

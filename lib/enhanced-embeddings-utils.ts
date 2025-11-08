@@ -34,7 +34,7 @@ export function getContextStats(chunks: ChunkResult[]): ContextStats {
 }
 
 /**
- * Enhance product pages by retrieving ALL chunks for complete product information
+ * Enhance item pages by retrieving ALL chunks for complete item information
  */
 export async function enhanceProductPages(
   results: Array<{ content: string; url: string; title: string; similarity: number }>,
@@ -47,7 +47,7 @@ export async function enhanceProductPages(
 
   if (productUrls.length === 0) return mapped;
 
-  console.log(`[Enhanced Embeddings] Found ${productUrls.length} product URLs, fetching ALL chunks for complete product info...`);
+  console.log(`[Enhanced Embeddings] Found ${productUrls.length} item URLs, fetching ALL chunks for complete item info...`);
 
   // For each product URL, get ALL its chunks
   for (const productUrl of productUrls) {
@@ -81,10 +81,10 @@ export async function enhanceProductPages(
 
             // Check what type of content this chunk contains
             if (text.includes('SKU:') && text.includes('Product Description')) {
-              // This chunk has the complete product info
+              // This chunk has the complete item info
               productDescChunk = text + '\n';
-              console.log(`[Enhanced Embeddings] Found COMPLETE product chunk with SKU and description`);
-            } else if (text.includes('Product Description') || text.includes('SKU:') || text.includes('Part Number')) {
+              console.log(`[Enhanced Embeddings] Found COMPLETE item chunk with SKU and description`);
+            } else if (text.includes('Product Description') || text.includes('SKU:') || text.includes('Item Number')) {
               productDescChunk += text + '\n';
             } else if (text.includes('Specification') || text.includes('Dimensions') || text.includes('Capacity')) {
               specsChunk += text + '\n';
@@ -106,20 +106,20 @@ export async function enhanceProductPages(
           const existingIndex = mapped.findIndex(r => r.url === productUrl);
           if (existingIndex >= 0 && mapped[existingIndex]) {
             mapped[existingIndex].content = combinedContent;
-            console.log(`[Enhanced Embeddings] Enhanced product content for ${productUrl}`);
+            console.log(`[Enhanced Embeddings] Enhanced item content for ${productUrl}`);
             console.log(`[Enhanced Embeddings] Combined content length: ${combinedContent.length} chars`);
 
             // Log summary of combined content
             console.log(`[Enhanced Embeddings] Combined chunks summary:`);
-            console.log(`  - Product info: ${productDescChunk.length > 0 ? 'Yes' : 'No'}`);
+            console.log(`  - Item info: ${productDescChunk.length > 0 ? 'Yes' : 'No'}`);
             console.log(`  - Specifications: ${specsChunk.length > 0 ? 'Yes' : 'No'}`);
             console.log(`  - Pricing: ${priceChunk.length > 0 ? 'Yes' : 'No'}`);
           }
         }
       }
     } catch (error) {
-      console.error(`[Enhanced Embeddings] Error enhancing product ${productUrl}:`, error);
-      // Continue with other products if one fails
+      console.error(`[Enhanced Embeddings] Error enhancing item ${productUrl}:`, error);
+      // Continue with other items if one fails
     }
   }
 

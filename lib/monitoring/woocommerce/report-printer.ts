@@ -24,8 +24,8 @@ export function printReport(report: MonitoringReport): void {
     `${getStatusEmoji(report.overallStatus)} ${report.overallStatus.toUpperCase()}`
   );
 
-  // Component status
-  console.log('\n🔧 COMPONENT HEALTH');
+  // Module status
+  console.log('\n🔧 MODULE HEALTH');
   console.log('━'.repeat(70));
 
   for (const check of report.checks) {

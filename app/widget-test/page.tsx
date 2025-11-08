@@ -56,9 +56,9 @@ export default function WidgetTestPage() {
             <div className="grid gap-2">
               {[
                 "What products do you sell?",
-                "Do you have equipment available?",
-                "Tell me about safety products",
-                "What parts are available?",
+                "Do you have items available?",
+                "Tell me about featured products",
+                "What items are in stock?",
                 "How can I contact you?"
               ].map((question, i) => (
                 <button

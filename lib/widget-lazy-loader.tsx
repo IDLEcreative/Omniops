@@ -11,7 +11,8 @@ import React, { useState, lazy, Suspense } from 'react';
 import { MinimalWidgetLoader } from './widget-loader-minimal';
 import type { StandaloneWidgetConfig } from './widget-standalone/types';
 
-// Lazy-load the full ChatWidget component
+// Lazy-load the full ChatWidget
+// eslint-disable-next-line no-restricted-syntax -- React component path, not product reference
 const ChatWidget = lazy(() => import('../components/ChatWidget'));
 
 interface LazyWidgetProps {

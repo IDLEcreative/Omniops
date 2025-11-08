@@ -12,7 +12,7 @@ const PRICING_TIERS = [
     price: 500,
     period: '/month',
     description: 'Great for startups and growing businesses',
-    repsReplaced: 'Replaces 1 part-time CS rep',
+    repsReplaced: 'Replaces 1 half-time CS rep',
     savings: '£1,177/month',
     savingsPercent: 70,
     conversationsPerMonth: 2500,
@@ -43,7 +43,7 @@ const PRICING_TIERS = [
     testimonial: {
       quote: 'Cut our support costs by 65% in the first month',
       author: 'Sarah Thompson',
-      company: 'Thompson\'s E-Parts',
+      company: 'Growing Online Business',
     },
   },
   {
@@ -84,7 +84,7 @@ const PRICING_TIERS = [
       quote:
         'Handles 3,000+ conversations monthly. Our CS team now focuses on complex issues only.',
       author: 'Mike Johnson',
-      company: 'Industrial Parts Ltd',
+      company: 'Established B2B Company',
     },
   },
   {
