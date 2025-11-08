@@ -14,6 +14,8 @@ export {
   generateEmbeddings,
   splitIntoChunks,
   generateEmbeddingVectors,
+  handleZeroResults,
+  shouldTriggerRecovery,
 } from './embeddings/index';
 
-export type { SearchResult, CachedSearchResult } from './embeddings/index';
+export type { SearchResult, CachedSearchResult, RecoveryResult } from './embeddings/index';
