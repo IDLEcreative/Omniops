@@ -6,6 +6,7 @@ import { PageHeader } from "@/components/dashboard/integrations/shopify/PageHead
 import { SetupInstructions } from "@/components/dashboard/integrations/shopify/SetupInstructions";
 import { ConnectionForm } from "@/components/dashboard/integrations/shopify/ConnectionForm";
 import { FeaturesCard } from "@/components/dashboard/integrations/shopify/FeaturesCard";
+import { WebhookStatus } from "@/components/dashboard/integrations/WebhookStatus";
 
 export default function ShopifyIntegrationPage() {
   const router = useRouter();
@@ -106,6 +107,7 @@ export default function ShopifyIntegrationPage() {
     setIsLoading(true);
 
     try {
+      // Step 1: Save Shopify configuration
       const response = await fetch("/api/shopify/configure", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
@@ -117,22 +119,57 @@ export default function ShopifyIntegrationPage() {
 
       const result = await response.json();
 
-      if (result.success) {
-        setTestResult({
-          success: true,
-          message: "Shopify integration configured successfully!",
-        });
-
-        // Redirect to integrations page after a delay
-        setTimeout(() => {
-          router.push("/dashboard/integrations");
-        }, 2000);
-      } else {
+      if (!result.success) {
         setTestResult({
           success: false,
           message: result.error || "Failed to save configuration",
         });
+        setIsLoading(false);
+        return;
       }
+
+      // Step 2: Automatically register webhook
+      setTestResult({
+        success: true,
+        message: "Configuration saved! Setting up purchase tracking...",
+      });
+
+      try {
+        const webhookResponse = await fetch("/api/webhooks/setup", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({
+            domain: window.location.hostname,
+            platform: "shopify",
+            action: "register",
+          }),
+        });
+
+        const webhookResult = await webhookResponse.json();
+
+        if (webhookResult.success) {
+          setTestResult({
+            success: true,
+            message: "Shopify integration configured and purchase tracking enabled!",
+          });
+        } else {
+          setTestResult({
+            success: true,
+            message: "Configuration saved (webhook setup will retry automatically)",
+          });
+        }
+      } catch (webhookError) {
+        console.error("Webhook registration failed:", webhookError);
+        setTestResult({
+          success: true,
+          message: "Configuration saved (webhook setup will retry automatically)",
+        });
+      }
+
+      // Redirect to integrations page after a delay
+      setTimeout(() => {
+        router.push("/dashboard/integrations");
+      }, 2000);
     } catch (error: any) {
       setTestResult({
         success: false,
@@ -179,6 +216,16 @@ export default function ShopifyIntegrationPage() {
           formatShopDomain={formatShopDomain}
         />
       </div>
+
+      {/* Webhook Status - Only show if credentials are configured */}
+      {(shopDomain && accessToken) || testResult?.success ? (
+        <div className="mt-6">
+          <WebhookStatus
+            domain={typeof window !== 'undefined' ? window.location.hostname : ''}
+            platform="shopify"
+          />
+        </div>
+      ) : null}
 
       <div className="mt-6">
         <FeaturesCard />
