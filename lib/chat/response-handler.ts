@@ -10,7 +10,7 @@ import { ChatTelemetry } from '@/lib/chat-telemetry';
 import { ConversationMetadataManager } from './conversation-metadata';
 import { saveAssistantMessage } from './conversation-manager';
 import { parseAndTrackEntities } from './response-parser';
-import { emitMessageEvent } from '@/lib/analytics/events';
+import { emitMessageEvent } from '@/lib/analytics/supabase-events';
 
 export async function saveFinalResponse(
   conversationId: string,

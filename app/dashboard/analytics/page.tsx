@@ -11,7 +11,7 @@ import { RefreshCw, AlertCircle, TrendingUp, BarChart3 } from 'lucide-react';
 
 import { useDashboardAnalytics } from '@/hooks/use-dashboard-analytics';
 import { useBusinessIntelligence } from '@/hooks/use-business-intelligence';
-import { useRealtimeAnalytics } from '@/hooks/use-realtime-analytics';
+import { useSupabaseRealtimeAnalytics } from '@/hooks/use-supabase-realtime-analytics';
 
 import { MetricsOverview } from '@/components/analytics/MetricsOverview';
 import { ResponseTimeChart } from '@/components/analytics/ResponseTimeChart';
@@ -46,7 +46,7 @@ export default function AnalyticsPage() {
 
   const organizationId = analyticsData?.metrics ? '1' : null;
 
-  const { isConnected, latestUpdate } = useRealtimeAnalytics({
+  const { isConnected, latestUpdate } = useSupabaseRealtimeAnalytics({
     organizationId,
     enabled: true,
   });
