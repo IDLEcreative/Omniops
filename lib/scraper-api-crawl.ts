@@ -206,6 +206,14 @@ export async function crawlWebsite(
     throw new Error(`Worker script not found at ${crawlerPath}`);
   }
 
+  // Prepare forceRescrape flag with logging
+  const forceRescrapeFlag = options?.forceRescrape ? 'true' : 'false';
+
+  console.log(`[CrawlWebsite] Starting crawl for ${url}`);
+  console.log(`[CrawlWebsite] forceRescrape option: ${options?.forceRescrape} (type: ${typeof options?.forceRescrape})`);
+  console.log(`[CrawlWebsite] forceRescrape flag to worker: "${forceRescrapeFlag}" (string)`);
+  console.log(`[CrawlWebsite] Worker args[8]: ${forceRescrapeFlag}`);
+
   const workerArgs = [
     crawlerPath,
     jobId,
@@ -215,11 +223,12 @@ export async function crawlWebsite(
     options?.configPreset || 'memoryEfficient',
     isOwnSite ? 'true' : 'false',
     JSON.stringify(sitemapUrls.slice(0, maxPages === -1 ? undefined : maxPages)),
-    (options?.forceRescrape ? 'true' : 'false')
+    forceRescrapeFlag
   ];
 
   try {
-    const child = spawn('node', workerArgs, {
+    // Use tsx to run worker with TypeScript support
+    const child = spawn('npx', ['tsx', ...workerArgs], {
       cwd: process.cwd(),
       env: { ...process.env },
       stdio: 'inherit'
