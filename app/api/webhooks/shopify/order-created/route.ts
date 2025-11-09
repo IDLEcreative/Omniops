@@ -9,6 +9,7 @@ import { NextRequest, NextResponse } from 'next/server';
 import { verifyShopifyWebhook, extractShopifyHeaders } from '@/lib/webhooks/shopify-verifier';
 import { parseShopifyOrder, shouldTrackShopifyOrder } from '@/lib/webhooks/shopify-order-parser';
 import { attributePurchaseToConversation } from '@/lib/attribution/purchase-attributor';
+import { recordPurchaseStage } from '@/lib/analytics/funnel-analytics';
 import { createServiceRoleClient } from '@/lib/supabase-server';
 import type { ShopifyOrderWebhook } from '@/types/purchase-attribution';
 
@@ -128,6 +129,18 @@ export async function POST(request: NextRequest) {
         confidence: attributionResult.confidence,
         method: attributionResult.method,
       });
+
+      // Record purchase in funnel (Shopify orders are typically purchases, not abandoned carts)
+      if (attributionResult.conversationId) {
+        await recordPurchaseStage(
+          attributionResult.conversationId,
+          orderData.customerEmail,
+          orderData.orderId,
+          orderData.total,
+          attributionResult.confidence,
+          attributionResult.method
+        );
+      }
 
       return NextResponse.json({
         status: 'success',

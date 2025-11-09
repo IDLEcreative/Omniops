@@ -9,8 +9,9 @@ import { NextRequest, NextResponse } from 'next/server';
 import { verifyWooCommerceWebhook, extractWooCommerceHeaders } from '@/lib/webhooks/woocommerce-verifier';
 import { parseWooCommerceOrder, shouldTrackWooCommerceOrder } from '@/lib/webhooks/woocommerce-order-parser';
 import { attributePurchaseToConversation } from '@/lib/attribution/purchase-attributor';
+import { recordCartStage, recordPurchaseStage } from '@/lib/analytics/funnel-analytics';
 import { createServiceRoleClient } from '@/lib/supabase-server';
-import type { WooCommerceOrderWebhook } from '@/types/purchase-attribution';
+import type { WooCommerceOrderWebhook, CartPriority } from '@/types/purchase-attribution';
 
 export const runtime = 'nodejs';
 export const dynamic = 'force-dynamic';
@@ -129,6 +130,38 @@ export async function POST(request: NextRequest) {
         confidence: attributionResult.confidence,
         method: attributionResult.method,
       });
+
+      // Record funnel stage based on order status
+      const isAbandonedCart = ['pending', 'on-hold', 'failed'].includes(payload.status);
+      const isPurchase = ['completed', 'processing'].includes(payload.status);
+
+      if (attributionResult.conversationId) {
+        if (isAbandonedCart) {
+          // Record cart abandonment in funnel
+          const priority: CartPriority =
+            orderData.total > 100 ? 'high' :
+            orderData.total > 50 ? 'medium' : 'low';
+
+          await recordCartStage(
+            attributionResult.conversationId,
+            orderData.customerEmail,
+            orderData.orderId,
+            orderData.total,
+            orderData.lineItems?.length || 0,
+            priority
+          );
+        } else if (isPurchase) {
+          // Record purchase completion in funnel
+          await recordPurchaseStage(
+            attributionResult.conversationId,
+            orderData.customerEmail,
+            orderData.orderId,
+            orderData.total,
+            attributionResult.confidence,
+            attributionResult.method
+          );
+        }
+      }
 
       return NextResponse.json({
         status: 'success',

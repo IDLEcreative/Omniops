@@ -187,3 +187,114 @@ export interface ShopifyOrderWebhook {
     value: string;
   }>;
 }
+
+// Conversation Funnel Types
+export type FunnelStage = 'chat' | 'cart_abandoned' | 'purchased';
+export type DropOffPoint = 'chat_to_cart' | 'cart_to_purchase';
+export type CartPriority = 'high' | 'medium' | 'low';
+
+export interface ConversationFunnel {
+  id: string;
+  conversation_id: string;
+  customer_email: string;
+  domain: string;
+
+  // Funnel stages
+  chat_started_at: string;
+  cart_created_at: string | null;
+  purchased_at: string | null;
+
+  // Cart details
+  cart_order_id: string | null;
+  cart_value: number | null;
+  cart_item_count: number | null;
+  cart_priority: CartPriority | null;
+
+  // Purchase details
+  purchase_order_id: string | null;
+  purchase_value: number | null;
+  attribution_confidence: number | null;
+  attribution_method: string | null;
+
+  // Analytics
+  current_stage: FunnelStage;
+  drop_off_point: DropOffPoint | null;
+
+  // Timing metrics (seconds)
+  time_to_cart: number | null;
+  time_to_purchase: number | null;
+  cart_to_purchase_time: number | null;
+
+  // Metadata
+  metadata: Record<string, any>;
+
+  created_at: string;
+  updated_at: string;
+}
+
+export interface FunnelMetrics {
+  timeRange: {
+    start: string;
+    end: string;
+  };
+  overview: {
+    totalChats: number;
+    totalCarts: number;
+    totalPurchases: number;
+    totalRevenue: number;
+  };
+  conversionRates: {
+    chatToCart: number; // percentage
+    cartToPurchase: number; // percentage
+    overallConversion: number; // chat to purchase percentage
+  };
+  dropOffAnalysis: {
+    droppedAtCart: number; // count
+    droppedAtPurchase: number; // count
+    chatOnlyRate: number; // percentage
+    cartAbandonmentRate: number; // percentage
+  };
+  timingMetrics: {
+    avgTimeToCartMinutes: number;
+    avgTimeToPurchaseMinutes: number;
+    avgCartToPurchaseMinutes: number;
+    medianTimeToCartMinutes: number;
+    medianTimeToPurchaseMinutes: number;
+  };
+  revenueMetrics: {
+    totalRevenue: number;
+    avgPurchaseValue: number;
+    cartValue: number; // total value in abandoned carts
+    lostRevenue: number; // value of carts not converted
+  };
+  cartPriorityBreakdown: {
+    high: { count: number; value: number; conversionRate: number };
+    medium: { count: number; value: number; conversionRate: number };
+    low: { count: number; value: number; conversionRate: number };
+  };
+}
+
+export interface FunnelTrend {
+  date: string;
+  totalChats: number;
+  totalCarts: number;
+  totalPurchases: number;
+  chatToCartRate: number;
+  cartToPurchaseRate: number;
+  overallConversionRate: number;
+  revenue: number;
+}
+
+export interface CustomerJourney {
+  conversationId: string;
+  customerEmail: string;
+  stages: Array<{
+    stage: FunnelStage;
+    timestamp: string;
+    details: Record<string, any>;
+  }>;
+  currentStage: FunnelStage;
+  completedPurchase: boolean;
+  totalValue: number;
+  timeToConversion?: number; // seconds
+}
