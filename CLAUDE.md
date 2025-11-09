@@ -1,7 +1,286 @@
-**Last Updated:** 2025-11-09 (Added "Fix Issues Immediately with Agents" guideline)
+**Last Updated:** 2025-11-09 (Added "Create Comprehensive Tests with Agents" guideline)
 **Verified Accurate For:** v0.1.0
 
 # CLAUDE.md
+
+**AI Assistant Instructions for Omniops Codebase**
+
+**📊 Metadata:**
+- **Last Updated:** 2025-11-09
+- **Version:** v0.1.0
+- **File Purpose:** Primary instruction set for Claude Code AI assistant
+- **Critical Sections:** Lines 6-165 (brand-agnostic, file placement, agents), 785-1044 (fix issues, create tests)
+- **Total MUST/NEVER Rules:** 52 directives
+- **Line Count:** ~1,700 lines
+- **Estimated Parse Time:** 30 seconds
+
+**⚡ Quick Navigation:**
+- [🚨 Critical Rules Index](#-critical-rules-index) - All MUST/NEVER/ALWAYS directives
+- [⚡ Trigger Index](#-trigger-index-auto-actions) - When to auto-deploy agents
+- [📚 Pattern Library](#-pattern-library-quick-reference) - Code examples (right vs wrong)
+- [📊 Decision Matrices](#-decision-matrices) - Quick reference tables
+- [🔍 Search Keywords](#-search-keywords-map) - Fast grep/search guide
+
+---
+
+## 🚨 Critical Rules Index
+
+**MUST Rules (Required Actions):**
+1. **[Line 10-17]** NEVER hardcode: company names, products, industries, domains, URLs, emails
+2. **[Line 68]** NEVER create files in root (only config files allowed)
+3. **[Line 729]** Files MUST be under 300 LOC - refactor if exceeded
+4. **[Line 734]** ALWAYS read entire file before making any changes
+5. **[Line 783]** Deploy agents immediately for parallelizable tasks (no user permission needed)
+6. **[Line 787]** Deploy agent immediately when encountering ANY issue
+7. **[Line 879]** Deploy testing agent immediately after completing any code
+8. **[Line 1152]** ALWAYS validate fixes with actual commands (`npm test`, `npm run build`)
+
+**NEVER Rules (Prohibited Actions):**
+1. **[Line 10-17]** NEVER hardcode brand-specific data (Thompson's, pumps, etc.) in production code
+2. **[Line 68]** NEVER create files directly in root directory
+3. **[Line 815]** NEVER defer issue fixes - deploy agent immediately
+4. **[Line 985]** NEVER complete code without creating comprehensive tests
+5. **[Line 1159]** NEVER mock 3+ levels deep - refactor for dependency injection instead
+6. **[Line 1509]** NEVER add dependencies without checking native JS/TS alternatives
+
+**ALWAYS Rules (Required Behaviors):**
+1. **[Line 734]** ALWAYS read complete file before editing
+2. **[Line 740]** ALWAYS consider multiple approaches like a Senior Engineer
+3. **[Line 787-799]** ALWAYS deploy agent immediately for: test failures, build errors, linting, imports, type errors
+4. **[Line 879-892]** ALWAYS deploy testing agent after: new features, bug fixes, refactors, API endpoints, components
+5. **[Line 1060]** ALWAYS use standardized agent prompt templates
+6. **[Line 1152]** ALWAYS validate with concrete commands, never assume fixes work
+
+**Auto-Trigger Rules (Do Without User Permission):**
+1. **[Line 759-782]** Auto-deploy parallel agents for: 2+ independent categories, 20+ files, >30min tasks, >10K tokens
+2. **[Line 787-799]** Auto-deploy fix agents for: test failures, build errors, TypeScript errors, imports, linting, security
+3. **[Line 879-892]** Auto-deploy testing agents for: completed features, bug fixes, refactors, new endpoints, new components
+4. **[Line 920-936]** Auto-deploy for: dependency updates, file refactoring, ESLint fixes
+
+→ **Full details:** [Brand-Agnostic](#-critical-brand-agnostic-application) | [File Placement](#-critical-file-placement-rules) | [Fix Issues](#fix-issues-immediately-with-agents) | [Create Tests](#create-comprehensive-tests-with-agents-after-code-completion)
+
+---
+
+## ⚡ Trigger Index (Auto-Actions)
+
+**Format:** `TRIGGER → ACTION (no user permission needed)`
+
+### Issue Triggers (Fix Immediately)
+```
+Test failure detected        → Deploy the-fixer agent (line 830)
+Build error detected         → Deploy the-fixer agent (line 833)
+TypeScript error detected    → Deploy the-fixer agent (line 833)
+Import error detected        → Deploy the-fixer agent (line 825)
+Linting violation detected   → Deploy the-fixer agent (line 792)
+Security issue detected      → Deploy the-fixer agent (line 837)
+Dead code found              → Deploy the-fixer agent (line 841)
+Performance issue (O(n²))    → Deploy performance-profiler agent (line 795)
+```
+
+### Code Completion Triggers (Test Immediately)
+```
+New feature completed        → Deploy code-quality-validator agent (line 892)
+Bug fix applied              → Deploy code-quality-validator agent (line 894)
+Refactoring finished         → Deploy code-quality-validator agent (line 895)
+API endpoint created         → Deploy code-quality-validator agent (line 896)
+Component built              → Deploy code-quality-validator agent (line 897)
+Utility function added       → Deploy code-quality-validator agent (line 898)
+Database migration done      → Deploy code-quality-validator agent (line 899)
+```
+
+### Parallelization Triggers (Multi-Agent Deploy)
+```
+2+ independent categories    → Deploy parallel agents (line 761)
+20+ files to modify          → Deploy parallel agents (line 768)
+>30 min sequential work      → Deploy parallel agents (line 773)
+>10K token output expected   → Deploy parallel agents (line 779)
+Dependency updates needed    → Deploy parallel agents by category (line 1013)
+```
+
+### Code Quality Triggers (Refactor Immediately)
+```
+File exceeds 300 LOC         → Refactor into smaller modules (line 729)
+Mock >3 levels deep          → Refactor for dependency injection (line 1159)
+Test setup >20 lines         → Refactor architecture (line 1160)
+O(n²) algorithm detected     → Optimize to O(n) or O(n log n) (line 1516-1623)
+Hidden dependencies found    → Extract to explicit constructor params (line 1175-1196)
+```
+
+→ **Full trigger details:** [Fix Issues Immediately](#fix-issues-immediately-with-agents) | [Create Tests](#create-comprehensive-tests-with-agents-after-code-completion) | [Agent Orchestration](#agent-orchestration--parallelization)
+
+---
+
+## 📚 Pattern Library (Quick Reference)
+
+### Brand-Agnostic Patterns
+```typescript
+// ❌ WRONG: Hardcoded business logic
+if (product.type === 'pump') { /* ... */ }
+if (domain.includes('thompson')) { /* ... */ }
+const defaultCategory = 'hydraulic-parts';
+
+// ✅ RIGHT: Dynamic business logic from database
+if (product.type === customer.config.primaryProductType) { /* ... */ }
+if (customer.settings.specialHandling) { /* ... */ }
+const defaultCategory = customer.config.defaultCategory;
+```
+
+### File Placement Patterns
+```typescript
+// ❌ WRONG: Files in root
+Write('test-checkout-flow.ts', content)
+Write('apply-migration.ts', content)
+Write('IMPLEMENTATION_REPORT.md', content)
+
+// ✅ RIGHT: Files in proper locations
+Write('__tests__/integration/test-checkout-flow.ts', content)
+Write('scripts/database/apply-migration.ts', content)
+Write('ARCHIVE/completion-reports-2025-11/IMPLEMENTATION_REPORT.md', content)
+```
+
+### Agent Deployment Patterns
+```typescript
+// ❌ WRONG: Defer issues or ask user
+"I found 5 test failures. Should I fix them?"
+"There are TypeScript errors. Let me note them and continue..."
+
+// ✅ RIGHT: Deploy agent immediately
+"I found 5 test failures. Deploying the-fixer agent now."
+Task({
+  subagent_type: 'the-fixer',
+  description: 'Fix 5 test failures',
+  prompt: 'Fix test failures in: test1.ts, test2.ts...'
+})
+```
+
+### Testing Patterns
+```typescript
+// ❌ WRONG: Complete feature without tests
+function newFeature() { /* implementation */ }
+// Move on to next task...
+
+// ✅ RIGHT: Complete feature, then deploy testing agent
+function newFeature() { /* implementation */ }
+Task({
+  subagent_type: 'code-quality-validator',
+  description: 'Create comprehensive tests',
+  prompt: 'Create test suite for newFeature() with 90%+ coverage...'
+})
+```
+
+### Dependency Injection Patterns
+```typescript
+// ❌ WRONG: Hidden dependencies (hard to test)
+class ShopifyProvider {
+  constructor(domain: string) {}
+  async fetch() {
+    const client = await getDynamicClient(this.domain); // Hidden!
+    return client.get();
+  }
+}
+
+// ✅ RIGHT: Explicit dependencies (easy to test)
+class ShopifyProvider {
+  constructor(private client: ShopifyAPI) {} // Explicit!
+  async fetch() {
+    return this.client.get();
+  }
+}
+
+// Test becomes trivial:
+const mockClient = { get: jest.fn() };
+const provider = new ShopifyProvider(mockClient);
+```
+
+### Performance Patterns
+```typescript
+// ❌ WRONG: O(n²) nested loops
+for (const item of items) {
+  for (const other of items) {
+    if (item.id === other.parentId) { /* ... */ }
+  }
+}
+
+// ✅ RIGHT: O(n) with Map/Set
+const itemMap = new Map(items.map(i => [i.id, i]));
+for (const item of items) {
+  const parent = itemMap.get(item.parentId); // O(1) lookup
+}
+```
+
+→ **More patterns:** [Testing Philosophy](#testing--code-quality-philosophy) | [Performance Guidelines](#performance-guidelines) | [Optimization Philosophy](#optimization-philosophy)
+
+---
+
+## 📊 Decision Matrices
+
+### File Placement Matrix
+| File Type | Example | Root? | Destination |
+|-----------|---------|-------|-------------|
+| Test script | `test-*.ts`, `verify-*.ts` | ❌ NO | `__tests__/[category]/` |
+| Utility script | `apply-*.ts`, `check-*.ts` | ❌ NO | `scripts/[category]/` |
+| SQL script | `*.sql` | ❌ NO | `scripts/sql/[category]/` |
+| Completion report | `*_REPORT.md`, `*_SUMMARY.md` | ❌ NO | `ARCHIVE/completion-reports-[date]/` |
+| Test output | `*.json` (results) | ❌ NO | `ARCHIVE/test-results/` |
+| Log file | `*.log` | ❌ NO | `logs/[category]/` |
+| Documentation | `*.md` (guides) | ❌ NO | `docs/[category]/` |
+| Config file | `package.json`, `tsconfig.json` | ✅ YES | `/` (root only) |
+
+### Agent Deployment Decision Matrix
+| Scenario | Independent? | Time Est | Deploy Agent? | Agent Type |
+|----------|--------------|----------|---------------|------------|
+| Update 15 dependencies | ✅ 4 categories | 2-3h | ✅ YES | 4 parallel agents by category |
+| Fix single failing test | ❌ 1 test | <5min | ❌ NO | Do directly |
+| Refactor 30+ files | ✅ 3 modules | 1-2h | ✅ YES | 3 parallel agents by module |
+| Fix import error | ✅ 1 file | 2min | ✅ YES | the-fixer (immediate) |
+| Build + test + lint | ✅ 3 tasks | 15min | ✅ YES | 3 parallel agents |
+| Create tests for feature | ✅ 1 feature | 20min | ✅ YES | code-quality-validator (auto) |
+
+### Testing Strategy Matrix
+| Mock Complexity | Test Setup Lines | Test Speed | Action Required |
+|----------------|------------------|------------|-----------------|
+| 3+ levels deep | >20 lines | Slow (>5s) | 🔧 Refactor for dependency injection |
+| 2 levels | 10-20 lines | Medium (2-5s) | ⚠️ Consider simplification |
+| 1 level (constructor) | <10 lines | Fast (<1s) | ✅ Good design |
+| No mocking needed | <5 lines | Fast (<1s) | ✅ Excellent design |
+
+### Performance Optimization Matrix
+| Complexity | Example | Action | Target |
+|------------|---------|--------|--------|
+| O(n²) or worse | Nested loops | 🔴 Refactor immediately | O(n) or O(n log n) |
+| O(n log n) | Sorting | ✅ Acceptable | Maintain |
+| O(n) | Single loop with Map | ✅ Good | Maintain |
+| O(1) | Direct lookup | ✅ Excellent | Maintain |
+
+---
+
+## 🔍 Search Keywords Map
+
+**To find rules about specific topics, grep/search for these terms:**
+
+| Topic | Search Terms | Jump To |
+|-------|-------------|---------|
+| **Brand-Agnostic** | "HARDCODING", "multi-tenant", "Thompson", "pumps" | [#brand-agnostic](#-critical-brand-agnostic-application) |
+| **File Placement** | "root directory", "NEVER create files", "Decision Tree" | [#file-placement](#-critical-file-placement-rules) |
+| **Agent Deployment** | "Deploy agent", "parallel", "Fix Issues Immediately" | [#fix-issues](#fix-issues-immediately-with-agents) |
+| **Testing** | "Hard to Test", "dependency injection", "mock", "Create Tests" | [#testing-philosophy](#testing--code-quality-philosophy) |
+| **Performance** | "O(n²)", "algorithmic complexity", "optimization" | [#performance-guidelines](#performance-guidelines) |
+| **Security** | "credentials", "encryption", "RLS", "GDPR" | [#security](#security--privacy) |
+| **Database** | "Supabase", "migrations", "schema", "pgvector" | [#database-structure](#database-structure) |
+| **Agent Templates** | "hallucination", "extrapolation", "verification" | [#preventing-hallucination](#preventing-agent-hallucination--extrapolation) |
+
+**Anchor links for instant jump:**
+```
+#brand-agnostic → Line 6
+#file-placement-rules → Line 66
+#fix-issues-immediately-with-agents → Line 785
+#create-comprehensive-tests → Line 877
+#testing--code-quality-philosophy → Line 1130
+#agent-orchestration--parallelization → Line 743
+#performance-guidelines → Line 1605
+```
+
+---
 
 ## 🚨 CRITICAL: BRAND-AGNOSTIC APPLICATION 🚨
 
@@ -873,6 +1152,175 @@ Fix this issue completely and verify the fix.
 ```
 
 **Remember**: Issues don't fix themselves. Every issue you encounter is an opportunity to improve the codebase immediately. Deploy agents liberally!
+
+#### Create Comprehensive Tests with Agents After Code Completion
+
+**CRITICAL**: When you complete writing any code (feature, bug fix, refactor), immediately deploy an agent to create comprehensive tests. DO NOT ask the user first - this is automatic.
+
+**The "Test Everything" Philosophy:**
+
+```
+Code Completed
+    ↓
+IMMEDIATELY Deploy Agent to Create Tests
+    ↓
+Verify Tests Pass & Coverage is Complete
+```
+
+**Trigger: Deploy Testing Agent When:**
+- ✅ New feature implementation completed
+- ✅ Bug fix applied
+- ✅ Refactoring finished
+- ✅ New API endpoint created
+- ✅ New component built
+- ✅ New utility function added
+- ✅ Database migration completed
+- ✅ Integration logic updated
+
+**What the Testing Agent Should Create:**
+
+1. **Unit Tests**
+   - Test all functions/methods in isolation
+   - Cover edge cases and error conditions
+   - Mock external dependencies
+   - Aim for 90%+ code coverage
+
+2. **Integration Tests**
+   - Test interactions between modules
+   - Test API endpoints end-to-end
+   - Test database operations
+   - Test external service integrations
+
+3. **Component Tests (for UI)**
+   - Test rendering in different states
+   - Test user interactions
+   - Test props and callbacks
+   - Test accessibility
+
+4. **Error Scenario Tests**
+   - Test failure modes
+   - Test error handling
+   - Test validation logic
+   - Test boundary conditions
+
+**Testing Agent Mission Template:**
+
+```markdown
+MISSION: Create comprehensive test suite for [FEATURE/CODE]
+
+## Code to Test
+- Location: [file paths]
+- Functionality: [brief description]
+- Dependencies: [list dependencies]
+
+## Your Mission
+Create a complete test suite that validates all functionality.
+
+## Required Test Coverage
+1. Unit tests for all functions/methods
+   - Happy path cases
+   - Edge cases
+   - Error conditions
+   - Boundary values
+
+2. Integration tests (if applicable)
+   - API endpoint tests
+   - Database operation tests
+   - External service mocks
+
+3. Component tests (if UI code)
+   - Rendering tests
+   - Interaction tests
+   - State management tests
+
+## Test Requirements
+- ✅ Follow existing test patterns in __tests__/
+- ✅ Use proper mocking strategies
+- ✅ Include descriptive test names
+- ✅ Group related tests with describe blocks
+- ✅ Add comments for complex test scenarios
+- ✅ Ensure all tests pass
+- ✅ Verify coverage is >90%
+
+## Success Criteria
+- [ ] All new code has corresponding tests
+- [ ] Tests are well-organized and documented
+- [ ] All tests pass (`npm test`)
+- [ ] No console errors or warnings
+- [ ] Coverage report shows >90% for new code
+- [ ] Tests follow existing patterns
+
+## Report Back
+✅ Tests created: [count] test cases
+✅ Coverage achieved: [percentage]%
+✅ All tests passing: [yes/no]
+⚠️ Areas needing manual review: [if any]
+```
+
+**Examples:**
+
+```typescript
+// ❌ WRONG: Complete feature and move on
+// "I've finished implementing the user authentication feature."
+
+// ✅ RIGHT: Complete feature, then deploy testing agent
+// "I've finished implementing the user authentication feature.
+//  Deploying agent to create comprehensive test suite now."
+// [Launches testing agent]
+```
+
+**Common Scenarios:**
+
+1. **New API Endpoint Created**
+   - ❌ Don't: Move to next task
+   - ✅ Do: Deploy agent to create endpoint tests (success, errors, validation)
+
+2. **Component Built**
+   - ❌ Don't: Assume it works
+   - ✅ Do: Deploy agent to create rendering, interaction, and state tests
+
+3. **Utility Function Added**
+   - ❌ Don't: Skip testing small functions
+   - ✅ Do: Deploy agent to test all edge cases and error handling
+
+4. **Database Migration Applied**
+   - ❌ Don't: Test manually once
+   - ✅ Do: Deploy agent to create migration tests and rollback verification
+
+5. **Bug Fix Completed**
+   - ❌ Don't: Just fix and commit
+   - ✅ Do: Deploy agent to create regression test preventing bug recurrence
+
+**Why This Matters:**
+- Prevents regressions - new code won't break existing functionality
+- Documents expected behavior through tests
+- Catches edge cases you might have missed
+- Builds confidence in code quality
+- Makes refactoring safer in the future
+- Enforces consistent test coverage across codebase
+
+**Test Coverage Standards:**
+- **Minimum**: 80% line coverage
+- **Target**: 90% line coverage
+- **Critical paths**: 100% coverage (authentication, payments, data integrity)
+
+**Integration with CI/CD:**
+Tests created by agents should:
+- Pass in CI pipeline
+- Not introduce flaky tests
+- Run quickly (< 5 seconds for unit tests)
+- Be deterministic and repeatable
+
+**Verification Checklist:**
+After testing agent completes:
+- [ ] Run `npm test` - all tests pass
+- [ ] Run `npm run test:coverage` - coverage meets standards
+- [ ] Review test quality - descriptive names, good organization
+- [ ] Check for test patterns - follows existing conventions
+- [ ] Verify mocks are appropriate - not over-mocked
+- [ ] Test failure scenarios - errors are properly tested
+
+**Remember**: Untested code is broken code waiting to happen. Every line of production code deserves a comprehensive test suite. Deploy testing agents automatically!
 
 #### The Proven Orchestration Pattern
 
