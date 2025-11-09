@@ -1,4 +1,4 @@
-**Last Updated:** 2025-10-31 (Added Industry Best Practices section)
+**Last Updated:** 2025-11-09 (Added "Fix Issues Immediately with Agents" guideline)
 **Verified Accurate For:** v0.1.0
 
 # CLAUDE.md
@@ -781,6 +781,98 @@ See [REFERENCE_DATABASE_SCHEMA.md](docs/09-REFERENCE/REFERENCE_DATABASE_SCHEMA.m
    - Long-running analysis or validation tasks
 
 **DO NOT Wait for User Permission** - If you identify a parallelizable task, immediately orchestrate agents!
+
+#### Fix Issues Immediately with Agents
+
+**CRITICAL**: When you encounter ANY issue during your work, deploy an agent to fix it immediately. DO NOT defer, document for later, or ask the user first.
+
+**Trigger: Deploy Agent When You Encounter:**
+- ❌ Test failures (any failing tests)
+- ❌ Build errors or TypeScript errors
+- ❌ Linting violations or warnings
+- ❌ Import errors or missing dependencies
+- ❌ Type mismatches or validation errors
+- ❌ Performance issues or bottlenecks
+- ❌ Security vulnerabilities
+- ❌ Dead code or unused imports
+- ❌ Documentation inconsistencies
+- ❌ Any bug, error, or technical debt
+
+**The "Fix Now" Philosophy:**
+
+```
+Issue Encountered
+    ↓
+IMMEDIATELY Deploy Agent to Fix
+    ↓
+Continue Your Original Task
+```
+
+**Examples:**
+
+```typescript
+// ❌ WRONG: Note the issue and continue
+// "I notice there are 5 failing tests, but let me finish this feature first"
+
+// ✅ RIGHT: Fix immediately with agent
+// "I found 5 failing tests. Deploying agent to fix them now while I continue with the feature."
+// [Launches agent in parallel]
+```
+
+**Common Scenarios:**
+
+1. **Writing Code & See Import Error**
+   - ❌ Don't: Note it and ask user
+   - ✅ Do: Deploy agent to fix imports immediately
+
+2. **Running Tests & See Failures**
+   - ❌ Don't: Document failing tests for later
+   - ✅ Do: Deploy agent to fix test failures now
+
+3. **Building & See TypeScript Errors**
+   - ❌ Don't: Ask user what to do about errors
+   - ✅ Do: Deploy agent to fix type errors immediately
+
+4. **Code Review & See Security Issue**
+   - ❌ Don't: Add to backlog
+   - ✅ Do: Deploy agent to fix security issue now
+
+5. **Refactoring & Find Dead Code**
+   - ❌ Don't: Mark as TODO
+   - ✅ Do: Deploy agent to clean up dead code immediately
+
+**Why This Matters:**
+- Issues compound - small problems become big problems
+- Context is fresh - fixing now is easier than fixing later
+- Zero technical debt accumulation
+- Maintains codebase health continuously
+- Prevents "broken windows" syndrome
+
+**Agent Mission Template for Issue Fixing:**
+
+```markdown
+URGENT: Fix [ISSUE TYPE] encountered during [TASK]
+
+## Issue Details
+- Location: [file:line]
+- Error: [exact error message]
+- Impact: [what's broken]
+
+## Your Mission
+Fix this issue completely and verify the fix.
+
+## Success Criteria
+- [ ] Issue resolved
+- [ ] All tests passing
+- [ ] Build successful
+- [ ] No new issues introduced
+
+## Report Back
+✅ Fixed [describe fix]
+⚠️ Side effects [if any]
+```
+
+**Remember**: Issues don't fix themselves. Every issue you encounter is an opportunity to improve the codebase immediately. Deploy agents liberally!
 
 #### The Proven Orchestration Pattern
 
