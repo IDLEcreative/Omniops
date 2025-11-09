@@ -5,6 +5,8 @@
  * including domain lookups, conversation creation, and message persistence.
  */
 
+import { recordChatStage } from '@/lib/analytics/funnel-analytics';
+
 export type ConversationMessage = {
   role: 'user' | 'assistant';
   content: string;
@@ -45,7 +47,8 @@ export async function getOrCreateConversation(
   conversationId: string | undefined,
   sessionId: string,
   domainId: string | null,
-  supabase: any
+  supabase: any,
+  sessionMetadata?: any
 ): Promise<string> {
   // Create new conversation if no ID provided
   if (!conversationId) {
@@ -53,12 +56,47 @@ export async function getOrCreateConversation(
       .from('conversations')
       .insert({
         session_id: sessionId,
-        domain_id: domainId
+        domain_id: domainId,
+        metadata: sessionMetadata ? { session_metadata: sessionMetadata } : {}
       })
       .select()
       .single();
 
     if (convError) throw convError;
+
+    // Record chat stage in funnel (non-blocking)
+    if (domainId) {
+      try {
+        // Get domain string for funnel tracking
+        const { data: domainData } = await supabase
+          .from('domains')
+          .select('domain')
+          .eq('id', domainId)
+          .single();
+
+        if (domainData?.domain) {
+          // Try to get customer email from customer_sessions
+          const { data: sessionData } = await supabase
+            .from('customer_sessions')
+            .select('customer_email')
+            .eq('session_id', sessionId)
+            .single();
+
+          if (sessionData?.customer_email) {
+            // Record chat initiation in funnel
+            await recordChatStage(
+              newConversation.id,
+              sessionData.customer_email,
+              domainData.domain
+            );
+          }
+        }
+      } catch (funnelError) {
+        // Log but don't block conversation creation
+        console.error('[ConversationManager] Failed to record chat funnel stage:', funnelError);
+      }
+    }
+
     return newConversation.id;
   }
 
@@ -76,15 +114,85 @@ export async function getOrCreateConversation(
       .insert({
         id: conversationId,
         session_id: sessionId,
-        domain_id: domainId
+        domain_id: domainId,
+        metadata: sessionMetadata ? { session_metadata: sessionMetadata } : {}
       });
 
     if (createError) {
       console.error('[ConversationManager] Failed to create conversation:', createError);
     }
+
+    // Record chat stage in funnel (non-blocking)
+    if (domainId && !createError) {
+      try {
+        // Get domain string for funnel tracking
+        const { data: domainData } = await supabase
+          .from('domains')
+          .select('domain')
+          .eq('id', domainId)
+          .single();
+
+        if (domainData?.domain) {
+          // Try to get customer email from customer_sessions
+          const { data: sessionData } = await supabase
+            .from('customer_sessions')
+            .select('customer_email')
+            .eq('session_id', sessionId)
+            .single();
+
+          if (sessionData?.customer_email) {
+            // Record chat initiation in funnel
+            await recordChatStage(
+              conversationId,
+              sessionData.customer_email,
+              domainData.domain
+            );
+          }
+        }
+      } catch (funnelError) {
+        // Log but don't block conversation creation
+        console.error('[ConversationManager] Failed to record chat funnel stage:', funnelError);
+      }
+    }
   }
 
   return conversationId;
+}
+
+/**
+ * Update conversation metadata with session tracking data
+ * Used to save page views, session duration, and user journey
+ */
+export async function updateConversationMetadata(
+  conversationId: string,
+  sessionMetadata: any,
+  supabase: any
+): Promise<void> {
+  if (!sessionMetadata) return;
+
+  // Get existing metadata first
+  const { data: existing } = await supabase
+    .from('conversations')
+    .select('metadata')
+    .eq('id', conversationId)
+    .single();
+
+  const currentMetadata = existing?.metadata || {};
+
+  // Merge session metadata (new data takes precedence)
+  const updatedMetadata = {
+    ...currentMetadata,
+    session_metadata: sessionMetadata
+  };
+
+  const { error } = await supabase
+    .from('conversations')
+    .update({ metadata: updatedMetadata })
+    .eq('id', conversationId);
+
+  if (error) {
+    console.error('[ConversationManager] Failed to update session metadata:', error);
+  }
 }
 
 /**
