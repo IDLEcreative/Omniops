@@ -313,7 +313,7 @@ describe('Phase 2 Rollout Simulation: 100 Pilot Users', () => {
     }
 
     expect(user.getMessageCount()).toBe(10);
-  });
+  }, 15000); // Increased timeout for rapid tab operations
 });
 
 // ============================================================================

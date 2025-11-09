@@ -30,4 +30,4 @@ export {
   domainDatabaseChecker,
   checkDomainStatus,
   getDomainSuggestions,
-} from './domain-validator/'
+} from './domain-validator/index'
