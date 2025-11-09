@@ -5,11 +5,11 @@ import { generateCSVContent } from '@/lib/analytics/export-csv';
 // For production, consider using Resend API instead (lib/alerts/send-alert-email.ts)
 
 // Lazy-load transporter to avoid issues during build
-let transporter: ReturnType<typeof nodemailer.createTransporter> | null = null;
+let transporter: ReturnType<typeof nodemailer.createTransport> | null = null;
 
 function getTransporter() {
   if (!transporter) {
-    transporter = nodemailer.createTransporter({
+    transporter = nodemailer.createTransport({
       host: process.env.SMTP_HOST || 'smtp.gmail.com',
       port: parseInt(process.env.SMTP_PORT || '587'),
       secure: false, // true for 465, false for other ports

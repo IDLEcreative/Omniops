@@ -5,7 +5,7 @@
 
 import Redis from 'ioredis';
 import { EventEmitter } from 'events';
-import type { RedisStatus } from './redis-enhanced-types';
+import type { RedisStatus, IResilientRedisClient } from './redis-enhanced-types';
 import { MemoryAwareCrawlJobManager } from './redis-enhanced-jobs';
 import { RedisCircuitBreaker } from './redis-enhanced-circuit-breaker';
 import { RedisOperations } from './redis-enhanced-operations';
@@ -21,7 +21,7 @@ const shouldBypassRedis =
   !!process.env.JEST_WORKER_ID ||
   process.env.REDIS_URL === 'memory';
 
-export class ResilientRedisClient extends EventEmitter {
+export class ResilientRedisClient extends EventEmitter implements IResilientRedisClient {
   private redis: Redis | null = null;
   private isConnected: boolean = false;
   private fallbackStorage: Map<string, any> = new Map();

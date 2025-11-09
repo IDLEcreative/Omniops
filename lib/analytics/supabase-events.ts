@@ -51,6 +51,10 @@ export async function emitMessageEvent(
 ): Promise<void> {
   try {
     const supabase = await createClient();
+    if (!supabase) {
+      console.error('[Supabase Analytics] Failed to initialize Supabase');
+      return;
+    }
     const channel = supabase.channel(`analytics:${organizationId}`);
 
     await channel.send({
@@ -88,6 +92,10 @@ export async function emitSentimentEvent(
 ): Promise<void> {
   try {
     const supabase = await createClient();
+    if (!supabase) {
+      console.error('[Supabase Analytics] Failed to initialize Supabase');
+      return;
+    }
     const channel = supabase.channel(`analytics:${organizationId}`);
 
     await channel.send({
@@ -124,6 +132,10 @@ export async function emitMetricsEvent(
 ): Promise<void> {
   try {
     const supabase = await createClient();
+    if (!supabase) {
+      console.error('[Supabase Analytics] Failed to initialize Supabase');
+      return;
+    }
     const channel = supabase.channel(`analytics:${organizationId}`);
 
     await channel.send({
@@ -161,6 +173,10 @@ export async function emitBatchEvents(
 ): Promise<void> {
   try {
     const supabase = await createClient();
+    if (!supabase) {
+      console.error('[Supabase Analytics] Failed to initialize Supabase');
+      return;
+    }
     const channel = supabase.channel(`analytics:${organizationId}`);
 
     for (const event of events) {

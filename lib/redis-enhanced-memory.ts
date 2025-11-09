@@ -3,15 +3,14 @@
  * Extracted from redis-enhanced.ts for better modularity
  */
 
-import type { ResilientRedisClient } from './redis-enhanced';
-import type { PageMetadata } from './redis-enhanced-types';
+import type { IResilientRedisClient, PageMetadata } from './redis-enhanced-types';
 
 export class MemoryManager {
   private readonly RESULT_TTL = 86400; // 24 hours
   private readonly MAX_RESULTS_IN_MEMORY = 1000;
   private readonly BATCH_SIZE = 100;
 
-  constructor(private redis: ResilientRedisClient) {}
+  constructor(private redis: IResilientRedisClient) {}
 
   /**
    * Add job result with memory management

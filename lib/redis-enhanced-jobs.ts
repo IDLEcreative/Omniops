@@ -3,16 +3,15 @@
  * Extracted from redis-enhanced.ts for better modularity
  */
 
-import type { ResilientRedisClient } from './redis-enhanced';
-import type { JobData, HealthStatus } from './redis-enhanced-types';
+import type { IResilientRedisClient, JobData, HealthStatus } from './redis-enhanced-types';
 import { MemoryManager } from './redis-enhanced-memory';
 
 export class MemoryAwareCrawlJobManager {
-  private redis: ResilientRedisClient;
+  private redis: IResilientRedisClient;
   private memoryManager: MemoryManager;
   private readonly JOB_TTL = 3600; // 1 hour
 
-  constructor(redis: ResilientRedisClient) {
+  constructor(redis: IResilientRedisClient) {
     this.redis = redis;
     this.memoryManager = new MemoryManager(redis);
   }
@@ -20,7 +19,7 @@ export class MemoryAwareCrawlJobManager {
   /**
    * Get the underlying Redis client
    */
-  getRedisClient(): ResilientRedisClient {
+  getRedisClient(): IResilientRedisClient {
     return this.redis;
   }
 

@@ -37,3 +37,24 @@ export interface JobManagerConfig {
   maxResultsInMemory?: number;
   batchSize?: number;
 }
+
+/**
+ * Interface for ResilientRedisClient to break circular dependencies
+ * This allows jobs and memory modules to import the interface instead of the class
+ */
+export interface IResilientRedisClient {
+  get(key: string): Promise<string | null>;
+  set(key: string, value: string, ttl?: number): Promise<boolean>;
+  del(key: string): Promise<boolean>;
+  exists(key: string): Promise<boolean>;
+  incr(key: string): Promise<number>;
+  expire(key: string, seconds: number): Promise<boolean>;
+  lrange(key: string, start: number, stop: number): Promise<string[]>;
+  rpush(key: string, ...values: string[]): Promise<number>;
+  ping(): Promise<boolean>;
+  keys(pattern: string): Promise<string[]>;
+  hgetall(key: string): Promise<Record<string, string>>;
+  disconnect(): Promise<void>;
+  getStatus(): RedisStatus;
+  clearFallbackStorage(): void;
+}
