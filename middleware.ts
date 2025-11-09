@@ -153,6 +153,10 @@ export async function middleware(request: NextRequest) {
     "'self'",
     'https://*.supabase.co',
     'https://api.openai.com',
+    // CRITICAL: Allow WebSocket connections to application domain
+    'wss://omniops.co.uk',
+    'wss://*.omniops.co.uk',
+    'ws://localhost:*', // Development WebSocket support
     // CRITICAL: Always allow Vercel tooling
     'https://vercel.live',
     'https://*.vercel.live',
