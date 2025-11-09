@@ -12,11 +12,7 @@ import {
   MockSupabaseClient,
 } from '@/test-utils/supabase-test-helpers';
 import { createMockOrganization, createMockUser } from '@/test-utils/api-test-helpers';
-
-// Mock the Supabase server module
-jest.mock('@/lib/supabase/server', () => ({
-  createClient: jest.fn(),
-}));
+import { __setMockSupabaseClient } from '@/lib/supabase-server';
 
 const mockRequest = new NextRequest('http://localhost:3000/api/organizations/org-123');
 
@@ -29,9 +25,8 @@ describe('GET /api/organizations/[id] - Get Organization Details', () => {
    * TEST 1: Authentication - Returns 401 for unauthenticated users
    */
   it('should return 401 for unauthenticated user', async () => {
-    const { createClient } = jest.requireMock('@/lib/supabase/server');
     const mockClient = createUnauthenticatedMockClient();
-    createClient.mockResolvedValue(mockClient);
+    __setMockSupabaseClient(mockClient);
 
     const response = await GET(mockRequest, { params: Promise.resolve({ id: 'org-123' }) });
     const data = await response.json();
@@ -45,7 +40,6 @@ describe('GET /api/organizations/[id] - Get Organization Details', () => {
    * TEST 2: Success - Returns organization details for authorized member
    */
   it('should return organization details for authorized member', async () => {
-    const { createClient } = jest.requireMock('@/lib/supabase/server');
     const mockUser = createMockUser({ id: 'user-123' });
     const mockOrg = createMockOrganization({
       id: 'org-123',
@@ -100,7 +94,7 @@ describe('GET /api/organizations/[id] - Get Organization Details', () => {
       };
     });
 
-    createClient.mockResolvedValue(mockClient);
+    __setMockSupabaseClient(mockClient);
 
     const response = await GET(mockRequest, { params: Promise.resolve({ id: 'org-123' }) });
     const data = await response.json();
@@ -120,7 +114,7 @@ describe('GET /api/organizations/[id] - Get Organization Details', () => {
    * TEST 3: Access Control - Returns 404 when user is not a member (RLS enforcement)
    */
   it('should return 404 when user is not a member of organization', async () => {
-    const { createClient } = jest.requireMock('@/lib/supabase/server');
+    
     const mockUser = createMockUser({ id: 'non-member-user' });
     const mockClient = createAuthenticatedMockClient(mockUser.id, mockUser.email);
 
@@ -145,7 +139,7 @@ describe('GET /api/organizations/[id] - Get Organization Details', () => {
       };
     });
 
-    createClient.mockResolvedValue(mockClient);
+    __setMockSupabaseClient(mockClient);
 
     const response = await GET(mockRequest, { params: Promise.resolve({ id: 'org-123' }) });
     const data = await response.json();
@@ -158,7 +152,7 @@ describe('GET /api/organizations/[id] - Get Organization Details', () => {
    * TEST 4: Not Found - Returns 404 when organization does not exist
    */
   it('should return 404 when organization does not exist', async () => {
-    const { createClient } = jest.requireMock('@/lib/supabase/server');
+    
     const mockUser = createMockUser();
     const mockClient = createAuthenticatedMockClient(mockUser.id, mockUser.email);
 
@@ -195,7 +189,7 @@ describe('GET /api/organizations/[id] - Get Organization Details', () => {
       };
     });
 
-    createClient.mockResolvedValue(mockClient);
+    __setMockSupabaseClient(mockClient);
 
     const response = await GET(mockRequest, { params: Promise.resolve({ id: 'nonexistent-org' }) });
     const data = await response.json();
@@ -208,7 +202,7 @@ describe('GET /api/organizations/[id] - Get Organization Details', () => {
    * TEST 5: Error Handling - Handles database errors gracefully
    */
   it('should handle database errors gracefully', async () => {
-    const { createClient } = jest.requireMock('@/lib/supabase/server');
+    
     const mockUser = createMockUser();
     const mockClient = createAuthenticatedMockClient(mockUser.id, mockUser.email);
 
@@ -233,7 +227,7 @@ describe('GET /api/organizations/[id] - Get Organization Details', () => {
       };
     });
 
-    createClient.mockResolvedValue(mockClient);
+    __setMockSupabaseClient(mockClient);
 
     const response = await GET(mockRequest, { params: Promise.resolve({ id: 'org-123' }) });
     const data = await response.json();
@@ -246,7 +240,7 @@ describe('GET /api/organizations/[id] - Get Organization Details', () => {
    * TEST 6: Response Shape - Returns proper organization shape with all fields
    */
   it('should return proper organization shape with all fields and counts', async () => {
-    const { createClient } = jest.requireMock('@/lib/supabase/server');
+    
     const mockUser = createMockUser();
     const mockOrg = createMockOrganization({
       id: 'org-full',
@@ -312,7 +306,7 @@ describe('GET /api/organizations/[id] - Get Organization Details', () => {
       };
     });
 
-    createClient.mockResolvedValue(mockClient);
+    __setMockSupabaseClient(mockClient);
 
     const response = await GET(mockRequest, { params: Promise.resolve({ id: 'org-full' }) });
     const data = await response.json();
@@ -337,7 +331,7 @@ describe('GET /api/organizations/[id] - Get Organization Details', () => {
    * TEST 7: User Role - Correctly returns user's role in the organization
    */
   it('should return correct user role for different membership types', async () => {
-    const { createClient } = jest.requireMock('@/lib/supabase/server');
+    
     const mockUser = createMockUser();
     const mockOrg = createMockOrganization({ id: 'org-role-test' });
     const mockClient = createAuthenticatedMockClient(mockUser.id, mockUser.email);
@@ -385,7 +379,7 @@ describe('GET /api/organizations/[id] - Get Organization Details', () => {
       };
     });
 
-    createClient.mockResolvedValue(mockClient);
+    __setMockSupabaseClient(mockClient);
 
     const response = await GET(mockRequest, { params: Promise.resolve({ id: 'org-role-test' }) });
     const data = await response.json();
@@ -398,7 +392,7 @@ describe('GET /api/organizations/[id] - Get Organization Details', () => {
    * TEST 8: Counts - Correctly counts members and domains
    */
   it('should return accurate member and domain counts', async () => {
-    const { createClient } = jest.requireMock('@/lib/supabase/server');
+    
     const mockUser = createMockUser();
     const mockOrg = createMockOrganization({ id: 'org-counts' });
     const mockClient = createAuthenticatedMockClient(mockUser.id, mockUser.email);
@@ -463,7 +457,7 @@ describe('GET /api/organizations/[id] - Get Organization Details', () => {
       };
     });
 
-    createClient.mockResolvedValue(mockClient);
+    __setMockSupabaseClient(mockClient);
 
     const response = await GET(mockRequest, { params: Promise.resolve({ id: 'org-counts' }) });
     const data = await response.json();
@@ -479,8 +473,8 @@ describe('GET /api/organizations/[id] - Get Organization Details', () => {
    * TEST 9: Service Unavailable - Returns 503 when Supabase client is unavailable
    */
   it('should return 503 when Supabase client is unavailable', async () => {
-    const { createClient } = jest.requireMock('@/lib/supabase/server');
-    createClient.mockResolvedValue(null);
+    
+    __setMockSupabaseClient(null);
 
     const response = await GET(mockRequest, { params: Promise.resolve({ id: 'org-123' }) });
     const data = await response.json();
@@ -493,7 +487,7 @@ describe('GET /api/organizations/[id] - Get Organization Details', () => {
    * TEST 10: Multi-Tenant Isolation - Verifies user cannot access other organizations
    */
   it('should enforce multi-tenant isolation and block cross-tenant access', async () => {
-    const { createClient } = jest.requireMock('@/lib/supabase/server');
+    
     const mockUser = createMockUser({ id: 'user-tenant-a' });
     const mockClient = createAuthenticatedMockClient(mockUser.id, mockUser.email);
 
@@ -530,7 +524,7 @@ describe('GET /api/organizations/[id] - Get Organization Details', () => {
       };
     });
 
-    createClient.mockResolvedValue(mockClient);
+    __setMockSupabaseClient(mockClient);
 
     const response = await GET(mockRequest, { params: Promise.resolve({ id: 'org-tenant-b' }) });
     const data = await response.json();

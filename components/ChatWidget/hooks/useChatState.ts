@@ -364,7 +364,7 @@ export function useChatState({
       try {
         // Use public widget config endpoint (no authentication required)
         const response = await fetch(`/api/widget/config?domain=${encodeURIComponent(domain)}`);
-        if (response.ok) {
+        if (response && response.ok) {
           const data = await response.json();
           if (data.success && data.config) {
             setWoocommerceEnabled(data.config.woocommerce_enabled || false);
