@@ -2,19 +2,19 @@
 
 **Type:** Reference
 **Status:** Active
-**Last Updated:** 2025-11-05
+**Last Updated:** 2025-11-09
 **Purpose:** Single source of truth for all bugs, technical debt, and problems discovered in the codebase
 
 ## Quick Reference
 
-**Total Issues:** 21
-- 🔴 Critical: 3
+**Total Issues:** 22
+- 🔴 Critical: 4
 - 🟠 High: 5
 - 🟡 Medium: 7
 - 🟢 Low: 6
 
 **Status Breakdown:**
-- Open: 20
+- Open: 21
 - In Progress: 0
 - Resolved: 1
 
@@ -63,6 +63,99 @@
 ---
 
 ## Open Issues
+
+### 🔴 [CRITICAL] useChatState Hook Infinite Loop Crashes Jest Workers {#issue-022}
+
+**Status:** Open
+**Severity:** Critical
+**Category:** Bug | Testing
+**Location:** `components/ChatWidget/hooks/useChatState.ts:296-399`
+**Discovered:** 2025-11-09
+**Effort:** 2-4 hours
+
+**Description:**
+The `useChatState` hook has an infinite loop in its main `useEffect` caused by dependency management issues. The `handleMessage` callback is included in the `useEffect` dependency array (line 399), but this callback is recreated on every render because it depends on state variables (`conversationId`, `isOpen`, `sessionId` - line 293).
+
+**Impact:**
+- 6 tests in `loading-messages.test.ts` cause Jest worker crashes (SIGKILL)
+- Parent test file `useChatState.test.ts` crashes when run directly
+- Infinite loop consumes memory and CPU until OS kills the process
+- Tests temporarily skipped with `describe.skip()`
+
+**Root Cause:**
+```typescript
+// Line 232-293: handleMessage depends on state
+const handleMessage = useCallback((event: MessageEvent) => {
+  // Uses conversationId, isOpen, sessionId
+}, [conversationId, isOpen, sessionId]); // Recreated on state change
+
+// Line 296-399: useEffect depends on handleMessage
+useEffect(() => {
+  // Storage operations that update state
+  initializeStorage(); // Updates sessionId, conversationId
+  // ...
+  window.addEventListener('message', handleMessage);
+  return () => window.removeEventListener('message', handleMessage);
+}, [onReady, demoConfig, handleMessage, storage]); // handleMessage triggers re-run
+```
+
+**Loop Cycle:**
+1. `useEffect` runs → calls `initializeStorage()`
+2. Storage updates trigger state change (`sessionId`, `conversationId`)
+3. State change causes re-render
+4. `handleMessage` recreated (due to state dependencies)
+5. `useEffect` runs again (due to `handleMessage` dependency change)
+6. Loop repeats infinitely → Jest kills worker
+
+**Steps to Reproduce:**
+1. Run: `npm test -- __tests__/components/ChatWidget/useChatState/loading-messages.test.ts`
+2. Observe console logs showing repeated "useEffect running" messages
+3. Jest worker crashes with SIGKILL after ~7-10 seconds
+
+**Proposed Solution:**
+Use `useRef` for stable callback reference:
+
+```typescript
+// Store callback in ref to prevent recreation
+const handleMessageRef = useRef<(event: MessageEvent) => void>();
+
+useEffect(() => {
+  // Update ref on state change, but don't trigger useEffect
+  handleMessageRef.current = (event: MessageEvent) => {
+    // Handler logic using latest state (via closure)
+    if (event.data?.type === 'init') {
+      if (event.data.storedData?.conversationId && !conversationId) {
+        setConversationId(event.data.storedData.conversationId);
+      }
+      // ... rest of handler
+    }
+  };
+}, [conversationId, isOpen, sessionId]); // Only update ref
+
+useEffect(() => {
+  // Stable event listener that uses ref
+  const handler = (event: MessageEvent) => handleMessageRef.current?.(event);
+  window.addEventListener('message', handler);
+  initializeStorage();
+  // ...
+  return () => window.removeEventListener('message', handler);
+}, [onReady, demoConfig, storage]); // handleMessage removed from deps
+```
+
+**Alternative Solution:**
+Split the `useEffect` into separate effects with clearer responsibilities:
+1. One for message listener setup (runs once)
+2. One for storage initialization (runs on mount)
+3. One for WooCommerce config (runs when domain changes)
+
+**Workaround (Current):**
+Tests temporarily skipped with `describe.skip()` in `loading-messages.test.ts`.
+Documentation added to both test files explaining the issue.
+
+**Related Issues:**
+- May relate to #issue-001 (testability issues due to tight coupling)
+
+---
 
 ### 🔴 [CRITICAL] Untestable Supabase Architecture {#issue-001}
 

@@ -1,3 +1,25 @@
+/**
+ * Jest Configuration for Next.js Application
+ *
+ * TEST FRAMEWORK SEPARATION:
+ * This config is for Jest tests only. Other test frameworks are excluded:
+ *
+ * 1. PLAYWRIGHT TESTS (Browser E2E Testing)
+ *    - Location: __tests__/playwright/, __tests__/e2e/
+ *    - Files: .spec.ts files
+ *    - Why excluded: Requires browser automation, incompatible with Jest's jsdom
+ *    - Run with: npx playwright test
+ *
+ * 2. VITEST TESTS (Vite-based Testing)
+ *    - Location: __tests__/integration/shopify-ux-flow.test.ts
+ *    - Why excluded: Uses Vitest API (describe/it/expect) which conflicts with Jest
+ *    - Run with: npx vitest
+ *
+ * JEST TESTS (Unit & Integration):
+ *    - Location: All other test files in __tests__ directory
+ *    - Run with: npm test
+ */
+
 const nextJest = require('next/jest')
 
 const createJestConfig = nextJest({
@@ -44,8 +66,14 @@ const customJestConfig = {
     '/__tests__/utils/',
     '/__tests__/mocks/',
     '/__tests__/fixtures/',
-    '/__tests__/playwright/', // Exclude Playwright tests (use npx playwright test)
+    // Playwright tests - use separate test runner (npx playwright test)
+    // These tests require browser automation and are incompatible with Jest
+    '/__tests__/playwright/', // Playwright test directory
+    '/__tests__/e2e/', // E2E tests using Playwright
     '.spec.ts$', // Exclude all .spec.ts files (Playwright convention)
+    // Vitest tests - use separate test runner (npx vitest)
+    // These tests use Vitest API which conflicts with Jest
+    '__tests__/integration/shopify-ux-flow.test.ts', // Uses Vitest describe/it/expect
     '/ARCHIVE/' // Exclude archived files and reports
   ],
   // Transform ESM packages in node_modules

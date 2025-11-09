@@ -9,6 +9,9 @@ interface MessageContentProps {
 export const MessageContent = React.memo(({ content, className = '' }: MessageContentProps) => {
   // Format markdown content for better display - simplified to preserve formatting
   const formatMarkdown = useCallback((text: string): string => {
+    // Safety check for null/undefined content
+    if (!text || typeof text !== 'string') return '';
+
     // DON'T modify the text much - preserve the original formatting
     // The AI is already providing proper formatting with line breaks
 

@@ -7,12 +7,11 @@ import {
   searchSimilar
 } from '@/lib/embeddings'
 import OpenAI from 'openai'
-import { createServiceRoleClient } from '@/lib/supabase/server'
 import { createServiceRoleMockClient } from '@/test-utils/supabase-test-helpers'
+import { __setMockSupabaseClient } from '@/lib/supabase-server'
 
 // Mock dependencies
 jest.mock('openai')
-jest.mock('@/lib/supabase/server')
 
 // Mock environment variables
 process.env.OPENAI_API_KEY = 'test-api-key'
@@ -66,7 +65,8 @@ describe('Embeddings Service', () => {
       error: null
     })
 
-    ;(createServiceRoleClient as jest.Mock).mockResolvedValue(mockSupabaseClient)
+    // Use helper to set mock Supabase client
+    __setMockSupabaseClient(mockSupabaseClient)
   })
 
   describe('splitIntoChunks', () => {

@@ -56,22 +56,16 @@ export function createFreshSupabaseMock(options?: {
   return {
     from: jest.fn((table: string) => {
       if (table === 'conversations') {
-        return {
-          insert: jest.fn().mockReturnValue({
-            select: jest.fn().mockReturnValue({
-              single: jest.fn().mockResolvedValue({
-                data: { id: conversationId, session_id: 'test-session' },
-                error: options?.shouldError ? new Error('DB error') : null,
-              }),
-            }),
-          }),
-          select: jest.fn().mockReturnThis(),
-          eq: jest.fn().mockReturnThis(),
+        const chainable = {
+          insert: jest.fn(function() { return this }),
+          select: jest.fn(function() { return this }),
+          eq: jest.fn(function() { return this }),
           single: jest.fn().mockResolvedValue({
-            data: { id: conversationId },
-            error: null,
+            data: { id: conversationId, session_id: 'test-session' },
+            error: options?.shouldError ? new Error('DB error') : null,
           }),
         }
+        return chainable
       }
 
       if (table === 'messages') {
@@ -82,9 +76,11 @@ export function createFreshSupabaseMock(options?: {
           }),
           select: jest.fn().mockReturnValue({
             eq: jest.fn().mockReturnValue({
-              order: jest.fn().mockResolvedValue({
-                data: messages,
-                error: null,
+              order: jest.fn().mockReturnValue({
+                limit: jest.fn().mockResolvedValue({
+                  data: messages,
+                  error: null,
+                }),
               }),
             }),
           }),

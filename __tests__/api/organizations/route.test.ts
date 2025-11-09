@@ -12,11 +12,7 @@ import {
   createMockSupabaseClient,
 } from '@/test-utils/supabase-test-helpers';
 import { createMockOrganization, createMockUser } from '@/test-utils/api-test-helpers';
-
-// Mock the module
-jest.mock('@/lib/supabase/server', () => ({
-  createClient: jest.fn(),
-}));
+import { __setMockSupabaseClient } from '@/lib/supabase-server';
 
 const buildRequest = (body: unknown) =>
   new NextRequest('http://localhost:3000/api/organizations', {
@@ -31,10 +27,8 @@ describe('GET /api/organizations', () => {
   });
 
   it('should return 401 if user is not authenticated', async () => {
-    const { createClient } = jest.requireMock('@/lib/supabase/server');
     const mockClient = createUnauthenticatedMockClient();
-
-    createClient.mockResolvedValue(mockClient);
+    __setMockSupabaseClient(mockClient);
 
     const response = await GET();
     const data = await response.json();
@@ -44,7 +38,6 @@ describe('GET /api/organizations', () => {
   });
 
   it('should handle database errors gracefully', async () => {
-    const { createClient } = jest.requireMock('@/lib/supabase/server');
     const mockUser = createMockUser();
     const mockClient = createAuthenticatedMockClient(mockUser.id, mockUser.email);
 
@@ -67,7 +60,7 @@ describe('GET /api/organizations', () => {
       };
     });
 
-    createClient.mockResolvedValue(mockClient);
+    __setMockSupabaseClient(mockClient);
 
     const response = await GET();
     const data = await response.json();
@@ -83,10 +76,8 @@ describe('POST /api/organizations', () => {
   });
 
   it('should return 401 if user is not authenticated', async () => {
-    const { createClient } = jest.requireMock('@/lib/supabase/server');
     const mockClient = createUnauthenticatedMockClient();
-
-    createClient.mockResolvedValue(mockClient);
+    __setMockSupabaseClient(mockClient);
 
     const request = buildRequest({ name: 'Test Org' });
     const response = await POST(request);
@@ -97,9 +88,8 @@ describe('POST /api/organizations', () => {
   });
 
   it('should validate request body - name too short', async () => {
-    const { createClient } = jest.requireMock('@/lib/supabase/server');
     const mockClient = createAuthenticatedMockClient();
-    createClient.mockResolvedValue(mockClient);
+    __setMockSupabaseClient(mockClient);
 
     const request = buildRequest({ name: 'A' });
     const response = await POST(request);
@@ -110,9 +100,8 @@ describe('POST /api/organizations', () => {
   });
 
   it('should reject invalid slug format', async () => {
-    const { createClient } = jest.requireMock('@/lib/supabase/server');
     const mockClient = createAuthenticatedMockClient();
-    createClient.mockResolvedValue(mockClient);
+    __setMockSupabaseClient(mockClient);
 
     const request = buildRequest({
       name: 'Test Org',
@@ -126,7 +115,6 @@ describe('POST /api/organizations', () => {
   });
 
   it('should reject duplicate slugs', async () => {
-    const { createClient } = jest.requireMock('@/lib/supabase/server');
     const mockUser = createMockUser();
     const mockClient = createAuthenticatedMockClient(mockUser.id, mockUser.email);
 
@@ -151,7 +139,7 @@ describe('POST /api/organizations', () => {
       };
     });
 
-    createClient.mockResolvedValue(mockClient);
+    __setMockSupabaseClient(mockClient);
 
     const request = buildRequest({ name: 'Test Org', slug: 'test-org' });
     const response = await POST(request);

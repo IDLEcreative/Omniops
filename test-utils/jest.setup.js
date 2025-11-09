@@ -21,13 +21,143 @@ if (!process.env.E2E_TEST) {
   process.env.WOOCOMMERCE_CONSUMER_SECRET = 'test-consumer-secret'
 }
 
+// Mock @/lib/supabase-server FIRST before any imports
+jest.mock('@/lib/supabase-server', () => {
+  // Create a comprehensive chainable Supabase query builder mock
+  const createChainableBuilder = () => {
+    const builder = {
+      // Data manipulation - each returns builder for chaining
+      select: jest.fn(function() { return this; }),
+      insert: jest.fn(function() { return this; }),
+      update: jest.fn(function() { return this; }),
+      delete: jest.fn(function() { return this; }),
+      upsert: jest.fn(function() { return this; }),
+
+      // Filters - each returns builder for chaining
+      eq: jest.fn(function() { return this; }),
+      neq: jest.fn(function() { return this; }),
+      gt: jest.fn(function() { return this; }),
+      gte: jest.fn(function() { return this; }),
+      lt: jest.fn(function() { return this; }),
+      lte: jest.fn(function() { return this; }),
+      like: jest.fn(function() { return this; }),
+      ilike: jest.fn(function() { return this; }),
+      is: jest.fn(function() { return this; }),
+      in: jest.fn(function() { return this; }),
+      contains: jest.fn(function() { return this; }),
+      containedBy: jest.fn(function() { return this; }),
+
+      // Logical operators - each returns builder for chaining
+      or: jest.fn(function() { return this; }),
+      and: jest.fn(function() { return this; }),
+      not: jest.fn(function() { return this; }),
+      filter: jest.fn(function() { return this; }),
+
+      // Modifiers - each returns builder for chaining
+      order: jest.fn(function() { return this; }),
+      limit: jest.fn(function() { return this; }),
+      range: jest.fn(function() { return this; }),
+
+      // Execution
+      single: jest.fn().mockResolvedValue({ data: null, error: null }),
+      maybeSingle: jest.fn().mockResolvedValue({ data: null, error: null }),
+
+      // Allow builder to be awaited (acts like a Promise)
+      then: jest.fn((resolve) => resolve({ data: null, error: null })),
+      catch: jest.fn((reject) => reject({ data: null, error: null })),
+    };
+    return builder;
+  };
+
+  const createMockSupabaseClient = () => ({
+    from: jest.fn(() => createChainableBuilder()),
+    rpc: jest.fn().mockResolvedValue({ data: [], error: null }),
+    auth: {
+      // User session methods
+      getUser: jest.fn().mockResolvedValue({ data: { user: null }, error: null }),
+      getSession: jest.fn().mockResolvedValue({ data: { session: null }, error: null }),
+      signOut: jest.fn().mockResolvedValue({ error: null }),
+      signInWithPassword: jest.fn().mockResolvedValue({ data: { user: null, session: null }, error: null }),
+
+      // Admin methods
+      admin: {
+        createUser: jest.fn().mockResolvedValue({ data: { user: null }, error: null }),
+        deleteUser: jest.fn().mockResolvedValue({ data: null, error: null }),
+        updateUser: jest.fn().mockResolvedValue({ data: { user: null }, error: null }),
+        listUsers: jest.fn().mockResolvedValue({ data: { users: [] }, error: null }),
+        getUserById: jest.fn().mockResolvedValue({ data: { user: null }, error: null }),
+        inviteUserByEmail: jest.fn().mockResolvedValue({ data: { user: null }, error: null }),
+      },
+    },
+  });
+
+  const validateSupabaseEnv = jest.fn().mockReturnValue(true);
+  const createServiceRoleClient = jest.fn().mockImplementation(async () => createMockSupabaseClient());
+  const createClient = jest.fn().mockImplementation(async () => createMockSupabaseClient());
+  const requireClient = jest.fn().mockImplementation(async () => createMockSupabaseClient());
+  const requireServiceRoleClient = jest.fn().mockImplementation(async () => createMockSupabaseClient());
+
+  const __setMockSupabaseClient = (customMockClient) => {
+    createServiceRoleClient.mockResolvedValue(customMockClient);
+    createClient.mockResolvedValue(customMockClient);
+    requireClient.mockResolvedValue(customMockClient);
+    requireServiceRoleClient.mockResolvedValue(customMockClient);
+  };
+
+  const __resetMockSupabaseClient = () => {
+    const mockClient = createMockSupabaseClient();
+    createServiceRoleClient.mockResolvedValue(mockClient);
+    createClient.mockResolvedValue(mockClient);
+    requireClient.mockResolvedValue(mockClient);
+    requireServiceRoleClient.mockResolvedValue(mockClient);
+  };
+
+  return {
+    validateSupabaseEnv,
+    createServiceRoleClient,
+    createClient,
+    requireClient,
+    requireServiceRoleClient,
+    __setMockSupabaseClient,
+    __resetMockSupabaseClient,
+  };
+});
+
 // Mock ioredis FIRST to prevent real Redis connections during test imports
 jest.mock('ioredis', () => {
+  const mockData = new Map();
+
   return jest.fn().mockImplementation(() => ({
+    // Basic operations
     get: jest.fn().mockResolvedValue(null),
     set: jest.fn().mockResolvedValue('OK'),
     setex: jest.fn().mockResolvedValue('OK'),
     del: jest.fn().mockResolvedValue(1),
+    exists: jest.fn().mockResolvedValue(0),
+    expire: jest.fn().mockResolvedValue(1),
+    incr: jest.fn().mockResolvedValue(1),
+
+    // List operations (for queue)
+    lpush: jest.fn().mockResolvedValue(1),
+    rpush: jest.fn().mockResolvedValue(1),
+    lrange: jest.fn().mockResolvedValue([]),
+
+    // Hash operations (for job status)
+    hset: jest.fn().mockResolvedValue('OK'),
+    hget: jest.fn().mockResolvedValue(null),
+    hgetall: jest.fn().mockResolvedValue({}),
+
+    // Pattern matching (for cleanup)
+    keys: jest.fn().mockResolvedValue([]),
+
+    // Sorted set operations (for caching)
+    zadd: jest.fn().mockResolvedValue(1),
+    zcard: jest.fn().mockResolvedValue(0),
+    zrange: jest.fn().mockResolvedValue([]),
+    zrem: jest.fn().mockResolvedValue(1),
+    zremrangebyrank: jest.fn().mockResolvedValue(1),
+
+    // Connection
     quit: jest.fn().mockResolvedValue('OK'),
     disconnect: jest.fn().mockResolvedValue(undefined),
     on: jest.fn(),
