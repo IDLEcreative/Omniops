@@ -210,8 +210,15 @@ export function registerMessageHandlers(ctx: IframeContext): void {
 
   window.addEventListener('message', event => {
     // Security: Validate origin to prevent XSS attacks
-    const expectedOrigin = process.env.NEXT_PUBLIC_APP_URL || window.location.origin;
-    if (event.origin !== expectedOrigin && event.origin !== window.location.origin) {
+    // Accept messages from either the parent origin or the widget's serverUrl
+    const parentOrigin = window.location.origin;
+    const widgetOrigin = config.serverUrl ? new URL(config.serverUrl).origin : parentOrigin;
+
+    const isAllowedOrigin =
+      event.origin === parentOrigin ||
+      event.origin === widgetOrigin;
+
+    if (!isAllowedOrigin) {
       console.warn('[ChatWidget] Blocked message from untrusted origin:', event.origin);
       return;
     }
