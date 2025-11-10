@@ -163,7 +163,9 @@ describe('Commerce Provider Circuit Breaker Integration', () => {
       mockGetDynamicShopifyClient.mockRejectedValue(new Error('Service down'));
       mockGetDynamicWooCommerceClient.mockRejectedValue(new Error('Service down'));
 
-      // Cause 3 failures to open the circuit
+      // Cause 3 failures to open the circuit (circuit breaker threshold = 3)
+      await getCommerceProvider(mockDomain);
+      clearCommerceProviderCache();
       await getCommerceProvider(mockDomain);
       clearCommerceProviderCache();
       await getCommerceProvider(mockDomain);
@@ -187,6 +189,9 @@ describe('Commerce Provider Circuit Breaker Integration', () => {
       mockGetDynamicShopifyClient.mockRejectedValue(new Error('Service down'));
       mockGetDynamicWooCommerceClient.mockRejectedValue(new Error('Service down'));
 
+      // Cause 3 failures to open circuit
+      await getCommerceProvider(mockDomain);
+      clearCommerceProviderCache();
       await getCommerceProvider(mockDomain);
       clearCommerceProviderCache();
       await getCommerceProvider(mockDomain);
@@ -207,6 +212,9 @@ describe('Commerce Provider Circuit Breaker Integration', () => {
       mockGetDynamicShopifyClient.mockRejectedValue(new Error('Service down'));
       mockGetDynamicWooCommerceClient.mockRejectedValue(new Error('Service down'));
 
+      // Cause 3 failures to open circuit
+      await getCommerceProvider(mockDomain);
+      clearCommerceProviderCache();
       await getCommerceProvider(mockDomain);
       clearCommerceProviderCache();
       await getCommerceProvider(mockDomain);
@@ -241,6 +249,9 @@ describe('Commerce Provider Circuit Breaker Integration', () => {
       mockGetDynamicShopifyClient.mockRejectedValue(new Error('Service down'));
       mockGetDynamicWooCommerceClient.mockRejectedValue(new Error('Service down'));
 
+      // Cause 3 failures to open circuit
+      await getCommerceProvider(mockDomain);
+      clearCommerceProviderCache();
       await getCommerceProvider(mockDomain);
       clearCommerceProviderCache();
       await getCommerceProvider(mockDomain);
@@ -318,6 +329,9 @@ describe('Commerce Provider Circuit Breaker Integration', () => {
       mockGetDynamicShopifyClient.mockRejectedValue(new Error('Service down'));
       mockGetDynamicWooCommerceClient.mockRejectedValue(new Error('Service down'));
 
+      // Cause 3 failures to open circuit
+      await getCommerceProvider(mockDomain);
+      clearCommerceProviderCache();
       await getCommerceProvider(mockDomain);
       clearCommerceProviderCache();
       await getCommerceProvider(mockDomain);
