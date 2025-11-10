@@ -1,11 +1,13 @@
 import { useState, useRef, useCallback } from 'react';
 import { Message } from '@/types';
+import type { StorageAdapter } from './useSessionManagement';
+import type { ChatWidgetConfig } from './useChatState';
 
 export interface UseMessageStateProps {
   conversationId: string;
   sessionId: string;
-  demoConfig?: any;
-  storage: any;
+  demoConfig?: ChatWidgetConfig | null;
+  storage: StorageAdapter;
 }
 
 export interface MessageState {
@@ -16,13 +18,28 @@ export interface MessageState {
   loading: boolean;
   setLoading: React.Dispatch<React.SetStateAction<boolean>>;
   loadingMessages: boolean;
+  messagesLoadError: Error | null;
   messagesContainerRef: React.RefObject<HTMLDivElement>;
   loadPreviousMessages: (convId: string, sessId: string) => Promise<void>;
+  retryLoadMessages: () => Promise<void>;
 }
 
 /**
  * Manages message state and message loading from API
- * Handles message list, input state, and loading states
+ *
+ * Features:
+ * - Message list management
+ * - Input state management
+ * - Loading states for messages
+ * - Previous message loading from API
+ * - Error handling with retry capability
+ * - Race condition prevention on unmount
+ *
+ * @param conversationId - Current conversation ID
+ * @param sessionId - Current session ID
+ * @param demoConfig - Widget configuration
+ * @param storage - Storage adapter for persistence
+ * @returns Message state and handlers
  */
 export function useMessageState({
   conversationId,
@@ -34,18 +51,30 @@ export function useMessageState({
   const [input, setInput] = useState('');
   const [loading, setLoading] = useState(false);
   const [loadingMessages, setLoadingMessages] = useState(false);
+  const [messagesLoadError, setMessagesLoadError] = useState<Error | null>(null);
   const messagesContainerRef = useRef<HTMLDivElement>(null);
   const hasLoadedMessages = useRef(false);
+  const isMountedRef = useRef(true);
 
-  // Fetch previous messages from API
+  // Store last attempted load params for retry
+  const lastLoadParams = useRef<{ convId: string; sessId: string } | null>(null);
+
+  /**
+   * Fetch previous messages from API
+   * Handles conversation not found, API errors, and race conditions
+   */
   const loadPreviousMessages = useCallback(
     async (convId: string, sessId: string) => {
       if (!convId || !sessId || hasLoadedMessages.current) {
         return;
       }
 
+      if (!isMountedRef.current) return;
+
       setLoadingMessages(true);
+      setMessagesLoadError(null);
       hasLoadedMessages.current = true;
+      lastLoadParams.current = { convId, sessId };
 
       try {
         // Build API URL - use serverUrl from config if available
@@ -60,35 +89,83 @@ export function useMessageState({
           },
         });
 
+        // Check if still mounted before processing response
+        if (!isMountedRef.current) return;
+
         if (response.ok) {
           const data = await response.json();
 
+          if (!isMountedRef.current) return;
+
           if (data.success && data.messages && data.messages.length > 0) {
-            console.log('[useMessageState] Loaded previous messages:', data.messages.length);
+            if (process.env.NODE_ENV === 'development') {
+              console.log('[useMessageState] Loaded previous messages:', data.messages.length);
+            }
             setMessages(data.messages);
           } else {
             // Conversation not found or expired - clear stored ID
-            console.log('[useMessageState] No messages found, clearing conversation ID');
-            storage.removeItem('conversation_id');
+            if (process.env.NODE_ENV === 'development') {
+              console.log('[useMessageState] No messages found, clearing conversation ID');
+            }
+            await storage.removeItem('conversation_id');
             hasLoadedMessages.current = false; // Reset to allow new conversation
           }
         } else {
           // API error - clear stored ID to start fresh
-          console.warn('[useMessageState] Failed to load messages, clearing conversation ID');
-          storage.removeItem('conversation_id');
+          if (!isMountedRef.current) return;
+
+          const error = new Error(`Failed to load messages: ${response.status} ${response.statusText}`);
+          console.warn('[useMessageState] API error:', error);
+          setMessagesLoadError(error);
+
+          await storage.removeItem('conversation_id');
           hasLoadedMessages.current = false; // Reset to allow new conversation
         }
-      } catch (error) {
+      } catch (err) {
+        if (!isMountedRef.current) return;
+
+        const error = err instanceof Error ? err : new Error('Failed to load messages');
         console.error('[useMessageState] Error loading messages:', error);
+        setMessagesLoadError(error);
+
         // On error, clear stored conversation to allow fresh start
-        storage.removeItem('conversation_id');
+        try {
+          await storage.removeItem('conversation_id');
+        } catch (storageErr) {
+          console.warn('[useMessageState] Failed to clear conversation ID:', storageErr);
+        }
         hasLoadedMessages.current = false; // Reset to allow new conversation
       } finally {
-        setLoadingMessages(false);
+        if (isMountedRef.current) {
+          setLoadingMessages(false);
+        }
       }
     },
-    [demoConfig, storage]
+    [demoConfig?.serverUrl, storage]
   );
+
+  /**
+   * Retry loading messages after a failure
+   */
+  const retryLoadMessages = useCallback(async () => {
+    if (!lastLoadParams.current) {
+      console.warn('[useMessageState] No previous load attempt to retry');
+      return;
+    }
+
+    hasLoadedMessages.current = false; // Reset to allow retry
+    await loadPreviousMessages(
+      lastLoadParams.current.convId,
+      lastLoadParams.current.sessId
+    );
+  }, [loadPreviousMessages]);
+
+  // Cleanup on unmount
+  useCallback(() => {
+    return () => {
+      isMountedRef.current = false;
+    };
+  }, []);
 
   return {
     messages,
@@ -98,7 +175,9 @@ export function useMessageState({
     loading,
     setLoading,
     loadingMessages,
+    messagesLoadError,
     messagesContainerRef,
     loadPreviousMessages,
+    retryLoadMessages,
   };
 }

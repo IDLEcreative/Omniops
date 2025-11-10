@@ -35,7 +35,7 @@ export class ConsentManager {
   }
 
   async grant(
-    customerId: string,
+    organizationId: string,
     userId: string,
     request: ConsentRequest
   ): Promise<ConsentRecord> {
@@ -46,14 +46,14 @@ export class ConsentManager {
 
       const record = await insertConsent(
         this.supabase,
-        customerId,
+        organizationId,
         userId,
         request,
         this.consentVersion
       );
 
       console.log('[ConsentManager] Consent granted:', {
-        customerId,
+        organizationId,
         userId,
         service: request.service,
         operation: request.operation
@@ -67,12 +67,12 @@ export class ConsentManager {
   }
 
   async verify(
-    customerId: string,
+    organizationId: string,
     service: string,
     operation: string
   ): Promise<ConsentVerification> {
     try {
-      const data = await selectConsent(this.supabase, customerId, service, operation);
+      const data = await selectConsent(this.supabase, organizationId, service, operation);
 
       if (!data) {
         return {
@@ -99,15 +99,15 @@ export class ConsentManager {
   }
 
   async revoke(
-    customerId: string,
+    organizationId: string,
     service: string,
     operation: string
   ): Promise<void> {
     try {
-      await updateConsentRevoked(this.supabase, customerId, service, operation);
+      await updateConsentRevoked(this.supabase, organizationId, service, operation);
 
       console.log('[ConsentManager] Consent revoked:', {
-        customerId,
+        organizationId,
         service,
         operation
       });
@@ -117,12 +117,12 @@ export class ConsentManager {
     }
   }
 
-  async revokeById(customerId: string, consentId: string): Promise<void> {
+  async revokeById(organizationId: string, consentId: string): Promise<void> {
     try {
-      await updateConsentRevokedById(this.supabase, customerId, consentId);
+      await updateConsentRevokedById(this.supabase, organizationId, consentId);
 
       console.log('[ConsentManager] Consent revoked by ID:', {
-        customerId,
+        organizationId,
         consentId
       });
     } catch (error) {
@@ -132,7 +132,7 @@ export class ConsentManager {
   }
 
   async list(
-    customerId: string,
+    organizationId: string,
     options?: {
       activeOnly?: boolean;
       service?: string;
@@ -142,7 +142,7 @@ export class ConsentManager {
       let query = this.supabase
         .from('autonomous_consent')
         .select('*')
-        .eq('customer_id', customerId)
+        .eq('organization_id', organizationId)
         .order('granted_at', { ascending: false });
 
       if (options?.activeOnly) {
@@ -189,12 +189,12 @@ export class ConsentManager {
   }
 
   async hasPermission(
-    customerId: string,
+    organizationId: string,
     service: string,
     operation: string,
     permission: string
   ): Promise<boolean> {
-    const verification = await this.verify(customerId, service, operation);
+    const verification = await this.verify(organizationId, service, operation);
 
     if (!verification.hasConsent || !verification.consentRecord) {
       return false;
@@ -204,16 +204,16 @@ export class ConsentManager {
   }
 
   async extend(
-    customerId: string,
+    organizationId: string,
     service: string,
     operation: string,
     newExpiresAt: Date
   ): Promise<void> {
     try {
-      await updateConsentExpiry(this.supabase, customerId, service, operation, newExpiresAt);
+      await updateConsentExpiry(this.supabase, organizationId, service, operation, newExpiresAt);
 
       console.log('[ConsentManager] Consent extended:', {
-        customerId,
+        organizationId,
         service,
         operation,
         newExpiresAt
@@ -224,14 +224,14 @@ export class ConsentManager {
     }
   }
 
-  async getStats(customerId: string): Promise<{
+  async getStats(organizationId: string): Promise<{
     total: number;
     active: number;
     revoked: number;
     expired: number;
   }> {
     try {
-      const all = await this.list(customerId);
+      const all = await this.list(organizationId);
 
       return {
         total: all.length,
@@ -247,9 +247,9 @@ export class ConsentManager {
     }
   }
 
-  async revokeAllForService(customerId: string, service: string): Promise<number> {
+  async revokeAllForService(organizationId: string, service: string): Promise<number> {
     try {
-      const count = await bulkRevokeForService(this.supabase, customerId, service);
+      const count = await bulkRevokeForService(this.supabase, organizationId, service);
       console.log(`[ConsentManager] Revoked ${count} consents for service ${service}`);
       return count;
     } catch (error) {

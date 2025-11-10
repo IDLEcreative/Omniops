@@ -1,4 +1,4 @@
-**Last Updated:** 2025-11-09 (Added "Create Comprehensive Tests with Agents" guideline)
+**Last Updated:** 2025-11-10 (Added comprehensive "E2E Tests as Agent Training Data" guidelines)
 **Verified Accurate For:** v0.1.0
 
 # CLAUDE.md
@@ -6,7 +6,7 @@
 **AI Assistant Instructions for Omniops Codebase**
 
 **📊 Metadata:**
-- **Last Updated:** 2025-11-09
+- **Last Updated:** 2025-11-10
 - **Version:** v0.1.0
 - **File Purpose:** Primary instruction set for Claude Code AI assistant
 - **Critical Sections:** Lines 6-165 (brand-agnostic, file placement, agents), 785-1044 (fix issues, create tests)
@@ -1029,15 +1029,24 @@ See [REFERENCE_DATABASE_SCHEMA.md](docs/09-REFERENCE/REFERENCE_DATABASE_SCHEMA.m
 
 **CRITICAL**: Proactively orchestrate specialized agents in parallel to maximize efficiency and protect your context window.
 
-**📚 Comprehensive Guides:**
-- **[Parallel Agent Orchestration Analysis](docs/10-ANALYSIS/ANALYSIS_PARALLEL_AGENT_ORCHESTRATION.md)** ⭐ **MUST READ** - Complete orchestration playbook from 4-week execution (1,400+ lines)
-  - Proven patterns that achieved 45% time savings
-  - Week-by-week breakdown with agent prompts
-  - Communication protocols & structured reporting
-  - Verification strategies & lessons learned
-  - 3 reusable agent prompt templates
-  - **Update this document** after each parallel agent deployment with new findings, improved prompts, and delegation tactics
+**📚 Learning Resources:**
+- **[Parallel Agent Orchestration Guide](docs/02-GUIDES/GUIDE_PARALLEL_AGENT_ORCHESTRATION.md)** ⭐ **START HERE** - Progressive learning guide (1,086 lines)
+  - 🚀 5-minute quick start with decision flowcharts
+  - 📚 Progressive learning (101 → 201 → 301)
+  - 🎯 5 ready-to-use scenario playbooks
+  - 📖 5 agent prompt templates (indexed for fast access)
+  - 🔧 Troubleshooting common issues
+  - ✅ Self-assessments & practice scenarios
+- **[Orchestration Archive](docs/10-ANALYSIS/ANALYSIS_PARALLEL_AGENT_ORCHESTRATION.md)** - Complete 4-week case study with week-by-week breakdown (reference/archive)
 - **[Agent Hierarchy Guide](.claude/AGENT_HIERARCHY.md)** - Three-tier agent system (Architect → Plan → Explore) and when to use each type
+
+**📖 Documentation Pattern:**
+For complex topics >1000 lines:
+1. **Archive** (ANALYSIS_*.md) - Comprehensive record with all context
+2. **Learning Guide** (GUIDE_*.md) - Progressive, action-oriented teaching tool
+3. Both cross-reference, both updated, different purposes
+
+Example: Parallel Agent Orchestration has both.
 
 #### When to Automatically Use Agent Orchestration
 
@@ -1067,19 +1076,45 @@ See [REFERENCE_DATABASE_SCHEMA.md](docs/09-REFERENCE/REFERENCE_DATABASE_SCHEMA.m
 
 **DO NOT Wait for User Permission** - If you identify a parallelizable task, immediately orchestrate agents!
 
-**📖 BEFORE Deploying Agents - Consult the Playbook:**
+**📖 BEFORE Deploying Agents - Consult the Learning Guide:**
 
 When you identify a task suitable for parallel agents:
-1. **Read** [ANALYSIS_PARALLEL_AGENT_ORCHESTRATION.md](docs/10-ANALYSIS/ANALYSIS_PARALLEL_AGENT_ORCHESTRATION.md)
-2. **Use** the appropriate agent prompt template (Code Refactoring, Database Migration, or Test Creation)
-3. **Apply** proven patterns from week-by-week breakdown
-4. **Follow** structured reporting format for consolidation
+1. **Read** [GUIDE_PARALLEL_AGENT_ORCHESTRATION.md](docs/02-GUIDES/GUIDE_PARALLEL_AGENT_ORCHESTRATION.md) - Start with 🚀 Quick Start section
+2. **Match** your task to one of the 5 scenario playbooks (line 492+)
+3. **Select** the appropriate template from indexed list (line 697+)
+4. **Follow** the scenario's specific agent configuration and example prompts
 
-**Quick Template Selection:**
-- **Refactoring** 20+ files with same pattern → Use "Code Refactoring Agent" template (line 1671)
-- **Database** migrations/schema changes → Use "Database Migration Agent" template (line 1767)
-- **Testing** comprehensive test suite creation → Use "Test Creation Agent" template (line 1910)
-- **Pattern Application** (ESLint fixes, import updates) → Use **Haiku model** (90% cheaper, line 1299)
+**Quick Scenario Selection:**
+- **Dependency Updates** (15+ packages) → Scenario 1 (line 494) - 4 agents, Haiku, 88-92% savings
+- **File Refactoring** (30+ files) → Scenario 2 (line 548) - 3 agents, Opus, 60-75% savings
+
+**📝 AFTER Deploying Agents - Update the Archive:**
+
+**CRITICAL**: After EVERY parallel agent orchestration, update [ANALYSIS_PARALLEL_AGENT_ORCHESTRATION.md](docs/10-ANALYSIS/ANALYSIS_PARALLEL_AGENT_ORCHESTRATION.md) with new findings.
+
+**When to Update:**
+- ✅ After deploying 2+ agents in parallel
+- ✅ When discovering new patterns or anti-patterns
+- ✅ When agent prompts are improved/optimized
+- ✅ When time savings deviate significantly from predictions
+
+**What to Add:**
+1. **New Patterns** - Any new orchestration approach used
+2. **Updated Prompts** - Improved prompt templates that worked better
+3. **Lessons Learned** - What worked/didn't work in latest execution
+4. **Efficiency Metrics** - Actual vs estimated times, savings %
+5. **Tools/Techniques** - New verification methods, consolidation approaches
+
+**Where to Add:**
+- Append to "Lessons Learned" section (after existing entries)
+- Add new prompt templates to "Agent Prompt Templates" section
+- Update metrics in tables (add new rows)
+- Add new sections under "Best Practices" if discovering novel patterns
+
+**Why This Matters:** Each orchestration effort reveals new insights. By continuously updating the archive, we build a comprehensive knowledge base that makes future parallel agent work increasingly efficient.
+- **Test Suite Creation** → Scenario 3 (line 600) - 1-3 agents, Opus, 25-40% savings
+- **Pattern Application** (ESLint, imports) → Scenario 4 (line 651) - 3 agents, **Haiku** (90% cheaper), 40-50% savings
+- **Fix Multiple Errors** → Scenario 5 (line 695) - 2-4 agents, Opus, 50-65% savings
 
 #### Fix Issues Immediately with Agents
 
@@ -1667,21 +1702,84 @@ const provider = new ShopifyProvider(mockClient);
 
 **Reference**: Commits 27b607d, 4d1006d (Oct 2025) - Dependency injection refactoring
 
+## 🤖 AUTOMATIC TESTING FOR AI AGENTS
+
+**IMPORTANT: Tests run automatically on code changes - you get immediate feedback!**
+
+### Quick Start (Full Automation)
+```bash
+npm run dev:full
+# Starts: Dev server + Unit tests (watch) + E2E tests (watch)
+# All tests run automatically when you save files
+```
+
+### What Runs Automatically
+
+1. **On File Save** (watch mode):
+   - Unit tests: <1s feedback
+   - Integration tests: 2-5s feedback
+   - E2E tests: 5-15s feedback (debounced)
+   - Screenshots captured on failures
+
+2. **On Git Push** (pre-push hook):
+   - All unit tests
+   - All integration tests
+   - Critical E2E tests (core journeys)
+   - Blocks push if any fail
+
+3. **On Git Commit** (post-commit hook):
+   - Auto-regenerates agent knowledge base (if E2E tests changed)
+
+4. **On GitHub Push** (CI/CD):
+   - Full test suite
+   - E2E tests
+   - Uploads screenshots/videos on failure
+
+### AI Agent Workflow
+
+```
+Make code change
+    ↓
+Save file (Cmd+S)
+    ↓
+Unit tests run (1s) ✅/❌
+    ↓
+E2E tests run (10s) ✅/❌
+    ↓
+Immediate feedback on broken workflows!
+```
+
+**Reference:** See [Test Automation Setup](#testing-approach) for details
+
+---
+
 ## Key Commands
 
 ```bash
-# Development
-npm run dev              # Start development server on port 3000
+# Development (Automated Testing)
+npm run dev:full         # Start dev + unit tests + E2E tests (RECOMMENDED)
+npm run dev              # Start development server only (port 3000)
 npm run build            # Build for production
 npm run start            # Start production server
 npm run lint             # Run ESLint
 
-# Testing
+# Testing (Automated)
 npm test                 # Run all tests (unit + integration)
 npm run test:unit        # Run unit tests only
 npm run test:integration # Run integration tests only
 npm run test:watch       # Run tests in watch mode
 npm run test:coverage    # Generate coverage report
+
+# E2E Testing (Automated)
+npm run test:e2e                # Run all E2E tests
+npm run test:e2e:watch          # Interactive UI mode (recommended)
+npm run test:e2e:watch-files    # Auto-run on file changes
+npm run test:e2e:critical       # Run core journeys only (fast)
+npm run test:e2e:headed         # Run with browser visible
+npm run test:e2e:debug          # Debug mode (step through)
+
+# Environment Check
+bash scripts/check-test-environment.sh  # Validate E2E test setup
 
 # Type Checking
 npx tsc --noEmit        # Run TypeScript type checking
@@ -1863,6 +1961,284 @@ docker exec -it omniops-app sh         # Shell into app container
 - Integration tests for API routes (`app/api/`)
 - Component tests for React components
 - MSW (Mock Service Worker) for external API mocking
+- **E2E tests (Playwright)** for complete user workflows - see below for AI agent training guidelines
+
+**🤖 FULLY AUTOMATED:**
+- Tests run automatically on file save (watch mode)
+- E2E tests validate workflows after every change
+- Screenshots/videos captured on failures
+- Pre-push hook prevents broken code from being pushed
+- CI/CD runs full suite on every push
+
+**Files:**
+- [scripts/watch-e2e.ts](scripts/watch-e2e.ts) - Automatic E2E test runner
+- [scripts/dev-with-tests.sh](scripts/dev-with-tests.sh) - Combined dev environment
+- [scripts/check-test-environment.sh](scripts/check-test-environment.sh) - Environment validation
+- [.husky/pre-push](.husky/pre-push) - Pre-push test validation
+- [.github/workflows/test.yml](.github/workflows/test.yml) - CI/CD pipeline
+
+### E2E Tests as Agent Training Data
+
+**Purpose:** E2E tests serve dual purpose - they validate functionality AND teach AI agents how to operate the application autonomously.
+
+**Key Insight:** E2E tests are executable documentation that never goes stale. If tests pass, documentation is accurate. If documentation becomes inaccurate, tests fail.
+
+#### Philosophy: Tests as Agent Training
+
+```
+Traditional View:          New View:
+Tests validate code   →   Tests teach agents how to use the app
+
+Write test               →   Write "user manual" that:
+Run test                 →   - Validates functionality (traditional)
+✅ Pass/Fail             →   - Documents complete workflows
+                          →   - Trains AI agents
+                          →   - Enables autonomous operation
+```
+
+**The Vision:**
+
+1. **Today:** Tests validate functionality
+2. **Tomorrow:** Tests train AI to guide users through workflows
+3. **Future:** Tests train AI to operate app autonomously
+
+**Example - Autonomous Customer Support:**
+```
+Customer: "OmniOps, set up WooCommerce for my store and show me this week's sales"
+
+AI Agent (executes E2E test workflows):
+- Reads woocommerce-integration-e2e.spec.ts to learn setup process
+- Executes steps autonomously using learned workflow
+- Navigates UI, fills forms, clicks buttons
+- Verifies success using test assertions
+- Reports: "Done. 47 products synced. Sales: $2,340 this week."
+```
+
+#### Writing E2E Tests for AI Agents
+
+**CRITICAL GUIDELINES:**
+
+1. **Test Complete Journeys, Not Isolated Functions**
+   ```typescript
+   // ❌ WRONG: Isolated action test
+   test('can click checkout button', async ({ page }) => {
+     await page.click('#checkout');
+   });
+
+   // ✅ RIGHT: Complete journey test
+   test('user completes purchase from chat to order confirmation', async ({ page }) => {
+     console.log('📍 Step 1: Navigate to widget');
+     await page.goto('/widget-test');
+
+     console.log('📍 Step 2: Send product query');
+     await iframe.locator('input').fill('Show me pumps');
+
+     console.log('📍 Step 3: Click product link');
+     await iframe.locator('a:has-text("Product")').click();
+
+     // ... 15 more steps to order confirmation ...
+
+     console.log('✅ Order confirmed - workflow complete');
+   });
+   ```
+
+2. **Use Verbose Logging (Step Markers)**
+   ```typescript
+   // Every major action needs a log statement
+   console.log('📍 Step X: What we're doing and why');
+   await performAction();
+   console.log('✅ Success indicator');
+   ```
+
+3. **Use Descriptive Selectors (Self-Documenting)**
+   ```typescript
+   // ❌ BAD: Cryptic selector
+   await page.click('.btn-1');
+
+   // ✅ GOOD: Self-explaining selector
+   await page.locator('button:has-text("Place Order"), #place_order').click();
+   ```
+
+4. **Test to the True "End"**
+   ```typescript
+   // ❌ STOPS TOO EARLY
+   test('checkout works', async () => {
+     await clickCheckout();
+     await submitOrder();
+     // Missing: order confirmation, email sent, analytics tracked
+   });
+
+   // ✅ COMPLETE JOURNEY
+   test('complete purchase flow', async () => {
+     await clickCheckout();
+     await submitOrder();
+     await verifyOrderConfirmation(); // ← TRUE END
+     await verifyEmailSent();
+     await verifyAnalyticsTracked();
+     await verifyOrderInDatabase();
+   });
+   ```
+
+5. **Document Intent in Comments**
+   ```typescript
+   /**
+    * E2E Test: Complete Purchase Flow
+    *
+    * Tests the COMPLETE purchase journey from chat to order confirmation.
+    * This validates the primary revenue-generating workflow end-to-end.
+    *
+    * User Journey:
+    * 1. Load chat widget
+    * 2. Search for products
+    * 3. Click product link
+    * 4. Add to cart
+    * 5. Proceed to checkout
+    * 6. Fill billing info
+    * 7. Place order
+    * 8. Verify order confirmation ← THE TRUE "END"
+    * 9. Verify analytics tracking
+    * 10. Verify email notification
+    *
+    * This test teaches AI agents:
+    * - How to navigate the purchase flow
+    * - Expected selectors at each step
+    * - Success indicators to verify
+    * - Error recovery patterns
+    */
+   test('user completes purchase from chat to order confirmation', async ({ page }) => {
+     // Implementation...
+   });
+   ```
+
+#### Workflow Extraction Tools
+
+**Available Tools:**
+
+1. **`scripts/extract-workflows-from-e2e.ts`**
+   - Parses all E2E test files (`__tests__/playwright/**/*.spec.ts`)
+   - Extracts step-by-step workflows with line numbers
+   - Generates: `docs/10-ANALYSIS/WORKFLOWS_FROM_E2E_TESTS.md`
+   - Usage: `npx tsx scripts/extract-workflows-from-e2e.ts`
+
+2. **`scripts/generate-agent-training-data.ts`**
+   - Converts workflows into AI-optimized knowledge base
+   - Generates:
+     - `docs/10-ANALYSIS/AGENT_KNOWLEDGE_BASE.md` (human-readable)
+     - `docs/10-ANALYSIS/AGENT_KNOWLEDGE_BASE.json` (machine-readable)
+   - Usage: `npx tsx scripts/generate-agent-training-data.ts`
+
+**When to Regenerate:**
+- After creating new E2E tests
+- After modifying existing E2E tests
+- Before deploying new features (to update agent knowledge)
+- Weekly (automated in CI/CD pipeline)
+
+#### Agent Knowledge Base Structure
+
+The generated knowledge base provides AI agents with:
+
+1. **Executable Workflows**: Step-by-step instructions for 44 user journeys
+2. **UI Element Catalog**: Semantic meanings of 47+ UI elements
+3. **API Reference**: 9 documented endpoints with purposes
+4. **Common Patterns**: 3 interaction patterns (navigation, form filling, verification)
+5. **Success Indicators**: How to verify each workflow succeeded
+6. **Error Recovery**: What to do when workflows fail
+
+**Example Agent Workflow Entry:**
+```markdown
+### Complete Purchase Flow
+
+**Intent:** Complete a product purchase from discovery to order confirmation
+
+**Preconditions:**
+- User must have network access to application
+- Products must be available in catalog
+- Payment processing must be configured
+
+**Steps (20):**
+1. **Navigate to widget test page**
+   - Action: navigate
+   - Target: /widget-test
+   - Expected: Page loads successfully
+
+2. **Click on iframe#chat-widget-iframe**
+   - Action: click
+   - Expected: Chat widget opens
+
+[... 18 more steps ...]
+
+**Success Indicators:**
+- ✅ Order confirmation page displayed
+- ✅ Order exists in database
+- ✅ Analytics event tracked
+- ✅ Email notification sent
+
+**Error Recovery:**
+- ⚠️ If payment fails, show clear error message
+- ⚠️ Do not lose cart contents
+- ⚠️ Provide retry option
+```
+
+#### E2E Test Coverage Goals
+
+**Current Status:**
+- 44 E2E tests across 7 categories
+- 284 documented workflow steps
+- ~15-20% coverage of critical user journeys
+
+**Coverage Targets:**
+- ✅ Complete purchase flow (covered)
+- ✅ WooCommerce integration (covered)
+- ✅ GDPR privacy workflows (covered)
+- ⏳ Shopify integration (needs expansion)
+- ⏳ Multi-turn chat conversations (needs expansion)
+- ⏳ Analytics dashboard (needs expansion)
+- ⏳ Widget customization (needs expansion)
+
+**When to Add E2E Tests:**
+- New user-facing features (always)
+- Critical revenue paths (required)
+- Complex multi-step workflows (required)
+- Integration points (WooCommerce, Shopify, etc.)
+- Privacy/compliance workflows (GDPR, CCPA)
+
+#### Best Practices Summary
+
+**DO:**
+- ✅ Test complete journeys from start to TRUE end
+- ✅ Use verbose console.log statements for every step
+- ✅ Use descriptive, self-documenting selectors
+- ✅ Document workflow intent in JSDoc comments
+- ✅ Verify all side effects (database, emails, analytics)
+- ✅ Include error scenarios and recovery paths
+- ✅ Regenerate agent knowledge base after changes
+
+**DON'T:**
+- ❌ Test isolated actions without context
+- ❌ Use cryptic selectors (`.btn-1`, `#x`)
+- ❌ Stop testing before verification is complete
+- ❌ Forget to document expected outcomes
+- ❌ Skip error scenario testing
+- ❌ Assume tests are only for validation (they're also training data!)
+
+**Remember:** Every E2E test you write is not just validating functionality - it's teaching future AI agents how to operate the application autonomously.
+
+#### Reference Documentation
+
+**Comprehensive Guides:**
+- [ANALYSIS_E2E_AS_AGENT_TRAINING_DATA.md](docs/10-ANALYSIS/ANALYSIS_E2E_AS_AGENT_TRAINING_DATA.md) - Complete strategy and vision (890 lines)
+- [E2E_TESTS_AGENT_TRAINING_SUMMARY.md](docs/10-ANALYSIS/E2E_TESTS_AGENT_TRAINING_SUMMARY.md) - Implementation summary
+- [ANALYSIS_MISSING_E2E_TESTS.md](docs/10-ANALYSIS/ANALYSIS_MISSING_E2E_TESTS.md) - Gap analysis and roadmap
+
+**Generated Documentation:**
+- [WORKFLOWS_FROM_E2E_TESTS.md](docs/10-ANALYSIS/WORKFLOWS_FROM_E2E_TESTS.md) - Extracted workflows
+- [AGENT_KNOWLEDGE_BASE.md](docs/10-ANALYSIS/AGENT_KNOWLEDGE_BASE.md) - AI-optimized training data
+- [AGENT_KNOWLEDGE_BASE.json](docs/10-ANALYSIS/AGENT_KNOWLEDGE_BASE.json) - Machine-readable knowledge
+
+**Example Tests:**
+- [complete-purchase-flow.spec.ts](__tests__/playwright/core-journeys/complete-purchase-flow.spec.ts) - Gold standard (547 lines)
+- [woocommerce-integration-e2e.spec.ts](__tests__/playwright/integrations/woocommerce-integration-e2e.spec.ts) - Integration example (562 lines)
+- [gdpr-privacy.spec.ts](__tests__/playwright/gdpr-privacy.spec.ts) - Best practice example (95% complete)
 
 ## Key Features & Entry Points
 

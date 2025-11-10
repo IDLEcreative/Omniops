@@ -2,13 +2,13 @@ import Image from "next/image";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Label } from "@/components/ui/label";
 import { Input } from "@/components/ui/input";
-import { Textarea } from "@/components/ui/textarea";
 import { Switch } from "@/components/ui/switch";
-import { Palette, MessageSquare, Settings2, Upload } from "lucide-react";
+import { Palette, Settings2, Upload } from "lucide-react";
 import { PositionPicker } from "../components/PositionPicker";
 import { IconUploadManager } from "../components/IconUploadManager";
 import { AdvancedColorPicker } from "../components/AdvancedColorPicker";
 import { AnimationCard } from "../components/AnimationCard";
+import { MessagesCard } from "./MessagesCard";
 
 interface EssentialsSettings {
   primaryColor: string;
@@ -162,55 +162,12 @@ export function EssentialsSection({ settings, onChange, customerConfigId }: Esse
       </Card>
 
       {/* Messages */}
-      <Card>
-        <CardHeader>
-          <CardTitle className="flex items-center">
-            <MessageSquare className="h-5 w-5 mr-2" />
-            Messages
-          </CardTitle>
-          <CardDescription>
-            Customize the chat messages
-          </CardDescription>
-        </CardHeader>
-        <CardContent className="space-y-4">
-          <div className="space-y-2">
-            <Label htmlFor="botName">Bot Name</Label>
-            <Input
-              id="botName"
-              value={settings.botName}
-              onChange={(e) => onChange({ botName: e.target.value })}
-              placeholder="Assistant"
-              maxLength={30}
-            />
-          </div>
-
-          <div className="space-y-2">
-            <Label htmlFor="welcomeMessage">Welcome Message</Label>
-            <Textarea
-              id="welcomeMessage"
-              value={settings.welcomeMessage}
-              onChange={(e) => onChange({ welcomeMessage: e.target.value })}
-              placeholder="Hi! How can I help you today?"
-              rows={2}
-              maxLength={200}
-            />
-            <p className="text-xs text-muted-foreground">
-              {settings.welcomeMessage.length}/200 characters
-            </p>
-          </div>
-
-          <div className="space-y-2">
-            <Label htmlFor="placeholderText">Input Placeholder</Label>
-            <Input
-              id="placeholderText"
-              value={settings.placeholderText}
-              onChange={(e) => onChange({ placeholderText: e.target.value })}
-              placeholder="Type your message..."
-              maxLength={50}
-            />
-          </div>
-        </CardContent>
-      </Card>
+      <MessagesCard
+        botName={settings.botName}
+        welcomeMessage={settings.welcomeMessage}
+        placeholderText={settings.placeholderText}
+        onChange={onChange}
+      />
 
       {/* Behavior */}
       <Card>

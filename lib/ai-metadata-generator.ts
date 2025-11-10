@@ -6,16 +6,12 @@
  */
 
 import OpenAI from 'openai';
-import { createHash } from 'crypto';
+import { MetadataCache } from './ai-metadata-cache';
 
 // Import types
 import type {
   AIMetadata,
   Question,
-  IntentMapping,
-  QualityScore,
-  ContentType,
-  CacheEntry,
   ProcessingOptions
 } from './ai-metadata-generator-types';
 
@@ -42,8 +38,7 @@ import {
 
 // Import validators
 import {
-  calculateQualityScore,
-  calculateCosineSimilarity
+  calculateQualityScore
 } from './ai-metadata-generator-validators';
 
 /**
@@ -51,12 +46,12 @@ import {
  */
 export class AIMetadataGenerator {
   private openai: OpenAI;
-  private cache: Map<string, CacheEntry>;
+  private cache: MetadataCache;
   private embeddingModel: string;
 
   constructor(openaiApiKey: string, embeddingModel: string = 'text-embedding-3-small') {
     this.openai = new OpenAI({ apiKey: openaiApiKey });
-    this.cache = new Map();
+    this.cache = new MetadataCache();
     this.embeddingModel = embeddingModel;
   }
 
@@ -77,11 +72,11 @@ export class AIMetadataGenerator {
     };
 
     const opts = { ...defaults, ...options };
-    const contentHash = this.generateContentHash(content);
+    const contentHash = this.cache.generateContentHash(content);
 
     // Check cache first
-    if (opts.useCache && this.isCached(contentHash)) {
-      const cached = this.getFromCache(contentHash);
+    if (opts.useCache && this.cache.isCached(contentHash)) {
+      const cached = this.cache.getFromCache(contentHash);
       if (cached) return cached;
     }
 
@@ -152,7 +147,7 @@ export class AIMetadataGenerator {
 
     // Cache the result
     if (opts.useCache) {
-      this.cacheMetadata(contentHash, metadata, opts.cacheTimeout || 3600000);
+      this.cache.cacheMetadata(contentHash, metadata, opts.cacheTimeout || 3600000);
     }
 
     return metadata;
@@ -179,7 +174,7 @@ export class AIMetadataGenerator {
   /**
    * Classify content type
    */
-  private async classifyContent(content: string): Promise<ContentType> {
+  private async classifyContent(content: string) {
     return classifyContentType(content);
   }
 
@@ -200,7 +195,7 @@ export class AIMetadataGenerator {
   /**
    * Extract entities
    */
-  private async getEntities(content: string): Promise<AIMetadata['entities']> {
+  private async getEntities(content: string) {
     return extractEntities(content);
   }
 
@@ -230,21 +225,21 @@ export class AIMetadataGenerator {
   /**
    * Analyze sentiment
    */
-  private getSentiment(content: string): Promise<'positive' | 'negative' | 'neutral'> {
+  private getSentiment(content: string) {
     return Promise.resolve(analyzeSentiment(content));
   }
 
   /**
    * Assess complexity
    */
-  private getComplexity(content: string): Promise<'simple' | 'moderate' | 'complex'> {
+  private getComplexity(content: string) {
     return Promise.resolve(assessComplexity(content));
   }
 
   /**
    * Generate intent mappings
    */
-  private async getIntentMappings(content: string): Promise<IntentMapping[]> {
+  private async getIntentMappings(content: string) {
     return generateIntentMappings(content);
   }
 
@@ -255,56 +250,19 @@ export class AIMetadataGenerator {
     summary: string,
     keywords: string[],
     model: string
-  ): Promise<AIMetadata['embeddings']> {
+  ) {
     return generateEmbeddingsWithAI(this.openai, summary, keywords, model);
-  }
-
-  /**
-   * Cache management
-   */
-  private generateContentHash(content: string): string {
-    return createHash('sha256').update(content).digest('hex');
-  }
-
-  private isCached(hash: string): boolean {
-    const entry = this.cache.get(hash);
-    if (!entry) return false;
-
-    const now = Date.now();
-    if (now - entry.timestamp > entry.ttl) {
-      this.cache.delete(hash);
-      return false;
-    }
-
-    return true;
-  }
-
-  private getFromCache(hash: string): AIMetadata | null {
-    const entry = this.cache.get(hash);
-    return entry ? entry.metadata : null;
-  }
-
-  private cacheMetadata(hash: string, metadata: AIMetadata, ttl: number): void {
-    this.cache.set(hash, {
-      hash,
-      metadata,
-      timestamp: Date.now(),
-      ttl
-    });
   }
 
   /**
    * Public cache operations
    */
   public clearCache(): void {
-    this.cache.clear();
+    this.cache.clearCache();
   }
 
   public getCacheStats(): { size: number; entries: string[] } {
-    return {
-      size: this.cache.size,
-      entries: Array.from(this.cache.keys())
-    };
+    return this.cache.getCacheStats();
   }
 }
 

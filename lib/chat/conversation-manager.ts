@@ -1,43 +1,22 @@
 /**
  * Conversation Manager
  *
- * Handles all database operations related to conversations and messages,
- * including domain lookups, conversation creation, and message persistence.
+ * Main orchestrator for conversation and message operations
  */
 
-import { recordChatStage } from '@/lib/analytics/funnel-analytics';
+import { recordChatFunnelStage } from './conversation-funnel-tracking';
 
 export type ConversationMessage = {
   role: 'user' | 'assistant';
   content: string;
 };
 
-/**
- * Look up domain ID from domain string
- * Returns null if domain not found or on error
- */
-export async function lookupDomain(
-  domain: string | undefined,
-  supabase: any
-): Promise<string | null> {
-  if (!domain) {
-    return null;
-  }
+// Re-export domain operations
+export { lookupDomain } from './conversation-domain-operations';
 
-  try {
-    const normalizedDomain = domain.replace(/^https?:\/\//, '').replace('www.', '');
-    const { data: domainData } = await supabase
-      .from('domains')
-      .select('id')
-      .eq('domain', normalizedDomain)
-      .single();
-
-    return domainData?.id || null;
-  } catch (error) {
-    console.error('[ConversationManager] Domain lookup error:', error);
-    return null;
-  }
-}
+// Re-export widget config
+export { loadWidgetConfig } from './conversation-widget-config';
+export type { WidgetConfig } from './conversation-widget-config';
 
 /**
  * Get existing conversation or create a new one
@@ -65,37 +44,7 @@ export async function getOrCreateConversation(
     if (convError) throw convError;
 
     // Record chat stage in funnel (non-blocking)
-    if (domainId) {
-      try {
-        // Get domain string for funnel tracking
-        const { data: domainData } = await supabase
-          .from('domains')
-          .select('domain')
-          .eq('id', domainId)
-          .single();
-
-        if (domainData?.domain) {
-          // Try to get customer email from customer_sessions
-          const { data: sessionData } = await supabase
-            .from('customer_sessions')
-            .select('customer_email')
-            .eq('session_id', sessionId)
-            .single();
-
-          if (sessionData?.customer_email) {
-            // Record chat initiation in funnel
-            await recordChatStage(
-              newConversation.id,
-              sessionData.customer_email,
-              domainData.domain
-            );
-          }
-        }
-      } catch (funnelError) {
-        // Log but don't block conversation creation
-        console.error('[ConversationManager] Failed to record chat funnel stage:', funnelError);
-      }
-    }
+    await recordChatFunnelStage(newConversation.id, sessionId, domainId, supabase);
 
     return newConversation.id;
   }
@@ -123,36 +72,8 @@ export async function getOrCreateConversation(
     }
 
     // Record chat stage in funnel (non-blocking)
-    if (domainId && !createError) {
-      try {
-        // Get domain string for funnel tracking
-        const { data: domainData } = await supabase
-          .from('domains')
-          .select('domain')
-          .eq('id', domainId)
-          .single();
-
-        if (domainData?.domain) {
-          // Try to get customer email from customer_sessions
-          const { data: sessionData } = await supabase
-            .from('customer_sessions')
-            .select('customer_email')
-            .eq('session_id', sessionId)
-            .single();
-
-          if (sessionData?.customer_email) {
-            // Record chat initiation in funnel
-            await recordChatStage(
-              conversationId,
-              sessionData.customer_email,
-              domainData.domain
-            );
-          }
-        }
-      } catch (funnelError) {
-        // Log but don't block conversation creation
-        console.error('[ConversationManager] Failed to record chat funnel stage:', funnelError);
-      }
+    if (!createError) {
+      await recordChatFunnelStage(conversationId, sessionId, domainId, supabase);
     }
   }
 
@@ -266,100 +187,3 @@ export async function getConversationHistory(
   return data || [];
 }
 
-/**
- * Widget Configuration Interface
- * Represents the complete widget configuration from database
- */
-export interface WidgetConfig {
-  theme_settings?: {
-    primaryColor?: string;
-    backgroundColor?: string;
-    textColor?: string;
-    darkMode?: boolean;
-    customCSS?: string;
-  };
-  position_settings?: {
-    position?: 'bottom-right' | 'bottom-left' | 'top-right' | 'top-left';
-    offsetX?: number;
-    offsetY?: number;
-  };
-  ai_settings?: {
-    personality?: 'professional' | 'friendly' | 'helpful' | 'concise' | 'technical';
-    responseLength?: 'short' | 'balanced' | 'detailed';
-    language?: string;
-    customSystemPrompt?: string;
-    enableSmartSuggestions?: boolean;
-    maxTokens?: number;
-    temperature?: number;
-  };
-  behavior_settings?: {
-    botName?: string;
-    welcomeMessage?: string;
-    placeholderText?: string;
-    showAvatar?: boolean;
-    autoOpen?: boolean;
-    openDelay?: number;
-    soundNotifications?: boolean;
-  };
-  integration_settings?: {
-    enableWooCommerce?: boolean;
-    enableWebSearch?: boolean;
-    enableKnowledgeBase?: boolean;
-    dataSourcePriority?: string[];
-  };
-  analytics_settings?: {
-    trackConversations?: boolean;
-    dataRetentionDays?: number;
-  };
-  branding_settings?: {
-    customLogoUrl?: string;
-    showPoweredBy?: boolean;
-  };
-}
-
-/**
- * Load widget configuration from database
- * Returns null if no configuration found
- */
-export async function loadWidgetConfig(
-  domainId: string | null,
-  supabase: any
-): Promise<WidgetConfig | null> {
-  if (!domainId) {
-    return null;
-  }
-
-  try {
-    // Get the customer_config_id from the domain
-    const { data: domainData, error: domainError } = await supabase
-      .from('domains')
-      .select('customer_config_id')
-      .eq('id', domainId)
-      .single();
-
-    if (domainError || !domainData?.customer_config_id) {
-      console.log('[ConversationManager] No customer_config_id found for domain');
-      return null;
-    }
-
-    // Get the active widget configuration
-    const { data: widgetConfig, error: configError } = await supabase
-      .from('widget_configs')
-      .select('config_data')
-      .eq('customer_config_id', domainData.customer_config_id)
-      .eq('is_active', true)
-      .order('updated_at', { ascending: false })
-      .limit(1)
-      .single();
-
-    if (configError || !widgetConfig) {
-      console.log('[ConversationManager] No active widget config found');
-      return null;
-    }
-
-    return widgetConfig.config_data as WidgetConfig;
-  } catch (error) {
-    console.error('[ConversationManager] Error loading widget config:', error);
-    return null;
-  }
-}

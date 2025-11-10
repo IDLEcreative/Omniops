@@ -261,20 +261,6 @@ export class PerformanceTracker {
     }
   }
 
-  private startAggregation_DEPRECATED(): void {
-    // DEPRECATED: Replaced with lazy cleanup for serverless compatibility
-    // This method is no longer called but kept for reference
-    // Old implementation used setInterval which is incompatible with serverless
-    logger.warn('startAggregation() is deprecated and does nothing in serverless mode');
-  }
-
-  /**
-   * Destroy is no longer needed with lazy cleanup
-   * @deprecated No automatic intervals to clean up in serverless mode
-   */
-  destroy(): void {
-    // No-op in serverless mode (no intervals to clear)
-  }
 }
 
 // Export singleton instance

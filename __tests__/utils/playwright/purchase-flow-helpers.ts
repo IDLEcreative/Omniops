@@ -1,163 +1,102 @@
-/**
- * Purchase Flow Test Helpers
- *
- * Reusable utilities for testing complete purchase journeys
- */
-
 import { Page } from '@playwright/test';
 
-export interface TestCustomer {
-  firstName: string;
-  lastName: string;
-  email: string;
-  phone: string;
-  address: string;
-  city: string;
-  postcode: string;
-  country: string;
-  state: string;
-}
-
-export const DEFAULT_TEST_CUSTOMER: TestCustomer = {
-  firstName: 'Test',
-  lastName: 'Customer',
-  email: 'test.customer@example.com',
-  phone: '555-0123',
-  address: '123 Test Street',
-  city: 'Test City',
-  postcode: '12345',
-  country: 'US',
-  state: 'CA'
-};
-
-/**
- * Fill form field with multiple selector fallbacks
- */
-export async function fillFormField(page: Page, selectors: string[], value: string): Promise<void> {
-  for (const selector of selectors) {
-    try {
-      const field = page.locator(selector).first();
-      if (await field.isVisible({ timeout: 1000 })) {
-        await field.fill(value);
-        return;
-      }
-    } catch {
-      continue;
-    }
-  }
-  console.warn(`⚠️  Could not find field with selectors: ${selectors.join(', ')}`);
-}
-
-/**
- * Find and click product link in chat
- */
 export async function clickProductLink(page: Page): Promise<{ hasProducts: boolean; productPage: Page | null }> {
-  const productLinks = page.locator('a[href*="product"], a[href*="/shop/"], a[href*="item"]');
-  const linkCount = await productLinks.count();
-
-  if (linkCount === 0) {
+  console.log('📍 Looking for product links...');
+  const productLinks = page.locator('a[href*="/product/"], a[href*="/shop/"], a.product-link, [data-product-id]');
+  const count = await productLinks.count();
+  if (count === 0) {
+    console.log('⏭️  No product links found');
     return { hasProducts: false, productPage: null };
   }
-
-  const firstProductLink = productLinks.first();
+  console.log(`✅ Found ${count} product link(s)`);
   const [productPage] = await Promise.all([
-    page.waitForEvent('popup').catch(() => null),
-    firstProductLink.click()
+    page.context().waitForEvent('page'),
+    productLinks.first().click()
   ]);
-
-  const activePage = productPage || page;
-  await activePage.waitForLoadState('networkidle');
-
-  return { hasProducts: true, productPage: activePage };
+  await productPage.waitForLoadState('networkidle');
+  console.log('✅ Product page opened');
+  return { hasProducts: true, productPage };
 }
 
-/**
- * Add product to cart
- */
-export async function addToCart(page: Page) {
-  const addToCartButton = page.locator(
-    'button:has-text("Add to cart"), button:has-text("Add to Cart"), button.add-to-cart, button.single_add_to_cart_button, .add-to-cart-button, [name="add-to-cart"]'
-  ).first();
-
+export async function addToCart(page: Page): Promise<void> {
+  console.log('📍 Adding product to cart...');
+  const addToCartButton = page.locator('button:has-text("Add to cart"), button:has-text("Add to Cart"), button.add-to-cart, button[name="add-to-cart"]').first();
   await addToCartButton.waitFor({ state: 'visible', timeout: 5000 });
   await addToCartButton.click();
   await page.waitForTimeout(2000);
+  console.log('✅ Product added to cart');
 }
 
-/**
- * Navigate to cart
- */
-export async function navigateToCart(page: Page, currentUrl: string) {
-  const cartLink = page.locator(
-    'a[href*="/cart"], a:has-text("Cart"), .cart-link, [aria-label*="cart" i]'
-  ).first();
-
-  try {
-    await cartLink.waitFor({ state: 'visible', timeout: 5000 });
+export async function navigateToCart(page: Page, currentUrl: string): Promise<void> {
+  console.log('📍 Navigating to cart...');
+  const cartLink = page.locator('a:has-text("View cart"), a:has-text("Cart"), a[href*="/cart"]').first();
+  const cartLinkVisible = await cartLink.isVisible({ timeout: 3000 }).catch(() => false);
+  if (cartLinkVisible) {
     await cartLink.click();
-  } catch (error) {
+  } else {
     const baseUrl = new URL(currentUrl).origin;
-    await page.goto(`${baseUrl}/cart`);
+    await page.goto(`${baseUrl}/cart`, { waitUntil: 'networkidle' });
   }
-
   await page.waitForLoadState('networkidle');
+  console.log('✅ Cart page loaded');
 }
 
-/**
- * Fill checkout form
- */
-export async function fillCheckoutForm(page: Page, customer: TestCustomer = DEFAULT_TEST_CUSTOMER) {
-  try {
-    await fillFormField(page, ['#billing_first_name', '[name="billing_first_name"]'], customer.firstName);
-    await fillFormField(page, ['#billing_last_name', '[name="billing_last_name"]'], customer.lastName);
-    await fillFormField(page, ['#billing_email', '[name="billing_email"]'], customer.email);
-    await fillFormField(page, ['#billing_phone', '[name="billing_phone"]'], customer.phone);
-    await fillFormField(page, ['#billing_address_1', '[name="billing_address_1"]'], customer.address);
-    await fillFormField(page, ['#billing_city', '[name="billing_city"]'], customer.city);
-    await fillFormField(page, ['#billing_postcode', '[name="billing_postcode"]'], customer.postcode);
-  } catch (error) {
-    console.warn('⚠️  Could not fill all checkout fields');
+export async function fillCheckoutForm(page: Page): Promise<void> {
+  console.log('📍 Filling checkout form...');
+  const formFields = [
+    { name: 'billing_first_name', value: 'Test' },
+    { name: 'billing_last_name', value: 'User' },
+    { name: 'billing_email', value: 'test@example.com' },
+    { name: 'billing_phone', value: '1234567890' },
+    { name: 'billing_address_1', value: '123 Test Street' },
+    { name: 'billing_city', value: 'Test City' },
+    { name: 'billing_postcode', value: '12345' }
+  ];
+  for (const field of formFields) {
+    const input = page.locator(`input[name="${field.name}"]`).first();
+    const isVisible = await input.isVisible({ timeout: 2000 }).catch(() => false);
+    if (isVisible) await input.fill(field.value);
   }
-}
-
-/**
- * Select test payment method
- */
-export async function selectTestPaymentMethod(page: Page) {
-  const testPaymentMethods = page.locator(
-    '#payment_method_cod, #payment_method_bacs, input[value="cod"], input[value="bacs"]'
-  );
-
-  if (await testPaymentMethods.count() > 0) {
-    await testPaymentMethods.first().check();
+  const countrySelect = page.locator('select[name="billing_country"]').first();
+  if (await countrySelect.isVisible({ timeout: 2000 }).catch(() => false)) {
+    await countrySelect.selectOption('US');
   }
+  console.log('✅ Checkout form filled');
 }
 
-/**
- * Place order
- */
-export async function placeOrder(page: Page) {
-  const placeOrderButton = page.locator(
-    '#place_order, button:has-text("Place order"), button:has-text("Place Order"), .place-order-button'
-  ).first();
+export async function selectTestPaymentMethod(page: Page): Promise<void> {
+  console.log('📍 Selecting payment method...');
+  const paymentMethods = ['input[value="cod"]', 'input[value="bacs"]', 'input[value="test"]', 'input[type="radio"][name="payment_method"]'];
+  for (const selector of paymentMethods) {
+    const paymentInput = page.locator(selector).first();
+    const isVisible = await paymentInput.isVisible({ timeout: 2000 }).catch(() => false);
+    if (isVisible) {
+      await paymentInput.check();
+      console.log('✅ Payment method selected');
+      return;
+    }
+  }
+  console.log('⏭️  No test payment method found (may use default)');
+}
 
+export async function placeOrder(page: Page): Promise<void> {
+  console.log('📍 Placing order...');
+  const placeOrderButton = page.locator('button:has-text("Place order"), button:has-text("Complete purchase"), button[name="woocommerce_checkout_place_order"], button#place_order').first();
   await placeOrderButton.waitFor({ state: 'visible', timeout: 5000 });
   await placeOrderButton.click();
-  await page.waitForLoadState('networkidle');
+  console.log('⏳ Waiting for order processing...');
+  await page.waitForTimeout(5000);
 }
 
-/**
- * Verify order confirmation
- */
 export async function verifyOrderConfirmation(page: Page): Promise<boolean> {
-  const confirmationIndicators = page.locator(
-    '.woocommerce-order-received, .order-confirmation, text=/thank you/i, text=/order received/i, text=/order confirmation/i'
-  );
-
+  console.log('📍 Verifying order confirmation...');
+  const confirmationIndicators = page.locator('.woocommerce-order-received, .order-confirmation, text=/thank you/i, text=/order received/i, text=/order complete/i');
   try {
     await confirmationIndicators.first().waitFor({ state: 'visible', timeout: 10000 });
+    console.log('✅ Order confirmation page loaded');
     return true;
   } catch (error) {
+    console.log('❌ Order confirmation not found');
     return false;
   }
 }

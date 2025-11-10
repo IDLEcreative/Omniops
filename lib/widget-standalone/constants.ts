@@ -1,7 +1,3 @@
-/**
- * Widget Standalone Constants
- */
-
 export const WIDGET_STYLES = `
   /* Tailwind Base - Reset */
   *, ::before, ::after { box-sizing: border-box; border-width: 0; border-style: solid; border-color: #e5e7eb; }
@@ -286,15 +282,10 @@ export const WIDGET_STYLES = `
   .flex-col { flex-direction: column; }
 
   /* Animation for typing indicator */
-  @keyframes typing-bounce {
-    0%, 80%, 100% { transform: translateY(0); }
-    40% { transform: translateY(-8px); }
-  }
+  @keyframes typing-bounce { 0%, 80%, 100% { transform: translateY(0); } 40% { transform: translateY(-8px); } }
   .animate-typing-bounce { animation: typing-bounce 1.4s infinite; }
-  .\\[animation-delay\\:0ms\\] { animation-delay: 0ms; }
-  .\\[animation-delay\\:150ms\\] { animation-delay: 150ms; }
-  .\\[animation-delay\\:200ms\\] { animation-delay: 200ms; }
-  .\\[animation-delay\\:300ms\\] { animation-delay: 300ms; }
+  .\\[animation-delay\\:0ms\\] { animation-delay: 0ms; } .\\[animation-delay\\:150ms\\] { animation-delay: 150ms; }
+  .\\[animation-delay\\:200ms\\] { animation-delay: 200ms; } .\\[animation-delay\\:300ms\\] { animation-delay: 300ms; }
   .\\[animation-delay\\:400ms\\] { animation-delay: 400ms; }
 
   /* Group hover for button icons */

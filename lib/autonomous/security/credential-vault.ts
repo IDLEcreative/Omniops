@@ -25,7 +25,7 @@ export interface CredentialData {
 
 export interface StoredCredential {
   id: string;
-  customerId: string;
+  organizationId: string;
   service: string;
   credentialType: CredentialType;
   metadata?: Record<string, any>;
@@ -64,7 +64,7 @@ export class CredentialVault {
    * });
    */
   async store(
-    customerId: string,
+    organizationId: string,
     service: string,
     credentialType: CredentialType,
     credential: CredentialData
@@ -78,7 +78,7 @@ export class CredentialVault {
       const { data, error } = await this.supabase
         .from('autonomous_credentials')
         .upsert({
-          customer_id: customerId,
+          organization_id: organizationId,
           service,
           credential_type: credentialType,
           encrypted_credential: encryptedBuffer,
@@ -88,7 +88,7 @@ export class CredentialVault {
           last_rotated_at: new Date().toISOString(),
           rotation_required: false
         }, {
-          onConflict: 'customer_id,service,credential_type'
+          onConflict: 'organization_id,service,credential_type'
         })
         .select()
         .single();
@@ -112,7 +112,7 @@ export class CredentialVault {
    * console.log(credential.value); // Decrypted API key
    */
   async get(
-    customerId: string,
+    organizationId: string,
     service: string,
     credentialType: CredentialType
   ): Promise<DecryptedCredential | null> {
@@ -120,7 +120,7 @@ export class CredentialVault {
       const { data, error } = await this.supabase
         .from('autonomous_credentials')
         .select('*')
-        .eq('customer_id', customerId)
+        .eq('organization_id', organizationId)
         .eq('service', service)
         .eq('credential_type', credentialType)
         .single();
@@ -164,12 +164,12 @@ export class CredentialVault {
    * const credentials = await vault.list('customer-123');
    * credentials.forEach(c => console.log(c.service, c.credentialType));
    */
-  async list(customerId: string, service?: string): Promise<StoredCredential[]> {
+  async list(organizationId: string, service?: string): Promise<StoredCredential[]> {
     try {
       let query = this.supabase
         .from('autonomous_credentials')
         .select('*')
-        .eq('customer_id', customerId);
+        .eq('organization_id', organizationId);
 
       if (service) {
         query = query.eq('service', service);
@@ -195,7 +195,7 @@ export class CredentialVault {
    * await vault.delete('customer-123', 'woocommerce', 'api_key');
    */
   async delete(
-    customerId: string,
+    organizationId: string,
     service: string,
     credentialType: CredentialType
   ): Promise<void> {
@@ -203,7 +203,7 @@ export class CredentialVault {
       const { error } = await this.supabase
         .from('autonomous_credentials')
         .delete()
-        .eq('customer_id', customerId)
+        .eq('organization_id', organizationId)
         .eq('service', service)
         .eq('credential_type', credentialType);
 
@@ -224,13 +224,13 @@ export class CredentialVault {
    * await vault.rotate('customer-123', 'woocommerce', 'api_key');
    */
   async rotate(
-    customerId: string,
+    organizationId: string,
     service: string,
     credentialType: CredentialType
   ): Promise<void> {
     try {
       // Get and decrypt current credential
-      const current = await this.get(customerId, service, credentialType);
+      const current = await this.get(organizationId, service, credentialType);
 
       if (!current) {
         throw new Error('Credential not found for rotation');
@@ -249,7 +249,7 @@ export class CredentialVault {
           last_rotated_at: new Date().toISOString(),
           rotation_required: false
         })
-        .eq('customer_id', customerId)
+        .eq('organization_id', organizationId)
         .eq('service', service)
         .eq('credential_type', credentialType);
 
@@ -258,7 +258,7 @@ export class CredentialVault {
       }
 
       console.log('[CredentialVault] Credential rotated:', {
-        customerId,
+        organizationId,
         service,
         credentialType
       });
@@ -322,11 +322,11 @@ export class CredentialVault {
    * Verify credential is valid and not expired
    */
   async verify(
-    customerId: string,
+    organizationId: string,
     service: string,
     credentialType: CredentialType
   ): Promise<boolean> {
-    const credential = await this.get(customerId, service, credentialType);
+    const credential = await this.get(organizationId, service, credentialType);
     return credential !== null;
   }
 
@@ -337,7 +337,7 @@ export class CredentialVault {
   private mapToStoredCredential(data: any): StoredCredential {
     return {
       id: data.id,
-      customerId: data.customer_id,
+      organizationId: data.organization_id,
       service: data.service,
       credentialType: data.credential_type,
       metadata: data.credential_metadata,
@@ -377,35 +377,35 @@ export function getCredentialVault(): CredentialVault {
  * Store credential (convenience function)
  */
 export async function storeCredential(
-  customerId: string,
+  organizationId: string,
   service: string,
   credentialType: CredentialType,
   credential: CredentialData
 ): Promise<StoredCredential> {
   const vault = getCredentialVault();
-  return vault.store(customerId, service, credentialType, credential);
+  return vault.store(organizationId, service, credentialType, credential);
 }
 
 /**
  * Get credential (convenience function)
  */
 export async function getCredential(
-  customerId: string,
+  organizationId: string,
   service: string,
   credentialType: CredentialType
 ): Promise<DecryptedCredential | null> {
   const vault = getCredentialVault();
-  return vault.get(customerId, service, credentialType);
+  return vault.get(organizationId, service, credentialType);
 }
 
 /**
  * Delete credential (convenience function)
  */
 export async function deleteCredential(
-  customerId: string,
+  organizationId: string,
   service: string,
   credentialType: CredentialType
 ): Promise<void> {
   const vault = getCredentialVault();
-  return vault.delete(customerId, service, credentialType);
+  return vault.delete(organizationId, service, credentialType);
 }

@@ -10,7 +10,9 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/com
 import { Alert, AlertDescription } from '@/components/ui/alert';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
-import { Loader2, RefreshCw, CheckCircle2, XCircle, AlertTriangle } from 'lucide-react';
+import { Loader2, RefreshCw, XCircle, AlertTriangle } from 'lucide-react';
+import { ProviderHealthCard } from './ProviderHealthCard';
+import { CircuitBreakerCard } from './CircuitBreakerCard';
 
 interface ProviderHealthMetric {
   platform: string;
@@ -155,41 +157,7 @@ export function SearchTelemetryDashboard({
       </div>
 
       {/* Provider Health */}
-      <Card>
-        <CardHeader>
-          <CardTitle>Provider Health</CardTitle>
-          <CardDescription>Success rates and performance by platform</CardDescription>
-        </CardHeader>
-        <CardContent>
-          {data.providerHealth.length === 0 ? (
-            <p className="text-muted-foreground">No provider resolution attempts recorded</p>
-          ) : (
-            <div className="space-y-4">
-              {data.providerHealth.map((metric) => (
-                <div key={metric.platform} className="flex items-center justify-between border-b pb-4">
-                  <div>
-                    <div className="font-medium capitalize">{metric.platform || 'Unknown'}</div>
-                    <div className="text-sm text-muted-foreground">
-                      {metric.totalAttempts} attempts
-                    </div>
-                  </div>
-                  <div className="flex items-center gap-4">
-                    <div className="text-right">
-                      <div className="text-sm text-muted-foreground">Success Rate</div>
-                      <div className="font-medium">{formatPercentage(metric.successRate)}</div>
-                    </div>
-                    <div className="text-right">
-                      <div className="text-sm text-muted-foreground">Avg Duration</div>
-                      <div className="font-medium">{formatDuration(metric.avgDuration)}</div>
-                    </div>
-                    {getSuccessRateBadge(metric.successRate)}
-                  </div>
-                </div>
-              ))}
-            </div>
-          )}
-        </CardContent>
-      </Card>
+      <ProviderHealthCard providerHealth={data.providerHealth} />
 
       {/* Retry Patterns */}
       <Card>
@@ -287,41 +255,7 @@ export function SearchTelemetryDashboard({
       </Card>
 
       {/* Circuit Breaker */}
-      <Card>
-        <CardHeader>
-          <CardTitle>Circuit Breaker Status</CardTitle>
-          <CardDescription>Failure protection and circuit state transitions</CardDescription>
-        </CardHeader>
-        <CardContent>
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-            <div className="space-y-1">
-              <div className="text-sm text-muted-foreground">Open Events</div>
-              <div className="text-2xl font-bold">{data.circuitBreaker.openEvents}</div>
-              {data.circuitBreaker.openEvents === 0 ? (
-                <Badge className="bg-green-500">
-                  <CheckCircle2 className="h-3 w-3 mr-1" />
-                  Healthy
-                </Badge>
-              ) : (
-                <Badge className="bg-yellow-500">
-                  <AlertTriangle className="h-3 w-3 mr-1" />
-                  Has Issues
-                </Badge>
-              )}
-            </div>
-            <div className="space-y-1">
-              <div className="text-sm text-muted-foreground">Half-Open Events</div>
-              <div className="text-2xl font-bold">{data.circuitBreaker.halfOpenEvents}</div>
-            </div>
-            <div className="space-y-1">
-              <div className="text-sm text-muted-foreground">Avg Failures Before Open</div>
-              <div className="text-2xl font-bold">
-                {formatNumber(data.circuitBreaker.avgFailuresBeforeOpen)}
-              </div>
-            </div>
-          </div>
-        </CardContent>
-      </Card>
+      <CircuitBreakerCard circuitBreaker={data.circuitBreaker} />
     </div>
   );
 }

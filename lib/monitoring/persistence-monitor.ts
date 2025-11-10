@@ -11,6 +11,11 @@
  */
 
 import { logger } from '@/lib/logger';
+import {
+  calculatePersistenceStats,
+  calculateRestorationStats,
+  calculateNavigationStats,
+} from './persistence-stats';
 
 export interface PersistenceMetric {
   operation: 'save' | 'restore' | 'sync' | 'delete' | 'navigation';
@@ -186,35 +191,7 @@ export class PersistenceMonitor {
       ? this.getRecentMetrics(timeWindowMs)
       : this.metrics;
 
-    const totalOperations = metricsToAnalyze.length;
-    const successCount = metricsToAnalyze.filter(m => m.success).length;
-    const failureCount = totalOperations - successCount;
-
-    const durations = metricsToAnalyze.map(m => m.duration).sort((a, b) => a - b);
-    const avgDuration = durations.reduce((a, b) => a + b, 0) / (durations.length || 1);
-
-    // Count errors by type
-    const errorsByType: Record<string, number> = {};
-    metricsToAnalyze
-      .filter(m => !m.success && m.errorType)
-      .forEach(m => {
-        const type = m.errorType!;
-        errorsByType[type] = (errorsByType[type] || 0) + 1;
-      });
-
-    return {
-      totalOperations,
-      successCount,
-      failureCount,
-      successRate: totalOperations > 0 ? (successCount / totalOperations) * 100 : 100,
-      avgDuration,
-      p50Duration: this.percentile(durations, 50),
-      p95Duration: this.percentile(durations, 95),
-      p99Duration: this.percentile(durations, 99),
-      dataLossIncidents: this.dataLossCount,
-      errorsByType,
-      lastUpdated: new Date(),
-    };
+    return calculatePersistenceStats(metricsToAnalyze, this.dataLossCount);
   }
 
   /**
@@ -233,33 +210,7 @@ export class PersistenceMonitor {
       ? this.restorations.filter(r => Date.now() - r.timestamp.getTime() < timeWindowMs)
       : this.restorations;
 
-    const totalRestorations = restorations.length;
-    const successCount = restorations.filter(r => r.success).length;
-    const failureCount = totalRestorations - successCount;
-
-    const durations = restorations.map(r => r.duration);
-    const avgDuration = durations.reduce((a, b) => a + b, 0) / (durations.length || 1);
-
-    const messagesRestored = restorations.map(r => r.messagesRestored);
-    const avgMessagesRestored = messagesRestored.reduce((a, b) => a + b, 0) / (messagesRestored.length || 1);
-
-    const errorsByType: Record<string, number> = {};
-    restorations
-      .filter(r => !r.success && r.errorType)
-      .forEach(r => {
-        const type = r.errorType!;
-        errorsByType[type] = (errorsByType[type] || 0) + 1;
-      });
-
-    return {
-      totalRestorations,
-      successCount,
-      failureCount,
-      successRate: totalRestorations > 0 ? (successCount / totalRestorations) * 100 : 100,
-      avgDuration,
-      avgMessagesRestored,
-      errorsByType,
-    };
+    return calculateRestorationStats(restorations);
   }
 
   /**
@@ -276,21 +227,7 @@ export class PersistenceMonitor {
       ? this.navigations.filter(n => Date.now() - n.timestamp.getTime() < timeWindowMs)
       : this.navigations;
 
-    const totalNavigations = navigations.length;
-    const successCount = navigations.filter(n => n.success).length;
-    const dataPreservedCount = navigations.filter(n => n.dataPreserved).length;
-    const dataLossCount = totalNavigations - dataPreservedCount;
-
-    const durations = navigations.map(n => n.duration);
-    const avgDuration = durations.reduce((a, b) => a + b, 0) / (durations.length || 1);
-
-    return {
-      totalNavigations,
-      successCount,
-      dataPreservedCount,
-      dataLossCount,
-      avgDuration,
-    };
+    return calculateNavigationStats(navigations);
   }
 
   /**
@@ -311,33 +248,16 @@ export class PersistenceMonitor {
   }
 
   /**
-   * Calculate percentile from sorted array
-   */
-  private percentile(sortedArray: number[], percentile: number): number {
-    if (sortedArray.length === 0) return 0;
-    const index = Math.ceil((percentile / 100) * sortedArray.length) - 1;
-    return sortedArray[Math.max(0, index)];
-  }
-
-  /**
    * Clean old metrics (keep last 1 hour)
    */
   private cleanOldMetrics(): void {
-    const cutoff = Date.now() - 3600000; // 1 hour
+    const cutoff = Date.now() - 3600000;
     this.metrics = this.metrics.filter(m => m.timestamp.getTime() > cutoff);
     this.restorations = this.restorations.filter(r => r.timestamp.getTime() > cutoff);
     this.navigations = this.navigations.filter(n => n.timestamp.getTime() > cutoff);
   }
 
-  /**
-   * Export all metrics for external analysis
-   */
-  exportMetrics(): {
-    persistence: PersistenceMetric[];
-    restorations: SessionRestorationMetric[];
-    navigations: CrossPageNavigationMetric[];
-    stats: PersistenceStats;
-  } {
+  exportMetrics() {
     return {
       persistence: this.metrics,
       restorations: this.restorations,
@@ -346,9 +266,6 @@ export class PersistenceMonitor {
     };
   }
 
-  /**
-   * Reset all metrics (for testing)
-   */
   reset(): void {
     this.metrics = [];
     this.restorations = [];

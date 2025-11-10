@@ -4,9 +4,7 @@
  */
 
 import { createServiceRoleClient } from '@/lib/supabase-server';
-import { sendAlertEmail } from './send-alert-email';
-import { sendAlertWebhook } from './send-alert-webhook';
-import { sendAlertSlack } from './send-alert-slack';
+import { sendAlertNotifications } from './notification-handlers';
 
 export interface AlertThreshold {
   id: string;
@@ -105,43 +103,6 @@ export async function checkThresholds(
   }
 
   return triggeredAlerts;
-}
-
-/**
- * Send notifications through configured channels
- */
-async function sendAlertNotifications(
-  alert: TriggeredAlert,
-  organizationId: string
-): Promise<void> {
-  const channels = alert.threshold.notification_channels || ['email'];
-
-  const results = await Promise.allSettled([
-    channels.includes('email') ? sendAlertEmail(alert, organizationId) : Promise.resolve(),
-    channels.includes('webhook')
-      ? sendAlertWebhook(alert, organizationId)
-      : Promise.resolve(),
-    channels.includes('slack') ? sendAlertSlack(alert, organizationId) : Promise.resolve(),
-  ]);
-
-  // Update alert history with notification status
-  const supabase = await createServiceRoleClient();
-
-  const notificationErrors = results
-    .filter((r) => r.status === 'rejected')
-    .map((r) => (r as PromiseRejectedResult).reason?.message || 'Unknown error')
-    .join('; ');
-
-  await supabase
-    .from('alert_history')
-    .update({
-      notification_sent: results.some((r) => r.status === 'fulfilled'),
-      notification_error: notificationErrors || null,
-    })
-    .eq('organization_id', organizationId)
-    .eq('metric', alert.threshold.metric)
-    .eq('value', alert.value)
-    .is('notification_sent', false);
 }
 
 /**
@@ -311,18 +272,3 @@ export async function deleteAlertThreshold(
   return { success: true };
 }
 
-/**
- * Format metric name for display
- */
-export function formatMetricName(metric: string): string {
-  const names: Record<string, string> = {
-    response_time: 'Response Time',
-    error_rate: 'Error Rate',
-    sentiment_score: 'Sentiment Score',
-    conversion_rate: 'Conversion Rate',
-    resolution_rate: 'Resolution Rate',
-    message_volume: 'Message Volume',
-  };
-
-  return names[metric] || metric.replace(/_/g, ' ').replace(/\b\w/g, (l) => l.toUpperCase());
-}

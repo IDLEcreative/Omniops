@@ -8,7 +8,7 @@ import type { ConsentRequest, ConsentRecord } from './consent-types';
 
 export async function insertConsent(
   supabase: SupabaseClient,
-  customerId: string,
+  organizationId: string,
   userId: string,
   request: ConsentRequest,
   consentVersion: string
@@ -16,7 +16,7 @@ export async function insertConsent(
   const { data, error } = await supabase
     .from('autonomous_consent')
     .insert({
-      customer_id: customerId,
+      organization_id: organizationId,
       user_id: userId,
       service: request.service,
       operation: request.operation,
@@ -39,14 +39,14 @@ export async function insertConsent(
 
 export async function selectConsent(
   supabase: SupabaseClient,
-  customerId: string,
+  organizationId: string,
   service: string,
   operation: string
 ): Promise<any> {
   const { data, error } = await supabase
     .from('autonomous_consent')
     .select('*')
-    .eq('customer_id', customerId)
+    .eq('organization_id', organizationId)
     .eq('service', service)
     .eq('operation', operation)
     .eq('is_active', true)
@@ -63,14 +63,14 @@ export async function selectConsent(
 
 export async function updateConsentRevoked(
   supabase: SupabaseClient,
-  customerId: string,
+  organizationId: string,
   service: string,
   operation: string
 ): Promise<void> {
   const { error } = await supabase
     .from('autonomous_consent')
     .update({ revoked_at: new Date().toISOString() })
-    .eq('customer_id', customerId)
+    .eq('organization_id', organizationId)
     .eq('service', service)
     .eq('operation', operation)
     .is('revoked_at', null);
@@ -82,14 +82,14 @@ export async function updateConsentRevoked(
 
 export async function updateConsentRevokedById(
   supabase: SupabaseClient,
-  customerId: string,
+  organizationId: string,
   consentId: string
 ): Promise<void> {
   const { error } = await supabase
     .from('autonomous_consent')
     .update({ revoked_at: new Date().toISOString() })
     .eq('id', consentId)
-    .eq('customer_id', customerId)
+    .eq('organization_id', organizationId)
     .is('revoked_at', null);
 
   if (error) {
@@ -99,7 +99,7 @@ export async function updateConsentRevokedById(
 
 export async function updateConsentExpiry(
   supabase: SupabaseClient,
-  customerId: string,
+  organizationId: string,
   service: string,
   operation: string,
   newExpiresAt: Date
@@ -107,7 +107,7 @@ export async function updateConsentExpiry(
   const { error } = await supabase
     .from('autonomous_consent')
     .update({ expires_at: newExpiresAt.toISOString() })
-    .eq('customer_id', customerId)
+    .eq('organization_id', organizationId)
     .eq('service', service)
     .eq('operation', operation)
     .is('revoked_at', null);
@@ -119,13 +119,13 @@ export async function updateConsentExpiry(
 
 export async function bulkRevokeForService(
   supabase: SupabaseClient,
-  customerId: string,
+  organizationId: string,
   service: string
 ): Promise<number> {
   const { data, error } = await supabase
     .from('autonomous_consent')
     .update({ revoked_at: new Date().toISOString() })
-    .eq('customer_id', customerId)
+    .eq('organization_id', organizationId)
     .eq('service', service)
     .is('revoked_at', null)
     .select('id');
@@ -140,7 +140,7 @@ export async function bulkRevokeForService(
 export function mapToConsentRecord(data: any): ConsentRecord {
   return {
     id: data.id,
-    customerId: data.customer_id,
+    organizationId: data.organization_id,
     userId: data.user_id,
     service: data.service,
     operation: data.operation,

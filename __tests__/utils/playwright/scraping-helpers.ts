@@ -1,153 +1,59 @@
-/**
- * Scraping E2E Test Helpers
- *
- * Reusable utilities for web scraping flow testing
- */
+import { Page } from '@playwright/test';
 
-import { Page, Route } from '@playwright/test';
-
-export interface ScrapeJob {
-  jobId: string;
-  domain: string;
-  estimatedPages: number;
+export async function mockScrapingError(page: Page, errorMessage: string): Promise<void> {
+  console.log('🔧 Setting up scraping error mock...');
+  await page.route('**/api/scrape**', async (route) => {
+    await route.fulfill({
+      status: 400,
+      contentType: 'application/json',
+      body: JSON.stringify({ success: false, error: errorMessage, message: errorMessage })
+    });
+  });
+  console.log('✅ Scraping error mock ready');
 }
 
-export interface ScrapePage {
-  id: string;
-  url: string;
-  title: string;
-  scraped_at: string;
-}
-
-/**
- * Setup scraping API mocks with progress simulation
- */
-export async function mockScrapingAPIs(page: Page, domain: string): Promise<ScrapeJob> {
-  const scrapeJobId = `job-${Date.now()}`;
-
-  // Mock scrape start endpoint
-  await page.route('**/api/scrape', async (route: Route) => {
+export async function mockScrapingAPIs(page: Page, domain: string): Promise<void> {
+  console.log('🔧 Setting up scraping API mocks...');
+  await page.route('**/api/scrape', async (route) => {
     if (route.request().method() === 'POST') {
-      const requestData = route.request().postDataJSON();
-      console.log('🔍 Scrape request:', { domain: requestData.domain });
-
       await route.fulfill({
         status: 200,
         contentType: 'application/json',
-        body: JSON.stringify({
-          success: true,
-          message: 'Scraping started',
-          job_id: scrapeJobId,
-          domain: domain,
-          estimated_pages: 10
-        })
+        body: JSON.stringify({ success: true, job_id: 'job-' + Date.now(), message: 'Scraping started successfully' })
       });
     } else {
       await route.continue();
     }
   });
-
-  // Mock scrape status endpoint with progressive updates
   let statusCallCount = 0;
-  await page.route('**/api/scrape/status**', async (route: Route) => {
+  await page.route('**/api/scrape/status**', async (route) => {
     statusCallCount++;
-
-    let status: string, progress: number, currentStep: string;
-
+    let status, progress, currentStep;
     if (statusCallCount <= 2) {
-      status = 'processing';
-      progress = 25;
-      currentStep = 'Analyzing homepage';
+      status = 'processing'; progress = 25; currentStep = 'Analyzing homepage';
     } else if (statusCallCount <= 4) {
-      status = 'processing';
-      progress = 50;
-      currentStep = 'Discovering pages from sitemap';
+      status = 'processing'; progress = 50; currentStep = 'Discovering pages';
     } else if (statusCallCount <= 6) {
-      status = 'processing';
-      progress = 75;
-      currentStep = 'Crawling pages (5/10)';
-    } else if (statusCallCount <= 8) {
-      status = 'processing';
-      progress = 90;
-      currentStep = 'Generating embeddings';
+      status = 'processing'; progress = 75; currentStep = 'Scraping pages';
     } else {
-      status = 'completed';
-      progress = 100;
-      currentStep = 'Complete';
+      status = 'completed'; progress = 100; currentStep = 'Generating embeddings';
     }
-
     await route.fulfill({
       status: 200,
       contentType: 'application/json',
-      body: JSON.stringify({
-        job_id: scrapeJobId,
-        status,
-        progress,
-        current_step: currentStep,
-        pages_scraped: Math.min(statusCallCount, 10),
-        total_pages: 10
-      })
+      body: JSON.stringify({ success: true, status, progress, currentStep, pages_scraped: statusCallCount * 2, embeddings_created: Math.max(0, (statusCallCount - 4) * 2) })
     });
   });
-
-  return { jobId: scrapeJobId, domain, estimatedPages: 10 };
+  console.log('✅ Scraping API mocks ready');
 }
 
-/**
- * Mock scraped pages API
- */
-export async function mockScrapedPagesAPI(page: Page, domain: string, pages: ScrapePage[]) {
-  await page.route('**/api/pages**', async (route: Route) => {
-    await route.fulfill({
-      status: 200,
-      contentType: 'application/json',
-      body: JSON.stringify({
-        pages,
-        total: pages.length,
-        domain
-      })
-    });
-  });
-}
-
-/**
- * Generate mock scraped pages
- */
-export function createMockScrapedPages(domain: string): ScrapePage[] {
-  return [
-    {
-      id: 'page-1',
-      url: `https://${domain}/`,
-      title: 'Homepage',
-      scraped_at: new Date().toISOString()
-    },
-    {
-      id: 'page-2',
-      url: `https://${domain}/about`,
-      title: 'About Us',
-      scraped_at: new Date().toISOString()
-    },
-    {
-      id: 'page-3',
-      url: `https://${domain}/products`,
-      title: 'Products',
-      scraped_at: new Date().toISOString()
-    }
-  ];
-}
-
-/**
- * Mock scraping error
- */
-export async function mockScrapingError(page: Page, errorMessage: string) {
-  await page.route('**/api/scrape', async (route: Route) => {
-    await route.fulfill({
-      status: 400,
-      contentType: 'application/json',
-      body: JSON.stringify({
-        error: 'Failed to scrape domain',
-        message: errorMessage
-      })
-    });
-  });
+export function createMockScrapedPages(domain: string, count = 5): Array<{ url: string; title: string; content: string }> {
+  const pages = [];
+  const pageTypes = ['Homepage', 'About Us', 'Products', 'Services', 'Contact'];
+  for (let i = 0; i < count; i++) {
+    const pageType = pageTypes[i] || 'Page ' + (i + 1);
+    const slug = pageType.toLowerCase().replace(/\s+/g, '-');
+    pages.push({ url: 'https://' + domain + '/' + slug, title: pageType, content: 'This is the ' + pageType + ' page content from ' + domain + '.' });
+  }
+  return pages;
 }

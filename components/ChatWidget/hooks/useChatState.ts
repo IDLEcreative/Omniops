@@ -239,6 +239,8 @@ export function useChatState({
     loading: messageState.loading,
     setLoading: messageState.setLoading,
     loadingMessages: messageState.loadingMessages,
+    messagesLoadError: messageState.messagesLoadError,
+    retryLoadMessages: messageState.retryLoadMessages,
     messagesContainerRef: messageState.messagesContainerRef,
     // From session hook
     conversationId: session.conversationId,
@@ -249,9 +251,13 @@ export function useChatState({
     // From config hook
     woocommerceEnabled: config.woocommerceEnabled,
     storeDomain: config.storeDomain,
+    configLoading: config.isLoading,
+    configError: config.error,
+    retryLoadConfig: config.retryLoadConfig,
     // From privacy hook
     privacySettings: privacy.privacySettings,
     handleConsent: privacy.handleConsent,
+    privacyError: privacy.error,
     // Local state
     isOpen,
     setIsOpen,

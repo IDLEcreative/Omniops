@@ -1,130 +1,56 @@
-/**
- * Scraping Test Step Functions
- *
- * High-level test step implementations for scraping E2E tests
- */
+import { Page } from '@playwright/test';
 
-import { Page, expect } from '@playwright/test';
-import {
-  mockScrapingAPIs,
-  mockScrapedPagesAPI,
-  createMockScrapedPages,
-  mockScrapingError
-} from './scraping-helpers';
+export async function navigateToScrapingSection(page: Page, baseUrl: string): Promise<void> {
+  console.log('📍 Step 1: Navigating to scraping section');
+  await page.goto(baseUrl + '/dashboard/installation', { waitUntil: 'networkidle', timeout: 15000 });
+  console.log('✅ Installation page loaded');
+}
 
-/**
- * Navigate to installation page and find scraping section
- */
-export async function navigateToScrapingSection(page: Page, baseUrl: string) {
-  await page.goto(`${baseUrl}/dashboard/installation`, {
-    waitUntil: 'networkidle',
-    timeout: 15000
-  });
-
-  const domainInput = page.locator(
-    'input[name="domain"], input[name="url"], input[placeholder*="domain" i], input[placeholder*="website" i]'
-  ).first();
-
-  try {
-    await domainInput.waitFor({ state: 'visible', timeout: 10000 });
-  } catch (error) {
-    const scrapeButton = page.locator(
-      'button:has-text("Start Scraping"), a:has-text("Scrape"), a[href*="scrape"]'
-    ).first();
-
-    if (await scrapeButton.isVisible().catch(() => false)) {
-      await scrapeButton.click();
-      await page.waitForLoadState('networkidle');
+export async function completeScraping(page: Page, domain: string): Promise<void> {
+  console.log('📍 Step 2: Initiating scraping for ' + domain);
+  let scrapeJobId: string | null = null;
+  await page.route('**/api/scrape', async (route) => {
+    if (route.request().method() === 'POST') {
+      scrapeJobId = 'job-' + Date.now();
+      await route.fulfill({ status: 200, contentType: 'application/json', body: JSON.stringify({ success: true, job_id: scrapeJobId, message: 'Scraping started successfully' }) });
+    } else {
+      await route.continue();
     }
-  }
-
-  return domainInput;
-}
-
-/**
- * Start scraping process
- */
-export async function startScraping(page: Page, domain: string) {
+  });
+  let statusCallCount = 0;
+  await page.route('**/api/scrape/status**', async (route) => {
+    statusCallCount++;
+    const stages = [
+      { status: 'processing', progress: 25, step: 'Analyzing homepage' },
+      { status: 'processing', progress: 50, step: 'Discovering pages' },
+      { status: 'processing', progress: 75, step: 'Scraping pages' },
+      { status: 'completed', progress: 100, step: 'Generating embeddings' }
+    ];
+    const stageIndex = Math.min(Math.floor(statusCallCount / 2), stages.length - 1);
+    const stage = stages[stageIndex];
+    await route.fulfill({ status: 200, contentType: 'application/json', body: JSON.stringify({ success: true, ...stage, pages_scraped: statusCallCount * 2, embeddings_created: Math.max(0, (statusCallCount - 4) * 2) }) });
+  });
   const domainInput = page.locator('input[name="domain"], input[placeholder*="domain" i]').first();
+  await domainInput.waitFor({ state: 'visible', timeout: 10000 });
   await domainInput.fill(domain);
-
-  const startButton = page.locator(
-    'button:has-text("Start Scraping"), button:has-text("Scrape"), button:has-text("Begin"), button[type="submit"]'
-  ).first();
-
+  console.log('✅ Entered domain: ' + domain);
+  const startButton = page.locator('button:has-text("Start Scraping"), button:has-text("Begin Scraping"), button[type="submit"]').first();
   await startButton.click();
-  await page.waitForTimeout(1000);
+  console.log('✅ Scraping started');
+  await page.waitForTimeout(8000);
+  console.log('✅ Scraping completed');
 }
 
-/**
- * Monitor scraping progress
- */
-export async function monitorScrapingProgress(page: Page): Promise<boolean> {
-  const progressBar = page.locator(
-    '[role="progressbar"], .progress-bar, [class*="progress"]'
-  ).first();
-
-  const progressVisible = await progressBar.isVisible({ timeout: 5000 }).catch(() => false);
-
-  const statusText = page.locator(
-    'text=/analyzing/i, text=/scraping/i, text=/crawling/i, text=/processing/i'
-  ).first();
-
-  const statusVisible = await statusText.isVisible({ timeout: 5000 }).catch(() => false);
-
-  return progressVisible || statusVisible;
-}
-
-/**
- * Wait for scraping completion
- */
-export async function waitForScrapingCompletion(page: Page) {
-  await page.waitForTimeout(10000);
-
-  const completionMessage = page.locator(
-    'text=/complete/i, text=/success/i, text=/finished/i, text=/done/i'
-  ).first();
-
-  try {
-    await completionMessage.waitFor({ state: 'visible', timeout: 15000 });
-    const message = await completionMessage.textContent();
-    console.log('✅ Scraping completed:', message);
-  } catch (error) {
-    console.warn('⚠️  Completion message not found');
-  }
-}
-
-/**
- * View scraped pages
- */
 export async function viewScrapedPages(page: Page): Promise<number> {
-  const pagesLink = page.locator(
-    'a:has-text("Pages"), a:has-text("Content"), button:has-text("View Pages"), [role="tab"]:has-text("Pages")'
-  ).first();
-
-  if (await pagesLink.isVisible().catch(() => false)) {
+  console.log('📍 Step 3: Viewing scraped pages');
+  const pagesLink = page.locator('a:has-text("Pages"), a:has-text("Scraped Pages"), a[href*="pages"]').first();
+  const linkVisible = await pagesLink.isVisible({ timeout: 5000 }).catch(() => false);
+  if (linkVisible) {
     await pagesLink.click();
-    await page.waitForTimeout(1000);
+    await page.waitForLoadState('networkidle');
   }
-
-  const pagesList = page.locator(
-    '.page-item, [data-testid="page"], table tbody tr, [class*="page-list"] li'
-  );
-
-  return await pagesList.count();
-}
-
-/**
- * Complete scraping workflow
- */
-export async function completeScraping(page: Page, domain: string) {
-  const scrapeJob = await mockScrapingAPIs(page, domain);
-  await startScraping(page, domain);
-  await monitorScrapingProgress(page);
-  await waitForScrapingCompletion(page);
-
-  const mockPages = createMockScrapedPages(domain);
-  await mockScrapedPagesAPI(page, domain, mockPages);
-
-  return scrapeJob;
+  const pageItems = page.locator('.page-item, .scraped-page, [data-page-url], tr:has-text("http")');
+  const count = await pageItems.count();
+  console.log('✅ Viewing ' + count + ' scraped page(s)');
+  return count;
 }

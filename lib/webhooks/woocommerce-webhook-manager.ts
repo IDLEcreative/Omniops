@@ -1,28 +1,21 @@
 /**
  * WooCommerce Webhook Manager
  *
- * Automatically creates and manages WooCommerce webhooks for purchase tracking
- * Users don't need to configure anything - just connect their store!
+ * Main orchestrator for webhook registration and management
  */
 
-import { createServiceRoleClient } from '@/lib/supabase-server';
 import crypto from 'crypto';
-
-interface WebhookConfig {
-  topic: string;
-  delivery_url: string;
-  secret: string;
-  name?: string;
-}
-
-interface WooCommerceWebhook {
-  id: number;
-  name: string;
-  status: string;
-  topic: string;
-  delivery_url: string;
-  date_created: string;
-}
+import {
+  createWooCommerceWebhook,
+  getWooCommerceWebhooks,
+  getWooCommerceWebhook,
+  deleteWooCommerceWebhookById
+} from './woocommerce-webhook-api';
+import {
+  saveWebhookSecret,
+  getWebhookIdFromDb,
+  removeWebhookFromDb
+} from './woocommerce-webhook-db';
 
 /**
  * Automatically register WooCommerce webhook when user connects their store
@@ -69,18 +62,16 @@ export async function registerWooCommerceWebhook(
     }
 
     // Create new webhook
-    const webhookConfig: WebhookConfig = {
-      name: 'Omniops - Order Tracking',
-      topic: 'order.created',
-      delivery_url: webhookUrl,
-      secret: webhookSecret,
-    };
-
     const webhook = await createWooCommerceWebhook(
       woocommerceUrl,
       consumerKey,
       consumerSecret,
-      webhookConfig
+      {
+        name: 'Omniops - Order Tracking',
+        topic: 'order.created',
+        delivery_url: webhookUrl,
+        secret: webhookSecret,
+      }
     );
 
     // Save webhook secret to database
@@ -101,87 +92,6 @@ export async function registerWooCommerceWebhook(
   }
 }
 
-/**
- * Create WooCommerce webhook via REST API
- */
-async function createWooCommerceWebhook(
-  woocommerceUrl: string,
-  consumerKey: string,
-  consumerSecret: string,
-  config: WebhookConfig
-): Promise<WooCommerceWebhook> {
-  const url = `${woocommerceUrl}/wp-json/wc/v3/webhooks`;
-
-  const auth = Buffer.from(`${consumerKey}:${consumerSecret}`).toString('base64');
-
-  const response = await fetch(url, {
-    method: 'POST',
-    headers: {
-      'Content-Type': 'application/json',
-      Authorization: `Basic ${auth}`,
-    },
-    body: JSON.stringify(config),
-  });
-
-  if (!response.ok) {
-    const error = await response.text();
-    throw new Error(`Failed to create webhook: ${error}`);
-  }
-
-  return response.json();
-}
-
-/**
- * Get all WooCommerce webhooks
- */
-async function getWooCommerceWebhooks(
-  woocommerceUrl: string,
-  consumerKey: string,
-  consumerSecret: string
-): Promise<WooCommerceWebhook[]> {
-  const url = `${woocommerceUrl}/wp-json/wc/v3/webhooks`;
-
-  const auth = Buffer.from(`${consumerKey}:${consumerSecret}`).toString('base64');
-
-  const response = await fetch(url, {
-    method: 'GET',
-    headers: {
-      Authorization: `Basic ${auth}`,
-    },
-  });
-
-  if (!response.ok) {
-    return [];
-  }
-
-  return response.json();
-}
-
-/**
- * Save webhook secret to database
- */
-async function saveWebhookSecret(
-  domain: string,
-  secret: string,
-  webhookId: number
-): Promise<void> {
-  const supabase = await createServiceRoleClient();
-
-  const { error } = await supabase
-    .from('customer_configs')
-    .update({
-      encrypted_credentials: {
-        woocommerce_webhook_secret: secret,
-        woocommerce_webhook_id: webhookId,
-      },
-    })
-    .eq('domain', domain);
-
-  if (error) {
-    console.error('[WooCommerce Webhook Manager] Failed to save secret:', error);
-    throw error;
-  }
-}
 
 /**
  * Delete WooCommerce webhook
@@ -193,46 +103,27 @@ export async function deleteWooCommerceWebhook(
   consumerSecret: string
 ): Promise<{ success: boolean; error?: string }> {
   try {
-    const supabase = await createServiceRoleClient();
-
     // Get webhook ID from database
-    const { data: config } = await supabase
-      .from('customer_configs')
-      .select('encrypted_credentials')
-      .eq('domain', domain)
-      .single();
+    const webhookId = await getWebhookIdFromDb(domain);
 
-    if (!config?.encrypted_credentials?.woocommerce_webhook_id) {
+    if (!webhookId) {
       return { success: true }; // Nothing to delete
     }
 
-    const webhookId = config.encrypted_credentials.woocommerce_webhook_id;
-
     // Delete from WooCommerce
-    const url = `${woocommerceUrl}/wp-json/wc/v3/webhooks/${webhookId}?force=true`;
-    const auth = Buffer.from(`${consumerKey}:${consumerSecret}`).toString('base64');
+    const deleted = await deleteWooCommerceWebhookById(
+      woocommerceUrl,
+      consumerKey,
+      consumerSecret,
+      webhookId
+    );
 
-    const response = await fetch(url, {
-      method: 'DELETE',
-      headers: {
-        Authorization: `Basic ${auth}`,
-      },
-    });
-
-    if (!response.ok && response.status !== 404) {
-      throw new Error(`Failed to delete webhook: ${await response.text()}`);
+    if (!deleted) {
+      throw new Error('Failed to delete webhook from WooCommerce');
     }
 
     // Remove from database
-    await supabase
-      .from('customer_configs')
-      .update({
-        encrypted_credentials: {
-          woocommerce_webhook_secret: null,
-          woocommerce_webhook_id: null,
-        },
-      })
-      .eq('domain', domain);
+    await removeWebhookFromDb(domain);
 
     console.log(`[WooCommerce Webhook Manager] Webhook deleted (ID: ${webhookId})`);
 
@@ -261,36 +152,24 @@ export async function checkWooCommerceWebhookStatus(
   webhookId?: number;
 }> {
   try {
-    const supabase = await createServiceRoleClient();
-
-    const { data: config } = await supabase
-      .from('customer_configs')
-      .select('encrypted_credentials')
-      .eq('domain', domain)
-      .single();
-
-    const webhookId = config?.encrypted_credentials?.woocommerce_webhook_id;
+    // Get webhook ID from database
+    const webhookId = await getWebhookIdFromDb(domain);
 
     if (!webhookId) {
       return { exists: false, active: false };
     }
 
     // Get webhook from WooCommerce
-    const url = `${woocommerceUrl}/wp-json/wc/v3/webhooks/${webhookId}`;
-    const auth = Buffer.from(`${consumerKey}:${consumerSecret}`).toString('base64');
+    const webhook = await getWooCommerceWebhook(
+      woocommerceUrl,
+      consumerKey,
+      consumerSecret,
+      webhookId
+    );
 
-    const response = await fetch(url, {
-      method: 'GET',
-      headers: {
-        Authorization: `Basic ${auth}`,
-      },
-    });
-
-    if (!response.ok) {
+    if (!webhook) {
       return { exists: false, active: false };
     }
-
-    const webhook: WooCommerceWebhook = await response.json();
 
     return {
       exists: true,

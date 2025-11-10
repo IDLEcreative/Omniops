@@ -16,20 +16,9 @@
 import { useState, useEffect, useCallback } from 'react';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
-import { Badge } from '@/components/ui/badge';
-import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
-import {
-  AlertCircle,
-  TrendingUp,
-  TrendingDown,
-  MessageSquare,
-  ThumbsUp,
-  ThumbsDown,
-  AlertTriangle,
-  Lightbulb,
-  Bug,
-  Star,
-} from 'lucide-react';
+import { AlertCircle, ThumbsDown, MessageSquare } from 'lucide-react';
+import { FeedbackStatsCards } from './FeedbackStatsCards';
+import { FeedbackItem } from './FeedbackItem';
 
 // ============================================================================
 // Types
@@ -97,43 +86,6 @@ export default function FeedbackDashboard({ domain }: FeedbackDashboardProps) {
     loadFeedback();
   }, [loadFeedback]);
 
-  const getSentimentIcon = (sentiment: string) => {
-    switch (sentiment) {
-      case 'positive':
-        return <ThumbsUp className="h-4 w-4 text-green-600" />;
-      case 'negative':
-        return <ThumbsDown className="h-4 w-4 text-red-600" />;
-      default:
-        return <MessageSquare className="h-4 w-4 text-gray-600" />;
-    }
-  };
-
-  const getTypeIcon = (type: string) => {
-    switch (type) {
-      case 'bug':
-        return <Bug className="h-4 w-4 text-red-600" />;
-      case 'feature_request':
-        return <Lightbulb className="h-4 w-4 text-yellow-600" />;
-      case 'nps':
-        return <Star className="h-4 w-4 text-blue-600" />;
-      default:
-        return <MessageSquare className="h-4 w-4 text-gray-600" />;
-    }
-  };
-
-  const formatDate = (dateString: string) => {
-    const date = new Date(dateString);
-    const now = new Date();
-    const diffMs = now.getTime() - date.getTime();
-    const diffMins = Math.floor(diffMs / 60000);
-    const diffHours = Math.floor(diffMs / 3600000);
-    const diffDays = Math.floor(diffMs / 86400000);
-
-    if (diffMins < 60) return `${diffMins}m ago`;
-    if (diffHours < 24) return `${diffHours}h ago`;
-    if (diffDays < 7) return `${diffDays}d ago`;
-    return date.toLocaleDateString();
-  };
 
   if (loading) {
     return (
@@ -146,106 +98,7 @@ export default function FeedbackDashboard({ domain }: FeedbackDashboardProps) {
   return (
     <div className="space-y-6">
       {/* Stats Overview */}
-      {stats && (
-        <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
-          <Card>
-            <CardHeader className="pb-2">
-              <CardTitle className="text-sm font-medium text-gray-600">
-                Total Feedback
-              </CardTitle>
-            </CardHeader>
-            <CardContent>
-              <div className="text-3xl font-bold">{stats.total}</div>
-              <p className="text-xs text-gray-500 mt-1">All time</p>
-            </CardContent>
-          </Card>
-
-          <Card>
-            <CardHeader className="pb-2">
-              <CardTitle className="text-sm font-medium text-gray-600">
-                Avg Satisfaction
-              </CardTitle>
-            </CardHeader>
-            <CardContent>
-              <div className="flex items-center gap-2">
-                <div className="text-3xl font-bold">
-                  {stats.average_rating.toFixed(1)}
-                </div>
-                <div className="text-sm text-gray-500">/ 5.0</div>
-              </div>
-              <div className="flex gap-1 mt-1">
-                {[1, 2, 3, 4, 5].map((star) => (
-                  <Star
-                    key={star}
-                    className={`h-4 w-4 ${
-                      star <= Math.round(stats.average_rating)
-                        ? 'text-yellow-500 fill-yellow-500'
-                        : 'text-gray-300'
-                    }`}
-                  />
-                ))}
-              </div>
-            </CardContent>
-          </Card>
-
-          <Card>
-            <CardHeader className="pb-2">
-              <CardTitle className="text-sm font-medium text-gray-600">
-                NPS Score
-              </CardTitle>
-            </CardHeader>
-            <CardContent>
-              <div className="flex items-center gap-2">
-                <div className="text-3xl font-bold">{stats.nps_score}</div>
-                {stats.nps_score >= 50 ? (
-                  <TrendingUp className="h-5 w-5 text-green-600" />
-                ) : stats.nps_score >= 0 ? (
-                  <MessageSquare className="h-5 w-5 text-gray-600" />
-                ) : (
-                  <TrendingDown className="h-5 w-5 text-red-600" />
-                )}
-              </div>
-              <p className="text-xs text-gray-500 mt-1">
-                {stats.nps_score >= 50
-                  ? 'Excellent'
-                  : stats.nps_score >= 0
-                  ? 'Good'
-                  : 'Needs Improvement'}
-              </p>
-            </CardContent>
-          </Card>
-
-          <Card>
-            <CardHeader className="pb-2">
-              <CardTitle className="text-sm font-medium text-gray-600">
-                Sentiment
-              </CardTitle>
-            </CardHeader>
-            <CardContent>
-              <div className="space-y-2">
-                <div className="flex justify-between text-sm">
-                  <span className="text-green-600">Positive</span>
-                  <span className="font-semibold">
-                    {stats.by_sentiment.positive || 0}
-                  </span>
-                </div>
-                <div className="flex justify-between text-sm">
-                  <span className="text-gray-600">Neutral</span>
-                  <span className="font-semibold">
-                    {stats.by_sentiment.neutral || 0}
-                  </span>
-                </div>
-                <div className="flex justify-between text-sm">
-                  <span className="text-red-600">Negative</span>
-                  <span className="font-semibold">
-                    {stats.by_sentiment.negative || 0}
-                  </span>
-                </div>
-              </div>
-            </CardContent>
-          </Card>
-        </div>
-      )}
+      {stats && <FeedbackStatsCards stats={stats} />}
 
       {/* Filters */}
       <div className="flex gap-2">
@@ -291,72 +144,7 @@ export default function FeedbackDashboard({ domain }: FeedbackDashboardProps) {
           ) : (
             <div className="space-y-4">
               {feedback.map((item) => (
-                <div
-                  key={item.id}
-                  className={`border rounded-lg p-4 ${
-                    item.is_urgent ? 'border-red-300 bg-red-50' : ''
-                  }`}
-                >
-                  <div className="flex items-start justify-between mb-2">
-                    <div className="flex items-center gap-2">
-                      {getTypeIcon(item.type)}
-                      <span className="font-medium capitalize">
-                        {item.type.replace('_', ' ')}
-                      </span>
-                      {item.is_urgent && (
-                        <Badge variant="destructive">Urgent</Badge>
-                      )}
-                    </div>
-                    <div className="flex items-center gap-2">
-                      {getSentimentIcon(item.sentiment)}
-                      <span className="text-sm text-gray-500">
-                        {formatDate(item.created_at)}
-                      </span>
-                    </div>
-                  </div>
-
-                  {item.rating && (
-                    <div className="flex gap-1 mb-2">
-                      {[1, 2, 3, 4, 5].map((star) => (
-                        <Star
-                          key={star}
-                          className={`h-4 w-4 ${
-                            star <= item.rating!
-                              ? 'text-yellow-500 fill-yellow-500'
-                              : 'text-gray-300'
-                          }`}
-                        />
-                      ))}
-                    </div>
-                  )}
-
-                  {item.nps_score !== undefined && (
-                    <div className="mb-2">
-                      <span className="text-sm text-gray-600">
-                        NPS Score:
-                      </span>
-                      <span className="ml-2 font-semibold">
-                        {item.nps_score}/10
-                      </span>
-                    </div>
-                  )}
-
-                  {item.message && (
-                    <p className="text-gray-700 mb-2">{item.message}</p>
-                  )}
-
-                  <div className="flex items-center gap-4 text-sm text-gray-500">
-                    <span>{item.domain}</span>
-                    {item.category && (
-                      <Badge variant="outline">{item.category}</Badge>
-                    )}
-                    {item.conversation_id && (
-                      <Button variant="link" size="sm" className="p-0 h-auto">
-                        View Conversation
-                      </Button>
-                    )}
-                  </div>
-                </div>
+                <FeedbackItem key={item.id} item={item} />
               ))}
             </div>
           )}
