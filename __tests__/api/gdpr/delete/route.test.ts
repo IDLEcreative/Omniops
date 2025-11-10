@@ -8,41 +8,33 @@ jest.mock('@/lib/supabase-server', () => ({
 }));
 
 const mockSupabase = (conversationResult: unknown[] = []) => {
-  const deleteChain = {
-    delete: jest.fn().mockReturnThis(),
-    in: jest.fn().mockResolvedValue({ error: null }),
-  };
-
-  const conversationsBuilder = {
-    select: jest.fn().mockReturnThis(),
-    eq: jest.fn().mockReturnThis(),
-    in: jest.fn().mockReturnThis(),
-    order: jest.fn().mockReturnThis(),
-    limit: jest.fn().mockReturnThis(),
-    single: jest.fn().mockReturnThis(),
-    delete: deleteChain.delete,
-  };
-
-  // Make the conversationsBuilder itself a thenable
-  Object.assign(conversationsBuilder, {
-    then: (resolve: (value: { data: unknown[]; error: null }) => void) => {
-      return Promise.resolve({ data: conversationResult, error: null }).then(resolve);
-    },
-  });
-
-  const auditBuilder = {
-    insert: jest.fn().mockResolvedValue({ error: null }),
-  };
-
   return {
-    from: jest.fn((table: string) => {
+    from: jest.fn().mockImplementation((table: string) => {
       if (table === 'conversations') {
-        return conversationsBuilder;
+        return {
+          select: jest.fn().mockImplementation(() => ({
+            eq: jest.fn().mockResolvedValue({
+              data: conversationResult,
+              error: null
+            }),
+          })),
+          eq: jest.fn().mockResolvedValue({
+            data: conversationResult,
+            error: null
+          }),
+          delete: jest.fn().mockReturnValue({
+            in: jest.fn().mockResolvedValue({ error: null }),
+          }),
+        };
       }
       if (table === 'gdpr_audit_log') {
-        return auditBuilder;
+        return {
+          insert: jest.fn().mockResolvedValue({ error: null }),
+        };
       }
-      return conversationsBuilder;
+      return {
+        select: jest.fn().mockResolvedValue({ data: [], error: null }),
+      };
     }),
   };
 };
