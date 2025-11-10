@@ -30,7 +30,10 @@ export async function scrapePage(url: string, timeout: number): Promise<ScrapedP
 
     // Use lightweight fallback in production (Vercel serverless has JSDOM issues)
     // Only try JSDOM in development for richer content extraction
-    const useJSDOM = process.env.NODE_ENV === 'development';
+    const useJSDOM =
+      process.env.NODE_ENV === 'development' &&
+      !process.env.VERCEL &&  // Never on Vercel serverless
+      !process.env.DISABLE_JSDOM;  // Allow operational override
 
     if (useJSDOM) {
       try {
