@@ -33,6 +33,37 @@ export function detectPlatform($: CheerioAPI): string | undefined {
  */
 export function detectPageType($: CheerioAPI, url: string): EcommerceExtractedContent['pageType'] {
   const urlLower = url.toLowerCase();
+
+  // Check for cart/checkout first (specific URLs)
+  if (urlLower.includes('/cart')) {
+    return 'cart';
+  }
+  if (urlLower.includes('/checkout')) {
+    return 'checkout';
+  }
+
+  // Count products on the page to determine type early
+  const productSchemaCount = $('[itemtype*="schema.org/Product"]').length;
+  const productCount = $('.product, .product-item, [data-product-id]').length;
+  const hasListingContainer = $('.product-list, .product-grid, .products, [data-listing]').length > 0;
+  const paginationSelectors = PRODUCT_SELECTORS.listing.pagination.join(', ');
+  const hasPagination = $(paginationSelectors).length > 0;
+  const hasSearchForm = $('form[action*="search"], input[name="s"], input[name="q"], input[name="search"]').length > 0;
+
+  // If we have multiple products, it's definitely a listing page (overrides URL heuristics)
+  if (productSchemaCount > 1 || productCount > 1) {
+    if (hasSearchForm) {
+      return 'search';
+    }
+    // Check URL for search indicators
+    const hasSearchSlug = /\/search(?:\/|$|\?|\#)/.test(urlLower) || /[?&](q|s|search|keyword)=/.test(urlLower);
+    if (hasSearchSlug) {
+      return 'search';
+    }
+    return 'category';
+  }
+
+  // URL-based heuristics (for pages with 0-1 products)
   let hasProductSlug = /\/(product|products|item|p)(?:\/|$|\?|\#)/.test(urlLower) || /[?&](sku|product)=/.test(urlLower);
   const hasCategorySlug = /\/(category|categories|shop|collection|collections)(?:\/|$|\?|\#)/.test(urlLower) || /[?&](category|cat|collection)=/.test(urlLower);
   const hasSearchSlug = /\/search(?:\/|$|\?|\#)/.test(urlLower) || /[?&](q|s|search|keyword)=/.test(urlLower);
@@ -58,27 +89,6 @@ export function detectPageType($: CheerioAPI, url: string): EcommerceExtractedCo
   }
   if (hasProductSlug) {
     return 'product';
-  }
-  if (urlLower.includes('/cart')) {
-    return 'cart';
-  }
-  if (urlLower.includes('/checkout')) {
-    return 'checkout';
-  }
-
-  const productSchemaCount = $('[itemtype*="schema.org/Product"]').length;
-  const productCount = $('.product, .product-item, [data-product-id]').length;
-  const hasListingContainer = $('.product-list, .product-grid, .products, [data-listing]').length > 0;
-  const paginationSelectors = PRODUCT_SELECTORS.listing.pagination.join(', ');
-  const hasPagination = $(paginationSelectors).length > 0;
-  const hasSearchForm = $('form[action*="search"], input[name="s"], input[name="q"], input[name="search"]').length > 0;
-
-  // If we have multiple products, it's likely a listing page
-  if (productSchemaCount > 1 || productCount > 1) {
-    if (hasSearchForm) {
-      return 'search';
-    }
-    return 'category';
   }
 
   // Single product indicators
