@@ -13,20 +13,27 @@ const scrapeSchema = z.object({
 // Rate limiting: 3 demos per IP per hour
 async function checkDemoRateLimit(req: NextRequest) {
   if (!process.env.REDIS_URL) {
+    console.warn('[DemoScrape] Redis not available, skipping rate limit');
     return;
   }
 
-  const redis = getRedisClient();
-  const ip = req.headers.get('x-forwarded-for') || req.headers.get('x-real-ip') || 'unknown';
-  const key = `demo:ratelimit:${ip}`;
+  try {
+    const redis = getRedisClient();
+    const ip = req.headers.get('x-forwarded-for') || req.headers.get('x-real-ip') || 'unknown';
+    const key = `demo:ratelimit:${ip}`;
 
-  const count = await redis.incr(key);
-  if (count === 1) {
-    await redis.expire(key, 3600); // 1 hour
-  }
+    const count = await redis.incr(key);
+    if (count === 1) {
+      await redis.expire(key, 3600); // 1 hour
+    }
 
-  if (count > 3) {
-    throw new Error('Demo rate limit exceeded. Please try again in an hour.');
+    if (count > 3) {
+      throw new Error('Demo rate limit exceeded. Please try again in an hour.');
+    }
+  } catch (redisError) {
+    console.error('[DemoScrape] Redis error, allowing request:', redisError);
+    // Don't fail the request if Redis is unavailable - just skip rate limiting
+    return;
   }
 }
 
@@ -35,13 +42,8 @@ export async function POST(req: NextRequest) {
     console.log('[DemoScrape] Starting scrape request');
 
     // Rate limiting
-    try {
-      await checkDemoRateLimit(req);
-      console.log('[DemoScrape] Rate limit check passed');
-    } catch (rateLimitError) {
-      console.error('[DemoScrape] Rate limit error:', rateLimitError);
-      throw rateLimitError;
-    }
+    await checkDemoRateLimit(req);
+    console.log('[DemoScrape] Rate limit check passed');
 
     // Parse and validate request
     const body = await req.json();
