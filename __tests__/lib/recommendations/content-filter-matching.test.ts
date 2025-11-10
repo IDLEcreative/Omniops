@@ -34,7 +34,10 @@ describe('Content-Based Filter - Matching', () => {
 
   describe('category matching', () => {
     it('should find products in same category', async () => {
-      // Mock reference product metadata (first query ends with .in())
+      // First query: .from().select().eq().in()
+      // The .eq() is intermediate, so it returns mockSupabase
+      // The .in() is terminal, so it returns data
+      mockSupabase.eq.mockReturnValueOnce(mockSupabase); // First .eq() returns mockSupabase
       mockSupabase.in.mockResolvedValueOnce({
         data: [
           {
@@ -48,7 +51,8 @@ describe('Content-Based Filter - Matching', () => {
         error: null,
       });
 
-      // Mock all products for comparison (second query ends with .eq())
+      // Second query: .from().select().eq()
+      // The .eq() is terminal, so it returns data
       mockSupabase.eq.mockResolvedValueOnce({
         data: [
           {

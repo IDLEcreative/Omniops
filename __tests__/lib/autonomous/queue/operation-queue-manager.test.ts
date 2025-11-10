@@ -11,47 +11,91 @@ import {
   WooCommerceSetupJobData,
 } from '@/lib/autonomous/queue';
 
-// Mock BullMQ
-jest.mock('bullmq');
-jest.mock('@/lib/redis');
+// Mock BullMQ and Redis BEFORE any imports
+let mockQueue: any;
+
+jest.mock('bullmq', () => {
+  // Create mock queue with all necessary methods
+  mockQueue = {
+    add: jest.fn().mockResolvedValue({ id: 'job-123' }),
+    getJob: jest.fn(),
+    getJobCounts: jest.fn().mockResolvedValue({
+      waiting: 5,
+      active: 2,
+      completed: 100,
+      failed: 3,
+      delayed: 1,
+      paused: 0,
+    }),
+    getCompleted: jest.fn().mockResolvedValue([
+      { finishedOn: Date.now() - 1000 },
+    ]),
+    pause: jest.fn().mockResolvedValue(undefined),
+    resume: jest.fn().mockResolvedValue(undefined),
+    clean: jest.fn().mockResolvedValue(undefined),
+    close: jest.fn().mockResolvedValue(undefined),
+    on: jest.fn(),
+    client: Promise.resolve({
+      ping: jest.fn().mockResolvedValue('PONG'),
+      incr: jest.fn().mockResolvedValue(1),
+      expire: jest.fn().mockResolvedValue(1),
+    }),
+  };
+
+  return {
+    Queue: jest.fn(() => mockQueue),
+  };
+});
+
+jest.mock('@/lib/redis', () => ({
+  createRedisClient: jest.fn(() => ({
+    ping: jest.fn().mockResolvedValue('PONG'),
+    incr: jest.fn().mockResolvedValue(1),
+    expire: jest.fn().mockResolvedValue(1),
+  })),
+}));
 
 describe('OperationQueueManager', () => {
   let queueManager: OperationQueueManager;
-  let mockQueue: any;
 
   beforeEach(() => {
-    jest.clearAllMocks();
+    // Reset mock implementations but keep the same objects for assertions
+    if (mockQueue) {
+      mockQueue.add.mockClear();
+      mockQueue.getJob.mockClear();
+      mockQueue.getJobCounts.mockClear();
+      mockQueue.getCompleted.mockClear();
+      mockQueue.pause.mockClear();
+      mockQueue.resume.mockClear();
+      mockQueue.clean.mockClear();
+      mockQueue.close.mockClear();
+      mockQueue.on.mockClear();
 
-    // Mock BullMQ Queue
-    mockQueue = {
-      add: jest.fn().mockResolvedValue({ id: 'job-123' }),
-      getJob: jest.fn(),
-      getJobCounts: jest.fn().mockResolvedValue({
+      // Reset implementations
+      mockQueue.add.mockResolvedValue({ id: 'job-123' });
+      mockQueue.getJobCounts.mockResolvedValue({
         waiting: 5,
         active: 2,
         completed: 100,
         failed: 3,
         delayed: 1,
         paused: 0,
-      }),
-      getCompleted: jest.fn().mockResolvedValue([
+      });
+      mockQueue.getCompleted.mockResolvedValue([
         { finishedOn: Date.now() - 1000 },
-      ]),
-      pause: jest.fn().mockResolvedValue(undefined),
-      resume: jest.fn().mockResolvedValue(undefined),
-      clean: jest.fn().mockResolvedValue(undefined),
-      close: jest.fn().mockResolvedValue(undefined),
-      on: jest.fn(),
-      client: Promise.resolve({
+      ]);
+      mockQueue.pause.mockResolvedValue(undefined);
+      mockQueue.resume.mockResolvedValue(undefined);
+      mockQueue.clean.mockResolvedValue(undefined);
+      mockQueue.close.mockResolvedValue(undefined);
+
+      // Reset the mock client on each test
+      mockQueue.client = Promise.resolve({
         ping: jest.fn().mockResolvedValue('PONG'),
         incr: jest.fn().mockResolvedValue(1),
         expire: jest.fn().mockResolvedValue(1),
-      }),
-    };
-
-    // Mock the Queue constructor
-    const { Queue } = require('bullmq');
-    Queue.mockImplementation(() => mockQueue);
+      });
+    }
 
     queueManager = createOperationQueueManager();
   });

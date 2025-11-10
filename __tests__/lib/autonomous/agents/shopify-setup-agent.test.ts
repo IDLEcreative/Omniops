@@ -12,19 +12,44 @@ jest.mock('@/lib/autonomous/core/workflow-registry', () => ({
   }
 }));
 
-jest.mock('@/lib/autonomous/security/credential-vault', () => ({
-  getCredential: jest.fn(),
-  storeCredential: jest.fn(),
-  updateCredential: jest.fn(),
-  deleteCredential: jest.fn()
-}));
+// Create mock vault instance
+const mockVaultInstance = {
+  store: jest.fn(),
+  get: jest.fn(),
+  delete: jest.fn(),
+  rotate: jest.fn(),
+  listCredentials: jest.fn()
+};
+
+// Mock the vault helpers to use mocked getCredential that returns the mock instance's values
+jest.mock('@/lib/autonomous/security/credential-vault-helpers', () => {
+  const mockGetCredentialFn = jest.fn();
+  const mockStoreCredentialFn = jest.fn();
+  const mockDeleteCredentialFn = jest.fn();
+
+  return {
+    getCredential: mockGetCredentialFn,
+    storeCredential: mockStoreCredentialFn,
+    deleteCredential: mockDeleteCredentialFn,
+    _mockGetCredential: mockGetCredentialFn,
+    _mockStoreCredential: mockStoreCredentialFn,
+    _mockDeleteCredential: mockDeleteCredentialFn
+  };
+});
+
+// credential-vault re-exports from vault-helpers
+jest.mock('@/lib/autonomous/security/credential-vault');
 
 // Import after mocking
 import { ShopifySetupAgent, createShopifySetupAgent, ShopifySetupResult } from '@/lib/autonomous/agents/shopify-setup-agent';
 import { WorkflowRegistry } from '@/lib/autonomous/core/workflow-registry';
 import * as credentialVault from '@/lib/autonomous/security/credential-vault';
-jest.mock('@/lib/supabase/server', () => ({
-  createServiceRoleClientSync: jest.fn(() => ({
+
+// Get reference to the mocked getCredential function
+const helpersMocks = require('@/lib/autonomous/security/credential-vault-helpers');
+const mockVaultGet = helpersMocks._mockGetCredential || helpersMocks.getCredential;
+jest.mock('@/lib/supabase/server', () => {
+  const mockClient = {
     from: jest.fn(() => ({
       update: jest.fn().mockResolvedValue({ data: null, error: null }),
       insert: jest.fn().mockResolvedValue({ data: null, error: null }),
@@ -37,13 +62,18 @@ jest.mock('@/lib/supabase/server', () => ({
         getPublicUrl: jest.fn(() => ({ data: { publicUrl: 'https://example.com/test.png' } }))
       }))
     }
-  })),
-  createClient: jest.fn(),
-  createServiceRoleClient: jest.fn(),
-  requireClient: jest.fn(),
-  requireServiceRoleClient: jest.fn(),
-  validateSupabaseEnv: jest.fn(() => true)
-}));
+  };
+
+  return {
+    createServerClient: jest.fn(() => mockClient),
+    createServiceRoleClientSync: jest.fn(() => mockClient),
+    createClient: jest.fn(() => mockClient),
+    createServiceRoleClient: jest.fn(() => mockClient),
+    requireClient: jest.fn(() => mockClient),
+    requireServiceRoleClient: jest.fn(() => mockClient),
+    validateSupabaseEnv: jest.fn(() => true)
+  };
+});
 
 describe('ShopifySetupAgent', () => {
   let agent: ShopifySetupAgent;
@@ -148,19 +178,18 @@ describe('ShopifySetupAgent', () => {
       const mockEmail = { value: 'admin@teststore.com' };
       const mockPassword = { value: 'secure-password' };
 
-      const mockGetCredential = credentialVault.getCredential as jest.MockedFunction<typeof credentialVault.getCredential>;
-      mockGetCredential
+      mockVaultGet
         .mockResolvedValueOnce(mockEmail)
         .mockResolvedValueOnce(mockPassword);
 
       const credentials = await agent.getCredentials(mockOrganizationId);
 
-      expect(credentialVault.getCredential).toHaveBeenCalledWith(
+      expect(mockVaultGet).toHaveBeenCalledWith(
         mockOrganizationId,
         'shopify',
         'admin_email'
       );
-      expect(credentialVault.getCredential).toHaveBeenCalledWith(
+      expect(mockVaultGet).toHaveBeenCalledWith(
         mockOrganizationId,
         'shopify',
         'admin_password'
@@ -174,8 +203,7 @@ describe('ShopifySetupAgent', () => {
     });
 
     it('should throw error when email credential not found', async () => {
-      const mockGetCredential = credentialVault.getCredential as jest.MockedFunction<typeof credentialVault.getCredential>;
-      mockGetCredential
+      mockVaultGet
         .mockResolvedValueOnce(null)
         .mockResolvedValueOnce({ value: 'password' });
 
@@ -185,8 +213,7 @@ describe('ShopifySetupAgent', () => {
     });
 
     it('should throw error when password credential not found', async () => {
-      const mockGetCredential = credentialVault.getCredential as jest.MockedFunction<typeof credentialVault.getCredential>;
-      mockGetCredential
+      mockVaultGet
         .mockResolvedValueOnce({ value: 'email@test.com' })
         .mockResolvedValueOnce(null);
 
@@ -196,8 +223,7 @@ describe('ShopifySetupAgent', () => {
     });
 
     it('should handle vault errors gracefully', async () => {
-      const mockGetCredential = credentialVault.getCredential as jest.MockedFunction<typeof credentialVault.getCredential>;
-      mockGetCredential.mockRejectedValue(
+      mockVaultGet.mockRejectedValue(
         new Error('Vault connection error')
       );
 

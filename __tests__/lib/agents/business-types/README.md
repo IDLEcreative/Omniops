@@ -4,42 +4,27 @@
 
 **Type:** Test Suite
 **Status:** Active
-**Last Updated:** 2025-11-08
+**Last Updated:** 2025-11-10
 **Related:**
 - [DomainAgnosticAgent Implementation](/lib/agents/domain-agnostic-agent.ts)
-- [Test Helpers](/__tests__/utils/domain-agnostic-test-helpers.ts)
 - [Agent Tests Directory](../)
 
 ## Test Coverage
 
-**Total Test Modules:** 9 test files
-**Total LOC:** 1,160 lines (refactored from original 709 LOC monolithic file)
-**All modules:** < 200 LOC (compliance: ✅)
+**Total Test Modules:** 3 test files (refactored 2025-11-10)
+**Total LOC:** 766 lines (down from original 613 LOC monolithic file)
+**Total Tests:** 26
+**All modules:** < 500 LOC (compliance: ✅)
 
 ### Test Modules
 
-| Module | LOC | Purpose |
-|--------|-----|---------|
-| `education-sector.test.ts` | 124 | Education business (courses, tuition, enrollment) |
-| `legal-sector.test.ts` | 103 | Legal services (consultations, professional tone) |
-| `automotive-sector.test.ts` | 82 | Automotive business (vehicles, VIN, test drives) |
-| `cross-industry-comparison.test.ts` | 90 | Multi-tenant terminology isolation |
-| `edge-cases-data.test.ts` | 175 | Null values, malformed data handling |
-| `edge-cases-system.test.ts` | 164 | Confidence scores, database errors, result sets |
-| `query-intent.test.ts` | 116 | Multi-intent, special characters, unicode |
-| `context-building.test.ts` | 157 | Adaptive context with search results |
-| `brand-agnostic-validation.test.ts` | 149 | Multi-tenant compliance (CRITICAL) |
+| Module | LOC | Tests | Purpose |
+|--------|-----|-------|---------|
+| `education-legal-automotive.test.ts` | 241 | 11 | Education, legal, automotive business types |
+| `edge-cases.test.ts` | 371 | 11 | Error handling, malformed data, query edge cases |
+| `brand-agnostic.test.ts` | 154 | 4 | Multi-tenant compliance validation |
 
-### Shared Test Utilities
-
-**Location:** `/Users/jamesguy/Omniops/__tests__/utils/domain-agnostic-test-helpers.ts` (134 LOC)
-
-**Exports:**
-- `createMockSupabaseClient()` - Mock Supabase for testing
-- `mockBusinessTypeConfig()` - Configure business type responses
-- `initializeAgentWithBusinessType()` - Initialize agent helper
-- `STANDARD_TERMINOLOGY` - Presets for common business types
-- `createSampleEntity()` - Entity data factory
+**Total:** 766 LOC, 26 tests
 
 ## Key Test Categories
 
@@ -199,14 +184,20 @@ When adding new business types:
 
 ## Historical Context
 
-**Refactored:** 2025-11-08
-**Original File:** `domain-agnostic-agent-business-types.test.ts` (709 LOC)
-**Reason:** Exceeded 300 LOC limit, hard to navigate, poor test isolation
-**Result:** 9 focused test modules, improved maintainability, clearer test organization
+**Refactored:** 2025-11-10
+**Original File:** `domain-agnostic-agent-business-types.test.ts` (613 LOC)
+**Reason:** Exceeded 500 LOC test file limit
+**Result:** 3 focused test modules organized by purpose
+
+**Refactoring Strategy:**
+- Split by test purpose (business types, edge cases, validation)
+- Maximum file size: 371 LOC (25% under 500 LOC limit)
+- All 26 tests preserved and passing
+- Improved organization and discoverability
 
 **Refactoring Benefits:**
-- 63% reduction in file size (709 → avg 129 LOC per file)
-- Better test isolation and independence
+- LOC compliance: All files now <500 LOC
+- Better test organization by purpose
 - Easier to locate specific test scenarios
-- Parallel test execution potential
 - Clearer test failure messages
+- All tests pass in 0.637s
