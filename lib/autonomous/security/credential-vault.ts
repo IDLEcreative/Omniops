@@ -7,9 +7,19 @@
  * @module lib/autonomous/security/credential-vault
  */
 
-import { encrypt, decrypt } from '@/lib/encryption/crypto-core';
 import { createServerClient } from '@/lib/supabase/server';
 import type { Database } from '@/types/supabase';
+
+// Default implementations (imported at function call time to avoid ESM issues)
+const defaultEncrypt = async (text: string): Promise<string> => {
+  const { encrypt } = await import('@/lib/encryption/crypto-core');
+  return encrypt(text);
+};
+
+const defaultDecrypt = async (text: string): Promise<string> => {
+  const { decrypt } = await import('@/lib/encryption/crypto-core');
+  return decrypt(text);
+};
 
 // ============================================================================
 // Types
@@ -40,66 +50,180 @@ export interface DecryptedCredential extends StoredCredential {
 }
 
 // ============================================================================
+// Interfaces for Dependency Injection
+// ============================================================================
+
+export interface VaultOperations {
+  encrypt: (text: string) => Promise<string>;
+  decrypt: (text: string) => Promise<string>;
+  upsertCredential: (supabase: ReturnType<typeof createServerClient>, data: any) => Promise<any>;
+  selectCredential: (supabase: ReturnType<typeof createServerClient>, organizationId: string, service: string, credentialType: CredentialType) => Promise<any>;
+  selectCredentials: (supabase: ReturnType<typeof createServerClient>, organizationId: string, service?: string) => Promise<any[]>;
+  deleteCredential: (supabase: ReturnType<typeof createServerClient>, organizationId: string, service: string, credentialType: CredentialType) => Promise<void>;
+  mapToStoredCredential: (data: any) => StoredCredential;
+}
+
+// ============================================================================
+// Default Implementations
+// ============================================================================
+
+const defaultUpsertCredential = async (
+  supabase: ReturnType<typeof createServerClient>,
+  data: any
+): Promise<any> => {
+  const { data: record, error } = await supabase
+    .from('autonomous_credentials')
+    .upsert(data, { onConflict: 'organization_id,service,credential_type' })
+    .select()
+    .single();
+
+  if (error) {
+    throw new Error(`Failed to store credential: ${error.message}`);
+  }
+
+  return record;
+};
+
+const defaultSelectCredential = async (
+  supabase: ReturnType<typeof createServerClient>,
+  organizationId: string,
+  service: string,
+  credentialType: CredentialType
+): Promise<any> => {
+  const { data, error } = await supabase
+    .from('autonomous_credentials')
+    .select('*')
+    .eq('organization_id', organizationId)
+    .eq('service', service)
+    .eq('credential_type', credentialType)
+    .single();
+
+  if (error) {
+    if (error.code === 'PGRST116') return null;
+    throw new Error(`Failed to get credential: ${error.message}`);
+  }
+
+  return data;
+};
+
+const defaultSelectCredentials = async (
+  supabase: ReturnType<typeof createServerClient>,
+  organizationId: string,
+  service?: string
+): Promise<any[]> => {
+  let query = supabase
+    .from('autonomous_credentials')
+    .select('*')
+    .eq('organization_id', organizationId);
+
+  if (service) {
+    query = query.eq('service', service);
+  }
+
+  const { data, error } = await query;
+
+  if (error) {
+    throw new Error(`Failed to list credentials: ${error.message}`);
+  }
+
+  return data || [];
+};
+
+const defaultDeleteCredential = async (
+  supabase: ReturnType<typeof createServerClient>,
+  organizationId: string,
+  service: string,
+  credentialType: CredentialType
+): Promise<void> => {
+  const { error } = await supabase
+    .from('autonomous_credentials')
+    .delete()
+    .eq('organization_id', organizationId)
+    .eq('service', service)
+    .eq('credential_type', credentialType);
+
+  if (error) {
+    throw new Error(`Failed to delete credential: ${error.message}`);
+  }
+};
+
+const defaultMapToStoredCredential = (data: any): StoredCredential => {
+  return {
+    id: data.id,
+    organizationId: data.organization_id,
+    service: data.service,
+    credentialType: data.credential_type,
+    metadata: data.credential_metadata,
+    expiresAt: data.expires_at,
+    lastRotatedAt: data.last_rotated_at,
+    rotationRequired: data.rotation_required,
+    createdAt: data.created_at
+  };
+};
+
+// ============================================================================
 // Credential Vault Service
 // ============================================================================
 
 export class CredentialVault {
   private supabase: ReturnType<typeof createServerClient>;
   private encryptionKeyId: string;
+  private operations: VaultOperations;
 
   /**
    * Create CredentialVault instance
    * @param client Optional Supabase client (for testing). If not provided, creates one.
+   * @param operations Optional vault operations (for testing). If not provided, uses defaults.
    */
-  constructor(client?: ReturnType<typeof createServerClient>) {
+  constructor(
+    client?: ReturnType<typeof createServerClient>,
+    operations?: Partial<VaultOperations>
+  ) {
     this.supabase = client || createServerClient();
     // Track encryption key version for rotation purposes
     this.encryptionKeyId = process.env.ENCRYPTION_KEY_VERSION || 'v1';
+
+    // Use provided operations or defaults
+    this.operations = {
+      encrypt: operations?.encrypt || defaultEncrypt,
+      decrypt: operations?.decrypt || defaultDecrypt,
+      upsertCredential: operations?.upsertCredential || defaultUpsertCredential,
+      selectCredential: operations?.selectCredential || defaultSelectCredential,
+      selectCredentials: operations?.selectCredentials || defaultSelectCredentials,
+      deleteCredential: operations?.deleteCredential || defaultDeleteCredential,
+      mapToStoredCredential: operations?.mapToStoredCredential || defaultMapToStoredCredential
+    };
   }
 
   /**
    * Store a new credential or update existing one
    */
   async store(organizationId: string, service: string, credentialType: CredentialType, credential: CredentialData): Promise<StoredCredential> {
-    const encryptedValue = encrypt(credential.value);
+    const encryptedValue = await this.operations.encrypt(credential.value);
     const encryptedBuffer = Buffer.from(encryptedValue, 'base64');
 
-    const { data, error } = await this.supabase
-      .from('autonomous_credentials')
-      .upsert({
-        organization_id: organizationId,
-        service,
-        credential_type: credentialType,
-        encrypted_credential: encryptedBuffer,
-        encryption_key_id: this.encryptionKeyId,
-        expires_at: credential.expiresAt?.toISOString(),
-        credential_metadata: credential.metadata || {},
-        last_rotated_at: new Date().toISOString(),
-        rotation_required: false
-      }, { onConflict: 'organization_id,service,credential_type' })
-      .select()
-      .single();
+    const data = await this.operations.upsertCredential(this.supabase, {
+      organization_id: organizationId,
+      service,
+      credential_type: credentialType,
+      encrypted_credential: encryptedBuffer,
+      encryption_key_id: this.encryptionKeyId,
+      expires_at: credential.expiresAt?.toISOString(),
+      credential_metadata: credential.metadata || {},
+      last_rotated_at: new Date().toISOString(),
+      rotation_required: false
+    });
 
-    if (error) throw new Error(`Failed to store credential: ${error.message}`);
-    return this.mapToStoredCredential(data);
+    return this.operations.mapToStoredCredential(data);
   }
 
   /**
    * Retrieve and decrypt a credential
    */
   async get(organizationId: string, service: string, credentialType: CredentialType): Promise<DecryptedCredential | null> {
-    const { data, error } = await this.supabase
-      .from('autonomous_credentials')
-      .select('*')
-      .eq('organization_id', organizationId)
-      .eq('service', service)
-      .eq('credential_type', credentialType)
-      .single();
+    const data = await this.operations.selectCredential(this.supabase, organizationId, service, credentialType);
 
-    if (error) {
-      if (error.code === 'PGRST116') return null;
-      throw new Error(`Failed to get credential: ${error.message}`);
-    }
+    if (data === null) return null;
 
     if (data.expires_at && new Date(data.expires_at) < new Date()) {
       console.warn('[CredentialVault] Credential expired:', { service, credentialType, expiredAt: data.expires_at });
@@ -107,8 +231,8 @@ export class CredentialVault {
     }
 
     const encryptedValue = Buffer.from(data.encrypted_credential).toString('base64');
-    const decryptedValue = decrypt(encryptedValue);
-    return { ...this.mapToStoredCredential(data), value: decryptedValue };
+    const decryptedValue = await this.operations.decrypt(encryptedValue);
+    return { ...this.operations.mapToStoredCredential(data), value: decryptedValue };
   }
 
   /**
@@ -120,22 +244,8 @@ export class CredentialVault {
    */
   async list(organizationId: string, service?: string): Promise<StoredCredential[]> {
     try {
-      let query = this.supabase
-        .from('autonomous_credentials')
-        .select('*')
-        .eq('organization_id', organizationId);
-
-      if (service) {
-        query = query.eq('service', service);
-      }
-
-      const { data, error } = await query;
-
-      if (error) {
-        throw new Error(`Failed to list credentials: ${error.message}`);
-      }
-
-      return (data || []).map(this.mapToStoredCredential);
+      const data = await this.operations.selectCredentials(this.supabase, organizationId, service);
+      return data.map(this.operations.mapToStoredCredential);
     } catch (error) {
       console.error('[CredentialVault] List error:', error);
       throw error;
@@ -154,16 +264,7 @@ export class CredentialVault {
     credentialType: CredentialType
   ): Promise<void> {
     try {
-      const { error } = await this.supabase
-        .from('autonomous_credentials')
-        .delete()
-        .eq('organization_id', organizationId)
-        .eq('service', service)
-        .eq('credential_type', credentialType);
-
-      if (error) {
-        throw new Error(`Failed to delete credential: ${error.message}`);
-      }
+      await this.operations.deleteCredential(this.supabase, organizationId, service, credentialType);
     } catch (error) {
       console.error('[CredentialVault] Delete error:', error);
       throw error;
@@ -199,7 +300,7 @@ export class CredentialVault {
   async getCredentialsRequiringRotation(): Promise<StoredCredential[]> {
     const { getCredentialsRequiringRotation } = await import('./credential-rotation');
     const data = await getCredentialsRequiringRotation(this.supabase);
-    return data.map(this.mapToStoredCredential);
+    return data.map(this.operations.mapToStoredCredential);
   }
 
   /**
@@ -212,24 +313,6 @@ export class CredentialVault {
   ): Promise<boolean> {
     const credential = await this.get(organizationId, service, credentialType);
     return credential !== null;
-  }
-
-  // ============================================================================
-  // Private Helpers
-  // ============================================================================
-
-  private mapToStoredCredential(data: any): StoredCredential {
-    return {
-      id: data.id,
-      organizationId: data.organization_id,
-      service: data.service,
-      credentialType: data.credential_type,
-      metadata: data.credential_metadata,
-      expiresAt: data.expires_at,
-      lastRotatedAt: data.last_rotated_at,
-      rotationRequired: data.rotation_required,
-      createdAt: data.created_at
-    };
   }
 }
 

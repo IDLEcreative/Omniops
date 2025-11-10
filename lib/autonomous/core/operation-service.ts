@@ -10,7 +10,7 @@
  */
 
 import { createServerClient } from '@/lib/supabase/server';
-import { verifyConsent } from '../security/consent-manager';
+import { verifyConsent as defaultVerifyConsent } from '../security/consent-manager';
 import {
   insertOperation as defaultInsertOperation,
   selectOperationById as defaultSelectOperationById,
@@ -66,6 +66,10 @@ export interface OperationDatabaseOps {
   mapToOperationRecord: typeof defaultMapToOperationRecord;
 }
 
+export interface OperationDependencies {
+  verifyConsent?: typeof defaultVerifyConsent;
+}
+
 // ============================================================================
 // Operation Service
 // ============================================================================
@@ -73,15 +77,18 @@ export interface OperationDatabaseOps {
 export class OperationService {
   private supabase: ReturnType<typeof createServerClient>;
   private operations: OperationDatabaseOps;
+  private verifyConsent: typeof defaultVerifyConsent;
 
   /**
    * Create OperationService instance
    * @param client Optional Supabase client (for testing). If not provided, creates one.
    * @param operations Optional operations (for testing). If not provided, uses defaults.
+   * @param dependencies Optional dependencies including verifyConsent (for testing).
    */
   constructor(
     client?: ReturnType<typeof createServerClient>,
-    operations?: Partial<OperationDatabaseOps>
+    operations?: Partial<OperationDatabaseOps>,
+    dependencies?: OperationDependencies
   ) {
     this.supabase = client || createServerClient();
 
@@ -94,13 +101,16 @@ export class OperationService {
       updateOperationCancelled: operations?.updateOperationCancelled || defaultUpdateOperationCancelled,
       mapToOperationRecord: operations?.mapToOperationRecord || defaultMapToOperationRecord
     };
+
+    // Use provided verifyConsent or default
+    this.verifyConsent = dependencies?.verifyConsent || defaultVerifyConsent;
   }
 
   /**
    * Create a new autonomous operation
    */
   async create(request: CreateOperationRequest): Promise<OperationRecord> {
-    const consentVerification = await verifyConsent(request.organizationId, request.service, request.operation);
+    const consentVerification = await this.verifyConsent(request.organizationId, request.service, request.operation);
     const status = consentVerification.hasConsent ? 'pending' : 'awaiting_consent';
     const consent_given = consentVerification.hasConsent;
 
@@ -193,13 +203,15 @@ let operationServiceInstance: OperationService | null = null;
  * Get singleton operation service instance
  * @param client Optional Supabase client (for testing)
  * @param operations Optional operations (for testing)
+ * @param dependencies Optional dependencies (for testing)
  */
 export function getOperationService(
   client?: ReturnType<typeof createServerClient>,
-  operations?: Partial<OperationDatabaseOps>
+  operations?: Partial<OperationDatabaseOps>,
+  dependencies?: OperationDependencies
 ): OperationService {
   if (!operationServiceInstance) {
-    operationServiceInstance = new OperationService(client, operations);
+    operationServiceInstance = new OperationService(client, operations, dependencies);
   }
   return operationServiceInstance;
 }

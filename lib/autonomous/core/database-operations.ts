@@ -3,14 +3,14 @@
  * @module lib/autonomous/core/database-operations
  */
 
-import { createServerClient } from '@/lib/supabase/server';
+import { createServiceRoleClientSync } from '@/lib/supabase/server';
 import { verifyConsent } from '../security/consent-manager';
 
 export class DatabaseOperations {
-  private supabase: ReturnType<typeof createServerClient>;
+  private supabase: any;
 
   constructor() {
-    this.supabase = createServerClient();
+    this.supabase = createServiceRoleClientSync();
   }
 
   async verifyConsent(organizationId: string, service: string, operation: string): Promise<void> {

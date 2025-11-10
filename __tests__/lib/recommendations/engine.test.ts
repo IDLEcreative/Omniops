@@ -8,35 +8,27 @@
 import { describe, it, expect, jest, beforeEach } from '@jest/globals';
 import type { SupabaseClient } from '@supabase/supabase-js';
 
-// Create mock functions that will be used in factory functions
-const mockVectorSimilarity = jest.fn();
-const mockCollaborativeFilter = jest.fn();
-const mockContentBased = jest.fn();
-const mockHybridRanker = jest.fn();
-const mockAnalyzeContext = jest.fn();
-
-// Mock dependencies with factory functions
+// Mock all dependencies BEFORE importing - use factory functions that return jest.fn()
 jest.mock('@/lib/recommendations/vector-similarity', () => ({
-  vectorSimilarityRecommendations: mockVectorSimilarity,
+  vectorSimilarityRecommendations: jest.fn(),
 }));
 
 jest.mock('@/lib/recommendations/collaborative-filter', () => ({
-  collaborativeFilterRecommendations: mockCollaborativeFilter,
+  collaborativeFilterRecommendations: jest.fn(),
 }));
 
 jest.mock('@/lib/recommendations/content-filter', () => ({
-  contentBasedRecommendations: mockContentBased,
+  contentBasedRecommendations: jest.fn(),
 }));
 
 jest.mock('@/lib/recommendations/hybrid-ranker', () => ({
-  hybridRanker: mockHybridRanker,
+  hybridRanker: jest.fn(),
 }));
 
 jest.mock('@/lib/recommendations/context-analyzer', () => ({
-  analyzeContext: mockAnalyzeContext,
+  analyzeContext: jest.fn(),
 }));
 
-// Mock Supabase BEFORE importing the engine (since engine imports createClient at top level)
 jest.mock('@/lib/supabase/server');
 
 import {
@@ -45,10 +37,19 @@ import {
   getRecommendationMetrics,
 } from '@/lib/recommendations/engine';
 
-// Get the mocked createClient directly from the mocked module
-const { createClient } = jest.requireMock('@/lib/supabase/server') as {
-  createClient: jest.MockedFunction<any>;
-};
+// Get mocked functions using jest.requireMock (ensures we get the actual mocks)
+const { vectorSimilarityRecommendations: mockVectorSimilarity } =
+  jest.requireMock('@/lib/recommendations/vector-similarity');
+const { collaborativeFilterRecommendations: mockCollaborativeFilter } =
+  jest.requireMock('@/lib/recommendations/collaborative-filter');
+const { contentBasedRecommendations: mockContentBased } =
+  jest.requireMock('@/lib/recommendations/content-filter');
+const { hybridRanker: mockHybridRanker } =
+  jest.requireMock('@/lib/recommendations/hybrid-ranker');
+const { analyzeContext: mockAnalyzeContext } =
+  jest.requireMock('@/lib/recommendations/context-analyzer');
+const { createClient: mockCreateClient } =
+  jest.requireMock('@/lib/supabase/server');
 
 describe('Recommendation Engine', () => {
   let mockSupabase: any;
@@ -69,7 +70,7 @@ describe('Recommendation Engine', () => {
     };
 
     // Configure the mock to return our mockSupabase
-    createClient.mockResolvedValue(mockSupabase);
+    mockCreateClient.mockResolvedValue(mockSupabase);
   });
 
   describe('getRecommendations', () => {
@@ -178,6 +179,7 @@ describe('Recommendation Engine', () => {
       const result = await getRecommendations({
         domainId: 'domain-123',
         limit: 5,
+        algorithm: 'hybrid',
       });
 
       expect(mockHybridRanker).toHaveBeenCalled();
@@ -199,6 +201,7 @@ describe('Recommendation Engine', () => {
       const result = await getRecommendations({
         domainId: 'domain-123',
         context: 'I need a hydraulic pump for my machine',
+        algorithm: 'hybrid',
         limit: 5,
       });
 
@@ -227,6 +230,7 @@ describe('Recommendation Engine', () => {
       const result = await getRecommendations({
         domainId: 'domain-123',
         excludeProductIds: ['prod-2'],
+        algorithm: 'hybrid',
         limit: 5,
       });
 
@@ -249,6 +253,7 @@ describe('Recommendation Engine', () => {
 
       const result = await getRecommendations({
         domainId: 'domain-123',
+        algorithm: 'hybrid',
         limit: 3,
       });
 
@@ -261,6 +266,7 @@ describe('Recommendation Engine', () => {
 
       await getRecommendations({
         domainId: 'domain-123',
+        algorithm: 'hybrid',
       });
 
       expect(mockHybridRanker).toHaveBeenCalledWith(
@@ -283,6 +289,7 @@ describe('Recommendation Engine', () => {
         domainId: 'domain-123',
         sessionId: 'session-123',
         conversationId: 'conv-456',
+        algorithm: 'hybrid',
         limit: 5,
       });
 
@@ -312,6 +319,7 @@ describe('Recommendation Engine', () => {
       // Should not throw
       const result = await getRecommendations({
         domainId: 'domain-123',
+        algorithm: 'hybrid',
         limit: 5,
       });
 
@@ -327,6 +335,7 @@ describe('Recommendation Engine', () => {
 
       const result = await getRecommendations({
         domainId: 'domain-123',
+        algorithm: 'hybrid',
         limit: 5,
       });
 
@@ -339,6 +348,7 @@ describe('Recommendation Engine', () => {
       await expect(
         getRecommendations({
           domainId: 'domain-123',
+          algorithm: 'hybrid',
           limit: 5,
         })
       ).rejects.toThrow('Algorithm failed');
@@ -353,7 +363,10 @@ describe('Recommendation Engine', () => {
       });
       mockSupabase.update.mockResolvedValue({ error: null });
 
+      console.log('mockCreateClient calls before:', mockCreateClient.mock.calls.length);
       await trackRecommendationEvent('prod-1', 'click', 'session-123');
+      console.log('mockCreateClient calls after:', mockCreateClient.mock.calls.length);
+      console.log('mockSupabase.from calls:', mockSupabase.from.mock.calls.length);
 
       expect(mockSupabase.from).toHaveBeenCalledWith('recommendation_events');
       expect(mockSupabase.eq).toHaveBeenCalledWith('product_id', 'prod-1');

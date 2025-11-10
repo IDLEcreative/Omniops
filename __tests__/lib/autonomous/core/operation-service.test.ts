@@ -6,9 +6,6 @@
 import { describe, it, expect, jest, beforeEach } from '@jest/globals';
 import { OperationService, type CreateOperationRequest, type OperationDatabaseOps } from '@/lib/autonomous/core/operation-service';
 
-// Consent manager is mocked via moduleNameMapper in jest.config.js
-import * as consentManagerModule from '@/lib/autonomous/security/consent-manager';
-
 // Mock Supabase client (not used for queries since we inject operations)
 const mockSupabaseClient = {
   from: jest.fn(),
@@ -20,9 +17,13 @@ const mockSupabaseClient = {
 describe('OperationService', () => {
   let operationService: OperationService;
   let mockOperations: jest.Mocked<OperationDatabaseOps>;
+  let mockVerifyConsent: jest.Mock;
 
   beforeEach(() => {
     jest.clearAllMocks();
+
+    // Create mock verifyConsent function
+    mockVerifyConsent = jest.fn();
 
     // Create mock operations
     mockOperations = {
@@ -52,8 +53,12 @@ describe('OperationService', () => {
       }))
     };
 
-    // Pass mock Supabase client and operations to OperationService constructor
-    operationService = new OperationService(mockSupabaseClient as any, mockOperations);
+    // Pass mock Supabase client, operations, and dependencies to OperationService constructor
+    operationService = new OperationService(
+      mockSupabaseClient as any,
+      mockOperations,
+      { verifyConsent: mockVerifyConsent }
+    );
   });
 
   describe('create', () => {
@@ -67,27 +72,22 @@ describe('OperationService', () => {
     };
 
     it('should create operation in pending state when consent exists', async () => {
-      // Mock verifyConsent by setting its implementation directly
-      // The verifyConsent from the mock is a jest.fn, so we can call it
-      // and it will return the mock implementation result
-      const mockVerifyConsent = consentManagerModule.verifyConsent as any;
-      mockVerifyConsent.mockImplementation(() =>
-        Promise.resolve({
-          hasConsent: true,
-          consentRecord: {
-            id: 'consent-123',
-            organizationId: 'org-123',
-            userId: 'user-456',
-            service: 'woocommerce',
-            operation: 'api_key_generation',
-            permissions: ['read', 'write'],
-            grantedAt: new Date().toISOString(),
-            isActive: true,
-            consentVersion: '1.0',
-            createdAt: new Date().toISOString()
-          }
-        })
-      );
+      // Mock verifyConsent to return consent granted
+      mockVerifyConsent.mockResolvedValue({
+        hasConsent: true,
+        consentRecord: {
+          id: 'consent-123',
+          organizationId: 'org-123',
+          userId: 'user-456',
+          service: 'woocommerce',
+          operation: 'api_key_generation',
+          permissions: ['read', 'write'],
+          grantedAt: new Date().toISOString(),
+          isActive: true,
+          consentVersion: '1.0',
+          createdAt: new Date().toISOString()
+        }
+      });
 
       const mockInsertData = {
         id: 'op-123',
@@ -127,13 +127,11 @@ describe('OperationService', () => {
     });
 
     it('should create operation in awaiting_consent state when no consent', async () => {
-      const mockVerifyConsent = consentManagerModule.verifyConsent as any;
-      mockVerifyConsent.mockImplementation(() =>
-        Promise.resolve({
-          hasConsent: false,
-          reason: 'No consent granted for this operation'
-        })
-      );
+      // Mock verifyConsent to return no consent
+      mockVerifyConsent.mockResolvedValue({
+        hasConsent: false,
+        reason: 'No consent granted for this operation'
+      });
 
       const mockInsertData = {
         id: 'op-124',
@@ -165,10 +163,8 @@ describe('OperationService', () => {
     });
 
     it('should handle database errors', async () => {
-      const mockVerifyConsent = consentManagerModule.verifyConsent as any;
-      mockVerifyConsent.mockImplementation(() =>
-        Promise.resolve({ hasConsent: true })
-      );
+      // Mock verifyConsent to return consent
+      mockVerifyConsent.mockResolvedValue({ hasConsent: true });
 
       mockOperations.insertOperation.mockRejectedValue(
         new Error('Failed to insert operation: Database connection failed')
@@ -179,10 +175,8 @@ describe('OperationService', () => {
     });
 
     it('should allow operation without userId', async () => {
-      const mockVerifyConsent = consentManagerModule.verifyConsent as any;
-      mockVerifyConsent.mockImplementation(() =>
-        Promise.resolve({ hasConsent: true })
-      );
+      // Mock verifyConsent to return consent
+      mockVerifyConsent.mockResolvedValue({ hasConsent: true });
 
       const requestWithoutUser: CreateOperationRequest = {
         organizationId: 'org-123',
