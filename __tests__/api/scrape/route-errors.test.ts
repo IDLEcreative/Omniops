@@ -1,28 +1,45 @@
 import { describe, it, expect, jest, beforeEach } from '@jest/globals'
 import { NextRequest } from 'next/server'
+
+// Import mocks BEFORE calling jest.mock() so we can reference them in the factory
 import {
   mockCreateServiceRoleClient,
   mockScrapePage,
   mockCheckCrawlStatus,
+  mockCrawlWebsite,
+  mockGetHealthStatus,
+  mockCrawlWebsiteWithCleanup,
   setupSupabaseMock,
   setupOpenAIMock,
   setupDefaultMocks,
 } from './test-setup'
 
+// Tell Jest to use our test-setup mocks as the implementation
+jest.mock('@/lib/scraper-api', () => ({
+  scrapePage: mockScrapePage,
+  crawlWebsite: mockCrawlWebsite,
+  checkCrawlStatus: mockCheckCrawlStatus,
+  getHealthStatus: mockGetHealthStatus,
+}))
+
+jest.mock('@/lib/scraper-with-cleanup', () => ({
+  crawlWebsiteWithCleanup: mockCrawlWebsiteWithCleanup,
+}))
+
+// Import the route handlers - they will use the mocked implementations above
+import { POST, GET } from '@/app/api/scrape/route'
+
 describe('/api/scrape - Error Handling', () => {
-  let POST: typeof import('@/app/api/scrape/route').POST
-  let GET: typeof import('@/app/api/scrape/route').GET
   let mockSupabaseClient: ReturnType<typeof mockCreateServiceRoleClient>
 
   beforeEach(async () => {
     jest.clearAllMocks()
-    jest.resetModules()
+    // NOTE: Removed jest.resetModules() because it invalidates mock references from test-setup
+    // jest.clearAllMocks() is sufficient to reset mock state between tests
 
     mockSupabaseClient = setupSupabaseMock()
     setupOpenAIMock()
     setupDefaultMocks()
-
-    ;({ POST, GET } = await import('@/app/api/scrape/route'))
   })
 
   const createRequest = (body: unknown) => {
@@ -38,6 +55,7 @@ describe('/api/scrape - Error Handling', () => {
   describe('POST Error Handling', () => {
     it('should handle scraper errors', async () => {
       mockScrapePage.mockRejectedValue(new Error('Scraper API error'))
+      console.log('[TEST] mockScrapePage configured to reject')
 
       const requestBody = {
         url: 'https://example.com',
@@ -46,6 +64,7 @@ describe('/api/scrape - Error Handling', () => {
 
       const response = await POST(createRequest(requestBody))
       const data = await response.json()
+      console.log('[TEST] Response status:', response.status, 'data:', data)
 
       expect(response.status).toBe(500)
       expect(data.error).toBe('Internal server error')

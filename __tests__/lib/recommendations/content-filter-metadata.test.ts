@@ -48,8 +48,17 @@ describe('Content-Based Filter - Metadata', () => {
       });
 
       // Second query: get all products (ends with .eq())
+      // Include products that match the extracted categories
       mockSupabase.eq.mockResolvedValueOnce({
         data: [
+          {
+            product_id: 'ref-1',
+            metadata: { categories: ['cat-1'], tags: [] },
+          },
+          {
+            product_id: 'ref-2',
+            metadata: { categories: ['cat-2'], tags: [] },
+          },
           {
             product_id: 'prod-1',
             metadata: { categories: ['cat-1', 'cat-2'], tags: [] },
@@ -108,6 +117,10 @@ describe('Content-Based Filter - Metadata', () => {
             product_id: 'prod-1',
             metadata: { categories: ['hydraulics'], tags: [] },
           },
+          {
+            product_id: 'prod-2',
+            metadata: { categories: ['other'], tags: [] },
+          },
         ],
         error: null,
       });
@@ -128,6 +141,10 @@ describe('Content-Based Filter - Metadata', () => {
           {
             product_id: 'prod-1',
             metadata: { categories: [], tags: ['industrial'] },
+          },
+          {
+            product_id: 'prod-2',
+            metadata: { categories: [], tags: ['other'] },
           },
         ],
         error: null,
@@ -157,6 +174,10 @@ describe('Content-Based Filter - Metadata', () => {
 
       mockSupabase.eq.mockResolvedValueOnce({
         data: [
+          {
+            product_id: 'ref-1',
+            metadata: { categories: ['hydraulics'], tags: ['industrial'] },
+          },
           {
             product_id: 'prod-1',
             metadata: { categories: ['hydraulics'], tags: ['industrial'] },
@@ -188,6 +209,10 @@ describe('Content-Based Filter - Metadata', () => {
 
       mockSupabase.eq.mockResolvedValueOnce({
         data: [
+          {
+            product_id: 'ref-1',
+            metadata: { categories: ['hydraulics'], tags: ['tag-1'] },
+          },
           {
             product_id: 'prod-1',
             metadata: { categories: ['hydraulics'], tags: ['tag-2'] },

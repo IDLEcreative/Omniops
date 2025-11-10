@@ -5351,6 +5351,269 @@
       "errorRecovery": [
         "Log error and notify user"
       ]
+    },
+    {
+      "id": "should-complete-shopify-api-credential-generation",
+      "name": "should complete Shopify API credential generation",
+      "intent": "Generate Shopify private app API credentials for store integration",
+      "preconditions": [
+        "Shopify store must exist and be accessible",
+        "Admin credentials must be available in credential vault",
+        "Store must allow private app development"
+      ],
+      "steps": [
+        {
+          "order": 1,
+          "intent": "Navigate to Shopify admin login",
+          "action": "navigate",
+          "target": "{storeUrl}/admin",
+          "expectedResult": "Login page loads successfully",
+          "alternatives": []
+        },
+        {
+          "order": 2,
+          "intent": "Enter admin email/username",
+          "action": "fill",
+          "target": "#account_email",
+          "value": "{adminEmail}",
+          "expectedResult": "Email field accepts input",
+          "alternatives": [
+            {
+              "intent": "Try alternative email selector",
+              "action": "fill",
+              "target": "input[name='email']",
+              "value": "{adminEmail}"
+            }
+          ]
+        },
+        {
+          "order": 3,
+          "intent": "Click continue or next button",
+          "action": "click",
+          "target": "button:has-text('Continue')",
+          "expectedResult": "Password page appears",
+          "alternatives": [
+            {
+              "intent": "Try alternative continue button",
+              "action": "click",
+              "target": "button[type='submit']"
+            }
+          ]
+        },
+        {
+          "order": 4,
+          "intent": "Enter admin password",
+          "action": "fill",
+          "target": "#account_password",
+          "value": "{adminPassword}",
+          "expectedResult": "Password field accepts input",
+          "alternatives": [
+            {
+              "intent": "Try alternative password selector",
+              "action": "fill",
+              "target": "input[name='password']",
+              "value": "{adminPassword}"
+            }
+          ]
+        },
+        {
+          "order": 5,
+          "intent": "Click login button",
+          "action": "click",
+          "target": "button:has-text('Log in')",
+          "expectedResult": "Admin dashboard loads",
+          "alternatives": [
+            {
+              "intent": "Try alternative login button",
+              "action": "click",
+              "target": "button[type='submit']"
+            }
+          ]
+        },
+        {
+          "order": 6,
+          "intent": "Navigate to Apps and sales channels",
+          "action": "navigate",
+          "target": "{storeUrl}/admin/apps",
+          "expectedResult": "Apps page loads",
+          "alternatives": []
+        },
+        {
+          "order": 7,
+          "intent": "Click on 'Develop apps' or 'App development'",
+          "action": "click",
+          "target": "a:has-text('Develop apps')",
+          "expectedResult": "App development page loads",
+          "alternatives": [
+            {
+              "intent": "Try 'App development' link",
+              "action": "click",
+              "target": "a:has-text('App development')"
+            },
+            {
+              "intent": "Try settings approach",
+              "action": "navigate",
+              "target": "{storeUrl}/admin/settings/apps"
+            }
+          ]
+        },
+        {
+          "order": 8,
+          "intent": "Click 'Create an app' or 'Create app' button",
+          "action": "click",
+          "target": "button:has-text('Create an app')",
+          "expectedResult": "Create app modal appears",
+          "alternatives": [
+            {
+              "intent": "Try 'Create app' button",
+              "action": "click",
+              "target": "button:has-text('Create app')"
+            },
+            {
+              "intent": "Try 'Allow custom app development' if needed",
+              "action": "click",
+              "target": "button:has-text('Allow')"
+            }
+          ]
+        },
+        {
+          "order": 9,
+          "intent": "Enter app name",
+          "action": "fill",
+          "target": "input[name='name']",
+          "value": "OmniOps Integration",
+          "expectedResult": "App name field accepts input",
+          "alternatives": [
+            {
+              "intent": "Try alternative app name selector",
+              "action": "fill",
+              "target": "#AppName",
+              "value": "OmniOps Integration"
+            }
+          ]
+        },
+        {
+          "order": 10,
+          "intent": "Click create or save button",
+          "action": "click",
+          "target": "button:has-text('Create app')",
+          "expectedResult": "App created successfully",
+          "alternatives": [
+            {
+              "intent": "Try 'Save' button",
+              "action": "click",
+              "target": "button:has-text('Save')"
+            }
+          ]
+        },
+        {
+          "order": 11,
+          "intent": "Navigate to Configuration tab",
+          "action": "click",
+          "target": "button:has-text('Configuration')",
+          "expectedResult": "Configuration page loads",
+          "alternatives": [
+            {
+              "intent": "Try tab navigation",
+              "action": "click",
+              "target": "a:has-text('Configuration')"
+            }
+          ]
+        },
+        {
+          "order": 12,
+          "intent": "Configure Admin API scopes",
+          "action": "click",
+          "target": "button:has-text('Configure')",
+          "expectedResult": "Scopes configuration modal opens",
+          "alternatives": []
+        },
+        {
+          "order": 13,
+          "intent": "Select required API scopes",
+          "action": "click",
+          "target": "input[value='read_products']",
+          "expectedResult": "Product read scope selected",
+          "alternatives": []
+        },
+        {
+          "order": 14,
+          "intent": "Select write products scope",
+          "action": "click",
+          "target": "input[value='write_products']",
+          "expectedResult": "Product write scope selected",
+          "alternatives": []
+        },
+        {
+          "order": 15,
+          "intent": "Select read orders scope",
+          "action": "click",
+          "target": "input[value='read_orders']",
+          "expectedResult": "Orders read scope selected",
+          "alternatives": []
+        },
+        {
+          "order": 16,
+          "intent": "Save scope configuration",
+          "action": "click",
+          "target": "button:has-text('Save')",
+          "expectedResult": "Scopes saved successfully",
+          "alternatives": []
+        },
+        {
+          "order": 17,
+          "intent": "Install app to generate credentials",
+          "action": "click",
+          "target": "button:has-text('Install app')",
+          "expectedResult": "App installed, credentials displayed",
+          "alternatives": [
+            {
+              "intent": "Try 'Reveal token' if credentials hidden",
+              "action": "click",
+              "target": "button:has-text('Reveal')"
+            }
+          ]
+        },
+        {
+          "order": 18,
+          "intent": "Extract Admin API access token",
+          "action": "copy",
+          "target": "input[readonly]:has-value('shpat_')",
+          "expectedResult": "Access token extracted successfully",
+          "alternatives": [
+            {
+              "intent": "Try copy button approach",
+              "action": "click",
+              "target": "button:has-text('Copy')"
+            }
+          ]
+        },
+        {
+          "order": 19,
+          "intent": "Verify credentials are valid",
+          "action": "verify",
+          "expectedResult": "Credentials displayed and accessible",
+          "alternatives": []
+        }
+      ],
+      "postconditions": [
+        "Shopify private app created successfully",
+        "Admin API access token generated",
+        "Required API scopes configured",
+        "Credentials extracted and ready for storage"
+      ],
+      "successIndicators": [
+        "Access token starts with 'shpat_'",
+        "App appears in Apps list",
+        "API scopes include read_products, write_products, read_orders",
+        "No error messages displayed"
+      ],
+      "errorRecovery": [
+        "If app development disabled, enable it in store settings",
+        "If authentication fails, verify credentials in vault",
+        "If scope selection fails, use alternative navigation path",
+        "Log all errors and notify user with specific failure reason"
+      ]
     }
   ],
   "uiCatalog": [],

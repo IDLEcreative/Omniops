@@ -8,13 +8,13 @@
 import { createServerClient } from '@/lib/supabase/server';
 import type { ConsentRequest, ConsentRecord, ConsentVerification } from './consent-types';
 import {
-  insertConsent,
-  selectConsent,
-  updateConsentRevoked,
-  updateConsentRevokedById,
-  updateConsentExpiry,
-  bulkRevokeForService,
-  mapToConsentRecord
+  insertConsent as defaultInsertConsent,
+  selectConsent as defaultSelectConsent,
+  updateConsentRevoked as defaultUpdateConsentRevoked,
+  updateConsentRevokedById as defaultUpdateConsentRevokedById,
+  updateConsentExpiry as defaultUpdateConsentExpiry,
+  bulkRevokeForService as defaultBulkRevokeForService,
+  mapToConsentRecord as defaultMapToConsentRecord
 } from './consent-operations';
 
 export type { ConsentRequest, ConsentRecord, ConsentVerification } from './consent-types';
@@ -25,17 +25,44 @@ export {
   hasConsent
 } from './consent-convenience';
 
+// Interface for consent operations (for dependency injection)
+export interface ConsentOperations {
+  insertConsent: typeof defaultInsertConsent;
+  selectConsent: typeof defaultSelectConsent;
+  updateConsentRevoked: typeof defaultUpdateConsentRevoked;
+  updateConsentRevokedById: typeof defaultUpdateConsentRevokedById;
+  updateConsentExpiry: typeof defaultUpdateConsentExpiry;
+  bulkRevokeForService: typeof defaultBulkRevokeForService;
+  mapToConsentRecord: typeof defaultMapToConsentRecord;
+}
+
 export class ConsentManager {
   private supabase: ReturnType<typeof createServerClient>;
   private consentVersion: string;
+  private operations: ConsentOperations;
 
   /**
    * Create ConsentManager instance
    * @param client Optional Supabase client (for testing). If not provided, creates one.
+   * @param operations Optional consent operations (for testing). If not provided, uses defaults.
    */
-  constructor(client?: ReturnType<typeof createServerClient>) {
+  constructor(
+    client?: ReturnType<typeof createServerClient>,
+    operations?: Partial<ConsentOperations>
+  ) {
     this.supabase = client || createServerClient();
     this.consentVersion = process.env.CONSENT_VERSION || '1.0';
+
+    // Use provided operations or defaults
+    this.operations = {
+      insertConsent: operations?.insertConsent || defaultInsertConsent,
+      selectConsent: operations?.selectConsent || defaultSelectConsent,
+      updateConsentRevoked: operations?.updateConsentRevoked || defaultUpdateConsentRevoked,
+      updateConsentRevokedById: operations?.updateConsentRevokedById || defaultUpdateConsentRevokedById,
+      updateConsentExpiry: operations?.updateConsentExpiry || defaultUpdateConsentExpiry,
+      bulkRevokeForService: operations?.bulkRevokeForService || defaultBulkRevokeForService,
+      mapToConsentRecord: operations?.mapToConsentRecord || defaultMapToConsentRecord
+    };
   }
 
   async grant(
@@ -48,7 +75,7 @@ export class ConsentManager {
         throw new Error('At least one permission required');
       }
 
-      const record = await insertConsent(
+      const record = await this.operations.insertConsent(
         this.supabase,
         organizationId,
         userId,
@@ -76,7 +103,7 @@ export class ConsentManager {
     operation: string
   ): Promise<ConsentVerification> {
     try {
-      const data = await selectConsent(this.supabase, organizationId, service, operation);
+      const data = await this.operations.selectConsent(this.supabase, organizationId, service, operation);
 
       if (!data) {
         return {
@@ -94,7 +121,7 @@ export class ConsentManager {
 
       return {
         hasConsent: true,
-        consentRecord: mapToConsentRecord(data)
+        consentRecord: this.operations.mapToConsentRecord(data)
       };
     } catch (error) {
       console.error('[ConsentManager] Verify error:', error);
@@ -108,7 +135,7 @@ export class ConsentManager {
     operation: string
   ): Promise<void> {
     try {
-      await updateConsentRevoked(this.supabase, organizationId, service, operation);
+      await this.operations.updateConsentRevoked(this.supabase, organizationId, service, operation);
 
       console.log('[ConsentManager] Consent revoked:', {
         organizationId,
@@ -123,7 +150,7 @@ export class ConsentManager {
 
   async revokeById(organizationId: string, consentId: string): Promise<void> {
     try {
-      await updateConsentRevokedById(this.supabase, organizationId, consentId);
+      await this.operations.updateConsentRevokedById(this.supabase, organizationId, consentId);
 
       console.log('[ConsentManager] Consent revoked by ID:', {
         organizationId,
@@ -163,7 +190,7 @@ export class ConsentManager {
         throw new Error(`Failed to list consents: ${error.message}`);
       }
 
-      return (data || []).map(mapToConsentRecord);
+      return (data || []).map(d => this.operations.mapToConsentRecord(d));
     } catch (error) {
       console.error('[ConsentManager] List error:', error);
       throw error;
@@ -185,7 +212,7 @@ export class ConsentManager {
         throw new Error(`Failed to get consent: ${error.message}`);
       }
 
-      return mapToConsentRecord(data);
+      return this.operations.mapToConsentRecord(data);
     } catch (error) {
       console.error('[ConsentManager] GetById error:', error);
       throw error;
@@ -214,7 +241,7 @@ export class ConsentManager {
     newExpiresAt: Date
   ): Promise<void> {
     try {
-      await updateConsentExpiry(this.supabase, organizationId, service, operation, newExpiresAt);
+      await this.operations.updateConsentExpiry(this.supabase, organizationId, service, operation, newExpiresAt);
 
       console.log('[ConsentManager] Consent extended:', {
         organizationId,
@@ -253,7 +280,7 @@ export class ConsentManager {
 
   async revokeAllForService(organizationId: string, service: string): Promise<number> {
     try {
-      const count = await bulkRevokeForService(this.supabase, organizationId, service);
+      const count = await this.operations.bulkRevokeForService(this.supabase, organizationId, service);
       console.log(`[ConsentManager] Revoked ${count} consents for service ${service}`);
       return count;
     } catch (error) {

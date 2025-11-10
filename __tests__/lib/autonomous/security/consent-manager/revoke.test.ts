@@ -10,11 +10,21 @@ import { createMockSupabaseClient } from '__tests__/utils/consent/supabase-mock'
 describe('ConsentManager revoke methods', () => {
   let consentManager: ConsentManager;
   let mockSupabaseClient: any;
+  let mockOperations: any;
 
   beforeEach(() => {
     jest.clearAllMocks();
     mockSupabaseClient = createMockSupabaseClient();
-    consentManager = new ConsentManager(mockSupabaseClient);
+
+    // Create mock operations using dependency injection
+    mockOperations = {
+      updateConsentRevoked: jest.fn().mockResolvedValue(undefined),
+      updateConsentRevokedById: jest.fn().mockResolvedValue(undefined),
+      bulkRevokeForService: jest.fn().mockResolvedValue(5) // Returns count of revoked consents
+    };
+
+    // Use dependency injection to provide mock operations
+    consentManager = new ConsentManager(mockSupabaseClient, mockOperations);
   });
 
   describe('revoke()', () => {
@@ -22,9 +32,15 @@ describe('ConsentManager revoke methods', () => {
       expect(typeof consentManager.revoke).toBe('function');
     });
 
-    it('should accept organization, service, and operation parameters', async () => {
-      const promise = consentManager.revoke('org-123', 'woocommerce', 'api_key_generation');
-      expect(promise).toBeInstanceOf(Promise);
+    it('should call updateConsentRevoked with correct parameters', async () => {
+      await consentManager.revoke('org-123', 'woocommerce', 'api_key_generation');
+
+      expect(mockOperations.updateConsentRevoked).toHaveBeenCalledWith(
+        mockSupabaseClient,
+        'org-123',
+        'woocommerce',
+        'api_key_generation'
+      );
     });
   });
 
@@ -33,9 +49,14 @@ describe('ConsentManager revoke methods', () => {
       expect(typeof consentManager.revokeById).toBe('function');
     });
 
-    it('should accept organization and consent ID parameters', async () => {
-      const promise = consentManager.revokeById('org-123', 'consent-123');
-      expect(promise).toBeInstanceOf(Promise);
+    it('should call updateConsentRevokedById with correct parameters', async () => {
+      await consentManager.revokeById('org-123', 'consent-123');
+
+      expect(mockOperations.updateConsentRevokedById).toHaveBeenCalledWith(
+        mockSupabaseClient,
+        'org-123',
+        'consent-123'
+      );
     });
   });
 });

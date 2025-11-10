@@ -1,43 +1,17 @@
 import { jest } from '@jest/globals'
 import OpenAI from 'openai'
 
-// Mock the scraper modules FIRST (jest.mock is hoisted, so this runs before anything else)
-jest.mock('@/lib/scraper-api', () => ({
-  scrapePage: jest.fn().mockResolvedValue({
-    url: 'https://example.com',
-    title: 'Example Page',
-    content: 'This is the page content. It contains multiple sentences. This helps test chunking.',
-    metadata: { description: 'Test description' },
-  }),
-  crawlWebsite: jest.fn().mockResolvedValue('job-123'),
-  checkCrawlStatus: jest.fn().mockResolvedValue({
-    status: 'completed',
-    data: [],
-  }),
-  getHealthStatus: jest.fn().mockResolvedValue({
-    status: 'ok',
-    crawler: 'ready',
-  }),
-}))
+// Create mock functions directly here - these will be used by jest.mock() factories in the main test file
+export const mockScrapePage = jest.fn<any>()
+export const mockCrawlWebsite = jest.fn<any>()
+export const mockCheckCrawlStatus = jest.fn<any>()
+export const mockGetHealthStatus = jest.fn<any>()
+export const mockCrawlWebsiteWithCleanup = jest.fn<any>()
 
-jest.mock('@/lib/scraper-with-cleanup', () => ({
-  crawlWebsiteWithCleanup: jest.fn().mockResolvedValue('job-123'),
-}))
-
-// NOW import the mocked modules to get references to the mocks
-import * as scraperMock from '@/lib/scraper-api'
-import * as cleanupMock from '@/lib/scraper-with-cleanup'
-import * as supabaseMock from '@/lib/supabase-server'
-
-// Export references to the mocks (these are now proper jest.fn() spies)
-export const mockScrapePage = scraperMock.scrapePage as jest.Mock
-export const mockCrawlWebsite = scraperMock.crawlWebsite as jest.Mock
-export const mockCheckCrawlStatus = scraperMock.checkCrawlStatus as jest.Mock
-export const mockGetHealthStatus = scraperMock.getHealthStatus as jest.Mock
-export const mockCrawlWebsiteWithCleanup = cleanupMock.crawlWebsiteWithCleanup as jest.Mock
-
-export const mockCreateServiceRoleClient = supabaseMock.createServiceRoleClient as jest.Mock
-export const mockCreateClient = supabaseMock.createClient as jest.Mock
+// Import supabase module (not mocked in this setup)
+import * as supabaseModule from '@/lib/supabase-server'
+export const mockCreateServiceRoleClient = supabaseModule.createServiceRoleClient as jest.Mock<any>
+export const mockCreateClient = supabaseModule.createClient as jest.Mock<any>
 
 // Mock OpenAI embedding response
 export const mockEmbeddingResponse = {
@@ -82,7 +56,25 @@ export function setupOpenAIMock() {
 }
 
 export function setupDefaultMocks() {
-  // Mock scraper functions are already configured in __mocks__/@/lib/scraper-api.ts
-  // via jest.config.js moduleNameMapper, so no additional setup needed here
-  // The mocks are already set to return the correct values by default
+  // Configure default mock implementations for scraper functions
+  mockScrapePage.mockResolvedValue({
+    url: 'https://example.com',
+    title: 'Example Page',
+    content: 'This is the page content. It contains multiple sentences. This helps test chunking.',
+    metadata: { description: 'Test description' },
+  })
+
+  mockCrawlWebsite.mockResolvedValue('job-123')
+
+  mockCheckCrawlStatus.mockResolvedValue({
+    status: 'completed',
+    data: [],
+  })
+
+  mockGetHealthStatus.mockResolvedValue({
+    status: 'ok',
+    crawler: 'ready',
+  })
+
+  mockCrawlWebsiteWithCleanup.mockResolvedValue('job-123')
 }

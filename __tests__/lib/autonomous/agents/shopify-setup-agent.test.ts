@@ -1,0 +1,403 @@
+/**
+ * Shopify Setup Agent Tests
+ * Tests for autonomous Shopify API credential generation
+ */
+
+import { describe, it, expect, jest, beforeEach } from '@jest/globals';
+import { ShopifySetupAgent, createShopifySetupAgent, ShopifySetupResult } from '@/lib/autonomous/agents/shopify-setup-agent';
+import { WorkflowRegistry } from '@/lib/autonomous/core/workflow-registry';
+import * as credentialVault from '@/lib/autonomous/security/credential-vault';
+
+// Mock dependencies
+jest.mock('@/lib/autonomous/core/workflow-registry');
+jest.mock('@/lib/autonomous/security/credential-vault');
+
+describe('ShopifySetupAgent', () => {
+  let agent: ShopifySetupAgent;
+  const mockStoreUrl = 'https://teststore.myshopify.com';
+  const mockOrganizationId = 'org-123';
+
+  beforeEach(() => {
+    jest.clearAllMocks();
+    agent = new ShopifySetupAgent(mockStoreUrl);
+  });
+
+  describe('constructor', () => {
+    it('should create agent with normalized store URL', () => {
+      expect(agent).toBeInstanceOf(ShopifySetupAgent);
+    });
+
+    it('should normalize store name to myshopify.com URL', () => {
+      const agent1 = new ShopifySetupAgent('teststore');
+      expect(agent1['storeUrl']).toBe('https://teststore.myshopify.com');
+    });
+
+    it('should normalize URL with protocol', () => {
+      const agent2 = new ShopifySetupAgent('http://teststore.myshopify.com');
+      expect(agent2['storeUrl']).toBe('https://teststore.myshopify.com');
+    });
+
+    it('should normalize URL with trailing slash', () => {
+      const agent3 = new ShopifySetupAgent('https://teststore.myshopify.com/');
+      expect(agent3['storeUrl']).toBe('https://teststore.myshopify.com');
+    });
+
+    it('should handle custom domains', () => {
+      const agent4 = new ShopifySetupAgent('https://shop.example.com');
+      expect(agent4['storeUrl']).toBe('https://shop.example.com');
+    });
+  });
+
+  describe('getWorkflow', () => {
+    it('should retrieve workflow from knowledge base', async () => {
+      const mockWorkflow = [
+        {
+          order: 1,
+          intent: 'Navigate to Shopify admin',
+          action: 'goto',
+          target: `${mockStoreUrl}/admin`,
+          expectedResult: 'Login page loads'
+        }
+      ];
+
+      (WorkflowRegistry.get as jest.Mock).mockReturnValue(mockWorkflow);
+
+      const workflow = await agent.getWorkflow();
+
+      expect(WorkflowRegistry.get).toHaveBeenCalledWith('should-complete-shopify-api-credential-generation');
+      expect(workflow).toEqual(mockWorkflow);
+    });
+
+    it('should use fallback workflow when knowledge base unavailable', async () => {
+      (WorkflowRegistry.get as jest.Mock).mockImplementation(() => {
+        throw new Error('Workflow not found');
+      });
+
+      const workflow = await agent.getWorkflow();
+
+      expect(workflow).toBeDefined();
+      expect(Array.isArray(workflow)).toBe(true);
+      expect(workflow.length).toBeGreaterThan(0);
+      expect(workflow[0]).toHaveProperty('intent');
+      expect(workflow[0]).toHaveProperty('action');
+    });
+
+    it('should have complete fallback workflow steps', async () => {
+      (WorkflowRegistry.get as jest.Mock).mockImplementation(() => {
+        throw new Error('Workflow not found');
+      });
+
+      const workflow = await agent.getWorkflow();
+
+      // Verify key steps exist
+      const intents = workflow.map(step => step.intent);
+      expect(intents).toContain('Navigate to Shopify admin login');
+      expect(intents).toContain('Enter admin email');
+      expect(intents).toContain('Enter admin password');
+      expect(intents).toContain('Click Create an app button');
+      expect(intents).toContain('Install app to generate credentials');
+    });
+  });
+
+  describe('getCredentials', () => {
+    it('should retrieve Shopify admin credentials from vault', async () => {
+      const mockEmail = { value: 'admin@teststore.com' };
+      const mockPassword = { value: 'secure-password' };
+
+      (credentialVault.getCredential as jest.Mock)
+        .mockResolvedValueOnce(mockEmail)
+        .mockResolvedValueOnce(mockPassword);
+
+      const credentials = await agent.getCredentials(mockOrganizationId);
+
+      expect(credentialVault.getCredential).toHaveBeenCalledWith(
+        mockOrganizationId,
+        'shopify',
+        'admin_email'
+      );
+      expect(credentialVault.getCredential).toHaveBeenCalledWith(
+        mockOrganizationId,
+        'shopify',
+        'admin_password'
+      );
+
+      expect(credentials).toEqual({
+        adminEmail: 'admin@teststore.com',
+        adminPassword: 'secure-password',
+        storeUrl: mockStoreUrl
+      });
+    });
+
+    it('should throw error when email credential not found', async () => {
+      (credentialVault.getCredential as jest.Mock)
+        .mockResolvedValueOnce(null)
+        .mockResolvedValueOnce({ value: 'password' });
+
+      await expect(agent.getCredentials(mockOrganizationId)).rejects.toThrow(
+        'Shopify admin credentials not found in vault'
+      );
+    });
+
+    it('should throw error when password credential not found', async () => {
+      (credentialVault.getCredential as jest.Mock)
+        .mockResolvedValueOnce({ value: 'email@test.com' })
+        .mockResolvedValueOnce(null);
+
+      await expect(agent.getCredentials(mockOrganizationId)).rejects.toThrow(
+        'Shopify admin credentials not found in vault'
+      );
+    });
+
+    it('should handle vault errors gracefully', async () => {
+      (credentialVault.getCredential as jest.Mock).mockRejectedValue(
+        new Error('Vault connection error')
+      );
+
+      await expect(agent.getCredentials(mockOrganizationId)).rejects.toThrow(
+        'Vault connection error'
+      );
+    });
+  });
+
+  describe('extractResult', () => {
+    let mockPage: any;
+
+    beforeEach(() => {
+      mockPage = {
+        locator: jest.fn().mockReturnThis(),
+        first: jest.fn().mockReturnThis(),
+        inputValue: jest.fn(),
+        textContent: jest.fn(),
+        all: jest.fn(),
+        allTextContents: jest.fn(),
+        getAttribute: jest.fn()
+      };
+    });
+
+    it('should extract access token from readonly input', async () => {
+      mockPage.locator.mockReturnValue({
+        first: jest.fn().mockReturnThis(),
+        inputValue: jest.fn().mockResolvedValue('shpat_1234567890abcdef')
+      });
+
+      const result = await agent.extractResult(mockPage);
+
+      expect(result.success).toBe(true);
+      expect(result.accessToken).toBe('shpat_1234567890abcdef');
+      expect(result.storeUrl).toBe(mockStoreUrl);
+    });
+
+    it('should extract access token from code block', async () => {
+      mockPage.locator.mockImplementation((selector: string) => {
+        if (selector.includes('input[readonly]')) {
+          return {
+            first: jest.fn().mockReturnThis(),
+            inputValue: jest.fn().mockRejectedValue(new Error('Not found'))
+          };
+        }
+        if (selector.includes('code')) {
+          return {
+            first: jest.fn().mockReturnThis(),
+            textContent: jest.fn().mockResolvedValue('Your access token: shpat_abcdef123456')
+          };
+        }
+        return {
+          first: jest.fn().mockReturnThis(),
+          all: jest.fn().mockResolvedValue([])
+        };
+      });
+
+      const result = await agent.extractResult(mockPage);
+
+      expect(result.success).toBe(true);
+      expect(result.accessToken).toBe('shpat_abcdef123456');
+    });
+
+    it('should extract API key and secret for older apps', async () => {
+      mockPage.locator.mockImplementation((selector: string) => {
+        if (selector.includes('shpat_')) {
+          return {
+            first: jest.fn().mockReturnThis(),
+            inputValue: jest.fn().mockRejectedValue(new Error('Not found'))
+          };
+        }
+        if (selector.includes('32')) {
+          return {
+            first: jest.fn().mockReturnThis(),
+            inputValue: jest.fn().mockResolvedValue('a1b2c3d4e5f6g7h8i9j0k1l2m3n4o5p6')
+          };
+        }
+        if (selector.includes('password')) {
+          return {
+            first: jest.fn().mockReturnThis(),
+            inputValue: jest.fn().mockResolvedValue('secret_key_value')
+          };
+        }
+        return {
+          first: jest.fn().mockReturnThis(),
+          all: jest.fn().mockResolvedValue([])
+        };
+      });
+
+      const result = await agent.extractResult(mockPage);
+
+      expect(result.success).toBe(true);
+      expect(result.apiKey).toBe('a1b2c3d4e5f6g7h8i9j0k1l2m3n4o5p6');
+      expect(result.apiSecret).toBe('secret_key_value');
+    });
+
+    it('should extract configured scopes', async () => {
+      const mockScopeElements = [
+        { getAttribute: jest.fn().mockResolvedValue('read_products') },
+        { getAttribute: jest.fn().mockResolvedValue('write_products') },
+        { getAttribute: jest.fn().mockResolvedValue('read_orders') }
+      ];
+
+      mockPage.locator.mockImplementation((selector: string) => {
+        if (selector.includes('shpat_')) {
+          return {
+            first: jest.fn().mockReturnThis(),
+            inputValue: jest.fn().mockResolvedValue('shpat_token123')
+          };
+        }
+        if (selector.includes('checkbox')) {
+          return {
+            all: jest.fn().mockResolvedValue(mockScopeElements)
+          };
+        }
+        return {
+          first: jest.fn().mockReturnThis()
+        };
+      });
+
+      const result = await agent.extractResult(mockPage);
+
+      expect(result.success).toBe(true);
+      expect(result.scopes).toEqual(['read_products', 'write_products', 'read_orders']);
+    });
+
+    it('should extract scopes from text when checkboxes not found', async () => {
+      mockPage.locator.mockImplementation((selector: string) => {
+        if (selector.includes('shpat_')) {
+          return {
+            first: jest.fn().mockReturnThis(),
+            inputValue: jest.fn().mockResolvedValue('shpat_token123')
+          };
+        }
+        if (selector.includes('checkbox')) {
+          return {
+            all: jest.fn().mockResolvedValue([])
+          };
+        }
+        if (selector.includes('read_|write_')) {
+          return {
+            allTextContents: jest.fn().mockResolvedValue([
+              'Permissions: read_products write_products read_orders'
+            ])
+          };
+        }
+        return {
+          first: jest.fn().mockReturnThis()
+        };
+      });
+
+      const result = await agent.extractResult(mockPage);
+
+      expect(result.success).toBe(true);
+      expect(result.scopes).toEqual(['read_products', 'write_products', 'read_orders']);
+    });
+
+    it('should handle extraction errors gracefully', async () => {
+      mockPage.locator.mockImplementation(() => {
+        throw new Error('Page locator failed');
+      });
+
+      const result = await agent.extractResult(mockPage);
+
+      expect(result.success).toBe(false);
+      expect(result.error).toBe('Page locator failed');
+    });
+
+    it('should warn when no credentials found', async () => {
+      const consoleWarnSpy = jest.spyOn(console, 'warn').mockImplementation();
+
+      mockPage.locator.mockImplementation(() => ({
+        first: jest.fn().mockReturnThis(),
+        inputValue: jest.fn().mockRejectedValue(new Error('Not found')),
+        textContent: jest.fn().mockRejectedValue(new Error('Not found')),
+        all: jest.fn().mockResolvedValue([])
+      }));
+
+      const result = await agent.extractResult(mockPage);
+
+      expect(result.success).toBe(true);
+      expect(result.accessToken).toBeUndefined();
+      expect(consoleWarnSpy).toHaveBeenCalledWith(
+        expect.stringContaining('Could not extract API credentials')
+      );
+
+      consoleWarnSpy.mockRestore();
+    });
+  });
+
+  describe('factory function', () => {
+    it('should create ShopifySetupAgent via factory', () => {
+      const agent = createShopifySetupAgent('teststore');
+
+      expect(agent).toBeInstanceOf(ShopifySetupAgent);
+      expect(agent['storeUrl']).toBe('https://teststore.myshopify.com');
+    });
+
+    it('should accept various store URL formats', () => {
+      const agent1 = createShopifySetupAgent('mystore');
+      const agent2 = createShopifySetupAgent('https://mystore.myshopify.com');
+      const agent3 = createShopifySetupAgent('shop.example.com');
+
+      expect(agent1['storeUrl']).toBe('https://mystore.myshopify.com');
+      expect(agent2['storeUrl']).toBe('https://mystore.myshopify.com');
+      expect(agent3['storeUrl']).toBe('https://shop.example.com');
+    });
+  });
+
+  describe('integration scenarios', () => {
+    it('should have workflow compatible with base agent executor', async () => {
+      const mockWorkflow = [
+        {
+          order: 1,
+          intent: 'Test step',
+          action: 'goto',
+          target: mockStoreUrl,
+          expectedResult: 'Success'
+        }
+      ];
+
+      (WorkflowRegistry.get as jest.Mock).mockReturnValue(mockWorkflow);
+
+      const workflow = await agent.getWorkflow();
+
+      // Verify workflow structure matches base agent expectations
+      workflow.forEach(step => {
+        expect(step).toHaveProperty('order');
+        expect(step).toHaveProperty('intent');
+        expect(step).toHaveProperty('action');
+        expect(step).toHaveProperty('expectedResult');
+      });
+    });
+
+    it('should provide complete workflow for credential generation', async () => {
+      (WorkflowRegistry.get as jest.Mock).mockImplementation(() => {
+        throw new Error('Use fallback');
+      });
+
+      const workflow = await agent.getWorkflow();
+
+      // Verify complete workflow coverage
+      expect(workflow.length).toBeGreaterThanOrEqual(10); // Minimum steps for complete flow
+
+      const actions = workflow.map(step => step.action);
+      expect(actions).toContain('goto');   // Navigation
+      expect(actions).toContain('fill');   // Form input
+      expect(actions).toContain('click');  // Button clicks
+    });
+  });
+});

@@ -1,14 +1,10 @@
 import { describe, it, expect, jest, beforeEach } from '@jest/globals';
-
-const mockCreateClient = jest.fn();
-
-jest.mock('@/lib/supabase/server', () => ({
-  createClient: mockCreateClient,
-}));
-
 import { contentBasedRecommendations } from '@/lib/recommendations/content-filter';
+import { createClient } from '@/lib/supabase/server';
 
-describe('Debug Test', () => {
+const mockCreateClient = createClient as jest.MockedFunction<typeof createClient>;
+
+describe('Debug Filter', () => {
   let mockSupabase: any;
 
   beforeEach(() => {
@@ -21,22 +17,34 @@ describe('Debug Test', () => {
       in: jest.fn().mockReturnThis(),
     };
 
-    // Use jest.requireMock to get the mocked module and configure it
     const supabaseModule = jest.requireMock('@/lib/supabase/server');
     supabaseModule.createClient.mockResolvedValue(mockSupabase);
-    
-    console.log('mockCreateClient:', typeof mockCreateClient);
-    console.log('supabaseModule.createClient:', typeof supabaseModule.createClient);
   });
 
-  it('should call Supabase', async () => {
+  it('should find matching products', async () => {
+    // Reference products
     mockSupabase.in.mockResolvedValueOnce({
-      data: [{ product_id: 'ref-1', metadata: { categories: ['cat-1'], tags: [] } }],
+      data: [
+        {
+          product_id: 'ref-1',
+          metadata: { categories: ['cat-1'], tags: [] },
+        },
+      ],
       error: null,
     });
 
+    // All products
     mockSupabase.eq.mockResolvedValueOnce({
-      data: [{ product_id: 'prod-1', metadata: { categories: ['cat-1'], tags: [] } }],
+      data: [
+        {
+          product_id: 'prod-1',
+          metadata: { categories: ['cat-1'], tags: [] },
+        },
+        {
+          product_id: 'prod-2',
+          metadata: { categories: ['cat-2'], tags: [] },
+        },
+      ],
       error: null,
     });
 
@@ -46,8 +54,9 @@ describe('Debug Test', () => {
       limit: 5,
     });
 
-    console.log('mockCreateClient called:', mockCreateClient.mock.calls.length);
-    console.log('mockSupabase.from called:', mockSupabase.from.mock.calls.length);
-    console.log('result:', result);
+    console.log('Result:', JSON.stringify(result, null, 2));
+    console.log('Result length:', result.length);
+    
+    expect(result.length).toBeGreaterThan(0);
   });
 });
