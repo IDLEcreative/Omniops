@@ -9,6 +9,9 @@ import {
   getEnhancedCustomerServicePrompt,
   buildConversationMessages
 } from '@/lib/chat/system-prompts';
+import { getEnhancedCustomerServicePromptVariantA } from '@/lib/chat/system-prompts-variant-a-minimal';
+import { getEnhancedCustomerServicePromptVariantB } from '@/lib/chat/system-prompts-variant-b-balanced';
+import { getEnhancedCustomerServicePromptVariantC } from '@/lib/chat/system-prompts-variant-c-focused';
 import { ConversationMetadataManager } from '@/lib/chat/conversation-metadata';
 
 describe('System Prompts - Basic Features', () => {
@@ -54,6 +57,27 @@ describe('System Prompts - Basic Features', () => {
       expect(prompt).toContain('I don\'t have that information');
       expect(prompt).toContain('compatibility');
       expect(prompt).toContain('technical specifications');
+    });
+
+    test('should include default organization context instructions', () => {
+      const prompt = getCustomerServicePrompt();
+
+      expect(prompt).toContain('🏢 ORGANIZATION CONTEXT');
+      expect(prompt).toContain('You are embedded on a customer\'s own website');
+      expect(prompt).toContain('Never reference other companies');
+    });
+
+    test('should include specific customer profile details when provided', () => {
+      const prompt = getCustomerServicePrompt(null, {
+        businessName: 'Example Hydraulics',
+        domain: 'example.com',
+        businessDescription: 'Industrial hydraulic solutions'
+      });
+
+      expect(prompt).toContain('Example Hydraulics');
+      expect(prompt).toContain('example.com');
+      expect(prompt).toContain('Industrial hydraulic solutions');
+      expect(prompt).toContain('🏢 ORGANIZATION CONTEXT');
     });
   });
 
@@ -260,6 +284,35 @@ describe('System Prompts - Basic Features', () => {
       expect(messages[0].content).toContain('Important Corrections');
       expect(messages[0].content).toContain('old');
       expect(messages[0].content).toContain('new');
+    });
+  });
+
+  describe('Prompt Variants', () => {
+    const profile = {
+      businessName: 'Variant Test Co',
+      domain: 'variant.example',
+      businessDescription: 'Variant testing'
+    };
+
+    test('variant A inherits organization context', () => {
+      const prompt = getEnhancedCustomerServicePromptVariantA(undefined, null, profile);
+
+      expect(prompt).toContain('Variant Test Co');
+      expect(prompt).toContain('variant.example');
+    });
+
+    test('variant B inherits organization context', () => {
+      const prompt = getEnhancedCustomerServicePromptVariantB(undefined, null, profile);
+
+      expect(prompt).toContain('Variant Test Co');
+      expect(prompt).toContain('variant.example');
+    });
+
+    test('variant C inherits organization context', () => {
+      const prompt = getEnhancedCustomerServicePromptVariantC(undefined, null, profile);
+
+      expect(prompt).toContain('Variant Test Co');
+      expect(prompt).toContain('variant.example');
     });
   });
 });

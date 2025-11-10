@@ -187,3 +187,6 @@ mcp-supabase-config.json
 omniops_commits_*.bundle
 omniops_patches_*.patch
 *.bak
+
+# Playwright authentication state
+playwright/.auth/

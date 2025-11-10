@@ -1,15 +1,19 @@
 {
-  "teardownTime": "2025-11-10T15:27:55.995Z",
-  "setupTime": "2025-11-10T15:27:41.565Z",
-  "duration": 14430,
+  "teardownTime": "2025-11-10T18:43:42.247Z",
+  "setupTime": "2025-11-10T18:43:40.729Z",
+  "duration": 1518,
   "testResultsPath": "/Users/jamesguy/Omniops/test-results",
   "generatedFiles": [
+    "advanced-features-multi-la-0ae7f-ediately-on-language-change-chromium",
+    "advanced-features-multi-la-0ae7f-ediately-on-language-change-firefox",
+    "advanced-features-multi-la-0ae7f-ediately-on-language-change-webkit",
+    "advanced-features-multi-la-303d4-lish-to-Spanish-translation-chromium",
+    "advanced-features-multi-la-303d4-lish-to-Spanish-translation-firefox",
+    "advanced-features-multi-la-303d4-lish-to-Spanish-translation-webkit",
     "browser-availability.json",
-    "chat-widget-integration-Ch-d2577-ssage-with-session-metadata-chromium",
     "screenshots",
     "setup-timestamp.txt",
     "traces",
-    "videos",
-    "widget-not-expanded-1762788475452.png"
+    "videos"
   ]
 }

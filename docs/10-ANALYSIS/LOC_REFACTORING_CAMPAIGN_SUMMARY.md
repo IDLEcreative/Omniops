@@ -110,7 +110,7 @@ The LOC Refactoring Campaign was a systematic effort to bring the Omniops codeba
 - **Artifacts:** `docs/10-ANALYSIS/ANALYSIS_LOC_REFACTORING_WAVE_10_PLAN.md`, `.claude/agents/loc-*.md`  
 - **Pods:** Integration/Server, Playwright/UI, API/Commerce, Library/Intelligence, Tooling/Utilities  
 - **Goal:** Reduce every violation to ≤200 LOC and shrink warnings list <10 files  
-- **Progress (2025-11-11):** Pod I split `__tests__/integration/test-hallucination-prevention.ts`, `__tests__/integration/analytics/export-integration.test.ts`, `servers/content/__tests__/getCompletePageDetails.test.ts`, and `servers/commerce/__tests__/lookupOrder.test.ts` into modular suites (shared helpers + focused spec files). Pod P refactored `__tests__/playwright/advanced-features/automated-follow-ups.spec.ts` into an orchestrator + 5 focused specs with reusable helpers. Latest compliance run shows **64** remaining violations and 31 warnings.
+- **Progress (2025-11-11):** Pod I split `__tests__/integration/test-hallucination-prevention.ts`, `__tests__/integration/analytics/export-integration.test.ts`, `servers/content/__tests__/getCompletePageDetails.test.ts`, `servers/commerce/__tests__/lookupOrder.test.ts`, and `servers/search/__tests__/searchByCategory.test.ts` into modular suites (shared helpers + focused spec files). Pod UI/Widget refactored `__tests__/components/ChatWidget/hooks/useParentCommunication-messages.test.ts` into an orchestrator + focused specs powered by a shared harness. Pod P refactored `__tests__/playwright/advanced-features/automated-follow-ups.spec.ts` earlier. Latest compliance run shows **60** remaining violations and 31 warnings.
 
 ---
 

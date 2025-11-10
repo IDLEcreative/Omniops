@@ -71,10 +71,19 @@ const playwrightConfig = {
   
   // Browser projects configuration
   projects: [
+    // Setup project - runs authentication before other tests
+    {
+      name: 'setup',
+      testMatch: /.*\.setup\.ts/,
+    },
+
+    // Main test projects - use authentication state
     {
       name: 'chromium',
-      use: { 
+      use: {
         ...devices['Desktop Chrome'],
+        // Use saved authentication state for dashboard tests
+        storageState: 'playwright/.auth/user.json',
         // Chromium-specific settings for web scraping
         launchOptions: {
           args: [
@@ -85,20 +94,30 @@ const playwrightConfig = {
           ]
         }
       },
+      // Run setup before chromium tests
+      dependencies: ['setup'],
     },
     {
       name: 'firefox',
-      use: { 
+      use: {
         ...devices['Desktop Firefox'],
+        // Use saved authentication state for dashboard tests
+        storageState: 'playwright/.auth/user.json',
         // Firefox-specific settings
       },
+      // Run setup before firefox tests
+      dependencies: ['setup'],
     },
     {
       name: 'webkit',
-      use: { 
+      use: {
         ...devices['Desktop Safari'],
+        // Use saved authentication state for dashboard tests
+        storageState: 'playwright/.auth/user.json',
         // WebKit-specific settings
       },
+      // Run setup before webkit tests
+      dependencies: ['setup'],
     }
   ]
 };
