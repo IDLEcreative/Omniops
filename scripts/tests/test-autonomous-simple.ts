@@ -170,8 +170,8 @@ async function main() {
 
     console.log('\n📝 Next Steps:');
     console.log('   1. Create storage bucket: autonomous-screenshots');
-    console.log('   2. Set ANTHROPIC_API_KEY in .env.local');
-    console.log('   3. Test with real WooCommerce store');
+    console.log('   2. Test with real WooCommerce store (OpenAI key already configured!)');
+    console.log('   3. Deploy to production');
 
   } catch (error) {
     console.error('\n❌ Test Failed:');

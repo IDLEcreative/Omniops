@@ -1,46 +1,50 @@
 /**
  * AI Command Generation for Autonomous Agents
+ * Uses OpenAI GPT-4 Vision to analyze screenshots and generate Playwright commands
+ *
  * @module lib/autonomous/core/ai-commander
  */
 
-import Anthropic from '@anthropic-ai/sdk';
+import OpenAI from 'openai';
 import type { TaskStep } from './base-agent-types';
 
 export class AICommander {
-  private anthropic: Anthropic;
+  private openai: OpenAI;
 
   constructor(apiKey: string) {
-    this.anthropic = new Anthropic({ apiKey });
+    this.openai = new OpenAI({ apiKey });
   }
 
   /**
-   * Get AI command for a step using Anthropic Computer Use
+   * Get AI command for a step using OpenAI GPT-4 Vision
    */
   async getCommand(
     step: TaskStep,
     screenshot: string,
     pageUrl: string
   ): Promise<string> {
-    const response = await this.anthropic.messages.create({
-      model: 'claude-sonnet-4-5-20250929',
-      max_tokens: 2048,
-      messages: [{
-        role: 'user',
-        content: [
-          {
-            type: 'image',
-            source: {
-              type: 'base64',
-              media_type: 'image/png',
-              data: screenshot
+    const response = await this.openai.chat.completions.create({
+      model: 'gpt-4-vision-preview',
+      max_tokens: 500,
+      messages: [
+        {
+          role: 'user',
+          content: [
+            {
+              type: 'text',
+              text: this.buildPrompt(step, pageUrl)
+            },
+            {
+              type: 'image_url',
+              image_url: {
+                url: `data:image/png;base64,${screenshot}`,
+                detail: 'high'
+              }
             }
-          },
-          {
-            type: 'text',
-            text: this.buildPrompt(step, pageUrl)
-          }
-        ]
-      }]
+          ]
+        }
+      ],
+      temperature: 0.1 // Low temperature for consistent, deterministic commands
     });
 
     return this.extractCommand(response);
@@ -71,11 +75,8 @@ Examples:
 Your command:`;
   }
 
-  private extractCommand(response: Anthropic.Message): string {
-    const textContent = response.content
-      .filter(block => block.type === 'text')
-      .map(block => (block as any).text)
-      .join('');
+  private extractCommand(response: OpenAI.Chat.Completions.ChatCompletion): string {
+    const textContent = response.choices[0]?.message?.content || '';
 
     // Extract command from code blocks
     const codeMatch = textContent.match(/```(?:typescript|javascript)?\n?(.*?)\n?```/s);

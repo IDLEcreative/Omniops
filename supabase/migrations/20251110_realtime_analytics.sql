@@ -44,11 +44,6 @@ CREATE INDEX IF NOT EXISTS idx_analytics_events_domain
   ON analytics_events(domain_id)
   WHERE domain_id IS NOT NULL;
 
--- Index for recent events (last 5 minutes) - used for active sessions
-CREATE INDEX IF NOT EXISTS idx_analytics_events_recent
-  ON analytics_events(created_at DESC)
-  WHERE created_at > (NOW() - INTERVAL '5 minutes');
-
 -- GIN index for JSONB data queries
 CREATE INDEX IF NOT EXISTS idx_analytics_events_data_gin
   ON analytics_events USING gin(data);

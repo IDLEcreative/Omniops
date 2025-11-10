@@ -86,9 +86,9 @@ All tests passing:
 - ✅ `NEXT_PUBLIC_SUPABASE_URL`
 - ✅ `SUPABASE_SERVICE_ROLE_KEY`
 - ✅ `ENCRYPTION_KEY` (32 characters)
+- ✅ `OPENAI_API_KEY` - Used for AI vision (screenshot analysis)
 
 **Required (To Be Added):**
-- ⏳ `ANTHROPIC_API_KEY` - For autonomous AI agents
 - ⏳ Storage bucket: `autonomous-screenshots`
 
 ---
@@ -97,13 +97,7 @@ All tests passing:
 
 ### Immediate (Required for Production)
 
-1. **Add Anthropic API Key**
-   ```bash
-   # Add to .env.local
-   ANTHROPIC_API_KEY=sk-ant-your-key-here
-   ```
-
-2. **Create Storage Bucket**
+1. **Create Storage Bucket**
    - Go to Supabase Dashboard → Storage
    - Create bucket: `autonomous-screenshots`
    - Make it public (screenshots need to be viewable)
@@ -215,8 +209,7 @@ All tests passing:
 3. ⏳ **API Endpoints** - Initiate, status, consent management
 
 **Waiting on:**
-- `ANTHROPIC_API_KEY` environment variable
-- `autonomous-screenshots` storage bucket
+- `autonomous-screenshots` storage bucket only!
 
 ---
 
@@ -235,5 +228,5 @@ All tests passing:
 ---
 
 **Status:** ✅ DEPLOYED AND TESTED
-**Next Action:** Add `ANTHROPIC_API_KEY` and create storage bucket
-**Estimated Time to Production:** 1 hour (environment setup)
+**Next Action:** Create storage bucket (that's it!)
+**Estimated Time to Production:** 5 minutes

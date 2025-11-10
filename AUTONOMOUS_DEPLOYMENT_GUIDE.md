@@ -72,21 +72,23 @@ WHERE table_name IN (
 
 ## 🔐 Step 2: Set Up Environment Variables
 
-Add to `.env.local`:
+Verify these are in `.env.local`:
 
 ```bash
-# Anthropic AI (for autonomous execution)
-ANTHROPIC_API_KEY=sk-ant-...
+# OpenAI API (already configured - used for AI vision)
+OPENAI_API_KEY=sk-proj-...
 
-# Encryption (generate with: openssl rand -base64 32)
+# Encryption (already configured)
 ENCRYPTION_KEY=your-32-byte-base64-key-here
 
-# Consent tracking
+# Consent tracking (optional)
 CONSENT_VERSION=1.0
 
 # Optional: Key rotation tracking
 ENCRYPTION_KEY_VERSION=v1
 ```
+
+**Note:** The system now uses your existing OpenAI API key instead of requiring a separate Anthropic key!
 
 ---
 
@@ -297,12 +299,15 @@ console.log('Failure Reasons:', stats.failureReasons);
 
 ## 🔧 Troubleshooting
 
-### Issue: "ANTHROPIC_API_KEY environment variable required"
+### Issue: "OPENAI_API_KEY environment variable required"
 
 **Solution:**
 ```bash
-# Get API key from: https://console.anthropic.com/
-export ANTHROPIC_API_KEY=sk-ant-...
+# Verify your OpenAI key is set
+echo $OPENAI_API_KEY
+
+# Should show: sk-proj-...
+# If not set, add to .env.local
 ```
 
 ### Issue: "ENCRYPTION_KEY environment variable required"

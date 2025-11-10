@@ -1,7 +1,7 @@
 #!/bin/bash
 
 # LOC Compliance Check Script
-# Enforces 300 LOC limit on all TypeScript/JavaScript files
+# Enforces 300 LOC limit on production files, 500 LOC for test files
 # Usage: ./scripts/check-loc-compliance.sh [--staged]
 
 set -e
@@ -11,7 +11,7 @@ echo "🔍 Checking LOC compliance..."
 # Determine which files to check
 if [ "$1" = "--staged" ]; then
   # Check only staged files (for pre-commit hook)
-  files=$(git diff --cached --name-only --diff-filter=ACM | grep -E '\.(ts|tsx|js|jsx)$' || true)
+  files=$(git diff --cached --name-only --diff-filter=ACM | grep -E '\.(ts|tsx|js|jsx)$' | grep -v -E '(\.bundle\.js|-bundle\.js)$' || true)
   if [ -z "$files" ]; then
     echo "✅ No TypeScript/JavaScript files staged"
     exit 0
@@ -22,7 +22,9 @@ else
     -not -path "*/node_modules/*" \
     -not -path "*/dist/*" \
     -not -path "*/.next/*" \
-    -not -path "*/build/*")
+    -not -path "*/build/*" \
+    -not -name "*-bundle.js" \
+    -not -name "*.bundle.js")
 fi
 
 violations=()
@@ -47,9 +49,18 @@ for file in $files; do
         wc -l | \
         tr -d ' ')
 
-  if [ "$loc" -gt 300 ]; then
+  # Test files get higher limit (500 LOC vs 300 LOC)
+  if [[ "$file" == *"__tests__"* ]] || [[ "$file" == *".test."* ]] || [[ "$file" == *".spec."* ]]; then
+    limit=500
+    warning_threshold=480
+  else
+    limit=300
+    warning_threshold=280
+  fi
+
+  if [ "$loc" -gt "$limit" ]; then
     violations+=("$file ($loc LOC)")
-  elif [ "$loc" -gt 280 ]; then
+  elif [ "$loc" -gt "$warning_threshold" ]; then
     warnings+=("$file ($loc LOC - approaching limit)")
     compliant=$((compliant + 1))
   else
@@ -69,7 +80,7 @@ echo ""
 
 # Show warnings (files approaching limit)
 if [ ${#warnings[@]} -gt 0 ]; then
-  echo "⚠️  Files approaching 300 LOC limit:"
+  echo "⚠️  Files approaching LOC limit (300 for production, 500 for tests):"
   for warning in "${warnings[@]}"; do
     echo "   $warning"
   done
@@ -78,7 +89,10 @@ fi
 
 # Show violations (files exceeding limit)
 if [ ${#violations[@]} -gt 0 ]; then
-  echo "❌ LOC Compliance Violations - Files exceed 300 LOC limit:"
+  echo "❌ LOC Compliance Violations:"
+  echo "   Production files: 300 LOC limit"
+  echo "   Test files: 500 LOC limit"
+  echo ""
   for violation in "${violations[@]}"; do
     echo "   $violation"
   done

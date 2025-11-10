@@ -129,7 +129,7 @@ export function useChatState({
   };
 
   // Parent window communication hook
-  useParentCommunication({
+  const parentComm = useParentCommunication({
     conversationId: session.conversationId,
     isOpen,
     sessionId: session.sessionId,
@@ -258,6 +258,10 @@ export function useChatState({
     privacySettings: privacy.privacySettings,
     handleConsent: privacy.handleConsent,
     privacyError: privacy.error,
+    // From parent communication hook
+    parentCommError: parentComm.error,
+    messagesReceived: parentComm.messagesReceived,
+    lastMessageType: parentComm.lastMessageType,
     // Local state
     isOpen,
     setIsOpen,
