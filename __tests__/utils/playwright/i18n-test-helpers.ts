@@ -92,19 +92,37 @@ export async function verifyTextLanguage(
  * 1. Iframe element to be attached to DOM
  * 2. Iframe content (srcdoc) to load
  * 3. Widget bundle to execute and initialize
- * 4. Widget to send 'ready' message to parent
+ * 4. Widget to signal ready state via data-ready attribute
+ * 5. Widget to send 'ready' message to parent
  */
 export async function waitForWidgetIframe(page: Page, timeout = 30000): Promise<void> {
+  console.log('📍 Waiting for widget iframe to load...');
+
   const iframeLocator = page.locator('iframe#chat-widget-iframe');
   await iframeLocator.waitFor({ state: 'attached', timeout });
 
+  console.log('✅ Widget iframe attached');
+
   // Wait for iframe to have content loaded (srcdoc rendered)
-  await page.waitForTimeout(1000);
+  await page.waitForTimeout(500);
 
   // Wait for widget bundle to initialize by checking for widget-root element
   const iframe = page.frameLocator('iframe#chat-widget-iframe');
   const widgetRoot = iframe.locator('#widget-root');
   await widgetRoot.waitFor({ state: 'attached', timeout: timeout - 2000 });
+
+  console.log('✅ Widget root element attached');
+
+  // NEW: Wait for widget ready signal via data-ready attribute
+  await page.waitForFunction(
+    () => {
+      const iframe = document.getElementById('chat-widget-iframe');
+      return iframe?.getAttribute('data-ready') === 'true';
+    },
+    { timeout: timeout }
+  );
+
+  console.log('✅ Widget ready signal received (data-ready=true)');
 
   // Wait for widget to signal it's ready by listening for 'ready' postMessage
   // This ensures the widget is fully initialized and interactive
@@ -125,37 +143,54 @@ export async function waitForWidgetIframe(page: Page, timeout = 30000): Promise<
       };
       window.addEventListener('message', handleReady);
 
-      // Generous fallback timeout - if widget is interactive but ready wasn't received,
-      // continue anyway after 5s
+      // Reduced fallback timeout since we already verified data-ready attribute
       setTimeout(() => {
         if (!resolved) {
           resolved = true;
           window.removeEventListener('message', handleReady);
           resolve();
         }
-      }, 5000);
+      }, 3000);
     });
   });
 
   await readyPromise;
+
+  console.log('✅ Widget initialization complete');
 }
 
 /**
  * Open chat widget programmatically and wait for it to be ready
- * Increased default delay to 3s to handle parallel test execution
+ * Reduced default delay to 1s since we now have reliable ready signals
  */
-export async function openWidget(page: Page, delayMs = 3000): Promise<void> {
+export async function openWidget(page: Page, delayMs = 1000): Promise<void> {
+  console.log('📍 Opening widget...');
+
   await page.evaluate(() => {
     (window as any).ChatWidget?.open();
   });
+
+  // Wait for widget to be visible
+  const iframe = page.locator('iframe#chat-widget-iframe');
+  await iframe.waitFor({ state: 'visible', timeout: 10000 });
+
+  console.log('✅ Widget iframe visible');
+
+  // Wait for pointer-events to be enabled (widget fully open)
+  await page.waitForFunction(
+    () => {
+      const iframe = document.getElementById('chat-widget-iframe') as HTMLIFrameElement;
+      return iframe?.style.pointerEvents === 'auto';
+    },
+    { timeout: 10000 }
+  );
+
+  console.log('✅ Widget pointer-events enabled');
+
+  // Small delay for any animations to complete
   await page.waitForTimeout(delayMs);
 
-  // Verify widget is actually open by checking iframe pointer-events
-  const iframe = page.locator('iframe#chat-widget-iframe');
-  await iframe.evaluate((el: HTMLIFrameElement) => {
-    // Widget is considered "open" when pointer-events is 'auto'
-    return el.style.pointerEvents === 'auto';
-  });
+  console.log('✅ Widget fully opened and ready for interaction');
 }
 
 /**
@@ -247,9 +282,41 @@ export function hasSpanishIndicators(text: string | null | undefined): boolean {
 }
 
 /**
- * Reload page and wait for widget
+ * Reload page and wait for widget to be fully initialized
+ * This is critical for language switching workflows
  */
 export async function reloadAndWaitForWidget(page: Page): Promise<void> {
   await page.reload({ waitUntil: 'networkidle' });
+
+  // Wait for widget iframe to load and be ready
+  await waitForWidgetIframe(page, 30000);
+
+  // Additional stabilization time for widget to fully render
   await page.waitForTimeout(2000);
+
+  console.log('   ✅ Page reloaded and widget ready');
+}
+
+/**
+ * Switch language with full widget reload and stabilization
+ * This is the recommended way to change languages in E2E tests
+ */
+export async function switchLanguage(page: Page, language: string): Promise<void> {
+  console.log(`   📍 Switching to language: ${language}`);
+
+  // Set language in localStorage
+  await setLanguage(page, language);
+
+  // Apply RTL if Arabic
+  const rtl = language === 'ar';
+  await setRTLDirection(page, rtl);
+
+  // Reload page and wait for widget to be ready
+  await page.reload({ waitUntil: 'networkidle' });
+  await waitForWidgetIframe(page, 30000);
+
+  // Additional stabilization time
+  await page.waitForTimeout(2000);
+
+  console.log(`   ✅ Language switched to ${language}, widget reloaded and ready`);
 }

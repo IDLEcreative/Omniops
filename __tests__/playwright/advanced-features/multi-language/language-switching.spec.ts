@@ -19,6 +19,7 @@ import {
   waitForWidgetIframe,
   openWidget,
   getWidgetIframe,
+  getWidgetInputField,
 } from '../../../utils/playwright/i18n-test-helpers';
 
 const BASE_URL = process.env.BASE_URL || 'http://localhost:3000';
@@ -29,13 +30,19 @@ test.describe('Language Switching with Active Conversation', () => {
 
     // Step 1: Start conversation in English
     console.log('📍 Step 1: Start conversation in English');
-    await page.goto(`${BASE_URL}/embed`, { waitUntil: 'networkidle' });
-    await page.waitForTimeout(2000);
+    await page.goto(`${BASE_URL}/test-widget`, { waitUntil: 'networkidle' });
 
-    const inputField = page.locator('input[type="text"], textarea').first();
+    // Wait for widget iframe to load
+    await waitForWidgetIframe(page);
+    await openWidget(page);
+
+    // Get widget iframe and input field
+    const iframe = getWidgetIframe(page);
+    const inputField = await getWidgetInputField(iframe);
+
     await inputField.fill('Hello, what products do you have?');
 
-    const sendButton = page.locator('button[type="submit"], button:has-text("Send")').first();
+    const sendButton = iframe.locator('button[type="submit"], button:has-text("Send")').first();
     await sendButton.click();
     console.log('✅ English message sent');
 
@@ -44,7 +51,7 @@ test.describe('Language Switching with Active Conversation', () => {
 
     // Step 2: Count messages before language change
     console.log('📍 Step 2: Count messages before language change');
-    const messagesBefore = await getMessageCount(page);
+    const messagesBefore = await iframe.locator('[role="log"] > div, .message-container > div').count();
     console.log(`   Messages before switch: ${messagesBefore}`);
 
     // Step 3: Switch to Spanish mid-conversation
@@ -53,9 +60,13 @@ test.describe('Language Switching with Active Conversation', () => {
     await reloadAndWaitForWidget(page);
     console.log('✅ Switched to Spanish');
 
+    // Re-open widget after reload
+    await openWidget(page);
+
     // Step 4: Verify conversation history preserved
     console.log('📍 Step 4: Verify conversation history preserved');
-    const messagesAfter = await getMessageCount(page);
+    const iframeAfterReload = getWidgetIframe(page);
+    const messagesAfter = await iframeAfterReload.locator('[role="log"] > div, .message-container > div').count();
     console.log(`   Messages after switch: ${messagesAfter}`);
 
     if (messagesAfter >= messagesBefore) {
@@ -66,10 +77,10 @@ test.describe('Language Switching with Active Conversation', () => {
 
     // Step 5: Continue conversation in Spanish
     console.log('📍 Step 5: Continue conversation in Spanish');
-    const spanishInput = page.locator('input[type="text"], textarea').first();
+    const spanishInput = await getWidgetInputField(iframeAfterReload);
     await spanishInput.fill('Muéstrame los productos más populares');
 
-    const spanishSendButton = page.locator('button[type="submit"], button:has-text("Enviar"), button:has-text("Send")').first();
+    const spanishSendButton = iframeAfterReload.locator('button[type="submit"], button:has-text("Enviar"), button:has-text("Send")').first();
     await spanishSendButton.click();
     console.log('✅ Spanish message sent in ongoing conversation');
 
@@ -77,7 +88,7 @@ test.describe('Language Switching with Active Conversation', () => {
     await page.waitForTimeout(5000);
     console.log('📍 Step 6: Verify mixed language conversation works');
 
-    const finalMessageCount = await getMessageCount(page);
+    const finalMessageCount = await iframeAfterReload.locator('[role="log"] > div, .message-container > div').count();
     console.log(`   Final message count: ${finalMessageCount}`);
 
     if (finalMessageCount > messagesAfter) {

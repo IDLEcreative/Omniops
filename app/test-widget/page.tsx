@@ -6,8 +6,11 @@
  * Used by E2E tests for translation and other widget functionality.
  */
 
-import { useEffect, useState } from 'react';
+import { useEffect, useState, useRef } from 'react';
 import Script from 'next/script';
+
+// Stable cache buster - only set once on mount
+const CACHE_VERSION = Date.now();
 
 export default function TestWidgetPage() {
   const [currentLanguage, setCurrentLanguage] = useState<string>('en');
@@ -133,8 +136,16 @@ export default function TestWidgetPage() {
         </p>
       </div>
 
-      <Script src="/widget-bundle.js" strategy="afterInteractive" />
-      <Script src="/embed.js" strategy="afterInteractive" />
+      <Script
+        src={`/widget-bundle.js?v=${CACHE_VERSION}`}
+        strategy="afterInteractive"
+        onLoad={() => console.log('[Test Page] widget-bundle.js loaded')}
+      />
+      <Script
+        src={`/embed.js?v=${CACHE_VERSION}`}
+        strategy="afterInteractive"
+        onLoad={() => console.log('[Test Page] embed.js loaded')}
+      />
     </div>
   );
 }

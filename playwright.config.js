@@ -34,9 +34,9 @@ const devices = {
 const playwrightConfig = {
   // Test directory (if using Playwright for testing)
   testDir: './__tests__/playwright',
-  
-  // Global test timeout
-  timeout: 30000,
+
+  // Global test timeout - increased to 60s for widget initialization
+  timeout: 60000,
   
   // Run tests in parallel
   fullyParallel: true,

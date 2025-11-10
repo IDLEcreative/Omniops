@@ -16,6 +16,13 @@ import { loadRemoteConfig, loadWidgetBundle, loadConfigByAppId } from './config-
 
 async function initialize() {
   console.log('[Chat Widget] Initialize function called');
+
+  // Prevent concurrent initialization attempts
+  if ((window as any)._widgetInitializing) {
+    logDebug('Widget initialization already in progress, skipping');
+    return;
+  }
+
   try {
     const userConfig = window.ChatWidgetConfig || {};
     console.log('[Chat Widget] User config:', userConfig);
@@ -28,7 +35,7 @@ async function initialize() {
     }
     console.log('[Chat Widget] serverUrl configured:', config.serverUrl);
 
-    // Check if widget exists - but allow re-initialization if config changed
+    // Check if widget exists - allow re-initialization only if config changed
     const existingIframe = document.getElementById('chat-widget-iframe');
     if (existingIframe) {
       // Compare current config with previously stored config
@@ -40,16 +47,21 @@ async function initialize() {
       });
       const lastConfigStr = (window as any)._lastWidgetConfig;
 
-      // If config is identical, skip re-initialization (prevents duplicate widgets)
-      if (lastConfigStr === currentConfigStr) {
+      // Only reinitialize if config actually changed
+      if (currentConfigStr !== lastConfigStr) {
+        console.log('[Widget] Config changed, cleaning up previous instance');
+        existingIframe.remove();
+        delete (window as any)._lastWidgetConfig;
+        delete (window as any)._widgetInitializing;
+        // Continue with initialization below
+      } else {
         logDebug('Widget already loaded with identical config, skipping initialization');
         return;
       }
-
-      // Config changed (e.g., language preference changed), remove old iframe and reinitialize
-      logDebug('Widget config changed, removing old iframe and reinitializing');
-      existingIframe.remove();
     }
+
+    // Mark initialization as in progress
+    (window as any)._widgetInitializing = true;
 
     // Get stored language preference (used for config comparison and auto-detection)
     let storedLanguage = localStorage.getItem('omniops_ui_language');
@@ -162,14 +174,41 @@ async function initialize() {
           },
           config.serverUrl || window.location.origin
         );
+
+        // Mark iframe as ready after initialization message sent
+        // This provides a reliable signal for E2E tests
+        iframe.setAttribute('data-ready', 'true');
+
+        // Emit ready event for any listeners
+        window.dispatchEvent(new CustomEvent('widget-ready', {
+          detail: { language: storedLanguage || 'en' }
+        }));
+
+        if (config.debug || (window as any).ChatWidgetDebug) {
+          console.log('[Chat Widget] Initialization complete, widget ready for interaction');
+        }
+
+        // Mark initialization as complete
+        (window as any)._widgetInitializing = false;
       }, 100);
     };
 
     registerMessageHandlers({ iframe, privacyPrefs, config });
     registerApi(config, iframe, privacyPrefs, WIDGET_VERSION);
     scheduleConversationCleanup(config, iframe, CLEANUP_KEY);
+
+    // Listen for page reload - clear ready flag so widget reinitializes
+    window.addEventListener('beforeunload', () => {
+      const iframeEl = document.getElementById('chat-widget-iframe');
+      if (iframeEl) {
+        iframeEl.removeAttribute('data-ready');
+      }
+      delete (window as any)._lastWidgetConfig;
+      delete (window as any)._widgetInitializing;
+    });
   } catch (error) {
     logError('Failed to initialize chat widget', error);
+    (window as any)._widgetInitializing = false; // Reset on error
   }
 }
 

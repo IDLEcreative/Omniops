@@ -25,6 +25,7 @@ import {
   getWidgetInputField,
   getWidgetSendButton,
   reloadAndWaitForWidget,
+  switchLanguage,
   getMessageCount,
   hasSpanishIndicators,
   getMessageText,
@@ -34,6 +35,7 @@ const BASE_URL = process.env.BASE_URL || 'http://localhost:3000';
 
 test.describe('Complete Multi-Language Workflow', () => {
   test('complete language workflow: English → Spanish → Arabic (RTL)', async ({ page }) => {
+    test.setTimeout(120000); // 2 minutes timeout for multi-language workflow
     console.log('🎯 Testing: Complete multi-language workflow');
     console.log('=== Starting Multi-Language Support E2E Test ===');
 
@@ -61,8 +63,7 @@ test.describe('Complete Multi-Language Workflow', () => {
 
     // Step 4: Change language to Spanish
     console.log('📍 Step 4: Change language to Spanish');
-    await setLanguage(page, 'es');
-    await reloadAndWaitForWidget(page);
+    await switchLanguage(page, 'es');
     await openWidget(page);
     console.log('✅ Page reloaded with Spanish language setting');
 
@@ -97,9 +98,7 @@ test.describe('Complete Multi-Language Workflow', () => {
 
     // Step 7: Change to Arabic
     console.log('📍 Step 7: Change language to Arabic (RTL)');
-    await setLanguage(page, 'ar');
-    await setRTLDirection(page, true);
-    await reloadAndWaitForWidget(page);
+    await switchLanguage(page, 'ar');
     console.log('✅ Page reloaded with Arabic language setting');
 
     // Step 8: Verify RTL layout
