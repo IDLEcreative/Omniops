@@ -9,6 +9,7 @@ import {
   lookupDomain,
   loadWidgetConfig,
   getOrCreateConversation,
+  updateConversationMetadata,
   saveUserMessage,
   getConversationHistory
 } from './conversation-manager';
@@ -35,12 +36,13 @@ export async function performParallelConfigAndConversation(
   conversationId: string | undefined,
   sessionId: string,
   supabase: SupabaseClient,
-  telemetry: ChatTelemetry | null
+  telemetry: ChatTelemetry | null,
+  sessionMetadata?: any
 ) {
   const parallelStart = performance.now();
   const results = await Promise.allSettled([
     loadWidgetConfig(domainId, supabase),
-    getOrCreateConversation(conversationId, sessionId, domainId, supabase)
+    getOrCreateConversation(conversationId, sessionId, domainId, supabase, sessionMetadata)
   ]);
   const parallelTime = performance.now() - parallelStart;
 

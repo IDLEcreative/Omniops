@@ -7,7 +7,7 @@ import { CartRecoveryTable } from '@/components/dashboard/analytics/CartRecovery
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { RefreshCw, Calendar, DollarSign, ShoppingCart, TrendingUp } from 'lucide-react';
-import { useToast } from '@/hooks/use-toast';
+import { useToast } from '@/components/ui/use-toast';
 import type { FunnelMetrics, FunnelTrend, ConversationFunnel } from '@/types/purchase-attribution';
 
 export default function FunnelDashboardPage() {

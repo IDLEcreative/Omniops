@@ -3,7 +3,7 @@
  * Main orchestrator for content refresh operations
  */
 
-import { createClient } from '@/lib/supabase-server';
+import { createServiceRoleClient } from '@/lib/supabase-server';
 import {
   findSitemaps,
   findUrlsInRobots,
@@ -49,7 +49,7 @@ export async function discoverNewPages(
   domainId: string,
   baseUrl: string
 ): Promise<string[]> {
-  const supabase = await createClient();
+  const supabase = await createServiceRoleClient();
   const newPages: string[] = [];
 
   try {
@@ -63,7 +63,7 @@ export async function discoverNewPages(
     }
 
     const { data: existingPages } = await supabase
-      .from('website_content')
+      .from('scraped_pages')
       .select('url')
       .eq('domain_id', domainId);
 

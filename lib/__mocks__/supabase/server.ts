@@ -15,6 +15,15 @@ export const createClient = jest.fn().mockResolvedValue({
     getSession: jest.fn().mockResolvedValue({ data: { session: null }, error: null }),
   },
   rpc: jest.fn().mockResolvedValue({ data: [], error: null }),
+  // Supabase Realtime methods
+  channel: jest.fn().mockReturnValue({
+    send: jest.fn().mockResolvedValue('ok'),
+    subscribe: jest.fn().mockReturnThis(),
+    unsubscribe: jest.fn().mockReturnValue('ok'),
+    on: jest.fn().mockReturnThis(),
+  }),
+  removeChannel: jest.fn().mockResolvedValue('ok'),
+  removeAllChannels: jest.fn().mockResolvedValue([]),
 })
 
 export const createServiceRoleClient = jest.fn().mockResolvedValue({
@@ -36,4 +45,13 @@ export const createServiceRoleClient = jest.fn().mockResolvedValue({
     },
   },
   rpc: jest.fn().mockResolvedValue({ data: [], error: null }),
+  // Supabase Realtime methods
+  channel: jest.fn().mockReturnValue({
+    send: jest.fn().mockResolvedValue('ok'),
+    subscribe: jest.fn().mockReturnThis(),
+    unsubscribe: jest.fn().mockReturnValue('ok'),
+    on: jest.fn().mockReturnThis(),
+  }),
+  removeChannel: jest.fn().mockResolvedValue('ok'),
+  removeAllChannels: jest.fn().mockResolvedValue([]),
 })

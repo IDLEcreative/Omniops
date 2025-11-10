@@ -70,7 +70,7 @@ export async function POST(
 
     const body = await request.json();
     const validatedData = ChatRequestSchema.parse(body);
-    const { message, conversation_id, session_id, domain, config } = validatedData;
+    const { message, conversation_id, session_id, domain, config, session_metadata } = validatedData;
 
     // Check if GPT-5 mini is enabled
     const useGPT5Mini = process.env.USE_GPT5_MINI === 'true';
@@ -126,7 +126,8 @@ export async function POST(
       conversation_id,
       session_id,
       adminSupabase!,
-      telemetry
+      telemetry,
+      session_metadata
     );
 
     // Step 3: Parallel conversation operations (save message, get history, load metadata)

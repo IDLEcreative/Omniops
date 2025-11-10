@@ -30,7 +30,8 @@ export async function scrapePage(
     useNewConfig?: boolean;
     configPreset?: keyof typeof ConfigPresets;
     aiOptimization?: AIOptimizationConfig;
-  }
+  },
+  redisClient?: Redis
 ): Promise<ScrapedPage | AIOptimizedResult> {
   const scrapeStartTime = Date.now();
   console.log(`[SCRAPER] Starting single page scrape for: ${url}`);
@@ -49,8 +50,8 @@ export async function scrapePage(
     // Create a job ID
     const jobId = `crawl_${Date.now()}_${Math.random().toString(36).substring(7)}`;
 
-    // Queue the job in Redis
-    const redis = new Redis(process.env.REDIS_URL || 'redis://localhost:6379');
+    // Queue the job in Redis (use injected client or create new one)
+    const redis = redisClient || new Redis(process.env.REDIS_URL || 'redis://localhost:6379');
 
     const jobData = {
       jobId,

@@ -4,6 +4,7 @@
 
 import type { SupabaseClient } from '@/types/supabase';
 import { OrganizationRole } from '@/types/organizations';
+import { randomBytes } from 'crypto';
 
 /**
  * Get user's membership in an organization
@@ -189,4 +190,43 @@ export async function hasReachedSeatLimit(
     .eq('organization_id', organizationId);
 
   return (count || 0) >= org.seat_limit;
+}
+
+/**
+ * Format organization name into URL-safe slug
+ * Converts to lowercase, replaces special chars with hyphens, removes invalid chars
+ */
+export function formatOrganizationSlug(name: string): string {
+  return name
+    .toLowerCase() // Convert to lowercase
+    .trim() // Remove leading/trailing whitespace
+    .replace(/[\s_]+/g, '-') // Replace spaces and underscores with hyphens
+    .replace(/[^a-z0-9-]/g, '') // Remove all chars except a-z, 0-9, and hyphens
+    .replace(/-+/g, '-') // Collapse multiple consecutive hyphens
+    .replace(/^-+|-+$/g, ''); // Trim hyphens from start and end
+}
+
+/**
+ * Generate cryptographically secure invitation token
+ * Returns 64-character lowercase hex string
+ */
+export function generateInvitationToken(): string {
+  return randomBytes(32).toString('hex');
+}
+
+/**
+ * Validate invitation token format
+ * Must be 64-character lowercase hex string
+ */
+export function validateInvitationToken(token: unknown): boolean {
+  if (typeof token !== 'string') {
+    return false;
+  }
+
+  if (token.length !== 64) {
+    return false;
+  }
+
+  // Must be lowercase hex only (0-9, a-f)
+  return /^[0-9a-f]{64}$/.test(token);
 }

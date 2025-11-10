@@ -1,6 +1,7 @@
 import type { Metadata, Viewport } from "next";
 import { AuthProvider } from "@/components/auth/auth-provider";
 import { ThemeProvider } from "@/components/theme-provider";
+import { SessionTrackerProvider } from "@/components/SessionTrackerProvider";
 import { Toaster } from "sonner";
 import "./globals.css";
 
@@ -38,6 +39,7 @@ export default function RootLayout({
           enableSystem
           disableTransitionOnChange
         >
+          <SessionTrackerProvider />
           <AuthProvider>
             {children}
           </AuthProvider>

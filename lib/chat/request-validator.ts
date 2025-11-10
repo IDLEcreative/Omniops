@@ -6,6 +6,7 @@
  */
 
 import { z } from 'zod';
+import type { SessionMetadata } from '@/types/analytics';
 
 /**
  * Chat request validation schema
@@ -23,6 +24,7 @@ export const ChatRequestSchema = z.object({
   session_id: z.string().min(1),
   domain: z.string().optional(),
   demoId: z.string().optional(),
+  session_metadata: z.any().optional(), // SessionMetadata from widget
   config: z.object({
     features: z.object({
       woocommerce: z.object({ enabled: z.boolean() }).optional(),

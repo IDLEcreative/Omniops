@@ -79,7 +79,7 @@ export class SearchIntelligence {
     }
     
     // Detect specific product search
-    if (/[A-Z0-9]{5,}/.test(query) || queryLower.includes('part number')) {
+    if (/[A-Z0-9]{5,}/.test(query) || queryLower.includes('item number')) {
       return {
         primary: 'specific',
         categories: [],
@@ -187,13 +187,13 @@ export class SearchIntelligence {
           'Check stock availability',
           'Find alternatives',
           'View technical specs',
-          'See compatible parts'
+          'See compatible items'
         );
         break;
-        
+
       case 'troubleshoot':
         suggestions.push(
-          'Common replacement parts',
+          'Common replacement items',
           'Installation guides',
           'Maintenance items',
           'Contact support'

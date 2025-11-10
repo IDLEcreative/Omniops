@@ -3,7 +3,7 @@
  * Core execution logic for refreshing content
  */
 
-import { createClient } from '@/lib/supabase-server';
+import { createServiceRoleClient } from '@/lib/supabase-server';
 import { scrapePage } from '@/lib/scraper-api';
 import { generateEmbeddings } from '@/lib/embeddings';
 import { generateContentHash } from './content-refresh-scheduler';
@@ -16,7 +16,7 @@ export async function refreshPageContent(
   url: string,
   domainId: string
 ): Promise<boolean> {
-  const supabase = await createClient();
+  const supabase = await createServiceRoleClient();
 
   try {
     if (!supabase) {
@@ -24,8 +24,8 @@ export async function refreshPageContent(
     }
 
     const { data: existingPage } = await supabase
-      .from('website_content')
-      .select('id, scraped_at, content_hash')
+      .from('scraped_pages')
+      .select('id, last_scraped_at, content_hash')
       .eq('url', url)
       .eq('domain_id', domainId)
       .single();
@@ -46,7 +46,7 @@ export async function refreshPageContent(
     }
 
     const { data: updatedContent, error: contentError } = await supabase
-      .from('website_content')
+      .from('scraped_pages')
       .upsert({
         domain_id: domainId,
         url,
@@ -54,7 +54,9 @@ export async function refreshPageContent(
         content: scrapedPage.content,
         metadata: scrapedPage.metadata,
         content_hash: contentHash,
-        scraped_at: new Date().toISOString(),
+        last_scraped_at: new Date().toISOString(),
+        status: 'success',
+        error_message: null,
       }, {
         onConflict: 'domain_id,url'
       })
@@ -74,6 +76,29 @@ export async function refreshPageContent(
     return true;
   } catch (error) {
     console.error(`Error refreshing ${url}:`, error);
+
+    // Handle 404s and scraping errors - mark as failed instead of throwing
+    const errorMessage = error instanceof Error ? error.message : 'Unknown error';
+    const is404 = errorMessage.includes('404') || errorMessage.includes('Not Found');
+
+    try {
+      await supabase
+        .from('scraped_pages')
+        .upsert({
+          domain_id: domainId,
+          url,
+          status: is404 ? 'deleted' : 'failed',
+          error_message: errorMessage,
+          last_scraped_at: new Date().toISOString(),
+        }, {
+          onConflict: 'domain_id,url'
+        });
+
+      console.log(`Marked ${url} as ${is404 ? 'deleted (404)' : 'failed'}`);
+    } catch (updateError) {
+      console.error(`Failed to update error status for ${url}:`, updateError);
+    }
+
     throw error;
   }
 }
@@ -82,7 +107,7 @@ export async function refreshPageContent(
  * Process a batch of pages for refresh
  */
 async function processBatch(
-  batch: Array<{ url: string; scraped_at: string }>,
+  batch: Array<{ url: string; last_scraped_at: string }>,
   domainId: string,
   options?: RefreshOptions
 ): Promise<PageRefreshResult[]> {
@@ -91,7 +116,7 @@ async function processBatch(
       try {
         if (!options?.forceRefresh) {
           const hoursSinceRefresh =
-            (Date.now() - new Date(page.scraped_at).getTime()) / (1000 * 60 * 60);
+            (Date.now() - new Date(page.last_scraped_at).getTime()) / (1000 * 60 * 60);
 
           if (hoursSinceRefresh < 24) {
             return { status: 'skipped', url: page.url };
@@ -126,7 +151,7 @@ export async function refreshDomainContent(
   domainId: string,
   options?: RefreshOptions
 ): Promise<RefreshStats> {
-  const supabase = await createClient();
+  const supabase = await createServiceRoleClient();
   const stats: RefreshStats = { refreshed: 0, skipped: 0, failed: 0 };
 
   try {
@@ -136,17 +161,17 @@ export async function refreshDomainContent(
 
     const { data: domain } = await supabase
       .from('domains')
-      .select('domain, settings')
+      .select('domain')
       .eq('id', domainId)
       .single();
 
     if (!domain) throw new Error('Domain not found');
 
     const { data: existingPages } = await supabase
-      .from('website_content')
-      .select('url, scraped_at')
+      .from('scraped_pages')
+      .select('url, last_scraped_at')
       .eq('domain_id', domainId)
-      .order('scraped_at', { ascending: true })
+      .order('last_scraped_at', { ascending: true })
       .limit(options?.maxPages || 100);
 
     const BATCH_SIZE = 5;

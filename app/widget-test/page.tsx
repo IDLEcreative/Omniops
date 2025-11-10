@@ -4,21 +4,25 @@ import { useEffect } from 'react';
 
 export default function WidgetTestPage() {
   useEffect(() => {
+    // Configure the widget BEFORE loading script
+    (window as any).ChatWidgetConfig = {
+      serverUrl: typeof window !== 'undefined' ? window.location.origin : 'http://localhost:3000',
+      appearance: {
+        position: 'bottom-right',
+        startMinimized: false, // Start expanded for testing
+      },
+      behavior: {
+        autoOpen: true, // Auto-open for E2E testing
+        showOnLoad: true,
+      },
+      debug: true, // Enable debug logging
+    };
+
     // Load the embed script
     const script = document.createElement('script');
     script.src = '/embed.js';
     script.async = true;
     document.body.appendChild(script);
-
-    // Configure the widget
-    (window as any).ChatWidgetConfig = {
-      appearance: {
-        position: 'bottom-right',
-      },
-      behavior: {
-        showOnLoad: false,
-      }
-    };
 
     return () => {
       // Cleanup
