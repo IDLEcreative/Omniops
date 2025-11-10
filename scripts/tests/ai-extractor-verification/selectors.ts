@@ -1,0 +1,21 @@
+export const UNWANTED_SELECTORS = [
+  'nav', 'header', 'footer', 'aside', 'form', 'iframe', 'object', 'embed',
+  'script', 'style', 'noscript', 'meta', 'link[rel="stylesheet"]',
+  '.nav', '.navbar', '.navigation', '.menu', '.header', '.footer',
+  '.sidebar', '.side-bar', '.aside', '.advertisement', '.ads', '.ad',
+  '.social-share', '.social-media', '.comments', '.comment-section',
+  '.related-posts', '.recommended', '.popup', '.modal', '.overlay',
+  '.cookie-notice', '.cookie-banner', '.newsletter', '.subscription',
+  '.breadcrumb', '.breadcrumbs', '.pagination', '.page-numbers',
+  '.author-bio', '.author-info', '.share-buttons', '.tags-container',
+  '#nav', '#navbar', '#navigation', '#menu', '#header', '#footer',
+  '#sidebar', '#side-bar', '#ads', '#advertisement', '#social',
+  '#comments', '#comment-section', '#related', '#recommended',
+  '[role="navigation"]', '[role="banner"]', '[role="contentinfo"]',
+  '[role="complementary"]', '[aria-label*="navigation"]',
+  '[aria-label*="menu"]', '[class*="sidebar"]', '[class*="header"]',
+  '[class*="footer"]', '[class*="nav"]', '[id*="sidebar"]',
+  '[id*="header"]', '[id*="footer"]', '[id*="nav"]',
+  '.widget', '.wp-widget', '.plugin', '.external-content',
+  '.third-party', '.tracking', '.analytics', '.gtm'
+];

@@ -15,14 +15,18 @@ import { logDebug, logError, isMobileViewport, resolveDomain, scheduleConversati
 import { loadRemoteConfig, loadWidgetBundle, loadConfigByAppId } from './config-loader';
 
 async function initialize() {
+  console.log('[Chat Widget] Initialize function called');
   try {
     const userConfig = window.ChatWidgetConfig || {};
+    console.log('[Chat Widget] User config:', userConfig);
     let config = createConfig(userConfig);
+    console.log('[Chat Widget] Created config:', config);
 
     if (!config.serverUrl) {
       console.error('[Chat Widget] serverUrl not configured. Please ensure window.ChatWidgetConfig includes a serverUrl.');
       return;
     }
+    console.log('[Chat Widget] serverUrl configured:', config.serverUrl);
 
     if (document.getElementById('chat-widget-iframe')) {
       logError('Widget already loaded');

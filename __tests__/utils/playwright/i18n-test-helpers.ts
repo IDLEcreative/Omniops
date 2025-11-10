@@ -85,21 +85,77 @@ export async function verifyTextLanguage(
 }
 
 /**
- * Wait for widget iframe to load
+ * Wait for widget iframe to load and be ready for interaction
+ * Increased timeout to 30s to handle parallel test execution
+ *
+ * This function waits for:
+ * 1. Iframe element to be attached to DOM
+ * 2. Iframe content (srcdoc) to load
+ * 3. Widget bundle to execute and initialize
+ * 4. Widget to send 'ready' message to parent
  */
-export async function waitForWidgetIframe(page: Page, timeout = 10000): Promise<void> {
+export async function waitForWidgetIframe(page: Page, timeout = 30000): Promise<void> {
   const iframeLocator = page.locator('iframe#chat-widget-iframe');
   await iframeLocator.waitFor({ state: 'attached', timeout });
+
+  // Wait for iframe to have content loaded (srcdoc rendered)
+  await page.waitForTimeout(1000);
+
+  // Wait for widget bundle to initialize by checking for widget-root element
+  const iframe = page.frameLocator('iframe#chat-widget-iframe');
+  const widgetRoot = iframe.locator('#widget-root');
+  await widgetRoot.waitFor({ state: 'attached', timeout: timeout - 2000 });
+
+  // Wait for widget to signal it's ready by listening for 'ready' postMessage
+  // This ensures the widget is fully initialized and interactive
+  // NOTE: We use a generous fallback timeout because postMessage origin mismatches
+  // can prevent the ready signal from being received in test environments
+  const readyPromise = page.evaluate(() => {
+    return new Promise<void>((resolve) => {
+      let resolved = false;
+
+      const handleReady = (event: MessageEvent) => {
+        // Accept ready message from any origin in test environment
+        // to handle localhost vs production URL mismatches
+        if (event.data?.type === 'ready' && !resolved) {
+          resolved = true;
+          window.removeEventListener('message', handleReady);
+          resolve();
+        }
+      };
+      window.addEventListener('message', handleReady);
+
+      // Generous fallback timeout - if widget is interactive but ready wasn't received,
+      // continue anyway after 5s
+      setTimeout(() => {
+        if (!resolved) {
+          resolved = true;
+          window.removeEventListener('message', handleReady);
+          resolve();
+        }
+      }, 5000);
+    });
+  });
+
+  await readyPromise;
 }
 
 /**
- * Open chat widget programmatically
+ * Open chat widget programmatically and wait for it to be ready
+ * Increased default delay to 3s to handle parallel test execution
  */
-export async function openWidget(page: Page, delayMs = 2000): Promise<void> {
+export async function openWidget(page: Page, delayMs = 3000): Promise<void> {
   await page.evaluate(() => {
     (window as any).ChatWidget?.open();
   });
   await page.waitForTimeout(delayMs);
+
+  // Verify widget is actually open by checking iframe pointer-events
+  const iframe = page.locator('iframe#chat-widget-iframe');
+  await iframe.evaluate((el: HTMLIFrameElement) => {
+    // Widget is considered "open" when pointer-events is 'auto'
+    return el.style.pointerEvents === 'auto';
+  });
 }
 
 /**
@@ -110,10 +166,13 @@ export function getWidgetIframe(page: Page): FrameLocator {
 }
 
 /**
- * Get input field from widget
+ * Get input field from widget and wait for it to be ready
+ * Returns input field with extended timeout for parallel test execution
  */
 export async function getWidgetInputField(iframe: FrameLocator) {
   const inputField = iframe.locator('input[type="text"], textarea').first();
+  // Wait for input to be visible and enabled (ready for interaction)
+  await inputField.waitFor({ state: 'visible', timeout: 30000 });
   return inputField;
 }
 

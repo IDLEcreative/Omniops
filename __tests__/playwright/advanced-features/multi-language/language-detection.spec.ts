@@ -62,7 +62,7 @@ test.describe('Language Auto-Detection', () => {
 
     const iframe = getWidgetIframe(page);
     const inputField = await getWidgetInputField(iframe);
-    await expect(inputField).toBeVisible({ timeout: 10000 });
+    await expect(inputField).toBeVisible({ timeout: 30000 });
 
     const placeholder = await inputField.getAttribute('placeholder');
     console.log(`   UI placeholder: "${placeholder}"`);

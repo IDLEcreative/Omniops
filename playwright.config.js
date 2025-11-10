@@ -71,19 +71,17 @@ const playwrightConfig = {
   
   // Browser projects configuration
   projects: [
-    // Setup project - runs authentication before other tests
+    // Setup project - runs authentication before dashboard tests
     {
       name: 'setup',
       testMatch: /.*\.setup\.ts/,
     },
 
-    // Main test projects - use authentication state
+    // Non-authenticated tests (widget, public pages)
     {
       name: 'chromium',
       use: {
         ...devices['Desktop Chrome'],
-        // Use saved authentication state for dashboard tests
-        storageState: 'playwright/.auth/user.json',
         // Chromium-specific settings for web scraping
         launchOptions: {
           args: [
@@ -94,29 +92,57 @@ const playwrightConfig = {
           ]
         }
       },
-      // Run setup before chromium tests
-      dependencies: ['setup'],
+      testIgnore: /.*analytics-exports.*|.*dashboard.*/,
     },
     {
       name: 'firefox',
       use: {
         ...devices['Desktop Firefox'],
-        // Use saved authentication state for dashboard tests
-        storageState: 'playwright/.auth/user.json',
-        // Firefox-specific settings
       },
-      // Run setup before firefox tests
-      dependencies: ['setup'],
+      testIgnore: /.*analytics-exports.*|.*dashboard.*/,
     },
     {
       name: 'webkit',
       use: {
         ...devices['Desktop Safari'],
-        // Use saved authentication state for dashboard tests
-        storageState: 'playwright/.auth/user.json',
-        // WebKit-specific settings
       },
-      // Run setup before webkit tests
+      testIgnore: /.*analytics-exports.*|.*dashboard.*/,
+    },
+
+    // Authenticated tests (dashboard, analytics) - require setup
+    {
+      name: 'chromium-auth',
+      use: {
+        ...devices['Desktop Chrome'],
+        storageState: 'playwright/.auth/user.json',
+        launchOptions: {
+          args: [
+            '--disable-blink-features=AutomationControlled',
+            '--disable-features=VizDisplayCompositor',
+            '--no-sandbox',
+            '--disable-setuid-sandbox'
+          ]
+        }
+      },
+      testMatch: /.*analytics-exports.*|.*dashboard.*/,
+      dependencies: ['setup'],
+    },
+    {
+      name: 'firefox-auth',
+      use: {
+        ...devices['Desktop Firefox'],
+        storageState: 'playwright/.auth/user.json',
+      },
+      testMatch: /.*analytics-exports.*|.*dashboard.*/,
+      dependencies: ['setup'],
+    },
+    {
+      name: 'webkit-auth',
+      use: {
+        ...devices['Desktop Safari'],
+        storageState: 'playwright/.auth/user.json',
+      },
+      testMatch: /.*analytics-exports.*|.*dashboard.*/,
       dependencies: ['setup'],
     }
   ]

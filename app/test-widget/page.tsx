@@ -7,46 +7,81 @@ export default function TestWidgetPage() {
   const [currentLanguage, setCurrentLanguage] = useState<string>('en');
   const [isRTL, setIsRTL] = useState(false);
 
+  // CRITICAL: Load scripts on mount AND when language changes
+  // This useEffect runs on initial page load
   useEffect(() => {
-    // Load language preference from localStorage
-    if (typeof window !== 'undefined') {
-      const storedLang = localStorage.getItem('omniops_ui_language') || 'en';
+    if (typeof window === 'undefined') return;
+
+    // Guard: Check if iframe already exists (widget already initialized)
+    const existingIframe = document.getElementById('chat-widget-iframe');
+    if (existingIframe) {
+      console.log('[Test Page] Widget already initialized, skipping script load');
+      return;
+    }
+
+    // Remove any old script tags from previous load
+    const oldScripts = document.querySelectorAll('script[src*="widget-bundle.js"], script[src*="embed.js"]');
+    oldScripts.forEach(s => s.remove());
+
+    // Step 1: Load language preference from localStorage (on mount)
+    const storedLang = localStorage.getItem('omniops_ui_language') || 'en';
+    if (currentLanguage !== storedLang) {
       setCurrentLanguage(storedLang);
-
-      // Apply RTL for Arabic
-      const rtl = storedLang === 'ar';
-      setIsRTL(rtl);
-      document.documentElement.setAttribute('dir', rtl ? 'rtl' : 'ltr');
-      document.documentElement.setAttribute('lang', storedLang);
     }
-  }, []);
 
-  useEffect(() => {
-    // Set widget configuration in browser
-    if (typeof window !== 'undefined') {
-      (window as any).ChatWidgetConfig = {
-        serverUrl: window.location.origin,
-        domain: 'www.thompsonseparts.co.uk',
-        appearance: {
-          position: 'bottom-right',
-          startMinimized: false,
-        },
-        behavior: {
-          autoOpen: false,
-          showOnLoad: true,
-        },
-        i18n: {
-          enabled: true,
-          defaultLanguage: currentLanguage,
-          supportedLanguages: ['en', 'es', 'ar'],
-        },
-        debug: true,
+    // Apply RTL for Arabic
+    const rtl = storedLang === 'ar';
+    setIsRTL(rtl);
+    document.documentElement.setAttribute('dir', rtl ? 'rtl' : 'ltr');
+    document.documentElement.setAttribute('lang', storedLang);
+
+    console.log('[Test Page] Setting ChatWidgetConfig with language:', storedLang);
+
+    // Step 2: Set ChatWidgetConfig FIRST
+    (window as any).ChatWidgetConfig = {
+      serverUrl: window.location.origin,
+      domain: 'www.thompsonseparts.co.uk',
+      skipRemoteConfig: true, // Skip API lookup for E2E tests
+      appearance: {
+        position: 'bottom-right',
+        startMinimized: false,
+      },
+      behavior: {
+        autoOpen: false,
+        showOnLoad: true,
+      },
+      i18n: {
+        enabled: true,
+        defaultLanguage: storedLang,
+        supportedLanguages: ['en', 'es', 'ar'],
+      },
+      debug: true,
+    };
+
+    // Enable debug mode globally
+    (window as any).ChatWidgetDebug = true;
+
+    console.log('[Test Page] ChatWidgetConfig set, now loading scripts...');
+
+    // Step 3: THEN load widget-bundle.js
+    const widgetScript = document.createElement('script');
+    widgetScript.src = '/widget-bundle.js';
+    widgetScript.async = false;
+    document.head.appendChild(widgetScript);
+
+    // Step 4: THEN load embed.js (after widget bundle loads)
+    widgetScript.onload = () => {
+      console.log('[Test Page] widget-bundle.js loaded, now loading embed.js...');
+      const embedScript = document.createElement('script');
+      embedScript.src = '/embed.js';
+      embedScript.defer = true;
+      document.head.appendChild(embedScript);
+
+      embedScript.onload = () => {
+        console.log('[Test Page] embed.js loaded and should initialize now');
       };
-
-      // Enable debug mode globally
-      (window as any).ChatWidgetDebug = true;
-    }
-  }, [currentLanguage]);
+    };
+  }, []); // Run once on mount (language changes trigger page reload anyway)
 
   const handleLanguageChange = (lang: string) => {
     localStorage.setItem('omniops_ui_language', lang);
@@ -73,10 +108,6 @@ export default function TestWidgetPage() {
 
   return (
     <>
-      {/* Load widget bundle and embed script */}
-      <Script src="/widget-bundle.js" strategy="beforeInteractive" />
-      <Script src="/embed.js" strategy="afterInteractive" />
-
       <div className="min-h-screen bg-gradient-to-br from-gray-50 to-gray-100">
         <div className="container mx-auto px-4 py-8">
           {/* Header */}

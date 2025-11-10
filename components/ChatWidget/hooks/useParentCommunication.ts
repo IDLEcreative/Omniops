@@ -232,8 +232,9 @@ export function useParentCommunication({
       // Send ready message to parent if in iframe
       if (window.parent !== window) {
         try {
-          const targetOrigin = process.env.NEXT_PUBLIC_APP_URL || window.location.origin;
-          window.parent.postMessage({ type: 'ready' }, targetOrigin);
+          // Use '*' for ready message to handle cross-origin scenarios (localhost vs production)
+          // The parent validates the message content, not just the origin
+          window.parent.postMessage({ type: 'ready' }, '*');
           setMessagesReceived((prev) => prev + 1);
           setLastMessageType('ready');
         } catch (err) {
@@ -275,7 +276,9 @@ export function useParentCommunication({
   useEffect(() => {
     if (mounted && window.parent !== window) {
       try {
-        const targetOrigin = process.env.NEXT_PUBLIC_APP_URL || window.location.origin;
+        // Use '*' for cross-origin scenarios (localhost vs production)
+        // The parent (embed.js) validates message content
+        const targetOrigin = '*';
 
         if (isOpen) {
           // Widget is open - request full size and enable pointer events

@@ -1,12 +1,19 @@
 {
-  "teardownTime": "2025-11-10T19:08:49.577Z",
-  "setupTime": "2025-11-10T19:08:20.481Z",
-  "duration": 29096,
+  "teardownTime": "2025-11-10T22:29:45.192Z",
+  "setupTime": "2025-11-10T22:28:53.433Z",
+  "duration": 51759,
   "testResultsPath": "/Users/jamesguy/Omniops/test-results",
   "generatedFiles": [
+    "advanced-features-multi-la-0ae7f-ediately-on-language-change-chromium",
+    "advanced-features-multi-la-303d4-lish-to-Spanish-translation-chromium",
+    "advanced-features-multi-la-3e06d-owser-locale-auto-detection-chromium",
+    "advanced-features-multi-la-66e3b--persists-after-page-reload-chromium",
+    "advanced-features-multi-la-780ca-t-Hebrew-RTL-text-rendering-chromium",
+    "advanced-features-multi-la-8c09d-serves-conversation-history-chromium",
+    "advanced-features-multi-la-aa767-s-display-correctly-Arabic--chromium",
+    "advanced-features-multi-la-b8d00-ish-→-Spanish-→-Arabic-RTL--chromium",
     "browser-availability.json",
     "screenshots",
-    "setup-auth.setup.ts-authenticate-for-E2E-tests-setup",
     "setup-timestamp.txt",
     "traces",
     "videos"

@@ -36,6 +36,7 @@ async function buildWidget() {
       define: {
         'process.env.NODE_ENV': '"production"',
         'process.env.NEXT_PUBLIC_DEMO_DOMAIN': '"demo.example.com"',
+        'process.env.NEXT_PUBLIC_APP_URL': '"https://www.omniops.co.uk"',
       },
       external: [],
       treeShaking: true,
