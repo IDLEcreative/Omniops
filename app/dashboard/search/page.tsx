@@ -40,9 +40,11 @@ export default function SearchPage() {
   const [exportLoading, setExportLoading] = useState<{
     csv: boolean;
     pdf: boolean;
+    excel: boolean;
   }>({
     csv: false,
-    pdf: false
+    pdf: false,
+    excel: false
   });
 
   // Perform search
@@ -192,6 +194,52 @@ export default function SearchPage() {
     }
   }, [searchState]);
 
+  // Export to Excel (NEW! Built in 20 mins using modular architecture)
+  const handleExportExcel = useCallback(async () => {
+    if (!searchState.query) {
+      toast.error('No search results to export');
+      return;
+    }
+
+    setExportLoading(prev => ({ ...prev, excel: true }));
+
+    try {
+      const response = await fetch('/api/search/export/excel', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json'
+        },
+        body: JSON.stringify({
+          query: searchState.query,
+          filters: searchState.filters,
+          includeMetadata: true
+        })
+      });
+
+      if (!response.ok) {
+        throw new Error('Export failed');
+      }
+
+      // Download the Excel file
+      const blob = await response.blob();
+      const url = window.URL.createObjectURL(blob);
+      const a = document.createElement('a');
+      a.href = url;
+      a.download = `search-export-${new Date().toISOString()}.xlsx`;
+      document.body.appendChild(a);
+      a.click();
+      document.body.removeChild(a);
+      window.URL.revokeObjectURL(url);
+
+      toast.success('Excel file exported successfully');
+    } catch (error) {
+      console.error('Excel export error:', error);
+      toast.error('Excel export failed. Please try again.');
+    } finally {
+      setExportLoading(prev => ({ ...prev, excel: false }));
+    }
+  }, [searchState]);
+
   return (
     <div className="container mx-auto p-6 space-y-6">
       {/* Header */}
@@ -211,6 +259,15 @@ export default function SearchPage() {
           >
             <Table className="w-4 h-4 mr-2" />
             {exportLoading.csv ? 'Exporting...' : 'Export CSV'}
+          </Button>
+          <Button
+            variant="outline"
+            size="sm"
+            onClick={handleExportExcel}
+            disabled={exportLoading.excel || searchState.results.length === 0}
+          >
+            <Download className="w-4 h-4 mr-2" />
+            {exportLoading.excel ? 'Exporting...' : 'Export Excel'}
           </Button>
           <Button
             variant="outline"
