@@ -27,9 +27,9 @@ export async function sendNotifications(payload: NotificationPayload) {
 }
 
 async function sendEmail(payload: NotificationPayload) {
-  const nodemailer = require('nodemailer');
+  const nodemailer = await import('nodemailer');
 
-  const transport = nodemailer.createTransport({
+  const transport = nodemailer.default.createTransport({
     host: process.env.SMTP_HOST,
     port: parseInt(process.env.SMTP_PORT || '587'),
     secure: process.env.SMTP_PORT === '465',

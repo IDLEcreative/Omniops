@@ -69,7 +69,7 @@ async function getUserViewedProducts(
   const supabase = await createClient();
 
   try {
-    let query = supabase
+    const query = supabase
       .from('recommendation_events')
       .select('product_id, clicked, purchased')
       .or(`session_id.eq.${sessionId},user_id.eq.${userId}`)

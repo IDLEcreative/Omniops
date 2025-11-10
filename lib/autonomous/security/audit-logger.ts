@@ -19,8 +19,12 @@ export type { AuditStepData, AuditRecord, OperationSummary } from './audit-logge
 export class AuditLogger {
   private supabase: ReturnType<typeof createServerClient>;
 
-  constructor() {
-    this.supabase = createServerClient();
+  /**
+   * Create AuditLogger instance
+   * @param client Optional Supabase client (for testing). If not provided, creates one.
+   */
+  constructor(client?: ReturnType<typeof createServerClient>) {
+    this.supabase = client || createServerClient();
   }
 
   /**
@@ -143,112 +147,32 @@ export class AuditLogger {
    * Get failed steps for an operation (for debugging)
    */
   async getFailedSteps(operationId: string): Promise<AuditRecord[]> {
-    try {
-      const { data, error } = await this.supabase
-        .from('autonomous_operations_audit')
-        .select('*')
-        .eq('operation_id', operationId)
-        .eq('success', false)
-        .order('step_number', { ascending: true });
-
-      if (error) {
-        throw new Error(`Failed to get failed steps: ${error.message}`);
-      }
-
-      return (data || []).map(this.mapToAuditRecord);
-    } catch (error) {
-      console.error('[AuditLogger] GetFailedSteps error:', error);
-      throw error;
-    }
+    const { getFailedSteps } = await import('./audit-queries');
+    return getFailedSteps(operationId, this.supabase, this.mapToAuditRecord);
   }
 
   /**
    * Get recent audit logs (for monitoring dashboard)
    */
   async getRecentLogs(limit: number = 100): Promise<AuditRecord[]> {
-    try {
-      const { data, error } = await this.supabase
-        .from('autonomous_operations_audit')
-        .select('*')
-        .order('timestamp', { ascending: false })
-        .limit(limit);
-
-      if (error) {
-        throw new Error(`Failed to get recent logs: ${error.message}`);
-      }
-
-      return (data || []).map(this.mapToAuditRecord);
-    } catch (error) {
-      console.error('[AuditLogger] GetRecentLogs error:', error);
-      throw error;
-    }
+    const { getRecentLogs } = await import('./audit-queries');
+    return getRecentLogs(limit, this.supabase, this.mapToAuditRecord);
   }
 
   /**
    * Export audit trail for GDPR/compliance
    */
-  async exportAuditTrail(
-    organizationId: string,
-    startDate?: Date,
-    endDate?: Date
-  ): Promise<AuditRecord[]> {
-    try {
-      let query = this.supabase
-        .from('autonomous_operations_audit')
-        .select(`
-          *,
-          autonomous_operations!inner(organization_id)
-        `)
-        .eq('autonomous_operations.organization_id', organizationId)
-        .order('timestamp', { ascending: true });
-
-      if (startDate) {
-        query = query.gte('timestamp', startDate.toISOString());
-      }
-
-      if (endDate) {
-        query = query.lte('timestamp', endDate.toISOString());
-      }
-
-      const { data, error } = await query;
-
-      if (error) {
-        throw new Error(`Failed to export audit trail: ${error.message}`);
-      }
-
-      return (data || []).map(this.mapToAuditRecord);
-    } catch (error) {
-      console.error('[AuditLogger] ExportAuditTrail error:', error);
-      throw error;
-    }
+  async exportAuditTrail(organizationId: string, startDate?: Date, endDate?: Date): Promise<AuditRecord[]> {
+    const { exportAuditTrail } = await import('./audit-queries');
+    return exportAuditTrail(organizationId, startDate, endDate, this.supabase, this.mapToAuditRecord);
   }
 
   /**
    * Delete old audit logs (retention policy)
-   * Default: Keep 90 days
    */
   async deleteOldLogs(retentionDays: number = 90): Promise<number> {
-    try {
-      const cutoffDate = new Date();
-      cutoffDate.setDate(cutoffDate.getDate() - retentionDays);
-
-      const { data, error } = await this.supabase
-        .from('autonomous_operations_audit')
-        .delete()
-        .lt('timestamp', cutoffDate.toISOString())
-        .select('id');
-
-      if (error) {
-        throw new Error(`Failed to delete old logs: ${error.message}`);
-      }
-
-      const count = data?.length || 0;
-      console.log(`[AuditLogger] Deleted ${count} audit logs older than ${retentionDays} days`);
-      return count;
-    } catch (error) {
-      console.error('[AuditLogger] DeleteOldLogs error:', error);
-      throw error;
-    }
+    const { deleteOldLogs } = await import('./audit-queries');
+    return deleteOldLogs(retentionDays, this.supabase);
   }
 
   /**
@@ -299,42 +223,21 @@ let auditLoggerInstance: AuditLogger | null = null;
 
 /**
  * Get singleton audit logger instance
+ * @param client Optional Supabase client (for testing)
  *
  * @example
  * const logger = getAuditLogger();
  * await logger.logStep(...);
  */
-export function getAuditLogger(): AuditLogger {
+export function getAuditLogger(client?: ReturnType<typeof createServerClient>): AuditLogger {
   if (!auditLoggerInstance) {
-    auditLoggerInstance = new AuditLogger();
+    auditLoggerInstance = new AuditLogger(client);
   }
   return auditLoggerInstance;
 }
 
 // ============================================================================
-// Convenience Functions
+// Convenience Functions (Re-exported from helpers)
 // ============================================================================
 
-/**
- * Log step (convenience function)
- */
-export async function logAuditStep(data: AuditStepData): Promise<AuditRecord> {
-  const logger = getAuditLogger();
-  return logger.logStep(data);
-}
-
-/**
- * Get operation logs (convenience function)
- */
-export async function getOperationAuditLogs(operationId: string): Promise<AuditRecord[]> {
-  const logger = getAuditLogger();
-  return logger.getOperationLogs(operationId);
-}
-
-/**
- * Get operation summary (convenience function)
- */
-export async function getOperationAuditSummary(operationId: string): Promise<OperationSummary> {
-  const logger = getAuditLogger();
-  return logger.getOperationSummary(operationId);
-}
+export { logAuditStep, getOperationAuditLogs, getOperationAuditSummary } from './audit-logger-helpers';

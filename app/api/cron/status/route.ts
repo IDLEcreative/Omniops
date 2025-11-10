@@ -32,8 +32,8 @@ export async function GET() {
   // Calculate next run using cron-parser
   let nextRun = null;
   try {
-    const parser = require('cron-parser');
-    const interval = parser.parseExpression(config.schedule);
+    const { parseExpression } = await import('cron-parser');
+    const interval = parseExpression(config.schedule);
     nextRun = interval.next().toDate().toISOString();
   } catch (error) {
     console.error('Failed to parse cron schedule:', error);

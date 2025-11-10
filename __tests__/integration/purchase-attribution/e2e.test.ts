@@ -7,6 +7,7 @@
 import { createMocks } from 'node-mocks-http';
 import { POST as woocommerceWebhook } from '@/app/api/webhooks/woocommerce/order-created/route';
 import crypto from 'crypto';
+import * as attributionDb from '@/lib/attribution/attribution-db';
 
 // Mock Supabase
 jest.mock('@/lib/supabase-server', () => ({
@@ -142,7 +143,7 @@ describe('Purchase Attribution E2E', () => {
 
   it('should handle attribution failure gracefully', async () => {
     // Mock attribution to throw error
-    const { savePurchaseAttribution } = require('@/lib/attribution/attribution-db');
+    const savePurchaseAttribution = jest.mocked(attributionDb.savePurchaseAttribution);
     savePurchaseAttribution.mockRejectedValueOnce(new Error('Database error'));
 
     const orderPayload = {

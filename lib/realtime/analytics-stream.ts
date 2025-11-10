@@ -1,4 +1,4 @@
-import { createClient } from '@supabase/supabase-js';
+import { createServiceClient } from '@/lib/supabase/server';
 import { EventEmitter } from 'events';
 
 export interface AnalyticsEvent {
@@ -30,14 +30,7 @@ class AnalyticsStreamManager extends EventEmitter {
   }
 
   private initializeSupabase() {
-    const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL;
-    const supabaseKey = process.env.SUPABASE_SERVICE_ROLE_KEY;
-
-    if (!supabaseUrl || !supabaseKey) {
-      throw new Error('Missing Supabase credentials for analytics stream');
-    }
-
-    this.supabase = createClient(supabaseUrl, supabaseKey);
+    this.supabase = createServiceClient();
     this.subscribeToEvents();
   }
 

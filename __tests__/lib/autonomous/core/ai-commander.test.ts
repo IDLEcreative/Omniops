@@ -134,12 +134,12 @@ describe('AICommander', () => {
       const call = mockOpenAI.chat.completions.create.mock.calls[0][0];
       const textContent = call.messages[0].content[0].text;
 
-      expect(textContent).toContain('Current Step: 1');
-      expect(textContent).toContain('Intent: Navigate to WooCommerce admin login');
-      expect(textContent).toContain('Action Type: goto');
-      expect(textContent).toContain('Target: /wp-admin');
-      expect(textContent).toContain('Expected Result: Login page loaded');
-      expect(textContent).toContain('Current Page URL: https://example.com/admin');
+      expect(textContent).toContain('**Current Step:** 1');
+      expect(textContent).toContain('**Intent:** Navigate to WooCommerce admin login');
+      expect(textContent).toContain('**Action Type:** goto');
+      expect(textContent).toContain('**Target:** /wp-admin');
+      expect(textContent).toContain('**Expected Result:** Login page loaded');
+      expect(textContent).toContain('**Current Page URL:** https://example.com/admin');
     });
 
     it('should handle AI response without code blocks', async () => {
@@ -271,7 +271,7 @@ describe('AICommander', () => {
       const call = mockOpenAI.chat.completions.create.mock.calls[0][0];
       const textContent = call.messages[0].content[0].text;
 
-      expect(textContent).toContain('Target: N/A');
+      expect(textContent).toContain('**Target:** N/A');
     });
   });
 

@@ -230,7 +230,7 @@ describe('Result Highlighter', () => {
       const result = highlightMatches(text, query);
 
       // Should only match whole word "test", not "subtest"
-      expect(result.match(/<mark>test</mark>/gi)).toBeTruthy();
+      expect(result.match(/<mark>test<\/mark>/gi)).toBeTruthy();
       expect(result).not.toContain('sub<mark>test</mark>');
     });
 

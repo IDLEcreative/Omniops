@@ -10,6 +10,7 @@
 
 import { useEffect, useState, useCallback } from 'react';
 import { createClient } from '@/lib/supabase/client';
+// eslint-disable-next-line no-restricted-imports -- Type-only import, no runtime code imported
 import type { RealtimeChannel } from '@supabase/supabase-js';
 
 interface RealtimeAnalyticsOptions {

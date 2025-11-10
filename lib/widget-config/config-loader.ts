@@ -4,6 +4,7 @@
  * Handles database queries to fetch customer and widget configurations.
  */
 
+// eslint-disable-next-line no-restricted-imports -- Type-only import, no runtime code imported
 import type { SupabaseClient } from '@supabase/supabase-js';
 
 export interface CustomerConfig {

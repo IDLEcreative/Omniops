@@ -29,8 +29,12 @@ export class ConsentManager {
   private supabase: ReturnType<typeof createServerClient>;
   private consentVersion: string;
 
-  constructor() {
-    this.supabase = createServerClient();
+  /**
+   * Create ConsentManager instance
+   * @param client Optional Supabase client (for testing). If not provided, creates one.
+   */
+  constructor(client?: ReturnType<typeof createServerClient>) {
+    this.supabase = client || createServerClient();
     this.consentVersion = process.env.CONSENT_VERSION || '1.0';
   }
 
@@ -261,9 +265,13 @@ export class ConsentManager {
 
 let consentManagerInstance: ConsentManager | null = null;
 
-export function getConsentManager(): ConsentManager {
+/**
+ * Get or create ConsentManager singleton
+ * @param client Optional Supabase client (for testing)
+ */
+export function getConsentManager(client?: ReturnType<typeof createServerClient>): ConsentManager {
   if (!consentManagerInstance) {
-    consentManagerInstance = new ConsentManager();
+    consentManagerInstance = new ConsentManager(client);
   }
   return consentManagerInstance;
 }

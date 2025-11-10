@@ -27,10 +27,10 @@ import { createServerClient } from '@/lib/supabase/server';
 
 export async function GET(
   request: NextRequest,
-  { params }: { params: { operationId: string } }
+  { params }: { params: Promise<{ operationId: string }> }
 ) {
   try {
-    const { operationId } = params;
+    const { operationId } = await params;
 
     // Get authenticated user
     const supabase = createServerClient();

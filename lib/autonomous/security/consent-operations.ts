@@ -3,6 +3,7 @@
  * Low-level database operations for consent management
  */
 
+// eslint-disable-next-line no-restricted-imports -- Type-only import, no runtime code imported
 import type { SupabaseClient } from '@supabase/supabase-js';
 import type { ConsentRequest, ConsentRecord } from './consent-types';
 

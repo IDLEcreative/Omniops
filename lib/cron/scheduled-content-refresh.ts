@@ -10,7 +10,6 @@
  */
 
 import cron from 'node-cron';
-import { createClient } from '@supabase/supabase-js';
 
 const REFRESH_INTERVAL_HOURS = 24;
 const MAX_PAGES_PER_DOMAIN = 50;

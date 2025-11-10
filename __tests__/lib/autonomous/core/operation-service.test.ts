@@ -6,23 +6,31 @@
 import { describe, it, expect, jest, beforeEach } from '@jest/globals';
 import { OperationService, type CreateOperationRequest } from '@/lib/autonomous/core/operation-service';
 
-// Mock Supabase
+// Mock Supabase with chainable query methods
+const createMockQuery = () => ({
+  select: jest.fn().mockReturnThis(),
+  insert: jest.fn().mockReturnThis(),
+  update: jest.fn().mockReturnThis(),
+  delete: jest.fn().mockReturnThis(),
+  eq: jest.fn().mockReturnThis(),
+  neq: jest.fn().mockReturnThis(),
+  gt: jest.fn().mockReturnThis(),
+  gte: jest.fn().mockReturnThis(),
+  lt: jest.fn().mockReturnThis(),
+  lte: jest.fn().mockReturnThis(),
+  order: jest.fn().mockReturnThis(),
+  limit: jest.fn().mockReturnThis(),
+  single: jest.fn().mockResolvedValue({ data: null, error: null })
+});
+
 const mockSupabaseClient = {
-  from: jest.fn(),
+  from: jest.fn(() => createMockQuery()),
   auth: {
     getUser: jest.fn()
   }
 };
 
-// Mock consent manager
-jest.mock('@/lib/autonomous/security/consent-manager', () => ({
-  verifyConsent: jest.fn()
-}));
-
-// Mock Supabase server
-jest.mock('@/lib/supabase/server', () => ({
-  createServerClient: jest.fn(() => mockSupabaseClient)
-}));
+// Consent manager is mocked via moduleNameMapper in jest.config.js
 
 import { verifyConsent } from '@/lib/autonomous/security/consent-manager';
 
@@ -32,7 +40,8 @@ describe('OperationService', () => {
 
   beforeEach(() => {
     jest.clearAllMocks();
-    operationService = new OperationService();
+    // Pass mock Supabase client to OperationService constructor
+    operationService = new OperationService(mockSupabaseClient as any);
   });
 
   describe('create', () => {

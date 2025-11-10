@@ -1,5 +1,5 @@
 // Mock for @/lib/supabase/server
-import { jest } from '@jest/globals';
+// This mock is automatically loaded via Jest's moduleNameMapper
 
 // Create a comprehensive Supabase client mock with Realtime support
 const createMockSupabaseClient = () => ({
@@ -25,11 +25,34 @@ const createMockSupabaseClient = () => ({
   removeAllChannels: jest.fn().mockResolvedValue([]),
 });
 
-export const createClient = jest.fn().mockResolvedValue(createMockSupabaseClient());
-export const createServerClient = jest.fn().mockResolvedValue(createMockSupabaseClient());
-export const createServiceClient = jest.fn().mockResolvedValue(createMockSupabaseClient());
-export const createServiceRoleClient = jest.fn().mockResolvedValue(createMockSupabaseClient());
-export const createServiceRoleClientSync = jest.fn().mockReturnValue(createMockSupabaseClient());
-export const requireClient = jest.fn().mockResolvedValue(createMockSupabaseClient());
-export const requireServiceRoleClient = jest.fn().mockResolvedValue(createMockSupabaseClient());
-export const validateSupabaseEnv = jest.fn().mockReturnValue(true);
+// Export mock functions - tests can reconfigure these in beforeEach
+const createClient = jest.fn();
+const createServerClient = jest.fn();
+const createServiceClient = jest.fn();
+const createServiceRoleClient = jest.fn();
+const createServiceRoleClientSync = jest.fn();
+const requireClient = jest.fn();
+const requireServiceRoleClient = jest.fn();
+const validateSupabaseEnv = jest.fn();
+
+// Set default implementations
+createClient.mockResolvedValue(createMockSupabaseClient());
+createServerClient.mockResolvedValue(createMockSupabaseClient());
+createServiceClient.mockResolvedValue(createMockSupabaseClient());
+createServiceRoleClient.mockResolvedValue(createMockSupabaseClient());
+createServiceRoleClientSync.mockReturnValue(createMockSupabaseClient());
+requireClient.mockResolvedValue(createMockSupabaseClient());
+requireServiceRoleClient.mockResolvedValue(createMockSupabaseClient());
+validateSupabaseEnv.mockReturnValue(true);
+
+// Export all functions
+export {
+  createClient,
+  createServerClient,
+  createServiceClient,
+  createServiceRoleClient,
+  createServiceRoleClientSync,
+  requireClient,
+  requireServiceRoleClient,
+  validateSupabaseEnv,
+};

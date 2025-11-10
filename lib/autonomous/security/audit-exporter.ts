@@ -3,6 +3,7 @@
  * @module lib/autonomous/security/audit-exporter
  */
 
+// eslint-disable-next-line no-restricted-imports -- Type-only import, no runtime code imported
 import type { SupabaseClient } from '@supabase/supabase-js';
 import type { AuditRecord } from './audit-logger-types';
 

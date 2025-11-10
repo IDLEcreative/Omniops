@@ -1,8 +1,13 @@
+import { Page, expect, test } from '@playwright/test';
+
+const BASE_URL = process.env.NEXT_PUBLIC_APP_URL || 'http://localhost:3000';
+const TEST_TIMEOUT = 180000; // 3 minutes
+
 // Helper functions extracted from conversations-management.spec.ts
 /**
  * Navigate to conversations page
  */
-async function navigateToConversations(page: Page): Promise<void> {
+export async function navigateToConversations(page: Page): Promise<void> {
   console.log('📍 Navigating to conversations page');
 
   await page.goto(`${BASE_URL}/dashboard/conversations`, { waitUntil: 'networkidle' });
@@ -16,7 +21,7 @@ async function navigateToConversations(page: Page): Promise<void> {
 /**
  * Verify conversations list loaded
  */
-async function verifyConversationsList(page: Page, expectedCount: number): Promise<void> {
+export async function verifyConversationsList(page: Page, expectedCount: number): Promise<void> {
   console.log('📍 Verifying conversations list');
 
   const conversationItems = page.locator('[data-testid="conversation-item"], .conversation-item, .conversation-row, tr[data-conversation-id]');
@@ -31,7 +36,7 @@ async function verifyConversationsList(page: Page, expectedCount: number): Promi
 /**
  * Filter conversations by status
  */
-async function filterByStatus(page: Page, status: 'active' | 'resolved' | 'archived'): Promise<void> {
+export async function filterByStatus(page: Page, status: 'active' | 'resolved' | 'archived'): Promise<void> {
   console.log(`📍 Filtering by status: ${status}`);
 
   const statusFilter = page.locator(`select[name="status"], [data-testid="status-filter"]`).first();
@@ -51,7 +56,7 @@ async function filterByStatus(page: Page, status: 'active' | 'resolved' | 'archi
 /**
  * Filter conversations by date range
  */
-async function filterByDateRange(page: Page, startDate: string, endDate: string): Promise<void> {
+export async function filterByDateRange(page: Page, startDate: string, endDate: string): Promise<void> {
   console.log(`📍 Filtering by date range: ${startDate} to ${endDate}`);
 
   const startDateInput = page.locator('input[name="start_date"], input[type="date"]').first();
@@ -72,7 +77,7 @@ async function filterByDateRange(page: Page, startDate: string, endDate: string)
 /**
  * Search conversations
  */
-async function searchConversations(page: Page, searchTerm: string): Promise<void> {
+export async function searchConversations(page: Page, searchTerm: string): Promise<void> {
   console.log(`📍 Searching for: "${searchTerm}"`);
 
   const searchInput = page.locator('input[name="search"], input[placeholder*="Search" i], input[type="search"]').first();
@@ -93,7 +98,7 @@ async function searchConversations(page: Page, searchTerm: string): Promise<void
 /**
  * View conversation details
  */
-async function viewConversationDetails(page: Page, conversationId: string): Promise<void> {
+export async function viewConversationDetails(page: Page, conversationId: string): Promise<void> {
   console.log(`📍 Viewing conversation details: ${conversationId}`);
 
   const conversationRow = page.locator(`[data-conversation-id="${conversationId}"], tr:has-text("${conversationId}")`).first();
@@ -118,7 +123,7 @@ async function viewConversationDetails(page: Page, conversationId: string): Prom
 /**
  * Export conversations
  */
-async function exportConversations(page: Page, format: 'csv' | 'json' = 'csv'): Promise<void> {
+export async function exportConversations(page: Page, format: 'csv' | 'json' = 'csv'): Promise<void> {
   console.log(`📍 Exporting conversations as ${format.toUpperCase()}`);
 
   // Navigate back to conversations list if on details page
@@ -142,6 +147,3 @@ async function exportConversations(page: Page, format: 'csv' | 'json' = 'csv'): 
   // Verify download initiated (in real scenario, would check download)
   console.log(`✅ Export initiated for ${format.toUpperCase()} format`);
 }
-
-test.describe('Conversations Management Journey E2E', () => {
-  test.setTimeout(TEST_TIMEOUT);

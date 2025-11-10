@@ -6,23 +6,29 @@
 import { describe, it, expect, jest, beforeEach } from '@jest/globals';
 import { CredentialVault, type CredentialData } from '@/lib/autonomous/security/credential-vault';
 
-// Mock encryption functions
-jest.mock('@/lib/encryption/crypto-core', () => ({
-  encrypt: jest.fn((text: string) => Buffer.from(`encrypted_${text}`).toString('base64')),
-  decrypt: jest.fn((encrypted: string) => {
-    const decoded = Buffer.from(encrypted, 'base64').toString();
-    return decoded.replace('encrypted_', '');
-  })
-}));
+// Encryption functions are mocked via moduleNameMapper in jest.config.js
 
-// Mock Supabase
+// Mock Supabase with chainable query methods
+const createMockQuery = () => ({
+  select: jest.fn().mockReturnThis(),
+  insert: jest.fn().mockReturnThis(),
+  update: jest.fn().mockReturnThis(),
+  upsert: jest.fn().mockReturnThis(),
+  delete: jest.fn().mockReturnThis(),
+  eq: jest.fn().mockReturnThis(),
+  neq: jest.fn().mockReturnThis(),
+  gt: jest.fn().mockReturnThis(),
+  gte: jest.fn().mockReturnThis(),
+  lt: jest.fn().mockReturnThis(),
+  lte: jest.fn().mockReturnThis(),
+  order: jest.fn().mockReturnThis(),
+  limit: jest.fn().mockReturnThis(),
+  single: jest.fn().mockResolvedValue({ data: null, error: null })
+});
+
 const mockSupabaseClient = {
-  from: jest.fn()
+  from: jest.fn(() => createMockQuery())
 };
-
-jest.mock('@/lib/supabase/server', () => ({
-  createServerClient: jest.fn(() => mockSupabaseClient)
-}));
 
 import { encrypt, decrypt } from '@/lib/encryption/crypto-core';
 
@@ -33,7 +39,8 @@ describe('CredentialVault', () => {
 
   beforeEach(() => {
     jest.clearAllMocks();
-    vault = new CredentialVault();
+    // Pass mock Supabase client to CredentialVault constructor
+    vault = new CredentialVault(mockSupabaseClient as any);
   });
 
   describe('store', () => {

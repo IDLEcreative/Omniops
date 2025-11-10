@@ -68,7 +68,7 @@ export async function GET(request: NextRequest) {
     };
 
     // Fetch requested metrics
-    let result: any = {};
+    const result: any = {};
 
     if (metric === 'overview' || metric === 'all') {
       result.overview = await getRevenueMetrics(domain, timeRange);

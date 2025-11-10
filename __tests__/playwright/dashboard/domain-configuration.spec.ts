@@ -97,7 +97,7 @@ test.describe('Domain Configuration E2E', () => {
     console.log('📍 Step 3: Setting up domain API mock');
 
     let domainCreated = false;
-    let createdDomainId = `domain-${Date.now()}`;
+    const createdDomainId = `domain-${Date.now()}`;
     let createdDomainData: any = null;
 
     await page.route('**/api/domains**', async (route) => {

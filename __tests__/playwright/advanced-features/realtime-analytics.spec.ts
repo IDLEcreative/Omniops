@@ -132,7 +132,7 @@ async function verifyRealtimeConnection(page: Page): Promise<void> {
 
   // Check for WebSocket connection in console or network
   const hasWebSocket = await page.evaluate(() => {
-    // @ts-ignore
+    // @ts-expect-error - Window type doesn't include WebSocket in Playwright context
     return window.WebSocket !== undefined;
   });
 
@@ -142,7 +142,7 @@ async function verifyRealtimeConnection(page: Page): Promise<void> {
 
   // Check for polling interval or event source
   const hasEventSource = await page.evaluate(() => {
-    // @ts-ignore
+    // @ts-expect-error - Window type doesn't include EventSource in Playwright context
     return window.EventSource !== undefined;
   });
 
@@ -239,7 +239,7 @@ async function verifyNoPageRefresh(page: Page, startTimestamp: number): Promise<
   console.log('📍 Verifying no page refresh occurred');
 
   const currentTimestamp = await page.evaluate(() => {
-    // @ts-ignore
+    // @ts-expect-error - Performance timing API is deprecated but still used for compatibility
     return window.performance.timing.navigationStart;
   });
 
@@ -265,7 +265,7 @@ test.describe('Real-time Analytics E2E', () => {
 
     // Capture navigation timestamp
     const navTimestamp = await page.evaluate(() => {
-      // @ts-ignore
+      // @ts-expect-error - Performance timing API is deprecated but still used for compatibility
       return window.performance.timing.navigationStart;
     });
 

@@ -7,41 +7,31 @@ import { describe, it, expect, jest, beforeEach } from '@jest/globals';
 import { ConsentManager } from '@/lib/autonomous/security/consent-manager';
 import type { ConsentRequest } from '@/lib/autonomous/security/consent-types';
 
-// Mock Supabase
+// Mock Supabase with chainable query methods
+const createMockQuery = () => ({
+  select: jest.fn().mockReturnThis(),
+  insert: jest.fn().mockReturnThis(),
+  update: jest.fn().mockReturnThis(),
+  delete: jest.fn().mockReturnThis(),
+  eq: jest.fn().mockReturnThis(),
+  neq: jest.fn().mockReturnThis(),
+  gt: jest.fn().mockReturnThis(),
+  gte: jest.fn().mockReturnThis(),
+  lt: jest.fn().mockReturnThis(),
+  lte: jest.fn().mockReturnThis(),
+  order: jest.fn().mockReturnThis(),
+  limit: jest.fn().mockReturnThis(),
+  single: jest.fn().mockResolvedValue({ data: null, error: null })
+});
+
 const mockSupabaseClient = {
-  from: jest.fn(),
+  from: jest.fn(() => createMockQuery()),
   auth: {
     getUser: jest.fn()
   }
 };
 
-jest.mock('@/lib/supabase/server', () => ({
-  createServerClient: jest.fn(() => mockSupabaseClient)
-}));
-
-// Mock consent operations
-jest.mock('@/lib/autonomous/security/consent-operations', () => ({
-  insertConsent: jest.fn(),
-  selectConsent: jest.fn(),
-  updateConsentRevoked: jest.fn(),
-  updateConsentRevokedById: jest.fn(),
-  updateConsentExpiry: jest.fn(),
-  bulkRevokeForService: jest.fn(),
-  mapToConsentRecord: jest.fn((data) => ({
-    id: data.id,
-    organizationId: data.organization_id,
-    userId: data.user_id,
-    service: data.service,
-    operation: data.operation,
-    permissions: data.permissions,
-    grantedAt: data.granted_at,
-    expiresAt: data.expires_at,
-    revokedAt: data.revoked_at,
-    isActive: data.is_active,
-    consentVersion: data.consent_version,
-    createdAt: data.created_at
-  }))
-}));
+// Consent operations are mocked via moduleNameMapper in jest.config.js
 
 import {
   insertConsent,
@@ -64,7 +54,8 @@ describe('ConsentManager', () => {
 
   beforeEach(() => {
     jest.clearAllMocks();
-    consentManager = new ConsentManager();
+    // Pass mock Supabase client to ConsentManager constructor
+    consentManager = new ConsentManager(mockSupabaseClient as any);
   });
 
   describe('grant', () => {

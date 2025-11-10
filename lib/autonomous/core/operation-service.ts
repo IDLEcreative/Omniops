@@ -52,155 +52,66 @@ export interface OperationRecord {
 export class OperationService {
   private supabase: ReturnType<typeof createServerClient>;
 
-  constructor() {
-    this.supabase = createServerClient();
+  /**
+   * Create OperationService instance
+   * @param client Optional Supabase client (for testing). If not provided, creates one.
+   */
+  constructor(client?: ReturnType<typeof createServerClient>) {
+    this.supabase = client || createServerClient();
   }
 
   /**
    * Create a new autonomous operation
-   *
-   * @example
-   * const operation = await service.create({
-   *   organizationId: 'org-123',
-   *   userId: 'user-456',
-   *   service: 'woocommerce',
-   *   operation: 'api_key_generation',
-   *   workflowId: 'should-complete-woocommerce-setup-and-enable-product-search'
-   * });
    */
   async create(request: CreateOperationRequest): Promise<OperationRecord> {
-    try {
-      // Verify consent exists
-      const consentVerification = await verifyConsent(
-        request.organizationId,
-        request.service,
-        request.operation
-      );
+    const consentVerification = await verifyConsent(request.organizationId, request.service, request.operation);
+    const status = consentVerification.hasConsent ? 'pending' : 'awaiting_consent';
+    const consent_given = consentVerification.hasConsent;
 
-      if (!consentVerification.hasConsent) {
-        // Create operation in "awaiting_consent" state
-        const { data, error } = await this.supabase
-          .from('autonomous_operations')
-          .insert({
-            organization_id: request.organizationId,
-            user_id: request.userId || null,
-            service: request.service,
-            operation: request.operation,
-            workflow_id: request.workflowId || null,
-            status: 'awaiting_consent',
-            consent_given: false,
-            execution_metadata: request.metadata || {}
-          })
-          .select()
-          .single();
-
-        if (error) {
-          throw new Error(`Failed to create operation: ${error.message}`);
-        }
-
-        return this.mapToOperationRecord(data);
-      }
-
-      // Create operation in "pending" state (ready to execute)
-      const { data, error } = await this.supabase
-        .from('autonomous_operations')
-        .insert({
-          organization_id: request.organizationId,
-          user_id: request.userId || null,
-          service: request.service,
-          operation: request.operation,
-          workflow_id: request.workflowId || null,
-          status: 'pending',
-          consent_given: true,
-          consent_timestamp: new Date().toISOString(),
-          execution_metadata: request.metadata || {}
-        })
-        .select()
-        .single();
-
-      if (error) {
-        throw new Error(`Failed to create operation: ${error.message}`);
-        }
-
-      console.log('[OperationService] Operation created:', {
-        id: data.id,
+    const { data, error } = await this.supabase
+      .from('autonomous_operations')
+      .insert({
+        organization_id: request.organizationId,
+        user_id: request.userId || null,
         service: request.service,
-        operation: request.operation
-      });
+        operation: request.operation,
+        workflow_id: request.workflowId || null,
+        status,
+        consent_given,
+        consent_timestamp: consent_given ? new Date().toISOString() : null,
+        execution_metadata: request.metadata || {}
+      })
+      .select()
+      .single();
 
-      return this.mapToOperationRecord(data);
-    } catch (error) {
-      console.error('[OperationService] Create error:', error);
-      throw error;
-    }
+    if (error) throw new Error(`Failed to create operation: ${error.message}`);
+    if (consent_given) console.log('[OperationService] Operation created:', { id: data.id, service: request.service, operation: request.operation });
+    return this.mapToOperationRecord(data);
   }
 
   /**
    * Get operation by ID
    */
   async get(operationId: string): Promise<OperationRecord | null> {
-    try {
-      const { data, error } = await this.supabase
-        .from('autonomous_operations')
-        .select('*')
-        .eq('id', operationId)
-        .single();
-
-      if (error) {
-        if (error.code === 'PGRST116') {
-          return null;
-        }
-        throw new Error(`Failed to get operation: ${error.message}`);
-      }
-
-      return this.mapToOperationRecord(data);
-    } catch (error) {
-      console.error('[OperationService] Get error:', error);
-      throw error;
+    const { data, error } = await this.supabase.from('autonomous_operations').select('*').eq('id', operationId).single();
+    if (error) {
+      if (error.code === 'PGRST116') return null;
+      throw new Error(`Failed to get operation: ${error.message}`);
     }
+    return this.mapToOperationRecord(data);
   }
 
   /**
    * List operations for organization
    */
-  async list(
-    organizationId: string,
-    options?: {
-      status?: string;
-      service?: string;
-      limit?: number;
-    }
-  ): Promise<OperationRecord[]> {
-    try {
-      let query = this.supabase
-        .from('autonomous_operations')
-        .select('*')
-        .eq('organization_id', organizationId)
-        .order('created_at', { ascending: false });
-
-      if (options?.status) {
-        query = query.eq('status', options.status);
-      }
-
-      if (options?.service) {
-        query = query.eq('service', options.service);
-      }
-
-      if (options?.limit) {
-        query = query.limit(options.limit);
-      }
-
-      const { data, error } = await query;
-
-      if (error) {
-        throw new Error(`Failed to list operations: ${error.message}`);
-      }
-
-      return (data || []).map(this.mapToOperationRecord);
-    } catch (error) {
-      console.error('[OperationService] List error:', error);
-      throw error;
-    }
+  async list(organizationId: string, options?: { status?: string; service?: string; limit?: number }): Promise<OperationRecord[]> {
+    let query = this.supabase.from('autonomous_operations').select('*').eq('organization_id', organizationId).order('created_at', { ascending: false });
+    if (options?.status) query = query.eq('status', options.status);
+    if (options?.service) query = query.eq('service', options.service);
+    if (options?.limit) query = query.limit(options.limit);
+    const { data, error } = await query;
+    if (error) throw new Error(`Failed to list operations: ${error.message}`);
+    return (data || []).map(this.mapToOperationRecord);
   }
 
   /**
@@ -254,36 +165,10 @@ export class OperationService {
   /**
    * Get operation statistics for organization
    */
-  async getStats(organizationId: string): Promise<{
-    total: number;
-    pending: number;
-    in_progress: number;
-    completed: number;
-    failed: number;
-    success_rate: number;
-  }> {
-    try {
-      const operations = await this.list(organizationId);
-
-      const stats = {
-        total: operations.length,
-        pending: operations.filter(op => op.status === 'pending').length,
-        in_progress: operations.filter(op => op.status === 'in_progress').length,
-        completed: operations.filter(op => op.status === 'completed').length,
-        failed: operations.filter(op => op.status === 'failed').length,
-        success_rate: 0
-      };
-
-      const finished = stats.completed + stats.failed;
-      if (finished > 0) {
-        stats.success_rate = Math.round((stats.completed / finished) * 100);
-      }
-
-      return stats;
-    } catch (error) {
-      console.error('[OperationService] GetStats error:', error);
-      throw error;
-    }
+  async getStats(organizationId: string) {
+    const { calculateStats } = await import('./operation-statistics');
+    const operations = await this.list(organizationId);
+    return calculateStats(operations);
   }
 
   // ============================================================================
@@ -321,41 +206,17 @@ let operationServiceInstance: OperationService | null = null;
 
 /**
  * Get singleton operation service instance
+ * @param client Optional Supabase client (for testing)
  */
-export function getOperationService(): OperationService {
+export function getOperationService(client?: ReturnType<typeof createServerClient>): OperationService {
   if (!operationServiceInstance) {
-    operationServiceInstance = new OperationService();
+    operationServiceInstance = new OperationService(client);
   }
   return operationServiceInstance;
 }
 
 // ============================================================================
-// Convenience Functions
+// Convenience Functions (Re-exported from helpers)
 // ============================================================================
 
-/**
- * Create operation (convenience function)
- */
-export async function createOperation(request: CreateOperationRequest): Promise<OperationRecord> {
-  const service = getOperationService();
-  return service.create(request);
-}
-
-/**
- * Get operation (convenience function)
- */
-export async function getOperation(operationId: string): Promise<OperationRecord | null> {
-  const service = getOperationService();
-  return service.get(operationId);
-}
-
-/**
- * List operations (convenience function)
- */
-export async function listOperations(
-  organizationId: string,
-  options?: Parameters<OperationService['list']>[1]
-): Promise<OperationRecord[]> {
-  const service = getOperationService();
-  return service.list(organizationId, options);
-}
+export { createOperation, getOperation, listOperations } from './operation-helpers';

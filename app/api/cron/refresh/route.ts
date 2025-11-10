@@ -69,6 +69,23 @@ export async function GET(request: NextRequest) {
     );
   }
 
+  // Create history record at start
+  const startTime = new Date();
+  const { data: historyRecord, error: historyError } = await supabase
+    .from('cron_refresh_history')
+    .insert({
+      status: 'running',
+      started_at: startTime.toISOString(),
+    })
+    .select()
+    .single();
+
+  if (historyError) {
+    console.error('[Cron] Failed to create history record:', historyError);
+  }
+
+  const historyId = historyRecord?.id;
+
   try {
     // Get all active domains
     const { data: domains, error } = await supabase
@@ -161,6 +178,26 @@ export async function GET(request: NextRequest) {
       // Don't fail the entire cron job if cleanup fails
     }
 
+    // Update history record with success
+    const endTime = new Date();
+    const duration = endTime.getTime() - startTime.getTime();
+    const successCount = results.filter(r => r.success).length;
+    const failureCount = results.filter(r => !r.success && !r.skipped).length;
+
+    if (historyId) {
+      await supabase
+        .from('cron_refresh_history')
+        .update({
+          status: 'completed',
+          completed_at: endTime.toISOString(),
+          domains_processed: successCount,
+          domains_failed: failureCount,
+          total_duration_ms: duration,
+          metadata: { results },
+        })
+        .eq('id', historyId);
+    }
+
     return NextResponse.json({
       success: true,
       processed: results.length,
@@ -171,6 +208,23 @@ export async function GET(request: NextRequest) {
     });
   } catch (error) {
     console.error('Cron refresh error:', error);
+
+    // Update history record with failure
+    if (historyId) {
+      const endTime = new Date();
+      const duration = endTime.getTime() - startTime.getTime();
+
+      await supabase
+        .from('cron_refresh_history')
+        .update({
+          status: 'failed',
+          completed_at: endTime.toISOString(),
+          total_duration_ms: duration,
+          error_message: error instanceof Error ? error.message : 'Unknown error',
+        })
+        .eq('id', historyId);
+    }
+
     return NextResponse.json(
       {
         error: 'Internal server error',

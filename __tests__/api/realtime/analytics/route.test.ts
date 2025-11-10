@@ -1,6 +1,7 @@
 import { describe, it, expect, jest, beforeEach } from '@jest/globals';
 import { GET, OPTIONS } from '@/app/api/realtime/analytics/route';
 import { NextRequest } from 'next/server';
+import * as eventAggregator from '@/lib/realtime/event-aggregator';
 
 // Mock the realtime modules
 jest.mock('@/lib/realtime/analytics-stream', () => ({
@@ -57,7 +58,7 @@ describe('Real-time Analytics API Route', () => {
     });
 
     it('should include initial metrics in the stream', async () => {
-      const { getAggregatedMetrics } = require('@/lib/realtime/event-aggregator');
+      const getAggregatedMetrics = jest.mocked(eventAggregator.getAggregatedMetrics);
       getAggregatedMetrics.mockResolvedValueOnce({
         activeSessions: 10,
         messagesPerMinute: 50,
