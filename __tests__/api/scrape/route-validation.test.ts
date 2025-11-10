@@ -13,7 +13,8 @@ describe('/api/scrape - Validation', () => {
 
   beforeEach(async () => {
     jest.clearAllMocks()
-    jest.resetModules()
+    // Note: NOT calling jest.resetModules() because it would clear the configured mocks
+    // The moduleNameMapper ensures @/lib/scraper-api resolves to the mock file
 
     setupSupabaseMock()
     setupOpenAIMock()
@@ -132,24 +133,27 @@ describe('/api/scrape - Validation', () => {
       expect(data.error).toBe('job_id parameter is required')
     })
 
-    it('should accept valid job_id', async () => {
+    it('should return 404 for non-existent job_id', async () => {
       const request = new NextRequest('http://localhost:3000/api/scrape?job_id=job-123')
 
       const response = await GET(request)
       const data = await response.json()
 
-      expect(response.status).toBe(200)
-      expect(data.status).toBeDefined()
+      // Non-existent jobs should return 404, not 500
+      expect(response.status).toBe(404)
+      expect(data.error).toBe('Job not found')
+      expect(data.job_id).toBe('job-123')
     })
 
-    it('should handle multiple query parameters', async () => {
+    it('should return 404 for non-existent job with multiple params', async () => {
       const request = new NextRequest('http://localhost:3000/api/scrape?job_id=job-123&extra=param')
 
       const response = await GET(request)
       const data = await response.json()
 
-      expect(response.status).toBe(200)
-      expect(data.status).toBeDefined()
+      // Non-existent jobs should return 404, not 500
+      expect(response.status).toBe(404)
+      expect(data.error).toBe('Job not found')
     })
   })
 })

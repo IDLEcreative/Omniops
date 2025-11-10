@@ -52,13 +52,10 @@ describe('EcommerceExtractor - JSON-LD Parser', () => {
         sku: 'WIDGET-123',
         description: 'An amazing widget for all your needs',
         brand: 'WidgetCorp',
-        price: expect.objectContaining({
-          value: 29.99,
-          currency: 'USD'
-        }),
-        availability: expect.objectContaining({
-          inStock: true
-        }),
+        price: 29.99,
+        currency: 'USD',
+        availability: 'https://schema.org/InStock',
+        inStock: true,
         images: expect.arrayContaining([
           expect.objectContaining({ url: 'https://example.com/widget1.jpg' })
         ]),
@@ -96,10 +93,8 @@ describe('EcommerceExtractor - JSON-LD Parser', () => {
     expect(mockProductNormalizer.normalizeProduct).toHaveBeenCalledWith(
       expect.objectContaining({
         name: 'Second Product',
-        price: expect.objectContaining({
-          value: 15.99,
-          currency: 'EUR'
-        })
+        price: 15.99,
+        currency: 'EUR'
       })
     )
   })
@@ -157,13 +152,10 @@ describe('EcommerceExtractor - JSON-LD Parser', () => {
         sku: 'CP-999',
         description: 'A complete product with all fields',
         brand: 'BrandName',
-        price: expect.objectContaining({
-          value: 99.99,
-          currency: 'GBP'
-        }),
-        availability: expect.objectContaining({
-          inStock: true
-        }),
+        price: 99.99,
+        currency: 'GBP',
+        availability: 'https://schema.org/InStock',
+        inStock: true,
         rating: expect.objectContaining({
           value: 4.8,
           count: 250

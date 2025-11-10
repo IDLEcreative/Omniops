@@ -162,6 +162,16 @@ export async function handleJobStatus(
     return NextResponse.json(status);
   } catch (error) {
     console.error('Error checking crawl status:', error);
+
+    // If job not found, return 404 instead of 500
+    const errorMessage = error instanceof Error ? error.message : 'Unknown error';
+    if (errorMessage.includes('not found')) {
+      return NextResponse.json(
+        { error: 'Job not found', job_id: jobId },
+        { status: 404 }
+      );
+    }
+
     return NextResponse.json(
       { error: 'Failed to check crawl status' },
       { status: 500 }

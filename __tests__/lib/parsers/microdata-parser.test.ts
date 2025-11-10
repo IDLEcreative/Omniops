@@ -41,10 +41,10 @@ describe('EcommerceExtractor - Microdata Parser', () => {
         sku: 'MD-123',
         description: 'A product with microdata',
         brand: 'MicroBrand',
-        price: expect.objectContaining({
-          value: 39.99,
-          currency: 'USD'
-        })
+        price: 39.99,
+        currency: 'USD',
+        availability: 'https://schema.org/InStock',
+        inStock: true
       })
     )
   })
@@ -67,10 +67,8 @@ describe('EcommerceExtractor - Microdata Parser', () => {
     expect(mockProductNormalizer.normalizeProduct).toHaveBeenCalledWith(
       expect.objectContaining({
         name: 'Priced Microdata Product',
-        price: expect.objectContaining({
-          value: 59.99,
-          currency: 'EUR'
-        })
+        price: 59.99,
+        currency: 'EUR'
       })
     )
   })

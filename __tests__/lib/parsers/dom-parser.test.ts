@@ -36,14 +36,10 @@ describe('EcommerceExtractor - DOM Parser', () => {
         expect.objectContaining({
           name: 'DOM Product',
           sku: 'DOM-456',
-          price: expect.objectContaining({
-            value: 45.99,
-            currency: 'GBP'
-          }),
-          availability: expect.objectContaining({
-            availabilityText: 'In Stock',
-            inStock: true
-          }),
+          price: 45.99,
+          currency: 'GBP',
+          availability: 'In Stock',
+          inStock: true,
           description: 'A product extracted from DOM'
         })
       )

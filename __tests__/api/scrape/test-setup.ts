@@ -91,8 +91,18 @@ export function setupDefaultMocks(mocks?: {
   crawlWebsite.mockResolvedValue('job-123')
 
   checkStatus.mockResolvedValue({
+    jobId: 'job-123',
     status: 'completed',
+    progress: 100,
+    total: 10,
+    completed: 10,
+    failed: 0,
+    skipped: 0,
+    startedAt: new Date().toISOString(),
+    completedAt: new Date().toISOString(),
+    errors: [],
     data: [],
+    resultCount: 0,
   })
 
   healthStatus.mockResolvedValue({

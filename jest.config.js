@@ -56,8 +56,9 @@ const customJestConfig = {
     '^@/lib/embeddings$': '<rootDir>/__mocks__/@/lib/embeddings.ts',
     '^@/lib/redis$': '<rootDir>/__mocks__/@/lib/redis.js',
     '^@/lib/redis-enhanced$': '<rootDir>/__mocks__/@/lib/redis-enhanced.ts',
-    // NOTE: scraper-api and scraper-with-cleanup are mocked via jest.mock() in test-setup.ts
-    // NOT via moduleNameMapper, so they can be properly spied on
+    // NOTE: scraper-api and scraper-with-cleanup NOW in moduleNameMapper for reliable mocking
+    '^@/lib/scraper-api$': '<rootDir>/__mocks__/@/lib/scraper-api.ts',
+    '^@/lib/scraper-with-cleanup$': '<rootDir>/__mocks__/@/lib/scraper-with-cleanup.ts',
     '^@/lib/middleware/csrf$': '<rootDir>/__mocks__/@/lib/middleware/csrf.ts',
     // NOTE: recommendation mocks (vector-similarity, collaborative-filter, content-filter)
     // are mocked via jest.mock() in jest.setup.js, NOT via moduleNameMapper
