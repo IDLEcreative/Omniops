@@ -14,6 +14,8 @@
 
 import { randomBytes } from 'crypto';
 
+let SERVER_PORT = 3001; // Will be set by checkServerRunning
+
 // Simulate the scrape endpoint behavior
 async function simulateScrapeEndpoint(url: string): Promise<{
   success: boolean;
@@ -26,7 +28,7 @@ async function simulateScrapeEndpoint(url: string): Promise<{
   console.log(`   URL: ${url}`);
 
   try {
-    const response = await fetch('http://localhost:3001/api/demo/scrape', {
+    const response = await fetch(`http://localhost:${SERVER_PORT}/api/demo/scrape`, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({ url })
@@ -74,7 +76,7 @@ async function simulateChatEndpoint(sessionId: string, message: string): Promise
   console.log(`   Session ID: ${sessionId}`);
 
   try {
-    const response = await fetch('http://localhost:3001/api/demo/chat', {
+    const response = await fetch(`http://localhost:${SERVER_PORT}/api/demo/chat`, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({
@@ -285,32 +287,39 @@ process.on('uncaughtException', (error) => {
 });
 
 // Check server is running
-async function checkServerRunning() {
-  try {
-    const response = await fetch('http://localhost:3001/api/health', {
-      method: 'GET'
-    });
-    return response.ok;
-  } catch {
-    return false;
+async function checkServerRunning(): Promise<number | null> {
+  // Try port 3001 first, then 3000
+  for (const port of [3001, 3000]) {
+    try {
+      const response = await fetch(`http://localhost:${port}/api/health`, {
+        method: 'GET'
+      });
+      if (response.ok) {
+        return port;
+      }
+    } catch {
+      // Try next port
+    }
   }
+  return null;
 }
 
 // Main entry point
 (async () => {
-  console.log('🔍 Checking if dev server is running on port 3001...');
+  console.log('🔍 Checking if dev server is running...');
 
-  const serverRunning = await checkServerRunning();
+  const port = await checkServerRunning();
 
-  if (!serverRunning) {
-    console.log('\n❌ ERROR: Dev server not running on port 3001');
+  if (!port) {
+    console.log('\n❌ ERROR: Dev server not running on port 3000 or 3001');
     console.log('\nPlease start the server first:');
     console.log('   npm run dev');
     console.log('\nThen run this test again.');
     process.exit(1);
   }
 
-  console.log('✅ Server is running\n');
+  SERVER_PORT = port;
+  console.log(`✅ Server is running on port ${port}\n`);
 
   await runDemoFlowSimulation();
 })();

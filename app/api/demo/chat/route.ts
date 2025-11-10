@@ -77,18 +77,48 @@ export async function POST(req: NextRequest) {
     await checkMessageRateLimit(session_id);
 
     // Find relevant chunks using simple similarity
-    const relevantChunks = await findRelevantChunks(
-      message,
-      sessionData.chunks,
-      sessionData.embeddings
-    );
+    console.log('[DemoChat] Finding relevant chunks...');
+    let relevantChunks: string[];
+    try {
+      relevantChunks = await findRelevantChunks(
+        message,
+        sessionData.chunks,
+        sessionData.embeddings
+      );
+      console.log('[DemoChat] Found relevant chunks:', relevantChunks.length);
+    } catch (embeddingError) {
+      console.error('[DemoChat] Embedding generation failed:', embeddingError);
+      // Fallback: use first 3 chunks without similarity search
+      relevantChunks = sessionData.chunks.slice(0, 3);
+      console.log('[DemoChat] Using fallback chunks (no embedding)');
+    }
 
     // Generate response using OpenAI
-    const response = await generateDemoResponse(
-      message,
-      relevantChunks,
-      sessionData.domain
-    );
+    console.log('[DemoChat] Generating AI response...');
+    let response: string;
+    try {
+      response = await generateDemoResponse(
+        message,
+        relevantChunks,
+        sessionData.domain
+      );
+      console.log('[DemoChat] AI response generated successfully');
+    } catch (openaiError) {
+      console.error('[DemoChat] OpenAI API call failed:', {
+        error: openaiError,
+        message: openaiError instanceof Error ? openaiError.message : String(openaiError),
+        name: openaiError instanceof Error ? openaiError.name : undefined
+      });
+
+      // Return graceful error response instead of crashing
+      return NextResponse.json(
+        {
+          error: 'AI service temporarily unavailable. Please try again in a moment.',
+          retry: true
+        },
+        { status: 503 }
+      );
+    }
 
     // Update message count
     sessionData.message_count += 1;
