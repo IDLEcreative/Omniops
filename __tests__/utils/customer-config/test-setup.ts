@@ -113,7 +113,10 @@ export async function initializeTestData(): Promise<TestDataContext> {
 /**
  * Clean up all test data in reverse order of dependencies
  */
-export async function cleanupTestData(context: TestDataContext): Promise<void> {
+export async function cleanupTestData(context?: TestDataContext): Promise<void> {
+  if (!context) {
+    return; // Nothing to clean up
+  }
   const { serviceClient, config1Id, config2Id, user1Id, user2Id, org1Id, org2Id } = context;
 
   // Cleanup in reverse order of dependencies
