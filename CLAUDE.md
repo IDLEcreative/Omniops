@@ -11,7 +11,7 @@
 - **File Purpose:** Primary instruction set for Claude Code AI assistant
 - **Critical Sections:** Lines 6-165 (brand-agnostic, file placement, agents), 785-1044 (fix issues, create tests)
 - **Total MUST/NEVER Rules:** 52 directives
-- **Line Count:** ~1,700 lines ⚠️ **VIOLATES 300 LOC RULE** - needs refactoring into multiple files
+- **Line Count:** ~1,700 lines (exempt from 300 LOC rule - must be fully loaded into AI memory)
 - **Estimated Parse Time:** 30 seconds
 
 **⚡ Quick Navigation:**
@@ -28,8 +28,8 @@
 **MUST Rules (Required Actions):**
 1. **[Line 10-17]** NEVER hardcode: company names, products, industries, domains, URLs, emails
 2. **[Line 68]** NEVER create files in root (only config files allowed)
-3. **[Line 1008]** ALL files MUST be under 300 LOC - NO EXCEPTIONS (including docs, markdown, CLAUDE.md)
-4. **[Line 1020]** ALWAYS read entire file before making any changes
+3. **[Line 1008]** Code files MUST be under 300 LOC (AI instruction files exempt - need full context)
+4. **[Line 1018]** ALWAYS read entire file before making any changes
 5. **[Line 783]** Deploy agents immediately for parallelizable tasks (no user permission needed)
 6. **[Line 787]** Deploy agent immediately when encountering ANY issue
 7. **[Line 879]** Deploy testing agent immediately after completing any code
@@ -44,8 +44,8 @@
 6. **[Line 1509]** NEVER add dependencies without checking native JS/TS alternatives
 
 **ALWAYS Rules (Required Behaviors):**
-1. **[Line 734]** ALWAYS read complete file before editing
-2. **[Line 740]** ALWAYS consider multiple approaches like a Senior Engineer
+1. **[Line 1018]** ALWAYS read complete file before editing
+2. **[Line 746]** ALWAYS consider multiple approaches like a Senior Engineer
 3. **[Line 787-799]** ALWAYS deploy agent immediately for: test failures, build errors, linting, imports, type errors
 4. **[Line 879-892]** ALWAYS deploy testing agent after: new features, bug fixes, refactors, API endpoints, components
 5. **[Line 1060]** ALWAYS use standardized agent prompt templates
@@ -99,7 +99,7 @@ Dependency updates needed    → Deploy parallel agents by category (line 1013)
 
 ### Code Quality Triggers (Refactor Immediately)
 ```
-File exceeds 300 LOC         → Refactor into smaller modules (line 1008) - NO EXCEPTIONS
+Code file exceeds 300 LOC    → Refactor into smaller modules (line 1008)
 Mock >3 levels deep          → Refactor for dependency injection (line 1159)
 Test setup >20 lines         → Refactor architecture (line 1160)
 O(n²) algorithm detected     → Optimize to O(n) or O(n log n) (line 1516-1623)
@@ -1005,17 +1005,15 @@ See [REFERENCE_DATABASE_SCHEMA.md](docs/09-REFERENCE/REFERENCE_DATABASE_SCHEMA.m
 ---
 
 ### FILE LENGTH
-- **STRICT RULE**: ALL files must be under 300 LOC (including documentation, markdown files, and CLAUDE.md itself)
-- **NO EXCEPTIONS**: Documentation files, configuration files, test files - everything must be <300 LOC
-- Current codebase has violations that need refactoring (including this file)
-- Files must be modular & single-purpose
-- **CLAUDE.md TODO**: Split into multiple focused files:
-  - `.claude/RULES_CRITICAL.md` - Critical rules index (~100 LOC)
-  - `.claude/TRIGGERS.md` - Auto-trigger index (~100 LOC)
-  - `.claude/PATTERNS.md` - Pattern library (~100 LOC)
-  - `.claude/MATRICES.md` - Decision matrices (~100 LOC)
-  - `.claude/PROJECT_OVERVIEW.md` - Project overview & architecture (~300 LOC)
-  - Main CLAUDE.md - High-level index pointing to sub-files (~50 LOC)
+- **STRICT RULE**: All code files (TypeScript, JavaScript) must be under 300 LOC
+- **EXCEPTION**: AI instruction files (CLAUDE.md, .claude/*.md) are EXEMPT
+  - **Reason**: Instruction files must be fully loaded into AI memory at session start
+  - Splitting would require active Read operations to access rules
+  - Critical rules/triggers might be missed if not in primary file
+  - Full context is essential for AI to function correctly
+- Current codebase has code violations that need refactoring
+- Code files must be modular & single-purpose
+- **Documentation files**: Should be <300 LOC where practical, but not strictly enforced if breaking would harm usefulness
 
 ### READING FILES
 - **ALWAYS** read the entire file before making changes
