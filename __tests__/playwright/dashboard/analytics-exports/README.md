@@ -61,6 +61,42 @@ Shared Playwright helpers for analytics export testing:
 - `verifyFileContent()` - Verify file exists and has content
 - `returnToDashboard()` - Return to dashboard after export
 
+## Authentication Required
+
+**IMPORTANT:** These tests require authentication to access the analytics dashboard.
+
+### First-Time Setup (Required)
+
+Before running analytics export tests, you must:
+
+1. **Create test user in database:**
+   ```bash
+   npx tsx scripts/tests/setup-test-user.ts
+   ```
+
+2. **Run authentication setup:**
+   ```bash
+   npx playwright test --project=setup
+   ```
+
+This creates a test user and saves authentication state to `playwright/.auth/user.json`.
+
+**See:** [AUTH_SETUP.md](../AUTH_SETUP.md) for complete authentication documentation.
+
+### Authentication Troubleshooting
+
+If tests fail with "Not authenticated":
+```bash
+# Re-run auth setup
+npx playwright test --project=setup
+
+# Verify test user exists
+npx tsx scripts/tests/setup-test-user.ts verify
+
+# Check auth state file
+ls -la playwright/.auth/user.json
+```
+
 ## Running Tests
 
 ### All analytics export tests

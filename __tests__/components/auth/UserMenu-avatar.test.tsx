@@ -1,14 +1,14 @@
 import { describe, it, expect, jest, beforeEach } from '@jest/globals';
 import { render, screen, waitFor } from '@/__tests__/utils/test-utils';
+
+// Use the automatic mock from __mocks__/@supabase/ssr.js
+jest.mock('@supabase/ssr');
+
+// Import the mock functions
+const { __mockGetUser, __mockOnAuthStateChange } = require('@supabase/ssr');
+
+// Import component AFTER mocks are set up
 import { UserMenu } from '@/components/auth/user-menu';
-import { createClient } from '@/lib/supabase/client';
-
-// Mock Supabase client
-const mockCreateBrowserClient = jest.fn();
-
-jest.mock('@/lib/supabase/client', () => ({
-  createClient: mockCreateBrowserClient,
-}));
 
 // Mock Next.js navigation
 const mockPush = jest.fn();
@@ -30,33 +30,30 @@ jest.mock('next/navigation', () => ({
 }));
 
 describe('UserMenu Component - Avatar Display', () => {
-  let mockSupabaseClient: any;
+  const mockGetUser = __mockGetUser;
+  const mockOnAuthStateChange = __mockOnAuthStateChange;
 
   beforeEach(() => {
-    jest.clearAllMocks();
+    // Clear mock call history but keep implementations
+    mockGetUser.mockClear();
+    mockOnAuthStateChange.mockClear();
 
-    mockSupabaseClient = {
-      auth: {
-        getUser: jest.fn(),
-        signOut: jest.fn(),
-        onAuthStateChange: jest.fn(() => ({
-          data: {
-            subscription: {
-              unsubscribe: jest.fn(),
-            },
-          },
-        })),
+    // Reset to default implementations
+    mockGetUser.mockResolvedValue({ data: { user: null }, error: null });
+    mockOnAuthStateChange.mockReturnValue({
+      data: {
+        subscription: {
+          unsubscribe: jest.fn(),
+        },
       },
-    };
-
-    mockCreateBrowserClient.mockReturnValue(mockSupabaseClient);
+    });
   });
 
   describe('Avatar URL Display', () => {
     it('should use avatar URL from user metadata', async () => {
       const avatarUrl = 'https://example.com/avatar.jpg';
 
-      mockSupabaseClient.auth.getUser.mockResolvedValue({
+      mockGetUser.mockResolvedValue({
         data: {
           user: {
             id: 'user-123',
@@ -80,7 +77,7 @@ describe('UserMenu Component - Avatar Display', () => {
 
   describe('Initials Fallback', () => {
     it('should display initials as fallback when no avatar', async () => {
-      mockSupabaseClient.auth.getUser.mockResolvedValue({
+      mockGetUser.mockResolvedValue({
         data: {
           user: {
             id: 'user-123',
@@ -99,7 +96,7 @@ describe('UserMenu Component - Avatar Display', () => {
     });
 
     it('should generate correct initials from email', async () => {
-      mockSupabaseClient.auth.getUser.mockResolvedValue({
+      mockGetUser.mockResolvedValue({
         data: {
           user: {
             id: 'user-123',
@@ -118,7 +115,7 @@ describe('UserMenu Component - Avatar Display', () => {
     });
 
     it('should handle empty email gracefully', async () => {
-      mockSupabaseClient.auth.getUser.mockResolvedValue({
+      mockGetUser.mockResolvedValue({
         data: {
           user: {
             id: 'user-123',
@@ -140,7 +137,7 @@ describe('UserMenu Component - Avatar Display', () => {
 
   describe('Menu Icons', () => {
     it('should display icons in menu items', async () => {
-      mockSupabaseClient.auth.getUser.mockResolvedValue({
+      mockGetUser.mockResolvedValue({
         data: {
           user: {
             id: 'user-123',

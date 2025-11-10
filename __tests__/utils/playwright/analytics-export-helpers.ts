@@ -35,6 +35,10 @@ export function parseCSV(csvContent: string): Record<string, string>[] {
 
 /**
  * Navigate to analytics dashboard with retry logic
+ *
+ * NOTE: This function assumes the user is already authenticated.
+ * Authentication is handled by the global setup (auth.setup.ts) which
+ * runs before tests and saves authentication state.
  */
 export async function navigateToDashboard(page: Page): Promise<void> {
   console.log('📍 Navigate to analytics dashboard');
@@ -49,6 +53,11 @@ export async function navigateToDashboard(page: Page): Promise<void> {
   });
 
   await page.waitForLoadState('domcontentloaded');
+
+  // Check if we were redirected to login (auth failed)
+  if (page.url().includes('/login')) {
+    throw new Error('Not authenticated - redirected to login page. Run: npx playwright test --project=setup');
+  }
 
   // Wait for spinner to disappear
   await page.waitForSelector('[class*="animate-spin"]', { state: 'hidden', timeout: 15000 }).catch(() => {
