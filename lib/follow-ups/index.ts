@@ -17,11 +17,12 @@ export {
 
 export {
   scheduleFollowUps,
-  sendPendingFollowUps,
   cancelFollowUps,
   type FollowUpMessage,
   type ScheduleOptions,
 } from './scheduler';
+
+export { sendPendingFollowUps } from './message-sender';
 
 export {
   getFollowUpAnalytics,

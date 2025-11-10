@@ -1,5 +1,19 @@
+/**
+ * CSV Export Generator
+ *
+ * Purpose: Main entry point for CSV export functionality, providing functions
+ * to export search results in various formats (single export, streaming, thread-based).
+ *
+ * Last Updated: 2025-11-10
+ * Refactored: Extracted utilities to comply with 300 LOC limit
+ */
+
 import { SearchResult } from '@/lib/search/conversation-search';
 import { Readable } from 'stream';
+import { buildHeaders, buildRow, buildThreadHeaders, buildThreadRow } from './csv/data-transformer';
+import { escapeCSV, formatDate } from './csv/csv-formatter';
+import { createCSVStream, linesToCSV } from './csv/csv-writer';
+import { calculateOverallSentiment, getSentimentDistribution } from './csv/sentiment-analyzer';
 
 export interface CSVExportOptions {
   includeHeaders?: boolean;
@@ -21,6 +35,10 @@ const DEFAULT_OPTIONS: CSVExportOptions = {
 
 /**
  * Export search results to CSV format
+ *
+ * @param results - Array of search results to export
+ * @param options - CSV export options
+ * @returns CSV string
  */
 export function exportToCSV(
   results: SearchResult[],
@@ -41,150 +59,30 @@ export function exportToCSV(
     lines.push(row.join(opts.delimiter));
   }
 
-  return lines.join('\n');
+  return linesToCSV(lines);
 }
 
 /**
  * Export search results as a readable stream (for large datasets)
+ *
+ * @param results - Array of search results to export
+ * @param options - CSV export options
+ * @returns Readable stream of CSV data
  */
 export function exportToCSVStream(
   results: SearchResult[],
   options: CSVExportOptions = {}
 ): Readable {
   const opts = { ...DEFAULT_OPTIONS, ...options };
-  let index = 0;
-  let headersSent = false;
-
-  return new Readable({
-    read() {
-      // Send headers first
-      if (!headersSent && opts.includeHeaders) {
-        const headers = buildHeaders(opts);
-        this.push(headers.join(opts.delimiter) + '\n');
-        headersSent = true;
-      }
-
-      // Send data in chunks
-      const chunkSize = 100;
-      let count = 0;
-
-      while (index < results.length && count < chunkSize) {
-        const result = results[index];
-        const row = buildRow(result, opts);
-        this.push(row.join(opts.delimiter) + '\n');
-        index++;
-        count++;
-      }
-
-      // Signal end of stream
-      if (index >= results.length) {
-        this.push(null);
-      }
-    }
-  });
-}
-
-/**
- * Build CSV headers
- */
-function buildHeaders(options: CSVExportOptions): string[] {
-  const headers = [
-    'Conversation ID',
-    'Message ID',
-    'Date & Time',
-    'Customer Email',
-    'Domain',
-    'Role',
-    'Content'
-  ];
-
-  if (options.includeSentiment) {
-    headers.push('Sentiment');
-  }
-
-  if (options.includeScore) {
-    headers.push('Relevance Score');
-  }
-
-  if (options.includeHighlight) {
-    headers.push('Highlighted Text');
-  }
-
-  return headers;
-}
-
-/**
- * Build a CSV row from a search result
- */
-function buildRow(result: SearchResult, options: CSVExportOptions): string[] {
-  const row = [
-    escapeCSV(result.conversationId),
-    escapeCSV(result.messageId),
-    formatDate(result.createdAt, options.dateFormat),
-    escapeCSV(result.customerEmail || ''),
-    escapeCSV(result.domainName || ''),
-    escapeCSV(result.role),
-    escapeCSV(result.content)
-  ];
-
-  if (options.includeSentiment) {
-    row.push(escapeCSV(result.sentiment || 'neutral'));
-  }
-
-  if (options.includeScore) {
-    row.push(result.relevanceScore.toFixed(4));
-  }
-
-  if (options.includeHighlight) {
-    row.push(escapeCSV(stripHtml(result.highlight)));
-  }
-
-  return row;
-}
-
-/**
- * Escape special CSV characters
- */
-function escapeCSV(value: string): string {
-  if (!value) return '""';
-
-  // Check if value needs escaping
-  if (value.includes('"') || value.includes(',') || value.includes('\n') || value.includes('\r')) {
-    // Escape quotes by doubling them
-    value = value.replace(/"/g, '""');
-    // Wrap in quotes
-    return `"${value}"`;
-  }
-
-  return value;
-}
-
-/**
- * Format date according to specified format
- */
-function formatDate(dateString: string, format?: string): string {
-  const date = new Date(dateString);
-
-  switch (format) {
-    case 'US':
-      return date.toLocaleDateString('en-US') + ' ' + date.toLocaleTimeString('en-US');
-    case 'EU':
-      return date.toLocaleDateString('en-GB') + ' ' + date.toLocaleTimeString('en-GB');
-    case 'ISO':
-    default:
-      return date.toISOString();
-  }
-}
-
-/**
- * Strip HTML tags from text
- */
-function stripHtml(html: string): string {
-  return html.replace(/<[^>]*>/g, '');
+  return createCSVStream(results, opts);
 }
 
 /**
  * Generate CSV with conversation thread context
+ *
+ * @param conversations - Map of conversation ID to messages
+ * @param options - CSV export options
+ * @returns CSV string with conversation threads
  */
 export async function exportConversationThreadsToCSV(
   conversations: Map<string, SearchResult[]>,
@@ -195,18 +93,7 @@ export async function exportConversationThreadsToCSV(
 
   // Add headers
   if (opts.includeHeaders) {
-    const headers = [
-      'Conversation ID',
-      'Start Time',
-      'End Time',
-      'Customer Email',
-      'Domain',
-      'Message Count',
-      'Messages'
-    ];
-    if (opts.includeSentiment) {
-      headers.push('Overall Sentiment');
-    }
+    const headers = buildThreadHeaders(opts);
     lines.push(headers.join(opts.delimiter));
   }
 
@@ -214,28 +101,7 @@ export async function exportConversationThreadsToCSV(
   for (const [convId, messages] of conversations.entries()) {
     if (messages.length === 0) continue;
 
-    // Sort messages by time
-    messages.sort((a, b) =>
-      new Date(a.createdAt).getTime() - new Date(b.createdAt).getTime()
-    );
-
-    const firstMessage = messages[0];
-    const lastMessage = messages[messages.length - 1];
-
-    // Combine message contents
-    const messageThread = messages
-      .map(m => `[${m.role}]: ${m.content}`)
-      .join(' | ');
-
-    const row = [
-      escapeCSV(convId),
-      formatDate(firstMessage.createdAt, opts.dateFormat),
-      formatDate(lastMessage.createdAt, opts.dateFormat),
-      escapeCSV(firstMessage.customerEmail || ''),
-      escapeCSV(firstMessage.domainName || ''),
-      messages.length.toString(),
-      escapeCSV(messageThread)
-    ];
+    const row = buildThreadRow(convId, messages, opts);
 
     if (opts.includeSentiment) {
       // Calculate overall sentiment
@@ -249,39 +115,17 @@ export async function exportConversationThreadsToCSV(
     lines.push(row.join(opts.delimiter));
   }
 
-  return lines.join('\n');
+  return linesToCSV(lines);
 }
 
 /**
- * Calculate overall sentiment from multiple messages
- */
-function calculateOverallSentiment(sentiments: (string | undefined)[]): string {
-  if (sentiments.length === 0) return 'neutral';
-
-  const counts = {
-    positive: 0,
-    negative: 0,
-    neutral: 0
-  };
-
-  for (const sentiment of sentiments) {
-    if (sentiment === 'positive') counts.positive++;
-    else if (sentiment === 'negative') counts.negative++;
-    else counts.neutral++;
-  }
-
-  // Return the dominant sentiment
-  if (counts.negative > counts.positive && counts.negative > counts.neutral) {
-    return 'negative';
-  } else if (counts.positive > counts.negative && counts.positive > counts.neutral) {
-    return 'positive';
-  } else {
-    return 'neutral';
-  }
-}
-
-/**
- * Generate CSV summary report
+ * Generate CSV summary report with statistics
+ *
+ * @param results - Search results to summarize
+ * @param searchQuery - Original search query
+ * @param filters - Applied filters
+ * @param executionTime - Query execution time in ms
+ * @returns CSV string with summary report
  */
 export function generateSearchSummaryCSV(
   results: SearchResult[],
@@ -318,16 +162,13 @@ export function generateSearchSummaryCSV(
   lines.push('');
 
   // Sentiment distribution
-  const sentiments = { positive: 0, negative: 0, neutral: 0 };
-  results.forEach(r => {
-    const sentiment = r.sentiment || 'neutral';
-    sentiments[sentiment as keyof typeof sentiments]++;
-  });
+  const sentiments = results.map(r => r.sentiment);
+  const distribution = getSentimentDistribution(sentiments);
 
   lines.push('Sentiment,Count');
-  lines.push(`Positive,${sentiments.positive}`);
-  lines.push(`Negative,${sentiments.negative}`);
-  lines.push(`Neutral,${sentiments.neutral}`);
+  lines.push(`Positive,${distribution.positive}`);
+  lines.push(`Negative,${distribution.negative}`);
+  lines.push(`Neutral,${distribution.neutral}`);
   lines.push('');
 
   // Add detailed results
@@ -337,5 +178,5 @@ export function generateSearchSummaryCSV(
   const csvContent = exportToCSV(results);
   lines.push(csvContent);
 
-  return lines.join('\n');
+  return linesToCSV(lines);
 }

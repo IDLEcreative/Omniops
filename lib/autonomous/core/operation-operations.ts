@@ -137,6 +137,32 @@ export const updateOperationCancelled = async (
 };
 
 /**
+ * Update operation with arbitrary fields
+ */
+export const updateOperation = async (
+  supabase: ReturnType<typeof createServerClient>,
+  operationId: string,
+  updates: Partial<{
+    status: string;
+    started_at: string;
+    completed_at: string;
+    current_step: number;
+    total_steps: number;
+    result: any;
+    error_message: string;
+  }>
+): Promise<void> => {
+  const { error } = await supabase
+    .from('autonomous_operations')
+    .update(updates)
+    .eq('id', operationId);
+
+  if (error) {
+    throw new Error(`Failed to update operation: ${error.message}`);
+  }
+};
+
+/**
  * Map database record to OperationRecord type
  */
 export const mapToOperationRecord = (data: any): OperationRecord => {

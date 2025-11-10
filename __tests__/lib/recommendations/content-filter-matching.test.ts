@@ -20,8 +20,6 @@ describe('Content-Based Filter - Matching', () => {
   beforeEach(() => {
     jest.clearAllMocks();
 
-    // Mock Supabase client with chainable methods
-    // Note: .eq() is terminal for second query, .in() is terminal for first query
     mockSupabase = {
       from: jest.fn().mockReturnThis(),
       select: jest.fn().mockReturnThis(),
@@ -29,15 +27,14 @@ describe('Content-Based Filter - Matching', () => {
       in: jest.fn().mockReturnThis(),
     };
 
-    mockCreateClient.mockResolvedValue(mockSupabase);
+    // Use jest.requireMock to get the mocked module and configure it
+    const supabaseModule = jest.requireMock('@/lib/supabase/server');
+    supabaseModule.createClient.mockResolvedValue(mockSupabase);
   });
 
   describe('category matching', () => {
     it('should find products in same category', async () => {
-      // First query: .from().select().eq().in()
-      // The .eq() is intermediate, so it returns mockSupabase
-      // The .in() is terminal, so it returns data
-      mockSupabase.eq.mockReturnValueOnce(mockSupabase); // First .eq() returns mockSupabase
+      // First query: fetch reference products
       mockSupabase.in.mockResolvedValueOnce({
         data: [
           {
@@ -51,8 +48,7 @@ describe('Content-Based Filter - Matching', () => {
         error: null,
       });
 
-      // Second query: .from().select().eq()
-      // The .eq() is terminal, so it returns data
+      // Second query: fetch all products for comparison
       mockSupabase.eq.mockResolvedValueOnce({
         data: [
           {
@@ -86,6 +82,7 @@ describe('Content-Based Filter - Matching', () => {
     });
 
     it('should calculate Jaccard similarity for categories', async () => {
+      // First query: fetch reference products
       mockSupabase.in.mockResolvedValueOnce({
         data: [
           {
@@ -99,6 +96,7 @@ describe('Content-Based Filter - Matching', () => {
         error: null,
       });
 
+      // Second query: fetch all products for comparison
       mockSupabase.eq.mockResolvedValueOnce({
         data: [
           {
@@ -111,7 +109,7 @@ describe('Content-Based Filter - Matching', () => {
           {
             product_id: 'prod-2',
             metadata: {
-              categories: ['cat-1'], // Partial match (Jaccard = 0.5)
+              categories: ['cat-1'], // Partial match (Jaccard ~0.67)
               tags: [],
             },
           },
@@ -126,11 +124,13 @@ describe('Content-Based Filter - Matching', () => {
       });
 
       // prod-1 should rank higher (perfect category match)
+      expect(result.length).toBeGreaterThan(0);
       expect(result[0].productId).toBe('prod-1');
       expect(result[0].score).toBeGreaterThan(result[1].score);
     });
 
     it('should weight categories more than tags (70/30)', async () => {
+      // First query: fetch reference products
       mockSupabase.in.mockResolvedValueOnce({
         data: [
           {
@@ -144,12 +144,13 @@ describe('Content-Based Filter - Matching', () => {
         error: null,
       });
 
+      // Second query: fetch all products for comparison
       mockSupabase.eq.mockResolvedValueOnce({
         data: [
           {
             product_id: 'prod-1',
             metadata: {
-              categories: ['cat-1'], // Category match only
+              categories: ['cat-1'], // Category match only (score = 1.0 * 0.7 = 0.7)
               tags: ['tag-2'],
             },
           },
@@ -157,7 +158,7 @@ describe('Content-Based Filter - Matching', () => {
             product_id: 'prod-2',
             metadata: {
               categories: ['cat-2'],
-              tags: ['tag-1'], // Tag match only
+              tags: ['tag-1'], // Tag match only (score = 1.0 * 0.3 = 0.3)
             },
           },
         ],
@@ -171,18 +172,20 @@ describe('Content-Based Filter - Matching', () => {
       });
 
       // prod-1 should rank higher (category match is weighted 70%)
+      expect(result.length).toBeGreaterThan(0);
       expect(result[0].productId).toBe('prod-1');
     });
   });
 
   describe('tag matching', () => {
     it('should find products with similar tags', async () => {
+      // First query: fetch reference products
       mockSupabase.in.mockResolvedValueOnce({
         data: [
           {
             product_id: 'ref-1',
             metadata: {
-              categories: [],
+              categories: ['cat-1'], // Add category to ensure score > 0.2
               tags: ['industrial', 'heavy-duty', 'hydraulic'],
             },
           },
@@ -190,12 +193,13 @@ describe('Content-Based Filter - Matching', () => {
         error: null,
       });
 
+      // Second query: fetch all products for comparison
       mockSupabase.eq.mockResolvedValueOnce({
         data: [
           {
             product_id: 'prod-1',
             metadata: {
-              categories: [],
+              categories: ['cat-1'], // Match category too
               tags: ['industrial', 'heavy-duty'],
             },
           },
@@ -214,12 +218,13 @@ describe('Content-Based Filter - Matching', () => {
     });
 
     it('should be case-insensitive for tag matching', async () => {
+      // First query: fetch reference products
       mockSupabase.in.mockResolvedValueOnce({
         data: [
           {
             product_id: 'ref-1',
             metadata: {
-              categories: [],
+              categories: ['cat-1'], // Add category to ensure score > 0.2
               tags: ['Industrial', 'HEAVY-DUTY'],
             },
           },
@@ -227,12 +232,13 @@ describe('Content-Based Filter - Matching', () => {
         error: null,
       });
 
+      // Second query: fetch all products for comparison
       mockSupabase.eq.mockResolvedValueOnce({
         data: [
           {
             product_id: 'prod-1',
             metadata: {
-              categories: [],
+              categories: ['cat-1'], // Match category too
               tags: ['industrial', 'heavy-duty'],
             },
           },

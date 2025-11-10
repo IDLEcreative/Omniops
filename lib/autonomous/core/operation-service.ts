@@ -221,3 +221,4 @@ export function getOperationService(
 // ============================================================================
 
 export { createOperation, getOperation, listOperations } from './operation-helpers';
+export { updateOperation } from './operation-operations';

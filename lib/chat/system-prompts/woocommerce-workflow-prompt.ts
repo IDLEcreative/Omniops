@@ -67,6 +67,12 @@ export function getWooCommerceWorkflowPrompt(): string {
 **Step 3: Review Cart** → operation: "get_cart" (shows what's in cart)
 **Step 4: Apply Discounts** → operation: "apply_coupon_to_cart", couponCode: "[CODE]"
 
+**🎯 DIRECT CART MANIPULATION ENABLED:**
+- Items are added DIRECTLY to cart via Store API
+- Real-time cart updates without page redirects
+- Instant totals with taxes and shipping
+- Cart persists for 24 hours (session-based)
+
 **Cart Management:**
 - Remove item: operation: "remove_from_cart", productId: "[ID]"
 - Update quantity: operation: "update_cart_quantity", productId: "[ID]", quantity: [number]

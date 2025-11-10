@@ -9,18 +9,17 @@
 
 import { Worker, Job, WorkerOptions } from 'bullmq';
 import { createRedisClient } from '@/lib/redis';
+import { createServiceRoleClient } from '@/lib/supabase/server';
 import {
   OperationJobData,
   OperationJobResult,
-  OperationProgressUpdate,
   OperationQueueConfig,
   WooCommerceSetupJobData,
   ShopifySetupJobData,
 } from './types';
-import { createWooCommerceSetupAgent } from '../agents/woocommerce-setup-agent';
-import { createShopifySetupAgent } from '../agents/shopify-setup-agent';
-import { verifyConsent } from '../security/consent-manager';
-import { updateOperation } from '../core/operation-service';
+import { executeWooCommerceSetup, executeShopifySetup } from './handlers';
+import { validateConsent, createProgressUpdater, setupWorkerEventListeners } from './utils';
+import { updateOperation } from '../core/operation-operations';
 import { logAuditStep, getOperationAuditSummary } from '../security/audit-logger';
 
 // ============================================================================
@@ -58,7 +57,7 @@ export class OperationJobProcessor {
     );
 
     // Set up event listeners
-    this.setupEventListeners();
+    setupWorkerEventListeners(this.worker);
 
     console.log('[OperationProcessor] Worker started');
   }
@@ -72,39 +71,24 @@ export class OperationJobProcessor {
 
     console.log(`[OperationProcessor] Processing job: ${job.id} (${data.jobType})`);
 
+    // Create progress updater
+    const updateProgress = createProgressUpdater(job, data.operationId);
+
     try {
       // Update progress: Starting
-      await this.updateProgress(job, {
-        operationId: data.operationId,
-        status: 'active',
-        progress: 0,
-        message: 'Starting operation',
-        timestamp: new Date().toISOString(),
-      });
+      await job.updateProgress(0);
+      await updateProgress(0, 'Starting operation');
 
       // Step 1: Verify consent (10% progress)
       await job.updateProgress(10);
-      const hasConsent = await verifyConsent(
-        data.organizationId,
-        data.service,
-        data.operation
-      );
+      await validateConsent(data);
 
-      if (!hasConsent) {
-        throw new Error('User consent not found or expired');
-      }
-
-      await this.updateProgress(job, {
-        operationId: data.operationId,
-        status: 'active',
-        progress: 20,
-        message: 'Consent verified',
-        timestamp: new Date().toISOString(),
-      });
+      await job.updateProgress(20);
+      await updateProgress(20, 'Consent verified');
 
       // Step 2: Execute agent based on job type (20-90% progress)
       await job.updateProgress(30);
-      const result = await this.executeAgent(job, data);
+      const result = await this.executeAgent(job, data, updateProgress);
 
       // Step 3: Complete (100%)
       await job.updateProgress(100);
@@ -115,7 +99,8 @@ export class OperationJobProcessor {
       const auditSummary = await getOperationAuditSummary(data.operationId);
 
       // Update operation in database
-      await updateOperation(data.operationId, {
+      const supabase = await createServiceRoleClient();
+      await updateOperation(supabase, data.operationId, {
         status: result.success ? 'completed' : 'failed',
         completed_at: new Date().toISOString(),
         result: result.result,
@@ -140,7 +125,8 @@ export class OperationJobProcessor {
       console.error(`[OperationProcessor] Job failed: ${job.id}`, error);
 
       // Update operation status
-      await updateOperation(data.operationId, {
+      const supabase = await createServiceRoleClient();
+      await updateOperation(supabase, data.operationId, {
         status: 'failed',
         completed_at: new Date().toISOString(),
         error_message: (error as Error).message,
@@ -166,14 +152,15 @@ export class OperationJobProcessor {
    */
   private async executeAgent(
     job: Job<OperationJobData>,
-    data: OperationJobData
+    data: OperationJobData,
+    updateProgress: (progress: number, message: string) => Promise<void>
   ): Promise<{ success: boolean; result?: any; error?: string }> {
     switch (data.jobType) {
       case 'woocommerce_setup':
-        return this.executeWooCommerceSetup(job, data as WooCommerceSetupJobData);
+        return executeWooCommerceSetup(job, data as WooCommerceSetupJobData, updateProgress);
 
       case 'shopify_setup':
-        return this.executeShopifySetup(job, data as ShopifySetupJobData);
+        return executeShopifySetup(job, data as ShopifySetupJobData, updateProgress);
 
       case 'credential_rotation':
         // TODO: Implement credential rotation
@@ -186,154 +173,6 @@ export class OperationJobProcessor {
       default:
         throw new Error(`Unknown job type: ${(data as any).jobType}`);
     }
-  }
-
-  /**
-   * Execute WooCommerce setup agent
-   */
-  private async executeWooCommerceSetup(
-    job: Job<OperationJobData>,
-    data: WooCommerceSetupJobData
-  ): Promise<{ success: boolean; result?: any; error?: string }> {
-    try {
-      await job.updateProgress(40);
-      await this.updateProgress(job, {
-        operationId: data.operationId,
-        status: 'active',
-        progress: 40,
-        message: 'Creating WooCommerce agent',
-        timestamp: new Date().toISOString(),
-      });
-
-      const agent = createWooCommerceSetupAgent(data.config.storeUrl);
-
-      await job.updateProgress(50);
-      await this.updateProgress(job, {
-        operationId: data.operationId,
-        status: 'active',
-        progress: 50,
-        message: 'Executing WooCommerce setup',
-        timestamp: new Date().toISOString(),
-      });
-
-      const result = await agent.execute({
-        operationId: data.operationId,
-        organizationId: data.organizationId,
-        service: data.service,
-        operation: data.operation,
-        headless: data.config.headless !== false,
-        slowMo: data.config.slowMo || 0,
-      });
-
-      await job.updateProgress(90);
-
-      return {
-        success: result.success,
-        result: result,
-        error: result.error,
-      };
-    } catch (error) {
-      return {
-        success: false,
-        error: (error as Error).message,
-      };
-    }
-  }
-
-  /**
-   * Execute Shopify setup agent
-   */
-  private async executeShopifySetup(
-    job: Job<OperationJobData>,
-    data: ShopifySetupJobData
-  ): Promise<{ success: boolean; result?: any; error?: string }> {
-    try {
-      await job.updateProgress(40);
-      await this.updateProgress(job, {
-        operationId: data.operationId,
-        status: 'active',
-        progress: 40,
-        message: 'Creating Shopify agent',
-        timestamp: new Date().toISOString(),
-      });
-
-      const agent = createShopifySetupAgent(data.config.storeUrl);
-
-      await job.updateProgress(50);
-      await this.updateProgress(job, {
-        operationId: data.operationId,
-        status: 'active',
-        progress: 50,
-        message: 'Executing Shopify setup',
-        timestamp: new Date().toISOString(),
-      });
-
-      const result = await agent.execute({
-        operationId: data.operationId,
-        organizationId: data.organizationId,
-        service: data.service,
-        operation: data.operation,
-        headless: data.config.headless !== false,
-        slowMo: data.config.slowMo || 0,
-      });
-
-      await job.updateProgress(90);
-
-      return {
-        success: result.success,
-        result: result,
-        error: result.error,
-      };
-    } catch (error) {
-      return {
-        success: false,
-        error: (error as Error).message,
-      };
-    }
-  }
-
-  /**
-   * Update progress in database (for real-time monitoring)
-   */
-  private async updateProgress(
-    job: Job<OperationJobData>,
-    update: OperationProgressUpdate
-  ): Promise<void> {
-    try {
-      // Store progress in Redis for real-time access
-      const client = await this.worker.client;
-      const key = `operation:progress:${update.operationId}`;
-      await client.set(key, JSON.stringify(update), 'EX', 3600); // 1 hour expiry
-    } catch (error) {
-      console.warn('[OperationProcessor] Failed to update progress:', error);
-    }
-  }
-
-  /**
-   * Set up event listeners for worker monitoring
-   */
-  private setupEventListeners(): void {
-    this.worker.on('completed', (job, result) => {
-      console.log(`[OperationProcessor] Job completed: ${job.id}`, {
-        success: result.success,
-        duration: result.duration,
-      });
-    });
-
-    this.worker.on('failed', (job, error) => {
-      console.error(`[OperationProcessor] Job failed: ${job?.id}`, {
-        error: error.message,
-        attemptsMade: job?.attemptsMade,
-      });
-    });
-
-    this.worker.on('error', (error) => {
-      console.error('[OperationProcessor] Worker error:', error);
-    });
-
-    this.worker.on('stalled', (jobId) => {
-      console.warn(`[OperationProcessor] Job stalled: ${jobId}`);
-    });
   }
 
   /**

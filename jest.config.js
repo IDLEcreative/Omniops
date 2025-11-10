@@ -43,6 +43,7 @@ const customJestConfig = {
     // Internal module mocks - MUST come before the catch-all '^@/(.*)$' pattern
     // NOTE: supabase-server is mocked via jest.mock() in jest.setup.js, NOT via moduleNameMapper
     '^@/lib/supabase/server$': '<rootDir>/__mocks__/@/lib/supabase/server.ts',
+    '^@/lib/supabase/client$': '<rootDir>/__mocks__/@/lib/supabase/client.ts',
     '^@/lib/autonomous/security/consent-operations$': '<rootDir>/__mocks__/@/lib/autonomous/security/consent-operations.ts',
     '^@/lib/autonomous/security/consent-manager$': '<rootDir>/__mocks__/@/lib/autonomous/security/consent-manager.ts',
     '^@/lib/autonomous/security/audit-logger$': '<rootDir>/__mocks__/@/lib/autonomous/security/audit-logger.ts',
