@@ -1,0 +1,5454 @@
+{
+  "workflows": [
+    {
+      "id": "renders-metrics-and-rollup-health-badge",
+      "name": "renders metrics and rollup health badge",
+      "intent": "Execute renders metrics and rollup health badge",
+      "preconditions": [
+        "User must have network access to application",
+        "Application must be running and accessible"
+      ],
+      "steps": [
+        {
+          "order": 1,
+          "intent": "Navigate to /dashboard/telemetry",
+          "action": "navigate",
+          "target": "/dashboard/telemetry",
+          "expectedResult": "Page loads successfully with expected content",
+          "alternatives": []
+        },
+        {
+          "order": 2,
+          "intent": "Verify expected state or outcome",
+          "action": "verify",
+          "expectedResult": "Verification passes",
+          "alternatives": []
+        },
+        {
+          "order": 3,
+          "intent": "Verify expected state or outcome",
+          "action": "verify",
+          "expectedResult": "Verification passes",
+          "alternatives": []
+        },
+        {
+          "order": 4,
+          "intent": "Verify expected state or outcome",
+          "action": "verify",
+          "expectedResult": "Verification passes",
+          "alternatives": []
+        },
+        {
+          "order": 5,
+          "intent": "Verify expected state or outcome",
+          "action": "verify",
+          "expectedResult": "Verification passes",
+          "alternatives": []
+        },
+        {
+          "order": 6,
+          "intent": "Verify expected state or outcome",
+          "action": "verify",
+          "expectedResult": "Verification passes",
+          "alternatives": []
+        },
+        {
+          "order": 7,
+          "intent": "Verify expected state or outcome",
+          "action": "verify",
+          "expectedResult": "Verification passes",
+          "alternatives": []
+        },
+        {
+          "order": 8,
+          "intent": "Verify expected state or outcome",
+          "action": "verify",
+          "expectedResult": "Verification passes",
+          "alternatives": []
+        },
+        {
+          "order": 9,
+          "intent": "Verify expected state or outcome",
+          "action": "verify",
+          "expectedResult": "Verification passes",
+          "alternatives": []
+        },
+        {
+          "order": 10,
+          "intent": "Verify expected state or outcome",
+          "action": "verify",
+          "expectedResult": "Verification passes",
+          "alternatives": []
+        }
+      ],
+      "postconditions": [
+        "All verification checks pass"
+      ],
+      "successIndicators": [
+        "No error messages displayed",
+        "All steps complete without exceptions"
+      ],
+      "errorRecovery": [
+        "Log error and notify user"
+      ]
+    },
+    {
+      "id": "should-track-session-metadata-across-page-navigation",
+      "name": "should track session metadata across page navigation",
+      "intent": "Execute should track session metadata across page navigation",
+      "preconditions": [
+        "User must have network access to application",
+        "Application must be running and accessible"
+      ],
+      "steps": [
+        {
+          "order": 1,
+          "intent": "Progress marker",
+          "action": "log",
+          "expectedResult": "Continue to next step",
+          "alternatives": []
+        },
+        {
+          "order": 2,
+          "intent": "Progress marker",
+          "action": "log",
+          "expectedResult": "Continue to next step",
+          "alternatives": []
+        },
+        {
+          "order": 3,
+          "intent": "Navigate to target page",
+          "action": "navigate",
+          "expectedResult": "Page loads successfully with expected content",
+          "alternatives": []
+        },
+        {
+          "order": 4,
+          "intent": "Wait for element or condition",
+          "action": "wait",
+          "expectedResult": "Element appears or condition becomes true",
+          "alternatives": []
+        },
+        {
+          "order": 5,
+          "intent": "Progress marker",
+          "action": "log",
+          "expectedResult": "Continue to next step",
+          "alternatives": []
+        },
+        {
+          "order": 6,
+          "intent": "Progress marker",
+          "action": "log",
+          "expectedResult": "Continue to next step",
+          "alternatives": []
+        },
+        {
+          "order": 7,
+          "intent": "Navigate to target page",
+          "action": "navigate",
+          "expectedResult": "Page loads successfully with expected content",
+          "alternatives": []
+        },
+        {
+          "order": 8,
+          "intent": "Wait for element or condition",
+          "action": "wait",
+          "expectedResult": "Element appears or condition becomes true",
+          "alternatives": []
+        },
+        {
+          "order": 9,
+          "intent": "Progress marker",
+          "action": "log",
+          "expectedResult": "Continue to next step",
+          "alternatives": []
+        },
+        {
+          "order": 10,
+          "intent": "Progress marker",
+          "action": "log",
+          "expectedResult": "Continue to next step",
+          "alternatives": []
+        },
+        {
+          "order": 11,
+          "intent": "Navigate to target page",
+          "action": "navigate",
+          "expectedResult": "Page loads successfully with expected content",
+          "alternatives": []
+        },
+        {
+          "order": 12,
+          "intent": "Wait for element or condition",
+          "action": "wait",
+          "expectedResult": "Element appears or condition becomes true",
+          "alternatives": []
+        },
+        {
+          "order": 13,
+          "intent": "Progress marker",
+          "action": "log",
+          "expectedResult": "Continue to next step",
+          "alternatives": []
+        },
+        {
+          "order": 14,
+          "intent": "Progress marker",
+          "action": "log",
+          "expectedResult": "Continue to next step",
+          "alternatives": []
+        },
+        {
+          "order": 15,
+          "intent": "Progress marker",
+          "action": "log",
+          "expectedResult": "Continue to next step",
+          "alternatives": []
+        },
+        {
+          "order": 16,
+          "intent": "Verify expected state or outcome",
+          "action": "verify",
+          "expectedResult": "Verification passes",
+          "alternatives": []
+        },
+        {
+          "order": 17,
+          "intent": "Verify expected state or outcome",
+          "action": "verify",
+          "expectedResult": "Verification passes",
+          "alternatives": []
+        },
+        {
+          "order": 18,
+          "intent": "Verify expected state or outcome",
+          "action": "verify",
+          "expectedResult": "Verification passes",
+          "alternatives": []
+        },
+        {
+          "order": 19,
+          "intent": "Verify expected state or outcome",
+          "action": "verify",
+          "expectedResult": "Verification passes",
+          "alternatives": []
+        },
+        {
+          "order": 20,
+          "intent": "Verify expected state or outcome",
+          "action": "verify",
+          "expectedResult": "Verification passes",
+          "alternatives": []
+        },
+        {
+          "order": 21,
+          "intent": "Verify expected state or outcome",
+          "action": "verify",
+          "expectedResult": "Verification passes",
+          "alternatives": []
+        },
+        {
+          "order": 22,
+          "intent": "Progress marker",
+          "action": "log",
+          "expectedResult": "Continue to next step",
+          "alternatives": []
+        },
+        {
+          "order": 23,
+          "intent": "Verify expected state or outcome",
+          "action": "verify",
+          "expectedResult": "Verification passes",
+          "alternatives": []
+        },
+        {
+          "order": 24,
+          "intent": "Verify expected state or outcome",
+          "action": "verify",
+          "expectedResult": "Verification passes",
+          "alternatives": []
+        },
+        {
+          "order": 25,
+          "intent": "Progress marker",
+          "action": "log",
+          "expectedResult": "Continue to next step",
+          "alternatives": []
+        },
+        {
+          "order": 26,
+          "intent": "Progress marker",
+          "action": "log",
+          "expectedResult": "Continue to next step",
+          "alternatives": []
+        }
+      ],
+      "postconditions": [
+        "All verification checks pass"
+      ],
+      "successIndicators": [
+        "No error messages displayed",
+        "All steps complete without exceptions"
+      ],
+      "errorRecovery": [
+        "Log error and notify user"
+      ]
+    },
+    {
+      "id": "exports-user-data-by-session-id-with-download",
+      "name": "exports user data by session ID with download",
+      "intent": "Export user data in compliance with privacy regulations",
+      "preconditions": [
+        "None - workflow can start from any state"
+      ],
+      "steps": [
+        {
+          "order": 1,
+          "intent": "Enter data into field",
+          "action": "fill",
+          "expectedResult": "Field accepts input and validates correctly",
+          "alternatives": []
+        },
+        {
+          "order": 2,
+          "intent": "Enter data into field",
+          "action": "fill",
+          "expectedResult": "Field accepts input and validates correctly",
+          "alternatives": []
+        },
+        {
+          "order": 3,
+          "intent": "Click on element",
+          "action": "click",
+          "expectedResult": "Element responds and triggers expected action",
+          "alternatives": []
+        },
+        {
+          "order": 4,
+          "intent": "Verify expected state or outcome",
+          "action": "verify",
+          "expectedResult": "Verification passes",
+          "alternatives": []
+        },
+        {
+          "order": 5,
+          "intent": "Verify expected state or outcome",
+          "action": "verify",
+          "expectedResult": "Verification passes",
+          "alternatives": []
+        },
+        {
+          "order": 6,
+          "intent": "Verify expected state or outcome",
+          "action": "verify",
+          "expectedResult": "Verification passes",
+          "alternatives": []
+        },
+        {
+          "order": 7,
+          "intent": "Click on element",
+          "action": "click",
+          "expectedResult": "Element responds and triggers expected action",
+          "alternatives": []
+        },
+        {
+          "order": 8,
+          "intent": "Verify expected state or outcome",
+          "action": "verify",
+          "expectedResult": "Verification passes",
+          "alternatives": []
+        }
+      ],
+      "postconditions": [
+        "All verification checks pass"
+      ],
+      "successIndicators": [
+        "No error messages displayed",
+        "All steps complete without exceptions"
+      ],
+      "errorRecovery": [
+        "Log error and notify user"
+      ]
+    },
+    {
+      "id": "exports-user-data-by-email",
+      "name": "exports user data by email",
+      "intent": "Export user data in compliance with privacy regulations",
+      "preconditions": [
+        "None - workflow can start from any state"
+      ],
+      "steps": [
+        {
+          "order": 1,
+          "intent": "Enter data into field",
+          "action": "fill",
+          "expectedResult": "Field accepts input and validates correctly",
+          "alternatives": []
+        },
+        {
+          "order": 2,
+          "intent": "Enter data into field",
+          "action": "fill",
+          "expectedResult": "Field accepts input and validates correctly",
+          "alternatives": []
+        },
+        {
+          "order": 3,
+          "intent": "Click on element",
+          "action": "click",
+          "expectedResult": "Element responds and triggers expected action",
+          "alternatives": []
+        },
+        {
+          "order": 4,
+          "intent": "Verify expected state or outcome",
+          "action": "verify",
+          "expectedResult": "Verification passes",
+          "alternatives": []
+        },
+        {
+          "order": 5,
+          "intent": "Click on element",
+          "action": "click",
+          "expectedResult": "Element responds and triggers expected action",
+          "alternatives": []
+        },
+        {
+          "order": 6,
+          "intent": "Verify expected state or outcome",
+          "action": "verify",
+          "expectedResult": "Verification passes",
+          "alternatives": []
+        }
+      ],
+      "postconditions": [
+        "All verification checks pass"
+      ],
+      "successIndicators": [
+        "No error messages displayed",
+        "All steps complete without exceptions"
+      ],
+      "errorRecovery": [
+        "Log error and notify user"
+      ]
+    },
+    {
+      "id": "shows-validation-error-when-exporting-without-identifiers",
+      "name": "shows validation error when exporting without identifiers",
+      "intent": "Export user data in compliance with privacy regulations",
+      "preconditions": [
+        "None - workflow can start from any state"
+      ],
+      "steps": [
+        {
+          "order": 1,
+          "intent": "Enter data into field",
+          "action": "fill",
+          "expectedResult": "Field accepts input and validates correctly",
+          "alternatives": []
+        },
+        {
+          "order": 2,
+          "intent": "Click on element",
+          "action": "click",
+          "expectedResult": "Element responds and triggers expected action",
+          "alternatives": []
+        },
+        {
+          "order": 3,
+          "intent": "Verify expected state or outcome",
+          "action": "verify",
+          "expectedResult": "Verification passes",
+          "alternatives": []
+        }
+      ],
+      "postconditions": [
+        "All verification checks pass"
+      ],
+      "successIndicators": [
+        "Error message is displayed to user",
+        "System handles error gracefully"
+      ],
+      "errorRecovery": [
+        "Display clear error message to user",
+        "Provide actionable next steps",
+        "Do not lose user progress"
+      ]
+    },
+    {
+      "id": "shows-api-error-when-export-fails",
+      "name": "shows API error when export fails",
+      "intent": "Export user data in compliance with privacy regulations",
+      "preconditions": [
+        "None - workflow can start from any state"
+      ],
+      "steps": [
+        {
+          "order": 1,
+          "intent": "Enter data into field",
+          "action": "fill",
+          "expectedResult": "Field accepts input and validates correctly",
+          "alternatives": []
+        },
+        {
+          "order": 2,
+          "intent": "Enter data into field",
+          "action": "fill",
+          "expectedResult": "Field accepts input and validates correctly",
+          "alternatives": []
+        },
+        {
+          "order": 3,
+          "intent": "Click on element",
+          "action": "click",
+          "expectedResult": "Element responds and triggers expected action",
+          "alternatives": []
+        },
+        {
+          "order": 4,
+          "intent": "Verify expected state or outcome",
+          "action": "verify",
+          "expectedResult": "Verification passes",
+          "alternatives": []
+        }
+      ],
+      "postconditions": [
+        "All verification checks pass"
+      ],
+      "successIndicators": [
+        "Error message is displayed to user",
+        "System handles error gracefully"
+      ],
+      "errorRecovery": [
+        "Display clear error message to user",
+        "Provide actionable next steps",
+        "Do not lose user progress"
+      ]
+    },
+    {
+      "id": "deletes-user-data-with-confirmation-toggle",
+      "name": "deletes user data with confirmation toggle",
+      "intent": "Delete user data permanently with proper authorization",
+      "preconditions": [
+        "None - workflow can start from any state"
+      ],
+      "steps": [
+        {
+          "order": 1,
+          "intent": "Verify expected state or outcome",
+          "action": "verify",
+          "expectedResult": "Verification passes",
+          "alternatives": []
+        },
+        {
+          "order": 2,
+          "intent": "Verify expected state or outcome",
+          "action": "verify",
+          "expectedResult": "Verification passes",
+          "alternatives": []
+        },
+        {
+          "order": 3,
+          "intent": "Verify expected state or outcome",
+          "action": "verify",
+          "expectedResult": "Verification passes",
+          "alternatives": []
+        },
+        {
+          "order": 4,
+          "intent": "Verify expected state or outcome",
+          "action": "verify",
+          "expectedResult": "Verification passes",
+          "alternatives": []
+        },
+        {
+          "order": 5,
+          "intent": "Enter data into field",
+          "action": "fill",
+          "expectedResult": "Field accepts input and validates correctly",
+          "alternatives": []
+        },
+        {
+          "order": 6,
+          "intent": "Enter data into field",
+          "action": "fill",
+          "expectedResult": "Field accepts input and validates correctly",
+          "alternatives": []
+        },
+        {
+          "order": 7,
+          "intent": "Click on element",
+          "action": "click",
+          "expectedResult": "Element responds and triggers expected action",
+          "alternatives": []
+        },
+        {
+          "order": 8,
+          "intent": "Click on element",
+          "action": "click",
+          "expectedResult": "Element responds and triggers expected action",
+          "alternatives": []
+        },
+        {
+          "order": 9,
+          "intent": "Verify expected state or outcome",
+          "action": "verify",
+          "expectedResult": "Verification passes",
+          "alternatives": []
+        },
+        {
+          "order": 10,
+          "intent": "Click on element",
+          "action": "click",
+          "expectedResult": "Element responds and triggers expected action",
+          "alternatives": []
+        },
+        {
+          "order": 11,
+          "intent": "Verify expected state or outcome",
+          "action": "verify",
+          "expectedResult": "Verification passes",
+          "alternatives": []
+        },
+        {
+          "order": 12,
+          "intent": "Verify expected state or outcome",
+          "action": "verify",
+          "expectedResult": "Verification passes",
+          "alternatives": []
+        }
+      ],
+      "postconditions": [
+        "All verification checks pass"
+      ],
+      "successIndicators": [
+        "No error messages displayed",
+        "All steps complete without exceptions"
+      ],
+      "errorRecovery": [
+        "Log error and notify user"
+      ]
+    },
+    {
+      "id": "deletes-user-data-by-email-with-confirmation",
+      "name": "deletes user data by email with confirmation",
+      "intent": "Delete user data permanently with proper authorization",
+      "preconditions": [
+        "None - workflow can start from any state"
+      ],
+      "steps": [
+        {
+          "order": 1,
+          "intent": "Verify expected state or outcome",
+          "action": "verify",
+          "expectedResult": "Verification passes",
+          "alternatives": []
+        },
+        {
+          "order": 2,
+          "intent": "Verify expected state or outcome",
+          "action": "verify",
+          "expectedResult": "Verification passes",
+          "alternatives": []
+        },
+        {
+          "order": 3,
+          "intent": "Verify expected state or outcome",
+          "action": "verify",
+          "expectedResult": "Verification passes",
+          "alternatives": []
+        },
+        {
+          "order": 4,
+          "intent": "Enter data into field",
+          "action": "fill",
+          "expectedResult": "Field accepts input and validates correctly",
+          "alternatives": []
+        },
+        {
+          "order": 5,
+          "intent": "Enter data into field",
+          "action": "fill",
+          "expectedResult": "Field accepts input and validates correctly",
+          "alternatives": []
+        },
+        {
+          "order": 6,
+          "intent": "Click on element",
+          "action": "click",
+          "expectedResult": "Element responds and triggers expected action",
+          "alternatives": []
+        },
+        {
+          "order": 7,
+          "intent": "Click on element",
+          "action": "click",
+          "expectedResult": "Element responds and triggers expected action",
+          "alternatives": []
+        },
+        {
+          "order": 8,
+          "intent": "Verify expected state or outcome",
+          "action": "verify",
+          "expectedResult": "Verification passes",
+          "alternatives": []
+        },
+        {
+          "order": 9,
+          "intent": "Click on element",
+          "action": "click",
+          "expectedResult": "Element responds and triggers expected action",
+          "alternatives": []
+        },
+        {
+          "order": 10,
+          "intent": "Verify expected state or outcome",
+          "action": "verify",
+          "expectedResult": "Verification passes",
+          "alternatives": []
+        }
+      ],
+      "postconditions": [
+        "All verification checks pass"
+      ],
+      "successIndicators": [
+        "No error messages displayed",
+        "All steps complete without exceptions"
+      ],
+      "errorRecovery": [
+        "Log error and notify user"
+      ]
+    },
+    {
+      "id": "shows-message-when-no-data-found-to-delete",
+      "name": "shows message when no data found to delete",
+      "intent": "Delete user data permanently with proper authorization",
+      "preconditions": [
+        "None - workflow can start from any state"
+      ],
+      "steps": [
+        {
+          "order": 1,
+          "intent": "Enter data into field",
+          "action": "fill",
+          "expectedResult": "Field accepts input and validates correctly",
+          "alternatives": []
+        },
+        {
+          "order": 2,
+          "intent": "Enter data into field",
+          "action": "fill",
+          "expectedResult": "Field accepts input and validates correctly",
+          "alternatives": []
+        },
+        {
+          "order": 3,
+          "intent": "Click on element",
+          "action": "click",
+          "expectedResult": "Element responds and triggers expected action",
+          "alternatives": []
+        },
+        {
+          "order": 4,
+          "intent": "Click on element",
+          "action": "click",
+          "expectedResult": "Element responds and triggers expected action",
+          "alternatives": []
+        },
+        {
+          "order": 5,
+          "intent": "Verify expected state or outcome",
+          "action": "verify",
+          "expectedResult": "Verification passes",
+          "alternatives": []
+        }
+      ],
+      "postconditions": [
+        "All verification checks pass"
+      ],
+      "successIndicators": [
+        "No error messages displayed",
+        "All steps complete without exceptions"
+      ],
+      "errorRecovery": [
+        "Log error and notify user"
+      ]
+    },
+    {
+      "id": "prevents-deletion-without-confirmation",
+      "name": "prevents deletion without confirmation",
+      "intent": "Execute prevents deletion without confirmation",
+      "preconditions": [
+        "None - workflow can start from any state"
+      ],
+      "steps": [
+        {
+          "order": 1,
+          "intent": "Enter data into field",
+          "action": "fill",
+          "expectedResult": "Field accepts input and validates correctly",
+          "alternatives": []
+        },
+        {
+          "order": 2,
+          "intent": "Enter data into field",
+          "action": "fill",
+          "expectedResult": "Field accepts input and validates correctly",
+          "alternatives": []
+        },
+        {
+          "order": 3,
+          "intent": "Click on element",
+          "action": "click",
+          "expectedResult": "Element responds and triggers expected action",
+          "alternatives": []
+        },
+        {
+          "order": 4,
+          "intent": "Verify expected state or outcome",
+          "action": "verify",
+          "expectedResult": "Verification passes",
+          "alternatives": []
+        }
+      ],
+      "postconditions": [
+        "All verification checks pass"
+      ],
+      "successIndicators": [
+        "No error messages displayed",
+        "All steps complete without exceptions"
+      ],
+      "errorRecovery": [
+        "Log error and notify user"
+      ]
+    },
+    {
+      "id": "shows-api-error-when-deletion-fails",
+      "name": "shows API error when deletion fails",
+      "intent": "Execute shows API error when deletion fails",
+      "preconditions": [
+        "None - workflow can start from any state"
+      ],
+      "steps": [
+        {
+          "order": 1,
+          "intent": "Enter data into field",
+          "action": "fill",
+          "expectedResult": "Field accepts input and validates correctly",
+          "alternatives": []
+        },
+        {
+          "order": 2,
+          "intent": "Enter data into field",
+          "action": "fill",
+          "expectedResult": "Field accepts input and validates correctly",
+          "alternatives": []
+        },
+        {
+          "order": 3,
+          "intent": "Click on element",
+          "action": "click",
+          "expectedResult": "Element responds and triggers expected action",
+          "alternatives": []
+        },
+        {
+          "order": 4,
+          "intent": "Click on element",
+          "action": "click",
+          "expectedResult": "Element responds and triggers expected action",
+          "alternatives": []
+        },
+        {
+          "order": 5,
+          "intent": "Verify expected state or outcome",
+          "action": "verify",
+          "expectedResult": "Verification passes",
+          "alternatives": []
+        }
+      ],
+      "postconditions": [
+        "All verification checks pass"
+      ],
+      "successIndicators": [
+        "Error message is displayed to user",
+        "System handles error gracefully"
+      ],
+      "errorRecovery": [
+        "Display clear error message to user",
+        "Provide actionable next steps",
+        "Do not lose user progress"
+      ]
+    },
+    {
+      "id": "shows-loading-state-during-export",
+      "name": "shows loading state during export",
+      "intent": "Export user data in compliance with privacy regulations",
+      "preconditions": [
+        "None - workflow can start from any state"
+      ],
+      "steps": [
+        {
+          "order": 1,
+          "intent": "Enter data into field",
+          "action": "fill",
+          "expectedResult": "Field accepts input and validates correctly",
+          "alternatives": []
+        },
+        {
+          "order": 2,
+          "intent": "Enter data into field",
+          "action": "fill",
+          "expectedResult": "Field accepts input and validates correctly",
+          "alternatives": []
+        },
+        {
+          "order": 3,
+          "intent": "Click on element",
+          "action": "click",
+          "expectedResult": "Element responds and triggers expected action",
+          "alternatives": []
+        },
+        {
+          "order": 4,
+          "intent": "Verify expected state or outcome",
+          "action": "verify",
+          "expectedResult": "Verification passes",
+          "alternatives": []
+        },
+        {
+          "order": 5,
+          "intent": "Verify expected state or outcome",
+          "action": "verify",
+          "expectedResult": "Verification passes",
+          "alternatives": []
+        }
+      ],
+      "postconditions": [
+        "All verification checks pass"
+      ],
+      "successIndicators": [
+        "No error messages displayed",
+        "All steps complete without exceptions"
+      ],
+      "errorRecovery": [
+        "Log error and notify user"
+      ]
+    },
+    {
+      "id": "shows-loading-state-during-deletion",
+      "name": "shows loading state during deletion",
+      "intent": "Execute shows loading state during deletion",
+      "preconditions": [
+        "None - workflow can start from any state"
+      ],
+      "steps": [
+        {
+          "order": 1,
+          "intent": "Enter data into field",
+          "action": "fill",
+          "expectedResult": "Field accepts input and validates correctly",
+          "alternatives": []
+        },
+        {
+          "order": 2,
+          "intent": "Enter data into field",
+          "action": "fill",
+          "expectedResult": "Field accepts input and validates correctly",
+          "alternatives": []
+        },
+        {
+          "order": 3,
+          "intent": "Click on element",
+          "action": "click",
+          "expectedResult": "Element responds and triggers expected action",
+          "alternatives": []
+        },
+        {
+          "order": 4,
+          "intent": "Click on element",
+          "action": "click",
+          "expectedResult": "Element responds and triggers expected action",
+          "alternatives": []
+        },
+        {
+          "order": 5,
+          "intent": "Verify expected state or outcome",
+          "action": "verify",
+          "expectedResult": "Verification passes",
+          "alternatives": []
+        },
+        {
+          "order": 6,
+          "intent": "Verify expected state or outcome",
+          "action": "verify",
+          "expectedResult": "Verification passes",
+          "alternatives": []
+        },
+        {
+          "order": 7,
+          "intent": "Verify expected state or outcome",
+          "action": "verify",
+          "expectedResult": "Verification passes",
+          "alternatives": []
+        }
+      ],
+      "postconditions": [
+        "All verification checks pass"
+      ],
+      "successIndicators": [
+        "No error messages displayed",
+        "All steps complete without exceptions"
+      ],
+      "errorRecovery": [
+        "Log error and notify user"
+      ]
+    },
+    {
+      "id": "renders-gdpr-compliance-ui-elements",
+      "name": "renders GDPR compliance UI elements",
+      "intent": "Export user data in compliance with privacy regulations",
+      "preconditions": [
+        "None - workflow can start from any state"
+      ],
+      "steps": [
+        {
+          "order": 1,
+          "intent": "Verify expected state or outcome",
+          "action": "verify",
+          "expectedResult": "Verification passes",
+          "alternatives": []
+        },
+        {
+          "order": 2,
+          "intent": "Verify expected state or outcome",
+          "action": "verify",
+          "expectedResult": "Verification passes",
+          "alternatives": []
+        },
+        {
+          "order": 3,
+          "intent": "Verify expected state or outcome",
+          "action": "verify",
+          "expectedResult": "Verification passes",
+          "alternatives": []
+        },
+        {
+          "order": 4,
+          "intent": "Verify expected state or outcome",
+          "action": "verify",
+          "expectedResult": "Verification passes",
+          "alternatives": []
+        },
+        {
+          "order": 5,
+          "intent": "Verify expected state or outcome",
+          "action": "verify",
+          "expectedResult": "Verification passes",
+          "alternatives": []
+        },
+        {
+          "order": 6,
+          "intent": "Verify expected state or outcome",
+          "action": "verify",
+          "expectedResult": "Verification passes",
+          "alternatives": []
+        },
+        {
+          "order": 7,
+          "intent": "Verify expected state or outcome",
+          "action": "verify",
+          "expectedResult": "Verification passes",
+          "alternatives": []
+        },
+        {
+          "order": 8,
+          "intent": "Verify expected state or outcome",
+          "action": "verify",
+          "expectedResult": "Verification passes",
+          "alternatives": []
+        },
+        {
+          "order": 9,
+          "intent": "Verify expected state or outcome",
+          "action": "verify",
+          "expectedResult": "Verification passes",
+          "alternatives": []
+        }
+      ],
+      "postconditions": [
+        "All verification checks pass"
+      ],
+      "successIndicators": [
+        "No error messages displayed",
+        "All steps complete without exceptions"
+      ],
+      "errorRecovery": [
+        "Log error and notify user"
+      ]
+    },
+    {
+      "id": "displays-audit-log-entries-with-correct-metadata",
+      "name": "displays audit log entries with correct metadata",
+      "intent": "Execute displays audit log entries with correct metadata",
+      "preconditions": [
+        "None - workflow can start from any state"
+      ],
+      "steps": [
+        {
+          "order": 1,
+          "intent": "Wait for element or condition",
+          "action": "wait",
+          "expectedResult": "Element appears or condition becomes true",
+          "alternatives": []
+        },
+        {
+          "order": 2,
+          "intent": "Verify expected state or outcome",
+          "action": "verify",
+          "expectedResult": "Verification passes",
+          "alternatives": []
+        },
+        {
+          "order": 3,
+          "intent": "Verify expected state or outcome",
+          "action": "verify",
+          "expectedResult": "Verification passes",
+          "alternatives": []
+        },
+        {
+          "order": 4,
+          "intent": "Verify expected state or outcome",
+          "action": "verify",
+          "expectedResult": "Verification passes",
+          "alternatives": []
+        },
+        {
+          "order": 5,
+          "intent": "Verify expected state or outcome",
+          "action": "verify",
+          "expectedResult": "Verification passes",
+          "alternatives": []
+        },
+        {
+          "order": 6,
+          "intent": "Verify expected state or outcome",
+          "action": "verify",
+          "expectedResult": "Verification passes",
+          "alternatives": []
+        },
+        {
+          "order": 7,
+          "intent": "Verify expected state or outcome",
+          "action": "verify",
+          "expectedResult": "Verification passes",
+          "alternatives": []
+        }
+      ],
+      "postconditions": [
+        "All verification checks pass"
+      ],
+      "successIndicators": [
+        "No error messages displayed",
+        "All steps complete without exceptions"
+      ],
+      "errorRecovery": [
+        "Log error and notify user"
+      ]
+    },
+    {
+      "id": "filters-audit-log-by-request-type",
+      "name": "filters audit log by request type",
+      "intent": "Execute filters audit log by request type",
+      "preconditions": [
+        "None - workflow can start from any state"
+      ],
+      "steps": [
+        {
+          "order": 1,
+          "intent": "Click on element",
+          "action": "click",
+          "expectedResult": "Element responds and triggers expected action",
+          "alternatives": []
+        },
+        {
+          "order": 2,
+          "intent": "Click on element",
+          "action": "click",
+          "expectedResult": "Element responds and triggers expected action",
+          "alternatives": []
+        },
+        {
+          "order": 3,
+          "intent": "Verify expected state or outcome",
+          "action": "verify",
+          "expectedResult": "Verification passes",
+          "alternatives": []
+        },
+        {
+          "order": 4,
+          "intent": "Click on element",
+          "action": "click",
+          "expectedResult": "Element responds and triggers expected action",
+          "alternatives": []
+        },
+        {
+          "order": 5,
+          "intent": "Click on element",
+          "action": "click",
+          "expectedResult": "Element responds and triggers expected action",
+          "alternatives": []
+        },
+        {
+          "order": 6,
+          "intent": "Verify expected state or outcome",
+          "action": "verify",
+          "expectedResult": "Verification passes",
+          "alternatives": []
+        },
+        {
+          "order": 7,
+          "intent": "Verify expected state or outcome",
+          "action": "verify",
+          "expectedResult": "Verification passes",
+          "alternatives": []
+        }
+      ],
+      "postconditions": [
+        "All verification checks pass"
+      ],
+      "successIndicators": [
+        "No error messages displayed",
+        "All steps complete without exceptions"
+      ],
+      "errorRecovery": [
+        "Log error and notify user"
+      ]
+    },
+    {
+      "id": "should-load-widget-open-programmatically-and-send-message-with-session-metadata",
+      "name": "should load widget, open programmatically, and send message with session metadata",
+      "intent": "Execute should load widget, open programmatically, and send message with session metadata",
+      "preconditions": [
+        "User must have network access to application",
+        "Application must be running and accessible",
+        "Customer must have valid domain configuration"
+      ],
+      "steps": [
+        {
+          "order": 1,
+          "intent": "Progress marker",
+          "action": "log",
+          "expectedResult": "Continue to next step",
+          "alternatives": []
+        },
+        {
+          "order": 2,
+          "intent": "Progress marker",
+          "action": "log",
+          "expectedResult": "Continue to next step",
+          "alternatives": []
+        },
+        {
+          "order": 3,
+          "intent": "Navigate to target page",
+          "action": "navigate",
+          "expectedResult": "Page loads successfully with expected content",
+          "alternatives": []
+        },
+        {
+          "order": 4,
+          "intent": "Progress marker",
+          "action": "log",
+          "expectedResult": "Continue to next step",
+          "alternatives": []
+        },
+        {
+          "order": 5,
+          "intent": "Progress marker",
+          "action": "log",
+          "expectedResult": "Continue to next step",
+          "alternatives": []
+        },
+        {
+          "order": 6,
+          "intent": "Wait for element or condition",
+          "action": "wait",
+          "expectedResult": "Element appears or condition becomes true",
+          "alternatives": []
+        },
+        {
+          "order": 7,
+          "intent": "Progress marker",
+          "action": "log",
+          "expectedResult": "Continue to next step",
+          "alternatives": []
+        },
+        {
+          "order": 8,
+          "intent": "Progress marker",
+          "action": "log",
+          "expectedResult": "Continue to next step",
+          "alternatives": []
+        },
+        {
+          "order": 9,
+          "intent": "Verify expected state or outcome",
+          "action": "verify",
+          "expectedResult": "Verification passes",
+          "alternatives": []
+        },
+        {
+          "order": 10,
+          "intent": "Verify expected state or outcome",
+          "action": "verify",
+          "expectedResult": "Verification passes",
+          "alternatives": []
+        },
+        {
+          "order": 11,
+          "intent": "Verify expected state or outcome",
+          "action": "verify",
+          "expectedResult": "Verification passes",
+          "alternatives": []
+        },
+        {
+          "order": 12,
+          "intent": "Verify expected state or outcome",
+          "action": "verify",
+          "expectedResult": "Verification passes",
+          "alternatives": []
+        },
+        {
+          "order": 13,
+          "intent": "Progress marker",
+          "action": "log",
+          "expectedResult": "Continue to next step",
+          "alternatives": []
+        },
+        {
+          "order": 14,
+          "intent": "Progress marker",
+          "action": "log",
+          "expectedResult": "Continue to next step",
+          "alternatives": []
+        },
+        {
+          "order": 15,
+          "intent": "Wait for element or condition",
+          "action": "wait",
+          "expectedResult": "Element appears or condition becomes true",
+          "alternatives": []
+        },
+        {
+          "order": 16,
+          "intent": "Progress marker",
+          "action": "log",
+          "expectedResult": "Continue to next step",
+          "alternatives": []
+        },
+        {
+          "order": 17,
+          "intent": "Progress marker",
+          "action": "log",
+          "expectedResult": "Continue to next step",
+          "alternatives": []
+        },
+        {
+          "order": 18,
+          "intent": "Wait for element or condition",
+          "action": "wait",
+          "expectedResult": "Element appears or condition becomes true",
+          "alternatives": []
+        },
+        {
+          "order": 19,
+          "intent": "Progress marker",
+          "action": "log",
+          "expectedResult": "Continue to next step",
+          "alternatives": []
+        },
+        {
+          "order": 20,
+          "intent": "Wait for element or condition",
+          "action": "wait",
+          "expectedResult": "Element appears or condition becomes true",
+          "alternatives": []
+        },
+        {
+          "order": 21,
+          "intent": "Progress marker",
+          "action": "log",
+          "expectedResult": "Continue to next step",
+          "alternatives": []
+        },
+        {
+          "order": 22,
+          "intent": "Progress marker",
+          "action": "log",
+          "expectedResult": "Continue to next step",
+          "alternatives": []
+        },
+        {
+          "order": 23,
+          "intent": "Progress marker",
+          "action": "log",
+          "expectedResult": "Continue to next step",
+          "alternatives": []
+        },
+        {
+          "order": 24,
+          "intent": "Progress marker",
+          "action": "log",
+          "expectedResult": "Continue to next step",
+          "alternatives": []
+        },
+        {
+          "order": 25,
+          "intent": "Progress marker",
+          "action": "log",
+          "expectedResult": "Continue to next step",
+          "alternatives": []
+        },
+        {
+          "order": 26,
+          "intent": "Progress marker",
+          "action": "log",
+          "expectedResult": "Continue to next step",
+          "alternatives": []
+        },
+        {
+          "order": 27,
+          "intent": "Progress marker",
+          "action": "log",
+          "expectedResult": "Continue to next step",
+          "alternatives": []
+        },
+        {
+          "order": 28,
+          "intent": "Progress marker",
+          "action": "log",
+          "expectedResult": "Continue to next step",
+          "alternatives": []
+        },
+        {
+          "order": 29,
+          "intent": "Progress marker",
+          "action": "log",
+          "expectedResult": "Continue to next step",
+          "alternatives": []
+        },
+        {
+          "order": 30,
+          "intent": "Enter data into field",
+          "action": "fill",
+          "expectedResult": "Field accepts input and validates correctly",
+          "alternatives": []
+        },
+        {
+          "order": 31,
+          "intent": "Click on element",
+          "action": "click",
+          "expectedResult": "Element responds and triggers expected action",
+          "alternatives": []
+        },
+        {
+          "order": 32,
+          "intent": "Progress marker",
+          "action": "log",
+          "expectedResult": "Continue to next step",
+          "alternatives": []
+        },
+        {
+          "order": 33,
+          "intent": "Wait for element or condition",
+          "action": "wait",
+          "expectedResult": "Element appears or condition becomes true",
+          "alternatives": []
+        },
+        {
+          "order": 34,
+          "intent": "Progress marker",
+          "action": "log",
+          "expectedResult": "Continue to next step",
+          "alternatives": []
+        },
+        {
+          "order": 35,
+          "intent": "Verify expected state or outcome",
+          "action": "verify",
+          "expectedResult": "Verification passes",
+          "alternatives": []
+        },
+        {
+          "order": 36,
+          "intent": "Verify expected state or outcome",
+          "action": "verify",
+          "expectedResult": "Verification passes",
+          "alternatives": []
+        },
+        {
+          "order": 37,
+          "intent": "Verify expected state or outcome",
+          "action": "verify",
+          "expectedResult": "Verification passes",
+          "alternatives": []
+        },
+        {
+          "order": 38,
+          "intent": "Progress marker",
+          "action": "log",
+          "expectedResult": "Continue to next step",
+          "alternatives": []
+        },
+        {
+          "order": 39,
+          "intent": "Progress marker",
+          "action": "log",
+          "expectedResult": "Continue to next step",
+          "alternatives": []
+        },
+        {
+          "order": 40,
+          "intent": "Progress marker",
+          "action": "log",
+          "expectedResult": "Continue to next step",
+          "alternatives": []
+        },
+        {
+          "order": 41,
+          "intent": "Progress marker",
+          "action": "log",
+          "expectedResult": "Continue to next step",
+          "alternatives": []
+        },
+        {
+          "order": 42,
+          "intent": "Progress marker",
+          "action": "log",
+          "expectedResult": "Continue to next step",
+          "alternatives": []
+        },
+        {
+          "order": 43,
+          "intent": "Progress marker",
+          "action": "log",
+          "expectedResult": "Continue to next step",
+          "alternatives": []
+        },
+        {
+          "order": 44,
+          "intent": "Progress marker",
+          "action": "log",
+          "expectedResult": "Continue to next step",
+          "alternatives": []
+        },
+        {
+          "order": 45,
+          "intent": "Progress marker",
+          "action": "log",
+          "expectedResult": "Continue to next step",
+          "alternatives": []
+        },
+        {
+          "order": 46,
+          "intent": "Progress marker",
+          "action": "log",
+          "expectedResult": "Continue to next step",
+          "alternatives": []
+        },
+        {
+          "order": 47,
+          "intent": "Progress marker",
+          "action": "log",
+          "expectedResult": "Continue to next step",
+          "alternatives": []
+        },
+        {
+          "order": 48,
+          "intent": "Progress marker",
+          "action": "log",
+          "expectedResult": "Continue to next step",
+          "alternatives": []
+        },
+        {
+          "order": 49,
+          "intent": "Progress marker",
+          "action": "log",
+          "expectedResult": "Continue to next step",
+          "alternatives": []
+        },
+        {
+          "order": 50,
+          "intent": "Progress marker",
+          "action": "log",
+          "expectedResult": "Continue to next step",
+          "alternatives": []
+        },
+        {
+          "order": 51,
+          "intent": "Progress marker",
+          "action": "log",
+          "expectedResult": "Continue to next step",
+          "alternatives": []
+        },
+        {
+          "order": 52,
+          "intent": "Progress marker",
+          "action": "log",
+          "expectedResult": "Continue to next step",
+          "alternatives": []
+        },
+        {
+          "order": 53,
+          "intent": "Progress marker",
+          "action": "log",
+          "expectedResult": "Continue to next step",
+          "alternatives": []
+        },
+        {
+          "order": 54,
+          "intent": "Progress marker",
+          "action": "log",
+          "expectedResult": "Continue to next step",
+          "alternatives": []
+        },
+        {
+          "order": 55,
+          "intent": "Progress marker",
+          "action": "log",
+          "expectedResult": "Continue to next step",
+          "alternatives": []
+        }
+      ],
+      "postconditions": [
+        "Workflow completes without errors"
+      ],
+      "successIndicators": [
+        "No error messages displayed",
+        "All steps complete without exceptions"
+      ],
+      "errorRecovery": [
+        "Log error and notify user"
+      ]
+    },
+    {
+      "id": "should-display-analytics-dashboard-with-user-metrics-and-charts",
+      "name": "should display analytics dashboard with user metrics and charts",
+      "intent": "View analytics dashboard with key performance metrics",
+      "preconditions": [
+        "User must have network access to application",
+        "Application must be running and accessible"
+      ],
+      "steps": [
+        {
+          "order": 1,
+          "intent": "Navigate to target page",
+          "action": "navigate",
+          "expectedResult": "Page loads successfully with expected content",
+          "alternatives": []
+        },
+        {
+          "order": 2,
+          "intent": "Wait for element or condition",
+          "action": "wait",
+          "expectedResult": "Element appears or condition becomes true",
+          "alternatives": []
+        },
+        {
+          "order": 3,
+          "intent": "Progress marker",
+          "action": "log",
+          "expectedResult": "Continue to next step",
+          "alternatives": []
+        },
+        {
+          "order": 4,
+          "intent": "Progress marker",
+          "action": "log",
+          "expectedResult": "Continue to next step",
+          "alternatives": []
+        },
+        {
+          "order": 5,
+          "intent": "Verify expected state or outcome",
+          "action": "verify",
+          "expectedResult": "Verification passes",
+          "alternatives": []
+        },
+        {
+          "order": 6,
+          "intent": "Verify expected state or outcome",
+          "action": "verify",
+          "expectedResult": "Verification passes",
+          "alternatives": []
+        },
+        {
+          "order": 7,
+          "intent": "Wait for element or condition",
+          "action": "wait",
+          "expectedResult": "Element appears or condition becomes true",
+          "alternatives": []
+        },
+        {
+          "order": 8,
+          "intent": "Progress marker",
+          "action": "log",
+          "expectedResult": "Continue to next step",
+          "alternatives": []
+        },
+        {
+          "order": 9,
+          "intent": "Verify expected state or outcome",
+          "action": "verify",
+          "expectedResult": "Verification passes",
+          "alternatives": []
+        },
+        {
+          "order": 10,
+          "intent": "Verify expected state or outcome",
+          "action": "verify",
+          "expectedResult": "Verification passes",
+          "alternatives": []
+        },
+        {
+          "order": 11,
+          "intent": "Verify expected state or outcome",
+          "action": "verify",
+          "expectedResult": "Verification passes",
+          "alternatives": []
+        },
+        {
+          "order": 12,
+          "intent": "Verify expected state or outcome",
+          "action": "verify",
+          "expectedResult": "Verification passes",
+          "alternatives": []
+        },
+        {
+          "order": 13,
+          "intent": "Verify expected state or outcome",
+          "action": "verify",
+          "expectedResult": "Verification passes",
+          "alternatives": []
+        },
+        {
+          "order": 14,
+          "intent": "Verify expected state or outcome",
+          "action": "verify",
+          "expectedResult": "Verification passes",
+          "alternatives": []
+        },
+        {
+          "order": 15,
+          "intent": "Verify expected state or outcome",
+          "action": "verify",
+          "expectedResult": "Verification passes",
+          "alternatives": []
+        },
+        {
+          "order": 16,
+          "intent": "Verify expected state or outcome",
+          "action": "verify",
+          "expectedResult": "Verification passes",
+          "alternatives": []
+        },
+        {
+          "order": 17,
+          "intent": "Progress marker",
+          "action": "log",
+          "expectedResult": "Continue to next step",
+          "alternatives": []
+        },
+        {
+          "order": 18,
+          "intent": "Progress marker",
+          "action": "log",
+          "expectedResult": "Continue to next step",
+          "alternatives": []
+        },
+        {
+          "order": 19,
+          "intent": "Progress marker",
+          "action": "log",
+          "expectedResult": "Continue to next step",
+          "alternatives": []
+        },
+        {
+          "order": 20,
+          "intent": "Verify expected state or outcome",
+          "action": "verify",
+          "expectedResult": "Verification passes",
+          "alternatives": []
+        },
+        {
+          "order": 21,
+          "intent": "Verify expected state or outcome",
+          "action": "verify",
+          "expectedResult": "Verification passes",
+          "alternatives": []
+        },
+        {
+          "order": 22,
+          "intent": "Progress marker",
+          "action": "log",
+          "expectedResult": "Continue to next step",
+          "alternatives": []
+        },
+        {
+          "order": 23,
+          "intent": "Verify expected state or outcome",
+          "action": "verify",
+          "expectedResult": "Verification passes",
+          "alternatives": []
+        },
+        {
+          "order": 24,
+          "intent": "Progress marker",
+          "action": "log",
+          "expectedResult": "Continue to next step",
+          "alternatives": []
+        },
+        {
+          "order": 25,
+          "intent": "Progress marker",
+          "action": "log",
+          "expectedResult": "Continue to next step",
+          "alternatives": []
+        },
+        {
+          "order": 26,
+          "intent": "Progress marker",
+          "action": "log",
+          "expectedResult": "Continue to next step",
+          "alternatives": []
+        },
+        {
+          "order": 27,
+          "intent": "Progress marker",
+          "action": "log",
+          "expectedResult": "Continue to next step",
+          "alternatives": []
+        },
+        {
+          "order": 28,
+          "intent": "Verify expected state or outcome",
+          "action": "verify",
+          "expectedResult": "Verification passes",
+          "alternatives": []
+        },
+        {
+          "order": 29,
+          "intent": "Verify expected state or outcome",
+          "action": "verify",
+          "expectedResult": "Verification passes",
+          "alternatives": []
+        },
+        {
+          "order": 30,
+          "intent": "Verify expected state or outcome",
+          "action": "verify",
+          "expectedResult": "Verification passes",
+          "alternatives": []
+        },
+        {
+          "order": 31,
+          "intent": "Verify expected state or outcome",
+          "action": "verify",
+          "expectedResult": "Verification passes",
+          "alternatives": []
+        },
+        {
+          "order": 32,
+          "intent": "Verify expected state or outcome",
+          "action": "verify",
+          "expectedResult": "Verification passes",
+          "alternatives": []
+        },
+        {
+          "order": 33,
+          "intent": "Verify expected state or outcome",
+          "action": "verify",
+          "expectedResult": "Verification passes",
+          "alternatives": []
+        },
+        {
+          "order": 34,
+          "intent": "Verify expected state or outcome",
+          "action": "verify",
+          "expectedResult": "Verification passes",
+          "alternatives": []
+        },
+        {
+          "order": 35,
+          "intent": "Verify expected state or outcome",
+          "action": "verify",
+          "expectedResult": "Verification passes",
+          "alternatives": []
+        },
+        {
+          "order": 36,
+          "intent": "Verify expected state or outcome",
+          "action": "verify",
+          "expectedResult": "Verification passes",
+          "alternatives": []
+        },
+        {
+          "order": 37,
+          "intent": "Verify expected state or outcome",
+          "action": "verify",
+          "expectedResult": "Verification passes",
+          "alternatives": []
+        },
+        {
+          "order": 38,
+          "intent": "Verify expected state or outcome",
+          "action": "verify",
+          "expectedResult": "Verification passes",
+          "alternatives": []
+        },
+        {
+          "order": 39,
+          "intent": "Verify expected state or outcome",
+          "action": "verify",
+          "expectedResult": "Verification passes",
+          "alternatives": []
+        },
+        {
+          "order": 40,
+          "intent": "Verify expected state or outcome",
+          "action": "verify",
+          "expectedResult": "Verification passes",
+          "alternatives": []
+        },
+        {
+          "order": 41,
+          "intent": "Progress marker",
+          "action": "log",
+          "expectedResult": "Continue to next step",
+          "alternatives": []
+        },
+        {
+          "order": 42,
+          "intent": "Progress marker",
+          "action": "log",
+          "expectedResult": "Continue to next step",
+          "alternatives": []
+        },
+        {
+          "order": 43,
+          "intent": "Progress marker",
+          "action": "log",
+          "expectedResult": "Continue to next step",
+          "alternatives": []
+        }
+      ],
+      "postconditions": [
+        "Workflow completes without errors"
+      ],
+      "successIndicators": [
+        "No error messages displayed",
+        "All steps complete without exceptions"
+      ],
+      "errorRecovery": [
+        "Log error and notify user"
+      ]
+    },
+    {
+      "id": "should-handle-empty-analytics-data-gracefully",
+      "name": "should handle empty analytics data gracefully",
+      "intent": "View analytics dashboard with key performance metrics",
+      "preconditions": [
+        "User must have network access to application",
+        "Application must be running and accessible"
+      ],
+      "steps": [
+        {
+          "order": 1,
+          "intent": "Navigate to target page",
+          "action": "navigate",
+          "expectedResult": "Page loads successfully with expected content",
+          "alternatives": []
+        },
+        {
+          "order": 2,
+          "intent": "Verify expected state or outcome",
+          "action": "verify",
+          "expectedResult": "Verification passes",
+          "alternatives": []
+        },
+        {
+          "order": 3,
+          "intent": "Verify expected state or outcome",
+          "action": "verify",
+          "expectedResult": "Verification passes",
+          "alternatives": []
+        },
+        {
+          "order": 4,
+          "intent": "Progress marker",
+          "action": "log",
+          "expectedResult": "Continue to next step",
+          "alternatives": []
+        }
+      ],
+      "postconditions": [
+        "All verification checks pass"
+      ],
+      "successIndicators": [
+        "No error messages displayed",
+        "All steps complete without exceptions"
+      ],
+      "errorRecovery": [
+        "Display clear error message to user",
+        "Provide actionable next steps",
+        "Do not lose user progress"
+      ]
+    },
+    {
+      "id": "should-handle-api-errors-gracefully",
+      "name": "should handle API errors gracefully",
+      "intent": "Execute should handle API errors gracefully",
+      "preconditions": [
+        "User must have network access to application",
+        "Application must be running and accessible"
+      ],
+      "steps": [
+        {
+          "order": 1,
+          "intent": "Navigate to target page",
+          "action": "navigate",
+          "expectedResult": "Page loads successfully with expected content",
+          "alternatives": []
+        },
+        {
+          "order": 2,
+          "intent": "Verify expected state or outcome",
+          "action": "verify",
+          "expectedResult": "Verification passes",
+          "alternatives": []
+        },
+        {
+          "order": 3,
+          "intent": "Progress marker",
+          "action": "log",
+          "expectedResult": "Continue to next step",
+          "alternatives": []
+        }
+      ],
+      "postconditions": [
+        "All verification checks pass"
+      ],
+      "successIndicators": [
+        "Error message is displayed to user",
+        "System handles error gracefully"
+      ],
+      "errorRecovery": [
+        "Display clear error message to user",
+        "Provide actionable next steps",
+        "Do not lose user progress"
+      ]
+    },
+    {
+      "id": "should-switch-between-tabs-correctly",
+      "name": "should switch between tabs correctly",
+      "intent": "Execute should switch between tabs correctly",
+      "preconditions": [
+        "User must have network access to application",
+        "Application must be running and accessible"
+      ],
+      "steps": [
+        {
+          "order": 1,
+          "intent": "Navigate to target page",
+          "action": "navigate",
+          "expectedResult": "Page loads successfully with expected content",
+          "alternatives": []
+        },
+        {
+          "order": 2,
+          "intent": "Wait for element or condition",
+          "action": "wait",
+          "expectedResult": "Element appears or condition becomes true",
+          "alternatives": []
+        },
+        {
+          "order": 3,
+          "intent": "Wait for element or condition",
+          "action": "wait",
+          "expectedResult": "Element appears or condition becomes true",
+          "alternatives": []
+        },
+        {
+          "order": 4,
+          "intent": "Click on element",
+          "action": "click",
+          "expectedResult": "Element responds and triggers expected action",
+          "alternatives": []
+        },
+        {
+          "order": 5,
+          "intent": "Verify expected state or outcome",
+          "action": "verify",
+          "expectedResult": "Verification passes",
+          "alternatives": []
+        },
+        {
+          "order": 6,
+          "intent": "Click on element",
+          "action": "click",
+          "expectedResult": "Element responds and triggers expected action",
+          "alternatives": []
+        },
+        {
+          "order": 7,
+          "intent": "Verify expected state or outcome",
+          "action": "verify",
+          "expectedResult": "Verification passes",
+          "alternatives": []
+        },
+        {
+          "order": 8,
+          "intent": "Progress marker",
+          "action": "log",
+          "expectedResult": "Continue to next step",
+          "alternatives": []
+        }
+      ],
+      "postconditions": [
+        "All verification checks pass"
+      ],
+      "successIndicators": [
+        "No error messages displayed",
+        "All steps complete without exceptions"
+      ],
+      "errorRecovery": [
+        "Log error and notify user"
+      ]
+    },
+    {
+      "id": "should-complete-scraping-and-make-content-searchable-in-chat",
+      "name": "should complete scraping and make content searchable in chat",
+      "intent": "Scrape website content and make it searchable",
+      "preconditions": [
+        "User must have network access to application",
+        "Application must be running and accessible"
+      ],
+      "steps": [
+        {
+          "order": 1,
+          "intent": "Progress marker",
+          "action": "log",
+          "expectedResult": "Continue to next step",
+          "alternatives": []
+        },
+        {
+          "order": 2,
+          "intent": "Progress marker",
+          "action": "log",
+          "expectedResult": "Continue to next step",
+          "alternatives": []
+        },
+        {
+          "order": 3,
+          "intent": "Navigate to target page",
+          "action": "navigate",
+          "expectedResult": "Page loads successfully with expected content",
+          "alternatives": []
+        },
+        {
+          "order": 4,
+          "intent": "Wait for element or condition",
+          "action": "wait",
+          "expectedResult": "Element appears or condition becomes true",
+          "alternatives": []
+        },
+        {
+          "order": 5,
+          "intent": "Enter data into field",
+          "action": "fill",
+          "expectedResult": "Field accepts input and validates correctly",
+          "alternatives": []
+        },
+        {
+          "order": 6,
+          "intent": "Click on element",
+          "action": "click",
+          "expectedResult": "Element responds and triggers expected action",
+          "alternatives": []
+        },
+        {
+          "order": 7,
+          "intent": "Wait for element or condition",
+          "action": "wait",
+          "expectedResult": "Element appears or condition becomes true",
+          "alternatives": []
+        },
+        {
+          "order": 8,
+          "intent": "Verify expected state or outcome",
+          "action": "verify",
+          "expectedResult": "Verification passes",
+          "alternatives": []
+        },
+        {
+          "order": 9,
+          "intent": "Verify expected state or outcome",
+          "action": "verify",
+          "expectedResult": "Verification passes",
+          "alternatives": []
+        },
+        {
+          "order": 10,
+          "intent": "Progress marker",
+          "action": "log",
+          "expectedResult": "Continue to next step",
+          "alternatives": []
+        },
+        {
+          "order": 11,
+          "intent": "Progress marker",
+          "action": "log",
+          "expectedResult": "Continue to next step",
+          "alternatives": []
+        }
+      ],
+      "postconditions": [
+        "All verification checks pass"
+      ],
+      "successIndicators": [
+        "No error messages displayed",
+        "All steps complete without exceptions"
+      ],
+      "errorRecovery": [
+        "Log error and notify user"
+      ]
+    },
+    {
+      "id": "should-handle-scraping-errors-gracefully",
+      "name": "should handle scraping errors gracefully",
+      "intent": "Scrape website content and make it searchable",
+      "preconditions": [
+        "User must have network access to application",
+        "Application must be running and accessible"
+      ],
+      "steps": [
+        {
+          "order": 1,
+          "intent": "Progress marker",
+          "action": "log",
+          "expectedResult": "Continue to next step",
+          "alternatives": []
+        },
+        {
+          "order": 2,
+          "intent": "Navigate to target page",
+          "action": "navigate",
+          "expectedResult": "Page loads successfully with expected content",
+          "alternatives": []
+        },
+        {
+          "order": 3,
+          "intent": "Wait for element or condition",
+          "action": "wait",
+          "expectedResult": "Element appears or condition becomes true",
+          "alternatives": []
+        },
+        {
+          "order": 4,
+          "intent": "Enter data into field",
+          "action": "fill",
+          "expectedResult": "Field accepts input and validates correctly",
+          "alternatives": []
+        },
+        {
+          "order": 5,
+          "intent": "Click on element",
+          "action": "click",
+          "expectedResult": "Element responds and triggers expected action",
+          "alternatives": []
+        },
+        {
+          "order": 6,
+          "intent": "Wait for element or condition",
+          "action": "wait",
+          "expectedResult": "Element appears or condition becomes true",
+          "alternatives": []
+        },
+        {
+          "order": 7,
+          "intent": "Verify expected state or outcome",
+          "action": "verify",
+          "expectedResult": "Verification passes",
+          "alternatives": []
+        },
+        {
+          "order": 8,
+          "intent": "Progress marker",
+          "action": "log",
+          "expectedResult": "Continue to next step",
+          "alternatives": []
+        }
+      ],
+      "postconditions": [
+        "All verification checks pass"
+      ],
+      "successIndicators": [
+        "Error message is displayed to user",
+        "System handles error gracefully"
+      ],
+      "errorRecovery": [
+        "Display clear error message to user",
+        "Provide actionable next steps",
+        "Do not lose user progress"
+      ]
+    },
+    {
+      "id": "should-show-progress-during-long-scraping-jobs",
+      "name": "should show progress during long scraping jobs",
+      "intent": "Scrape website content and make it searchable",
+      "preconditions": [
+        "None - workflow can start from any state"
+      ],
+      "steps": [
+        {
+          "order": 1,
+          "intent": "Progress marker",
+          "action": "log",
+          "expectedResult": "Continue to next step",
+          "alternatives": []
+        },
+        {
+          "order": 2,
+          "intent": "Progress marker",
+          "action": "log",
+          "expectedResult": "Continue to next step",
+          "alternatives": []
+        }
+      ],
+      "postconditions": [
+        "Workflow completes without errors"
+      ],
+      "successIndicators": [
+        "No error messages displayed",
+        "All steps complete without exceptions"
+      ],
+      "errorRecovery": [
+        "Log error and notify user"
+      ]
+    },
+    {
+      "id": "should-complete-woocommerce-setup-and-enable-product-search",
+      "name": "should complete WooCommerce setup and enable product search",
+      "intent": "Configure WooCommerce integration for product synchronization",
+      "preconditions": [
+        "User must have network access to application",
+        "Application must be running and accessible"
+      ],
+      "steps": [
+        {
+          "order": 1,
+          "intent": "Progress marker",
+          "action": "log",
+          "expectedResult": "Continue to next step",
+          "alternatives": []
+        },
+        {
+          "order": 2,
+          "intent": "Navigate to target page",
+          "action": "navigate",
+          "expectedResult": "Page loads successfully with expected content",
+          "alternatives": []
+        },
+        {
+          "order": 3,
+          "intent": "Enter data into field",
+          "action": "fill",
+          "expectedResult": "Field accepts input and validates correctly",
+          "alternatives": []
+        },
+        {
+          "order": 4,
+          "intent": "Click on element",
+          "action": "click",
+          "expectedResult": "Element responds and triggers expected action",
+          "alternatives": []
+        },
+        {
+          "order": 5,
+          "intent": "Wait for element or condition",
+          "action": "wait",
+          "expectedResult": "Element appears or condition becomes true",
+          "alternatives": []
+        },
+        {
+          "order": 6,
+          "intent": "Verify expected state or outcome",
+          "action": "verify",
+          "expectedResult": "Verification passes",
+          "alternatives": []
+        },
+        {
+          "order": 7,
+          "intent": "Verify expected state or outcome",
+          "action": "verify",
+          "expectedResult": "Verification passes",
+          "alternatives": []
+        },
+        {
+          "order": 8,
+          "intent": "Verify expected state or outcome",
+          "action": "verify",
+          "expectedResult": "Verification passes",
+          "alternatives": []
+        },
+        {
+          "order": 9,
+          "intent": "Navigate to target page",
+          "action": "navigate",
+          "expectedResult": "Page loads successfully with expected content",
+          "alternatives": []
+        },
+        {
+          "order": 10,
+          "intent": "Verify expected state or outcome",
+          "action": "verify",
+          "expectedResult": "Verification passes",
+          "alternatives": []
+        },
+        {
+          "order": 11,
+          "intent": "Progress marker",
+          "action": "log",
+          "expectedResult": "Continue to next step",
+          "alternatives": []
+        }
+      ],
+      "postconditions": [
+        "All verification checks pass"
+      ],
+      "successIndicators": [
+        "No error messages displayed",
+        "All steps complete without exceptions"
+      ],
+      "errorRecovery": [
+        "Log error and notify user"
+      ]
+    },
+    {
+      "id": "should-handle-woocommerce-connection-errors-gracefully",
+      "name": "should handle WooCommerce connection errors gracefully",
+      "intent": "Execute should handle WooCommerce connection errors gracefully",
+      "preconditions": [
+        "User must have network access to application",
+        "Application must be running and accessible"
+      ],
+      "steps": [
+        {
+          "order": 1,
+          "intent": "Progress marker",
+          "action": "log",
+          "expectedResult": "Continue to next step",
+          "alternatives": []
+        },
+        {
+          "order": 2,
+          "intent": "Navigate to target page",
+          "action": "navigate",
+          "expectedResult": "Page loads successfully with expected content",
+          "alternatives": []
+        },
+        {
+          "order": 3,
+          "intent": "Click on element",
+          "action": "click",
+          "expectedResult": "Element responds and triggers expected action",
+          "alternatives": []
+        },
+        {
+          "order": 4,
+          "intent": "Wait for element or condition",
+          "action": "wait",
+          "expectedResult": "Element appears or condition becomes true",
+          "alternatives": []
+        },
+        {
+          "order": 5,
+          "intent": "Verify expected state or outcome",
+          "action": "verify",
+          "expectedResult": "Verification passes",
+          "alternatives": []
+        },
+        {
+          "order": 6,
+          "intent": "Progress marker",
+          "action": "log",
+          "expectedResult": "Continue to next step",
+          "alternatives": []
+        }
+      ],
+      "postconditions": [
+        "All verification checks pass"
+      ],
+      "successIndicators": [
+        "Error message is displayed to user",
+        "System handles error gracefully"
+      ],
+      "errorRecovery": [
+        "Display clear error message to user",
+        "Provide actionable next steps",
+        "Do not lose user progress"
+      ]
+    },
+    {
+      "id": "should-install-and-customize-widget-successfully",
+      "name": "should install and customize widget successfully",
+      "intent": "Install and configure chat widget on customer website",
+      "preconditions": [
+        "User must have network access to application",
+        "Application must be running and accessible",
+        "Customer must have valid domain configuration"
+      ],
+      "steps": [
+        {
+          "order": 1,
+          "intent": "Progress marker",
+          "action": "log",
+          "expectedResult": "Continue to next step",
+          "alternatives": []
+        },
+        {
+          "order": 2,
+          "intent": "Progress marker",
+          "action": "log",
+          "expectedResult": "Continue to next step",
+          "alternatives": []
+        },
+        {
+          "order": 3,
+          "intent": "Navigate to target page",
+          "action": "navigate",
+          "expectedResult": "Page loads successfully with expected content",
+          "alternatives": []
+        },
+        {
+          "order": 4,
+          "intent": "Progress marker",
+          "action": "log",
+          "expectedResult": "Continue to next step",
+          "alternatives": []
+        },
+        {
+          "order": 5,
+          "intent": "Progress marker",
+          "action": "log",
+          "expectedResult": "Continue to next step",
+          "alternatives": []
+        },
+        {
+          "order": 6,
+          "intent": "Wait for element or condition",
+          "action": "wait",
+          "expectedResult": "Element appears or condition becomes true",
+          "alternatives": []
+        },
+        {
+          "order": 7,
+          "intent": "Progress marker",
+          "action": "log",
+          "expectedResult": "Continue to next step",
+          "alternatives": []
+        },
+        {
+          "order": 8,
+          "intent": "Progress marker",
+          "action": "log",
+          "expectedResult": "Continue to next step",
+          "alternatives": []
+        },
+        {
+          "order": 9,
+          "intent": "Verify expected state or outcome",
+          "action": "verify",
+          "expectedResult": "Verification passes",
+          "alternatives": []
+        },
+        {
+          "order": 10,
+          "intent": "Progress marker",
+          "action": "log",
+          "expectedResult": "Continue to next step",
+          "alternatives": []
+        },
+        {
+          "order": 11,
+          "intent": "Progress marker",
+          "action": "log",
+          "expectedResult": "Continue to next step",
+          "alternatives": []
+        },
+        {
+          "order": 12,
+          "intent": "Click on element",
+          "action": "click",
+          "expectedResult": "Element responds and triggers expected action",
+          "alternatives": []
+        },
+        {
+          "order": 13,
+          "intent": "Progress marker",
+          "action": "log",
+          "expectedResult": "Continue to next step",
+          "alternatives": []
+        },
+        {
+          "order": 14,
+          "intent": "Wait for element or condition",
+          "action": "wait",
+          "expectedResult": "Element appears or condition becomes true",
+          "alternatives": []
+        },
+        {
+          "order": 15,
+          "intent": "Progress marker",
+          "action": "log",
+          "expectedResult": "Continue to next step",
+          "alternatives": []
+        },
+        {
+          "order": 16,
+          "intent": "Progress marker",
+          "action": "log",
+          "expectedResult": "Continue to next step",
+          "alternatives": []
+        },
+        {
+          "order": 17,
+          "intent": "Progress marker",
+          "action": "log",
+          "expectedResult": "Continue to next step",
+          "alternatives": []
+        },
+        {
+          "order": 18,
+          "intent": "Click on element",
+          "action": "click",
+          "expectedResult": "Element responds and triggers expected action",
+          "alternatives": []
+        },
+        {
+          "order": 19,
+          "intent": "Wait for element or condition",
+          "action": "wait",
+          "expectedResult": "Element appears or condition becomes true",
+          "alternatives": []
+        },
+        {
+          "order": 20,
+          "intent": "Progress marker",
+          "action": "log",
+          "expectedResult": "Continue to next step",
+          "alternatives": []
+        },
+        {
+          "order": 21,
+          "intent": "Progress marker",
+          "action": "log",
+          "expectedResult": "Continue to next step",
+          "alternatives": []
+        },
+        {
+          "order": 22,
+          "intent": "Navigate to target page",
+          "action": "navigate",
+          "expectedResult": "Page loads successfully with expected content",
+          "alternatives": []
+        },
+        {
+          "order": 23,
+          "intent": "Progress marker",
+          "action": "log",
+          "expectedResult": "Continue to next step",
+          "alternatives": []
+        },
+        {
+          "order": 24,
+          "intent": "Progress marker",
+          "action": "log",
+          "expectedResult": "Continue to next step",
+          "alternatives": []
+        },
+        {
+          "order": 25,
+          "intent": "Progress marker",
+          "action": "log",
+          "expectedResult": "Continue to next step",
+          "alternatives": []
+        },
+        {
+          "order": 26,
+          "intent": "Progress marker",
+          "action": "log",
+          "expectedResult": "Continue to next step",
+          "alternatives": []
+        },
+        {
+          "order": 27,
+          "intent": "Enter data into field",
+          "action": "fill",
+          "expectedResult": "Field accepts input and validates correctly",
+          "alternatives": []
+        },
+        {
+          "order": 28,
+          "intent": "Progress marker",
+          "action": "log",
+          "expectedResult": "Continue to next step",
+          "alternatives": []
+        },
+        {
+          "order": 29,
+          "intent": "Wait for element or condition",
+          "action": "wait",
+          "expectedResult": "Element appears or condition becomes true",
+          "alternatives": []
+        },
+        {
+          "order": 30,
+          "intent": "Progress marker",
+          "action": "log",
+          "expectedResult": "Continue to next step",
+          "alternatives": []
+        },
+        {
+          "order": 31,
+          "intent": "Progress marker",
+          "action": "log",
+          "expectedResult": "Continue to next step",
+          "alternatives": []
+        },
+        {
+          "order": 32,
+          "intent": "Wait for element or condition",
+          "action": "wait",
+          "expectedResult": "Element appears or condition becomes true",
+          "alternatives": []
+        },
+        {
+          "order": 33,
+          "intent": "Progress marker",
+          "action": "log",
+          "expectedResult": "Continue to next step",
+          "alternatives": []
+        },
+        {
+          "order": 34,
+          "intent": "Progress marker",
+          "action": "log",
+          "expectedResult": "Continue to next step",
+          "alternatives": []
+        },
+        {
+          "order": 35,
+          "intent": "Wait for element or condition",
+          "action": "wait",
+          "expectedResult": "Element appears or condition becomes true",
+          "alternatives": []
+        },
+        {
+          "order": 36,
+          "intent": "Progress marker",
+          "action": "log",
+          "expectedResult": "Continue to next step",
+          "alternatives": []
+        },
+        {
+          "order": 37,
+          "intent": "Progress marker",
+          "action": "log",
+          "expectedResult": "Continue to next step",
+          "alternatives": []
+        },
+        {
+          "order": 38,
+          "intent": "Progress marker",
+          "action": "log",
+          "expectedResult": "Continue to next step",
+          "alternatives": []
+        },
+        {
+          "order": 39,
+          "intent": "Progress marker",
+          "action": "log",
+          "expectedResult": "Continue to next step",
+          "alternatives": []
+        },
+        {
+          "order": 40,
+          "intent": "Progress marker",
+          "action": "log",
+          "expectedResult": "Continue to next step",
+          "alternatives": []
+        },
+        {
+          "order": 41,
+          "intent": "Wait for element or condition",
+          "action": "wait",
+          "expectedResult": "Element appears or condition becomes true",
+          "alternatives": []
+        },
+        {
+          "order": 42,
+          "intent": "Click on element",
+          "action": "click",
+          "expectedResult": "Element responds and triggers expected action",
+          "alternatives": []
+        },
+        {
+          "order": 43,
+          "intent": "Progress marker",
+          "action": "log",
+          "expectedResult": "Continue to next step",
+          "alternatives": []
+        },
+        {
+          "order": 44,
+          "intent": "Wait for element or condition",
+          "action": "wait",
+          "expectedResult": "Element appears or condition becomes true",
+          "alternatives": []
+        },
+        {
+          "order": 45,
+          "intent": "Progress marker",
+          "action": "log",
+          "expectedResult": "Continue to next step",
+          "alternatives": []
+        },
+        {
+          "order": 46,
+          "intent": "Progress marker",
+          "action": "log",
+          "expectedResult": "Continue to next step",
+          "alternatives": []
+        },
+        {
+          "order": 47,
+          "intent": "Progress marker",
+          "action": "log",
+          "expectedResult": "Continue to next step",
+          "alternatives": []
+        },
+        {
+          "order": 48,
+          "intent": "Progress marker",
+          "action": "log",
+          "expectedResult": "Continue to next step",
+          "alternatives": []
+        },
+        {
+          "order": 49,
+          "intent": "Progress marker",
+          "action": "log",
+          "expectedResult": "Continue to next step",
+          "alternatives": []
+        },
+        {
+          "order": 50,
+          "intent": "Progress marker",
+          "action": "log",
+          "expectedResult": "Continue to next step",
+          "alternatives": []
+        },
+        {
+          "order": 51,
+          "intent": "Navigate to target page",
+          "action": "navigate",
+          "expectedResult": "Page loads successfully with expected content",
+          "alternatives": []
+        },
+        {
+          "order": 52,
+          "intent": "Progress marker",
+          "action": "log",
+          "expectedResult": "Continue to next step",
+          "alternatives": []
+        },
+        {
+          "order": 53,
+          "intent": "Wait for element or condition",
+          "action": "wait",
+          "expectedResult": "Element appears or condition becomes true",
+          "alternatives": []
+        },
+        {
+          "order": 54,
+          "intent": "Progress marker",
+          "action": "log",
+          "expectedResult": "Continue to next step",
+          "alternatives": []
+        },
+        {
+          "order": 55,
+          "intent": "Wait for element or condition",
+          "action": "wait",
+          "expectedResult": "Element appears or condition becomes true",
+          "alternatives": []
+        },
+        {
+          "order": 56,
+          "intent": "Progress marker",
+          "action": "log",
+          "expectedResult": "Continue to next step",
+          "alternatives": []
+        },
+        {
+          "order": 57,
+          "intent": "Progress marker",
+          "action": "log",
+          "expectedResult": "Continue to next step",
+          "alternatives": []
+        },
+        {
+          "order": 58,
+          "intent": "Verify expected state or outcome",
+          "action": "verify",
+          "expectedResult": "Verification passes",
+          "alternatives": []
+        },
+        {
+          "order": 59,
+          "intent": "Progress marker",
+          "action": "log",
+          "expectedResult": "Continue to next step",
+          "alternatives": []
+        },
+        {
+          "order": 60,
+          "intent": "Progress marker",
+          "action": "log",
+          "expectedResult": "Continue to next step",
+          "alternatives": []
+        },
+        {
+          "order": 61,
+          "intent": "Progress marker",
+          "action": "log",
+          "expectedResult": "Continue to next step",
+          "alternatives": []
+        },
+        {
+          "order": 62,
+          "intent": "Progress marker",
+          "action": "log",
+          "expectedResult": "Continue to next step",
+          "alternatives": []
+        },
+        {
+          "order": 63,
+          "intent": "Progress marker",
+          "action": "log",
+          "expectedResult": "Continue to next step",
+          "alternatives": []
+        },
+        {
+          "order": 64,
+          "intent": "Progress marker",
+          "action": "log",
+          "expectedResult": "Continue to next step",
+          "alternatives": []
+        },
+        {
+          "order": 65,
+          "intent": "Progress marker",
+          "action": "log",
+          "expectedResult": "Continue to next step",
+          "alternatives": []
+        },
+        {
+          "order": 66,
+          "intent": "Progress marker",
+          "action": "log",
+          "expectedResult": "Continue to next step",
+          "alternatives": []
+        },
+        {
+          "order": 67,
+          "intent": "Progress marker",
+          "action": "log",
+          "expectedResult": "Continue to next step",
+          "alternatives": []
+        },
+        {
+          "order": 68,
+          "intent": "Progress marker",
+          "action": "log",
+          "expectedResult": "Continue to next step",
+          "alternatives": []
+        },
+        {
+          "order": 69,
+          "intent": "Progress marker",
+          "action": "log",
+          "expectedResult": "Continue to next step",
+          "alternatives": []
+        },
+        {
+          "order": 70,
+          "intent": "Progress marker",
+          "action": "log",
+          "expectedResult": "Continue to next step",
+          "alternatives": []
+        },
+        {
+          "order": 71,
+          "intent": "Progress marker",
+          "action": "log",
+          "expectedResult": "Continue to next step",
+          "alternatives": []
+        },
+        {
+          "order": 72,
+          "intent": "Progress marker",
+          "action": "log",
+          "expectedResult": "Continue to next step",
+          "alternatives": []
+        },
+        {
+          "order": 73,
+          "intent": "Progress marker",
+          "action": "log",
+          "expectedResult": "Continue to next step",
+          "alternatives": []
+        },
+        {
+          "order": 74,
+          "intent": "Progress marker",
+          "action": "log",
+          "expectedResult": "Continue to next step",
+          "alternatives": []
+        },
+        {
+          "order": 75,
+          "intent": "Progress marker",
+          "action": "log",
+          "expectedResult": "Continue to next step",
+          "alternatives": []
+        },
+        {
+          "order": 76,
+          "intent": "Progress marker",
+          "action": "log",
+          "expectedResult": "Continue to next step",
+          "alternatives": []
+        },
+        {
+          "order": 77,
+          "intent": "Progress marker",
+          "action": "log",
+          "expectedResult": "Continue to next step",
+          "alternatives": []
+        },
+        {
+          "order": 78,
+          "intent": "Progress marker",
+          "action": "log",
+          "expectedResult": "Continue to next step",
+          "alternatives": []
+        },
+        {
+          "order": 79,
+          "intent": "Progress marker",
+          "action": "log",
+          "expectedResult": "Continue to next step",
+          "alternatives": []
+        },
+        {
+          "order": 80,
+          "intent": "Progress marker",
+          "action": "log",
+          "expectedResult": "Continue to next step",
+          "alternatives": []
+        },
+        {
+          "order": 81,
+          "intent": "Progress marker",
+          "action": "log",
+          "expectedResult": "Continue to next step",
+          "alternatives": []
+        },
+        {
+          "order": 82,
+          "intent": "Progress marker",
+          "action": "log",
+          "expectedResult": "Continue to next step",
+          "alternatives": []
+        },
+        {
+          "order": 83,
+          "intent": "Progress marker",
+          "action": "log",
+          "expectedResult": "Continue to next step",
+          "alternatives": []
+        }
+      ],
+      "postconditions": [
+        "Workflow completes without errors"
+      ],
+      "successIndicators": [
+        "No error messages displayed",
+        "All steps complete without exceptions"
+      ],
+      "errorRecovery": [
+        "Log error and notify user"
+      ]
+    },
+    {
+      "id": "should-generate-correct-embed-code-for-different-environments",
+      "name": "should generate correct embed code for different environments",
+      "intent": "Execute should generate correct embed code for different environments",
+      "preconditions": [
+        "User must have network access to application",
+        "Application must be running and accessible"
+      ],
+      "steps": [
+        {
+          "order": 1,
+          "intent": "Progress marker",
+          "action": "log",
+          "expectedResult": "Continue to next step",
+          "alternatives": []
+        },
+        {
+          "order": 2,
+          "intent": "Navigate to target page",
+          "action": "navigate",
+          "expectedResult": "Page loads successfully with expected content",
+          "alternatives": []
+        },
+        {
+          "order": 3,
+          "intent": "Verify expected state or outcome",
+          "action": "verify",
+          "expectedResult": "Verification passes",
+          "alternatives": []
+        },
+        {
+          "order": 4,
+          "intent": "Verify expected state or outcome",
+          "action": "verify",
+          "expectedResult": "Verification passes",
+          "alternatives": []
+        },
+        {
+          "order": 5,
+          "intent": "Progress marker",
+          "action": "log",
+          "expectedResult": "Continue to next step",
+          "alternatives": []
+        },
+        {
+          "order": 6,
+          "intent": "Progress marker",
+          "action": "log",
+          "expectedResult": "Continue to next step",
+          "alternatives": []
+        },
+        {
+          "order": 7,
+          "intent": "Progress marker",
+          "action": "log",
+          "expectedResult": "Continue to next step",
+          "alternatives": []
+        },
+        {
+          "order": 8,
+          "intent": "Progress marker",
+          "action": "log",
+          "expectedResult": "Continue to next step",
+          "alternatives": []
+        }
+      ],
+      "postconditions": [
+        "Workflow completes without errors"
+      ],
+      "successIndicators": [
+        "No error messages displayed",
+        "All steps complete without exceptions"
+      ],
+      "errorRecovery": [
+        "Log error and notify user"
+      ]
+    },
+    {
+      "id": "should-handle-widget-customization-with-invalid-values",
+      "name": "should handle widget customization with invalid values",
+      "intent": "Execute should handle widget customization with invalid values",
+      "preconditions": [
+        "Customer must have valid domain configuration"
+      ],
+      "steps": [
+        {
+          "order": 1,
+          "intent": "Progress marker",
+          "action": "log",
+          "expectedResult": "Continue to next step",
+          "alternatives": []
+        },
+        {
+          "order": 2,
+          "intent": "Progress marker",
+          "action": "log",
+          "expectedResult": "Continue to next step",
+          "alternatives": []
+        },
+        {
+          "order": 3,
+          "intent": "Progress marker",
+          "action": "log",
+          "expectedResult": "Continue to next step",
+          "alternatives": []
+        },
+        {
+          "order": 4,
+          "intent": "Progress marker",
+          "action": "log",
+          "expectedResult": "Continue to next step",
+          "alternatives": []
+        },
+        {
+          "order": 5,
+          "intent": "Progress marker",
+          "action": "log",
+          "expectedResult": "Continue to next step",
+          "alternatives": []
+        },
+        {
+          "order": 6,
+          "intent": "Progress marker",
+          "action": "log",
+          "expectedResult": "Continue to next step",
+          "alternatives": []
+        }
+      ],
+      "postconditions": [
+        "Workflow completes without errors"
+      ],
+      "successIndicators": [
+        "No error messages displayed",
+        "All steps complete without exceptions"
+      ],
+      "errorRecovery": [
+        "Log error and notify user"
+      ]
+    },
+    {
+      "id": "should-add-and-configure-domain-successfully",
+      "name": "should add and configure domain successfully",
+      "intent": "Execute should add and configure domain successfully",
+      "preconditions": [
+        "User must have network access to application",
+        "Application must be running and accessible"
+      ],
+      "steps": [
+        {
+          "order": 1,
+          "intent": "Progress marker",
+          "action": "log",
+          "expectedResult": "Continue to next step",
+          "alternatives": []
+        },
+        {
+          "order": 2,
+          "intent": "Progress marker",
+          "action": "log",
+          "expectedResult": "Continue to next step",
+          "alternatives": []
+        },
+        {
+          "order": 3,
+          "intent": "Navigate to target page",
+          "action": "navigate",
+          "expectedResult": "Page loads successfully with expected content",
+          "alternatives": []
+        },
+        {
+          "order": 4,
+          "intent": "Click on element",
+          "action": "click",
+          "expectedResult": "Element responds and triggers expected action",
+          "alternatives": []
+        },
+        {
+          "order": 5,
+          "intent": "Wait for element or condition",
+          "action": "wait",
+          "expectedResult": "Element appears or condition becomes true",
+          "alternatives": []
+        },
+        {
+          "order": 6,
+          "intent": "Progress marker",
+          "action": "log",
+          "expectedResult": "Continue to next step",
+          "alternatives": []
+        },
+        {
+          "order": 7,
+          "intent": "Progress marker",
+          "action": "log",
+          "expectedResult": "Continue to next step",
+          "alternatives": []
+        },
+        {
+          "order": 8,
+          "intent": "Navigate to target page",
+          "action": "navigate",
+          "expectedResult": "Page loads successfully with expected content",
+          "alternatives": []
+        },
+        {
+          "order": 9,
+          "intent": "Progress marker",
+          "action": "log",
+          "expectedResult": "Continue to next step",
+          "alternatives": []
+        },
+        {
+          "order": 10,
+          "intent": "Progress marker",
+          "action": "log",
+          "expectedResult": "Continue to next step",
+          "alternatives": []
+        },
+        {
+          "order": 11,
+          "intent": "Wait for element or condition",
+          "action": "wait",
+          "expectedResult": "Element appears or condition becomes true",
+          "alternatives": []
+        },
+        {
+          "order": 12,
+          "intent": "Click on element",
+          "action": "click",
+          "expectedResult": "Element responds and triggers expected action",
+          "alternatives": []
+        },
+        {
+          "order": 13,
+          "intent": "Progress marker",
+          "action": "log",
+          "expectedResult": "Continue to next step",
+          "alternatives": []
+        },
+        {
+          "order": 14,
+          "intent": "Wait for element or condition",
+          "action": "wait",
+          "expectedResult": "Element appears or condition becomes true",
+          "alternatives": []
+        },
+        {
+          "order": 15,
+          "intent": "Progress marker",
+          "action": "log",
+          "expectedResult": "Continue to next step",
+          "alternatives": []
+        },
+        {
+          "order": 16,
+          "intent": "Progress marker",
+          "action": "log",
+          "expectedResult": "Continue to next step",
+          "alternatives": []
+        },
+        {
+          "order": 17,
+          "intent": "Progress marker",
+          "action": "log",
+          "expectedResult": "Continue to next step",
+          "alternatives": []
+        },
+        {
+          "order": 18,
+          "intent": "Progress marker",
+          "action": "log",
+          "expectedResult": "Continue to next step",
+          "alternatives": []
+        },
+        {
+          "order": 19,
+          "intent": "Wait for element or condition",
+          "action": "wait",
+          "expectedResult": "Element appears or condition becomes true",
+          "alternatives": []
+        },
+        {
+          "order": 20,
+          "intent": "Enter data into field",
+          "action": "fill",
+          "expectedResult": "Field accepts input and validates correctly",
+          "alternatives": []
+        },
+        {
+          "order": 21,
+          "intent": "Progress marker",
+          "action": "log",
+          "expectedResult": "Continue to next step",
+          "alternatives": []
+        },
+        {
+          "order": 22,
+          "intent": "Enter data into field",
+          "action": "fill",
+          "expectedResult": "Field accepts input and validates correctly",
+          "alternatives": []
+        },
+        {
+          "order": 23,
+          "intent": "Progress marker",
+          "action": "log",
+          "expectedResult": "Continue to next step",
+          "alternatives": []
+        },
+        {
+          "order": 24,
+          "intent": "Progress marker",
+          "action": "log",
+          "expectedResult": "Continue to next step",
+          "alternatives": []
+        },
+        {
+          "order": 25,
+          "intent": "Progress marker",
+          "action": "log",
+          "expectedResult": "Continue to next step",
+          "alternatives": []
+        },
+        {
+          "order": 26,
+          "intent": "Progress marker",
+          "action": "log",
+          "expectedResult": "Continue to next step",
+          "alternatives": []
+        },
+        {
+          "order": 27,
+          "intent": "Progress marker",
+          "action": "log",
+          "expectedResult": "Continue to next step",
+          "alternatives": []
+        },
+        {
+          "order": 28,
+          "intent": "Progress marker",
+          "action": "log",
+          "expectedResult": "Continue to next step",
+          "alternatives": []
+        },
+        {
+          "order": 29,
+          "intent": "Click on element",
+          "action": "click",
+          "expectedResult": "Element responds and triggers expected action",
+          "alternatives": []
+        },
+        {
+          "order": 30,
+          "intent": "Progress marker",
+          "action": "log",
+          "expectedResult": "Continue to next step",
+          "alternatives": []
+        },
+        {
+          "order": 31,
+          "intent": "Wait for element or condition",
+          "action": "wait",
+          "expectedResult": "Element appears or condition becomes true",
+          "alternatives": []
+        },
+        {
+          "order": 32,
+          "intent": "Progress marker",
+          "action": "log",
+          "expectedResult": "Continue to next step",
+          "alternatives": []
+        },
+        {
+          "order": 33,
+          "intent": "Verify expected state or outcome",
+          "action": "verify",
+          "expectedResult": "Verification passes",
+          "alternatives": []
+        },
+        {
+          "order": 34,
+          "intent": "Verify expected state or outcome",
+          "action": "verify",
+          "expectedResult": "Verification passes",
+          "alternatives": []
+        },
+        {
+          "order": 35,
+          "intent": "Progress marker",
+          "action": "log",
+          "expectedResult": "Continue to next step",
+          "alternatives": []
+        },
+        {
+          "order": 36,
+          "intent": "Progress marker",
+          "action": "log",
+          "expectedResult": "Continue to next step",
+          "alternatives": []
+        },
+        {
+          "order": 37,
+          "intent": "Progress marker",
+          "action": "log",
+          "expectedResult": "Continue to next step",
+          "alternatives": []
+        },
+        {
+          "order": 38,
+          "intent": "Progress marker",
+          "action": "log",
+          "expectedResult": "Continue to next step",
+          "alternatives": []
+        },
+        {
+          "order": 39,
+          "intent": "Progress marker",
+          "action": "log",
+          "expectedResult": "Continue to next step",
+          "alternatives": []
+        },
+        {
+          "order": 40,
+          "intent": "Wait for element or condition",
+          "action": "wait",
+          "expectedResult": "Element appears or condition becomes true",
+          "alternatives": []
+        },
+        {
+          "order": 41,
+          "intent": "Progress marker",
+          "action": "log",
+          "expectedResult": "Continue to next step",
+          "alternatives": []
+        },
+        {
+          "order": 42,
+          "intent": "Progress marker",
+          "action": "log",
+          "expectedResult": "Continue to next step",
+          "alternatives": []
+        },
+        {
+          "order": 43,
+          "intent": "Wait for element or condition",
+          "action": "wait",
+          "expectedResult": "Element appears or condition becomes true",
+          "alternatives": []
+        },
+        {
+          "order": 44,
+          "intent": "Progress marker",
+          "action": "log",
+          "expectedResult": "Continue to next step",
+          "alternatives": []
+        },
+        {
+          "order": 45,
+          "intent": "Progress marker",
+          "action": "log",
+          "expectedResult": "Continue to next step",
+          "alternatives": []
+        },
+        {
+          "order": 46,
+          "intent": "Navigate to target page",
+          "action": "navigate",
+          "expectedResult": "Page loads successfully with expected content",
+          "alternatives": []
+        },
+        {
+          "order": 47,
+          "intent": "Progress marker",
+          "action": "log",
+          "expectedResult": "Continue to next step",
+          "alternatives": []
+        },
+        {
+          "order": 48,
+          "intent": "Wait for element or condition",
+          "action": "wait",
+          "expectedResult": "Element appears or condition becomes true",
+          "alternatives": []
+        },
+        {
+          "order": 49,
+          "intent": "Wait for element or condition",
+          "action": "wait",
+          "expectedResult": "Element appears or condition becomes true",
+          "alternatives": []
+        },
+        {
+          "order": 50,
+          "intent": "Progress marker",
+          "action": "log",
+          "expectedResult": "Continue to next step",
+          "alternatives": []
+        },
+        {
+          "order": 51,
+          "intent": "Progress marker",
+          "action": "log",
+          "expectedResult": "Continue to next step",
+          "alternatives": []
+        },
+        {
+          "order": 52,
+          "intent": "Wait for element or condition",
+          "action": "wait",
+          "expectedResult": "Element appears or condition becomes true",
+          "alternatives": []
+        },
+        {
+          "order": 53,
+          "intent": "Enter data into field",
+          "action": "fill",
+          "expectedResult": "Field accepts input and validates correctly",
+          "alternatives": []
+        },
+        {
+          "order": 54,
+          "intent": "Click on element",
+          "action": "click",
+          "expectedResult": "Element responds and triggers expected action",
+          "alternatives": []
+        },
+        {
+          "order": 55,
+          "intent": "Progress marker",
+          "action": "log",
+          "expectedResult": "Continue to next step",
+          "alternatives": []
+        },
+        {
+          "order": 56,
+          "intent": "Wait for element or condition",
+          "action": "wait",
+          "expectedResult": "Element appears or condition becomes true",
+          "alternatives": []
+        },
+        {
+          "order": 57,
+          "intent": "Verify expected state or outcome",
+          "action": "verify",
+          "expectedResult": "Verification passes",
+          "alternatives": []
+        },
+        {
+          "order": 58,
+          "intent": "Verify expected state or outcome",
+          "action": "verify",
+          "expectedResult": "Verification passes",
+          "alternatives": []
+        },
+        {
+          "order": 59,
+          "intent": "Progress marker",
+          "action": "log",
+          "expectedResult": "Continue to next step",
+          "alternatives": []
+        },
+        {
+          "order": 60,
+          "intent": "Progress marker",
+          "action": "log",
+          "expectedResult": "Continue to next step",
+          "alternatives": []
+        },
+        {
+          "order": 61,
+          "intent": "Progress marker",
+          "action": "log",
+          "expectedResult": "Continue to next step",
+          "alternatives": []
+        },
+        {
+          "order": 62,
+          "intent": "Progress marker",
+          "action": "log",
+          "expectedResult": "Continue to next step",
+          "alternatives": []
+        },
+        {
+          "order": 63,
+          "intent": "Progress marker",
+          "action": "log",
+          "expectedResult": "Continue to next step",
+          "alternatives": []
+        },
+        {
+          "order": 64,
+          "intent": "Progress marker",
+          "action": "log",
+          "expectedResult": "Continue to next step",
+          "alternatives": []
+        },
+        {
+          "order": 65,
+          "intent": "Progress marker",
+          "action": "log",
+          "expectedResult": "Continue to next step",
+          "alternatives": []
+        },
+        {
+          "order": 66,
+          "intent": "Progress marker",
+          "action": "log",
+          "expectedResult": "Continue to next step",
+          "alternatives": []
+        },
+        {
+          "order": 67,
+          "intent": "Progress marker",
+          "action": "log",
+          "expectedResult": "Continue to next step",
+          "alternatives": []
+        },
+        {
+          "order": 68,
+          "intent": "Progress marker",
+          "action": "log",
+          "expectedResult": "Continue to next step",
+          "alternatives": []
+        },
+        {
+          "order": 69,
+          "intent": "Progress marker",
+          "action": "log",
+          "expectedResult": "Continue to next step",
+          "alternatives": []
+        },
+        {
+          "order": 70,
+          "intent": "Progress marker",
+          "action": "log",
+          "expectedResult": "Continue to next step",
+          "alternatives": []
+        },
+        {
+          "order": 71,
+          "intent": "Progress marker",
+          "action": "log",
+          "expectedResult": "Continue to next step",
+          "alternatives": []
+        },
+        {
+          "order": 72,
+          "intent": "Progress marker",
+          "action": "log",
+          "expectedResult": "Continue to next step",
+          "alternatives": []
+        },
+        {
+          "order": 73,
+          "intent": "Progress marker",
+          "action": "log",
+          "expectedResult": "Continue to next step",
+          "alternatives": []
+        },
+        {
+          "order": 74,
+          "intent": "Progress marker",
+          "action": "log",
+          "expectedResult": "Continue to next step",
+          "alternatives": []
+        },
+        {
+          "order": 75,
+          "intent": "Progress marker",
+          "action": "log",
+          "expectedResult": "Continue to next step",
+          "alternatives": []
+        },
+        {
+          "order": 76,
+          "intent": "Progress marker",
+          "action": "log",
+          "expectedResult": "Continue to next step",
+          "alternatives": []
+        },
+        {
+          "order": 77,
+          "intent": "Progress marker",
+          "action": "log",
+          "expectedResult": "Continue to next step",
+          "alternatives": []
+        },
+        {
+          "order": 78,
+          "intent": "Progress marker",
+          "action": "log",
+          "expectedResult": "Continue to next step",
+          "alternatives": []
+        },
+        {
+          "order": 79,
+          "intent": "Progress marker",
+          "action": "log",
+          "expectedResult": "Continue to next step",
+          "alternatives": []
+        },
+        {
+          "order": 80,
+          "intent": "Progress marker",
+          "action": "log",
+          "expectedResult": "Continue to next step",
+          "alternatives": []
+        },
+        {
+          "order": 81,
+          "intent": "Progress marker",
+          "action": "log",
+          "expectedResult": "Continue to next step",
+          "alternatives": []
+        }
+      ],
+      "postconditions": [
+        "Workflow completes without errors"
+      ],
+      "successIndicators": [
+        "No error messages displayed",
+        "All steps complete without exceptions"
+      ],
+      "errorRecovery": [
+        "Log error and notify user"
+      ]
+    },
+    {
+      "id": "should-handle-domain-editing",
+      "name": "should handle domain editing",
+      "intent": "Execute should handle domain editing",
+      "preconditions": [
+        "None - workflow can start from any state"
+      ],
+      "steps": [
+        {
+          "order": 1,
+          "intent": "Progress marker",
+          "action": "log",
+          "expectedResult": "Continue to next step",
+          "alternatives": []
+        },
+        {
+          "order": 2,
+          "intent": "Progress marker",
+          "action": "log",
+          "expectedResult": "Continue to next step",
+          "alternatives": []
+        },
+        {
+          "order": 3,
+          "intent": "Progress marker",
+          "action": "log",
+          "expectedResult": "Continue to next step",
+          "alternatives": []
+        },
+        {
+          "order": 4,
+          "intent": "Progress marker",
+          "action": "log",
+          "expectedResult": "Continue to next step",
+          "alternatives": []
+        },
+        {
+          "order": 5,
+          "intent": "Progress marker",
+          "action": "log",
+          "expectedResult": "Continue to next step",
+          "alternatives": []
+        },
+        {
+          "order": 6,
+          "intent": "Progress marker",
+          "action": "log",
+          "expectedResult": "Continue to next step",
+          "alternatives": []
+        },
+        {
+          "order": 7,
+          "intent": "Progress marker",
+          "action": "log",
+          "expectedResult": "Continue to next step",
+          "alternatives": []
+        }
+      ],
+      "postconditions": [
+        "Workflow completes without errors"
+      ],
+      "successIndicators": [
+        "No error messages displayed",
+        "All steps complete without exceptions"
+      ],
+      "errorRecovery": [
+        "Log error and notify user"
+      ]
+    },
+    {
+      "id": "should-handle-domain-deletion-disabling",
+      "name": "should handle domain deletion/disabling",
+      "intent": "Execute should handle domain deletion/disabling",
+      "preconditions": [
+        "None - workflow can start from any state"
+      ],
+      "steps": [
+        {
+          "order": 1,
+          "intent": "Progress marker",
+          "action": "log",
+          "expectedResult": "Continue to next step",
+          "alternatives": []
+        },
+        {
+          "order": 2,
+          "intent": "Progress marker",
+          "action": "log",
+          "expectedResult": "Continue to next step",
+          "alternatives": []
+        },
+        {
+          "order": 3,
+          "intent": "Progress marker",
+          "action": "log",
+          "expectedResult": "Continue to next step",
+          "alternatives": []
+        },
+        {
+          "order": 4,
+          "intent": "Progress marker",
+          "action": "log",
+          "expectedResult": "Continue to next step",
+          "alternatives": []
+        },
+        {
+          "order": 5,
+          "intent": "Progress marker",
+          "action": "log",
+          "expectedResult": "Continue to next step",
+          "alternatives": []
+        },
+        {
+          "order": 6,
+          "intent": "Progress marker",
+          "action": "log",
+          "expectedResult": "Continue to next step",
+          "alternatives": []
+        },
+        {
+          "order": 7,
+          "intent": "Progress marker",
+          "action": "log",
+          "expectedResult": "Continue to next step",
+          "alternatives": []
+        },
+        {
+          "order": 8,
+          "intent": "Progress marker",
+          "action": "log",
+          "expectedResult": "Continue to next step",
+          "alternatives": []
+        }
+      ],
+      "postconditions": [
+        "Workflow completes without errors"
+      ],
+      "successIndicators": [
+        "No error messages displayed",
+        "All steps complete without exceptions"
+      ],
+      "errorRecovery": [
+        "Log error and notify user"
+      ]
+    },
+    {
+      "id": "should-enforce-domain-access-control",
+      "name": "should enforce domain access control",
+      "intent": "Execute should enforce domain access control",
+      "preconditions": [
+        "None - workflow can start from any state"
+      ],
+      "steps": [
+        {
+          "order": 1,
+          "intent": "Progress marker",
+          "action": "log",
+          "expectedResult": "Continue to next step",
+          "alternatives": []
+        },
+        {
+          "order": 2,
+          "intent": "Progress marker",
+          "action": "log",
+          "expectedResult": "Continue to next step",
+          "alternatives": []
+        },
+        {
+          "order": 3,
+          "intent": "Progress marker",
+          "action": "log",
+          "expectedResult": "Continue to next step",
+          "alternatives": []
+        },
+        {
+          "order": 4,
+          "intent": "Progress marker",
+          "action": "log",
+          "expectedResult": "Continue to next step",
+          "alternatives": []
+        },
+        {
+          "order": 5,
+          "intent": "Progress marker",
+          "action": "log",
+          "expectedResult": "Continue to next step",
+          "alternatives": []
+        },
+        {
+          "order": 6,
+          "intent": "Progress marker",
+          "action": "log",
+          "expectedResult": "Continue to next step",
+          "alternatives": []
+        },
+        {
+          "order": 7,
+          "intent": "Progress marker",
+          "action": "log",
+          "expectedResult": "Continue to next step",
+          "alternatives": []
+        }
+      ],
+      "postconditions": [
+        "Workflow completes without errors"
+      ],
+      "successIndicators": [
+        "No error messages displayed",
+        "All steps complete without exceptions"
+      ],
+      "errorRecovery": [
+        "Log error and notify user"
+      ]
+    },
+    {
+      "id": "should-complete-demo-flow-from-url-entry-to-ai-chat-response",
+      "name": "should complete demo flow from URL entry to AI chat response",
+      "intent": "Execute should complete demo flow from URL entry to AI chat response",
+      "preconditions": [
+        "User must have network access to application",
+        "Application must be running and accessible"
+      ],
+      "steps": [
+        {
+          "order": 1,
+          "intent": "Progress marker",
+          "action": "log",
+          "expectedResult": "Continue to next step",
+          "alternatives": []
+        },
+        {
+          "order": 2,
+          "intent": "Navigate to target page",
+          "action": "navigate",
+          "expectedResult": "Page loads successfully with expected content",
+          "alternatives": []
+        },
+        {
+          "order": 3,
+          "intent": "Wait for element or condition",
+          "action": "wait",
+          "expectedResult": "Element appears or condition becomes true",
+          "alternatives": []
+        },
+        {
+          "order": 4,
+          "intent": "Enter data into field",
+          "action": "fill",
+          "expectedResult": "Field accepts input and validates correctly",
+          "alternatives": []
+        },
+        {
+          "order": 5,
+          "intent": "Click on element",
+          "action": "click",
+          "expectedResult": "Element responds and triggers expected action",
+          "alternatives": []
+        },
+        {
+          "order": 6,
+          "intent": "Wait for element or condition",
+          "action": "wait",
+          "expectedResult": "Element appears or condition becomes true",
+          "alternatives": []
+        },
+        {
+          "order": 7,
+          "intent": "Verify expected state or outcome",
+          "action": "verify",
+          "expectedResult": "Verification passes",
+          "alternatives": []
+        },
+        {
+          "order": 8,
+          "intent": "Wait for element or condition",
+          "action": "wait",
+          "expectedResult": "Element appears or condition becomes true",
+          "alternatives": []
+        },
+        {
+          "order": 9,
+          "intent": "Enter data into field",
+          "action": "fill",
+          "expectedResult": "Field accepts input and validates correctly",
+          "alternatives": []
+        },
+        {
+          "order": 10,
+          "intent": "Click on element",
+          "action": "click",
+          "expectedResult": "Element responds and triggers expected action",
+          "alternatives": []
+        },
+        {
+          "order": 11,
+          "intent": "Wait for element or condition",
+          "action": "wait",
+          "expectedResult": "Element appears or condition becomes true",
+          "alternatives": []
+        },
+        {
+          "order": 12,
+          "intent": "Verify expected state or outcome",
+          "action": "verify",
+          "expectedResult": "Verification passes",
+          "alternatives": []
+        },
+        {
+          "order": 13,
+          "intent": "Progress marker",
+          "action": "log",
+          "expectedResult": "Continue to next step",
+          "alternatives": []
+        },
+        {
+          "order": 14,
+          "intent": "Enter data into field",
+          "action": "fill",
+          "expectedResult": "Field accepts input and validates correctly",
+          "alternatives": []
+        },
+        {
+          "order": 15,
+          "intent": "Click on element",
+          "action": "click",
+          "expectedResult": "Element responds and triggers expected action",
+          "alternatives": []
+        },
+        {
+          "order": 16,
+          "intent": "Wait for element or condition",
+          "action": "wait",
+          "expectedResult": "Element appears or condition becomes true",
+          "alternatives": []
+        },
+        {
+          "order": 17,
+          "intent": "Progress marker",
+          "action": "log",
+          "expectedResult": "Continue to next step",
+          "alternatives": []
+        }
+      ],
+      "postconditions": [
+        "Workflow completes without errors"
+      ],
+      "successIndicators": [
+        "No error messages displayed",
+        "All steps complete without exceptions"
+      ],
+      "errorRecovery": [
+        "Log error and notify user"
+      ]
+    },
+    {
+      "id": "should-handle-invalid-urls-gracefully",
+      "name": "should handle invalid URLs gracefully",
+      "intent": "Execute should handle invalid URLs gracefully",
+      "preconditions": [
+        "User must have network access to application",
+        "Application must be running and accessible"
+      ],
+      "steps": [
+        {
+          "order": 1,
+          "intent": "Progress marker",
+          "action": "log",
+          "expectedResult": "Continue to next step",
+          "alternatives": []
+        },
+        {
+          "order": 2,
+          "intent": "Navigate to target page",
+          "action": "navigate",
+          "expectedResult": "Page loads successfully with expected content",
+          "alternatives": []
+        },
+        {
+          "order": 3,
+          "intent": "Wait for element or condition",
+          "action": "wait",
+          "expectedResult": "Element appears or condition becomes true",
+          "alternatives": []
+        },
+        {
+          "order": 4,
+          "intent": "Enter data into field",
+          "action": "fill",
+          "expectedResult": "Field accepts input and validates correctly",
+          "alternatives": []
+        },
+        {
+          "order": 5,
+          "intent": "Click on element",
+          "action": "click",
+          "expectedResult": "Element responds and triggers expected action",
+          "alternatives": []
+        },
+        {
+          "order": 6,
+          "intent": "Wait for element or condition",
+          "action": "wait",
+          "expectedResult": "Element appears or condition becomes true",
+          "alternatives": []
+        },
+        {
+          "order": 7,
+          "intent": "Progress marker",
+          "action": "log",
+          "expectedResult": "Continue to next step",
+          "alternatives": []
+        }
+      ],
+      "postconditions": [
+        "Workflow completes without errors"
+      ],
+      "successIndicators": [
+        "No error messages displayed",
+        "All steps complete without exceptions"
+      ],
+      "errorRecovery": [
+        "Display clear error message to user",
+        "Provide actionable next steps",
+        "Do not lose user progress"
+      ]
+    },
+    {
+      "id": "should-enforce-demo-session-limits",
+      "name": "should enforce demo session limits",
+      "intent": "Execute should enforce demo session limits",
+      "preconditions": [
+        "None - workflow can start from any state"
+      ],
+      "steps": [
+        {
+          "order": 1,
+          "intent": "Progress marker",
+          "action": "log",
+          "expectedResult": "Continue to next step",
+          "alternatives": []
+        }
+      ],
+      "postconditions": [
+        "Workflow completes without errors"
+      ],
+      "successIndicators": [
+        "No error messages displayed",
+        "All steps complete without exceptions"
+      ],
+      "errorRecovery": [
+        "Log error and notify user"
+      ]
+    },
+    {
+      "id": "should-show-upgrade-prompt-after-demo-limits-reached",
+      "name": "should show upgrade prompt after demo limits reached",
+      "intent": "Execute should show upgrade prompt after demo limits reached",
+      "preconditions": [
+        "None - workflow can start from any state"
+      ],
+      "steps": [
+        {
+          "order": 1,
+          "intent": "Progress marker",
+          "action": "log",
+          "expectedResult": "Continue to next step",
+          "alternatives": []
+        }
+      ],
+      "postconditions": [
+        "Workflow completes without errors"
+      ],
+      "successIndicators": [
+        "No error messages displayed",
+        "All steps complete without exceptions"
+      ],
+      "errorRecovery": [
+        "Log error and notify user"
+      ]
+    },
+    {
+      "id": "should-complete-full-purchase-flow-from-chat-to-order-confirmation",
+      "name": "should complete full purchase flow from chat to order confirmation",
+      "intent": "Complete a product purchase from discovery to order confirmation",
+      "preconditions": [
+        "User must have network access to application",
+        "Application must be running and accessible",
+        "Products must be available in catalog",
+        "Payment processing must be configured"
+      ],
+      "steps": [
+        {
+          "order": 1,
+          "intent": "Progress marker",
+          "action": "log",
+          "expectedResult": "Continue to next step",
+          "alternatives": []
+        },
+        {
+          "order": 2,
+          "intent": "Navigate to target page",
+          "action": "navigate",
+          "expectedResult": "Page loads successfully with expected content",
+          "alternatives": []
+        },
+        {
+          "order": 3,
+          "intent": "Wait for element or condition",
+          "action": "wait",
+          "expectedResult": "Element appears or condition becomes true",
+          "alternatives": []
+        },
+        {
+          "order": 4,
+          "intent": "Verify expected state or outcome",
+          "action": "verify",
+          "expectedResult": "Verification passes",
+          "alternatives": []
+        },
+        {
+          "order": 5,
+          "intent": "Verify expected state or outcome",
+          "action": "verify",
+          "expectedResult": "Verification passes",
+          "alternatives": []
+        },
+        {
+          "order": 6,
+          "intent": "Progress marker",
+          "action": "log",
+          "expectedResult": "Continue to next step",
+          "alternatives": []
+        },
+        {
+          "order": 7,
+          "intent": "Progress marker",
+          "action": "log",
+          "expectedResult": "Continue to next step",
+          "alternatives": []
+        },
+        {
+          "order": 8,
+          "intent": "Verify expected state or outcome",
+          "action": "verify",
+          "expectedResult": "Verification passes",
+          "alternatives": []
+        },
+        {
+          "order": 9,
+          "intent": "Verify expected state or outcome",
+          "action": "verify",
+          "expectedResult": "Verification passes",
+          "alternatives": []
+        },
+        {
+          "order": 10,
+          "intent": "Wait for element or condition",
+          "action": "wait",
+          "expectedResult": "Element appears or condition becomes true",
+          "alternatives": []
+        },
+        {
+          "order": 11,
+          "intent": "Click on element",
+          "action": "click",
+          "expectedResult": "Element responds and triggers expected action",
+          "alternatives": []
+        },
+        {
+          "order": 12,
+          "intent": "Wait for element or condition",
+          "action": "wait",
+          "expectedResult": "Element appears or condition becomes true",
+          "alternatives": []
+        },
+        {
+          "order": 13,
+          "intent": "Verify expected state or outcome",
+          "action": "verify",
+          "expectedResult": "Verification passes",
+          "alternatives": []
+        },
+        {
+          "order": 14,
+          "intent": "Progress marker",
+          "action": "log",
+          "expectedResult": "Continue to next step",
+          "alternatives": []
+        }
+      ],
+      "postconditions": [
+        "Order is created in database",
+        "User receives order confirmation",
+        "Analytics event is tracked",
+        "All verification checks pass"
+      ],
+      "successIndicators": [
+        "No error messages displayed",
+        "All steps complete without exceptions"
+      ],
+      "errorRecovery": [
+        "Log error and notify user"
+      ]
+    },
+    {
+      "id": "should-handle-purchase-flow-with-guest-checkout",
+      "name": "should handle purchase flow with guest checkout",
+      "intent": "Complete a product purchase from discovery to order confirmation",
+      "preconditions": [
+        "Products must be available in catalog",
+        "Payment processing must be configured"
+      ],
+      "steps": [
+        {
+          "order": 1,
+          "intent": "Progress marker",
+          "action": "log",
+          "expectedResult": "Continue to next step",
+          "alternatives": []
+        }
+      ],
+      "postconditions": [
+        "Order is created in database",
+        "User receives order confirmation",
+        "Analytics event is tracked"
+      ],
+      "successIndicators": [
+        "No error messages displayed",
+        "All steps complete without exceptions"
+      ],
+      "errorRecovery": [
+        "Log error and notify user"
+      ]
+    },
+    {
+      "id": "should-handle-purchase-flow-with-registered-user",
+      "name": "should handle purchase flow with registered user",
+      "intent": "Complete a product purchase from discovery to order confirmation",
+      "preconditions": [
+        "Products must be available in catalog",
+        "Payment processing must be configured"
+      ],
+      "steps": [
+        {
+          "order": 1,
+          "intent": "Progress marker",
+          "action": "log",
+          "expectedResult": "Continue to next step",
+          "alternatives": []
+        }
+      ],
+      "postconditions": [
+        "Order is created in database",
+        "User receives order confirmation",
+        "Analytics event is tracked"
+      ],
+      "successIndicators": [
+        "No error messages displayed",
+        "All steps complete without exceptions"
+      ],
+      "errorRecovery": [
+        "Log error and notify user"
+      ]
+    },
+    {
+      "id": "should-maintain-context-across-multiple-conversation-turns",
+      "name": "should maintain context across multiple conversation turns",
+      "intent": "Execute should maintain context across multiple conversation turns",
+      "preconditions": [
+        "User must have network access to application",
+        "Application must be running and accessible"
+      ],
+      "steps": [
+        {
+          "order": 1,
+          "intent": "Progress marker",
+          "action": "log",
+          "expectedResult": "Continue to next step",
+          "alternatives": []
+        },
+        {
+          "order": 2,
+          "intent": "Progress marker",
+          "action": "log",
+          "expectedResult": "Continue to next step",
+          "alternatives": []
+        },
+        {
+          "order": 3,
+          "intent": "Navigate to target page",
+          "action": "navigate",
+          "expectedResult": "Page loads successfully with expected content",
+          "alternatives": []
+        },
+        {
+          "order": 4,
+          "intent": "Wait for element or condition",
+          "action": "wait",
+          "expectedResult": "Element appears or condition becomes true",
+          "alternatives": []
+        },
+        {
+          "order": 5,
+          "intent": "Wait for element or condition",
+          "action": "wait",
+          "expectedResult": "Element appears or condition becomes true",
+          "alternatives": []
+        },
+        {
+          "order": 6,
+          "intent": "Progress marker",
+          "action": "log",
+          "expectedResult": "Continue to next step",
+          "alternatives": []
+        },
+        {
+          "order": 7,
+          "intent": "Progress marker",
+          "action": "log",
+          "expectedResult": "Continue to next step",
+          "alternatives": []
+        },
+        {
+          "order": 8,
+          "intent": "Progress marker",
+          "action": "log",
+          "expectedResult": "Continue to next step",
+          "alternatives": []
+        },
+        {
+          "order": 9,
+          "intent": "Progress marker",
+          "action": "log",
+          "expectedResult": "Continue to next step",
+          "alternatives": []
+        },
+        {
+          "order": 10,
+          "intent": "Progress marker",
+          "action": "log",
+          "expectedResult": "Continue to next step",
+          "alternatives": []
+        },
+        {
+          "order": 11,
+          "intent": "Wait for element or condition",
+          "action": "wait",
+          "expectedResult": "Element appears or condition becomes true",
+          "alternatives": []
+        },
+        {
+          "order": 12,
+          "intent": "Enter data into field",
+          "action": "fill",
+          "expectedResult": "Field accepts input and validates correctly",
+          "alternatives": []
+        },
+        {
+          "order": 13,
+          "intent": "Click on element",
+          "action": "click",
+          "expectedResult": "Element responds and triggers expected action",
+          "alternatives": []
+        },
+        {
+          "order": 14,
+          "intent": "Progress marker",
+          "action": "log",
+          "expectedResult": "Continue to next step",
+          "alternatives": []
+        },
+        {
+          "order": 15,
+          "intent": "Wait for element or condition",
+          "action": "wait",
+          "expectedResult": "Element appears or condition becomes true",
+          "alternatives": []
+        },
+        {
+          "order": 16,
+          "intent": "Verify expected state or outcome",
+          "action": "verify",
+          "expectedResult": "Verification passes",
+          "alternatives": []
+        },
+        {
+          "order": 17,
+          "intent": "Verify expected state or outcome",
+          "action": "verify",
+          "expectedResult": "Verification passes",
+          "alternatives": []
+        },
+        {
+          "order": 18,
+          "intent": "Verify expected state or outcome",
+          "action": "verify",
+          "expectedResult": "Verification passes",
+          "alternatives": []
+        },
+        {
+          "order": 19,
+          "intent": "Progress marker",
+          "action": "log",
+          "expectedResult": "Continue to next step",
+          "alternatives": []
+        },
+        {
+          "order": 20,
+          "intent": "Progress marker",
+          "action": "log",
+          "expectedResult": "Continue to next step",
+          "alternatives": []
+        },
+        {
+          "order": 21,
+          "intent": "Progress marker",
+          "action": "log",
+          "expectedResult": "Continue to next step",
+          "alternatives": []
+        },
+        {
+          "order": 22,
+          "intent": "Wait for element or condition",
+          "action": "wait",
+          "expectedResult": "Element appears or condition becomes true",
+          "alternatives": []
+        },
+        {
+          "order": 23,
+          "intent": "Enter data into field",
+          "action": "fill",
+          "expectedResult": "Field accepts input and validates correctly",
+          "alternatives": []
+        },
+        {
+          "order": 24,
+          "intent": "Click on element",
+          "action": "click",
+          "expectedResult": "Element responds and triggers expected action",
+          "alternatives": []
+        },
+        {
+          "order": 25,
+          "intent": "Progress marker",
+          "action": "log",
+          "expectedResult": "Continue to next step",
+          "alternatives": []
+        },
+        {
+          "order": 26,
+          "intent": "Wait for element or condition",
+          "action": "wait",
+          "expectedResult": "Element appears or condition becomes true",
+          "alternatives": []
+        },
+        {
+          "order": 27,
+          "intent": "Verify expected state or outcome",
+          "action": "verify",
+          "expectedResult": "Verification passes",
+          "alternatives": []
+        },
+        {
+          "order": 28,
+          "intent": "Verify expected state or outcome",
+          "action": "verify",
+          "expectedResult": "Verification passes",
+          "alternatives": []
+        },
+        {
+          "order": 29,
+          "intent": "Verify expected state or outcome",
+          "action": "verify",
+          "expectedResult": "Verification passes",
+          "alternatives": []
+        },
+        {
+          "order": 30,
+          "intent": "Progress marker",
+          "action": "log",
+          "expectedResult": "Continue to next step",
+          "alternatives": []
+        },
+        {
+          "order": 31,
+          "intent": "Progress marker",
+          "action": "log",
+          "expectedResult": "Continue to next step",
+          "alternatives": []
+        },
+        {
+          "order": 32,
+          "intent": "Progress marker",
+          "action": "log",
+          "expectedResult": "Continue to next step",
+          "alternatives": []
+        },
+        {
+          "order": 33,
+          "intent": "Wait for element or condition",
+          "action": "wait",
+          "expectedResult": "Element appears or condition becomes true",
+          "alternatives": []
+        },
+        {
+          "order": 34,
+          "intent": "Enter data into field",
+          "action": "fill",
+          "expectedResult": "Field accepts input and validates correctly",
+          "alternatives": []
+        },
+        {
+          "order": 35,
+          "intent": "Click on element",
+          "action": "click",
+          "expectedResult": "Element responds and triggers expected action",
+          "alternatives": []
+        },
+        {
+          "order": 36,
+          "intent": "Progress marker",
+          "action": "log",
+          "expectedResult": "Continue to next step",
+          "alternatives": []
+        },
+        {
+          "order": 37,
+          "intent": "Wait for element or condition",
+          "action": "wait",
+          "expectedResult": "Element appears or condition becomes true",
+          "alternatives": []
+        },
+        {
+          "order": 38,
+          "intent": "Verify expected state or outcome",
+          "action": "verify",
+          "expectedResult": "Verification passes",
+          "alternatives": []
+        },
+        {
+          "order": 39,
+          "intent": "Verify expected state or outcome",
+          "action": "verify",
+          "expectedResult": "Verification passes",
+          "alternatives": []
+        },
+        {
+          "order": 40,
+          "intent": "Verify expected state or outcome",
+          "action": "verify",
+          "expectedResult": "Verification passes",
+          "alternatives": []
+        },
+        {
+          "order": 41,
+          "intent": "Progress marker",
+          "action": "log",
+          "expectedResult": "Continue to next step",
+          "alternatives": []
+        },
+        {
+          "order": 42,
+          "intent": "Progress marker",
+          "action": "log",
+          "expectedResult": "Continue to next step",
+          "alternatives": []
+        },
+        {
+          "order": 43,
+          "intent": "Progress marker",
+          "action": "log",
+          "expectedResult": "Continue to next step",
+          "alternatives": []
+        },
+        {
+          "order": 44,
+          "intent": "Wait for element or condition",
+          "action": "wait",
+          "expectedResult": "Element appears or condition becomes true",
+          "alternatives": []
+        },
+        {
+          "order": 45,
+          "intent": "Enter data into field",
+          "action": "fill",
+          "expectedResult": "Field accepts input and validates correctly",
+          "alternatives": []
+        },
+        {
+          "order": 46,
+          "intent": "Click on element",
+          "action": "click",
+          "expectedResult": "Element responds and triggers expected action",
+          "alternatives": []
+        },
+        {
+          "order": 47,
+          "intent": "Progress marker",
+          "action": "log",
+          "expectedResult": "Continue to next step",
+          "alternatives": []
+        },
+        {
+          "order": 48,
+          "intent": "Wait for element or condition",
+          "action": "wait",
+          "expectedResult": "Element appears or condition becomes true",
+          "alternatives": []
+        },
+        {
+          "order": 49,
+          "intent": "Verify expected state or outcome",
+          "action": "verify",
+          "expectedResult": "Verification passes",
+          "alternatives": []
+        },
+        {
+          "order": 50,
+          "intent": "Verify expected state or outcome",
+          "action": "verify",
+          "expectedResult": "Verification passes",
+          "alternatives": []
+        },
+        {
+          "order": 51,
+          "intent": "Progress marker",
+          "action": "log",
+          "expectedResult": "Continue to next step",
+          "alternatives": []
+        },
+        {
+          "order": 52,
+          "intent": "Progress marker",
+          "action": "log",
+          "expectedResult": "Continue to next step",
+          "alternatives": []
+        },
+        {
+          "order": 53,
+          "intent": "Progress marker",
+          "action": "log",
+          "expectedResult": "Continue to next step",
+          "alternatives": []
+        },
+        {
+          "order": 54,
+          "intent": "Verify expected state or outcome",
+          "action": "verify",
+          "expectedResult": "Verification passes",
+          "alternatives": []
+        },
+        {
+          "order": 55,
+          "intent": "Progress marker",
+          "action": "log",
+          "expectedResult": "Continue to next step",
+          "alternatives": []
+        },
+        {
+          "order": 56,
+          "intent": "Progress marker",
+          "action": "log",
+          "expectedResult": "Continue to next step",
+          "alternatives": []
+        },
+        {
+          "order": 57,
+          "intent": "Progress marker",
+          "action": "log",
+          "expectedResult": "Continue to next step",
+          "alternatives": []
+        },
+        {
+          "order": 58,
+          "intent": "Progress marker",
+          "action": "log",
+          "expectedResult": "Continue to next step",
+          "alternatives": []
+        },
+        {
+          "order": 59,
+          "intent": "Progress marker",
+          "action": "log",
+          "expectedResult": "Continue to next step",
+          "alternatives": []
+        },
+        {
+          "order": 60,
+          "intent": "Progress marker",
+          "action": "log",
+          "expectedResult": "Continue to next step",
+          "alternatives": []
+        },
+        {
+          "order": 61,
+          "intent": "Progress marker",
+          "action": "log",
+          "expectedResult": "Continue to next step",
+          "alternatives": []
+        },
+        {
+          "order": 62,
+          "intent": "Wait for element or condition",
+          "action": "wait",
+          "expectedResult": "Element appears or condition becomes true",
+          "alternatives": []
+        },
+        {
+          "order": 63,
+          "intent": "Enter data into field",
+          "action": "fill",
+          "expectedResult": "Field accepts input and validates correctly",
+          "alternatives": []
+        },
+        {
+          "order": 64,
+          "intent": "Click on element",
+          "action": "click",
+          "expectedResult": "Element responds and triggers expected action",
+          "alternatives": []
+        },
+        {
+          "order": 65,
+          "intent": "Progress marker",
+          "action": "log",
+          "expectedResult": "Continue to next step",
+          "alternatives": []
+        },
+        {
+          "order": 66,
+          "intent": "Wait for element or condition",
+          "action": "wait",
+          "expectedResult": "Element appears or condition becomes true",
+          "alternatives": []
+        },
+        {
+          "order": 67,
+          "intent": "Verify expected state or outcome",
+          "action": "verify",
+          "expectedResult": "Verification passes",
+          "alternatives": []
+        },
+        {
+          "order": 68,
+          "intent": "Verify expected state or outcome",
+          "action": "verify",
+          "expectedResult": "Verification passes",
+          "alternatives": []
+        },
+        {
+          "order": 69,
+          "intent": "Progress marker",
+          "action": "log",
+          "expectedResult": "Continue to next step",
+          "alternatives": []
+        },
+        {
+          "order": 70,
+          "intent": "Progress marker",
+          "action": "log",
+          "expectedResult": "Continue to next step",
+          "alternatives": []
+        },
+        {
+          "order": 71,
+          "intent": "Progress marker",
+          "action": "log",
+          "expectedResult": "Continue to next step",
+          "alternatives": []
+        },
+        {
+          "order": 72,
+          "intent": "Progress marker",
+          "action": "log",
+          "expectedResult": "Continue to next step",
+          "alternatives": []
+        },
+        {
+          "order": 73,
+          "intent": "Progress marker",
+          "action": "log",
+          "expectedResult": "Continue to next step",
+          "alternatives": []
+        },
+        {
+          "order": 74,
+          "intent": "Progress marker",
+          "action": "log",
+          "expectedResult": "Continue to next step",
+          "alternatives": []
+        },
+        {
+          "order": 75,
+          "intent": "Progress marker",
+          "action": "log",
+          "expectedResult": "Continue to next step",
+          "alternatives": []
+        },
+        {
+          "order": 76,
+          "intent": "Progress marker",
+          "action": "log",
+          "expectedResult": "Continue to next step",
+          "alternatives": []
+        },
+        {
+          "order": 77,
+          "intent": "Progress marker",
+          "action": "log",
+          "expectedResult": "Continue to next step",
+          "alternatives": []
+        },
+        {
+          "order": 78,
+          "intent": "Progress marker",
+          "action": "log",
+          "expectedResult": "Continue to next step",
+          "alternatives": []
+        },
+        {
+          "order": 79,
+          "intent": "Progress marker",
+          "action": "log",
+          "expectedResult": "Continue to next step",
+          "alternatives": []
+        },
+        {
+          "order": 80,
+          "intent": "Progress marker",
+          "action": "log",
+          "expectedResult": "Continue to next step",
+          "alternatives": []
+        },
+        {
+          "order": 81,
+          "intent": "Progress marker",
+          "action": "log",
+          "expectedResult": "Continue to next step",
+          "alternatives": []
+        },
+        {
+          "order": 82,
+          "intent": "Progress marker",
+          "action": "log",
+          "expectedResult": "Continue to next step",
+          "alternatives": []
+        },
+        {
+          "order": 83,
+          "intent": "Progress marker",
+          "action": "log",
+          "expectedResult": "Continue to next step",
+          "alternatives": []
+        },
+        {
+          "order": 84,
+          "intent": "Progress marker",
+          "action": "log",
+          "expectedResult": "Continue to next step",
+          "alternatives": []
+        },
+        {
+          "order": 85,
+          "intent": "Progress marker",
+          "action": "log",
+          "expectedResult": "Continue to next step",
+          "alternatives": []
+        },
+        {
+          "order": 86,
+          "intent": "Progress marker",
+          "action": "log",
+          "expectedResult": "Continue to next step",
+          "alternatives": []
+        },
+        {
+          "order": 87,
+          "intent": "Progress marker",
+          "action": "log",
+          "expectedResult": "Continue to next step",
+          "alternatives": []
+        },
+        {
+          "order": 88,
+          "intent": "Progress marker",
+          "action": "log",
+          "expectedResult": "Continue to next step",
+          "alternatives": []
+        },
+        {
+          "order": 89,
+          "intent": "Progress marker",
+          "action": "log",
+          "expectedResult": "Continue to next step",
+          "alternatives": []
+        },
+        {
+          "order": 90,
+          "intent": "Progress marker",
+          "action": "log",
+          "expectedResult": "Continue to next step",
+          "alternatives": []
+        },
+        {
+          "order": 91,
+          "intent": "Progress marker",
+          "action": "log",
+          "expectedResult": "Continue to next step",
+          "alternatives": []
+        },
+        {
+          "order": 92,
+          "intent": "Progress marker",
+          "action": "log",
+          "expectedResult": "Continue to next step",
+          "alternatives": []
+        }
+      ],
+      "postconditions": [
+        "Workflow completes without errors"
+      ],
+      "successIndicators": [
+        "No error messages displayed",
+        "All steps complete without exceptions"
+      ],
+      "errorRecovery": [
+        "Log error and notify user"
+      ]
+    },
+    {
+      "id": "should-handle-conversation-with-context-reset",
+      "name": "should handle conversation with context reset",
+      "intent": "Execute should handle conversation with context reset",
+      "preconditions": [
+        "None - workflow can start from any state"
+      ],
+      "steps": [
+        {
+          "order": 1,
+          "intent": "Progress marker",
+          "action": "log",
+          "expectedResult": "Continue to next step",
+          "alternatives": []
+        },
+        {
+          "order": 2,
+          "intent": "Progress marker",
+          "action": "log",
+          "expectedResult": "Continue to next step",
+          "alternatives": []
+        },
+        {
+          "order": 3,
+          "intent": "Progress marker",
+          "action": "log",
+          "expectedResult": "Continue to next step",
+          "alternatives": []
+        },
+        {
+          "order": 4,
+          "intent": "Progress marker",
+          "action": "log",
+          "expectedResult": "Continue to next step",
+          "alternatives": []
+        },
+        {
+          "order": 5,
+          "intent": "Progress marker",
+          "action": "log",
+          "expectedResult": "Continue to next step",
+          "alternatives": []
+        },
+        {
+          "order": 6,
+          "intent": "Progress marker",
+          "action": "log",
+          "expectedResult": "Continue to next step",
+          "alternatives": []
+        }
+      ],
+      "postconditions": [
+        "Workflow completes without errors"
+      ],
+      "successIndicators": [
+        "No error messages displayed",
+        "All steps complete without exceptions"
+      ],
+      "errorRecovery": [
+        "Log error and notify user"
+      ]
+    },
+    {
+      "id": "should-handle-very-long-conversations",
+      "name": "should handle very long conversations",
+      "intent": "Execute should handle very long conversations",
+      "preconditions": [
+        "None - workflow can start from any state"
+      ],
+      "steps": [
+        {
+          "order": 1,
+          "intent": "Progress marker",
+          "action": "log",
+          "expectedResult": "Continue to next step",
+          "alternatives": []
+        },
+        {
+          "order": 2,
+          "intent": "Progress marker",
+          "action": "log",
+          "expectedResult": "Continue to next step",
+          "alternatives": []
+        },
+        {
+          "order": 3,
+          "intent": "Progress marker",
+          "action": "log",
+          "expectedResult": "Continue to next step",
+          "alternatives": []
+        },
+        {
+          "order": 4,
+          "intent": "Progress marker",
+          "action": "log",
+          "expectedResult": "Continue to next step",
+          "alternatives": []
+        },
+        {
+          "order": 5,
+          "intent": "Progress marker",
+          "action": "log",
+          "expectedResult": "Continue to next step",
+          "alternatives": []
+        },
+        {
+          "order": 6,
+          "intent": "Progress marker",
+          "action": "log",
+          "expectedResult": "Continue to next step",
+          "alternatives": []
+        },
+        {
+          "order": 7,
+          "intent": "Progress marker",
+          "action": "log",
+          "expectedResult": "Continue to next step",
+          "alternatives": []
+        }
+      ],
+      "postconditions": [
+        "Workflow completes without errors"
+      ],
+      "successIndicators": [
+        "No error messages displayed",
+        "All steps complete without exceptions"
+      ],
+      "errorRecovery": [
+        "Log error and notify user"
+      ]
+    },
+    {
+      "id": "should-handle-ambiguous-pronouns",
+      "name": "should handle ambiguous pronouns",
+      "intent": "Execute should handle ambiguous pronouns",
+      "preconditions": [
+        "None - workflow can start from any state"
+      ],
+      "steps": [
+        {
+          "order": 1,
+          "intent": "Progress marker",
+          "action": "log",
+          "expectedResult": "Continue to next step",
+          "alternatives": []
+        },
+        {
+          "order": 2,
+          "intent": "Progress marker",
+          "action": "log",
+          "expectedResult": "Continue to next step",
+          "alternatives": []
+        },
+        {
+          "order": 3,
+          "intent": "Progress marker",
+          "action": "log",
+          "expectedResult": "Continue to next step",
+          "alternatives": []
+        },
+        {
+          "order": 4,
+          "intent": "Progress marker",
+          "action": "log",
+          "expectedResult": "Continue to next step",
+          "alternatives": []
+        },
+        {
+          "order": 5,
+          "intent": "Progress marker",
+          "action": "log",
+          "expectedResult": "Continue to next step",
+          "alternatives": []
+        },
+        {
+          "order": 6,
+          "intent": "Progress marker",
+          "action": "log",
+          "expectedResult": "Continue to next step",
+          "alternatives": []
+        }
+      ],
+      "postconditions": [
+        "Workflow completes without errors"
+      ],
+      "successIndicators": [
+        "No error messages displayed",
+        "All steps complete without exceptions"
+      ],
+      "errorRecovery": [
+        "Log error and notify user"
+      ]
+    }
+  ],
+  "uiCatalog": [],
+  "apiReference": [
+    {
+      "endpoint": "/api/dashboard/telemetry**",
+      "purpose": "Application API endpoint",
+      "usedInWorkflows": [
+        "renders metrics and rollup health badge"
+      ]
+    },
+    {
+      "endpoint": "/api/gdpr/export",
+      "purpose": "Handle privacy-related operations",
+      "usedInWorkflows": [
+        "exports user data by session ID with download",
+        "exports user data by email",
+        "shows API error when export fails",
+        "shows loading state during export"
+      ]
+    },
+    {
+      "endpoint": "/api/gdpr/delete",
+      "purpose": "Handle privacy-related operations",
+      "usedInWorkflows": [
+        "deletes user data with confirmation toggle",
+        "deletes user data by email with confirmation",
+        "shows message when no data found to delete",
+        "shows API error when deletion fails",
+        "shows loading state during deletion"
+      ]
+    },
+    {
+      "endpoint": "/api/chat",
+      "purpose": "Process chat messages and return AI responses",
+      "usedInWorkflows": [
+        "should load widget, open programmatically, and send message with session metadata",
+        "should add and configure domain successfully",
+        "should maintain context across multiple conversation turns"
+      ]
+    },
+    {
+      "endpoint": "/api/dashboard/analytics**",
+      "purpose": "Retrieve analytics data",
+      "usedInWorkflows": [
+        "should display analytics dashboard with user metrics and charts",
+        "should handle empty analytics data gracefully",
+        "should handle API errors gracefully"
+      ]
+    },
+    {
+      "endpoint": "/api/widget/config**",
+      "purpose": "Application API endpoint",
+      "usedInWorkflows": [
+        "should install and customize widget successfully"
+      ]
+    },
+    {
+      "endpoint": "/api/domains**",
+      "purpose": "Application API endpoint",
+      "usedInWorkflows": [
+        "should add and configure domain successfully"
+      ]
+    },
+    {
+      "endpoint": "/api/demo/scrape",
+      "purpose": "Initiate web scraping job",
+      "usedInWorkflows": [
+        "should complete demo flow from URL entry to AI chat response"
+      ]
+    },
+    {
+      "endpoint": "/api/demo/chat",
+      "purpose": "Process chat messages and return AI responses",
+      "usedInWorkflows": [
+        "should complete demo flow from URL entry to AI chat response"
+      ]
+    }
+  ],
+  "commonPatterns": [
+    {
+      "name": "State Verification",
+      "description": "Verify expected state or element visibility",
+      "example": "await expect(element).toBeVisible();",
+      "frequency": 31
+    },
+    {
+      "name": "Page Navigation",
+      "description": "Navigate to a URL and wait for page load",
+      "example": "await page.goto(url, { waitUntil: \"networkidle\" })",
+      "frequency": 18
+    },
+    {
+      "name": "Form Filling",
+      "description": "Fill multiple form fields and submit",
+      "example": "await input.fill(value); await submitButton.click();",
+      "frequency": 13
+    }
+  ],
+  "generatedAt": "2025-11-10T00:23:32.683Z"
+}

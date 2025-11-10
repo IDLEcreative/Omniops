@@ -2,8 +2,8 @@
 
 **Type:** Reference
 **Status:** Active
-**Last Updated:** 2025-10-29
-**Verified For:** v0.1.0 (Issue #11: Removed duplicate chat tables)
+**Last Updated:** 2025-01-08
+**Verified For:** v0.1.0 (Added RLS policies to widget_config_versions, domain_mappings, demo_sessions)
 **Dependencies:**
 - [Search Architecture](./docs/01-ARCHITECTURE/ARCHITECTURE_SEARCH_SYSTEM.md) - Uses page_embeddings and scraped_pages
 - [Performance Optimization](./docs/07-REFERENCE/REFERENCE_PERFORMANCE_OPTIMIZATION.md) - Index strategies
@@ -358,6 +358,39 @@ FOREIGN KEYS:
 **Row Count**: 4,491
 
 **RLS Policies**: 1 policy active
+
+**Status Column Documentation:**
+
+The `status` column tracks the lifecycle state of scraped pages:
+
+- `'pending'` - Page queued for scraping (default)
+- `'completed'` - Page scraped successfully
+- `'failed'` - Temporary error, will retry on next scrape
+- `'deleted'` - Page returned 404/410, marked for cleanup
+- `null` - Legacy records without status (treated as pending)
+
+**Cleanup Policy:**
+
+Pages with `status='deleted'` are automatically removed after 30 days by the daily cron job (`/api/cron/refresh`). When a page is marked as deleted:
+
+1. **Immediate**: Embeddings are deleted via CASCADE relationship
+2. **After 30 days**: Page record is permanently removed from database
+3. **Monitoring**: Use `npx tsx scripts/monitoring/check-deleted-pages.ts` to view status
+
+**Example Queries:**
+
+```sql
+-- Find all deleted pages ready for cleanup (>30 days old)
+SELECT url, last_scraped_at
+FROM scraped_pages
+WHERE status = 'deleted'
+  AND last_scraped_at < NOW() - INTERVAL '30 days';
+
+-- Count pages by status
+SELECT status, COUNT(*) as count
+FROM scraped_pages
+GROUP BY status;
+```
 
 ---
 
@@ -1525,8 +1558,8 @@ ORDER BY pg_relation_size(indexrelid) DESC;
 
 ### RLS Coverage
 
-**Tables with RLS Policies**: 24 out of 31 tables
-**Total Policies**: 53 policies
+**Tables with RLS Policies**: 27 out of 31 tables (3 newly protected: widget_config_versions, domain_mappings, demo_sessions)
+**Total Policies**: 59 policies (6 new policies added 2025-01-08)
 
 | Table | Policy Count | Description |
 |-------|--------------|-------------|
@@ -1554,6 +1587,30 @@ ORDER BY pg_relation_size(indexrelid) DESC;
 | `scrape_jobs` | 1 | Domain-based access |
 | `query_cache` | 1 | Domain-based cache |
 | `search_cache` | 1 | Domain-based cache |
+| `widget_config_versions` | 2 | Organization-based access (NEW 2025-01-08) |
+| `domain_mappings` | 2 | Domain ownership (NEW 2025-01-08) |
+| `demo_sessions` | 2 | Public access with app-level security (NEW 2025-01-08) |
+
+### Recently Protected Tables (2025-01-08)
+
+**Security Fix**: Three tables were identified as missing RLS protection and have been secured:
+
+1. **widget_config_versions** (2 policies)
+   - Service role: Full access
+   - Organization members: Can access versions for their customer configs only
+   - [Migration](../../supabase/migrations/20250108000001_add_rls_widget_config_versions.sql)
+
+2. **domain_mappings** (2 policies)
+   - Service role: Full access
+   - Organization members: Can access mappings where they own staging OR production domain
+   - [Migration](../../supabase/migrations/20250108000002_add_rls_domain_mappings.sql)
+
+3. **demo_sessions** (2 policies)
+   - Service role: Full access
+   - Public: Intentional open access (session-based validation at app layer)
+   - [Migration](../../supabase/migrations/20250108000003_add_rls_demo_sessions.sql)
+
+**Documentation**: See [ANALYSIS_RLS_SECURITY_FIX.md](../10-ANALYSIS/ANALYSIS_RLS_SECURITY_FIX.md) for complete analysis.
 
 ### RLS Implementation Pattern
 
