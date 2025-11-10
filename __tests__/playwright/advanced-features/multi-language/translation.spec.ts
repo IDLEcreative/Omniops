@@ -23,7 +23,7 @@ import {
   reloadAndWaitForWidget,
   hasSpanishIndicators,
   getMessageText,
-} from '__tests__/utils/playwright/i18n-test-helpers';
+} from '../../../utils/playwright/i18n-test-helpers';
 
 const BASE_URL = process.env.BASE_URL || 'http://localhost:3000';
 

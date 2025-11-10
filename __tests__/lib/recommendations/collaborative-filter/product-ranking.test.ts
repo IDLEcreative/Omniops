@@ -31,21 +31,14 @@ describe('Product Ranking - Collaborative Filtering', () => {
     it('should recommend products from similar users', async () => {
       const { mockSupabase } = setupCFTestSuite();
 
-      // User viewed one product
       mockSupabase.select.mockResolvedValueOnce({
         data: [{ product_id: 'prod-1', clicked: true, purchased: false }],
         error: null,
       });
-
-      // Similar user also viewed prod-1
       mockSupabase.select.mockResolvedValueOnce({
-        data: [
-          { session_id: 'session-456', product_id: 'prod-1', clicked: true, purchased: false },
-        ],
+        data: [{ session_id: 'session-456', product_id: 'prod-1', clicked: true, purchased: false }],
         error: null,
       });
-
-      // Similar user also viewed prod-2, prod-3
       mockSupabase.select.mockResolvedValueOnce({
         data: [
           { session_id: 'session-456', product_id: 'prod-2', clicked: true, purchased: false },
@@ -73,24 +66,14 @@ describe('Product Ranking - Collaborative Filtering', () => {
 
     it('should weight products by engagement (purchase > click)', async () => {
       const { mockSupabase } = setupCFTestSuite();
-
-      // User viewed prod-1
       mockSupabase.select.mockResolvedValueOnce({
         data: [{ product_id: 'prod-1', clicked: true, purchased: false }],
         error: null,
       });
-
-      // Similar user also viewed prod-1
       mockSupabase.select.mockResolvedValueOnce({
-        data: [
-          { session_id: 'session-456', product_id: 'prod-1', clicked: true, purchased: false },
-        ],
+        data: [{ session_id: 'session-456', product_id: 'prod-1', clicked: true, purchased: false }],
         error: null,
       });
-
-      // Similar user viewed:
-      // - prod-2 (clicked only, weight 2x)
-      // - prod-3 (purchased, weight 3x)
       mockSupabase.select.mockResolvedValueOnce({
         data: [
           { session_id: 'session-456', product_id: 'prod-2', clicked: true, purchased: false },
@@ -113,8 +96,6 @@ describe('Product Ranking - Collaborative Filtering', () => {
 
     it('should exclude user\'s already viewed products', async () => {
       const { mockSupabase } = setupCFTestSuite();
-
-      // User already viewed prod-1, prod-2
       mockSupabase.select.mockResolvedValueOnce({
         data: [
           { product_id: 'prod-1', clicked: true, purchased: false },
@@ -122,16 +103,10 @@ describe('Product Ranking - Collaborative Filtering', () => {
         ],
         error: null,
       });
-
-      // Similar user also viewed prod-1
       mockSupabase.select.mockResolvedValueOnce({
-        data: [
-          { session_id: 'session-456', product_id: 'prod-1', clicked: true, purchased: false },
-        ],
+        data: [{ session_id: 'session-456', product_id: 'prod-1', clicked: true, purchased: false }],
         error: null,
       });
-
-      // Similar user viewed prod-1 (already viewed), prod-3 (new)
       mockSupabase.select.mockResolvedValueOnce({
         data: [
           { session_id: 'session-456', product_id: 'prod-1', clicked: true, purchased: false },
@@ -158,22 +133,14 @@ describe('Product Ranking - Collaborative Filtering', () => {
 
     it('should exclude products in excludeProductIds parameter', async () => {
       const { mockSupabase } = setupCFTestSuite();
-
-      // User viewed prod-1
       mockSupabase.select.mockResolvedValueOnce({
         data: [{ product_id: 'prod-1', clicked: true, purchased: false }],
         error: null,
       });
-
-      // Similar user also viewed prod-1
       mockSupabase.select.mockResolvedValueOnce({
-        data: [
-          { session_id: 'session-456', product_id: 'prod-1', clicked: true, purchased: false },
-        ],
+        data: [{ session_id: 'session-456', product_id: 'prod-1', clicked: true, purchased: false }],
         error: null,
       });
-
-      // Similar user viewed prod-2, prod-3
       mockSupabase.select.mockResolvedValueOnce({
         data: [
           { session_id: 'session-456', product_id: 'prod-2', clicked: true, purchased: false },
@@ -202,23 +169,16 @@ describe('Product Ranking - Collaborative Filtering', () => {
   describe('Score Normalization', () => {
     it('should normalize all scores to 0-1 range', async () => {
       const { mockSupabase } = setupCFTestSuite();
-
       mockSupabase.select.mockResolvedValueOnce({
         data: [{ product_id: 'prod-1', clicked: true, purchased: false }],
         error: null,
       });
-
       mockSupabase.select.mockResolvedValueOnce({
-        data: [
-          { session_id: 'session-456', product_id: 'prod-1', clicked: true, purchased: false },
-        ],
+        data: [{ session_id: 'session-456', product_id: 'prod-1', clicked: true, purchased: false }],
         error: null,
       });
-
       mockSupabase.select.mockResolvedValueOnce({
-        data: [
-          { session_id: 'session-456', product_id: 'prod-2', clicked: true, purchased: true },
-        ],
+        data: [{ session_id: 'session-456', product_id: 'prod-2', clicked: true, purchased: true }],
         error: null,
       });
 
@@ -233,25 +193,18 @@ describe('Product Ranking - Collaborative Filtering', () => {
       }
     });
 
-    it('should handle score when maximum possible score is reached', async () => {
+    it('should handle max score correctly', async () => {
       const { mockSupabase } = setupCFTestSuite();
-
       mockSupabase.select.mockResolvedValueOnce({
         data: [{ product_id: 'prod-1', clicked: true, purchased: false }],
         error: null,
       });
-
       mockSupabase.select.mockResolvedValueOnce({
-        data: [
-          { session_id: 'session-456', product_id: 'prod-1', clicked: true, purchased: false },
-        ],
+        data: [{ session_id: 'session-456', product_id: 'prod-1', clicked: true, purchased: false }],
         error: null,
       });
-
       mockSupabase.select.mockResolvedValueOnce({
-        data: [
-          { session_id: 'session-456', product_id: 'prod-2', clicked: true, purchased: true },
-        ],
+        data: [{ session_id: 'session-456', product_id: 'prod-2', clicked: true, purchased: true }],
         error: null,
       });
 
@@ -269,25 +222,18 @@ describe('Product Ranking - Collaborative Filtering', () => {
   });
 
   describe('Metadata and Transparency', () => {
-    it('should include metadata with rawScore and similarUserCount', async () => {
+    it('should include metadata with rawScore and count', async () => {
       const { mockSupabase } = setupCFTestSuite();
-
       mockSupabase.select.mockResolvedValueOnce({
         data: [{ product_id: 'prod-1', clicked: true, purchased: false }],
         error: null,
       });
-
       mockSupabase.select.mockResolvedValueOnce({
-        data: [
-          { session_id: 'session-456', product_id: 'prod-1', clicked: true, purchased: false },
-        ],
+        data: [{ session_id: 'session-456', product_id: 'prod-1', clicked: true, purchased: false }],
         error: null,
       });
-
       mockSupabase.select.mockResolvedValueOnce({
-        data: [
-          { session_id: 'session-456', product_id: 'prod-2', clicked: true, purchased: false },
-        ],
+        data: [{ session_id: 'session-456', product_id: 'prod-2', clicked: true, purchased: false }],
         error: null,
       });
 

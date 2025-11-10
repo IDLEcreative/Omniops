@@ -293,9 +293,7 @@ export function createTestResult(domain: string, businessType: string): DomainTe
   };
 }
 
-/**
- * Update result status based on failures
- */
+/** Update result status based on failures */
 export function finializeTestResult(result: DomainTestResult): void {
   result.status = result.testsFailed === 0 ? 'PASS' : 'FAIL';
 }
