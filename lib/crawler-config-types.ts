@@ -27,7 +27,7 @@ export const CrawlerConfigSchema = z.object({
 
   // Rate limiting
   rateLimit: z.object({
-    requestsPerMinute: z.number().min(1).max(100).default(20),
+    requestsPerMinute: z.number().min(1).max(200).default(20), // Increased max to 200 for fast presets
     delayBetweenRequests: z.number().min(0).max(10000).default(1000), // 1s default
     adaptiveDelay: z.boolean().default(true),
     respectRobotsTxt: z.boolean().default(false), // Set to true in production

@@ -63,6 +63,16 @@ export class EcommerceExtractor extends ContentExtractor {
   private static productSelectors = PRODUCT_SELECTORS;
 
   /**
+   * Instance method to extract products from HTML
+   * Used by tests and backward compatibility
+   */
+  async extractProducts(html: string, options?: { url?: string }): Promise<NormalizedProduct[]> {
+    const url = options?.url || 'https://example.com';
+    const content = await EcommerceExtractor.extractEcommerce(html, url);
+    return content.products || [];
+  }
+
+  /**
    * Enhanced extraction for e-commerce sites
    * Main entry point for extracting e-commerce content
    */

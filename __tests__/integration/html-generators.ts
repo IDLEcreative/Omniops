@@ -16,9 +16,37 @@ export class TestDataGenerator {
         </div>
         <div class="sku" itemprop="sku">PROD-${String(i + 1).padStart(3, '0')}</div>
         <div class="description" itemprop="description">
-          This is an amazing product with great features.
+          This is an amazing product with great features and exceptional quality.
           It offers excellent value for money and comes with a warranty.
           Perfect for customers who want quality and reliability.
+
+          Our product has been carefully designed and tested to meet the highest standards.
+          The manufacturing process uses premium materials sourced from certified suppliers.
+          Each item undergoes rigorous quality assurance testing before shipping.
+
+          Key Features:
+          - Premium construction with high-grade materials and components
+          - Advanced technology for superior performance and reliability
+          - Comprehensive warranty covering all manufacturing defects for twelve months
+          - Excellent customer support available seven days a week
+          - Fast and reliable shipping to all locations
+          - Easy returns and exchange policy for your convenience
+
+          Specifications and Details:
+          - Weight approximately 500 grams for optimal balance
+          - Compact dimensions of 30cm by 20cm by 10cm for easy storage
+          - Available in multiple color options to suit your preferences
+          - Twelve months comprehensive manufacturer warranty included
+
+          Customer Testimonials and Reviews:
+          - "Excellent product with outstanding build quality highly recommended" - Sarah M.
+          - "Best value for money in the current market very satisfied" - John D.
+          - "Outstanding quality and exceptional customer service" - Emma T.
+          - "Exceeded expectations great investment" - Michael R.
+
+          Why Choose Our Product:
+          We are committed to providing the highest quality products with exceptional customer service.
+          Our team works tirelessly to ensure your complete satisfaction with every purchase.
         </div>
         <div class="availability" itemprop="availability" content="https://schema.org/InStock">
           In Stock
@@ -100,10 +128,44 @@ export class TestDataGenerator {
 
     return `
       <html>
+        <head>
+          <title>Large Content Page</title>
+          <meta name="description" content="Test page with large content" />
+          <script>console.log('test');</script>
+          <style>.test { color: red; }</style>
+        </head>
         <body>
+          <header class="site-header">
+            <nav class="navigation">
+              <ul>
+                <li><a href="/">Home</a></li>
+                <li><a href="/about">About</a></li>
+                <li><a href="/contact">Contact</a></li>
+              </ul>
+            </nav>
+          </header>
+
+          <aside class="sidebar">
+            <div class="widget">
+              <h3>Popular Posts</h3>
+              <ul>
+                <li><a href="/post1">Post 1</a></li>
+                <li><a href="/post2">Post 2</a></li>
+              </ul>
+            </div>
+          </aside>
+
           <div class="large-content">
             ${sections}
           </div>
+
+          <footer class="site-footer">
+            <div class="footer-links">
+              <a href="/privacy">Privacy</a>
+              <a href="/terms">Terms</a>
+            </div>
+            <p>&copy; 2024 Test Site</p>
+          </footer>
         </body>
       </html>
     `;

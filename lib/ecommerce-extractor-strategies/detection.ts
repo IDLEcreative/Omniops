@@ -67,16 +67,25 @@ export function detectPageType($: CheerioAPI, url: string): EcommerceExtractedCo
   }
 
   const productSchemaCount = $('[itemtype*="schema.org/Product"]').length;
-  const hasSingleProduct = productSchemaCount === 1 || $('.product-single, .single-product').length > 0;
-  if (hasSingleProduct) {
-    return 'product';
-  }
-
   const productCount = $('.product, .product-item, [data-product-id]').length;
   const hasListingContainer = $('.product-list, .product-grid, .products, [data-listing]').length > 0;
   const paginationSelectors = PRODUCT_SELECTORS.listing.pagination.join(', ');
   const hasPagination = $(paginationSelectors).length > 0;
   const hasSearchForm = $('form[action*="search"], input[name="s"], input[name="q"], input[name="search"]').length > 0;
+
+  // If we have multiple products, it's likely a listing page
+  if (productSchemaCount > 1 || productCount > 1) {
+    if (hasSearchForm) {
+      return 'search';
+    }
+    return 'category';
+  }
+
+  // Single product indicators
+  const hasSingleProduct = productSchemaCount === 1 || $('.product-single, .single-product').length > 0;
+  if (hasSingleProduct) {
+    return 'product';
+  }
 
   if (hasSearchForm && (hasListingContainer || productCount > 0 || hasPagination)) {
     return 'search';

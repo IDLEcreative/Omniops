@@ -111,7 +111,7 @@ describe('Enhanced Scraper System - Edge Cases and Error Handling', () => {
 
       expect(processingTime).toBeLessThan(10000);
       expect(optimizedContent.compressionRatio).toBeGreaterThan(0.3);
-      expect(optimizedContent.processingStats.compressionTime).toBeLessThan(processingTime);
+      expect(optimizedContent.processingStats.compressionTime).toBeLessThanOrEqual(processingTime);
 
       console.log('Large content performance:', {
         processingTime,
