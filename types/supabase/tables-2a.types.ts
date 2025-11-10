@@ -1,13 +1,12 @@
 /**
  * Auto-generated types from Supabase
- * Database table definitions (Part 2/3)
- * Tables: conversations, customer_access_logs, customer_configs,
- *         customer_data_cache, customer_verifications, customers, domains
+ * Database table definitions (Part 2a)
+ * Tables: conversations, customer_access_logs, customer_configs, customer_data_cache
  */
 
 import type { Json } from './json.types'
 
-export interface Tables2 {
+export interface Tables2a {
   conversations: {
     Row: {
       created_at: string | null
@@ -178,7 +177,47 @@ export interface Tables2 {
         referencedRelation: "customers"
         referencedColumns: ["id"]
       },
-
-export type Tables2a = {
-  // Tables 2a types (lines 1-180)
+    ]
+  }
+  customer_data_cache: {
+    Row: {
+      business_id: string
+      cache_key: string
+      cached_data: Json
+      conversation_id: string
+      created_at: string | null
+      data_type: string
+      expires_at: string
+      id: string
+    }
+    Insert: {
+      business_id: string
+      cache_key: string
+      cached_data: Json
+      conversation_id: string
+      created_at?: string | null
+      data_type: string
+      expires_at?: string
+      id?: string
+    }
+    Update: {
+      business_id?: string
+      cache_key?: string
+      cached_data?: Json
+      conversation_id?: string
+      created_at?: string | null
+      data_type?: string
+      expires_at?: string
+      id?: string
+    }
+    Relationships: [
+      {
+        foreignKeyName: "customer_data_cache_business_id_fkey"
+        columns: ["business_id"]
+        isOneToOne: false
+        referencedRelation: "businesses"
+        referencedColumns: ["id"]
+      },
+    ]
+  }
 }

@@ -27,9 +27,7 @@ describe('Content-Based Filter - Matching', () => {
       in: jest.fn().mockReturnThis(),
     };
 
-    // Use jest.requireMock to get the mocked module and configure it
-    const supabaseModule = jest.requireMock('@/lib/supabase/server');
-    supabaseModule.createClient.mockResolvedValue(mockSupabase);
+    mockCreateClient.mockResolvedValue(mockSupabase);
   });
 
   describe('category matching', () => {
