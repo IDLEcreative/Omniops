@@ -357,3 +357,11 @@ on:
 - [Brand-Agnostic Requirements](../../CLAUDE.md#-critical-brand-agnostic-application-)
 - [Documentation Standards](../../CLAUDE.md#documentation-standards-for-ai-discoverability)
 - [Privacy Compliance](../../docs/privacy-compliance.md)
+
+## CI/CD Pipeline Testing
+
+This section was added to test the automated E2E workflow trigger mechanism.
+
+**Test Date:** 2025-11-10
+**Test Purpose:** Validate E2E tests workflow runs correctly on PR creation
+
