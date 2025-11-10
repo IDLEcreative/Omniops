@@ -176,7 +176,7 @@ describe('Excel Exporter', () => {
       await exportToExcel(messageAnalytics, null);
 
       // Verify User Analytics sheet was not created
-      const sheetNames = (XLSX.utils.book_append_sheet as jest.Mock).mock.calls
+      const sheetNames = mockBookAppendSheet.mock.calls
         .map(call => call[2]);
 
       expect(sheetNames).toContain('Summary');
@@ -188,7 +188,7 @@ describe('Excel Exporter', () => {
       await exportToExcel(null, null);
 
       // Only Summary sheet should be created
-      const sheetNames = (XLSX.utils.book_append_sheet as jest.Mock).mock.calls
+      const sheetNames = mockBookAppendSheet.mock.calls
         .map(call => call[2]);
 
       expect(sheetNames).toHaveLength(1);

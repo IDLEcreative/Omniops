@@ -11,6 +11,27 @@ import * as credentialVault from '@/lib/autonomous/security/credential-vault';
 // Mock dependencies
 jest.mock('@/lib/autonomous/core/workflow-registry');
 jest.mock('@/lib/autonomous/security/credential-vault');
+jest.mock('@/lib/supabase/server', () => ({
+  createServiceRoleClientSync: jest.fn(() => ({
+    from: jest.fn(() => ({
+      update: jest.fn().mockResolvedValue({ data: null, error: null }),
+      insert: jest.fn().mockResolvedValue({ data: null, error: null }),
+      select: jest.fn().mockResolvedValue({ data: [], error: null }),
+      eq: jest.fn().mockResolvedValue({ data: null, error: null })
+    })),
+    storage: {
+      from: jest.fn(() => ({
+        upload: jest.fn().mockResolvedValue({ data: { path: 'test' }, error: null }),
+        getPublicUrl: jest.fn(() => ({ data: { publicUrl: 'https://example.com/test.png' } }))
+      }))
+    }
+  })),
+  createClient: jest.fn(),
+  createServiceRoleClient: jest.fn(),
+  requireClient: jest.fn(),
+  requireServiceRoleClient: jest.fn(),
+  validateSupabaseEnv: jest.fn(() => true)
+}));
 
 describe('ShopifySetupAgent', () => {
   let agent: ShopifySetupAgent;
