@@ -1,0 +1,45 @@
+# Page snapshot
+
+```yaml
+- generic [active] [ref=e1]:
+  - generic [ref=e2]:
+    - link "Back to home" [ref=e3] [cursor=pointer]:
+      - /url: /
+      - img [ref=e4]
+      - generic [ref=e6]: Back to home
+    - generic [ref=e7]:
+      - generic [ref=e8]:
+        - generic [ref=e9]: Login
+        - generic [ref=e10]: Enter your credentials to access your dashboard
+      - generic [ref=e11]:
+        - generic [ref=e12]:
+          - generic [ref=e13]:
+            - generic [ref=e14]: Email
+            - textbox "Email" [ref=e15]:
+              - /placeholder: you@example.com
+          - generic [ref=e16]:
+            - generic [ref=e17]: Password
+            - textbox "Password" [ref=e18]
+        - generic [ref=e19]:
+          - button "Sign In" [ref=e20] [cursor=pointer]
+          - generic [ref=e24]: Or continue with
+          - generic [ref=e25]:
+            - button "GitHub" [ref=e26] [cursor=pointer]:
+              - img
+              - text: GitHub
+            - button "Google" [ref=e27] [cursor=pointer]:
+              - img
+              - text: Google
+          - generic [ref=e28]:
+            - paragraph [ref=e29]:
+              - text: Don't have an account?
+              - link "Sign up" [ref=e30] [cursor=pointer]:
+                - /url: /signup
+            - paragraph [ref=e31]:
+              - link "Forgot your password?" [ref=e32] [cursor=pointer]:
+                - /url: /reset-password
+  - region "Notifications alt+T"
+  - button "Open Next.js Dev Tools" [ref=e38] [cursor=pointer]:
+    - img [ref=e39]
+  - alert [ref=e42]
+```

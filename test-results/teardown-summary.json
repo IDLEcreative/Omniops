@@ -1,17 +1,12 @@
 {
-  "teardownTime": "2025-11-10T18:43:42.247Z",
-  "setupTime": "2025-11-10T18:43:40.729Z",
-  "duration": 1518,
+  "teardownTime": "2025-11-10T19:08:49.577Z",
+  "setupTime": "2025-11-10T19:08:20.481Z",
+  "duration": 29096,
   "testResultsPath": "/Users/jamesguy/Omniops/test-results",
   "generatedFiles": [
-    "advanced-features-multi-la-0ae7f-ediately-on-language-change-chromium",
-    "advanced-features-multi-la-0ae7f-ediately-on-language-change-firefox",
-    "advanced-features-multi-la-0ae7f-ediately-on-language-change-webkit",
-    "advanced-features-multi-la-303d4-lish-to-Spanish-translation-chromium",
-    "advanced-features-multi-la-303d4-lish-to-Spanish-translation-firefox",
-    "advanced-features-multi-la-303d4-lish-to-Spanish-translation-webkit",
     "browser-availability.json",
     "screenshots",
+    "setup-auth.setup.ts-authenticate-for-E2E-tests-setup",
     "setup-timestamp.txt",
     "traces",
     "videos"
