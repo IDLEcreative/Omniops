@@ -11,12 +11,12 @@ import {
   WooCommerceSetupJobData,
 } from '@/lib/autonomous/queue';
 
-// Mock BullMQ and Redis BEFORE any imports
-let mockQueue: any;
+// Global mock queue that tests can access
+let mockQueueInstance: any;
 
 jest.mock('bullmq', () => {
   // Create mock queue with all necessary methods
-  mockQueue = {
+  mockQueueInstance = {
     add: jest.fn().mockResolvedValue({ id: 'job-123' }),
     getJob: jest.fn(),
     getJobCounts: jest.fn().mockResolvedValue({
@@ -43,7 +43,7 @@ jest.mock('bullmq', () => {
   };
 
   return {
-    Queue: jest.fn(() => mockQueue),
+    Queue: jest.fn(() => mockQueueInstance),
   };
 });
 
@@ -57,10 +57,27 @@ jest.mock('@/lib/redis', () => ({
 
 describe('OperationQueueManager', () => {
   let queueManager: OperationQueueManager;
+  let mockQueue: any;
 
   beforeEach(() => {
-    // Reset mock implementations but keep the same objects for assertions
-    if (mockQueue) {
+    // Get the mocked Queue constructor to verify it's being called
+    const { Queue } = require('bullmq');
+
+    // The Queue constructor should return our mockQueueInstance
+    // If mockQueueInstance is still undefined, it means jest.mock() hasn't initialized it yet
+    // This is a known issue with how jest.mock() scopes variables
+
+    // Workaround: directly use mockQueueInstance which should be set by jest.mock factory
+    mockQueue = mockQueueInstance;
+
+    // If mockQueue is still undefined, use the mocked Queue directly
+    if (!mockQueue) {
+      // This shouldn't happen, but if it does, we need to debug the jest.mock setup
+      console.warn('mockQueueInstance is undefined, mockQueue setup failed');
+    }
+
+    // Clear only the mock call counts, not the mocks themselves
+    if (mockQueue && typeof mockQueue.add === 'function') {
       mockQueue.add.mockClear();
       mockQueue.getJob.mockClear();
       mockQueue.getJobCounts.mockClear();
@@ -70,31 +87,6 @@ describe('OperationQueueManager', () => {
       mockQueue.clean.mockClear();
       mockQueue.close.mockClear();
       mockQueue.on.mockClear();
-
-      // Reset implementations
-      mockQueue.add.mockResolvedValue({ id: 'job-123' });
-      mockQueue.getJobCounts.mockResolvedValue({
-        waiting: 5,
-        active: 2,
-        completed: 100,
-        failed: 3,
-        delayed: 1,
-        paused: 0,
-      });
-      mockQueue.getCompleted.mockResolvedValue([
-        { finishedOn: Date.now() - 1000 },
-      ]);
-      mockQueue.pause.mockResolvedValue(undefined);
-      mockQueue.resume.mockResolvedValue(undefined);
-      mockQueue.clean.mockResolvedValue(undefined);
-      mockQueue.close.mockResolvedValue(undefined);
-
-      // Reset the mock client on each test
-      mockQueue.client = Promise.resolve({
-        ping: jest.fn().mockResolvedValue('PONG'),
-        incr: jest.fn().mockResolvedValue(1),
-        expire: jest.fn().mockResolvedValue(1),
-      });
     }
 
     queueManager = createOperationQueueManager();

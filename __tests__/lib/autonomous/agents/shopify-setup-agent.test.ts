@@ -21,33 +21,36 @@ const mockVaultInstance = {
   listCredentials: jest.fn()
 };
 
-// Mock the vault helpers to use mocked getCredential that returns the mock instance's values
-jest.mock('@/lib/autonomous/security/credential-vault-helpers', () => {
-  const mockGetCredentialFn = jest.fn();
-  const mockStoreCredentialFn = jest.fn();
-  const mockDeleteCredentialFn = jest.fn();
+// Create mocks as global variables that test can access
+const mockGetCredentialFn = jest.fn();
+const mockStoreCredentialFn = jest.fn();
+const mockDeleteCredentialFn = jest.fn();
 
-  return {
-    getCredential: mockGetCredentialFn,
-    storeCredential: mockStoreCredentialFn,
-    deleteCredential: mockDeleteCredentialFn,
-    _mockGetCredential: mockGetCredentialFn,
-    _mockStoreCredential: mockStoreCredentialFn,
-    _mockDeleteCredential: mockDeleteCredentialFn
-  };
-});
+// Mock dependencies
+jest.mock('@/lib/autonomous/core/workflow-registry', () => ({
+  WorkflowRegistry: {
+    get: jest.fn()
+  }
+}));
 
-// credential-vault re-exports from vault-helpers
-jest.mock('@/lib/autonomous/security/credential-vault');
+// Mock the vault helpers first (where getCredential is actually defined)
+jest.mock('@/lib/autonomous/security/credential-vault-helpers', () => ({
+  getCredential: mockGetCredentialFn,
+  storeCredential: mockStoreCredentialFn,
+  deleteCredential: mockDeleteCredentialFn
+}));
+
+// Mock the vault which re-exports from vault-helpers
+jest.mock('@/lib/autonomous/security/credential-vault', () => ({
+  ...jest.requireActual('@/lib/autonomous/security/credential-vault-helpers'),
+  CredentialVault: jest.fn(),
+  getCredentialVault: jest.fn()
+}));
 
 // Import after mocking
 import { ShopifySetupAgent, createShopifySetupAgent, ShopifySetupResult } from '@/lib/autonomous/agents/shopify-setup-agent';
 import { WorkflowRegistry } from '@/lib/autonomous/core/workflow-registry';
 import * as credentialVault from '@/lib/autonomous/security/credential-vault';
-
-// Get reference to the mocked getCredential function
-const helpersMocks = require('@/lib/autonomous/security/credential-vault-helpers');
-const mockVaultGet = helpersMocks._mockGetCredential || helpersMocks.getCredential;
 jest.mock('@/lib/supabase/server', () => {
   const mockClient = {
     from: jest.fn(() => ({
@@ -178,18 +181,18 @@ describe('ShopifySetupAgent', () => {
       const mockEmail = { value: 'admin@teststore.com' };
       const mockPassword = { value: 'secure-password' };
 
-      mockVaultGet
-        .mockResolvedValueOnce(mockEmail)
-        .mockResolvedValueOnce(mockPassword);
+      mockGetCredentialFn
+        .mockResolvedValueOnce(mockEmail as any)
+        .mockResolvedValueOnce(mockPassword as any);
 
       const credentials = await agent.getCredentials(mockOrganizationId);
 
-      expect(mockVaultGet).toHaveBeenCalledWith(
+      expect(mockGetCredentialFn).toHaveBeenCalledWith(
         mockOrganizationId,
         'shopify',
         'admin_email'
       );
-      expect(mockVaultGet).toHaveBeenCalledWith(
+      expect(mockGetCredentialFn).toHaveBeenCalledWith(
         mockOrganizationId,
         'shopify',
         'admin_password'
@@ -203,9 +206,9 @@ describe('ShopifySetupAgent', () => {
     });
 
     it('should throw error when email credential not found', async () => {
-      mockVaultGet
+      mockGetCredentialFn
         .mockResolvedValueOnce(null)
-        .mockResolvedValueOnce({ value: 'password' });
+        .mockResolvedValueOnce({ value: 'password' } as any);
 
       await expect(agent.getCredentials(mockOrganizationId)).rejects.toThrow(
         'Shopify admin credentials not found in vault'
@@ -213,8 +216,8 @@ describe('ShopifySetupAgent', () => {
     });
 
     it('should throw error when password credential not found', async () => {
-      mockVaultGet
-        .mockResolvedValueOnce({ value: 'email@test.com' })
+      mockGetCredentialFn
+        .mockResolvedValueOnce({ value: 'email@test.com' } as any)
         .mockResolvedValueOnce(null);
 
       await expect(agent.getCredentials(mockOrganizationId)).rejects.toThrow(
@@ -223,7 +226,7 @@ describe('ShopifySetupAgent', () => {
     });
 
     it('should handle vault errors gracefully', async () => {
-      mockVaultGet.mockRejectedValue(
+      mockGetCredentialFn.mockRejectedValue(
         new Error('Vault connection error')
       );
 
