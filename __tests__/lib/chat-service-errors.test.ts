@@ -2,7 +2,6 @@ import { describe, it, expect, jest, beforeEach } from '@jest/globals'
 import { ChatService } from '@/lib/chat-service'
 import { __setMockSupabaseClient } from '@/lib/supabase-server'
 
-jest.mock('@/lib/supabase-server')
 
 describe('ChatService - Error Handling', () => {
   let chatService: ChatService

@@ -11,7 +11,6 @@ import {
 } from '@/__tests__/setup/isolated-test-setup'
 
 // Mock dependencies
-jest.mock('@/lib/supabase-server')
 jest.mock('@/lib/rate-limit')
 jest.mock('openai')
 jest.mock('@/lib/embeddings')

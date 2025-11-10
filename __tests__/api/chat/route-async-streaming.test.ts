@@ -159,7 +159,16 @@ describe('Chat API Route - Streaming Performance', () => {
           }))
         };
       }),
-      rpc: jest.fn().mockResolvedValue({ data: [], error: null })
+      rpc: jest.fn().mockResolvedValue({ data: [], error: null }),
+      // Supabase Realtime methods
+      channel: jest.fn().mockReturnValue({
+        send: jest.fn().mockResolvedValue('ok'),
+        subscribe: jest.fn().mockReturnThis(),
+        unsubscribe: jest.fn().mockReturnValue('ok'),
+        on: jest.fn().mockReturnThis(),
+      }),
+      removeChannel: jest.fn().mockResolvedValue('ok'),
+      removeAllChannels: jest.fn().mockResolvedValue([])
     } as any;
 
     const mockModule = jest.requireMock('@/lib/supabase-server');

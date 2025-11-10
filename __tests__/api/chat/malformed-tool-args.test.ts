@@ -3,7 +3,6 @@ import { NextRequest } from 'next/server'
 import { POST } from '@/app/api/chat/route'
 
 // Mock all dependencies
-jest.mock('@/lib/supabase-server')
 jest.mock('@/lib/rate-limit')
 jest.mock('openai')
 jest.mock('@/lib/embeddings')

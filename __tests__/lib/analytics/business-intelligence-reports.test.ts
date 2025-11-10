@@ -3,7 +3,6 @@ import { createServiceRoleClient } from '@/lib/supabase-server';
 import type { SupabaseClient } from '@supabase/supabase-js';
 import { createMockSupabase } from './test-utils';
 
-jest.mock('@/lib/supabase-server');
 
 describe('BusinessIntelligence - Reports', () => {
   let mockSupabase: jest.Mocked<SupabaseClient>;

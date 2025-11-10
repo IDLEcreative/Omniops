@@ -2,7 +2,6 @@ import { describe, it, expect, beforeEach, jest } from '@jest/globals';
 import { NextRequest } from 'next/server';
 import { POST } from '@/app/api/gdpr/export/route';
 
-jest.mock('@/lib/supabase-server');
 
 import { createServiceRoleClient } from '@/lib/supabase-server';
 

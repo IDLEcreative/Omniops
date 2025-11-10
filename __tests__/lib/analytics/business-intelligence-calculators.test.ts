@@ -3,7 +3,6 @@ import { createServiceRoleClient } from '@/lib/supabase-server';
 import type { SupabaseClient } from '@supabase/supabase-js';
 import { createMockSupabase, mockSupabaseQuery, TEST_TIME_RANGE } from './test-utils';
 
-jest.mock('@/lib/supabase-server');
 
 describe('BusinessIntelligence - Calculators', () => {
   let mockSupabase: jest.Mocked<SupabaseClient>;
