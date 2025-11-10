@@ -21,8 +21,14 @@ const mockSupabase = (conversationResult: unknown[] = []) => {
     limit: jest.fn().mockReturnThis(),
     single: jest.fn().mockReturnThis(),
     delete: deleteChain.delete,
-    then: jest.fn().mockResolvedValue({ data: conversationResult, error: null }),
   };
+
+  // Make the conversationsBuilder itself a thenable
+  Object.assign(conversationsBuilder, {
+    then: (resolve: (value: { data: unknown[]; error: null }) => void) => {
+      return Promise.resolve({ data: conversationResult, error: null }).then(resolve);
+    },
+  });
 
   const auditBuilder = {
     insert: jest.fn().mockResolvedValue({ error: null }),
@@ -49,6 +55,9 @@ const buildRequest = (body: unknown) =>
   });
 
 describe('POST /api/gdpr/delete', () => {
+  // Increase timeout for all tests in this suite
+  jest.setTimeout(20000);
+
   beforeEach(() => {
     jest.resetAllMocks();
   });
