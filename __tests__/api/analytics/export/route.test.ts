@@ -4,7 +4,6 @@ import { GET } from '@/app/api/analytics/export/route';
 import { createServiceRoleClient } from '@/lib/supabase-server';
 import { requireAuth } from '@/lib/middleware/auth';
 import { checkAnalyticsRateLimit } from '@/lib/middleware/analytics-rate-limit';
-import * as exporters from '@/lib/analytics/export';
 
 // Mock dependencies
 jest.mock('@/lib/supabase-server');
@@ -17,16 +16,19 @@ jest.mock('@/lib/dashboard/analytics/user-analytics', () => ({
   calculateUserAnalytics: jest.fn(),
 }));
 
+// Mock the entire export module
+jest.mock('@/lib/analytics/export', () => ({
+  exportToCSV: jest.fn(() => 'csv,data,here'),
+  exportToExcel: jest.fn(async () => Buffer.from('excel-data')),
+  exportToPDF: jest.fn(async () => Buffer.from('pdf-data')),
+  generateCSVFilename: jest.fn(() => 'analytics_2024-01-01.csv'),
+  generateExcelFilename: jest.fn(() => 'analytics_2024-01-01.xlsx'),
+  generatePDFFilename: jest.fn(() => 'analytics_2024-01-01.pdf'),
+}));
+
 import { analyseMessages } from '@/lib/dashboard/analytics';
 import { calculateUserAnalytics } from '@/lib/dashboard/analytics/user-analytics';
-
-// Mock exporters
-jest.spyOn(exporters, 'exportToCSV').mockImplementation(() => 'csv,data,here');
-jest.spyOn(exporters, 'exportToExcel').mockImplementation(async () => Buffer.from('excel-data'));
-jest.spyOn(exporters, 'exportToPDF').mockImplementation(async () => Buffer.from('pdf-data'));
-jest.spyOn(exporters, 'generateCSVFilename').mockImplementation(() => 'analytics_2024-01-01.csv');
-jest.spyOn(exporters, 'generateExcelFilename').mockImplementation(() => 'analytics_2024-01-01.xlsx');
-jest.spyOn(exporters, 'generatePDFFilename').mockImplementation(() => 'analytics_2024-01-01.pdf');
+import * as exporters from '@/lib/analytics/export';
 
 // Helper to create mock Supabase client
 const createMockSupabase = () => {

@@ -4,13 +4,25 @@
  */
 
 import { describe, it, expect, jest, beforeEach } from '@jest/globals';
+
+// Mock dependencies - must come before imports
+jest.mock('@/lib/autonomous/core/workflow-registry', () => ({
+  WorkflowRegistry: {
+    get: jest.fn()
+  }
+}));
+
+jest.mock('@/lib/autonomous/security/credential-vault', () => ({
+  getCredential: jest.fn(),
+  storeCredential: jest.fn(),
+  updateCredential: jest.fn(),
+  deleteCredential: jest.fn()
+}));
+
+// Import after mocking
 import { ShopifySetupAgent, createShopifySetupAgent, ShopifySetupResult } from '@/lib/autonomous/agents/shopify-setup-agent';
 import { WorkflowRegistry } from '@/lib/autonomous/core/workflow-registry';
 import * as credentialVault from '@/lib/autonomous/security/credential-vault';
-
-// Mock dependencies
-jest.mock('@/lib/autonomous/core/workflow-registry');
-jest.mock('@/lib/autonomous/security/credential-vault');
 jest.mock('@/lib/supabase/server', () => ({
   createServiceRoleClientSync: jest.fn(() => ({
     from: jest.fn(() => ({
@@ -183,22 +195,54 @@ describe('ShopifySetupAgent', () => {
   describe('extractResult', () => {
     let mockPage: any;
 
+    // Helper function to create a mock locator with default behaviors
+    const createMockLocator = (overrides: any = {}) => {
+      const mockLocator: any = {
+        first: jest.fn(),
+        inputValue: jest.fn().mockRejectedValue(new Error('Not found')),
+        textContent: jest.fn().mockRejectedValue(new Error('Not found')),
+        all: jest.fn().mockResolvedValue([]),
+        allTextContents: jest.fn().mockResolvedValue([]),
+        getAttribute: jest.fn(),
+        ...overrides
+      };
+
+      // Make first() return the same object for chaining
+      mockLocator.first.mockReturnValue(mockLocator);
+
+      return mockLocator;
+    };
+
     beforeEach(() => {
+      // Create a flexible mock that returns appropriate methods
       mockPage = {
-        locator: jest.fn().mockReturnThis(),
-        first: jest.fn().mockReturnThis(),
-        inputValue: jest.fn(),
-        textContent: jest.fn(),
-        all: jest.fn(),
-        allTextContents: jest.fn(),
-        getAttribute: jest.fn()
+        locator: jest.fn((selector: string) => createMockLocator())
       };
     });
 
     it('should extract access token from readonly input', async () => {
-      mockPage.locator.mockReturnValue({
-        first: jest.fn().mockReturnThis(),
-        inputValue: jest.fn().mockResolvedValue('shpat_1234567890abcdef')
+      // Override the mock for this specific test
+      mockPage.locator.mockImplementation((selector: string) => {
+        const mockLocator: any = {
+          first: jest.fn(),
+          inputValue: jest.fn(),
+          textContent: jest.fn(),
+          all: jest.fn().mockResolvedValue([]),
+          allTextContents: jest.fn().mockResolvedValue([]),
+          getAttribute: jest.fn()
+        };
+
+        mockLocator.first.mockReturnValue(mockLocator);
+
+        // Match the selector for the readonly input with shpat_ value
+        if (selector.includes('shpat_')) {
+          mockLocator.inputValue.mockResolvedValue('shpat_1234567890abcdef');
+        } else {
+          mockLocator.inputValue.mockRejectedValue(new Error('Not found'));
+          mockLocator.textContent.mockRejectedValue(new Error('Not found'));
+        }
+
+        return mockLocator;
       });
 
       const result = await agent.extractResult(mockPage);
@@ -210,22 +254,12 @@ describe('ShopifySetupAgent', () => {
 
     it('should extract access token from code block', async () => {
       mockPage.locator.mockImplementation((selector: string) => {
-        if (selector.includes('input[readonly]')) {
-          return {
-            first: jest.fn().mockReturnThis(),
-            inputValue: jest.fn().mockRejectedValue(new Error('Not found'))
-          };
-        }
         if (selector.includes('code')) {
-          return {
-            first: jest.fn().mockReturnThis(),
+          return createMockLocator({
             textContent: jest.fn().mockResolvedValue('Your access token: shpat_abcdef123456')
-          };
+          });
         }
-        return {
-          first: jest.fn().mockReturnThis(),
-          all: jest.fn().mockResolvedValue([])
-        };
+        return createMockLocator();
       });
 
       const result = await agent.extractResult(mockPage);
@@ -236,28 +270,16 @@ describe('ShopifySetupAgent', () => {
 
     it('should extract API key and secret for older apps', async () => {
       mockPage.locator.mockImplementation((selector: string) => {
-        if (selector.includes('shpat_')) {
-          return {
-            first: jest.fn().mockReturnThis(),
-            inputValue: jest.fn().mockRejectedValue(new Error('Not found'))
-          };
-        }
         if (selector.includes('32')) {
-          return {
-            first: jest.fn().mockReturnThis(),
+          return createMockLocator({
             inputValue: jest.fn().mockResolvedValue('a1b2c3d4e5f6g7h8i9j0k1l2m3n4o5p6')
-          };
-        }
-        if (selector.includes('password')) {
-          return {
-            first: jest.fn().mockReturnThis(),
+          });
+        } else if (selector.includes('password')) {
+          return createMockLocator({
             inputValue: jest.fn().mockResolvedValue('secret_key_value')
-          };
+          });
         }
-        return {
-          first: jest.fn().mockReturnThis(),
-          all: jest.fn().mockResolvedValue([])
-        };
+        return createMockLocator();
       });
 
       const result = await agent.extractResult(mockPage);
@@ -276,19 +298,15 @@ describe('ShopifySetupAgent', () => {
 
       mockPage.locator.mockImplementation((selector: string) => {
         if (selector.includes('shpat_')) {
-          return {
-            first: jest.fn().mockReturnThis(),
+          return createMockLocator({
             inputValue: jest.fn().mockResolvedValue('shpat_token123')
-          };
-        }
-        if (selector.includes('checkbox')) {
-          return {
+          });
+        } else if (selector.includes('checkbox')) {
+          return createMockLocator({
             all: jest.fn().mockResolvedValue(mockScopeElements)
-          };
+          });
         }
-        return {
-          first: jest.fn().mockReturnThis()
-        };
+        return createMockLocator();
       });
 
       const result = await agent.extractResult(mockPage);
@@ -300,26 +318,17 @@ describe('ShopifySetupAgent', () => {
     it('should extract scopes from text when checkboxes not found', async () => {
       mockPage.locator.mockImplementation((selector: string) => {
         if (selector.includes('shpat_')) {
-          return {
-            first: jest.fn().mockReturnThis(),
+          return createMockLocator({
             inputValue: jest.fn().mockResolvedValue('shpat_token123')
-          };
-        }
-        if (selector.includes('checkbox')) {
-          return {
-            all: jest.fn().mockResolvedValue([])
-          };
-        }
-        if (selector.includes('read_|write_')) {
-          return {
+          });
+        } else if (selector.includes('read_|write_')) {
+          return createMockLocator({
             allTextContents: jest.fn().mockResolvedValue([
               'Permissions: read_products write_products read_orders'
             ])
-          };
+          });
         }
-        return {
-          first: jest.fn().mockReturnThis()
-        };
+        return createMockLocator();
       });
 
       const result = await agent.extractResult(mockPage);
@@ -342,12 +351,8 @@ describe('ShopifySetupAgent', () => {
     it('should warn when no credentials found', async () => {
       const consoleWarnSpy = jest.spyOn(console, 'warn').mockImplementation();
 
-      mockPage.locator.mockImplementation(() => ({
-        first: jest.fn().mockReturnThis(),
-        inputValue: jest.fn().mockRejectedValue(new Error('Not found')),
-        textContent: jest.fn().mockRejectedValue(new Error('Not found')),
-        all: jest.fn().mockResolvedValue([])
-      }));
+      // Mock returns nothing/errors for all selectors
+      mockPage.locator.mockImplementation(() => createMockLocator());
 
       const result = await agent.extractResult(mockPage);
 

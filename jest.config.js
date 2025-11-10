@@ -87,7 +87,7 @@ const customJestConfig = {
   // Transform ESM packages in node_modules
   // Note: cheerio is mapped to CommonJS build above, but its dependencies may need transformation
   transformIgnorePatterns: [
-    '/node_modules/(?!(parse5|dom-serializer|domhandler|domutils|entities|htmlparser2)/)',
+    '/node_modules/(?!(parse5|dom-serializer|domhandler|domutils|entities|htmlparser2|bullmq|uuid)/)',
   ],
   collectCoverageFrom: [
     'app/**/*.{js,jsx,ts,tsx}',

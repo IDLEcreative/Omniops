@@ -12,6 +12,7 @@
  */
 
 import { createClient } from '@/lib/supabase/server';
+import type { SupabaseClient } from '@supabase/supabase-js';
 import { vectorSimilarityRecommendations } from './vector-similarity';
 import { collaborativeFilterRecommendations } from './collaborative-filter';
 import { contentBasedRecommendations } from './content-filter';
@@ -27,6 +28,7 @@ export interface RecommendationRequest {
   algorithm?: 'collaborative' | 'content_based' | 'hybrid' | 'vector_similarity';
   context?: string; // Chat message context
   excludeProductIds?: string[];
+  supabaseClient?: SupabaseClient; // Optional for dependency injection (testing)
 }
 
 export interface ProductRecommendation {
@@ -117,7 +119,7 @@ export async function getRecommendations(
     );
 
     // Track recommendations
-    await trackRecommendations(recommendations, request);
+    await trackRecommendations(recommendations, request, request.supabaseClient);
 
     const executionTime = Date.now() - startTime;
 
@@ -156,12 +158,13 @@ async function applyBusinessRules(
  */
 async function trackRecommendations(
   recommendations: ProductRecommendation[],
-  request: RecommendationRequest
+  request: RecommendationRequest,
+  supabaseClient?: SupabaseClient
 ): Promise<void> {
   if (!recommendations.length) return;
 
   try {
-    const supabase = await createClient();
+    const supabase = supabaseClient ?? (await createClient());
 
     const events = recommendations.map((rec) => ({
       session_id: request.sessionId,
@@ -194,10 +197,11 @@ export async function trackRecommendationEvent(
   productId: string,
   eventType: 'click' | 'purchase',
   sessionId?: string,
-  conversationId?: string
+  conversationId?: string,
+  supabaseClient?: SupabaseClient
 ): Promise<void> {
   try {
-    const supabase = await createClient();
+    const supabase = supabaseClient ?? (await createClient());
 
     // Find the most recent recommendation event for this product
     const { data: event, error: findError } = await supabase
@@ -240,10 +244,11 @@ export async function trackRecommendationEvent(
  */
 export async function getRecommendationMetrics(
   domainId: string,
-  hours: number = 24
+  hours: number = 24,
+  supabaseClient?: SupabaseClient
 ) {
   try {
-    const supabase = await createClient();
+    const supabase = supabaseClient ?? (await createClient());
 
     const { data, error } = await supabase
       .rpc('get_recommendation_metrics', {

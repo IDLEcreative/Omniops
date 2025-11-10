@@ -205,7 +205,7 @@ describe('Excel Exporter', () => {
 
       await exportToExcel(null, null, options);
 
-      const summarySheetCall = (XLSX.utils.aoa_to_sheet as jest.Mock).mock.calls[0];
+      const summarySheetCall = mockAoaToSheet.mock.calls[0];
       const summaryData = summarySheetCall[0];
 
       expect(summaryData).toEqual(expect.arrayContaining([
@@ -227,7 +227,7 @@ describe('Excel Exporter', () => {
 
       await exportToExcel(messageAnalytics, userAnalytics, options);
 
-      const sheetNames = (XLSX.utils.book_append_sheet as jest.Mock).mock.calls
+      const sheetNames = mockBookAppendSheet.mock.calls
         .map(call => call[2]);
 
       expect(sheetNames).toEqual(['Summary']);
@@ -239,13 +239,13 @@ describe('Excel Exporter', () => {
       await exportToExcel(messageAnalytics, null);
 
       // Find the Message Analytics sheet call
-      const messageSheetIndex = (XLSX.utils.book_append_sheet as jest.Mock).mock.calls
+      const messageSheetIndex = mockBookAppendSheet.mock.calls
         .findIndex(call => call[2] === 'Message Analytics');
 
       expect(messageSheetIndex).toBeGreaterThan(-1);
 
       // Verify the sheet data structure
-      const messageSheetData = (XLSX.utils.aoa_to_sheet as jest.Mock).mock.calls[messageSheetIndex][0];
+      const messageSheetData = mockAoaToSheet.mock.calls[messageSheetIndex][0];
 
       expect(messageSheetData).toEqual(expect.arrayContaining([
         expect.arrayContaining(['Message Analytics Details']),
@@ -266,13 +266,13 @@ describe('Excel Exporter', () => {
       await exportToExcel(null, userAnalytics);
 
       // Find the User Analytics sheet call
-      const userSheetIndex = (XLSX.utils.book_append_sheet as jest.Mock).mock.calls
+      const userSheetIndex = mockBookAppendSheet.mock.calls
         .findIndex(call => call[2] === 'User Analytics');
 
       expect(userSheetIndex).toBeGreaterThan(-1);
 
       // Verify the sheet data structure
-      const userSheetData = (XLSX.utils.aoa_to_sheet as jest.Mock).mock.calls[userSheetIndex][0];
+      const userSheetData = mockAoaToSheet.mock.calls[userSheetIndex][0];
 
       expect(userSheetData).toEqual(expect.arrayContaining([
         expect.arrayContaining(['User Analytics Details']),
@@ -293,13 +293,13 @@ describe('Excel Exporter', () => {
       await exportToExcel(null, userAnalytics);
 
       // Find the Daily Metrics sheet call
-      const dailySheetIndex = (XLSX.utils.book_append_sheet as jest.Mock).mock.calls
+      const dailySheetIndex = mockBookAppendSheet.mock.calls
         .findIndex(call => call[2] === 'Daily Metrics');
 
       expect(dailySheetIndex).toBeGreaterThan(-1);
 
       // Verify the sheet data structure
-      const dailySheetData = (XLSX.utils.aoa_to_sheet as jest.Mock).mock.calls[dailySheetIndex][0];
+      const dailySheetData = mockAoaToSheet.mock.calls[dailySheetIndex][0];
 
       expect(dailySheetData).toEqual(expect.arrayContaining([
         expect.arrayContaining(['Daily User Metrics']),
@@ -315,13 +315,13 @@ describe('Excel Exporter', () => {
       await exportToExcel(messageAnalytics, null);
 
       // Find the Top Queries sheet call
-      const queriesSheetIndex = (XLSX.utils.book_append_sheet as jest.Mock).mock.calls
+      const queriesSheetIndex = mockBookAppendSheet.mock.calls
         .findIndex(call => call[2] === 'Top Queries');
 
       expect(queriesSheetIndex).toBeGreaterThan(-1);
 
       // Verify the sheet data structure
-      const queriesSheetData = (XLSX.utils.aoa_to_sheet as jest.Mock).mock.calls[queriesSheetIndex][0];
+      const queriesSheetData = mockAoaToSheet.mock.calls[queriesSheetIndex][0];
 
       expect(queriesSheetData).toEqual(expect.arrayContaining([
         expect.arrayContaining(['Top Queries']),
@@ -338,13 +338,13 @@ describe('Excel Exporter', () => {
       await exportToExcel(messageAnalytics, null);
 
       // Find the Languages sheet call
-      const langSheetIndex = (XLSX.utils.book_append_sheet as jest.Mock).mock.calls
+      const langSheetIndex = mockBookAppendSheet.mock.calls
         .findIndex(call => call[2] === 'Languages');
 
       expect(langSheetIndex).toBeGreaterThan(-1);
 
       // Verify the sheet data structure
-      const langSheetData = (XLSX.utils.aoa_to_sheet as jest.Mock).mock.calls[langSheetIndex][0];
+      const langSheetData = mockAoaToSheet.mock.calls[langSheetIndex][0];
 
       expect(langSheetData).toEqual(expect.arrayContaining([
         expect.arrayContaining(['Language Distribution']),
@@ -366,7 +366,7 @@ describe('Excel Exporter', () => {
 
       await exportToExcel(messageAnalytics, userAnalytics);
 
-      const sheetNames = (XLSX.utils.book_append_sheet as jest.Mock).mock.calls
+      const sheetNames = mockBookAppendSheet.mock.calls
         .map(call => call[2]);
 
       expect(sheetNames).not.toContain('Top Queries');
