@@ -30,6 +30,7 @@ import {
   formatApplyCouponMessage,
   handleCartError
 } from './cart-operations-utils';
+import { trackCartOperation } from '../cart-analytics';
 
 /**
  * Add to cart (transactional)
@@ -64,6 +65,18 @@ export async function addToCartDirect(
     const addedItem = cart.items.find(item => item.id === productId);
 
     if (!addedItem) {
+      // Track failed operation
+      await trackCartOperation({
+        domain: params.domain || '',
+        sessionId: storeAPI.getSessionNonce(),
+        operationType: 'add_to_cart',
+        platform: 'woocommerce',
+        productId: params.productId,
+        quantity,
+        success: false,
+        errorMessage: 'Item was not added to cart'
+      });
+
       return {
         success: false,
         data: null,
@@ -71,12 +84,36 @@ export async function addToCartDirect(
       };
     }
 
+    // Track successful operation
+    await trackCartOperation({
+      domain: params.domain || '',
+      sessionId: storeAPI.getSessionNonce(),
+      operationType: 'add_to_cart',
+      platform: 'woocommerce',
+      productId: params.productId,
+      quantity,
+      cartValue: parseFloat(cart.totals.total_price),
+      success: true
+    });
+
     return {
       success: true,
       data: formatCartResponse(cart),
       message: formatAddToCartMessage(cart, addedItem)
     };
   } catch (error) {
+    // Track error
+    await trackCartOperation({
+      domain: params.domain || '',
+      sessionId: storeAPI.getSessionNonce(),
+      operationType: 'add_to_cart',
+      platform: 'woocommerce',
+      productId: params.productId,
+      quantity: params.quantity || 1,
+      success: false,
+      errorMessage: error instanceof Error ? error.message : 'Unknown error'
+    });
+
     return handleCartError(error, 'Add to cart');
   }
 }
@@ -93,6 +130,15 @@ export async function getCartDirect(
     const result = await storeAPI.getCart();
 
     if (!result.success || !result.data) {
+      await trackCartOperation({
+        domain: params.domain || '',
+        sessionId: storeAPI.getSessionNonce(),
+        operationType: 'get_cart',
+        platform: 'woocommerce',
+        success: false,
+        errorMessage: result.error?.message || 'Failed to retrieve cart'
+      });
+
       return {
         success: false,
         data: null,
@@ -102,12 +148,30 @@ export async function getCartDirect(
 
     const cart = result.data;
 
+    await trackCartOperation({
+      domain: params.domain || '',
+      sessionId: storeAPI.getSessionNonce(),
+      operationType: 'get_cart',
+      platform: 'woocommerce',
+      cartValue: parseFloat(cart.totals.total_price),
+      success: true
+    });
+
     return {
       success: true,
       data: formatCartResponse(cart),
       message: formatViewCartMessage(cart)
     };
   } catch (error) {
+    await trackCartOperation({
+      domain: params.domain || '',
+      sessionId: storeAPI.getSessionNonce(),
+      operationType: 'get_cart',
+      platform: 'woocommerce',
+      success: false,
+      errorMessage: error instanceof Error ? error.message : 'Unknown error'
+    });
+
     return handleCartError(error, 'Get cart');
   }
 }

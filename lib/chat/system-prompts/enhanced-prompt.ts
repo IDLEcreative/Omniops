@@ -3,7 +3,7 @@
  */
 
 import { ConversationMetadataManager } from '../conversation-metadata';
-import type { WidgetConfig } from './types';
+import type { WidgetConfig, CustomerProfile } from './types';
 import { getCustomerServicePrompt } from './base-prompt';
 
 /**
@@ -22,9 +22,10 @@ import { getCustomerServicePrompt } from './base-prompt';
  */
 export function getEnhancedCustomerServicePrompt(
   metadataManager?: ConversationMetadataManager,
-  widgetConfig?: WidgetConfig | null
+  widgetConfig?: WidgetConfig | null,
+  customerProfile?: CustomerProfile | null
 ): string {
-  const basePrompt = getCustomerServicePrompt(widgetConfig);
+  const basePrompt = getCustomerServicePrompt(widgetConfig, customerProfile);
 
   if (!metadataManager) {
     return basePrompt;

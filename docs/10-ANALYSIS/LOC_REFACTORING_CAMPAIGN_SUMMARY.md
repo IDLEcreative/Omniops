@@ -21,6 +21,7 @@ This is the master document tracking the complete LOC (Lines of Code) refactorin
 - [Wave 7 Report](./ANALYSIS_LOC_REFACTORING_WAVE_7_2025_11_10.md) - Privacy settings, audit logger, consent manager, security, database cleanup
 - [Wave 8 Report](./ANALYSIS_LOC_REFACTORING_WAVE_8_2025_11_10.md) - Follow-ups detector/scheduler, postmessage security, recommendations engine, agent conversations
 - [Wave 9 Report](./ANALYSIS_LOC_REFACTORING_WAVE_9_2025_11_10.md) - Analytics exports, metadata system E2E, multi-language, multi-domain, collaborative filter
+- [Wave 10 Orchestration Plan](./ANALYSIS_LOC_REFACTORING_WAVE_10_PLAN.md) - 69 remaining files + dedicated LOC agent suite
 
 ### Historical Documents (Waves 1-4)
 - [Progress Report](./ANALYSIS_LOC_REFACTORING_PROGRESS_2025_11_08.md) - Waves 1-4 progress
@@ -102,6 +103,14 @@ The LOC Refactoring Campaign was a systematic effort to bring the Omniops codeba
 **Medium-Priority Files (300-400 LOC):** ⏳ Not yet addressed
 - Lower priority due to smaller size
 - Can be addressed in future waves
+
+### Upcoming Wave 10 (Planned)
+
+- **Scope:** 69 remaining violations (4,611 LOC above limit) + 31 near-limit warnings  
+- **Artifacts:** `docs/10-ANALYSIS/ANALYSIS_LOC_REFACTORING_WAVE_10_PLAN.md`, `.claude/agents/loc-*.md`  
+- **Pods:** Integration/Server, Playwright/UI, API/Commerce, Library/Intelligence, Tooling/Utilities  
+- **Goal:** Reduce every violation to ≤200 LOC and shrink warnings list <10 files  
+- **Progress (2025-11-11):** Pod I split `__tests__/integration/test-hallucination-prevention.ts`, `__tests__/integration/analytics/export-integration.test.ts`, `servers/content/__tests__/getCompletePageDetails.test.ts`, and `servers/commerce/__tests__/lookupOrder.test.ts` into modular suites (shared helpers + focused spec files). Pod P refactored `__tests__/playwright/advanced-features/automated-follow-ups.spec.ts` into an orchestrator + 5 focused specs with reusable helpers. Latest compliance run shows **64** remaining violations and 31 warnings.
 
 ---
 

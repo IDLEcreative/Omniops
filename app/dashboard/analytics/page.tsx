@@ -16,6 +16,7 @@ import { useAnalyticsRefresh } from './hooks/useAnalyticsRefresh';
 
 import { OverviewTab } from './components/OverviewTab';
 import { IntelligenceTab } from './components/IntelligenceTab';
+import { ExportButtons } from './components/ExportButtons';
 
 export default function AnalyticsPage() {
   const [timeRange, setTimeRange] = useState<number>(7);
@@ -90,6 +91,8 @@ export default function AnalyticsPage() {
         </div>
 
         <div className="flex items-center gap-3">
+          <ExportButtons days={timeRange} />
+
           <Select
             value={timeRange.toString()}
             onValueChange={(value) => setTimeRange(parseInt(value))}

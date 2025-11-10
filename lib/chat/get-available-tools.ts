@@ -7,6 +7,7 @@
 
 import { createServiceRoleClient } from '@/lib/supabase-server';
 import { WOOCOMMERCE_TOOL } from './woocommerce-tool';
+import { SHOPIFY_TOOL } from './shopify-tool';
 
 export interface ToolAvailability {
   hasWooCommerce: boolean;
@@ -159,10 +160,12 @@ export async function getAvailableTools(domain: string): Promise<any[]> {
     console.log('[Tool Availability] WooCommerce not configured - cart operations disabled');
   }
 
-  // TODO: Add Shopify tool when available
+  // Add Shopify tool if the customer has it configured
   if (availability.hasShopify) {
-    console.log('[Tool Availability] Shopify is configured - cart operations would be available if implemented');
-    // tools.push(SHOPIFY_TOOL); // When implemented
+    console.log('[Tool Availability] Shopify is configured - adding cart operations');
+    tools.push(SHOPIFY_TOOL);
+  } else {
+    console.log('[Tool Availability] Shopify not configured - cart operations disabled');
   }
 
   return tools;
@@ -191,8 +194,8 @@ export function getToolInstructions(availability: ToolAvailability): string {
 
   if (availability.hasShopify) {
     instructions.push(
-      "✅ Shopify is configured - e-commerce operations are available.",
-      "Note: Shopify cart operations are not yet implemented but order lookups may be available."
+      "✅ Shopify is configured - you can perform cart operations, check orders, and manage the shopping experience.",
+      "Use the shopify_operations tool for all Shopify e-commerce tasks."
     );
   }
 

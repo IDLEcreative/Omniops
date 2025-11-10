@@ -1,6 +1,6 @@
 # AI Agent Knowledge Base
 
-**Generated:** 2025-11-10T00:23:32.683Z
+**Generated:** 2025-11-10T14:53:21.618Z
 **Purpose:** This document teaches AI agents how to operate the application autonomously
 
 ---
@@ -21,7 +21,7 @@
 
 ---
 
-## 🎯 Available Workflows (44)
+## 🎯 Available Workflows (156)
 
 ### 1. renders metrics and rollup health badge
 
@@ -466,14 +466,14 @@
 
 ---
 
-... 34 more workflows available in JSON export
+... 146 more workflows available in JSON export
 
 ## 🎨 UI Element Catalog (0)
 
 Common UI elements you will interact with:
 
 
-## 🔌 API Reference (9)
+## 🔌 API Reference (28)
 
 ### `/api/dashboard/telemetry**`
 - **Purpose:** Application API endpoint
@@ -489,19 +489,75 @@ Common UI elements you will interact with:
 
 ### `/api/chat`
 - **Purpose:** Process chat messages and return AI responses
-- **Used in:** should load widget, open programmatically, and send message with session metadata, should add and configure domain successfully, should maintain context across multiple conversation turns
+- **Used in:** should load widget, open programmatically, and send message with session metadata, should enforce rate limits and allow retry after cooldown, should handle network timeout and allow successful retry, should add and configure domain successfully, should maintain context across multiple conversation turns
 
 ### `/api/dashboard/analytics**`
 - **Purpose:** Retrieve analytics data
-- **Used in:** should display analytics dashboard with user metrics and charts, should handle empty analytics data gracefully, should handle API errors gracefully
+- **Used in:** should display analytics dashboard with user metrics and charts, should handle empty analytics data gracefully, should handle API errors gracefully, export with empty data: handle gracefully
+
+### `/api/woocommerce/cart-test`
+- **Purpose:** Interact with WooCommerce integration
+- **Used in:** should maintain cart session across messages, should handle Store API failures gracefully
 
 ### `/api/widget/config**`
 - **Purpose:** Application API endpoint
-- **Used in:** should install and customize widget successfully
+- **Used in:** should enforce rate limits and allow retry after cooldown, should handle network timeout and allow successful retry, should install and customize widget successfully
+
+### `/api/products**`
+- **Purpose:** Application API endpoint
+- **Used in:** should handle payment failure and allow retry with cart preserved
+
+### `/api/checkout`
+- **Purpose:** Application API endpoint
+- **Used in:** should handle payment failure and allow retry with cart preserved
+
+### `/api/woocommerce/configure`
+- **Purpose:** Interact with WooCommerce integration
+- **Used in:** should handle invalid WooCommerce credentials and allow correction
+
+### `/api/domains/*/settings`
+- **Purpose:** Application API endpoint
+- **Used in:** should detect concurrent edits and provide conflict resolution
+
+### `/api/domains/test/settings`
+- **Purpose:** Application API endpoint
+- **Used in:** should detect concurrent edits and provide conflict resolution
+
+### `/api/scrape`
+- **Purpose:** Initiate web scraping job
+- **Used in:** should prevent concurrent scraping and allow retry after completion
+
+### `/api/scrape/status**`
+- **Purpose:** Initiate web scraping job
+- **Used in:** should prevent concurrent scraping and allow retry after completion
+
+### `/api/scrape/status?jobId=job-12345`
+- **Purpose:** Initiate web scraping job
+- **Used in:** should prevent concurrent scraping and allow retry after completion
+
+### `/api/widget/config`
+- **Purpose:** Application API endpoint
+- **Used in:** handles save errors gracefully
 
 ### `/api/domains**`
 - **Purpose:** Application API endpoint
 - **Used in:** should add and configure domain successfully
+
+### `/api/analytics/export?format=csv&days={days}`
+- **Purpose:** Retrieve analytics data
+- **Used in:** Export workflow documentation for AI agents
+
+### `/api/analytics/export?format=excel&days={days}`
+- **Purpose:** Retrieve analytics data
+- **Used in:** Export workflow documentation for AI agents
+
+### `/api/analytics/export?format=pdf&days={days}`
+- **Purpose:** Retrieve analytics data
+- **Used in:** Export workflow documentation for AI agents
+
+### `/api/dashboard/analytics?days={days}`
+- **Purpose:** Retrieve analytics data
+- **Used in:** Export workflow documentation for AI agents
 
 ### `/api/demo/scrape`
 - **Purpose:** Initiate web scraping job
@@ -511,10 +567,30 @@ Common UI elements you will interact with:
 - **Purpose:** Process chat messages and return AI responses
 - **Used in:** should complete demo flow from URL entry to AI chat response
 
+### `/api/analytics/realtime**`
+- **Purpose:** Retrieve analytics data
+- **Used in:** should handle connection interruptions gracefully
+
+### `/api/analytics/export**`
+- **Purpose:** Retrieve analytics data
+- **Used in:** handle request timeout gracefully
+
+### `/api/analytics/export?format=csv&days=7`
+- **Purpose:** Retrieve analytics data
+- **Used in:** handle request timeout gracefully, complete export workflow: UI suggestion for missing buttons
+
+### `/api/analytics/export?format=${formats[i]}&days=7`);`
+- **Purpose:** Retrieve analytics data
+- **Used in:** sequential export downloads: verify file independence
+
+### `/api/analytics/export?format=csv&days=${days}`);`
+- **Purpose:** Retrieve analytics data
+- **Used in:** export with custom time ranges
+
 
 ## 🔄 Common Patterns
 
-### 1. State Verification (31 uses)
+### 1. State Verification (97 uses)
 Verify expected state or element visibility
 
 **Example:**
@@ -522,7 +598,7 @@ Verify expected state or element visibility
 await expect(element).toBeVisible();
 ```
 
-### 2. Page Navigation (18 uses)
+### 2. Page Navigation (55 uses)
 Navigate to a URL and wait for page load
 
 **Example:**
@@ -530,7 +606,7 @@ Navigate to a URL and wait for page load
 await page.goto(url, { waitUntil: "networkidle" })
 ```
 
-### 3. Form Filling (13 uses)
+### 3. Form Filling (22 uses)
 Fill multiple form fields and submit
 
 **Example:**

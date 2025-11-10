@@ -1014,6 +1014,7 @@ See [REFERENCE_DATABASE_SCHEMA.md](docs/09-REFERENCE/REFERENCE_DATABASE_SCHEMA.m
 - Current codebase has code violations that need refactoring
 - Code files must be modular & single-purpose
 - **Documentation files**: Should be <300 LOC where practical, but not strictly enforced if breaking would harm usefulness
+- **Wave 10 LOC campaign**: Follow `docs/10-ANALYSIS/ANALYSIS_LOC_REFACTORING_WAVE_10_PLAN.md` and the dedicated LOC agents in `.claude/agents/loc-*.md` to keep every TS/JS file under 300 LOC (run `scripts/check-loc-compliance.sh` + `scripts/check-file-length.ts --strict` before committing)
 
 ### READING FILES
 - **ALWAYS** read the entire file before making changes
@@ -1039,6 +1040,13 @@ See [REFERENCE_DATABASE_SCHEMA.md](docs/09-REFERENCE/REFERENCE_DATABASE_SCHEMA.m
   - ✅ Self-assessments & practice scenarios
 - **[Orchestration Archive](docs/10-ANALYSIS/ANALYSIS_PARALLEL_AGENT_ORCHESTRATION.md)** - Complete 4-week case study with week-by-week breakdown (reference/archive)
 - **[Agent Hierarchy Guide](.claude/AGENT_HIERARCHY.md)** - Three-tier agent system (Architect → Plan → Explore) and when to use each type
+
+**LOC Agent Suite (Wave 10)**
+- **Architect:** `.claude/agents/loc-architect.md` (Opus) – owns global LOC campaign, assigns pods, refreshes compliance data
+- **Planner:** `.claude/agents/loc-planner.md` (Sonnet) – designs module splits + verification plans per file
+- **Refactor:** `.claude/agents/loc-refactor.md` (Sonnet) – implements the plan, ensures each file <300 LOC, updates docs/tests
+- **Verification:** `.claude/agents/loc-verifier.md` (Haiku) – reruns compliance + lint/tests before sign-off
+- Reference execution roadmap: `docs/10-ANALYSIS/ANALYSIS_LOC_REFACTORING_WAVE_10_PLAN.md`
 
 **📖 Documentation Pattern:**
 For complex topics >1000 lines:

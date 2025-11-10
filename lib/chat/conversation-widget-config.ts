@@ -55,6 +55,14 @@ export interface WidgetConfig {
   };
 }
 
+export interface CustomerProfile {
+  domain?: string | null;
+  domainLabel?: string | null;
+  domainDescription?: string | null;
+  businessName?: string | null;
+  businessDescription?: string | null;
+}
+
 /**
  * Load widget configuration from database
  * Returns null if no configuration found
@@ -98,6 +106,57 @@ export async function loadWidgetConfig(
     return widgetConfig.config_data as WidgetConfig;
   } catch (error) {
     console.error('[ConversationManager] Error loading widget config:', error);
+    return null;
+  }
+}
+
+/**
+ * Load basic customer profile/branding metadata for the domain
+ */
+export async function loadCustomerProfile(
+  domainId: string | null,
+  supabase: any
+): Promise<CustomerProfile | null> {
+  if (!domainId) {
+    return null;
+  }
+
+  try {
+    const { data: domainData, error: domainError } = await supabase
+      .from('domains')
+      .select('domain, name, description, customer_config_id')
+      .eq('id', domainId)
+      .single();
+
+    if (domainError || !domainData) {
+      console.log('[ConversationManager] No domain metadata found for profile context');
+      return null;
+    }
+
+    const profile: CustomerProfile = {
+      domain: domainData.domain || null,
+      domainLabel: domainData.name || null,
+      domainDescription: domainData.description || null,
+      businessName: null,
+      businessDescription: null
+    };
+
+    if (domainData.customer_config_id) {
+      const { data: customerConfig, error: customerError } = await supabase
+        .from('customer_configs')
+        .select('business_name, business_description')
+        .eq('id', domainData.customer_config_id)
+        .single();
+
+      if (!customerError && customerConfig) {
+        profile.businessName = customerConfig.business_name;
+        profile.businessDescription = customerConfig.business_description;
+      }
+    }
+
+    return profile;
+  } catch (error) {
+    console.error('[ConversationManager] Error loading customer profile:', error);
     return null;
   }
 }

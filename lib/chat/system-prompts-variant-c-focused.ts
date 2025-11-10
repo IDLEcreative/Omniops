@@ -11,11 +11,14 @@
 
 import { ConversationMetadataManager } from './conversation-metadata';
 import { getCustomerServicePrompt } from './system-prompts';
+import type { WidgetConfig, CustomerProfile } from './system-prompts';
 
 export function getEnhancedCustomerServicePromptVariantC(
-  metadataManager?: ConversationMetadataManager
+  metadataManager?: ConversationMetadataManager,
+  widgetConfig?: WidgetConfig | null,
+  customerProfile?: CustomerProfile | null
 ): string {
-  const basePrompt = getCustomerServicePrompt();
+  const basePrompt = getCustomerServicePrompt(widgetConfig, customerProfile);
 
   if (!metadataManager) {
     return basePrompt;

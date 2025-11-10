@@ -14,9 +14,9 @@ export type ConversationMessage = {
 // Re-export domain operations
 export { lookupDomain } from './conversation-domain-operations';
 
-// Re-export widget config
-export { loadWidgetConfig } from './conversation-widget-config';
-export type { WidgetConfig } from './conversation-widget-config';
+// Re-export widget config + customer profile helpers
+export { loadWidgetConfig, loadCustomerProfile } from './conversation-widget-config';
+export type { WidgetConfig, CustomerProfile } from './conversation-widget-config';
 
 /**
  * Get existing conversation or create a new one
@@ -186,4 +186,3 @@ export async function getConversationHistory(
 
   return data || [];
 }
-

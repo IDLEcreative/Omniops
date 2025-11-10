@@ -8,4 +8,4 @@
 export { getCustomerServicePrompt } from './base-prompt';
 export { getEnhancedCustomerServicePrompt } from './enhanced-prompt';
 export { buildConversationMessages } from './message-builder';
-export type { WidgetConfig } from './types';
+export type { WidgetConfig, CustomerProfile } from './types';

@@ -1,7 +1,7 @@
 #!/bin/bash
 
 # LOC Compliance Check Script
-# Enforces 300 LOC limit on production files, 500 LOC for test files
+# Enforces the strict 300 LOC limit for all TS/JS files (see CLAUDE.md, line ~1008)
 # Usage: ./scripts/check-loc-compliance.sh [--staged]
 
 set -e
@@ -49,14 +49,8 @@ for file in $files; do
         wc -l | \
         tr -d ' ')
 
-  # Test files get higher limit (500 LOC vs 300 LOC)
-  if [[ "$file" == *"__tests__"* ]] || [[ "$file" == *".test."* ]] || [[ "$file" == *".spec."* ]]; then
-    limit=500
-    warning_threshold=480
-  else
-    limit=300
-    warning_threshold=280
-  fi
+  limit=300
+  warning_threshold=280
 
   if [ "$loc" -gt "$limit" ]; then
     violations+=("$file ($loc LOC)")
@@ -80,7 +74,7 @@ echo ""
 
 # Show warnings (files approaching limit)
 if [ ${#warnings[@]} -gt 0 ]; then
-  echo "⚠️  Files approaching LOC limit (300 for production, 500 for tests):"
+  echo "⚠️  Files approaching LOC limit (300 LOC max across the board):"
   for warning in "${warnings[@]}"; do
     echo "   $warning"
   done
@@ -90,8 +84,7 @@ fi
 # Show violations (files exceeding limit)
 if [ ${#violations[@]} -gt 0 ]; then
   echo "❌ LOC Compliance Violations:"
-  echo "   Production files: 300 LOC limit"
-  echo "   Test files: 500 LOC limit"
+  echo "   All TypeScript/JavaScript files: 300 LOC limit"
   echo ""
   for violation in "${violations[@]}"; do
     echo "   $violation"

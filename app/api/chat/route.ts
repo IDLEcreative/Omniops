@@ -121,7 +121,7 @@ export async function POST(
     const domainId = await performDomainLookup(domain, adminSupabase!, telemetry);
 
     // Step 2: Parallel config and conversation operations
-    const { widgetConfig, conversationId } = await performParallelConfigAndConversation(
+    const { widgetConfig, customerProfile, conversationId } = await performParallelConfigAndConversation(
       domainId,
       conversation_id,
       session_id,
@@ -152,7 +152,7 @@ export async function POST(
     // Build conversation messages for OpenAI with enhanced system prompt
     // Metadata context is always injected for improved conversation accuracy
     const conversationMessages = buildConversationMessages(
-      getCustomerServicePrompt(widgetConfig) + enhancedContext,
+      getCustomerServicePrompt(widgetConfig, customerProfile) + enhancedContext,
       historyData,
       message
     );

@@ -14,4 +14,4 @@ export {
   buildConversationMessages
 } from './system-prompts/index';
 
-export type { WidgetConfig } from './system-prompts/index';
+export type { WidgetConfig, CustomerProfile } from './system-prompts/index';

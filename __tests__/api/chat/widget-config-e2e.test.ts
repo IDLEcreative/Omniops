@@ -12,27 +12,92 @@
  */
 
 import { describe, test, expect, beforeEach, jest } from '@jest/globals';
-import { POST } from '@/app/api/chat/route';
 import { NextRequest } from 'next/server';
 import OpenAI from 'openai';
 
 // Mock OpenAI
 jest.mock('openai');
 
+// Mock Supabase client used by analytics events
+jest.mock('@/lib/supabase/server', () => {
+  const mockRealtimeChannel = {
+    send: jest.fn().mockResolvedValue({ status: 'ok' }),
+    on: jest.fn().mockReturnThis(),
+    subscribe: jest.fn().mockResolvedValue({ status: 'ok' })
+  };
+
+  const mockAnalyticsClient = {
+    channel: jest.fn().mockReturnValue(mockRealtimeChannel),
+    from: jest.fn().mockReturnThis(),
+    select: jest.fn().mockReturnThis(),
+    insert: jest.fn().mockReturnThis(),
+    update: jest.fn().mockReturnThis(),
+    eq: jest.fn().mockReturnThis(),
+    single: jest.fn().mockResolvedValue({ data: null, error: null })
+  };
+
+  return {
+    __esModule: true,
+    createClient: jest.fn().mockResolvedValue(mockAnalyticsClient),
+    createServerClient: jest.fn(),
+    createServiceClient: jest.fn(),
+    createServiceRoleClient: jest.fn(),
+    createServiceRoleClientSync: jest.fn(),
+    requireClient: jest.fn(),
+    requireServiceRoleClient: jest.fn(),
+    validateSupabaseEnv: jest.fn(() => true)
+  };
+});
+
+// Mock Supabase server helpers used by the chat route
+jest.mock('@/lib/supabase-server', () => {
+  const mockRouteSupabase = {
+    from: jest.fn().mockReturnThis(),
+    select: jest.fn().mockReturnThis(),
+    eq: jest.fn().mockReturnThis(),
+    single: jest.fn().mockResolvedValue({ data: null, error: null })
+  };
+  return {
+    __esModule: true,
+    createClient: jest.fn().mockResolvedValue(mockRouteSupabase),
+    createServiceRoleClient: jest.fn().mockResolvedValue(mockRouteSupabase),
+    requireClient: jest.fn().mockResolvedValue(mockRouteSupabase),
+    requireServiceRoleClient: jest.fn().mockResolvedValue(mockRouteSupabase),
+    validateSupabaseEnv: jest.fn(() => true)
+  };
+});
+
+const emitMessageEventMock = jest.fn().mockResolvedValue(undefined);
+jest.mock('@/lib/analytics/supabase-events', () => ({
+  __esModule: true,
+  emitMessageEvent: emitMessageEventMock
+}));
+
 // Mock getOpenAIClient with a mock implementation
+const createCompletionMock = jest.fn();
 const mockOpenAIClient = {
   chat: {
     completions: {
-      create: jest.fn()
+      create: createCompletionMock
     }
   }
 };
 
 jest.mock('@/lib/chat/openai-client', () => ({
-  getOpenAIClient: jest.fn(() => mockOpenAIClient)
+  __esModule: true,
+  getOpenAIClient: jest.fn()
 }));
 
-import { getOpenAIClient } from '@/lib/chat/openai-client';
+const { getOpenAIClient } = jest.requireMock('@/lib/chat/openai-client') as {
+  getOpenAIClient: jest.Mock;
+};
+getOpenAIClient.mockImplementation(() => mockOpenAIClient);
+
+let POST: typeof import('@/app/api/chat/route').POST;
+
+beforeAll(async () => {
+  ({ POST } = await import('@/app/api/chat/route'));
+});
 
 describe('Widget Config E2E - Chat API Integration', () => {
   let mockSupabase: any;
@@ -40,6 +105,7 @@ describe('Widget Config E2E - Chat API Integration', () => {
   beforeEach(() => {
     // Reset all mocks
     jest.clearAllMocks();
+    emitMessageEventMock.mockClear();
 
     // Mock Supabase client
     mockSupabase = {
@@ -54,7 +120,7 @@ describe('Widget Config E2E - Chat API Integration', () => {
     };
 
     // Set default OpenAI response
-    mockOpenAIClient.chat.completions.create.mockResolvedValue({
+    createCompletionMock.mockResolvedValue({
       choices: [{
         message: {
           role: 'assistant',
@@ -106,8 +172,8 @@ describe('Widget Config E2E - Chat API Integration', () => {
     expect(data.message).toBeDefined();
 
     // Verify OpenAI was called with correct parameters
-    expect(mockOpenAIClient.chat.completions.create).toHaveBeenCalled();
-    const callArgs = mockOpenAIClient.chat.completions.create.mock.calls[0][0];
+    expect(createCompletionMock).toHaveBeenCalled();
+    const callArgs = createCompletionMock.mock.calls[0][0];
 
     // Check that system message contains friendly personality
     const systemMessage = callArgs.messages.find((m: any) => m.role === 'system');
@@ -144,7 +210,7 @@ describe('Widget Config E2E - Chat API Integration', () => {
     });
 
     // Verify OpenAI was called with 1000 token limit
-    const callArgs = mockOpenAIClient.chat.completions.create.mock.calls[0][0];
+    const callArgs = createCompletionMock.mock.calls[0][0];
     expect(callArgs.max_completion_tokens).toBe(1000);
   });
 
@@ -178,7 +244,7 @@ describe('Widget Config E2E - Chat API Integration', () => {
     });
 
     // Verify OpenAI was called with 4000 token limit
-    const callArgs = mockOpenAIClient.chat.completions.create.mock.calls[0][0];
+    const callArgs = createCompletionMock.mock.calls[0][0];
     expect(callArgs.max_completion_tokens).toBe(4000);
   });
 
@@ -212,12 +278,12 @@ describe('Widget Config E2E - Chat API Integration', () => {
     });
 
     // Verify system prompt contains language instruction
-    const callArgs = mockOpenAIClient.chat.completions.create.mock.calls[0][0];
+    const callArgs = createCompletionMock.mock.calls[0][0];
     const systemMessage = callArgs.messages.find((m: any) => m.role === 'system');
     expect(systemMessage.content).toContain('Respond in Spanish');
   });
 
-  test('should apply custom temperature setting', async () => {
+  test('should ignore custom temperature setting for GPT-5 mini', async () => {
     setupMockDatabase({
       domainId: 'test-domain-id',
       customerConfigId: 'test-config-id',
@@ -246,9 +312,9 @@ describe('Widget Config E2E - Chat API Integration', () => {
       }
     });
 
-    // Verify temperature setting
-    const callArgs = mockOpenAIClient.chat.completions.create.mock.calls[0][0];
-    expect(callArgs.temperature).toBe(0.2);
+    // GPT-5 mini ignores temperature overrides
+    const callArgs = createCompletionMock.mock.calls[0][0];
+    expect(callArgs.temperature).toBeUndefined();
   });
 
   test('should use custom system prompt when provided', async () => {
@@ -281,10 +347,11 @@ describe('Widget Config E2E - Chat API Integration', () => {
       }
     });
 
-    // Verify custom prompt is used
-    const callArgs = mockOpenAIClient.chat.completions.create.mock.calls[0][0];
+    // Verify custom prompt prefix is preserved with organization context appended
+    const callArgs = createCompletionMock.mock.calls[0][0];
     const systemMessage = callArgs.messages.find((m: any) => m.role === 'system');
-    expect(systemMessage.content).toBe(customPrompt);
+    expect(systemMessage.content.startsWith(customPrompt)).toBe(true);
+    expect(systemMessage.content).toContain('ORGANIZATION CONTEXT');
   });
 
   test('should work without widget config (use defaults)', async () => {
@@ -326,9 +393,9 @@ describe('Widget Config E2E - Chat API Integration', () => {
     expect(response.status).toBe(200);
 
     // Verify default settings used
-    const callArgs = mockOpenAIClient.chat.completions.create.mock.calls[0][0];
+    const callArgs = createCompletionMock.mock.calls[0][0];
     expect(callArgs.max_completion_tokens).toBe(2500); // default balanced
-    expect(callArgs.temperature).toBe(0.7); // default
+    expect(callArgs.temperature).toBeUndefined(); // GPT-5 mini ignores temperature
   });
 
   // Helper functions
@@ -348,9 +415,27 @@ describe('Widget Config E2E - Chat API Integration', () => {
         data: { customer_config_id: config.customerConfigId },
         error: null
       })
+      // Domain metadata lookup for profile context
+      .mockResolvedValueOnce({
+        data: {
+          domain: 'test-domain.com',
+          name: 'Test Domain',
+          description: 'Test description',
+          customer_config_id: config.customerConfigId
+        },
+        error: null
+      })
       // Widget config lookup
       .mockResolvedValueOnce({
         data: { config_data: config.widgetConfig },
+        error: null
+      })
+      // Customer profile lookup
+      .mockResolvedValueOnce({
+        data: {
+          business_name: 'Test Domain',
+          business_description: 'Test description'
+        },
         error: null
       })
       // Conversation creation/lookup
@@ -373,12 +458,6 @@ describe('Widget Config E2E - Chat API Integration', () => {
       select: jest.fn().mockResolvedValue({ data: {}, error: null })
     });
 
-    // Mock select operations (for history)
-    mockSupabase.select.mockReturnValue({
-      eq: jest.fn().mockReturnThis(),
-      order: jest.fn().mockReturnThis(),
-      limit: jest.fn().mockResolvedValue({ data: [], error: null })
-    });
   }
 
   function createMockRequest(body: any): NextRequest {

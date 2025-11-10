@@ -8,6 +8,7 @@ import { ChatTelemetry } from '@/lib/chat-telemetry';
 import {
   lookupDomain,
   loadWidgetConfig,
+  loadCustomerProfile,
   getOrCreateConversation,
   updateConversationMetadata,
   saveUserMessage,
@@ -42,12 +43,14 @@ export async function performParallelConfigAndConversation(
   const parallelStart = performance.now();
   const results = await Promise.allSettled([
     loadWidgetConfig(domainId, supabase),
+    loadCustomerProfile(domainId, supabase),
     getOrCreateConversation(conversationId, sessionId, domainId, supabase, sessionMetadata)
   ]);
   const parallelTime = performance.now() - parallelStart;
 
   const widgetConfig = results[0].status === 'fulfilled' ? results[0].value : null;
-  const finalConversationId = results[1].status === 'fulfilled' ? results[1].value : null;
+  const customerProfile = results[1].status === 'fulfilled' ? results[1].value : null;
+  const finalConversationId = results[2].status === 'fulfilled' ? results[2].value : null;
 
   if (results[0].status === 'rejected') {
     telemetry?.log('error', 'config', 'Failed to load widget config, using defaults', {
@@ -55,15 +58,20 @@ export async function performParallelConfigAndConversation(
     });
   }
   if (results[1].status === 'rejected') {
-    telemetry?.log('error', 'conversation', 'Failed to get/create conversation', {
+    telemetry?.log('error', 'config', 'Failed to load customer profile context', {
       error: results[1].reason?.message
+    });
+  }
+  if (results[2].status === 'rejected') {
+    telemetry?.log('error', 'conversation', 'Failed to get/create conversation', {
+      error: results[2].reason?.message
     });
     throw new Error('Failed to initialize conversation');
   }
 
   telemetry?.log('info', 'performance', 'Parallel operations completed', {
     duration: `${parallelTime.toFixed(2)}ms`,
-    operations: ['loadWidgetConfig', 'getOrCreateConversation']
+    operations: ['loadWidgetConfig', 'loadCustomerProfile', 'getOrCreateConversation']
   });
 
   if (widgetConfig) {
@@ -74,7 +82,14 @@ export async function performParallelConfigAndConversation(
     });
   }
 
-  return { widgetConfig, conversationId: finalConversationId };
+  if (customerProfile) {
+    telemetry?.log('info', 'ai', 'Customer profile loaded', {
+      hasBusinessName: !!customerProfile.businessName,
+      hasDescription: !!customerProfile.businessDescription
+    });
+  }
+
+  return { widgetConfig, customerProfile, conversationId: finalConversationId };
 }
 
 export async function performConversationOperations(

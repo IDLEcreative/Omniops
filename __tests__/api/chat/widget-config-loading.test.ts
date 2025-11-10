@@ -5,7 +5,8 @@
  */
 
 import { describe, test, expect, jest } from '@jest/globals';
-import { loadWidgetConfig, WidgetConfig } from '@/lib/chat/conversation-manager';
+import { loadWidgetConfig, loadCustomerProfile } from '@/lib/chat/conversation-manager';
+import type { WidgetConfig } from '@/lib/chat/conversation-manager';
 
 describe('Widget Config - Database Loading', () => {
   test('should load widget config from database via domain ID', async () => {
@@ -92,5 +93,56 @@ describe('Widget Config - Database Loading', () => {
     expect(config.ai_settings?.personality).toBe('professional');
     expect(config.ai_settings?.responseLength).toBe('balanced');
     expect(config.integration_settings?.enableWebSearch).toBe(false);
+  });
+
+  test('should load customer profile with business metadata', async () => {
+    const mockSupabase = {
+      from: jest.fn().mockReturnThis(),
+      select: jest.fn().mockReturnThis(),
+      eq: jest.fn().mockReturnThis(),
+      single: jest.fn()
+    };
+
+    (mockSupabase.single as jest.Mock)
+      // Domain metadata lookup
+      .mockResolvedValueOnce({
+        data: {
+          domain: 'example.com',
+          name: 'Example Brand',
+          description: 'Premium outdoor equipment',
+          customer_config_id: 'config-id'
+        },
+        error: null
+      })
+      // Customer config metadata lookup
+      .mockResolvedValueOnce({
+        data: {
+          business_name: 'Example Brand Ltd',
+          business_description: 'UK-based retailer for outdoor adventures'
+        },
+        error: null
+      });
+
+    const profile = await loadCustomerProfile('test-domain-id', mockSupabase);
+
+    expect(profile).not.toBeNull();
+    expect(profile?.businessName).toBe('Example Brand Ltd');
+    expect(profile?.domain).toBe('example.com');
+    expect(profile?.domainDescription).toBe('Premium outdoor equipment');
+  });
+
+  test('should return null profile when domain metadata missing', async () => {
+    const mockSupabase = {
+      from: jest.fn().mockReturnThis(),
+      select: jest.fn().mockReturnThis(),
+      eq: jest.fn().mockReturnThis(),
+      single: jest.fn().mockResolvedValue({
+        data: null,
+        error: new Error('Missing domain')
+      })
+    };
+
+    const profile = await loadCustomerProfile('missing-domain', mockSupabase);
+    expect(profile).toBeNull();
   });
 });

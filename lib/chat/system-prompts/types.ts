@@ -2,6 +2,6 @@
  * Types for system prompts
  */
 
-import type { WidgetConfig } from '../conversation-manager';
+import type { WidgetConfig, CustomerProfile } from '../conversation-manager';
 
-export type { WidgetConfig };
+export type { WidgetConfig, CustomerProfile };

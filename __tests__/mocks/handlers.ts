@@ -18,6 +18,7 @@
 import { authHandlers } from './handlers-auth'
 import { openaiHandlers } from './handlers-openai'
 import { woocommerceHandlers } from './handlers-woocommerce'
+import { chatHandlers } from './handlers-chat'
 
 /**
  * Combined array of all mock handlers for MSW
@@ -27,6 +28,7 @@ import { woocommerceHandlers } from './handlers-woocommerce'
  * handlers to this array.
  */
 export const handlers = [
+  ...chatHandlers,
   ...openaiHandlers,
   ...authHandlers,
   ...woocommerceHandlers
@@ -35,4 +37,4 @@ export const handlers = [
 /**
  * Re-export individual handler groups for granular testing control
  */
-export { authHandlers, openaiHandlers, woocommerceHandlers }
+export { authHandlers, openaiHandlers, woocommerceHandlers, chatHandlers }

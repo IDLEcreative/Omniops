@@ -2,12 +2,44 @@
  * Base customer service prompt
  */
 
-import type { WidgetConfig } from './types';
+import type { WidgetConfig, CustomerProfile } from './types';
 import { getPersonalityIntro } from './personality';
 import { getWooCommerceWorkflowPrompt } from './woocommerce-workflow-prompt';
 import { getShopifyWorkflowPrompt } from './shopify-workflow-prompt';
 import { getErrorHandlingPrompt } from './error-handling-prompt';
 import { getAlternativeProductsPrompt } from './alternative-products-prompt';
+
+function buildOrganizationContext(customerProfile?: CustomerProfile | null): string {
+  const businessName =
+    customerProfile?.businessName?.trim() ||
+    customerProfile?.domainLabel?.trim() ||
+    customerProfile?.domain?.trim();
+
+  const businessDescription =
+    customerProfile?.businessDescription?.trim() ||
+    customerProfile?.domainDescription?.trim();
+
+  if (!businessName && !businessDescription && !customerProfile?.domain) {
+    return `
+
+🏢 ORGANIZATION CONTEXT:
+- You are embedded on a customer's own website. Speak ONLY on behalf of that organization.
+- Never reference other companies, marketplaces, or suppliers.
+- If users ask about unrelated stores, explain you only have information for the business whose site this widget is on.
+- When users ask about discounts, promotions, or "offers," search this business's data. If no offer exists, say so clearly and guide them to available products instead.`;
+  }
+
+  const contextLines = [
+    businessName ? `You are the AI assistant for ${businessName}.` : null,
+    customerProfile?.domain ? `This chat widget only serves visitors on ${customerProfile.domain}. Do not send customers elsewhere.` : null,
+    businessDescription ? `Business focus: ${businessDescription}` : null,
+    'All recommendations must be specific to this organization—never mention competitors or outside suppliers.',
+    'If a requested product, service, or discount is unavailable, explain that you only have data for this business and suggest constructive next steps (searching our catalog, asking for categories, or contacting the team).',
+    'When customers ask “what is on offer,” first search this business’s inventory or promotion data. If no offer exists, state that clearly and highlight relevant categories or best sellers from this business.'
+  ].filter(Boolean);
+
+  return `\n\n🏢 ORGANIZATION CONTEXT:\n${contextLines.map(line => `- ${line}`).join('\n')}`;
+}
 
 /**
  * Get the main customer service system prompt
@@ -22,7 +54,10 @@ import { getAlternativeProductsPrompt } from './alternative-products-prompt';
  *
  * @param widgetConfig Optional widget configuration for customization
  */
-export function getCustomerServicePrompt(widgetConfig?: WidgetConfig | null): string {
+export function getCustomerServicePrompt(
+  widgetConfig?: WidgetConfig | null,
+  customerProfile?: CustomerProfile | null
+): string {
   // Get personality intro (custom prompt only replaces this section, not operational instructions)
   const personalityIntro = widgetConfig?.ai_settings?.customSystemPrompt
     ? widgetConfig.ai_settings.customSystemPrompt
@@ -33,7 +68,9 @@ export function getCustomerServicePrompt(widgetConfig?: WidgetConfig | null): st
     ? `\n\n🌐 LANGUAGE: Respond in ${widgetConfig.ai_settings.language}. All your responses should be in this language unless the user explicitly asks for a different language.`
     : '';
 
-  return `${personalityIntro}${languageInstruction}
+  const organizationContext = buildOrganizationContext(customerProfile);
+
+  return `${personalityIntro}${languageInstruction}${organizationContext}
 
 🔍 SEARCH BEHAVIOR:
 You have full visibility of ALL search results. When you search, you see the complete inventory.

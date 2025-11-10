@@ -1,0 +1,15 @@
+{
+  "teardownTime": "2025-11-10T15:27:55.995Z",
+  "setupTime": "2025-11-10T15:27:41.565Z",
+  "duration": 14430,
+  "testResultsPath": "/Users/jamesguy/Omniops/test-results",
+  "generatedFiles": [
+    "browser-availability.json",
+    "chat-widget-integration-Ch-d2577-ssage-with-session-metadata-chromium",
+    "screenshots",
+    "setup-timestamp.txt",
+    "traces",
+    "videos",
+    "widget-not-expanded-1762788475452.png"
+  ]
+}
