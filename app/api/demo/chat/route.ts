@@ -36,19 +36,34 @@ async function checkMessageRateLimit(sessionId: string) {
 
 export async function POST(req: NextRequest) {
   try {
+    console.log('[DemoChat] Starting chat request');
+
     // Parse and validate request
     const body = await req.json();
-    const { session_id, message } = chatSchema.parse(body);
+    console.log('[DemoChat] Request body parsed:', { session_id: body.session_id, messageLength: body.message?.length });
 
-    // Retrieve session data from Redis
+    const { session_id, message } = chatSchema.parse(body);
+    console.log('[DemoChat] Request validated');
+
+    // Retrieve session data from storage
+    console.log('[DemoChat] Retrieving session:', session_id);
     const sessionData = await getDemoSession(session_id);
 
+    console.log('[DemoChat] Session retrieval result:', {
+      found: sessionData !== null,
+      domain: sessionData?.domain,
+      messageCount: sessionData?.message_count
+    });
+
     if (!sessionData) {
+      console.warn('[DemoChat] Session not found:', session_id);
       return NextResponse.json(
         { error: 'Demo session expired. Please start a new demo.' },
         { status: 404 }
       );
     }
+
+    console.log('[DemoChat] Session found, proceeding with chat');
 
     // Check message count
     if (sessionData.message_count >= sessionData.max_messages) {
@@ -105,7 +120,12 @@ export async function POST(req: NextRequest) {
     });
 
   } catch (error) {
-    console.error('Demo chat error:', error);
+    console.error('[DemoChat] Error occurred:', {
+      error,
+      message: error instanceof Error ? error.message : String(error),
+      stack: error instanceof Error ? error.stack : undefined,
+      name: error instanceof Error ? error.name : undefined
+    });
 
     if (error instanceof Error) {
       if (error.message.includes('wait 2 seconds')) {
@@ -120,10 +140,32 @@ export async function POST(req: NextRequest) {
           { status: 404 }
         );
       }
+
+      // Check for specific error types
+      if (error.message.includes('OpenAI') || error.message.includes('API key')) {
+        console.error('[DemoChat] OpenAI error detected');
+        return NextResponse.json(
+          { error: 'AI service temporarily unavailable. Please try again.' },
+          { status: 503 }
+        );
+      }
+
+      if (error.message.includes('session') || error.message.includes('storage')) {
+        console.error('[DemoChat] Storage error detected');
+        return NextResponse.json(
+          { error: 'Session storage error. Please start a new demo.' },
+          { status: 500 }
+        );
+      }
     }
 
     return NextResponse.json(
-      { error: 'Failed to generate response. Please try again.' },
+      {
+        error: 'Failed to generate response. Please try again.',
+        details: process.env.NODE_ENV === 'development'
+          ? (error instanceof Error ? error.message : String(error))
+          : undefined
+      },
       { status: 500 }
     );
   }

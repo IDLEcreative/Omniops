@@ -17,7 +17,26 @@ export interface DemoSessionData {
 
 const SESSION_KEY_PREFIX = 'demo';
 const DEFAULT_TTL_SECONDS = 600;
-const REDIS_ENABLED = Boolean(process.env.REDIS_URL);
+
+// Check if Redis is actually available (not just if URL is set)
+async function isRedisAvailable(): Promise<boolean> {
+  if (!process.env.REDIS_URL) {
+    return false;
+  }
+
+  try {
+    const redis = await getRedisClient();
+    // Check if we're using the fallback client
+    if ('isUsingFallback' in redis && typeof redis.isUsingFallback === 'function') {
+      return !redis.isUsingFallback();
+    }
+    // For regular Redis clients, assume it's available if we got this far
+    return true;
+  } catch (error) {
+    logger.error('[DemoSessionStore] Error checking Redis availability', error as Error);
+    return false;
+  }
+}
 
 type MemorySession = {
   data: DemoSessionData;
@@ -63,9 +82,28 @@ async function saveInRedis(sessionId: string, data: DemoSessionData): Promise<vo
   try {
     const redis = await getRedisClient();
     const ttlSeconds = getTtlSeconds(data.expires_at);
-    await redis.setex(getSessionKey(sessionId), ttlSeconds, JSON.stringify(data));
+    const key = getSessionKey(sessionId);
+
+    logger.info('[DemoSessionStore] saveInRedis details', {
+      sessionId,
+      key,
+      ttlSeconds,
+      dataSize: JSON.stringify(data).length
+    });
+
+    await redis.setex(key, ttlSeconds, JSON.stringify(data));
+
+    // Verify the save by reading it back
+    const verification = await redis.get(key);
+    logger.info('[DemoSessionStore] Redis save verification', {
+      sessionId,
+      key,
+      saved: verification !== null,
+      verificationDataLength: verification?.length || 0
+    });
   } catch (error) {
     logger.error('[DemoSessionStore] Failed to save session to Redis', error as Error);
+    logger.info('[DemoSessionStore] Falling back to in-memory storage', { sessionId });
     saveInMemory(sessionId, data);
   }
 }
@@ -73,13 +111,39 @@ async function saveInRedis(sessionId: string, data: DemoSessionData): Promise<vo
 async function readFromRedis(sessionId: string): Promise<DemoSessionData | null> {
   try {
     const redis = await getRedisClient();
-    const raw = await redis.get(getSessionKey(sessionId));
+    const key = getSessionKey(sessionId);
+
+    logger.info('[DemoSessionStore] readFromRedis details', {
+      sessionId,
+      key
+    });
+
+    const raw = await redis.get(key);
+
+    logger.info('[DemoSessionStore] Redis read raw result', {
+      sessionId,
+      key,
+      found: raw !== null,
+      rawDataLength: raw?.length || 0
+    });
+
     if (!raw) {
-      return null;
+      logger.warn('[DemoSessionStore] Session not found in Redis, checking memory', { sessionId });
+      return readFromMemory(sessionId);
     }
-    return JSON.parse(raw) as DemoSessionData;
+
+    const parsed = JSON.parse(raw) as DemoSessionData;
+    logger.info('[DemoSessionStore] Successfully parsed session from Redis', {
+      sessionId,
+      domain: parsed.domain,
+      expiresAt: new Date(parsed.expires_at).toISOString(),
+      isExpired: parsed.expires_at <= Date.now()
+    });
+
+    return parsed;
   } catch (error) {
     logger.error('[DemoSessionStore] Failed to read session from Redis', error as Error);
+    logger.info('[DemoSessionStore] Falling back to memory storage', { sessionId });
     return readFromMemory(sessionId);
   }
 }
@@ -94,6 +158,8 @@ async function deleteFromRedis(sessionId: string): Promise<void> {
 }
 
 async function saveInSupabase(sessionId: string, data: DemoSessionData): Promise<void> {
+  logger.info('[DemoSessionStore] saveInSupabase called', { sessionId, domain: data.domain });
+
   const supabase = await createServiceRoleClient();
 
   if (!supabase) {
@@ -101,6 +167,12 @@ async function saveInSupabase(sessionId: string, data: DemoSessionData): Promise
     saveInMemory(sessionId, data);
     return;
   }
+
+  logger.info('[DemoSessionStore] Upserting to demo_sessions table', {
+    sessionId,
+    domain: data.domain,
+    expiresAt: new Date(data.expires_at).toISOString()
+  });
 
   const { error } = await supabase
     .from('demo_sessions')
@@ -115,16 +187,24 @@ async function saveInSupabase(sessionId: string, data: DemoSessionData): Promise
 
   if (error) {
     logger.error('[DemoSessionStore] Failed to persist session to Supabase', error);
+    logger.info('[DemoSessionStore] Falling back to in-memory storage', { sessionId });
     saveInMemory(sessionId, data);
+  } else {
+    logger.info('[DemoSessionStore] Successfully saved to Supabase', { sessionId });
   }
 }
 
 async function readFromSupabase(sessionId: string): Promise<DemoSessionData | null> {
+  logger.info('[DemoSessionStore] readFromSupabase called', { sessionId });
+
   const supabase = await createServiceRoleClient();
 
   if (!supabase) {
+    logger.warn('[DemoSessionStore] Supabase unavailable, checking memory', { sessionId });
     return readFromMemory(sessionId);
   }
+
+  logger.info('[DemoSessionStore] Querying demo_sessions table', { sessionId });
 
   const { data, error } = await supabase
     .from('demo_sessions')
@@ -134,15 +214,28 @@ async function readFromSupabase(sessionId: string): Promise<DemoSessionData | nu
 
   if (error) {
     logger.error('[DemoSessionStore] Failed to read session from Supabase', error);
+    logger.info('[DemoSessionStore] Falling back to memory storage', { sessionId });
     return readFromMemory(sessionId);
   }
 
   if (!data) {
+    logger.warn('[DemoSessionStore] Session not found in Supabase', { sessionId });
     return null;
   }
 
+  logger.info('[DemoSessionStore] Found session in Supabase', {
+    sessionId,
+    expiresAt: data.expires_at,
+    messageCount: data.message_count
+  });
+
   const expiresAt = new Date(data.expires_at).getTime();
   if (Number.isNaN(expiresAt) || expiresAt <= Date.now()) {
+    logger.warn('[DemoSessionStore] Session expired in Supabase, deleting', {
+      sessionId,
+      expiresAt: new Date(data.expires_at).toISOString(),
+      now: new Date().toISOString()
+    });
     await deleteDemoSession(sessionId);
     return null;
   }
@@ -154,6 +247,11 @@ async function readFromSupabase(sessionId: string): Promise<DemoSessionData | nu
     sessionData.expires_at ?? expiresAt,
     expiresAt,
   );
+
+  logger.info('[DemoSessionStore] Successfully parsed session from Supabase', {
+    sessionId,
+    domain: sessionData.domain
+  });
 
   return sessionData;
 }
@@ -176,26 +274,64 @@ async function deleteFromSupabase(sessionId: string): Promise<void> {
 }
 
 export async function saveDemoSession(sessionId: string, data: DemoSessionData): Promise<void> {
-  if (REDIS_ENABLED) {
+  const redisAvailable = await isRedisAvailable();
+
+  logger.info('[DemoSessionStore] saveDemoSession called', {
+    sessionId,
+    redisAvailable,
+    hasRedisUrl: Boolean(process.env.REDIS_URL),
+    expiresAt: new Date(data.expires_at).toISOString(),
+    domain: data.domain
+  });
+
+  if (redisAvailable) {
+    logger.info('[DemoSessionStore] Saving to Redis', { sessionId });
     await saveInRedis(sessionId, data);
+    logger.info('[DemoSessionStore] Successfully saved to Redis', { sessionId });
     return;
   }
 
+  logger.info('[DemoSessionStore] Saving to Supabase (Redis disabled)', { sessionId });
   await saveInSupabase(sessionId, data);
+  logger.info('[DemoSessionStore] Successfully saved to Supabase', { sessionId });
 }
 
 export async function getDemoSession(sessionId: string): Promise<DemoSessionData | null> {
-  if (REDIS_ENABLED) {
-    return readFromRedis(sessionId);
+  const redisAvailable = await isRedisAvailable();
+
+  logger.info('[DemoSessionStore] getDemoSession called', {
+    sessionId,
+    redisAvailable,
+    hasRedisUrl: Boolean(process.env.REDIS_URL)
+  });
+
+  if (redisAvailable) {
+    logger.info('[DemoSessionStore] Reading from Redis', { sessionId });
+    const result = await readFromRedis(sessionId);
+    logger.info('[DemoSessionStore] Redis read result', {
+      sessionId,
+      found: result !== null,
+      domain: result?.domain
+    });
+    return result;
   }
 
-  return readFromSupabase(sessionId);
+  logger.info('[DemoSessionStore] Reading from Supabase (Redis disabled)', { sessionId });
+  const result = await readFromSupabase(sessionId);
+  logger.info('[DemoSessionStore] Supabase read result', {
+    sessionId,
+    found: result !== null,
+    domain: result?.domain
+  });
+  return result;
 }
 
 export async function deleteDemoSession(sessionId: string): Promise<void> {
   memoryStore.delete(sessionId);
 
-  if (REDIS_ENABLED) {
+  const redisAvailable = await isRedisAvailable();
+
+  if (redisAvailable) {
     await deleteFromRedis(sessionId);
     return;
   }

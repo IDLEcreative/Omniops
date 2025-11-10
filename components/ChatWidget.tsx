@@ -53,6 +53,7 @@ export default function ChatWidget({
     setHighContrast,
     fontSize,
     setFontSize,
+    isRTL,
     textareaRef,
     privacySettings,
     messagesContainerRef,
@@ -193,6 +194,7 @@ export default function ChatWidget({
       role="dialog"
       aria-label="Chat support widget"
       aria-modal="true"
+      dir={isRTL ? 'rtl' : 'ltr'}
     >
       <Header
         headerTitle={demoConfig?.appearance?.headerTitle || demoConfig?.headerTitle}

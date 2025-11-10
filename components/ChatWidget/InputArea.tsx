@@ -1,5 +1,6 @@
 import { RefObject, useEffect } from 'react';
 import { Send, Type } from 'lucide-react';
+import { useTranslation } from './hooks/useTranslation';
 
 export interface InputAreaProps {
   input: string;
@@ -34,6 +35,9 @@ export function InputArea({
   onFontSizeChange,
   appearance,
 }: InputAreaProps) {
+  // Translation hook for i18n support
+  const { t } = useTranslation();
+
   // Use config-driven colors with fallbacks to current hardcoded values
   const inputAreaBgColor = appearance?.inputAreaBackgroundColor || '#111111';
   const inputAreaBorderColor = appearance?.inputAreaBorderColor || '#2a2a2a';
@@ -74,16 +78,16 @@ export function InputArea({
       className={`px-3 sm:px-4 py-3 border-t ${highContrast ? 'border-t-2 border-white bg-black' : ''}`}
     >
       <div className="flex gap-2 items-center">
-        <label htmlFor="chat-input" className="sr-only">Type your message</label>
+        <label htmlFor="chat-input" className="sr-only">{t('chat.placeholder')}</label>
         <textarea
           ref={textareaRef}
           id="chat-input"
           value={input}
           onChange={handleTextareaChange}
           onKeyDown={handleKeyPress}
-          placeholder="Type your message..."
+          placeholder={t('chat.placeholder')}
           disabled={loading}
-          aria-label="Message input"
+          aria-label={t('chat.placeholder')}
           rows={1}
           style={{
             height: '40px',
@@ -123,7 +127,7 @@ export function InputArea({
         <button
           onClick={onSend}
           disabled={!input.trim() || loading}
-          aria-label="Send message"
+          aria-label={t('chat.send')}
           className="p-2 flex items-center justify-center flex-shrink-0 text-gray-400 hover:text-white disabled:opacity-30 transition-colors duration-200 focus:outline-none bg-transparent border-0 rounded-md hover:bg-gray-800/50 disabled:hover:bg-transparent"
         >
           <Send className="h-5 w-5" aria-hidden="true" />

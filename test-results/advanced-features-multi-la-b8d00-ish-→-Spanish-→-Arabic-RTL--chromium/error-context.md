@@ -4,67 +4,20 @@
 - generic [active] [ref=e1]:
   - generic [ref=e3]:
     - generic [ref=e4]:
-      - heading "Chat Widget Test Environment" [level=1] [ref=e5]
-      - paragraph [ref=e6]: Multi-language support with English, Spanish, and Arabic
-    - generic [ref=e7]:
-      - heading "Language Settings" [level=2] [ref=e8]
-      - generic [ref=e9]:
-        - button "English" [ref=e10] [cursor=pointer]
-        - button "Español" [ref=e11] [cursor=pointer]
-        - button "العربية" [ref=e12] [cursor=pointer]
-      - paragraph [ref=e13]: "Current language: English"
-    - generic [ref=e14]:
-      - heading "Widget Features:" [level=2] [ref=e15]
-      - list [ref=e16]:
-        - listitem [ref=e17]: "Loaded via iframe for isolation (ID: chat-widget-iframe)"
-        - listitem [ref=e18]: Fixed position in bottom-right corner
-        - listitem [ref=e19]: Multi-language support (English, Spanish, Arabic)
-        - listitem [ref=e20]: RTL support for Arabic
-        - listitem [ref=e21]: Session tracking enabled
-        - listitem [ref=e22]: Programmatic API available via window.ChatWidget
-    - generic [ref=e23]:
-      - heading "Example Queries" [level=2] [ref=e24]
-      - generic [ref=e25]:
-        - generic [ref=e26]:
-          - heading "English" [level=3] [ref=e27]
-          - list [ref=e28]:
-            - listitem [ref=e29]: → "What products do you have?"
-            - listitem [ref=e30]: → "Show me your catalog"
-            - listitem [ref=e31]: → "Check order status"
-        - generic [ref=e32]:
-          - heading "Español" [level=3] [ref=e33]
-          - list [ref=e34]:
-            - listitem [ref=e35]: → "¿Qué productos tienes?"
-            - listitem [ref=e36]: → "Muéstrame tu catálogo"
-            - listitem [ref=e37]: → "Verificar estado del pedido"
-        - generic [ref=e38]:
-          - heading "العربية" [level=3] [ref=e39]
-          - list [ref=e40]:
-            - listitem [ref=e41]: → "ما هي المنتجات المتوفرة؟"
-            - listitem [ref=e42]: → "أرني الكتالوج"
-            - listitem [ref=e43]: → "تحقق من حالة الطلب"
-    - generic [ref=e44]:
-      - heading "Test Instructions:" [level=2] [ref=e45]
-      - list [ref=e46]:
-        - listitem [ref=e47]: Select a language above to change the widget UI language
-        - listitem [ref=e48]: Click the chat widget icon in the bottom-right corner
-        - listitem [ref=e49]: Verify that UI elements (placeholder, buttons) are in the selected language
-        - listitem [ref=e50]: For Arabic, verify that text alignment is right-to-left
-        - listitem [ref=e51]: Send a message in the selected language and verify AI responds appropriately
-    - generic [ref=e52]:
-      - heading "Technical Details" [level=2] [ref=e53]
-      - generic [ref=e54]:
-        - generic [ref=e55]:
-          - paragraph [ref=e56]: "Widget Iframe ID:"
-          - code [ref=e57]: chat-widget-iframe
-        - generic [ref=e58]:
-          - paragraph [ref=e59]: "Language Storage:"
-          - code [ref=e60]: localStorage.omniops_ui_language
-        - generic [ref=e61]:
-          - paragraph [ref=e62]: "Supported Languages:"
-          - code [ref=e63]: en, es, ar
-        - generic [ref=e64]:
-          - paragraph [ref=e65]: "RTL Support:"
-          - code [ref=e66]: document.dir = "rtl" (for Arabic)
+      - generic [ref=e5]: "404"
+      - generic [ref=e6]: Page not found
+      - generic [ref=e7]: Sorry, we couldn't find the page you're looking for.
+    - generic [ref=e9]:
+      - link "Go home" [ref=e10] [cursor=pointer]:
+        - /url: /
+        - img
+        - text: Go home
+      - link "Get started" [ref=e11] [cursor=pointer]:
+        - /url: /setup
+        - img
+        - text: Get started
   - region "Notifications alt+T"
+  - button "Open Next.js Dev Tools" [ref=e17] [cursor=pointer]:
+    - img [ref=e18]
+  - alert [ref=e21]
 ```

@@ -93,6 +93,7 @@ export function useChatState({
   const [mounted, setMounted] = useState(false);
   const [highContrast, setHighContrast] = useState(false);
   const [fontSize, setFontSize] = useState<'normal' | 'large' | 'xlarge'>('normal');
+  const [isRTL, setIsRTL] = useState(false);
   const textareaRef = useRef<HTMLTextAreaElement>(null);
   const [connectionState, setConnectionState] = useState<ConnectionState>('connecting');
 
@@ -169,6 +170,43 @@ export function useChatState({
       });
     }
   }, [useEnhancedStorage]);
+
+  // Detect and apply RTL for right-to-left languages
+  useEffect(() => {
+    if (!mounted) return;
+
+    const detectRTL = () => {
+      // Get language from localStorage or document
+      const storedLang = localStorage.getItem('omniops_ui_language')
+        || document.documentElement.getAttribute('lang')
+        || 'en';
+
+      // RTL languages: Arabic, Hebrew, Farsi, Urdu
+      const rtlLanguages = ['ar', 'he', 'fa', 'ur'];
+      const isRTLLang = rtlLanguages.includes(storedLang);
+
+      setIsRTL(isRTLLang);
+
+      // Apply dir attribute to document if not already set
+      if (!document.documentElement.getAttribute('dir')) {
+        document.documentElement.setAttribute('dir', isRTLLang ? 'rtl' : 'ltr');
+      }
+
+      console.log(`[ChatWidget RTL] Language: ${storedLang}, RTL: ${isRTLLang}`);
+    };
+
+    detectRTL();
+
+    // Listen for language changes from storage
+    const handleStorageChange = (e: StorageEvent) => {
+      if (e.key === 'omniops_ui_language') {
+        detectRTL();
+      }
+    };
+
+    window.addEventListener('storage', handleStorageChange);
+    return () => window.removeEventListener('storage', handleStorageChange);
+  }, [mounted]);
 
   // Handle forceClose and initialOpen from URL params
   useEffect(() => {
@@ -270,6 +308,7 @@ export function useChatState({
     setHighContrast,
     fontSize,
     setFontSize,
+    isRTL,
     textareaRef,
     connectionState,
     onMessage,

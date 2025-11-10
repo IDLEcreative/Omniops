@@ -1,11 +1,9 @@
-#!/usr/bin/env node
+interface OptimizationStep {
+  name: string;
+  sql: string;
+}
 
-// MIGRATED: Now uses environment variables via supabase-config.js
-import { getSupabaseConfig, executeSQL } from './supabase-config.js';
-
-const config = getSupabaseConfig();
-
-const optimizationSteps = [
+export const optimizationSteps: OptimizationStep[] = [
   {
     name: 'Remove duplicate index on page_embeddings',
     sql: `DROP INDEX IF EXISTS idx_page_embeddings_page;`
@@ -225,7 +223,6 @@ const optimizationSteps = [
   {
     name: 'Optimize policies with helper functions',
     sql: `
-      -- Re-create business_configs with optimized function
       DROP POLICY IF EXISTS "Business configs access control" ON business_configs;
       CREATE POLICY "Business configs access control" ON business_configs
         FOR ALL
@@ -234,7 +231,6 @@ const optimizationSteps = [
           OR business_id IN (SELECT get_user_business_ids())
         );
       
-      -- Re-create scraped_pages with optimized function
       DROP POLICY IF EXISTS "Users can access their domain pages" ON scraped_pages;
       CREATE POLICY "Users can access their domain pages" ON scraped_pages
         FOR ALL
@@ -242,7 +238,6 @@ const optimizationSteps = [
           domain_id IN (SELECT get_user_domain_ids())
         );
       
-      -- Re-create website_content with optimized function
       DROP POLICY IF EXISTS "Users can access their domain content" ON website_content;
       CREATE POLICY "Users can access their domain content" ON website_content
         FOR ALL
@@ -250,7 +245,6 @@ const optimizationSteps = [
           domain_id IN (SELECT get_user_domain_ids())
         );
       
-      -- Re-create scrape_jobs with optimized function
       DROP POLICY IF EXISTS "Users can access their own scrape jobs" ON scrape_jobs;
       CREATE POLICY "Users can access their own scrape jobs" ON scrape_jobs
         FOR ALL
@@ -280,73 +274,3 @@ const optimizationSteps = [
     `
   }
 ];
-
-async function applyRLSOptimizations() {
-  console.log('🔒 Applying RLS Performance Optimizations');
-  console.log('=' .repeat(60));
-  console.log('This will fix 124+ linter warnings about:');
-  console.log('  • Auth function re-evaluation (24 instances)');
-  console.log('  • Multiple permissive policies (100+ instances)');
-  console.log('  • Duplicate indexes');
-  console.log('=' .repeat(60));
-  
-  let successCount = 0;
-  let errorCount = 0;
-  const errors = [];
-  
-  for (const step of optimizationSteps) {
-    process.stdout.write(`⏳ ${step.name}... `);
-
-    try {
-      await executeSQL(config, step.sql);
-      console.log('✅');
-      successCount++;
-    } catch (error) {
-      console.log(`❌ ${error.message}`);
-      errors.push({ step: step.name, error: error.message });
-      errorCount++;
-    }
-
-    // Small delay between operations
-    await new Promise(resolve => setTimeout(resolve, 500));
-  }
-  
-  console.log('\n' + '=' .repeat(60));
-  console.log('📊 RLS Optimization Summary:');
-  console.log(`✅ Successful: ${successCount}/${optimizationSteps.length}`);
-  console.log(`❌ Failed: ${errorCount}/${optimizationSteps.length}`);
-  
-  if (errorCount > 0) {
-    console.log('\n⚠️  Failed operations:');
-    errors.forEach(e => {
-      console.log(`  • ${e.step}: ${e.error}`);
-    });
-  }
-  
-  if (successCount === optimizationSteps.length) {
-    console.log('\n✨ All RLS optimizations applied successfully!');
-    console.log('\n🎯 Performance Improvements:');
-    console.log('  • Auth functions now use InitPlan (evaluated once, not per-row)');
-    console.log('  • Consolidated 100+ duplicate policies into single policies');
-    console.log('  • Removed duplicate indexes');
-    console.log('  • Created cached helper functions for auth lookups');
-    console.log('  • Service role now bypasses RLS entirely');
-    
-    console.log('\n📈 Expected Results:');
-    console.log('  • 50-80% reduction in RLS evaluation overhead');
-    console.log('  • Faster query execution for authenticated users');
-    console.log('  • Lower CPU usage on database');
-    console.log('  • Better query plan optimization');
-    
-    console.log('\n🔍 To verify improvements:');
-    console.log('  1. Run: npm run monitor:performance');
-    console.log('  2. Check EXPLAIN ANALYZE on queries with RLS');
-    console.log('  3. Look for "InitPlan" instead of "Filter" in query plans');
-  } else {
-    console.log('\n⚠️  Some optimizations failed. Review errors above.');
-    console.log('You may need to apply these manually in the SQL Editor.');
-  }
-}
-
-// Run the optimizations
-applyRLSOptimizations().catch(console.error);

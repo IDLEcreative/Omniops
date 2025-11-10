@@ -178,9 +178,10 @@ export async function getWidgetInputField(iframe: FrameLocator) {
 
 /**
  * Get send button from widget
+ * Button uses aria-label (icon button), so we search by aria-label instead of visible text
  */
 export async function getWidgetSendButton(iframe: FrameLocator) {
-  return iframe.locator('button:has-text("Enviar"), button:has-text("Send"), button[type="submit"]').first();
+  return iframe.locator('button[aria-label*="Send"], button[aria-label*="Enviar"], button[aria-label*="إرسال"], button[type="submit"]').first();
 }
 
 /**

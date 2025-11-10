@@ -38,6 +38,44 @@ export default function EmbedPage() {
     };
   }, []);
 
+  // Detect and apply RTL for right-to-left languages
+  useEffect(() => {
+    const detectAndApplyRTL = () => {
+      // Get language from localStorage
+      const storedLang = localStorage.getItem('omniops_ui_language') || 'en';
+
+      // RTL languages: Arabic, Hebrew, Farsi, Urdu
+      const rtlLanguages = ['ar', 'he', 'fa', 'ur'];
+      const isRTL = rtlLanguages.includes(storedLang);
+
+      // Apply dir attribute to document
+      document.documentElement.setAttribute('dir', isRTL ? 'rtl' : 'ltr');
+      document.documentElement.setAttribute('lang', storedLang);
+
+      // Apply RTL class to body for CSS targeting
+      if (isRTL) {
+        document.body.classList.add('rtl');
+      } else {
+        document.body.classList.remove('rtl');
+      }
+
+      console.log(`[RTL] Language: ${storedLang}, RTL: ${isRTL}`);
+    };
+
+    // Apply RTL on mount
+    detectAndApplyRTL();
+
+    // Listen for language changes
+    const handleStorageChange = (e: StorageEvent) => {
+      if (e.key === 'omniops_ui_language') {
+        detectAndApplyRTL();
+      }
+    };
+
+    window.addEventListener('storage', handleStorageChange);
+    return () => window.removeEventListener('storage', handleStorageChange);
+  }, []);
+
   // Parse URL parameters and listen for config from parent
   useEffect(() => {
     const params = new URLSearchParams(window.location.search);
