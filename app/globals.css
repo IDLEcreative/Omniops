@@ -406,9 +406,62 @@
 
   /* Dark mode chat shadow */
   .dark .chat-shadow {
-    box-shadow: 
+    box-shadow:
       0 20px 25px -5px rgba(0, 0, 0, 0.3),
       0 10px 10px -5px rgba(0, 0, 0, 0.2),
       0 0 0 1px rgba(255, 255, 255, 0.1);
+  }
+
+  /* RTL (Right-to-Left) Support for Arabic, Hebrew, Persian, Urdu */
+  [dir="rtl"] {
+    direction: rtl;
+    text-align: right;
+  }
+
+  [dir="rtl"] .chat-messages {
+    text-align: right;
+  }
+
+  [dir="rtl"] .chat-input {
+    text-align: right;
+  }
+
+  /* Flip horizontal margins/padding for RTL */
+  [dir="rtl"] .ml-auto {
+    margin-left: initial;
+    margin-right: auto;
+  }
+
+  [dir="rtl"] .mr-auto {
+    margin-right: initial;
+    margin-left: auto;
+  }
+
+  [dir="rtl"] .pl-4 {
+    padding-left: initial;
+    padding-right: 1rem;
+  }
+
+  [dir="rtl"] .pr-4 {
+    padding-right: initial;
+    padding-left: 1rem;
+  }
+
+  /* Flip icons and chevrons for RTL */
+  [dir="rtl"] .lucide-chevron-right {
+    transform: scaleX(-1);
+  }
+
+  [dir="rtl"] .lucide-chevron-left {
+    transform: scaleX(-1);
+  }
+
+  /* Arabic/Hebrew font support */
+  .font-arabic {
+    font-family: 'Noto Naskh Arabic', 'Arabic Typesetting', 'Simplified Arabic', 'Traditional Arabic', serif;
+  }
+
+  .font-hebrew {
+    font-family: 'Noto Serif Hebrew', 'Times New Roman', serif;
   }
 }

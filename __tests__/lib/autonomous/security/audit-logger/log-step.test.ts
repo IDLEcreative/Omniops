@@ -17,21 +17,54 @@ import { createMockSupabaseClient } from '@/__tests__/utils/audit/mock-supabase'
 describe('AuditLogger.logStep', () => {
   let auditLogger: AuditLogger;
   let mockSupabaseClient: any;
+  let mockOperations: any;
 
   beforeEach(() => {
     mockSupabaseClient = createMockSupabaseClient();
-    auditLogger = new AuditLogger(mockSupabaseClient);
+
+    // Create mock operations using dependency injection
+    mockOperations = {
+      insertAuditStep: jest.fn(),
+      selectOperationLogs: jest.fn(),
+      mapToAuditRecord: jest.fn((data) => ({
+        id: data.id,
+        operationId: data.operation_id,
+        stepNumber: data.step_number,
+        intent: data.intent,
+        action: data.action,
+        success: data.success,
+        error: data.error,
+        screenshotUrl: data.screenshot_url,
+        pageUrl: data.page_url,
+        durationMs: data.duration_ms,
+        aiResponse: data.ai_response,
+        timestamp: data.timestamp
+      }))
+    };
+
+    // Use dependency injection to provide mock operations
+    auditLogger = new AuditLogger(mockSupabaseClient, mockOperations);
   });
 
   it('should log successful step', async () => {
-    mockSupabaseClient.from.mockReturnValue({
-      insert: jest.fn().mockReturnThis(),
-      select: jest.fn().mockReturnThis(),
-      single: jest.fn().mockResolvedValue(createMockLogResponse(validStepData))
-    });
+    const mockResponse = createMockLogResponse(validStepData);
+    mockOperations.insertAuditStep.mockResolvedValue(mockResponse.data);
 
     const record = await auditLogger.logStep(validStepData);
 
+    // Verify insertAuditStep was called with correct data
+    expect(mockOperations.insertAuditStep).toHaveBeenCalledWith(
+      mockSupabaseClient,
+      expect.objectContaining({
+        operation_id: validStepData.operationId,
+        step_number: validStepData.stepNumber,
+        intent: validStepData.intent,
+        action: validStepData.action,
+        success: validStepData.success
+      })
+    );
+
+    // Verify record was mapped correctly
     expect(record.operationId).toBe('op-123');
     expect(record.stepNumber).toBe(1);
     expect(record.success).toBe(true);
@@ -39,11 +72,8 @@ describe('AuditLogger.logStep', () => {
   });
 
   it('should log failed step with error message', async () => {
-    mockSupabaseClient.from.mockReturnValue({
-      insert: jest.fn().mockReturnThis(),
-      select: jest.fn().mockReturnThis(),
-      single: jest.fn().mockResolvedValue(createMockLogResponse(failedStepData, 'audit-124'))
-    });
+    const mockResponse = createMockLogResponse(failedStepData, 'audit-124');
+    mockOperations.insertAuditStep.mockResolvedValue(mockResponse.data);
 
     const record = await auditLogger.logStep(failedStepData);
 
@@ -52,13 +82,8 @@ describe('AuditLogger.logStep', () => {
   });
 
   it('should log step with screenshot URL', async () => {
-    mockSupabaseClient.from.mockReturnValue({
-      insert: jest.fn().mockReturnThis(),
-      select: jest.fn().mockReturnThis(),
-      single: jest.fn().mockResolvedValue(
-        createMockLogResponse(stepWithScreenshot, 'audit-125')
-      )
-    });
+    const mockResponse = createMockLogResponse(stepWithScreenshot, 'audit-125');
+    mockOperations.insertAuditStep.mockResolvedValue(mockResponse.data);
 
     const record = await auditLogger.logStep(stepWithScreenshot);
 
@@ -66,13 +91,8 @@ describe('AuditLogger.logStep', () => {
   });
 
   it('should log step with AI response', async () => {
-    mockSupabaseClient.from.mockReturnValue({
-      insert: jest.fn().mockReturnThis(),
-      select: jest.fn().mockReturnThis(),
-      single: jest.fn().mockResolvedValue(
-        createMockLogResponse(stepWithAI, 'audit-126')
-      )
-    });
+    const mockResponse = createMockLogResponse(stepWithAI, 'audit-126');
+    mockOperations.insertAuditStep.mockResolvedValue(mockResponse.data);
 
     const record = await auditLogger.logStep(stepWithAI);
 
@@ -80,14 +100,9 @@ describe('AuditLogger.logStep', () => {
   });
 
   it('should handle database errors', async () => {
-    mockSupabaseClient.from.mockReturnValue({
-      insert: jest.fn().mockReturnThis(),
-      select: jest.fn().mockReturnThis(),
-      single: jest.fn().mockResolvedValue({
-        data: null,
-        error: { message: 'Database connection failed' }
-      })
-    });
+    mockOperations.insertAuditStep.mockRejectedValue(
+      new Error('Failed to log audit step: Database connection failed')
+    );
 
     await expect(auditLogger.logStep(validStepData))
       .rejects.toThrow('Failed to log audit step: Database connection failed');

@@ -1,32 +1,62 @@
 import { describe, it, expect, jest, beforeEach } from '@jest/globals'
 import { NextRequest } from 'next/server'
 
-// Import mocks BEFORE calling jest.mock() so we can reference them in the factory
+// Jest automatically hoists jest.mock() calls to the top
+// These MUST be before any imports that might use these modules
+// We need to explicitly provide the factory function for TypeScript path aliases
+jest.mock('@/lib/scraper-api', () => {
+  const { jest } = require('@jest/globals')
+  return {
+    scrapePage: jest.fn(),
+    crawlWebsite: jest.fn(),
+    checkCrawlStatus: jest.fn(),
+    getHealthStatus: jest.fn(),
+    createAIOptimizationConfig: jest.fn(),
+    isAIOptimizedResult: jest.fn(),
+    convertToStandardResult: jest.fn(),
+    getOptimizationMetrics: jest.fn(),
+    clearAIOptimizationCache: jest.fn(),
+    applyAIOptimizationPreset: jest.fn(),
+    getAIOptimizationMetrics: jest.fn(),
+    resetAIOptimizationMetrics: jest.fn(),
+    cleanupOldJobs: jest.fn(),
+    streamCrawlResults: jest.fn(),
+    resumeCrawl: jest.fn(),
+    configureOwnedDomains: jest.fn(),
+    isOwnedSite: jest.fn(),
+    ScrapedPageSchema: {},
+    CrawlJobSchema: {},
+    crawlerPresets: {},
+  }
+})
+
+jest.mock('@/lib/scraper-with-cleanup', () => {
+  const { jest } = require('@jest/globals')
+  return {
+    crawlWebsiteWithCleanup: jest.fn(),
+  }
+})
+
+// Import the mocked modules to get references to the mock functions
+import * as scraperApi from '@/lib/scraper-api'
+import * as scraperWithCleanup from '@/lib/scraper-with-cleanup'
+
+// Extract mock functions
+const mockScrapePage = scraperApi.scrapePage as jest.Mock
+const mockCheckCrawlStatus = scraperApi.checkCrawlStatus as jest.Mock
+const mockCrawlWebsite = scraperApi.crawlWebsite as jest.Mock
+const mockGetHealthStatus = scraperApi.getHealthStatus as jest.Mock
+const mockCrawlWebsiteWithCleanup = scraperWithCleanup.crawlWebsiteWithCleanup as jest.Mock
+
+// Import test setup utilities
 import {
   mockCreateServiceRoleClient,
-  mockScrapePage,
-  mockCheckCrawlStatus,
-  mockCrawlWebsite,
-  mockGetHealthStatus,
-  mockCrawlWebsiteWithCleanup,
   setupSupabaseMock,
   setupOpenAIMock,
   setupDefaultMocks,
 } from './test-setup'
 
-// Tell Jest to use our test-setup mocks as the implementation
-jest.mock('@/lib/scraper-api', () => ({
-  scrapePage: mockScrapePage,
-  crawlWebsite: mockCrawlWebsite,
-  checkCrawlStatus: mockCheckCrawlStatus,
-  getHealthStatus: mockGetHealthStatus,
-}))
-
-jest.mock('@/lib/scraper-with-cleanup', () => ({
-  crawlWebsiteWithCleanup: mockCrawlWebsiteWithCleanup,
-}))
-
-// Import the route handlers - they will use the mocked implementations above
+// Import the route handlers - they will use the mocked implementations
 import { POST, GET } from '@/app/api/scrape/route'
 
 describe('/api/scrape - Error Handling', () => {
@@ -39,7 +69,14 @@ describe('/api/scrape - Error Handling', () => {
 
     mockSupabaseClient = setupSupabaseMock()
     setupOpenAIMock()
-    setupDefaultMocks()
+    // Pass the mock references so setupDefaultMocks can configure them
+    setupDefaultMocks({
+      mockScrapePage,
+      mockCrawlWebsite,
+      mockCheckCrawlStatus,
+      mockGetHealthStatus,
+      mockCrawlWebsiteWithCleanup,
+    })
   })
 
   const createRequest = (body: unknown) => {
@@ -56,6 +93,8 @@ describe('/api/scrape - Error Handling', () => {
     it('should handle scraper errors', async () => {
       mockScrapePage.mockRejectedValue(new Error('Scraper API error'))
       console.log('[TEST] mockScrapePage configured to reject')
+      console.log('[TEST] mockScrapePage is:', mockScrapePage)
+      console.log('[TEST] mockScrapePage.getMockName():', mockScrapePage.getMockName?.())
 
       const requestBody = {
         url: 'https://example.com',
@@ -65,6 +104,7 @@ describe('/api/scrape - Error Handling', () => {
       const response = await POST(createRequest(requestBody))
       const data = await response.json()
       console.log('[TEST] Response status:', response.status, 'data:', data)
+      console.log('[TEST] mockScrapePage called:', mockScrapePage.mock.calls.length, 'times')
 
       expect(response.status).toBe(500)
       expect(data.error).toBe('Internal server error')

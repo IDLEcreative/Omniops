@@ -4,44 +4,56 @@
  */
 
 import { describe, it, expect, jest, beforeEach } from '@jest/globals';
-import { OperationService, type CreateOperationRequest } from '@/lib/autonomous/core/operation-service';
+import { OperationService, type CreateOperationRequest, type OperationDatabaseOps } from '@/lib/autonomous/core/operation-service';
 
-// Mock Supabase with chainable query methods
-const createMockQuery = () => ({
-  select: jest.fn().mockReturnThis(),
-  insert: jest.fn().mockReturnThis(),
-  update: jest.fn().mockReturnThis(),
-  delete: jest.fn().mockReturnThis(),
-  eq: jest.fn().mockReturnThis(),
-  neq: jest.fn().mockReturnThis(),
-  gt: jest.fn().mockReturnThis(),
-  gte: jest.fn().mockReturnThis(),
-  lt: jest.fn().mockReturnThis(),
-  lte: jest.fn().mockReturnThis(),
-  order: jest.fn().mockReturnThis(),
-  limit: jest.fn().mockReturnThis(),
-  single: jest.fn().mockResolvedValue({ data: null, error: null })
-});
+// Consent manager is mocked via moduleNameMapper in jest.config.js
+import * as consentManagerModule from '@/lib/autonomous/security/consent-manager';
 
+// Mock Supabase client (not used for queries since we inject operations)
 const mockSupabaseClient = {
-  from: jest.fn(() => createMockQuery()),
+  from: jest.fn(),
   auth: {
     getUser: jest.fn()
   }
 };
 
-// Consent manager is mocked via moduleNameMapper in jest.config.js
-
-import { verifyConsent } from '@/lib/autonomous/security/consent-manager';
-
 describe('OperationService', () => {
   let operationService: OperationService;
-  const mockVerifyConsent = verifyConsent as jest.MockedFunction<typeof verifyConsent>;
+  let mockOperations: jest.Mocked<OperationDatabaseOps>;
 
   beforeEach(() => {
     jest.clearAllMocks();
-    // Pass mock Supabase client to OperationService constructor
-    operationService = new OperationService(mockSupabaseClient as any);
+
+    // Create mock operations
+    mockOperations = {
+      insertOperation: jest.fn(),
+      selectOperationById: jest.fn(),
+      selectOperations: jest.fn(),
+      updateOperationConsent: jest.fn(),
+      updateOperationCancelled: jest.fn(),
+      mapToOperationRecord: jest.fn(data => ({
+        id: data.id,
+        organizationId: data.organization_id,
+        userId: data.user_id,
+        service: data.service,
+        operation: data.operation,
+        workflowId: data.workflow_id,
+        status: data.status,
+        consentGiven: data.consent_given,
+        consentTimestamp: data.consent_timestamp,
+        startedAt: data.started_at,
+        completedAt: data.completed_at,
+        totalSteps: data.total_steps,
+        currentStep: data.current_step,
+        result: data.result,
+        executionMetadata: data.execution_metadata,
+        createdAt: data.created_at,
+        updatedAt: data.updated_at
+      }))
+    };
+
+    // Pass mock Supabase client and operations to OperationService constructor
+    operationService = new OperationService(mockSupabaseClient as any, mockOperations);
   });
 
   describe('create', () => {
@@ -55,93 +67,95 @@ describe('OperationService', () => {
     };
 
     it('should create operation in pending state when consent exists', async () => {
-      mockVerifyConsent.mockResolvedValue({
-        hasConsent: true,
-        consentRecord: {
-          id: 'consent-123',
-          organizationId: 'org-123',
-          userId: 'user-456',
-          service: 'woocommerce',
-          operation: 'api_key_generation',
-          permissions: ['read', 'write'],
-          grantedAt: new Date().toISOString(),
-          isActive: true,
-          consentVersion: '1.0',
-          createdAt: new Date().toISOString()
-        }
-      });
+      // Mock verifyConsent by setting its implementation directly
+      // The verifyConsent from the mock is a jest.fn, so we can call it
+      // and it will return the mock implementation result
+      const mockVerifyConsent = consentManagerModule.verifyConsent as any;
+      mockVerifyConsent.mockImplementation(() =>
+        Promise.resolve({
+          hasConsent: true,
+          consentRecord: {
+            id: 'consent-123',
+            organizationId: 'org-123',
+            userId: 'user-456',
+            service: 'woocommerce',
+            operation: 'api_key_generation',
+            permissions: ['read', 'write'],
+            grantedAt: new Date().toISOString(),
+            isActive: true,
+            consentVersion: '1.0',
+            createdAt: new Date().toISOString()
+          }
+        })
+      );
 
-      const mockInsertResponse = {
-        data: {
-          id: 'op-123',
-          organization_id: 'org-123',
-          user_id: 'user-456',
-          service: 'woocommerce',
-          operation: 'api_key_generation',
-          workflow_id: 'workflow-789',
-          status: 'pending',
-          consent_given: true,
-          consent_timestamp: new Date().toISOString(),
-          started_at: null,
-          completed_at: null,
-          total_steps: null,
-          current_step: 0,
-          result: null,
-          execution_metadata: { storeUrl: 'https://shop.example.com' },
-          created_at: new Date().toISOString(),
-          updated_at: new Date().toISOString()
-        },
-        error: null
+      const mockInsertData = {
+        id: 'op-123',
+        organization_id: 'org-123',
+        user_id: 'user-456',
+        service: 'woocommerce',
+        operation: 'api_key_generation',
+        workflow_id: 'workflow-789',
+        status: 'pending',
+        consent_given: true,
+        consent_timestamp: new Date().toISOString(),
+        started_at: null,
+        completed_at: null,
+        total_steps: null,
+        current_step: 0,
+        result: null,
+        execution_metadata: { storeUrl: 'https://shop.example.com' },
+        created_at: new Date().toISOString(),
+        updated_at: new Date().toISOString()
       };
 
-      mockSupabaseClient.from.mockReturnValue({
-        insert: jest.fn().mockReturnThis(),
-        select: jest.fn().mockReturnThis(),
-        single: jest.fn().mockResolvedValue(mockInsertResponse)
-      });
+      mockOperations.insertOperation.mockResolvedValue(mockInsertData);
 
       const operation = await operationService.create(validRequest);
 
       expect(operation.status).toBe('pending');
       expect(operation.consentGiven).toBe(true);
       expect(operation.organizationId).toBe('org-123');
-      expect(mockSupabaseClient.from).toHaveBeenCalledWith('autonomous_operations');
+      expect(mockOperations.insertOperation).toHaveBeenCalledWith(
+        mockSupabaseClient,
+        expect.objectContaining({
+          organization_id: 'org-123',
+          service: 'woocommerce',
+          operation: 'api_key_generation'
+        })
+      );
     });
 
     it('should create operation in awaiting_consent state when no consent', async () => {
-      mockVerifyConsent.mockResolvedValue({
-        hasConsent: false,
-        reason: 'No consent granted for this operation'
-      });
+      const mockVerifyConsent = consentManagerModule.verifyConsent as any;
+      mockVerifyConsent.mockImplementation(() =>
+        Promise.resolve({
+          hasConsent: false,
+          reason: 'No consent granted for this operation'
+        })
+      );
 
-      const mockInsertResponse = {
-        data: {
-          id: 'op-124',
-          organization_id: 'org-123',
-          user_id: 'user-456',
-          service: 'woocommerce',
-          operation: 'api_key_generation',
-          workflow_id: 'workflow-789',
-          status: 'awaiting_consent',
-          consent_given: false,
-          consent_timestamp: null,
-          started_at: null,
-          completed_at: null,
-          total_steps: null,
-          current_step: 0,
-          result: null,
-          execution_metadata: { storeUrl: 'https://shop.example.com' },
-          created_at: new Date().toISOString(),
-          updated_at: new Date().toISOString()
-        },
-        error: null
+      const mockInsertData = {
+        id: 'op-124',
+        organization_id: 'org-123',
+        user_id: 'user-456',
+        service: 'woocommerce',
+        operation: 'api_key_generation',
+        workflow_id: 'workflow-789',
+        status: 'awaiting_consent',
+        consent_given: false,
+        consent_timestamp: null,
+        started_at: null,
+        completed_at: null,
+        total_steps: null,
+        current_step: 0,
+        result: null,
+        execution_metadata: { storeUrl: 'https://shop.example.com' },
+        created_at: new Date().toISOString(),
+        updated_at: new Date().toISOString()
       };
 
-      mockSupabaseClient.from.mockReturnValue({
-        insert: jest.fn().mockReturnThis(),
-        select: jest.fn().mockReturnThis(),
-        single: jest.fn().mockResolvedValue(mockInsertResponse)
-      });
+      mockOperations.insertOperation.mockResolvedValue(mockInsertData);
 
       const operation = await operationService.create(validRequest);
 
@@ -151,23 +165,24 @@ describe('OperationService', () => {
     });
 
     it('should handle database errors', async () => {
-      mockVerifyConsent.mockResolvedValue({ hasConsent: true });
+      const mockVerifyConsent = consentManagerModule.verifyConsent as any;
+      mockVerifyConsent.mockImplementation(() =>
+        Promise.resolve({ hasConsent: true })
+      );
 
-      mockSupabaseClient.from.mockReturnValue({
-        insert: jest.fn().mockReturnThis(),
-        select: jest.fn().mockReturnThis(),
-        single: jest.fn().mockResolvedValue({
-          data: null,
-          error: { message: 'Database connection failed' }
-        })
-      });
+      mockOperations.insertOperation.mockRejectedValue(
+        new Error('Failed to insert operation: Database connection failed')
+      );
 
       await expect(operationService.create(validRequest))
-        .rejects.toThrow('Failed to create operation: Database connection failed');
+        .rejects.toThrow('Failed to insert operation: Database connection failed');
     });
 
     it('should allow operation without userId', async () => {
-      mockVerifyConsent.mockResolvedValue({ hasConsent: true });
+      const mockVerifyConsent = consentManagerModule.verifyConsent as any;
+      mockVerifyConsent.mockImplementation(() =>
+        Promise.resolve({ hasConsent: true })
+      );
 
       const requestWithoutUser: CreateOperationRequest = {
         organizationId: 'org-123',
@@ -175,34 +190,27 @@ describe('OperationService', () => {
         operation: 'api_key_generation'
       };
 
-      const mockInsertResponse = {
-        data: {
-          id: 'op-125',
-          organization_id: 'org-123',
-          user_id: null,
-          service: 'woocommerce',
-          operation: 'api_key_generation',
-          workflow_id: null,
-          status: 'pending',
-          consent_given: true,
-          consent_timestamp: new Date().toISOString(),
-          started_at: null,
-          completed_at: null,
-          total_steps: null,
-          current_step: 0,
-          result: null,
-          execution_metadata: {},
-          created_at: new Date().toISOString(),
-          updated_at: new Date().toISOString()
-        },
-        error: null
+      const mockInsertData = {
+        id: 'op-125',
+        organization_id: 'org-123',
+        user_id: null,
+        service: 'woocommerce',
+        operation: 'api_key_generation',
+        workflow_id: null,
+        status: 'pending',
+        consent_given: true,
+        consent_timestamp: new Date().toISOString(),
+        started_at: null,
+        completed_at: null,
+        total_steps: null,
+        current_step: 0,
+        result: null,
+        execution_metadata: {},
+        created_at: new Date().toISOString(),
+        updated_at: new Date().toISOString()
       };
 
-      mockSupabaseClient.from.mockReturnValue({
-        insert: jest.fn().mockReturnThis(),
-        select: jest.fn().mockReturnThis(),
-        single: jest.fn().mockResolvedValue(mockInsertResponse)
-      });
+      mockOperations.insertOperation.mockResolvedValue(mockInsertData);
 
       const operation = await operationService.create(requestWithoutUser);
 
@@ -212,34 +220,27 @@ describe('OperationService', () => {
 
   describe('get', () => {
     it('should retrieve operation by ID', async () => {
-      const mockSelectResponse = {
-        data: {
-          id: 'op-123',
-          organization_id: 'org-123',
-          user_id: 'user-456',
-          service: 'woocommerce',
-          operation: 'api_key_generation',
-          workflow_id: 'workflow-789',
-          status: 'in_progress',
-          consent_given: true,
-          consent_timestamp: new Date().toISOString(),
-          started_at: new Date().toISOString(),
-          completed_at: null,
-          total_steps: 10,
-          current_step: 5,
-          result: null,
-          execution_metadata: {},
-          created_at: new Date().toISOString(),
-          updated_at: new Date().toISOString()
-        },
-        error: null
+      const mockSelectData = {
+        id: 'op-123',
+        organization_id: 'org-123',
+        user_id: 'user-456',
+        service: 'woocommerce',
+        operation: 'api_key_generation',
+        workflow_id: 'workflow-789',
+        status: 'in_progress',
+        consent_given: true,
+        consent_timestamp: new Date().toISOString(),
+        started_at: new Date().toISOString(),
+        completed_at: null,
+        total_steps: 10,
+        current_step: 5,
+        result: null,
+        execution_metadata: {},
+        created_at: new Date().toISOString(),
+        updated_at: new Date().toISOString()
       };
 
-      mockSupabaseClient.from.mockReturnValue({
-        select: jest.fn().mockReturnThis(),
-        eq: jest.fn().mockReturnThis(),
-        single: jest.fn().mockResolvedValue(mockSelectResponse)
-      });
+      mockOperations.selectOperationById.mockResolvedValue(mockSelectData);
 
       const operation = await operationService.get('op-123');
 
@@ -248,17 +249,11 @@ describe('OperationService', () => {
       expect(operation?.status).toBe('in_progress');
       expect(operation?.currentStep).toBe(5);
       expect(operation?.totalSteps).toBe(10);
+      expect(mockOperations.selectOperationById).toHaveBeenCalledWith(mockSupabaseClient, 'op-123');
     });
 
     it('should return null for non-existent operation', async () => {
-      mockSupabaseClient.from.mockReturnValue({
-        select: jest.fn().mockReturnThis(),
-        eq: jest.fn().mockReturnThis(),
-        single: jest.fn().mockResolvedValue({
-          data: null,
-          error: { code: 'PGRST116', message: 'No rows found' }
-        })
-      });
+      mockOperations.selectOperationById.mockResolvedValue(null);
 
       const operation = await operationService.get('non-existent');
 
@@ -266,17 +261,12 @@ describe('OperationService', () => {
     });
 
     it('should throw on database errors', async () => {
-      mockSupabaseClient.from.mockReturnValue({
-        select: jest.fn().mockReturnThis(),
-        eq: jest.fn().mockReturnThis(),
-        single: jest.fn().mockResolvedValue({
-          data: null,
-          error: { code: 'ERROR', message: 'Database error' }
-        })
-      });
+      mockOperations.selectOperationById.mockRejectedValue(
+        new Error('Failed to select operation: Database error')
+      );
 
       await expect(operationService.get('op-123'))
-        .rejects.toThrow('Failed to get operation: Database error');
+        .rejects.toThrow('Failed to select operation: Database error');
     });
   });
 
@@ -323,121 +313,103 @@ describe('OperationService', () => {
         }
       ];
 
-      mockSupabaseClient.from.mockReturnValue({
-        select: jest.fn().mockReturnThis(),
-        eq: jest.fn().mockReturnThis(),
-        order: jest.fn().mockResolvedValue({ data: mockData, error: null })
-      });
+      mockOperations.selectOperations.mockResolvedValue(mockData);
 
       const operations = await operationService.list('org-123');
 
       expect(operations).toHaveLength(2);
       expect(operations[0].service).toBe('woocommerce');
       expect(operations[1].service).toBe('shopify');
+      expect(mockOperations.selectOperations).toHaveBeenCalledWith(mockSupabaseClient, 'org-123', undefined);
     });
 
     it('should filter by status', async () => {
-      mockSupabaseClient.from.mockReturnValue({
-        select: jest.fn().mockReturnThis(),
-        eq: jest.fn().mockReturnThis(),
-        order: jest.fn().mockResolvedValue({ data: [], error: null })
-      });
+      mockOperations.selectOperations.mockResolvedValue([]);
 
       await operationService.list('org-123', { status: 'pending' });
 
-      expect(mockSupabaseClient.from().eq).toHaveBeenCalledWith('status', 'pending');
+      expect(mockOperations.selectOperations).toHaveBeenCalledWith(
+        mockSupabaseClient,
+        'org-123',
+        expect.objectContaining({ status: 'pending' })
+      );
     });
 
     it('should filter by service', async () => {
-      mockSupabaseClient.from.mockReturnValue({
-        select: jest.fn().mockReturnThis(),
-        eq: jest.fn().mockReturnThis(),
-        order: jest.fn().mockResolvedValue({ data: [], error: null })
-      });
+      mockOperations.selectOperations.mockResolvedValue([]);
 
       await operationService.list('org-123', { service: 'woocommerce' });
 
-      expect(mockSupabaseClient.from().eq).toHaveBeenCalledWith('service', 'woocommerce');
+      expect(mockOperations.selectOperations).toHaveBeenCalledWith(
+        mockSupabaseClient,
+        'org-123',
+        expect.objectContaining({ service: 'woocommerce' })
+      );
     });
 
     it('should apply limit', async () => {
-      const mockLimit = jest.fn().mockResolvedValue({ data: [], error: null });
-
-      mockSupabaseClient.from.mockReturnValue({
-        select: jest.fn().mockReturnThis(),
-        eq: jest.fn().mockReturnThis(),
-        order: jest.fn().mockReturnThis(),
-        limit: mockLimit
-      });
+      mockOperations.selectOperations.mockResolvedValue([]);
 
       await operationService.list('org-123', { limit: 10 });
 
-      expect(mockLimit).toHaveBeenCalledWith(10);
+      expect(mockOperations.selectOperations).toHaveBeenCalledWith(
+        mockSupabaseClient,
+        'org-123',
+        expect.objectContaining({ limit: 10 })
+      );
     });
   });
 
   describe('grantConsent', () => {
     it('should grant consent for awaiting operation', async () => {
-      mockSupabaseClient.from.mockReturnValue({
-        update: jest.fn().mockReturnThis(),
-        eq: jest.fn().mockResolvedValue({ error: null })
-      });
+      mockOperations.updateOperationConsent.mockResolvedValue(undefined);
 
       await expect(operationService.grantConsent('op-123')).resolves.not.toThrow();
 
-      expect(mockSupabaseClient.from).toHaveBeenCalledWith('autonomous_operations');
-      expect(mockSupabaseClient.from().update).toHaveBeenCalledWith(
-        expect.objectContaining({
-          consent_given: true,
-          status: 'pending'
-        })
-      );
+      expect(mockOperations.updateOperationConsent).toHaveBeenCalledWith(mockSupabaseClient, 'op-123');
     });
 
     it('should handle database errors', async () => {
-      mockSupabaseClient.from.mockReturnValue({
-        update: jest.fn().mockReturnThis(),
-        eq: jest.fn().mockResolvedValue({
-          error: { message: 'Update failed' }
-        })
-      });
+      mockOperations.updateOperationConsent.mockRejectedValue(
+        new Error('Failed to update consent: Update failed')
+      );
 
       await expect(operationService.grantConsent('op-123'))
-        .rejects.toThrow('Failed to grant consent: Update failed');
+        .rejects.toThrow('Failed to update consent: Update failed');
     });
   });
 
   describe('cancel', () => {
     it('should cancel pending operation', async () => {
-      mockSupabaseClient.from.mockReturnValue({
-        update: jest.fn().mockReturnThis(),
-        eq: jest.fn().mockReturnThis(),
-        in: jest.fn().mockResolvedValue({ error: null })
-      });
+      mockOperations.updateOperationCancelled.mockResolvedValue(undefined);
 
       await expect(operationService.cancel('op-123')).resolves.not.toThrow();
 
-      expect(mockSupabaseClient.from().update).toHaveBeenCalledWith({ status: 'cancelled' });
-      expect(mockSupabaseClient.from().in).toHaveBeenCalledWith('status', ['pending', 'awaiting_consent']);
+      expect(mockOperations.updateOperationCancelled).toHaveBeenCalledWith(mockSupabaseClient, 'op-123');
+    });
+
+    it('should handle database errors', async () => {
+      mockOperations.updateOperationCancelled.mockRejectedValue(
+        new Error('Failed to cancel operation: Cancellation failed')
+      );
+
+      await expect(operationService.cancel('op-123'))
+        .rejects.toThrow('Failed to cancel operation: Cancellation failed');
     });
   });
 
   describe('getStats', () => {
     it('should calculate operation statistics', async () => {
       const mockData = [
-        { status: 'pending' },
-        { status: 'in_progress' },
-        { status: 'completed' },
-        { status: 'completed' },
-        { status: 'completed' },
-        { status: 'failed' }
+        { status: 'pending', id: '1', organization_id: 'org-123', user_id: null, service: 's', operation: 'o', workflow_id: null, consent_given: true, consent_timestamp: null, started_at: null, completed_at: null, total_steps: null, current_step: 0, result: null, execution_metadata: {}, created_at: '', updated_at: '' },
+        { status: 'in_progress', id: '2', organization_id: 'org-123', user_id: null, service: 's', operation: 'o', workflow_id: null, consent_given: true, consent_timestamp: null, started_at: null, completed_at: null, total_steps: null, current_step: 0, result: null, execution_metadata: {}, created_at: '', updated_at: '' },
+        { status: 'completed', id: '3', organization_id: 'org-123', user_id: null, service: 's', operation: 'o', workflow_id: null, consent_given: true, consent_timestamp: null, started_at: null, completed_at: null, total_steps: null, current_step: 0, result: null, execution_metadata: {}, created_at: '', updated_at: '' },
+        { status: 'completed', id: '4', organization_id: 'org-123', user_id: null, service: 's', operation: 'o', workflow_id: null, consent_given: true, consent_timestamp: null, started_at: null, completed_at: null, total_steps: null, current_step: 0, result: null, execution_metadata: {}, created_at: '', updated_at: '' },
+        { status: 'completed', id: '5', organization_id: 'org-123', user_id: null, service: 's', operation: 'o', workflow_id: null, consent_given: true, consent_timestamp: null, started_at: null, completed_at: null, total_steps: null, current_step: 0, result: null, execution_metadata: {}, created_at: '', updated_at: '' },
+        { status: 'failed', id: '6', organization_id: 'org-123', user_id: null, service: 's', operation: 'o', workflow_id: null, consent_given: true, consent_timestamp: null, started_at: null, completed_at: null, total_steps: null, current_step: 0, result: null, execution_metadata: {}, created_at: '', updated_at: '' }
       ] as any;
 
-      mockSupabaseClient.from.mockReturnValue({
-        select: jest.fn().mockReturnThis(),
-        eq: jest.fn().mockReturnThis(),
-        order: jest.fn().mockResolvedValue({ data: mockData, error: null })
-      });
+      mockOperations.selectOperations.mockResolvedValue(mockData);
 
       const stats = await operationService.getStats('org-123');
 
@@ -450,11 +422,7 @@ describe('OperationService', () => {
     });
 
     it('should handle zero operations', async () => {
-      mockSupabaseClient.from.mockReturnValue({
-        select: jest.fn().mockReturnThis(),
-        eq: jest.fn().mockReturnThis(),
-        order: jest.fn().mockResolvedValue({ data: [], error: null })
-      });
+      mockOperations.selectOperations.mockResolvedValue([]);
 
       const stats = await operationService.getStats('org-123');
 

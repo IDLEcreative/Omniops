@@ -3,17 +3,55 @@
  * Tests exportAuditTrail and deleteOldLogs methods
  */
 
-import { describe, it, expect, beforeEach } from '@jest/globals';
+import { describe, it, expect, beforeEach, jest } from '@jest/globals';
 import { AuditLogger } from '@/lib/autonomous/security/audit-logger';
 import { createMockSupabaseClient } from '@/__tests__/utils/audit/mock-supabase';
+
+// Mock the audit-queries module
+jest.mock('@/lib/autonomous/security/audit-queries', () => ({
+  getFailedSteps: jest.fn(),
+  getRecentLogs: jest.fn(),
+  exportAuditTrail: jest.fn(),
+  deleteOldLogs: jest.fn()
+}));
 
 describe('AuditLogger.exportAuditTrail', () => {
   let auditLogger: AuditLogger;
   let mockSupabaseClient: any;
+  let mockOperations: any;
+  let auditQueries: any;
 
   beforeEach(() => {
+    // Import the mocked module
+    auditQueries = require('@/lib/autonomous/security/audit-queries');
+
     mockSupabaseClient = createMockSupabaseClient();
-    auditLogger = new AuditLogger(mockSupabaseClient);
+
+    // Create mock operations using dependency injection
+    mockOperations = {
+      insertAuditStep: jest.fn(),
+      selectOperationLogs: jest.fn(),
+      mapToAuditRecord: jest.fn((data) => ({
+        id: data.id,
+        operationId: data.operation_id,
+        stepNumber: data.step_number,
+        intent: data.intent,
+        action: data.action,
+        success: data.success,
+        error: data.error,
+        screenshotUrl: data.screenshot_url,
+        pageUrl: data.page_url,
+        durationMs: data.duration_ms,
+        aiResponse: data.ai_response,
+        timestamp: data.timestamp
+      }))
+    };
+
+    // Reset all mocks before each test
+    jest.clearAllMocks();
+
+    // Use dependency injection to provide mock operations
+    auditLogger = new AuditLogger(mockSupabaseClient, mockOperations);
   });
 
   it('should export audit trail for organization', async () => {
@@ -34,84 +72,107 @@ describe('AuditLogger.exportAuditTrail', () => {
       }
     ];
 
-    mockSupabaseClient.from.mockReturnValue({
-      select: jest.fn().mockReturnThis(),
-      eq: jest.fn().mockReturnThis(),
-      order: jest.fn().mockReturnThis(),
-      gte: jest.fn().mockReturnThis(),
-      lte: jest.fn().mockResolvedValue({ data: mockData, error: null })
-    });
+    // Mock the exportAuditTrail query function
+    auditQueries.exportAuditTrail.mockResolvedValue(
+      mockData.map(d => mockOperations.mapToAuditRecord(d))
+    );
 
     const trail = await auditLogger.exportAuditTrail('org-123');
 
+    expect(auditQueries.exportAuditTrail).toHaveBeenCalledWith(
+      'org-123',
+      undefined,
+      undefined,
+      mockSupabaseClient,
+      expect.any(Function)
+    );
     expect(trail).toHaveLength(1);
-    expect(mockSupabaseClient.from).toHaveBeenCalledWith('autonomous_operations_audit');
   });
 
   it('should filter by date range', async () => {
     const startDate = new Date('2024-01-01');
     const endDate = new Date('2024-12-31');
 
-    mockSupabaseClient.from.mockReturnValue({
-      select: jest.fn().mockReturnThis(),
-      eq: jest.fn().mockReturnThis(),
-      order: jest.fn().mockReturnThis(),
-      gte: jest.fn().mockReturnThis(),
-      lte: jest.fn().mockResolvedValue({ data: [], error: null })
-    });
+    // Mock the exportAuditTrail query function
+    auditQueries.exportAuditTrail.mockResolvedValue([]);
 
     await auditLogger.exportAuditTrail('org-123', startDate, endDate);
 
-    expect(mockSupabaseClient.from().gte).toHaveBeenCalledWith('timestamp', startDate.toISOString());
-    expect(mockSupabaseClient.from().lte).toHaveBeenCalledWith('timestamp', endDate.toISOString());
+    expect(auditQueries.exportAuditTrail).toHaveBeenCalledWith(
+      'org-123',
+      startDate,
+      endDate,
+      mockSupabaseClient,
+      expect.any(Function)
+    );
   });
 });
 
 describe('AuditLogger.deleteOldLogs', () => {
   let auditLogger: AuditLogger;
   let mockSupabaseClient: any;
+  let mockOperations: any;
+  let auditQueries: any;
 
   beforeEach(() => {
+    // Import the mocked module
+    auditQueries = require('@/lib/autonomous/security/audit-queries');
+
     mockSupabaseClient = createMockSupabaseClient();
-    auditLogger = new AuditLogger(mockSupabaseClient);
+
+    // Create mock operations using dependency injection
+    mockOperations = {
+      insertAuditStep: jest.fn(),
+      selectOperationLogs: jest.fn(),
+      mapToAuditRecord: jest.fn((data) => ({
+        id: data.id,
+        operationId: data.operation_id,
+        stepNumber: data.step_number,
+        intent: data.intent,
+        action: data.action,
+        success: data.success,
+        error: data.error,
+        screenshotUrl: data.screenshot_url,
+        pageUrl: data.page_url,
+        durationMs: data.duration_ms,
+        aiResponse: data.ai_response,
+        timestamp: data.timestamp
+      }))
+    };
+
+    // Reset all mocks before each test
+    jest.clearAllMocks();
+
+    // Use dependency injection to provide mock operations
+    auditLogger = new AuditLogger(mockSupabaseClient, mockOperations);
   });
 
   it('should delete logs older than retention period', async () => {
-    const mockData = [{ id: 'audit-1' }, { id: 'audit-2' }, { id: 'audit-3' }];
-
-    mockSupabaseClient.from.mockReturnValue({
-      delete: jest.fn().mockReturnThis(),
-      lt: jest.fn().mockReturnThis(),
-      select: jest.fn().mockResolvedValue({ data: mockData, error: null })
-    });
+    // Mock the deleteOldLogs query function to return count
+    auditQueries.deleteOldLogs.mockResolvedValue(3);
 
     const count = await auditLogger.deleteOldLogs(90);
 
+    expect(auditQueries.deleteOldLogs).toHaveBeenCalledWith(90, mockSupabaseClient);
     expect(count).toBe(3);
-    expect(mockSupabaseClient.from().delete).toHaveBeenCalled();
   });
 
   it('should use custom retention period', async () => {
-    mockSupabaseClient.from.mockReturnValue({
-      delete: jest.fn().mockReturnThis(),
-      lt: jest.fn().mockReturnThis(),
-      select: jest.fn().mockResolvedValue({ data: [], error: null })
-    });
+    // Mock the deleteOldLogs query function
+    auditQueries.deleteOldLogs.mockResolvedValue(0);
 
     await auditLogger.deleteOldLogs(30);
 
-    expect(mockSupabaseClient.from().lt).toHaveBeenCalled();
+    expect(auditQueries.deleteOldLogs).toHaveBeenCalledWith(30, mockSupabaseClient);
   });
 
   it('should return 0 when no logs to delete', async () => {
-    mockSupabaseClient.from.mockReturnValue({
-      delete: jest.fn().mockReturnThis(),
-      lt: jest.fn().mockReturnThis(),
-      select: jest.fn().mockResolvedValue({ data: [], error: null })
-    });
+    // Mock the deleteOldLogs query function
+    auditQueries.deleteOldLogs.mockResolvedValue(0);
 
     const count = await auditLogger.deleteOldLogs(90);
 
+    expect(auditQueries.deleteOldLogs).toHaveBeenCalledWith(90, mockSupabaseClient);
     expect(count).toBe(0);
   });
 });

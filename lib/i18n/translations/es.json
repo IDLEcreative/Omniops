@@ -1,0 +1,42 @@
+{
+  "chat": {
+    "placeholder": "Escribe tu mensaje...",
+    "send": "Enviar",
+    "clear": "Borrar Chat",
+    "close": "Cerrar",
+    "typing": "IA está escribiendo...",
+    "error": "Algo salió mal. Por favor, inténtalo de nuevo.",
+    "retry": "Reintentar",
+    "newConversation": "Nueva Conversación"
+  },
+  "settings": {
+    "title": "Configuración",
+    "language": "Idioma",
+    "theme": "Tema",
+    "privacy": "Privacidad",
+    "notifications": "Notificaciones"
+  },
+  "products": {
+    "viewProduct": "Ver Producto",
+    "addToCart": "Agregar al Carrito",
+    "outOfStock": "Agotado",
+    "price": "Precio",
+    "description": "Descripción"
+  },
+  "recommendations": {
+    "title": "Recomendado para ti",
+    "next": "Siguiente",
+    "previous": "Anterior",
+    "viewAll": "Ver Todo"
+  },
+  "common": {
+    "loading": "Cargando...",
+    "save": "Guardar",
+    "cancel": "Cancelar",
+    "delete": "Eliminar",
+    "edit": "Editar",
+    "search": "Buscar",
+    "filter": "Filtrar",
+    "sort": "Ordenar"
+  }
+}

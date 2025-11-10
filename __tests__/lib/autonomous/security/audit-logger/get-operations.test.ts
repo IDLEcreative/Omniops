@@ -11,23 +11,42 @@ import { createMockMultipleLogsResponse } from '@/__tests__/utils/audit/test-dat
 describe('AuditLogger.getOperationLogs', () => {
   let auditLogger: AuditLogger;
   let mockSupabaseClient: any;
+  let mockOperations: any;
 
   beforeEach(() => {
     mockSupabaseClient = createMockSupabaseClient();
-    auditLogger = new AuditLogger(mockSupabaseClient);
+
+    // Create mock operations using dependency injection
+    mockOperations = {
+      insertAuditStep: jest.fn(),
+      selectOperationLogs: jest.fn(),
+      mapToAuditRecord: jest.fn((data) => ({
+        id: data.id,
+        operationId: data.operation_id,
+        stepNumber: data.step_number,
+        intent: data.intent,
+        action: data.action,
+        success: data.success,
+        error: data.error,
+        screenshotUrl: data.screenshot_url,
+        pageUrl: data.page_url,
+        durationMs: data.duration_ms,
+        aiResponse: data.ai_response,
+        timestamp: data.timestamp
+      }))
+    };
+
+    // Use dependency injection to provide mock operations
+    auditLogger = new AuditLogger(mockSupabaseClient, mockOperations);
   });
 
   it('should retrieve all logs for an operation', async () => {
     const mockData = createMockMultipleLogsResponse();
-
-    mockSupabaseClient.from.mockReturnValue({
-      select: jest.fn().mockReturnThis(),
-      eq: jest.fn().mockReturnThis(),
-      order: jest.fn().mockResolvedValue({ data: mockData, error: null })
-    });
+    mockOperations.selectOperationLogs.mockResolvedValue(mockData);
 
     const logs = await auditLogger.getOperationLogs('op-123');
 
+    expect(mockOperations.selectOperationLogs).toHaveBeenCalledWith(mockSupabaseClient, 'op-123');
     expect(logs).toHaveLength(3);
     expect(logs[0].stepNumber).toBe(1);
     expect(logs[1].stepNumber).toBe(2);
@@ -36,14 +55,11 @@ describe('AuditLogger.getOperationLogs', () => {
   });
 
   it('should return empty array for non-existent operation', async () => {
-    mockSupabaseClient.from.mockReturnValue({
-      select: jest.fn().mockReturnThis(),
-      eq: jest.fn().mockReturnThis(),
-      order: jest.fn().mockResolvedValue({ data: [], error: null })
-    });
+    mockOperations.selectOperationLogs.mockResolvedValue([]);
 
     const logs = await auditLogger.getOperationLogs('non-existent');
 
+    expect(mockOperations.selectOperationLogs).toHaveBeenCalledWith(mockSupabaseClient, 'non-existent');
     expect(logs).toHaveLength(0);
   });
 });
@@ -51,10 +67,33 @@ describe('AuditLogger.getOperationLogs', () => {
 describe('AuditLogger.getOperationSummary', () => {
   let auditLogger: AuditLogger;
   let mockSupabaseClient: any;
+  let mockOperations: any;
 
   beforeEach(() => {
     mockSupabaseClient = createMockSupabaseClient();
-    auditLogger = new AuditLogger(mockSupabaseClient);
+
+    // Create mock operations using dependency injection
+    mockOperations = {
+      insertAuditStep: jest.fn(),
+      selectOperationLogs: jest.fn(),
+      mapToAuditRecord: jest.fn((data) => ({
+        id: data.id,
+        operationId: data.operation_id,
+        stepNumber: data.step_number,
+        intent: data.intent,
+        action: data.action,
+        success: data.success,
+        error: data.error,
+        screenshotUrl: data.screenshot_url,
+        pageUrl: data.page_url,
+        durationMs: data.duration_ms,
+        aiResponse: data.ai_response,
+        timestamp: data.timestamp
+      }))
+    };
+
+    // Use dependency injection to provide mock operations
+    auditLogger = new AuditLogger(mockSupabaseClient, mockOperations);
   });
 
   it('should calculate operation summary statistics', async () => {
@@ -103,14 +142,12 @@ describe('AuditLogger.getOperationSummary', () => {
       }
     ];
 
-    mockSupabaseClient.from.mockReturnValue({
-      select: jest.fn().mockReturnThis(),
-      eq: jest.fn().mockReturnThis(),
-      order: jest.fn().mockResolvedValue({ data: mockData, error: null })
-    });
+    // Use dependency injection to mock selectOperationLogs
+    mockOperations.selectOperationLogs.mockResolvedValue(mockData);
 
     const summary = await auditLogger.getOperationSummary('op-123');
 
+    expect(mockOperations.selectOperationLogs).toHaveBeenCalledWith(mockSupabaseClient, 'op-123');
     expect(summary.totalSteps).toBe(3);
     expect(summary.successfulSteps).toBe(2);
     expect(summary.failedSteps).toBe(1);
@@ -137,14 +174,12 @@ describe('AuditLogger.getOperationSummary', () => {
       }
     ];
 
-    mockSupabaseClient.from.mockReturnValue({
-      select: jest.fn().mockReturnThis(),
-      eq: jest.fn().mockReturnThis(),
-      order: jest.fn().mockResolvedValue({ data: mockData, error: null })
-    });
+    // Use dependency injection to mock selectOperationLogs
+    mockOperations.selectOperationLogs.mockResolvedValue(mockData);
 
     const summary = await auditLogger.getOperationSummary('op-124');
 
+    expect(mockOperations.selectOperationLogs).toHaveBeenCalledWith(mockSupabaseClient, 'op-124');
     expect(summary.totalDurationMs).toBe(0);
     expect(summary.avgStepDurationMs).toBe(0);
   });

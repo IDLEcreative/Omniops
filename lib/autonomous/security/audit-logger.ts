@@ -13,18 +13,92 @@ import type { AuditStepData, AuditRecord, OperationSummary } from './audit-logge
 export type { AuditStepData, AuditRecord, OperationSummary } from './audit-logger-types';
 
 // ============================================================================
+// Interfaces for Dependency Injection
+// ============================================================================
+
+export interface AuditOperations {
+  insertAuditStep: (supabase: ReturnType<typeof createServerClient>, data: any) => Promise<any>;
+  selectOperationLogs: (supabase: ReturnType<typeof createServerClient>, operationId: string) => Promise<any[]>;
+  mapToAuditRecord: (data: any) => AuditRecord;
+}
+
+// Default implementations
+const defaultInsertAuditStep = async (
+  supabase: ReturnType<typeof createServerClient>,
+  data: any
+): Promise<any> => {
+  const { data: record, error } = await supabase
+    .from('autonomous_operations_audit')
+    .insert(data)
+    .select()
+    .single();
+
+  if (error) {
+    throw new Error(`Failed to log audit step: ${error.message}`);
+  }
+
+  return record;
+};
+
+const defaultSelectOperationLogs = async (
+  supabase: ReturnType<typeof createServerClient>,
+  operationId: string
+): Promise<any[]> => {
+  const { data, error } = await supabase
+    .from('autonomous_operations_audit')
+    .select('*')
+    .eq('operation_id', operationId)
+    .order('step_number', { ascending: true });
+
+  if (error) {
+    throw new Error(`Failed to get operation logs: ${error.message}`);
+  }
+
+  return data || [];
+};
+
+const defaultMapToAuditRecord = (data: any): AuditRecord => {
+  return {
+    id: data.id,
+    operationId: data.operation_id,
+    stepNumber: data.step_number,
+    intent: data.intent,
+    action: data.action,
+    success: data.success,
+    error: data.error,
+    screenshotUrl: data.screenshot_url,
+    pageUrl: data.page_url,
+    durationMs: data.duration_ms,
+    aiResponse: data.ai_response,
+    timestamp: data.timestamp
+  };
+};
+
+// ============================================================================
 // Audit Logger Service
 // ============================================================================
 
 export class AuditLogger {
   private supabase: ReturnType<typeof createServerClient>;
+  private operations: AuditOperations;
 
   /**
    * Create AuditLogger instance
    * @param client Optional Supabase client (for testing). If not provided, creates one.
+   * @param operations Optional audit operations (for testing). If not provided, uses defaults.
    */
-  constructor(client?: ReturnType<typeof createServerClient>) {
+  constructor(
+    client?: ReturnType<typeof createServerClient>,
+    operations?: Partial<AuditOperations>
+  ) {
     this.supabase = client || createServerClient();
+
+    // Use provided operations or defaults
+    this.operations = {
+      insertAuditStep: operations?.insertAuditStep || defaultInsertAuditStep,
+      selectOperationLogs: operations?.selectOperationLogs || defaultSelectOperationLogs,
+      mapToAuditRecord: operations?.mapToAuditRecord || defaultMapToAuditRecord
+    };
   }
 
   /**
@@ -43,26 +117,18 @@ export class AuditLogger {
    */
   async logStep(data: AuditStepData): Promise<AuditRecord> {
     try {
-      const { data: record, error } = await this.supabase
-        .from('autonomous_operations_audit')
-        .insert({
-          operation_id: data.operationId,
-          step_number: data.stepNumber,
-          intent: data.intent,
-          action: data.action,
-          success: data.success,
-          error: data.error || null,
-          screenshot_url: data.screenshotUrl || null,
-          page_url: data.pageUrl || null,
-          duration_ms: data.durationMs || null,
-          ai_response: data.aiResponse || null
-        })
-        .select()
-        .single();
-
-      if (error) {
-        throw new Error(`Failed to log audit step: ${error.message}`);
-      }
+      const record = await this.operations.insertAuditStep(this.supabase, {
+        operation_id: data.operationId,
+        step_number: data.stepNumber,
+        intent: data.intent,
+        action: data.action,
+        success: data.success,
+        error: data.error || null,
+        screenshot_url: data.screenshotUrl || null,
+        page_url: data.pageUrl || null,
+        duration_ms: data.durationMs || null,
+        ai_response: data.aiResponse || null
+      });
 
       // Log to console for real-time monitoring
       console.log(`[AuditLogger] ${data.success ? '✅' : '❌'} Step ${data.stepNumber}:`, {
@@ -71,7 +137,7 @@ export class AuditLogger {
         durationMs: data.durationMs
       });
 
-      return this.mapToAuditRecord(record);
+      return this.operations.mapToAuditRecord(record);
     } catch (error) {
       console.error('[AuditLogger] LogStep error:', error);
       // Don't throw - audit logging should never break the main operation
@@ -88,17 +154,8 @@ export class AuditLogger {
    */
   async getOperationLogs(operationId: string): Promise<AuditRecord[]> {
     try {
-      const { data, error } = await this.supabase
-        .from('autonomous_operations_audit')
-        .select('*')
-        .eq('operation_id', operationId)
-        .order('step_number', { ascending: true });
-
-      if (error) {
-        throw new Error(`Failed to get operation logs: ${error.message}`);
-      }
-
-      return (data || []).map(this.mapToAuditRecord);
+      const data = await this.operations.selectOperationLogs(this.supabase, operationId);
+      return data.map(d => this.operations.mapToAuditRecord(d));
     } catch (error) {
       console.error('[AuditLogger] GetOperationLogs error:', error);
       throw error;
@@ -148,7 +205,7 @@ export class AuditLogger {
    */
   async getFailedSteps(operationId: string): Promise<AuditRecord[]> {
     const { getFailedSteps } = await import('./audit-queries');
-    return getFailedSteps(operationId, this.supabase, this.mapToAuditRecord);
+    return getFailedSteps(operationId, this.supabase, this.operations.mapToAuditRecord);
   }
 
   /**
@@ -156,7 +213,7 @@ export class AuditLogger {
    */
   async getRecentLogs(limit: number = 100): Promise<AuditRecord[]> {
     const { getRecentLogs } = await import('./audit-queries');
-    return getRecentLogs(limit, this.supabase, this.mapToAuditRecord);
+    return getRecentLogs(limit, this.supabase, this.operations.mapToAuditRecord);
   }
 
   /**
@@ -164,7 +221,7 @@ export class AuditLogger {
    */
   async exportAuditTrail(organizationId: string, startDate?: Date, endDate?: Date): Promise<AuditRecord[]> {
     const { exportAuditTrail } = await import('./audit-queries');
-    return exportAuditTrail(organizationId, startDate, endDate, this.supabase, this.mapToAuditRecord);
+    return exportAuditTrail(organizationId, startDate, endDate, this.supabase, this.operations.mapToAuditRecord);
   }
 
   /**
@@ -191,27 +248,6 @@ export class AuditLogger {
     const { AuditStatistics } = await import('./audit-statistics');
     const stats = new AuditStatistics();
     return stats.getStatistics(organizationId, period);
-  }
-
-  // ============================================================================
-  // Private Helpers
-  // ============================================================================
-
-  private mapToAuditRecord(data: any): AuditRecord {
-    return {
-      id: data.id,
-      operationId: data.operation_id,
-      stepNumber: data.step_number,
-      intent: data.intent,
-      action: data.action,
-      success: data.success,
-      error: data.error,
-      screenshotUrl: data.screenshot_url,
-      pageUrl: data.page_url,
-      durationMs: data.duration_ms,
-      aiResponse: data.ai_response,
-      timestamp: data.timestamp
-    };
   }
 }
 

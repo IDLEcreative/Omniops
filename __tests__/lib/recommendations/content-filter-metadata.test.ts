@@ -6,17 +6,14 @@
 
 import { describe, it, expect, jest, beforeEach } from '@jest/globals';
 import { contentBasedRecommendations } from '@/lib/recommendations/content-filter';
-import { createClient } from '@/lib/supabase/server';
-
-// Type the mocked function (manual mock is automatically loaded)
-const mockCreateClient = createClient as jest.MockedFunction<typeof createClient>;
+import * as supabaseServer from '@/lib/supabase/server';
 
 describe('Content-Based Filter - Metadata', () => {
   let mockSupabase: any;
+  let createClientSpy: jest.SpyInstance;
 
   beforeEach(() => {
-    jest.clearAllMocks();
-
+    // Create fresh mocks for each test
     mockSupabase = {
       from: jest.fn().mockReturnThis(),
       select: jest.fn().mockReturnThis(),
@@ -24,10 +21,15 @@ describe('Content-Based Filter - Metadata', () => {
       in: jest.fn().mockReturnThis(),
     };
 
-    // Configure the mock
-    // Use jest.requireMock to get the mocked module and configure it
-    const supabaseModule = jest.requireMock('@/lib/supabase/server');
-    supabaseModule.createClient.mockResolvedValue(mockSupabase);
+    // Spy on createClient and mock its return value
+    createClientSpy = jest.spyOn(supabaseServer, 'createClient').mockResolvedValue(mockSupabase as any);
+  });
+
+  afterEach(() => {
+    // Cleanup spy if it exists
+    if (createClientSpy?.mockRestore) {
+      createClientSpy.mockRestore();
+    }
   });
 
   describe('metadata extraction', () => {

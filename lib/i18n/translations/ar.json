@@ -1,0 +1,42 @@
+{
+  "chat": {
+    "placeholder": "اكتب رسالتك...",
+    "send": "إرسال",
+    "clear": "مسح الدردشة",
+    "close": "إغلاق",
+    "typing": "الذكاء الاصطناعي يكتب...",
+    "error": "حدث خطأ ما. يرجى المحاولة مرة أخرى.",
+    "retry": "إعادة المحاولة",
+    "newConversation": "محادثة جديدة"
+  },
+  "settings": {
+    "title": "الإعدادات",
+    "language": "اللغة",
+    "theme": "المظهر",
+    "privacy": "الخصوصية",
+    "notifications": "الإشعارات"
+  },
+  "products": {
+    "viewProduct": "عرض المنتج",
+    "addToCart": "أضف إلى السلة",
+    "outOfStock": "نفذ من المخزون",
+    "price": "السعر",
+    "description": "الوصف"
+  },
+  "recommendations": {
+    "title": "موصى به لك",
+    "next": "التالي",
+    "previous": "السابق",
+    "viewAll": "عرض الكل"
+  },
+  "common": {
+    "loading": "جاري التحميل...",
+    "save": "حفظ",
+    "cancel": "إلغاء",
+    "delete": "حذف",
+    "edit": "تعديل",
+    "search": "بحث",
+    "filter": "تصفية",
+    "sort": "ترتيب"
+  }
+}

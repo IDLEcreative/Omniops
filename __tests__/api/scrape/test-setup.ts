@@ -1,12 +1,17 @@
 import { jest } from '@jest/globals'
 import OpenAI from 'openai'
 
-// Create mock functions directly here - these will be used by jest.mock() factories in the main test file
-export const mockScrapePage = jest.fn<any>()
-export const mockCrawlWebsite = jest.fn<any>()
-export const mockCheckCrawlStatus = jest.fn<any>()
-export const mockGetHealthStatus = jest.fn<any>()
-export const mockCrawlWebsiteWithCleanup = jest.fn<any>()
+// Import the actual mock functions from the mock module
+// These are the same instances that will be used by the route handlers
+import * as scraperApiMock from '../../../__mocks__/@/lib/scraper-api'
+import * as scraperWithCleanupMock from '../../../__mocks__/@/lib/scraper-with-cleanup'
+
+// Re-export for convenience in tests - these are the ACTUAL mocks used by route handlers
+export const mockScrapePage = scraperApiMock.scrapePage
+export const mockCrawlWebsite = scraperApiMock.crawlWebsite
+export const mockCheckCrawlStatus = scraperApiMock.checkCrawlStatus
+export const mockGetHealthStatus = scraperApiMock.getHealthStatus
+export const mockCrawlWebsiteWithCleanup = scraperWithCleanupMock.crawlWebsiteWithCleanup
 
 // Import supabase module (not mocked in this setup)
 import * as supabaseModule from '@/lib/supabase-server'
@@ -18,8 +23,11 @@ export const mockEmbeddingResponse = {
   data: [{ embedding: Array(1536).fill(0.1) }],
 }
 
-// Set environment variable for OpenAI
+// Set environment variables for testing
 process.env.OPENAI_API_KEY = 'test-openai-key'
+// Ensure we're NOT in serverless mode so scrapePage mock is actually called
+delete process.env.VERCEL
+delete process.env.NETLIFY
 
 export let embeddingsCreateMock: jest.Mock
 
@@ -55,26 +63,42 @@ export function setupOpenAIMock() {
   )
 }
 
-export function setupDefaultMocks() {
+// Note: setupDefaultMocks is called by tests to configure the mocks
+// The test file will pass in the mock references since they're created by jest.mock()
+export function setupDefaultMocks(mocks?: {
+  mockScrapePage?: any
+  mockCrawlWebsite?: any
+  mockCheckCrawlStatus?: any
+  mockGetHealthStatus?: any
+  mockCrawlWebsiteWithCleanup?: any
+}) {
+  // If mocks are provided, configure them
+  // Otherwise, use the shared instances from this file (backward compatibility)
+  const scrapePage = mocks?.mockScrapePage || mockScrapePage
+  const crawlWebsite = mocks?.mockCrawlWebsite || mockCrawlWebsite
+  const checkStatus = mocks?.mockCheckCrawlStatus || mockCheckCrawlStatus
+  const healthStatus = mocks?.mockGetHealthStatus || mockGetHealthStatus
+  const crawlWithCleanup = mocks?.mockCrawlWebsiteWithCleanup || mockCrawlWebsiteWithCleanup
+
   // Configure default mock implementations for scraper functions
-  mockScrapePage.mockResolvedValue({
+  scrapePage.mockResolvedValue({
     url: 'https://example.com',
     title: 'Example Page',
     content: 'This is the page content. It contains multiple sentences. This helps test chunking.',
     metadata: { description: 'Test description' },
   })
 
-  mockCrawlWebsite.mockResolvedValue('job-123')
+  crawlWebsite.mockResolvedValue('job-123')
 
-  mockCheckCrawlStatus.mockResolvedValue({
+  checkStatus.mockResolvedValue({
     status: 'completed',
     data: [],
   })
 
-  mockGetHealthStatus.mockResolvedValue({
+  healthStatus.mockResolvedValue({
     status: 'ok',
     crawler: 'ready',
   })
 
-  mockCrawlWebsiteWithCleanup.mockResolvedValue('job-123')
+  crawlWithCleanup.mockResolvedValue('job-123')
 }

@@ -10,11 +10,35 @@ import { createMockSupabaseClient } from '__tests__/utils/consent/supabase-mock'
 describe('ConsentManager list and query methods', () => {
   let consentManager: ConsentManager;
   let mockSupabaseClient: any;
+  let mockOperations: any;
 
   beforeEach(() => {
     jest.clearAllMocks();
     mockSupabaseClient = createMockSupabaseClient();
-    consentManager = new ConsentManager(mockSupabaseClient);
+
+    // Create mock operations using dependency injection
+    mockOperations = {
+      mapToConsentRecord: jest.fn((data) => {
+        if (!data) return null;
+        return {
+          id: data.id,
+          organizationId: data.organization_id,
+          userId: data.user_id,
+          service: data.service,
+          operation: data.operation,
+          permissions: data.permissions,
+          grantedAt: data.granted_at,
+          expiresAt: data.expires_at,
+          revokedAt: data.revoked_at,
+          isActive: data.is_active,
+          consentVersion: data.consent_version,
+          createdAt: data.created_at
+        };
+      })
+    };
+
+    // Use dependency injection to provide mock operations
+    consentManager = new ConsentManager(mockSupabaseClient, mockOperations);
   });
 
   describe('list()', () => {
