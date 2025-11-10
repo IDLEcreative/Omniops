@@ -70,7 +70,7 @@ describe('ErrorBoundary - Integration and Logging', () => {
         expect(body.stack).toBeDefined();
         expect(body.componentStack).toBeDefined();
         expect(body.timestamp).toBeDefined();
-        expect(body.category).toBe('react_component');
+        expect(body.category).toBe('react_error');
       });
     });
 
