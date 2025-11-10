@@ -84,6 +84,8 @@ const customJestConfig = {
     // Vitest tests - use separate test runner (npx vitest)
     // These tests use Vitest API which conflicts with Jest
     '__tests__/integration/shopify-ux-flow.test.ts', // Uses Vitest describe/it/expect
+    // Integration tests requiring running dev server (not suitable for pre-push)
+    '__tests__/integration/agent4-correction-tracking.test.ts', // Requires dev server
     '/ARCHIVE/' // Exclude archived files and reports
   ],
   // Transform ESM packages in node_modules

@@ -32,12 +32,21 @@ async function checkDemoRateLimit(req: NextRequest) {
 
 export async function POST(req: NextRequest) {
   try {
+    console.log('[DemoScrape] Starting scrape request');
+
     // Rate limiting
-    await checkDemoRateLimit(req);
+    try {
+      await checkDemoRateLimit(req);
+      console.log('[DemoScrape] Rate limit check passed');
+    } catch (rateLimitError) {
+      console.error('[DemoScrape] Rate limit error:', rateLimitError);
+      throw rateLimitError;
+    }
 
     // Parse and validate request
     const body = await req.json();
     const { url } = scrapeSchema.parse(body);
+    console.log('[DemoScrape] URL validated:', url);
 
     // Validate domain
     const domain = new URL(url).hostname;
@@ -46,13 +55,25 @@ export async function POST(req: NextRequest) {
     const sessionId = `demo_${Date.now()}_${randomBytes(8).toString('hex')}`;
 
     // Quick scrape with 8s timeout
-    const scrapeResult = await quickScrape(url, {
-      maxPages: 3,
-      timeout: 8000,
-      useSitemap: true
-    });
+    console.log('[DemoScrape] Starting quickScrape');
+    let scrapeResult;
+    try {
+      scrapeResult = await quickScrape(url, {
+        maxPages: 3,
+        timeout: 8000,
+        useSitemap: true
+      });
+      console.log('[DemoScrape] Scrape completed:', {
+        pagesScraped: scrapeResult.pages.length,
+        duration: scrapeResult.scrapeDuration
+      });
+    } catch (scrapeError) {
+      console.error('[DemoScrape] Scraping failed:', scrapeError);
+      throw new Error(`Scraping failed: ${scrapeError instanceof Error ? scrapeError.message : 'Unknown error'}`);
+    }
 
     if (scrapeResult.pages.length === 0) {
+      console.warn('[DemoScrape] No pages scraped');
       return NextResponse.json(
         { error: 'Unable to scrape website. Please try a different URL.' },
         { status: 400 }
@@ -60,7 +81,21 @@ export async function POST(req: NextRequest) {
     }
 
     // Generate embeddings in-memory
-    const { chunks, embeddings, metadata } = await generateDemoEmbeddings(scrapeResult.pages);
+    console.log('[DemoScrape] Generating embeddings');
+    let chunks, embeddings, metadata;
+    try {
+      const embeddingsResult = await generateDemoEmbeddings(scrapeResult.pages);
+      chunks = embeddingsResult.chunks;
+      embeddings = embeddingsResult.embeddings;
+      metadata = embeddingsResult.metadata;
+      console.log('[DemoScrape] Embeddings generated:', {
+        chunkCount: chunks.length,
+        embeddingCount: embeddings.length
+      });
+    } catch (embeddingError) {
+      console.error('[DemoScrape] Embeddings generation failed:', embeddingError);
+      throw new Error(`Embeddings generation failed: ${embeddingError instanceof Error ? embeddingError.message : 'Unknown error'}`);
+    }
 
     // Store in Redis with 10-minute TTL
     const sessionData: DemoSessionData = {
@@ -76,10 +111,18 @@ export async function POST(req: NextRequest) {
       max_messages: 20
     };
 
-    await saveDemoSession(sessionId, sessionData);
+    console.log('[DemoScrape] Saving session to storage');
+    try {
+      await saveDemoSession(sessionId, sessionData);
+      console.log('[DemoScrape] Session saved successfully');
+    } catch (sessionError) {
+      console.error('[DemoScrape] Failed to save session:', sessionError);
+      // Don't fail the request if session storage fails
+    }
 
     // Log to Supabase for lead tracking
     try {
+      console.log('[DemoScrape] Logging to Supabase');
       const supabase = await createServiceRoleClient();
       if (!supabase) {
         console.warn('Supabase client unavailable, skipping demo attempt logging');
