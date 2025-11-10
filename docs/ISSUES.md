@@ -2,19 +2,19 @@
 
 **Type:** Reference
 **Status:** Active
-**Last Updated:** 2025-11-09
+**Last Updated:** 2025-11-10
 **Purpose:** Single source of truth for all bugs, technical debt, and problems discovered in the codebase
 
 ## Quick Reference
 
-**Total Issues:** 23
+**Total Issues:** 24
 - 🔴 Critical: 4
-- 🟠 High: 6
+- 🟠 High: 7
 - 🟡 Medium: 7
 - 🟢 Low: 6
 
 **Status Breakdown:**
-- Open: 22
+- Open: 23
 - In Progress: 0
 - Resolved: 1
 
@@ -63,6 +63,157 @@
 ---
 
 ## Open Issues
+
+### 🟠 [HIGH] UserMenu Avatar Tests Failing - Auth State Mocking Issue {#issue-024}
+
+**Status:** Open
+**Severity:** High
+**Category:** Testing | Bug
+**Location:** `__tests__/components/auth/UserMenu-avatar.test.tsx`
+**Discovered:** 2025-11-10
+**Effort:** 2-4 hours
+
+**Description:**
+4 tests in the UserMenu avatar test suite are failing because the component renders a "Sign In" button instead of the expected user avatar. The auth state is not being properly mocked in tests.
+
+**Impact:**
+- 4 failing tests blocking pre-push hook
+- Cannot validate UserMenu avatar functionality
+- Requires `--no-verify` flag to push commits
+- Blocks CI/CD pipeline validation
+
+**Failing Tests:**
+```
+FAIL __tests__/components/auth/UserMenu-avatar.test.tsx
+  ● should use avatar URL from user metadata
+  ● should display initials as fallback when no avatar
+  ● should generate correct initials from email
+  ● should display icons in menu items
+```
+
+**Root Cause:**
+The Supabase client mock is returning user data, but the UserMenu component is still rendering "Sign In" button instead of the avatar. This suggests:
+1. Auth state initialization timing issue
+2. Mock not being applied early enough
+3. Component not responding to mocked auth state changes
+
+**Current Mock Setup:**
+```typescript
+mockSupabaseClient.auth.getUser.mockResolvedValue({
+  data: {
+    user: {
+      id: 'user-123',
+      email: 'test@example.com',
+      user_metadata: {
+        avatar_url: avatarUrl,
+      },
+    },
+  },
+  error: null,
+});
+
+render(<UserMenu />);
+```
+
+**Expected Behavior:**
+- UserMenu should render avatar image when avatar_url present
+- UserMenu should render initials when no avatar_url
+- Menu items should be accessible after clicking avatar
+
+**Actual Behavior:**
+- UserMenu renders "Sign In" button in all test scenarios
+- Avatar elements not found in DOM
+- Menu items not accessible
+
+**Proposed Solution:**
+
+**Option 1: Fix Auth State Initialization**
+```typescript
+beforeEach(() => {
+  // Set up mock before creating client
+  const mockUser = {
+    id: 'user-123',
+    email: 'test@example.com',
+    user_metadata: { avatar_url: 'https://example.com/avatar.jpg' }
+  };
+
+  mockSupabaseClient.auth.getUser.mockResolvedValue({
+    data: { user: mockUser },
+    error: null
+  });
+
+  // Also mock onAuthStateChange to return user immediately
+  mockSupabaseClient.auth.onAuthStateChange.mockImplementation((callback) => {
+    // Simulate immediate auth state change
+    callback('SIGNED_IN', { user: mockUser });
+    return {
+      data: { subscription: { unsubscribe: jest.fn() } }
+    };
+  });
+});
+```
+
+**Option 2: Wait for Auth State Update**
+```typescript
+it('should use avatar URL from user metadata', async () => {
+  mockSupabaseClient.auth.getUser.mockResolvedValue({
+    data: { user: mockUser },
+    error: null
+  });
+
+  render(<UserMenu />);
+
+  // Wait for component to process auth state
+  await waitFor(() => {
+    expect(screen.queryByText('Sign In')).not.toBeInTheDocument();
+  });
+
+  // Then check for avatar
+  const img = screen.getByAltText('test@example.com');
+  expect(img).toHaveAttribute('src', expect.stringContaining(avatarUrl));
+});
+```
+
+**Option 3: Refactor UserMenu for Testability**
+- Accept auth state as prop for testing
+- Implement dependency injection pattern
+- Separate auth logic from presentation
+
+**Recommended Approach:**
+Combine Option 1 + Option 2:
+1. Fix onAuthStateChange mock to trigger immediately
+2. Add waitFor to ensure component updates before assertions
+3. Document pattern for future auth-dependent tests
+
+**Verification Steps:**
+```bash
+# Run failing tests
+npm test -- __tests__/components/auth/UserMenu-avatar.test.tsx
+
+# After fix, all 5 tests should pass (4 currently failing + 1 passing)
+
+# Verify pre-push hook works
+git push  # Should not require --no-verify
+```
+
+**Related Issues:**
+- #issue-001 (Untestable Supabase Architecture) - Similar auth mocking challenges
+- #issue-022 (useChatState Hook Infinite Loop) - Timing/state initialization issues
+
+**Why This Blocks CI/CD:**
+- Pre-push hook runs all tests
+- These failures prevent pushing without `--no-verify`
+- Creates friction in development workflow
+- Reduces confidence in test suite reliability
+
+**Next Steps:**
+1. Deploy the-fixer agent to resolve auth mocking
+2. Apply fix to UserMenu tests
+3. Verify all 5 tests pass
+4. Document auth testing pattern for future use
+5. Remove `--no-verify` workaround from workflow
+
+---
 
 ### 🔴 [CRITICAL] useChatState Hook Infinite Loop Crashes Jest Workers {#issue-022}
 
