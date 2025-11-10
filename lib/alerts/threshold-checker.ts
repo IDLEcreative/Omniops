@@ -6,6 +6,38 @@
 import { createServiceRoleClient } from '@/lib/supabase-server';
 import { sendAlertNotifications } from './notification-handlers';
 
+/**
+ * Format metric name for display
+ */
+export function formatMetricName(metric: string): string {
+  const formatted = metric
+    .replace(/_/g, ' ')
+    .replace(/([a-z])([A-Z])/g, '$1 $2')
+    .toLowerCase()
+    .replace(/\b\w/g, (l) => l.toUpperCase());
+
+  // Special cases
+  const specialCases: Record<string, string> = {
+    'Response Time': 'Response Time',
+    'Error Rate': 'Error Rate',
+    'Sentiment Score': 'Sentiment Score',
+    'Conversion Rate': 'Conversion Rate',
+    'Resolution Rate': 'Resolution Rate',
+    'Message Volume': 'Message Volume',
+    'Api': 'API',
+    'Cpu': 'CPU',
+    'Ram': 'RAM',
+  };
+
+  for (const [key, value] of Object.entries(specialCases)) {
+    if (formatted.includes(key)) {
+      return formatted.replace(key, value);
+    }
+  }
+
+  return formatted;
+}
+
 export interface AlertThreshold {
   id: string;
   organization_id: string;

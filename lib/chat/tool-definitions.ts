@@ -5,8 +5,6 @@
  * validation logic, and timeout utilities.
  */
 
-import { WOOCOMMERCE_TOOL } from './woocommerce-tool';
-
 /**
  * OpenAI function calling tool definitions
  */
@@ -114,8 +112,7 @@ export const SEARCH_TOOLS = [
         required: ["pageQuery"]
       }
     }
-  },
-  WOOCOMMERCE_TOOL
+  }
 ];
 
 /**

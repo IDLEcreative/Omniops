@@ -11,7 +11,7 @@
 import OpenAI from 'openai';
 import { SearchResult } from '@/types';
 import { ChatTelemetry } from '@/lib/chat-telemetry';
-import { SEARCH_TOOLS } from './tool-definitions';
+import { getAvailableTools, checkToolAvailability, getToolInstructions } from './get-available-tools';
 import type { AIProcessorDependencies, AIProcessorResult, AIProcessorParams } from './ai-processor-types';
 import { executeToolCallsParallel, formatToolResultsForAI } from './ai-processor-tool-executor';
 import { formatResponse, getModelConfig } from './ai-processor-formatter';
@@ -44,8 +44,18 @@ export async function processAIConversation(params: AIProcessorParams): Promise<
     });
 
     // TODO: Implement web search tool integration
-    // When enableWebSearch is true, add external web search tools to SEARCH_TOOLS
+    // When enableWebSearch is true, add external web search tools to available tools
     // When enableWebSearch is false, only use knowledge base search
+  }
+
+  // Get available tools based on customer configuration
+  const availableTools = await getAvailableTools(domain);
+  const toolAvailability = await checkToolAvailability(domain);
+  const toolInstructions = getToolInstructions(toolAvailability);
+
+  // Add tool availability instructions to system message
+  if (toolInstructions) {
+    conversationMessages[0].content += `\n\n${toolInstructions}`;
   }
 
   // Configuration
@@ -65,11 +75,19 @@ export async function processAIConversation(params: AIProcessorParams): Promise<
   // Initial AI call with tools
   const modelConfig = getModelConfig(useGPT5Mini, false, widgetConfig);
 
+  telemetry?.log('info', 'ai', 'Getting initial completion', {
+    messageCount: conversationMessages.length,
+    toolCount: availableTools.length,
+    hasWooCommerce: toolAvailability.hasWooCommerce,
+    hasShopify: toolAvailability.hasShopify,
+    iteration: 0
+  });
+
   let completion = await openaiClient.chat.completions.create({
     ...modelConfig,
     messages: conversationMessages,
-    tools: SEARCH_TOOLS,
-    tool_choice: 'required'  // Force AI to search instead of hallucinating from training data
+    tools: availableTools,
+    tool_choice: availableTools.length > 0 ? 'required' : 'none'  // Force AI to search if tools available
   } as any);
 
   let finalResponse = '';
@@ -161,7 +179,7 @@ export async function processAIConversation(params: AIProcessorParams): Promise<
       completion = await openaiClient.chat.completions.create({
         ...iterationConfig,
         messages: conversationMessages,
-        tools: SEARCH_TOOLS,
+        tools: availableTools,
         tool_choice: 'auto'
       } as any);
     } catch (error) {
@@ -174,7 +192,7 @@ export async function processAIConversation(params: AIProcessorParams): Promise<
         errorParam: (error as any)?.param,
         iteration,
         messageCount: conversationMessages.length,
-        hasTools: !!SEARCH_TOOLS
+        hasTools: availableTools.length > 0
       });
       finalResponse = 'I found some information but encountered an error processing it. Please try again.';
       break;

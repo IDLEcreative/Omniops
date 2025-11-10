@@ -67,7 +67,7 @@ export async function getRecommendations(
       contextAnalysis = await analyzeContext(request.context, request.domainId);
     }
 
-    let recommendations: ProductRecommendation[];
+    let recommendations: ProductRecommendation[] = [];
 
     // Route to appropriate algorithm
     switch (algorithm) {
@@ -76,7 +76,7 @@ export async function getRecommendations(
           ...request,
           limit,
           context: contextAnalysis,
-        });
+        }) || [];
         break;
 
       case 'collaborative':
@@ -84,7 +84,7 @@ export async function getRecommendations(
           ...request,
           limit,
           context: contextAnalysis,
-        });
+        }) || [];
         break;
 
       case 'content_based':
@@ -92,7 +92,7 @@ export async function getRecommendations(
           ...request,
           limit,
           context: contextAnalysis,
-        });
+        }) || [];
         break;
 
       case 'hybrid':
@@ -101,7 +101,7 @@ export async function getRecommendations(
           ...request,
           limit,
           context: contextAnalysis,
-        });
+        }) || [];
         break;
     }
 
@@ -113,10 +113,10 @@ export async function getRecommendations(
     }
 
     // Apply business rules (inventory, pricing, etc.)
-    recommendations = await applyBusinessRules(
+    recommendations = (await applyBusinessRules(
       recommendations,
       request.domainId
-    );
+    )) || [];
 
     // Track recommendations
     await trackRecommendations(recommendations, request, request.supabaseClient);
@@ -161,7 +161,7 @@ async function trackRecommendations(
   request: RecommendationRequest,
   supabaseClient?: SupabaseClient
 ): Promise<void> {
-  if (!recommendations.length) return;
+  if (!recommendations || !recommendations.length) return;
 
   try {
     const supabase = supabaseClient ?? (await createClient());

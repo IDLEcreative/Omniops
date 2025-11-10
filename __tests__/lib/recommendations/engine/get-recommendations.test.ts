@@ -96,24 +96,20 @@ describe('getRecommendations', () => {
 
   it('should route to hybrid algorithm by default', async () => {
     const mockRecs = createMockRecommendations(1);
-    mocks.vectorSimilarity.mockResolvedValue(mockRecs);
-    mocks.collaborativeFilter.mockResolvedValue([]);
-    mocks.contentBased.mockResolvedValue([]);
+    mocks.hybridRanker.mockResolvedValue(mockRecs);
     const result = await getRecommendations({
       ...createGetRecommendationsParams({
         algorithm: 'hybrid',
         supabaseClient: mockSupabase,
       }),
     });
-    expect(mocks.vectorSimilarity).toHaveBeenCalled();
+    expect(mocks.hybridRanker).toHaveBeenCalled();
     expect(result.recommendations.length).toBeGreaterThanOrEqual(0);
     expect(result.algorithm).toBe('hybrid');
   });
 
   it('should analyze context when provided', async () => {
-    mocks.vectorSimilarity.mockResolvedValue([]);
-    mocks.collaborativeFilter.mockResolvedValue([]);
-    mocks.contentBased.mockResolvedValue([]);
+    mocks.hybridRanker.mockResolvedValue([]);
     const result = await getRecommendations({
       ...createGetRecommendationsParams({
         context: 'I need a hydraulic pump for my machine',
@@ -121,15 +117,13 @@ describe('getRecommendations', () => {
         supabaseClient: mockSupabase,
       }),
     });
-    expect(mocks.vectorSimilarity).toHaveBeenCalled();
+    expect(mocks.hybridRanker).toHaveBeenCalled();
     expect(result).toHaveProperty('context');
   });
 
   it('should filter out excluded products', async () => {
     const mockRecs = createMockRecommendations(3);
-    mocks.vectorSimilarity.mockResolvedValue(mockRecs);
-    mocks.collaborativeFilter.mockResolvedValue([]);
-    mocks.contentBased.mockResolvedValue([]);
+    mocks.hybridRanker.mockResolvedValue(mockRecs);
     const result = await getRecommendations({
       ...createGetRecommendationsParams({
         excludeProductIds: ['prod-2'],
@@ -144,9 +138,7 @@ describe('getRecommendations', () => {
 
   it('should respect limit parameter', async () => {
     const mockRecs = createMockRecommendations(10);
-    mocks.vectorSimilarity.mockResolvedValue(mockRecs);
-    mocks.collaborativeFilter.mockResolvedValue([]);
-    mocks.contentBased.mockResolvedValue([]);
+    mocks.hybridRanker.mockResolvedValue(mockRecs);
     const result = await getRecommendations({
       ...createGetRecommendationsParams({
         algorithm: 'hybrid',
@@ -158,17 +150,15 @@ describe('getRecommendations', () => {
   });
 
   it('should use default limit of 5', async () => {
-    mocks.vectorSimilarity.mockResolvedValue([]);
-    mocks.collaborativeFilter.mockResolvedValue([]);
-    mocks.contentBased.mockResolvedValue([]);
+    mocks.hybridRanker.mockResolvedValue([]);
     await getRecommendations({
       ...createGetRecommendationsParams({
         algorithm: 'hybrid',
         supabaseClient: mockSupabase,
       }),
     });
-    expect(mocks.vectorSimilarity).toHaveBeenCalledWith(
-      expect.objectContaining({ limit: 10 })
+    expect(mocks.hybridRanker).toHaveBeenCalledWith(
+      expect.objectContaining({ limit: 5 })
     );
   });
 
@@ -177,9 +167,7 @@ describe('getRecommendations', () => {
       { productId: 'prod-1', score: 0.9, algorithm: 'vector' },
       { productId: 'prod-2', score: 0.85, algorithm: 'collaborative' },
     ];
-    mocks.vectorSimilarity.mockResolvedValue([mockRecs[0]]);
-    mocks.collaborativeFilter.mockResolvedValue([mockRecs[1]]);
-    mocks.contentBased.mockResolvedValue([]);
+    mocks.hybridRanker.mockResolvedValue(mockRecs);
     await getRecommendations({
       ...createGetRecommendationsParams({
         sessionId: 'session-123',
@@ -195,7 +183,7 @@ describe('getRecommendations', () => {
           session_id: 'session-123',
           conversation_id: 'conv-456',
           product_id: 'prod-1',
-          algorithm_used: 'hybrid',
+          algorithm_used: 'vector',
           shown: true,
         }),
       ])
@@ -204,9 +192,7 @@ describe('getRecommendations', () => {
 
   it('should handle tracking errors gracefully', async () => {
     const mockRecs = createMockRecommendations(1);
-    mocks.vectorSimilarity.mockResolvedValue(mockRecs);
-    mocks.collaborativeFilter.mockResolvedValue([]);
-    mocks.contentBased.mockResolvedValue([]);
+    mocks.hybridRanker.mockResolvedValue(mockRecs);
     mockSupabase.insert.mockResolvedValue({ error: new Error('DB error') });
     const result = await getRecommendations({
       ...createGetRecommendationsParams({
@@ -219,12 +205,10 @@ describe('getRecommendations', () => {
   });
 
   it('should measure execution time', async () => {
-    mocks.vectorSimilarity.mockImplementation(async () => {
+    mocks.hybridRanker.mockImplementation(async () => {
       await new Promise((resolve) => setTimeout(resolve, 100));
       return [];
     });
-    mocks.collaborativeFilter.mockResolvedValue([]);
-    mocks.contentBased.mockResolvedValue([]);
     const result = await getRecommendations({
       ...createGetRecommendationsParams({
         algorithm: 'hybrid',
@@ -235,15 +219,14 @@ describe('getRecommendations', () => {
   });
 
   it('should handle algorithm errors gracefully for hybrid', async () => {
-    mocks.vectorSimilarity.mockRejectedValue(new Error('Algorithm failed'));
-    mocks.collaborativeFilter.mockResolvedValue([]);
-    mocks.contentBased.mockResolvedValue([]);
-    const result = await getRecommendations({
-      ...createGetRecommendationsParams({
-        algorithm: 'hybrid',
-        supabaseClient: mockSupabase,
-      }),
-    });
-    expect(result.recommendations).toEqual([]);
+    mocks.hybridRanker.mockRejectedValue(new Error('Algorithm failed'));
+    await expect(
+      getRecommendations({
+        ...createGetRecommendationsParams({
+          algorithm: 'hybrid',
+          supabaseClient: mockSupabase,
+        }),
+      })
+    ).rejects.toThrow('Algorithm failed');
   });
 });

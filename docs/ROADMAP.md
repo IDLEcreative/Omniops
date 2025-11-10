@@ -1,6 +1,6 @@
 # OmniOps Platform Roadmap
 
-**Last Updated:** 2025-11-03
+**Last Updated:** 2025-11-10
 **Status:** Active
 **Owner:** Platform Owner
 
@@ -857,6 +857,98 @@ interface PageContext {
 
 ---
 
+### Voice & Audio Chat Support
+**Timeline:** 3-4 weeks
+**Priority:** LOW
+**Status:** 🔜 Planned
+
+**Objectives:**
+- Enable voice input for chat widget
+- Provide voice output for AI responses
+- Support audio message recording and playback
+- Improve accessibility for users who prefer voice interaction
+
+**Features:**
+- [ ] **Voice Input (Speech-to-Text)**
+  - Browser Web Speech API integration
+  - Microphone permission handling
+  - Real-time speech recognition
+  - Fallback to keyboard input if not supported
+  - Visual feedback during recording
+
+- [ ] **Voice Output (Text-to-Speech)**
+  - Browser Speech Synthesis API
+  - Natural-sounding AI voice responses
+  - Configurable voice selection (male/female, language)
+  - Play/pause/stop controls
+  - Auto-play toggle in settings
+
+- [ ] **Audio Message Recording**
+  - Record and send voice messages
+  - Audio waveform visualization
+  - Max duration limits (configurable)
+  - Audio compression for efficient storage
+  - Playback in chat history
+
+- [ ] **Accessibility Enhancements**
+  - Screen reader compatibility
+  - Keyboard shortcuts for voice controls
+  - Visual indicators for audio state
+  - Transcription display for audio messages
+  - ARIA labels for all voice controls
+
+**Technical Implementation:**
+```typescript
+// Voice input using Web Speech API
+interface VoiceInputConfig {
+  language: string;
+  continuous: boolean;
+  interimResults: boolean;
+  maxAlternatives: number;
+}
+
+// Voice output using Speech Synthesis API
+interface VoiceOutputConfig {
+  voice: SpeechSynthesisVoice;
+  rate: number; // 0.1 to 10
+  pitch: number; // 0 to 2
+  volume: number; // 0 to 1
+}
+
+// Audio recording using MediaRecorder API
+interface AudioRecordingConfig {
+  mimeType: string; // 'audio/webm', 'audio/ogg'
+  audioBitsPerSecond: number;
+  maxDuration: number; // seconds
+}
+```
+
+**Browser Compatibility:**
+- Chrome/Edge: Full support
+- Firefox: Full support
+- Safari: Partial support (requires vendor prefixes)
+- Mobile: iOS 14+, Android 5+
+
+**Benefits:**
+- ✅ Improved accessibility for visually impaired users
+- ✅ Hands-free interaction option
+- ✅ Better mobile user experience
+- ✅ Multilingual voice support
+- ✅ Reduced typing friction for long queries
+
+**Dependencies:**
+- Widget customization UI (for voice settings)
+- Audio file storage infrastructure
+- Transcription service (optional, for audio message text)
+
+**Future Enhancements:**
+- WebRTC for real-time voice calls with support agents
+- Custom AI voice cloning (brand-specific voice)
+- Voice biometrics for authentication
+- Noise cancellation and echo reduction
+
+---
+
 ### Phase 3: Full Role-Based Access Control (RBAC)
 **Timeline:** 3-4 weeks
 **Priority:** MEDIUM
@@ -1015,6 +1107,12 @@ These items have been considered and explicitly decided against:
 ---
 
 ## 📝 Change Log
+
+### 2025-11-10 (Update 2)
+- **Feature Addition**: Voice & Audio Chat Support added to Future roadmap
+- Includes voice input/output, audio recording, and accessibility features
+- Timeline: 3-4 weeks, Priority: LOW
+- Deferred from Phase 4 to allow focus on higher-priority features
 
 ### 2025-11-10
 - **Major Addition**: ChatWidget Post-Production Enhancement Plan (6-week plan)

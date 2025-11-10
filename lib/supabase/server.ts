@@ -176,3 +176,9 @@ export async function requireServiceRoleClient() {
 
 // Export validation function for use in API routes
 export { validateSupabaseEnv }
+
+// Export aliases for backward compatibility
+export {
+  createClient as createServerClient,
+  createServiceRoleClient as createServiceClient
+}

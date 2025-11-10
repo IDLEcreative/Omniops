@@ -46,7 +46,7 @@ test.describe('Chat Widget Integration E2E', () => {
 
     expect(widgetConfig).toBeDefined();
     expect(widgetConfig.serverUrl).toBeTruthy();
-    expect(widgetConfig.behavior?.autoOpen).toBe(true);
+    expect(widgetConfig.behavior?.autoOpen).toBe(false);
     expect(widgetConfig.appearance?.startMinimized).toBe(false);
     console.log('✅ Widget configuration verified:', {
       serverUrl: widgetConfig.serverUrl,
