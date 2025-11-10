@@ -4,7 +4,8 @@
  */
 
 import type { SupabaseClient } from '@supabase/supabase-js';
-import { supabaseRestInsert, supabaseRestDelete } from './rest-api';
+import fetch from 'cross-fetch';
+import { supabaseRestInsert, supabaseRestDelete, supabaseRestSelect } from './rest-api';
 import { createTestUser, createUserClient, deleteTestUser } from './user-management';
 
 /**
@@ -109,6 +110,50 @@ export async function deleteTestOrganization(orgId: string): Promise<void> {
 }
 
 /**
+ * Get existing user ID by email
+ */
+async function getExistingUserId(email: string): Promise<string | null> {
+  try {
+    const serviceRoleKey = process.env.SUPABASE_SERVICE_ROLE_KEY!;
+    const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL!;
+
+    const response = await fetch(
+      `${supabaseUrl}/auth/v1/admin/users`,
+      {
+        headers: {
+          'Authorization': `Bearer ${serviceRoleKey}`,
+          'apikey': serviceRoleKey
+        }
+      }
+    );
+
+    if (!response.ok) return null;
+
+    const data = await response.json();
+    const user = data.users?.find((u: any) => u.email === email);
+    return user?.id || null;
+  } catch (error) {
+    return null;
+  }
+}
+
+/**
+ * Get existing organization IDs for a user
+ */
+async function getExistingOrgIds(userId: string): Promise<string[]> {
+  try {
+    const members = await supabaseRestSelect(
+      'organization_members',
+      { user_id: userId },
+      { serviceRole: true, select: 'organization_id' }
+    );
+    return members.map(m => m.organization_id);
+  } catch (error) {
+    return [];
+  }
+}
+
+/**
  * Test suite helper for RLS testing
  */
 export function setupRLSTest() {
@@ -123,19 +168,46 @@ export function setupRLSTest() {
 
   return {
     async setup() {
-      user1Id = await createTestUser(user1Email, { name: 'Test User 1' });
-      user2Id = await createTestUser(user2Email, { name: 'Test User 2' });
+      // Try to get existing users first
+      let existingUser1 = await getExistingUserId(user1Email);
+      let existingUser2 = await getExistingUserId(user2Email);
+
+      if (existingUser1 && existingUser2) {
+        console.log('Using existing test users');
+        user1Id = existingUser1;
+        user2Id = existingUser2;
+
+        // Get their existing organizations
+        const org1Ids = await getExistingOrgIds(user1Id);
+        const org2Ids = await getExistingOrgIds(user2Id);
+
+        if (org1Ids.length > 0 && org2Ids.length > 0) {
+          org1Id = org1Ids[0];
+          org2Id = org2Ids[0];
+          console.log('Using existing test organizations');
+        } else {
+          // Create new organizations
+          org1Id = await createTestOrganization('Test Org 1', user1Id);
+          org2Id = await createTestOrganization('Test Org 2', user2Id);
+        }
+      } else {
+        // Create fresh users and organizations
+        user1Id = await createTestUser(user1Email, { name: 'Test User 1' });
+        user2Id = await createTestUser(user2Email, { name: 'Test User 2' });
+        org1Id = await createTestOrganization('Test Org 1', user1Id);
+        org2Id = await createTestOrganization('Test Org 2', user2Id);
+      }
+
+      // Create user clients
       user1Client = await createUserClient(user1Id, user1Email);
       user2Client = await createUserClient(user2Id, user2Email);
-      org1Id = await createTestOrganization('Test Org 1', user1Id);
-      org2Id = await createTestOrganization('Test Org 2', user2Id);
     },
 
     async teardown() {
-      await deleteTestOrganization(org1Id);
-      await deleteTestOrganization(org2Id);
-      await deleteTestUser(user1Id);
-      await deleteTestUser(user2Id);
+      if (org1Id) await deleteTestOrganization(org1Id);
+      if (org2Id) await deleteTestOrganization(org2Id);
+      if (user1Id) await deleteTestUser(user1Id);
+      if (user2Id) await deleteTestUser(user2Id);
       await user1Client?.auth.signOut();
       await user2Client?.auth.signOut();
     },

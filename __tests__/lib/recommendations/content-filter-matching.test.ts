@@ -5,11 +5,14 @@
  */
 
 import { describe, it, expect, jest, beforeEach } from '@jest/globals';
-import { contentBasedRecommendations } from '@/lib/recommendations/content-filter';
-import { createClient } from '@/lib/supabase/server';
 
-// Type the mocked function (manual mock is automatically loaded)
-const mockCreateClient = createClient as jest.MockedFunction<typeof createClient>;
+const mockCreateClient = jest.fn();
+
+jest.mock('@/lib/supabase/server', () => ({
+  createClient: mockCreateClient,
+}));
+
+import { contentBasedRecommendations } from '@/lib/recommendations/content-filter';
 
 describe('Content-Based Filter - Matching', () => {
   let mockSupabase: any;
@@ -26,10 +29,7 @@ describe('Content-Based Filter - Matching', () => {
       in: jest.fn().mockReturnThis(),
     };
 
-    // Configure the mock
-    // Use jest.requireMock to get the mocked module and configure it
-    const supabaseModule = jest.requireMock('@/lib/supabase/server');
-    supabaseModule.createClient.mockResolvedValue(mockSupabase);
+    mockCreateClient.mockResolvedValue(mockSupabase);
   });
 
   describe('category matching', () => {

@@ -82,6 +82,11 @@ describe('ShopifySetupAgent', () => {
   });
 
   describe('getWorkflow', () => {
+    beforeEach(() => {
+      // Reset the WorkflowRegistry mock
+      jest.clearAllMocks();
+    });
+
     it('should retrieve workflow from knowledge base', async () => {
       const mockWorkflow = [
         {
@@ -93,7 +98,8 @@ describe('ShopifySetupAgent', () => {
         }
       ];
 
-      (WorkflowRegistry.get as jest.Mock).mockReturnValue(mockWorkflow);
+      // Access the mock directly - it should be a jest.fn() from our mock
+      (WorkflowRegistry.get as any) = jest.fn().mockReturnValue(mockWorkflow);
 
       const workflow = await agent.getWorkflow();
 
@@ -102,7 +108,7 @@ describe('ShopifySetupAgent', () => {
     });
 
     it('should use fallback workflow when knowledge base unavailable', async () => {
-      (WorkflowRegistry.get as jest.Mock).mockImplementation(() => {
+      (WorkflowRegistry.get as any) = jest.fn().mockImplementation(() => {
         throw new Error('Workflow not found');
       });
 
@@ -116,7 +122,8 @@ describe('ShopifySetupAgent', () => {
     });
 
     it('should have complete fallback workflow steps', async () => {
-      (WorkflowRegistry.get as jest.Mock).mockImplementation(() => {
+      const mockGet = WorkflowRegistry.get as jest.MockedFunction<typeof WorkflowRegistry.get>;
+      mockGet.mockImplementation(() => {
         throw new Error('Workflow not found');
       });
 
@@ -133,11 +140,16 @@ describe('ShopifySetupAgent', () => {
   });
 
   describe('getCredentials', () => {
+    beforeEach(() => {
+      jest.clearAllMocks();
+    });
+
     it('should retrieve Shopify admin credentials from vault', async () => {
       const mockEmail = { value: 'admin@teststore.com' };
       const mockPassword = { value: 'secure-password' };
 
-      (credentialVault.getCredential as jest.Mock)
+      const mockGetCredential = credentialVault.getCredential as jest.MockedFunction<typeof credentialVault.getCredential>;
+      mockGetCredential
         .mockResolvedValueOnce(mockEmail)
         .mockResolvedValueOnce(mockPassword);
 
@@ -162,7 +174,8 @@ describe('ShopifySetupAgent', () => {
     });
 
     it('should throw error when email credential not found', async () => {
-      (credentialVault.getCredential as jest.Mock)
+      const mockGetCredential = credentialVault.getCredential as jest.MockedFunction<typeof credentialVault.getCredential>;
+      mockGetCredential
         .mockResolvedValueOnce(null)
         .mockResolvedValueOnce({ value: 'password' });
 
@@ -172,7 +185,8 @@ describe('ShopifySetupAgent', () => {
     });
 
     it('should throw error when password credential not found', async () => {
-      (credentialVault.getCredential as jest.Mock)
+      const mockGetCredential = credentialVault.getCredential as jest.MockedFunction<typeof credentialVault.getCredential>;
+      mockGetCredential
         .mockResolvedValueOnce({ value: 'email@test.com' })
         .mockResolvedValueOnce(null);
 
@@ -182,7 +196,8 @@ describe('ShopifySetupAgent', () => {
     });
 
     it('should handle vault errors gracefully', async () => {
-      (credentialVault.getCredential as jest.Mock).mockRejectedValue(
+      const mockGetCredential = credentialVault.getCredential as jest.MockedFunction<typeof credentialVault.getCredential>;
+      mockGetCredential.mockRejectedValue(
         new Error('Vault connection error')
       );
 
@@ -397,7 +412,8 @@ describe('ShopifySetupAgent', () => {
         }
       ];
 
-      (WorkflowRegistry.get as jest.Mock).mockReturnValue(mockWorkflow);
+      const mockGet = WorkflowRegistry.get as jest.MockedFunction<typeof WorkflowRegistry.get>;
+      mockGet.mockReturnValue(mockWorkflow);
 
       const workflow = await agent.getWorkflow();
 
@@ -411,7 +427,8 @@ describe('ShopifySetupAgent', () => {
     });
 
     it('should provide complete workflow for credential generation', async () => {
-      (WorkflowRegistry.get as jest.Mock).mockImplementation(() => {
+      const mockGet = WorkflowRegistry.get as jest.MockedFunction<typeof WorkflowRegistry.get>;
+      mockGet.mockImplementation(() => {
         throw new Error('Use fallback');
       });
 

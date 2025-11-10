@@ -140,6 +140,16 @@ export class CircuitBreaker {
   }
 
   /**
+   * Reset all statistics (for testing purposes)
+   */
+  private resetStats(): void {
+    this.totalExecutions = 0;
+    this.totalFailures = 0;
+    this.totalSuccesses = 0;
+    this.log('Statistics reset');
+  }
+
+  /**
    * Transition between states with logging
    */
   private transitionState(
@@ -195,6 +205,7 @@ export class CircuitBreaker {
   forceClose(): void {
     this.transitionState(this.state, 'closed', 'forced close');
     this.reset();
+    this.resetStats();
   }
 
   /**

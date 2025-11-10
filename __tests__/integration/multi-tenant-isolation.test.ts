@@ -60,17 +60,7 @@ describe('Multi-Tenant Data Isolation', () => {
     }
 
     // Setup users and organizations with proper RLS
-    try {
-      await rlsTest.setup();
-    } catch (error) {
-      // If setup fails due to existing users, skip tests gracefully
-      if (error instanceof Error && error.message.includes('email_exists')) {
-        console.warn('Test users already exist - please clean up manually or wait for teardown');
-        // Mark as "should run" false to skip tests
-        return;
-      }
-      throw error;
-    }
+    await rlsTest.setup();
 
     const timestamp = Date.now();
 
@@ -98,7 +88,8 @@ describe('Multi-Tenant Data Isolation', () => {
       organization_id: rlsTest.org1Id,
       domain: `test1-${timestamp}.example.com`,
       business_name: 'Test Business 1',
-      business_description: 'E-commerce test business for org 1'
+      business_description: 'E-commerce test business for org 1',
+      app_id: `app_test1_${timestamp.toString().slice(-8)}`
     });
     configId1 = config1.id;
 
@@ -106,7 +97,8 @@ describe('Multi-Tenant Data Isolation', () => {
       organization_id: rlsTest.org2Id,
       domain: `test2-${timestamp}.example.com`,
       business_name: 'Test Business 2',
-      business_description: 'E-commerce test business for org 2'
+      business_description: 'E-commerce test business for org 2',
+      app_id: `app_test2_${timestamp.toString().slice(-8)}`
     });
     configId2 = config2.id;
   });
@@ -291,7 +283,7 @@ describe('Multi-Tenant Data Isolation', () => {
 
       const embed1 = await insertAsAdmin('page_embeddings', {
         page_id: page1Id,
-        domain_id: domainId1,
+        domain_id: configId1, // FK references customer_configs.id
         chunk_text: 'Org 1 chunk',
         embedding: dummyVector
       });
@@ -299,7 +291,7 @@ describe('Multi-Tenant Data Isolation', () => {
 
       const embed2 = await insertAsAdmin('page_embeddings', {
         page_id: page2Id,
-        domain_id: domainId2,
+        domain_id: configId2, // FK references customer_configs.id
         chunk_text: 'Org 2 chunk',
         embedding: dummyVector
       });
@@ -332,7 +324,7 @@ describe('Multi-Tenant Data Isolation', () => {
 
       // Should NOT contain org1's embeddings
       expect(contents2).not.toContain('Org 1 chunk');
-    });
+    }, 15000); // Increase timeout to 15 seconds for large embedding tables
 
     it('should prevent access to other domain\'s scraped pages', async () => {
       if (!shouldRun) return;
