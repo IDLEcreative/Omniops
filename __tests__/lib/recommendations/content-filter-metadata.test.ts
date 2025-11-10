@@ -5,33 +5,35 @@
  */
 
 import { describe, it, expect, jest, beforeEach } from '@jest/globals';
-import {
-  createMockSupabaseClient,
-  setupSupabaseMock,
-  mockReferenceProducts,
-  mockAllProducts,
-} from '@/__tests__/utils/recommendations/content-filter-helpers';
-
-const mockCreateClient = jest.fn();
-
-jest.mock('@/lib/supabase/server', () => ({
-  createClient: mockCreateClient,
-}));
-
 import { contentBasedRecommendations } from '@/lib/recommendations/content-filter';
+import { createClient } from '@/lib/supabase/server';
+
+// Type the mocked function (manual mock is automatically loaded)
+const mockCreateClient = createClient as jest.MockedFunction<typeof createClient>;
 
 describe('Content-Based Filter - Metadata', () => {
   let mockSupabase: any;
 
   beforeEach(() => {
     jest.clearAllMocks();
-    mockSupabase = createMockSupabaseClient();
-    setupSupabaseMock(mockCreateClient, mockSupabase);
+
+    mockSupabase = {
+      from: jest.fn().mockReturnThis(),
+      select: jest.fn().mockReturnThis(),
+      eq: jest.fn().mockReturnThis(),
+      in: jest.fn().mockReturnThis(),
+    };
+
+    // Configure the mock
+    // Use jest.requireMock to get the mocked module and configure it
+    const supabaseModule = jest.requireMock('@/lib/supabase/server');
+    supabaseModule.createClient.mockResolvedValue(mockSupabase);
   });
 
   describe('metadata extraction', () => {
     it('should extract categories from multiple reference products', async () => {
-      mockSupabase.select.mockResolvedValueOnce({
+      // First query: get reference products (ends with .in())
+      mockSupabase.in.mockResolvedValueOnce({
         data: [
           {
             product_id: 'ref-1',
@@ -45,9 +47,16 @@ describe('Content-Based Filter - Metadata', () => {
         error: null,
       });
 
-      mockAllProducts(mockSupabase, [
-        { productId: 'prod-1', categories: ['cat-1', 'cat-2'], tags: [] },
-      ]);
+      // Second query: get all products (ends with .eq())
+      mockSupabase.eq.mockResolvedValueOnce({
+        data: [
+          {
+            product_id: 'prod-1',
+            metadata: { categories: ['cat-1', 'cat-2'], tags: [] },
+          },
+        ],
+        error: null,
+      });
 
       const result = await contentBasedRecommendations({
         domainId: 'domain-123',
@@ -60,7 +69,7 @@ describe('Content-Based Filter - Metadata', () => {
     });
 
     it('should handle products without metadata', async () => {
-      mockSupabase.select.mockResolvedValueOnce({
+      mockSupabase.in.mockResolvedValueOnce({
         data: [
           {
             product_id: 'ref-1',
@@ -70,9 +79,15 @@ describe('Content-Based Filter - Metadata', () => {
         error: null,
       });
 
-      mockAllProducts(mockSupabase, [
-        { productId: 'prod-1', categories: ['cat-1'], tags: [] },
-      ]);
+      mockSupabase.eq.mockResolvedValueOnce({
+        data: [
+          {
+            product_id: 'prod-1',
+            metadata: { categories: ['cat-1'], tags: [] },
+          },
+        ],
+        error: null,
+      });
 
       const result = await contentBasedRecommendations({
         domainId: 'domain-123',
@@ -85,14 +100,17 @@ describe('Content-Based Filter - Metadata', () => {
     });
 
     it('should accept categories parameter directly', async () => {
-      mockSupabase.select.mockResolvedValueOnce({
-        data: [],
+      // When no productIds, first query returns empty but doesn't error
+      // Only one query is made (to get all products)
+      mockSupabase.eq.mockResolvedValueOnce({
+        data: [
+          {
+            product_id: 'prod-1',
+            metadata: { categories: ['hydraulics'], tags: [] },
+          },
+        ],
         error: null,
       });
-
-      mockAllProducts(mockSupabase, [
-        { productId: 'prod-1', categories: ['hydraulics'], tags: [] },
-      ]);
 
       const result = await contentBasedRecommendations({
         domainId: 'domain-123',
@@ -104,14 +122,16 @@ describe('Content-Based Filter - Metadata', () => {
     });
 
     it('should accept tags parameter directly', async () => {
-      mockSupabase.select.mockResolvedValueOnce({
-        data: [],
+      // When no productIds, only one query is made (to get all products)
+      mockSupabase.eq.mockResolvedValueOnce({
+        data: [
+          {
+            product_id: 'prod-1',
+            metadata: { categories: [], tags: ['industrial'] },
+          },
+        ],
         error: null,
       });
-
-      mockAllProducts(mockSupabase, [
-        { productId: 'prod-1', categories: [], tags: ['industrial'] },
-      ]);
 
       const result = await contentBasedRecommendations({
         domainId: 'domain-123',
@@ -125,13 +145,25 @@ describe('Content-Based Filter - Metadata', () => {
 
   describe('reason building', () => {
     it('should build reason for category and tag matches', async () => {
-      mockReferenceProducts(mockSupabase, [
-        { productId: 'ref-1', categories: ['hydraulics'], tags: ['industrial'] },
-      ]);
+      mockSupabase.in.mockResolvedValueOnce({
+        data: [
+          {
+            product_id: 'ref-1',
+            metadata: { categories: ['hydraulics'], tags: ['industrial'] },
+          },
+        ],
+        error: null,
+      });
 
-      mockAllProducts(mockSupabase, [
-        { productId: 'prod-1', categories: ['hydraulics'], tags: ['industrial'] },
-      ]);
+      mockSupabase.eq.mockResolvedValueOnce({
+        data: [
+          {
+            product_id: 'prod-1',
+            metadata: { categories: ['hydraulics'], tags: ['industrial'] },
+          },
+        ],
+        error: null,
+      });
 
       const result = await contentBasedRecommendations({
         domainId: 'domain-123',
@@ -144,13 +176,25 @@ describe('Content-Based Filter - Metadata', () => {
     });
 
     it('should build reason for category match only', async () => {
-      mockReferenceProducts(mockSupabase, [
-        { productId: 'ref-1', categories: ['hydraulics'], tags: ['tag-1'] },
-      ]);
+      mockSupabase.in.mockResolvedValueOnce({
+        data: [
+          {
+            product_id: 'ref-1',
+            metadata: { categories: ['hydraulics'], tags: ['tag-1'] },
+          },
+        ],
+        error: null,
+      });
 
-      mockAllProducts(mockSupabase, [
-        { productId: 'prod-1', categories: ['hydraulics'], tags: ['tag-2'] },
-      ]);
+      mockSupabase.eq.mockResolvedValueOnce({
+        data: [
+          {
+            product_id: 'prod-1',
+            metadata: { categories: ['hydraulics'], tags: ['tag-2'] },
+          },
+        ],
+        error: null,
+      });
 
       const result = await contentBasedRecommendations({
         domainId: 'domain-123',
@@ -164,7 +208,7 @@ describe('Content-Based Filter - Metadata', () => {
 
   describe('error handling', () => {
     it('should handle database errors gracefully', async () => {
-      mockSupabase.select.mockResolvedValue({
+      mockSupabase.in.mockResolvedValue({
         data: null,
         error: new Error('DB error'),
       });
@@ -179,12 +223,8 @@ describe('Content-Based Filter - Metadata', () => {
     });
 
     it('should handle empty product list', async () => {
-      mockSupabase.select.mockResolvedValueOnce({
-        data: [],
-        error: null,
-      });
-
-      mockSupabase.select.mockResolvedValueOnce({
+      // When productIds is empty, only second query is made
+      mockSupabase.eq.mockResolvedValueOnce({
         data: [],
         error: null,
       });

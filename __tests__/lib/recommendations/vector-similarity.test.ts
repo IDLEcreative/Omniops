@@ -7,22 +7,22 @@
 import { describe, it, expect, jest, beforeEach } from '@jest/globals';
 
 // Mock dependencies
-const mockCreateClient = jest.fn();
 const mockOpenAI = {
   embeddings: {
     create: jest.fn(),
   },
 };
 
-jest.mock('@/lib/supabase/server', () => ({
-  createClient: mockCreateClient,
-}));
-
 jest.mock('openai', () => {
   return jest.fn().mockImplementation(() => mockOpenAI);
 });
 
+// Import createClient from the mocked module (manual mock is automatically loaded)
 import { vectorSimilarityRecommendations } from '@/lib/recommendations/vector-similarity';
+import { createClient } from '@/lib/supabase/server';
+
+// Type the mocked function
+const mockCreateClient = createClient as jest.MockedFunction<typeof createClient>;
 
 describe('Vector Similarity Recommendations', () => {
   let mockSupabase: any;
@@ -40,7 +40,11 @@ describe('Vector Similarity Recommendations', () => {
       rpc: jest.fn(),
     };
 
-    mockCreateClient.mockResolvedValue(mockSupabase);
+    // Reset and configure the mock
+    mockCreateClient.mockReset();
+    // Use jest.requireMock to get the mocked module and configure it
+    const supabaseModule = jest.requireMock('@/lib/supabase/server');
+    supabaseModule.createClient.mockResolvedValue(mockSupabase);
   });
 
   describe('findSimilarProducts', () => {

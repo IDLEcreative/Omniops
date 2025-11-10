@@ -5,14 +5,11 @@
  */
 
 import { describe, it, expect, jest, beforeEach } from '@jest/globals';
-
-const mockCreateClient = jest.fn();
-
-jest.mock('@/lib/supabase/server', () => ({
-  createClient: mockCreateClient,
-}));
-
 import { contentBasedRecommendations } from '@/lib/recommendations/content-filter';
+import { createClient } from '@/lib/supabase/server';
+
+// Type the mocked function (manual mock is automatically loaded)
+const mockCreateClient = createClient as jest.MockedFunction<typeof createClient>;
 
 describe('Content-Based Filter - Matching', () => {
   let mockSupabase: any;
@@ -20,6 +17,8 @@ describe('Content-Based Filter - Matching', () => {
   beforeEach(() => {
     jest.clearAllMocks();
 
+    // Mock Supabase client with chainable methods
+    // Note: .eq() is terminal for second query, .in() is terminal for first query
     mockSupabase = {
       from: jest.fn().mockReturnThis(),
       select: jest.fn().mockReturnThis(),
@@ -27,13 +26,16 @@ describe('Content-Based Filter - Matching', () => {
       in: jest.fn().mockReturnThis(),
     };
 
-    mockCreateClient.mockResolvedValue(mockSupabase);
+    // Configure the mock
+    // Use jest.requireMock to get the mocked module and configure it
+    const supabaseModule = jest.requireMock('@/lib/supabase/server');
+    supabaseModule.createClient.mockResolvedValue(mockSupabase);
   });
 
   describe('category matching', () => {
     it('should find products in same category', async () => {
-      // Mock reference product metadata
-      mockSupabase.select.mockResolvedValueOnce({
+      // Mock reference product metadata (first query ends with .in())
+      mockSupabase.in.mockResolvedValueOnce({
         data: [
           {
             product_id: 'ref-1',
@@ -46,8 +48,8 @@ describe('Content-Based Filter - Matching', () => {
         error: null,
       });
 
-      // Mock all products for comparison
-      mockSupabase.select.mockResolvedValueOnce({
+      // Mock all products for comparison (second query ends with .eq())
+      mockSupabase.eq.mockResolvedValueOnce({
         data: [
           {
             product_id: 'prod-1',
@@ -80,7 +82,7 @@ describe('Content-Based Filter - Matching', () => {
     });
 
     it('should calculate Jaccard similarity for categories', async () => {
-      mockSupabase.select.mockResolvedValueOnce({
+      mockSupabase.in.mockResolvedValueOnce({
         data: [
           {
             product_id: 'ref-1',
@@ -93,7 +95,7 @@ describe('Content-Based Filter - Matching', () => {
         error: null,
       });
 
-      mockSupabase.select.mockResolvedValueOnce({
+      mockSupabase.eq.mockResolvedValueOnce({
         data: [
           {
             product_id: 'prod-1',
@@ -125,7 +127,7 @@ describe('Content-Based Filter - Matching', () => {
     });
 
     it('should weight categories more than tags (70/30)', async () => {
-      mockSupabase.select.mockResolvedValueOnce({
+      mockSupabase.in.mockResolvedValueOnce({
         data: [
           {
             product_id: 'ref-1',
@@ -138,7 +140,7 @@ describe('Content-Based Filter - Matching', () => {
         error: null,
       });
 
-      mockSupabase.select.mockResolvedValueOnce({
+      mockSupabase.eq.mockResolvedValueOnce({
         data: [
           {
             product_id: 'prod-1',
@@ -171,7 +173,7 @@ describe('Content-Based Filter - Matching', () => {
 
   describe('tag matching', () => {
     it('should find products with similar tags', async () => {
-      mockSupabase.select.mockResolvedValueOnce({
+      mockSupabase.in.mockResolvedValueOnce({
         data: [
           {
             product_id: 'ref-1',
@@ -184,7 +186,7 @@ describe('Content-Based Filter - Matching', () => {
         error: null,
       });
 
-      mockSupabase.select.mockResolvedValueOnce({
+      mockSupabase.eq.mockResolvedValueOnce({
         data: [
           {
             product_id: 'prod-1',
@@ -208,7 +210,7 @@ describe('Content-Based Filter - Matching', () => {
     });
 
     it('should be case-insensitive for tag matching', async () => {
-      mockSupabase.select.mockResolvedValueOnce({
+      mockSupabase.in.mockResolvedValueOnce({
         data: [
           {
             product_id: 'ref-1',
@@ -221,7 +223,7 @@ describe('Content-Based Filter - Matching', () => {
         error: null,
       });
 
-      mockSupabase.select.mockResolvedValueOnce({
+      mockSupabase.eq.mockResolvedValueOnce({
         data: [
           {
             product_id: 'prod-1',

@@ -5,12 +5,6 @@
  */
 
 import { describe, it, expect, jest, beforeEach } from '@jest/globals';
-import {
-  createMockSupabaseClient,
-  setupSupabaseMock,
-  mockReferenceProducts,
-  mockAllProducts,
-} from '@/__tests__/utils/recommendations/content-filter-helpers';
 
 const mockCreateClient = jest.fn();
 
@@ -25,19 +19,40 @@ describe('Content-Based Filter - Scoring', () => {
 
   beforeEach(() => {
     jest.clearAllMocks();
-    mockSupabase = createMockSupabaseClient();
-    setupSupabaseMock(mockCreateClient, mockSupabase);
+
+    mockSupabase = {
+      from: jest.fn().mockReturnThis(),
+      select: jest.fn().mockReturnThis(),
+      eq: jest.fn().mockReturnThis(),
+      in: jest.fn().mockReturnThis(),
+    };
+
+    // Use jest.requireMock to get the mocked module and configure it
+    const supabaseModule = jest.requireMock('@/lib/supabase/server');
+    supabaseModule.createClient.mockResolvedValue(mockSupabase);
   });
 
   describe('filtering and ranking', () => {
     it('should filter products with score < 0.2', async () => {
-      mockReferenceProducts(mockSupabase, [
-        { productId: 'ref-1', categories: ['cat-1', 'cat-2', 'cat-3'], tags: [] },
-      ]);
+      mockSupabase.in.mockResolvedValueOnce({
+        data: [
+          {
+            product_id: 'ref-1',
+            metadata: { categories: ['cat-1', 'cat-2', 'cat-3'], tags: [] },
+          },
+        ],
+        error: null,
+      });
 
-      mockAllProducts(mockSupabase, [
-        { productId: 'prod-1', categories: ['cat-1'], tags: [] }, // Low similarity
-      ]);
+      mockSupabase.eq.mockResolvedValueOnce({
+        data: [
+          {
+            product_id: 'prod-1',
+            metadata: { categories: ['cat-1'], tags: [] }, // Low similarity
+          },
+        ],
+        error: null,
+      });
 
       const result = await contentBasedRecommendations({
         domainId: 'domain-123',
@@ -52,14 +67,29 @@ describe('Content-Based Filter - Scoring', () => {
     });
 
     it('should exclude specified products', async () => {
-      mockReferenceProducts(mockSupabase, [
-        { productId: 'ref-1', categories: ['cat-1'], tags: [] },
-      ]);
+      mockSupabase.in.mockResolvedValueOnce({
+        data: [
+          {
+            product_id: 'ref-1',
+            metadata: { categories: ['cat-1'], tags: [] },
+          },
+        ],
+        error: null,
+      });
 
-      mockAllProducts(mockSupabase, [
-        { productId: 'prod-1', categories: ['cat-1'], tags: [] },
-        { productId: 'prod-2', categories: ['cat-1'], tags: [] },
-      ]);
+      mockSupabase.eq.mockResolvedValueOnce({
+        data: [
+          {
+            product_id: 'prod-1',
+            metadata: { categories: ['cat-1'], tags: [] },
+          },
+          {
+            product_id: 'prod-2',
+            metadata: { categories: ['cat-1'], tags: [] },
+          },
+        ],
+        error: null,
+      });
 
       const result = await contentBasedRecommendations({
         domainId: 'domain-123',
@@ -72,15 +102,33 @@ describe('Content-Based Filter - Scoring', () => {
     });
 
     it('should sort by score descending', async () => {
-      mockReferenceProducts(mockSupabase, [
-        { productId: 'ref-1', categories: ['cat-1', 'cat-2'], tags: [] },
-      ]);
+      mockSupabase.in.mockResolvedValueOnce({
+        data: [
+          {
+            product_id: 'ref-1',
+            metadata: { categories: ['cat-1', 'cat-2'], tags: [] },
+          },
+        ],
+        error: null,
+      });
 
-      mockAllProducts(mockSupabase, [
-        { productId: 'prod-1', categories: ['cat-1', 'cat-2'], tags: [] }, // High score
-        { productId: 'prod-2', categories: ['cat-1'], tags: [] }, // Medium score
-        { productId: 'prod-3', categories: ['cat-3'], tags: [] }, // Low score (filtered)
-      ]);
+      mockSupabase.eq.mockResolvedValueOnce({
+        data: [
+          {
+            product_id: 'prod-1',
+            metadata: { categories: ['cat-1', 'cat-2'], tags: [] }, // High score
+          },
+          {
+            product_id: 'prod-2',
+            metadata: { categories: ['cat-1'], tags: [] }, // Medium score
+          },
+          {
+            product_id: 'prod-3',
+            metadata: { categories: ['cat-3'], tags: [] }, // Low score (filtered)
+          },
+        ],
+        error: null,
+      });
 
       const result = await contentBasedRecommendations({
         domainId: 'domain-123',
@@ -95,17 +143,23 @@ describe('Content-Based Filter - Scoring', () => {
     });
 
     it('should respect limit parameter', async () => {
-      mockReferenceProducts(mockSupabase, [
-        { productId: 'ref-1', categories: ['cat-1'], tags: [] },
-      ]);
+      mockSupabase.in.mockResolvedValueOnce({
+        data: [
+          {
+            product_id: 'ref-1',
+            metadata: { categories: ['cat-1'], tags: [] },
+          },
+        ],
+        error: null,
+      });
 
-      mockAllProducts(mockSupabase, [
-        ...Array.from({ length: 10 }, (_, i) => ({
-          productId: `prod-${i}`,
-          categories: ['cat-1'],
-          tags: [],
+      mockSupabase.eq.mockResolvedValueOnce({
+        data: Array.from({ length: 10 }, (_, i) => ({
+          product_id: `prod-${i}`,
+          metadata: { categories: ['cat-1'], tags: [] },
         })),
-      ]);
+        error: null,
+      });
 
       const result = await contentBasedRecommendations({
         domainId: 'domain-123',

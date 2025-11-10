@@ -9,16 +9,11 @@ import { describe, it, expect, jest, beforeEach } from '@jest/globals';
 import type { SupabaseClient } from '@supabase/supabase-js';
 
 // Mock dependencies
-const mockCreateClient = jest.fn();
 const mockVectorSimilarity = jest.fn();
 const mockCollaborativeFilter = jest.fn();
 const mockContentBased = jest.fn();
 const mockHybridRanker = jest.fn();
 const mockAnalyzeContext = jest.fn();
-
-jest.mock('@/lib/supabase/server', () => ({
-  createClient: mockCreateClient,
-}));
 
 jest.mock('@/lib/recommendations/vector-similarity', () => ({
   vectorSimilarityRecommendations: mockVectorSimilarity,
@@ -45,6 +40,10 @@ import {
   trackRecommendationEvent,
   getRecommendationMetrics,
 } from '@/lib/recommendations/engine';
+import { createClient } from '@/lib/supabase/server';
+
+// Type the mocked function (manual mock is automatically loaded)
+const mockCreateClient = createClient as jest.MockedFunction<typeof createClient>;
 
 describe('Recommendation Engine', () => {
   let mockSupabase: any;
@@ -64,7 +63,11 @@ describe('Recommendation Engine', () => {
       rpc: jest.fn(),
     };
 
-    mockCreateClient.mockResolvedValue(mockSupabase);
+    // Reset and configure the mock
+    mockCreateClient.mockReset();
+    // Use jest.requireMock to get the mocked module and configure it
+    const supabaseModule = jest.requireMock('@/lib/supabase/server');
+    supabaseModule.createClient.mockResolvedValue(mockSupabase);
   });
 
   describe('getRecommendations', () => {
