@@ -58,6 +58,8 @@ const customJestConfig = {
     // NOTE: scraper-api and scraper-with-cleanup are mocked via jest.mock() in test-setup.ts
     // NOT via moduleNameMapper, so they can be properly spied on
     '^@/lib/middleware/csrf$': '<rootDir>/__mocks__/@/lib/middleware/csrf.ts',
+    // NOTE: recommendation mocks (vector-similarity, collaborative-filter, content-filter)
+    // are mocked via jest.mock() in jest.setup.js, NOT via moduleNameMapper
     // Catch-all pattern - MUST be last
     '^@/(.*)$': '<rootDir>/$1',
   },

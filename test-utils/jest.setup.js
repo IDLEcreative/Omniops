@@ -237,6 +237,17 @@ jest.mock('next/headers', () => ({
   })),
 }))
 
+// Mock recommendation algorithms for testing
+jest.mock('@/lib/recommendations/vector-similarity', () => ({
+  vectorSimilarityRecommendations: jest.fn().mockResolvedValue([]),
+}))
+jest.mock('@/lib/recommendations/collaborative-filter', () => ({
+  collaborativeFilterRecommendations: jest.fn().mockResolvedValue([]),
+}))
+jest.mock('@/lib/recommendations/content-filter', () => ({
+  contentBasedRecommendations: jest.fn().mockResolvedValue([]),
+}))
+
 // Establish API mocking before all tests (guarded for Node/MSW compatibility)
 beforeAll(() => {
   try {

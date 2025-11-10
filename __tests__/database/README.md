@@ -18,7 +18,7 @@ Tests for database layer functionality including Supabase operations, security p
 __tests__/database/
 ├── test-chunk-quality-analysis.ts          # Chunk quality metrics
 ├── test-chunk-ranking-simple.ts            # Chunk ranking algorithms
-├── test-database-cleanup.ts                # Cleanup utilities
+├── test-database-cleanup.ts                # Cleanup CLI tool (refactored)
 ├── test-full-page-final-verification.ts    # Page retrieval validation
 ├── test-full-page-retrieval-10mtr.ts       # 10MTR retrieval strategy
 ├── test-full-page-retrieval-detailed.ts    # Detailed page retrieval
@@ -27,7 +27,14 @@ __tests__/database/
 ├── test-rpc-page-id.ts                     # RPC function tests
 ├── test-scattered-chunks-verification.ts   # Chunk distribution tests
 ├── test-storage-utilities.ts               # Storage helper tests
-└── test-supabase-insert-debug.ts           # Insert debugging
+├── test-supabase-insert-debug.ts           # Insert debugging
+├── cleanup/                                # Cleanup tool modules (refactored)
+│   ├── cli-helpers.ts                      # CLI formatting and interaction
+│   ├── commands.ts                         # Command handlers
+│   ├── deletion-executor.ts                # Core deletion logic
+│   ├── stats-query.ts                      # Statistics gathering
+│   └── README.md                           # Module documentation
+└── REFACTORING_REPORT.md                   # Cleanup tool refactoring report
 ```
 
 ## Running Tests
@@ -45,6 +52,32 @@ npm test -- test-chunk-quality-analysis
 # Run with real Supabase (requires connection)
 SUPABASE_URL=xxx npm test -- __tests__/database/
 ```
+
+## Database Cleanup Tool
+
+**Location:** `test-database-cleanup.ts` (refactored 2025-11-10)
+
+The database cleanup tool has been refactored into focused modules for better maintainability:
+
+```bash
+# Show statistics
+npx tsx test-database-cleanup.ts stats
+npx tsx test-database-cleanup.ts stats --domain=example.com
+
+# Preview cleanup (dry run)
+npx tsx test-database-cleanup.ts clean --dry-run
+
+# Execute cleanup
+npx tsx test-database-cleanup.ts clean --domain=example.com
+```
+
+**Refactoring Details:**
+- **Original:** Single 535-line file
+- **Refactored:** 8 focused modules, all <300 LOC
+- **Status:** ✓ Complete | **Verification:** TypeScript compilation successful
+- **Backward Compatibility:** ✓ CLI interface identical
+
+See `cleanup/README.md` and `REFACTORING_REPORT.md` for complete documentation.
 
 ## Key Test Areas
 

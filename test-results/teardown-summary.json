@@ -1,7 +1,7 @@
 {
-  "teardownTime": "2025-11-10T09:42:23.764Z",
-  "setupTime": "2025-11-10T09:42:22.543Z",
-  "duration": 1221,
+  "teardownTime": "2025-11-10T09:53:05.971Z",
+  "setupTime": "2025-11-10T09:52:49.138Z",
+  "duration": 16833,
   "testResultsPath": "/Users/jamesguy/Omniops/test-results",
   "generatedFiles": [
     "browser-availability.json",
