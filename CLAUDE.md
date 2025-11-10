@@ -1067,6 +1067,20 @@ See [REFERENCE_DATABASE_SCHEMA.md](docs/09-REFERENCE/REFERENCE_DATABASE_SCHEMA.m
 
 **DO NOT Wait for User Permission** - If you identify a parallelizable task, immediately orchestrate agents!
 
+**📖 BEFORE Deploying Agents - Consult the Playbook:**
+
+When you identify a task suitable for parallel agents:
+1. **Read** [ANALYSIS_PARALLEL_AGENT_ORCHESTRATION.md](docs/10-ANALYSIS/ANALYSIS_PARALLEL_AGENT_ORCHESTRATION.md)
+2. **Use** the appropriate agent prompt template (Code Refactoring, Database Migration, or Test Creation)
+3. **Apply** proven patterns from week-by-week breakdown
+4. **Follow** structured reporting format for consolidation
+
+**Quick Template Selection:**
+- **Refactoring** 20+ files with same pattern → Use "Code Refactoring Agent" template (line 1671)
+- **Database** migrations/schema changes → Use "Database Migration Agent" template (line 1767)
+- **Testing** comprehensive test suite creation → Use "Test Creation Agent" template (line 1910)
+- **Pattern Application** (ESLint fixes, import updates) → Use **Haiku model** (90% cheaper, line 1299)
+
 #### Fix Issues Immediately with Agents
 
 **CRITICAL**: When you encounter ANY issue during your work, deploy an agent to fix it immediately. DO NOT defer, document for later, or ask the user first.
