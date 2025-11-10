@@ -11,7 +11,7 @@
 - **File Purpose:** Primary instruction set for Claude Code AI assistant
 - **Critical Sections:** Lines 6-165 (brand-agnostic, file placement, agents), 785-1044 (fix issues, create tests)
 - **Total MUST/NEVER Rules:** 52 directives
-- **Line Count:** ~1,700 lines
+- **Line Count:** ~1,700 lines ⚠️ **VIOLATES 300 LOC RULE** - needs refactoring into multiple files
 - **Estimated Parse Time:** 30 seconds
 
 **⚡ Quick Navigation:**
@@ -28,8 +28,8 @@
 **MUST Rules (Required Actions):**
 1. **[Line 10-17]** NEVER hardcode: company names, products, industries, domains, URLs, emails
 2. **[Line 68]** NEVER create files in root (only config files allowed)
-3. **[Line 729]** Files MUST be under 300 LOC - refactor if exceeded
-4. **[Line 734]** ALWAYS read entire file before making any changes
+3. **[Line 1008]** ALL files MUST be under 300 LOC - NO EXCEPTIONS (including docs, markdown, CLAUDE.md)
+4. **[Line 1020]** ALWAYS read entire file before making any changes
 5. **[Line 783]** Deploy agents immediately for parallelizable tasks (no user permission needed)
 6. **[Line 787]** Deploy agent immediately when encountering ANY issue
 7. **[Line 879]** Deploy testing agent immediately after completing any code
@@ -99,7 +99,7 @@ Dependency updates needed    → Deploy parallel agents by category (line 1013)
 
 ### Code Quality Triggers (Refactor Immediately)
 ```
-File exceeds 300 LOC         → Refactor into smaller modules (line 729)
+File exceeds 300 LOC         → Refactor into smaller modules (line 1008) - NO EXCEPTIONS
 Mock >3 levels deep          → Refactor for dependency injection (line 1159)
 Test setup >20 lines         → Refactor architecture (line 1160)
 O(n²) algorithm detected     → Optimize to O(n) or O(n log n) (line 1516-1623)
@@ -1005,9 +1005,17 @@ See [REFERENCE_DATABASE_SCHEMA.md](docs/09-REFERENCE/REFERENCE_DATABASE_SCHEMA.m
 ---
 
 ### FILE LENGTH
-- **STRICT RULE**: All files must be under 300 LOC
-- Current codebase has violations that need refactoring
+- **STRICT RULE**: ALL files must be under 300 LOC (including documentation, markdown files, and CLAUDE.md itself)
+- **NO EXCEPTIONS**: Documentation files, configuration files, test files - everything must be <300 LOC
+- Current codebase has violations that need refactoring (including this file)
 - Files must be modular & single-purpose
+- **CLAUDE.md TODO**: Split into multiple focused files:
+  - `.claude/RULES_CRITICAL.md` - Critical rules index (~100 LOC)
+  - `.claude/TRIGGERS.md` - Auto-trigger index (~100 LOC)
+  - `.claude/PATTERNS.md` - Pattern library (~100 LOC)
+  - `.claude/MATRICES.md` - Decision matrices (~100 LOC)
+  - `.claude/PROJECT_OVERVIEW.md` - Project overview & architecture (~300 LOC)
+  - Main CLAUDE.md - High-level index pointing to sub-files (~50 LOC)
 
 ### READING FILES
 - **ALWAYS** read the entire file before making changes
