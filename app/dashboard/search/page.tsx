@@ -1,244 +1,43 @@
 'use client';
 
-import { useState, useCallback, useEffect } from 'react';
 import { ConversationSearchBar } from '@/components/search/ConversationSearchBar';
 import { SearchFilters } from '@/components/search/SearchFilters';
 import { SearchResults } from '@/components/search/SearchResults';
 import { Button } from '@/components/ui/button';
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+import { Card, CardContent } from '@/components/ui/card';
 import { Download, FileText, Table } from 'lucide-react';
-import { toast } from 'sonner';
+import { useSearchState } from '@/hooks/useSearchState';
+import { useSearchExports } from '@/hooks/useSearchExports';
 
-interface SearchState {
-  query: string;
-  filters: {
-    dateFrom?: string;
-    dateTo?: string;
-    sentiment?: 'positive' | 'negative' | 'neutral';
-    domainId?: string;
-    customerEmail?: string;
-  };
-  results: any[];
-  loading: boolean;
-  totalCount: number;
-  currentPage: number;
-  totalPages: number;
-  executionTime?: number;
-}
-
+/**
+ * Conversation Search Page
+ *
+ * Provides full-text search across all chat conversations with:
+ * - Advanced filtering (date range, sentiment, domain, customer)
+ * - Multiple export formats (CSV, PDF, Excel)
+ * - Pagination and performance metrics
+ *
+ * Refactored to use custom hooks for clean separation of concerns:
+ * - useSearchState: Search execution and state management
+ * - useSearchExports: Export functionality (CSV, PDF, Excel)
+ *
+ * Before refactoring: 337 lines (293 LOC)
+ * After refactoring: 135 lines (~110 LOC) - 62% reduction!
+ */
 export default function SearchPage() {
-  const [searchState, setSearchState] = useState<SearchState>({
-    query: '',
-    filters: {},
-    results: [],
-    loading: false,
-    totalCount: 0,
-    currentPage: 1,
-    totalPages: 0
-  });
+  const {
+    searchState,
+    handleSearch,
+    handleFilterChange,
+    handlePageChange
+  } = useSearchState();
 
-  const [exportLoading, setExportLoading] = useState<{
-    csv: boolean;
-    pdf: boolean;
-    excel: boolean;
-  }>({
-    csv: false,
-    pdf: false,
-    excel: false
-  });
-
-  // Perform search
-  const handleSearch = useCallback(async (query: string, page: number = 1) => {
-    if (!query.trim()) {
-      toast.error('Please enter a search query');
-      return;
-    }
-
-    setSearchState(prev => ({ ...prev, loading: true, query }));
-
-    try {
-      const response = await fetch('/api/search/conversations', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json'
-        },
-        body: JSON.stringify({
-          query,
-          filters: searchState.filters,
-          page,
-          limit: 20
-        })
-      });
-
-      if (!response.ok) {
-        throw new Error('Search failed');
-      }
-
-      const data = await response.json();
-
-      setSearchState(prev => ({
-        ...prev,
-        results: data.data.results,
-        totalCount: data.data.pagination.totalCount,
-        currentPage: data.data.pagination.page,
-        totalPages: data.data.pagination.totalPages,
-        executionTime: data.data.performance.executionTime,
-        loading: false
-      }));
-
-      toast.success(`Found ${data.data.pagination.totalCount} results in ${Math.round(data.data.performance.executionTime)}ms`);
-    } catch (error) {
-      console.error('Search error:', error);
-      toast.error('Search failed. Please try again.');
-      setSearchState(prev => ({ ...prev, loading: false }));
-    }
-  }, [searchState.filters]);
-
-  // Handle filter changes
-  const handleFilterChange = useCallback((filters: SearchState['filters']) => {
-    setSearchState(prev => ({ ...prev, filters }));
-  }, []);
-
-  // Handle page change
-  const handlePageChange = useCallback((page: number) => {
-    handleSearch(searchState.query, page);
-  }, [searchState.query, handleSearch]);
-
-  // Export to CSV
-  const handleExportCSV = useCallback(async () => {
-    if (!searchState.query) {
-      toast.error('No search results to export');
-      return;
-    }
-
-    setExportLoading(prev => ({ ...prev, csv: true }));
-
-    try {
-      const response = await fetch('/api/search/export/csv', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json'
-        },
-        body: JSON.stringify({
-          query: searchState.query,
-          filters: searchState.filters
-        })
-      });
-
-      if (!response.ok) {
-        throw new Error('Export failed');
-      }
-
-      // Download the CSV
-      const blob = await response.blob();
-      const url = window.URL.createObjectURL(blob);
-      const a = document.createElement('a');
-      a.href = url;
-      a.download = `search-export-${new Date().toISOString()}.csv`;
-      document.body.appendChild(a);
-      a.click();
-      document.body.removeChild(a);
-      window.URL.revokeObjectURL(url);
-
-      toast.success('CSV exported successfully');
-    } catch (error) {
-      console.error('Export error:', error);
-      toast.error('Export failed. Please try again.');
-    } finally {
-      setExportLoading(prev => ({ ...prev, csv: false }));
-    }
-  }, [searchState]);
-
-  // Export to PDF
-  const handleExportPDF = useCallback(async () => {
-    if (!searchState.query) {
-      toast.error('No search results to export');
-      return;
-    }
-
-    setExportLoading(prev => ({ ...prev, pdf: true }));
-
-    try {
-      const response = await fetch('/api/search/export/pdf', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json'
-        },
-        body: JSON.stringify({
-          query: searchState.query,
-          filters: searchState.filters
-        })
-      });
-
-      if (!response.ok) {
-        throw new Error('Export failed');
-      }
-
-      // Download the PDF
-      const blob = await response.blob();
-      const url = window.URL.createObjectURL(blob);
-      const a = document.createElement('a');
-      a.href = url;
-      a.download = `search-results-${new Date().toISOString()}.pdf`;
-      document.body.appendChild(a);
-      a.click();
-      document.body.removeChild(a);
-      window.URL.revokeObjectURL(url);
-
-      toast.success('PDF exported successfully');
-    } catch (error) {
-      console.error('Export error:', error);
-      toast.error('Export failed. Please try again.');
-    } finally {
-      setExportLoading(prev => ({ ...prev, pdf: false }));
-    }
-  }, [searchState]);
-
-  // Export to Excel (NEW! Built in 20 mins using modular architecture)
-  const handleExportExcel = useCallback(async () => {
-    if (!searchState.query) {
-      toast.error('No search results to export');
-      return;
-    }
-
-    setExportLoading(prev => ({ ...prev, excel: true }));
-
-    try {
-      const response = await fetch('/api/search/export/excel', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json'
-        },
-        body: JSON.stringify({
-          query: searchState.query,
-          filters: searchState.filters,
-          includeMetadata: true
-        })
-      });
-
-      if (!response.ok) {
-        throw new Error('Export failed');
-      }
-
-      // Download the Excel file
-      const blob = await response.blob();
-      const url = window.URL.createObjectURL(blob);
-      const a = document.createElement('a');
-      a.href = url;
-      a.download = `search-export-${new Date().toISOString()}.xlsx`;
-      document.body.appendChild(a);
-      a.click();
-      document.body.removeChild(a);
-      window.URL.revokeObjectURL(url);
-
-      toast.success('Excel file exported successfully');
-    } catch (error) {
-      console.error('Excel export error:', error);
-      toast.error('Excel export failed. Please try again.');
-    } finally {
-      setExportLoading(prev => ({ ...prev, excel: false }));
-    }
-  }, [searchState]);
+  const {
+    exportLoading,
+    handleExportCSV,
+    handleExportPDF,
+    handleExportExcel
+  } = useSearchExports(searchState.query, searchState.filters);
 
   return (
     <div className="container mx-auto p-6 space-y-6">
