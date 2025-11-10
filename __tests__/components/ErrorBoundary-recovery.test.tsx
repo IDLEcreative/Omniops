@@ -27,27 +27,37 @@ describe('ErrorBoundary - Error Recovery and Reset', () => {
     it('should reset error state when Try Again is clicked', async () => {
       let shouldThrow = true;
 
+      // Component that can be re-rendered with different props
+      function ControlledThrowError({ mustThrow }: { mustThrow: boolean }) {
+        if (mustThrow) {
+          throw new Error('Test error message');
+        }
+        return <div>No error</div>;
+      }
+
       const { rerender, user } = render(
         <ErrorBoundary>
-          <ThrowError shouldThrow={shouldThrow} />
+          <ControlledThrowError mustThrow={shouldThrow} />
         </ErrorBoundary>
       );
 
+      // Verify error is displayed
       expect(screen.getByText('Something went wrong')).toBeInTheDocument();
 
-      // Fix the error
+      // Fix the underlying problem
       shouldThrow = false;
 
-      // Click Try Again
+      // Click Try Again button - this calls handleReset which clears the error boundary state
       await user.click(screen.getByText('Try Again'));
 
-      // Re-render with fixed component
+      // Re-render with the fixed component - now it won't throw
       rerender(
         <ErrorBoundary>
-          <ThrowError shouldThrow={shouldThrow} />
+          <ControlledThrowError mustThrow={shouldThrow} />
         </ErrorBoundary>
       );
 
+      // After reset, the component should render without error
       await waitFor(() => {
         expect(screen.getByText('No error')).toBeInTheDocument();
       });
@@ -73,46 +83,67 @@ describe('ErrorBoundary - Error Recovery and Reset', () => {
 
     it('should reload page after reset if multiple errors occurred', async () => {
       const reloadSpy = jest.fn();
-      Object.defineProperty(window, 'location', {
-        value: { reload: reloadSpy },
-        writable: true,
-      });
+      const originalLocation = window.location;
+      delete (window as any).location;
+      (window as any).location = {
+        reload: reloadSpy,
+        href: '/'
+      };
 
-      // Simulate multiple errors by throwing 3 times quickly
+      let errorNumber = 0;
+      let shouldThrow = true;
+
+      // Component that throws a specific error each time
+      function MultiErrorComponent({ triggerError }: { triggerError: boolean }) {
+        if (triggerError) {
+          errorNumber++;
+          throw new Error(`Error ${errorNumber}`);
+        }
+        return <div>No error</div>;
+      }
+
       const { rerender, user } = render(
         <ErrorBoundary>
-          <ThrowError />
+          <MultiErrorComponent triggerError={shouldThrow} />
         </ErrorBoundary>
       );
 
-      // First error
+      // First error (errorCount becomes 1)
       expect(screen.getByText('Something went wrong')).toBeInTheDocument();
 
-      // Try Again to reset
+      // Reset and trigger second error quickly (errorCount becomes 2)
       await user.click(screen.getByText('Try Again'));
 
-      // Throw again quickly (within 5 seconds)
       rerender(
         <ErrorBoundary>
-          <ThrowError />
+          <MultiErrorComponent triggerError={shouldThrow} />
         </ErrorBoundary>
       );
 
+      // Second error should display
+      expect(screen.getByText('Something went wrong')).toBeInTheDocument();
+
+      // Reset and trigger third error (errorCount becomes 3)
       await user.click(screen.getByText('Try Again'));
 
-      // Third error
       rerender(
         <ErrorBoundary>
-          <ThrowError />
+          <MultiErrorComponent triggerError={shouldThrow} />
         </ErrorBoundary>
       );
 
-      // Now when clicking Try Again, it should reload
+      // Third error should display
+      expect(screen.getByText('Something went wrong')).toBeInTheDocument();
+
+      // Now clicking Try Again should trigger reload because errorCount is 3 (> 2)
       await user.click(screen.getByText('Try Again'));
 
       await waitFor(() => {
         expect(reloadSpy).toHaveBeenCalled();
       });
+
+      // Restore window.location
+      (window as any).location = originalLocation;
     });
   });
 

@@ -5,10 +5,15 @@ import { render, screen, waitFor } from '@/__tests__/utils/test-utils';
 jest.mock('@supabase/ssr');
 
 // Import the mock functions
-const { __mockGetUser, __mockOnAuthStateChange } = require('@supabase/ssr');
+const { __mockGetUser, __mockSignOut, __mockOnAuthStateChange } = require('@supabase/ssr');
 
 // Import component AFTER mocks are set up
 import { UserMenu } from '@/components/auth/user-menu';
+
+// Create local references for cleaner code
+const mockGetUser = __mockGetUser;
+const mockSignOut = __mockSignOut;
+const mockOnAuthStateChange = __mockOnAuthStateChange;
 
 // Mock Next.js navigation
 const mockPush = jest.fn();
@@ -30,16 +35,15 @@ jest.mock('next/navigation', () => ({
 }));
 
 describe('UserMenu Component - Avatar Display', () => {
-  const mockGetUser = __mockGetUser;
-  const mockOnAuthStateChange = __mockOnAuthStateChange;
-
   beforeEach(() => {
     // Clear mock call history but keep implementations
     mockGetUser.mockClear();
+    mockSignOut.mockClear();
     mockOnAuthStateChange.mockClear();
 
-    // Reset to default implementations
+    // Reset to default implementations (will be overridden in individual tests)
     mockGetUser.mockResolvedValue({ data: { user: null }, error: null });
+    mockSignOut.mockResolvedValue({ error: null });
     mockOnAuthStateChange.mockReturnValue({
       data: {
         subscription: {
