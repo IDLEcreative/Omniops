@@ -32,14 +32,40 @@ describe('Content-Based Filter - Matching', () => {
 
   describe('category matching', () => {
     it('should find products in same category', async () => {
-      mockReferenceProducts(mockSupabase, [
-        { productId: 'ref-1', categories: ['hydraulics', 'pumps'], tags: ['industrial'] },
-      ]);
+      // Mock reference product metadata
+      mockSupabase.select.mockResolvedValueOnce({
+        data: [
+          {
+            product_id: 'ref-1',
+            metadata: {
+              categories: ['hydraulics', 'pumps'],
+              tags: ['industrial'],
+            },
+          },
+        ],
+        error: null,
+      });
 
-      mockAllProducts(mockSupabase, [
-        { productId: 'prod-1', categories: ['hydraulics', 'motors'], tags: ['industrial', 'heavy-duty'] },
-        { productId: 'prod-2', categories: ['electrical'], tags: ['light-duty'] },
-      ]);
+      // Mock all products for comparison
+      mockSupabase.select.mockResolvedValueOnce({
+        data: [
+          {
+            product_id: 'prod-1',
+            metadata: {
+              categories: ['hydraulics', 'motors'],
+              tags: ['industrial', 'heavy-duty'],
+            },
+          },
+          {
+            product_id: 'prod-2',
+            metadata: {
+              categories: ['electrical'],
+              tags: ['light-duty'],
+            },
+          },
+        ],
+        error: null,
+      });
 
       const result = await contentBasedRecommendations({
         domainId: 'domain-123',
@@ -54,14 +80,38 @@ describe('Content-Based Filter - Matching', () => {
     });
 
     it('should calculate Jaccard similarity for categories', async () => {
-      mockReferenceProducts(mockSupabase, [
-        { productId: 'ref-1', categories: ['cat-1', 'cat-2'], tags: [] },
-      ]);
+      mockSupabase.select.mockResolvedValueOnce({
+        data: [
+          {
+            product_id: 'ref-1',
+            metadata: {
+              categories: ['cat-1', 'cat-2'],
+              tags: [],
+            },
+          },
+        ],
+        error: null,
+      });
 
-      mockAllProducts(mockSupabase, [
-        { productId: 'prod-1', categories: ['cat-1', 'cat-2'], tags: [] }, // Perfect match (Jaccard = 1.0)
-        { productId: 'prod-2', categories: ['cat-1'], tags: [] }, // Partial match (Jaccard = 0.5)
-      ]);
+      mockSupabase.select.mockResolvedValueOnce({
+        data: [
+          {
+            product_id: 'prod-1',
+            metadata: {
+              categories: ['cat-1', 'cat-2'], // Perfect match (Jaccard = 1.0)
+              tags: [],
+            },
+          },
+          {
+            product_id: 'prod-2',
+            metadata: {
+              categories: ['cat-1'], // Partial match (Jaccard = 0.5)
+              tags: [],
+            },
+          },
+        ],
+        error: null,
+      });
 
       const result = await contentBasedRecommendations({
         domainId: 'domain-123',
@@ -75,14 +125,38 @@ describe('Content-Based Filter - Matching', () => {
     });
 
     it('should weight categories more than tags (70/30)', async () => {
-      mockReferenceProducts(mockSupabase, [
-        { productId: 'ref-1', categories: ['cat-1'], tags: ['tag-1'] },
-      ]);
+      mockSupabase.select.mockResolvedValueOnce({
+        data: [
+          {
+            product_id: 'ref-1',
+            metadata: {
+              categories: ['cat-1'],
+              tags: ['tag-1'],
+            },
+          },
+        ],
+        error: null,
+      });
 
-      mockAllProducts(mockSupabase, [
-        { productId: 'prod-1', categories: ['cat-1'], tags: ['tag-2'] }, // Category match only
-        { productId: 'prod-2', categories: ['cat-2'], tags: ['tag-1'] }, // Tag match only
-      ]);
+      mockSupabase.select.mockResolvedValueOnce({
+        data: [
+          {
+            product_id: 'prod-1',
+            metadata: {
+              categories: ['cat-1'], // Category match only
+              tags: ['tag-2'],
+            },
+          },
+          {
+            product_id: 'prod-2',
+            metadata: {
+              categories: ['cat-2'],
+              tags: ['tag-1'], // Tag match only
+            },
+          },
+        ],
+        error: null,
+      });
 
       const result = await contentBasedRecommendations({
         domainId: 'domain-123',
@@ -97,13 +171,31 @@ describe('Content-Based Filter - Matching', () => {
 
   describe('tag matching', () => {
     it('should find products with similar tags', async () => {
-      mockReferenceProducts(mockSupabase, [
-        { productId: 'ref-1', categories: [], tags: ['industrial', 'heavy-duty', 'hydraulic'] },
-      ]);
+      mockSupabase.select.mockResolvedValueOnce({
+        data: [
+          {
+            product_id: 'ref-1',
+            metadata: {
+              categories: [],
+              tags: ['industrial', 'heavy-duty', 'hydraulic'],
+            },
+          },
+        ],
+        error: null,
+      });
 
-      mockAllProducts(mockSupabase, [
-        { productId: 'prod-1', categories: [], tags: ['industrial', 'heavy-duty'] },
-      ]);
+      mockSupabase.select.mockResolvedValueOnce({
+        data: [
+          {
+            product_id: 'prod-1',
+            metadata: {
+              categories: [],
+              tags: ['industrial', 'heavy-duty'],
+            },
+          },
+        ],
+        error: null,
+      });
 
       const result = await contentBasedRecommendations({
         domainId: 'domain-123',
@@ -116,13 +208,31 @@ describe('Content-Based Filter - Matching', () => {
     });
 
     it('should be case-insensitive for tag matching', async () => {
-      mockReferenceProducts(mockSupabase, [
-        { productId: 'ref-1', categories: [], tags: ['Industrial', 'HEAVY-DUTY'] },
-      ]);
+      mockSupabase.select.mockResolvedValueOnce({
+        data: [
+          {
+            product_id: 'ref-1',
+            metadata: {
+              categories: [],
+              tags: ['Industrial', 'HEAVY-DUTY'],
+            },
+          },
+        ],
+        error: null,
+      });
 
-      mockAllProducts(mockSupabase, [
-        { productId: 'prod-1', categories: [], tags: ['industrial', 'heavy-duty'] },
-      ]);
+      mockSupabase.select.mockResolvedValueOnce({
+        data: [
+          {
+            product_id: 'prod-1',
+            metadata: {
+              categories: [],
+              tags: ['industrial', 'heavy-duty'],
+            },
+          },
+        ],
+        error: null,
+      });
 
       const result = await contentBasedRecommendations({
         domainId: 'domain-123',

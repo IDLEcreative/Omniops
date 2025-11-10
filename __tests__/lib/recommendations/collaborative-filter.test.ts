@@ -7,30 +7,26 @@
 
 import {
   createMockSupabaseClient,
-  setupSequentialMocks,
   type MockSupabaseClient,
 } from '@/__tests__/utils/recommendations/supabase-mock-factory';
 
-// Jest will auto-mock @/lib/supabase/server via moduleNameMapper
-// Import the implementation - the mock will be used automatically
+// Jest automatically mocks @/lib/supabase/server via the manual mock at __mocks__/@/lib/supabase/server.ts
 import { collaborativeFilterRecommendations } from '@/lib/recommendations/collaborative-filter';
 import { createClient } from '@/lib/supabase/server';
 
-// Get the mocked version
-jest.mock('@/lib/supabase/server');
-const mockCreateClient = jest.mocked(createClient);
+// Mock is already loaded - just type it
+const mockCreateClient = createClient as jest.MockedFunction<typeof createClient>;
 
 describe('Collaborative Filter Recommendations', () => {
   let mockSupabase: MockSupabaseClient;
 
   beforeEach(() => {
-    // Clear previous mock data but keep mock implementation
-    mockCreateClient.mockClear();
-
-    // Create a fresh mock Supabase client
+    // Create a fresh mock Supabase client for this test
     mockSupabase = createMockSupabaseClient();
 
-    // Configure the mocked createClient to return our custom mock
+    // The manual mock already returns a client, but we want to return our specific one
+    // Clear and reconfigure
+    mockCreateClient.mockReset();
     mockCreateClient.mockResolvedValue(mockSupabase as any);
   });
 
