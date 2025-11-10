@@ -67,7 +67,7 @@ export class ParentStorageAdapter {
   /**
    * Set item in storage (parent localStorage if in iframe, regular localStorage otherwise)
    */
-  setItem(key: string, value: string): void {
+  async setItem(key: string, value: string): Promise<void> {
     if (!this.isInIframe) {
       // Not in iframe, use regular localStorage
       try {
@@ -90,7 +90,7 @@ export class ParentStorageAdapter {
   /**
    * Remove item from storage (parent localStorage if in iframe, regular localStorage otherwise)
    */
-  removeItem(key: string): void {
+  async removeItem(key: string): Promise<void> {
     if (!this.isInIframe) {
       // Not in iframe, use regular localStorage
       try {

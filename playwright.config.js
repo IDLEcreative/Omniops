@@ -49,17 +49,24 @@ const playwrightConfig = {
   use: {
     // Base URL for relative paths
     baseURL: 'http://localhost:3000',
-    
+
     // Browser context settings
     ignoreHTTPSErrors: true,
     viewport: { width: 1280, height: 720 },
-    
+
     // User agent for scraping
     userAgent: 'Mozilla/5.0 (compatible; CustomerServiceAgent/1.0; Web-Scraper)',
-    
+
     // Default timeouts
     actionTimeout: 10000,
     navigationTimeout: 30000,
+
+    // Automatic screenshots on failure for AI debugging
+    screenshot: 'only-on-failure',
+    video: 'retain-on-failure',
+
+    // Capture trace for debugging (includes screenshots, DOM, network)
+    trace: 'on-first-retry',
   },
   
   // Browser projects configuration

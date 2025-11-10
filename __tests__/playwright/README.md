@@ -26,6 +26,16 @@ __tests__/playwright/
 ├── integrations/               # Third-party integration flows
 │   └── woocommerce-integration-e2e.spec.ts # Setup → Sync → Search → Purchase
 │
+├── scraping/                   # Web scraping flows
+│   └── scraping-flow.spec.ts               # Enter Domain → Scraping → Content Searchable
+│
+├── dashboard/                  # Dashboard feature flows
+│   ├── widget-installation.spec.ts         # Configure → Customize → Install → Verify
+│   └── domain-configuration.spec.ts        # Add Domain → Configure → Multi-tenant Isolation
+│
+├── chat/                       # Chat functionality flows
+│   └── multi-turn-chat.spec.ts             # Multi-turn conversation with context
+│
 ├── analytics-dashboard-display.spec.ts      # ✅ Good coverage (75%)
 ├── gdpr-privacy.spec.ts                     # ✅ Excellent! (95%) - Use as template
 ├── chat-widget-integration.spec.ts          # ⚠️  Needs enhancement (40%)
@@ -59,19 +69,31 @@ __tests__/playwright/
 - **Duration:** ~120 seconds
 - **Status:** ✅ Implemented
 
-### 🟡 Priority 2: Core Functionality (TODO)
+### 🟢 Priority 2: Core Functionality (IMPLEMENTED ✅)
 
-**Scraping Flow**
+**Scraping Flow** ([scraping/scraping-flow.spec.ts](scraping/scraping-flow.spec.ts))
 - **Journey:** Enter Domain → Scraping → Completion → **Content Searchable**
-- **File:** `scraping/scraping-flow.spec.ts` (NOT YET IMPLEMENTED)
+- **Impact:** HIGH - validates content ingestion pipeline
+- **Duration:** ~60 seconds
+- **Status:** ✅ Implemented
 
-**Widget Installation**
+**Widget Installation** ([dashboard/widget-installation.spec.ts](dashboard/widget-installation.spec.ts))
 - **Journey:** Configure → Customize → Install → **Verify Loaded**
-- **File:** `dashboard/widget-installation.spec.ts` (NOT YET IMPLEMENTED)
+- **Impact:** HIGH - validates customer onboarding
+- **Duration:** ~45 seconds
+- **Status:** ✅ Implemented
 
-**Multi-turn Chat**
+**Multi-turn Chat** ([chat/multi-turn-chat.spec.ts](chat/multi-turn-chat.spec.ts))
 - **Journey:** Question 1 → Answer → Question 2 with **Context**
-- **File:** `chat/multi-turn-chat.spec.ts` (NOT YET IMPLEMENTED)
+- **Impact:** HIGH - validates conversation quality
+- **Duration:** ~40 seconds
+- **Status:** ✅ Implemented
+
+**Domain Configuration** ([dashboard/domain-configuration.spec.ts](dashboard/domain-configuration.spec.ts))
+- **Journey:** Add Domain → Configure → Save → **Multi-tenant Isolation**
+- **Impact:** CRITICAL - validates multi-tenant core
+- **Duration:** ~50 seconds
+- **Status:** ✅ Implemented
 
 ### 🟢 Priority 3: Advanced Features (TODO)
 
@@ -248,19 +270,21 @@ test.afterEach(async ({ page }, testInfo) => {
 
 **Current Coverage:**
 - ✅ Revenue flows: 3/3 (100%)
-- ⏳ Core features: 0/4 (0%)
+- ✅ Core features: 4/4 (100%)
 - ⏳ Advanced features: 0/7 (0%)
 
-**Overall:** ~18% complete (3/17 critical tests)
+**Overall:** ~35% complete (7/20 critical tests - DOUBLED from 18%!)
 
 ---
 
 ## Next Steps
 
-1. ✅ **Phase 1 Complete:** Critical revenue flows implemented
-2. ⏳ **Phase 2:** Core functionality tests (scraping, widget, chat)
-3. ⏳ **Phase 3:** Advanced features (team, conversations, realtime)
-4. ⏳ **Phase 4:** Error scenarios and edge cases
+1. ✅ **Phase 1 Complete:** Critical revenue flows implemented (3 tests)
+2. ✅ **Phase 2 Complete:** Core functionality tests implemented (4 tests)
+3. ⏳ **Phase 3:** Advanced features (team, conversations, realtime) - 7 tests planned
+4. ⏳ **Phase 4:** Error scenarios and edge cases - 6 tests planned
+
+**Recent Completion:** Phase 2 finished 2025-11-09 with 4 new tests covering scraping, widget installation, multi-turn chat, and domain configuration.
 
 See [ANALYSIS_MISSING_E2E_TESTS.md](../../docs/10-ANALYSIS/ANALYSIS_MISSING_E2E_TESTS.md) for complete implementation plan.
 
@@ -269,10 +293,12 @@ See [ANALYSIS_MISSING_E2E_TESTS.md](../../docs/10-ANALYSIS/ANALYSIS_MISSING_E2E_
 ## Related Documentation
 
 - **[Missing E2E Tests Analysis](../../docs/10-ANALYSIS/ANALYSIS_MISSING_E2E_TESTS.md)** - Complete audit and roadmap
+- **[Phase 1 Completion Report](../../ARCHIVE/completion-reports-2025-11/E2E_TESTS_PRIORITY_1_COMPLETE.md)** - Revenue flows implementation
+- **[Phase 2 Completion Report](../../ARCHIVE/completion-reports-2025-11/E2E_TESTS_PHASE_2_COMPLETE.md)** - Core functionality implementation
 - **[Playwright Config](../../playwright.config.js)** - Test configuration
 - **[GDPR Privacy Test](gdpr-privacy.spec.ts)** - ⭐ Best example to follow
 - **[Playwright Documentation](https://playwright.dev/)** - Official docs
-- **[Main Tests README](../__tests__/README.md)** - All test types
+- **[Main Tests README](../README.md)** - All test types
 
 ---
 

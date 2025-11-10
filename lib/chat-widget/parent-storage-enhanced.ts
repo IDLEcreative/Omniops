@@ -98,7 +98,7 @@ export class EnhancedParentStorageAdapter {
   /**
    * Set item in storage with debouncing
    */
-  setItem(key: string, value: string): void {
+  async setItem(key: string, value: string): Promise<void> {
     this.cache.set(key, value);
 
     if (!this.isInIframe) {
@@ -112,7 +112,7 @@ export class EnhancedParentStorageAdapter {
   /**
    * Remove item from storage
    */
-  removeItem(key: string): void {
+  async removeItem(key: string): Promise<void> {
     this.cache.delete(key);
 
     if (!this.isInIframe) {

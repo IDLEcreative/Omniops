@@ -1,14 +1,14 @@
 {
   "chromium": {
-    "available": false,
-    "error": "browserType.launch: Executable doesn't exist at /Users/jamesguy/Library/Caches/ms-playwright/chromium_headless_shell-1194/chrome-mac/headless_shell\n╔═════════════════════════════════════════════════════════════════════════╗\n║ Looks like Playwright Test or Playwright was just installed or updated. ║\n║ Please run the following command to download new browsers:              ║\n║                                                                         ║\n║     npx playwright install                                              ║\n║                                                                         ║\n║ <3 Playwright Team                                                      ║\n╚═════════════════════════════════════════════════════════════════════════╝"
+    "available": true,
+    "version": "141.0.7390.37"
   },
   "firefox": {
-    "available": false,
-    "error": "browserType.launch: Executable doesn't exist at /Users/jamesguy/Library/Caches/ms-playwright/firefox-1495/firefox/Nightly.app/Contents/MacOS/firefox\n╔═════════════════════════════════════════════════════════════════════════╗\n║ Looks like Playwright Test or Playwright was just installed or updated. ║\n║ Please run the following command to download new browsers:              ║\n║                                                                         ║\n║     npx playwright install                                              ║\n║                                                                         ║\n║ <3 Playwright Team                                                      ║\n╚═════════════════════════════════════════════════════════════════════════╝"
+    "available": true,
+    "version": "142.0.1"
   },
   "webkit": {
-    "available": false,
-    "error": "browserType.launch: Executable doesn't exist at /Users/jamesguy/Library/Caches/ms-playwright/webkit-2215/pw_run.sh\n╔═════════════════════════════════════════════════════════════════════════╗\n║ Looks like Playwright Test or Playwright was just installed or updated. ║\n║ Please run the following command to download new browsers:              ║\n║                                                                         ║\n║     npx playwright install                                              ║\n║                                                                         ║\n║ <3 Playwright Team                                                      ║\n╚═════════════════════════════════════════════════════════════════════════╝"
+    "available": true,
+    "version": "26.0"
   }
 }

@@ -1,0 +1,30 @@
+#!/bin/sh
+echo "🧪 Running tests before push..."
+
+# Run unit and integration tests
+echo "\n📦 Running unit and integration tests..."
+npm test -- --bail --passWithNoTests
+
+if [ $? -ne 0 ]; then
+  echo ""
+  echo "❌ Unit/Integration tests failed! Cannot push."
+  echo "   Fix failing tests or use 'git push --no-verify' to bypass."
+  exit 1
+fi
+
+echo "✅ Unit/Integration tests passed!"
+
+# Run critical E2E tests (core user journeys)
+echo "\n🎭 Running critical E2E tests (core journeys)..."
+npm run test:e2e:critical
+
+if [ $? -ne 0 ]; then
+  echo ""
+  echo "❌ E2E tests failed! Core user journeys are broken."
+  echo "   This means AI agents will fail when executing workflows."
+  echo "   Fix failing E2E tests or use 'git push --no-verify' to bypass."
+  exit 1
+fi
+
+echo "✅ All critical E2E tests passed!"
+echo "✅ Ready to push - AI agents can execute workflows successfully!"

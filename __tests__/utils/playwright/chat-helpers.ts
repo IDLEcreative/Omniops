@@ -1,83 +1,98 @@
-/**
- * Chat Widget E2E Test Helpers
- *
- * Reusable utilities for chat widget testing
- */
-
 import { Page, FrameLocator } from '@playwright/test';
 
-export interface ChatResponse {
-  success: boolean;
-  response: string;
-  sources?: Array<{ url: string; title: string }>;
-  message_count?: number;
-  messages_remaining?: number;
-}
+/**
+ * Chat Helper Functions for Playwright E2E Tests
+ *
+ * Reusable utilities for interacting with the chat widget across tests.
+ */
 
 /**
- * Wait for chat widget to load
+ * Wait for chat widget iframe to load and return frame locator
  */
 export async function waitForChatWidget(page: Page, timeout = 15000): Promise<FrameLocator> {
-  const iframeLocator = page.locator('iframe#chat-widget-iframe');
-  await iframeLocator.waitFor({ state: 'attached', timeout });
-  await page.waitForTimeout(3000); // Give widget time to initialize
-  return page.frameLocator('iframe#chat-widget-iframe');
+  console.log('📍 Waiting for chat widget to load...');
+
+  const widgetIframe = page.locator('iframe#chat-widget-iframe, iframe[title*="chat" i]');
+  await widgetIframe.waitFor({ state: 'attached', timeout });
+  await page.waitForTimeout(3000); // Allow widget to initialize
+
+  console.log('✅ Chat widget loaded');
+  return page.frameLocator('iframe#chat-widget-iframe, iframe[title*="chat" i]');
 }
 
 /**
- * Send chat message and wait for response
+ * Send a message in the chat widget
  */
-export async function sendChatMessage(
-  iframe: FrameLocator,
-  message: string
-): Promise<void> {
+export async function sendChatMessage(iframe: FrameLocator, message: string): Promise<void> {
+  console.log(`📤 Sending message: "${message}"`);
+
   const inputField = iframe.locator('input[type="text"], textarea').first();
   await inputField.waitFor({ state: 'visible', timeout: 10000 });
   await inputField.fill(message);
 
-  const sendButton = iframe.locator('button[type="submit"], button[aria-label*="send" i]').first();
+  const sendButton = iframe.locator('button[type="submit"]').first();
   await sendButton.click();
 
-  console.log(`✅ Sent message: "${message}"`);
+  console.log('✅ Message sent');
 }
 
 /**
- * Mock chat API with custom response
+ * Mock chat API and track responses
  */
 export async function mockChatAPI(
   page: Page,
-  responseGenerator: (message: string) => ChatResponse
-): Promise<{ response: ChatResponse | null }> {
-  const state = { response: null as ChatResponse | null };
+  responseGenerator: () => { success: boolean; response: string; sources?: Array<{ url: string; title: string }> }
+): Promise<{ response: any }> {
+  console.log('🔧 Setting up chat API mock...');
+
+  const state = { response: null as any };
 
   await page.route('**/api/chat', async (route) => {
     const requestData = route.request().postDataJSON();
-    console.log('🔍 Chat request:', { message: requestData.message });
+    console.log('🔍 Chat request received:', requestData.message?.substring(0, 50));
 
-    const response = responseGenerator(requestData.message);
-    state.response = response;
+    const responseData = responseGenerator();
+    state.response = responseData;
 
     await route.fulfill({
       status: 200,
       contentType: 'application/json',
-      body: JSON.stringify(response)
+      body: JSON.stringify(responseData)
     });
   });
 
+  console.log('✅ Chat API mock ready');
   return state;
 }
 
 /**
- * Mock demo chat API
+ * Mock demo chat API (for landing page demo flow)
  */
-export async function mockDemoChatAPI(
-  page: Page,
-  domain: string
-): Promise<{ response: ChatResponse | null }> {
-  return mockChatAPI(page, (message) => ({
-    success: true,
-    response: `Based on the content from ${domain}, I can help you with information about the website. The site contains various pages and content that I've analyzed. What would you like to know more about?`,
-    message_count: 1,
-    messages_remaining: 19
-  }));
+export async function mockDemoChatAPI(page: Page, demoSite: string): Promise<{ response: any }> {
+  console.log('🔧 Setting up demo chat API mock...');
+
+  const state = { response: null as any };
+
+  await page.route('**/api/demo/chat', async (route) => {
+    const requestData = route.request().postDataJSON();
+    console.log('🔍 Demo chat request:', requestData.message?.substring(0, 50));
+
+    const responseData = {
+      success: true,
+      response: `Based on the content from ${demoSite}, I can help you with information about their products and services.`,
+      message_count: 1,
+      messages_remaining: 19
+    };
+
+    state.response = responseData;
+
+    await route.fulfill({
+      status: 200,
+      contentType: 'application/json',
+      body: JSON.stringify(responseData)
+    });
+  });
+
+  console.log('✅ Demo chat API mock ready');
+  return state;
 }

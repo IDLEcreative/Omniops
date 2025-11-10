@@ -97,6 +97,42 @@ export interface DashboardAnalyticsData {
     positiveMessages: number;
     negativeMessages: number;
   };
+  // User Analytics
+  userMetrics?: {
+    dailyActiveUsers: number;
+    totalUniqueUsers: number;
+    growthRate: number;
+    growthAbsolute: number;
+  };
+  sessionMetrics?: {
+    avgDuration: number;
+    medianDuration: number;
+    totalSessions: number;
+    bounceRate: number;
+  };
+  pageViews?: {
+    total: number;
+    uniquePages: number;
+    avgPerSession: number;
+    topPages: Array<{ url: string; views: number }>;
+  };
+  shoppingBehavior?: {
+    productViews: number;
+    uniqueProducts: number;
+    cartViews: number;
+    checkoutViews: number;
+    conversionRate: number;
+    avgProductsPerSession: number;
+  };
+  dailyUsers?: Array<{
+    date: string;
+    users: number;
+    newUsers: number;
+    returningUsers: number;
+    sessions: number;
+    avgSessionDuration: number;
+    pageViews: number;
+  }>;
 }
 
 export interface DashboardConversation {

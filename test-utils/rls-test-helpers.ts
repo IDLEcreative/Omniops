@@ -9,11 +9,11 @@
 
 import { createClient } from '@supabase/supabase-js';
 import type { SupabaseClient } from '@supabase/supabase-js';
-import { fetch as undicicFetch } from 'undici';
+import fetch from 'cross-fetch';
 
-// Use undici's fetch directly to bypass MSW interception in tests
-// MSW wraps globalThis.fetch, but undici is the underlying implementation
-const nativeFetch = undicicFetch as typeof fetch;
+// Use cross-fetch to provide fetch in Node.js test environment
+// Compatible with both Node.js and browser environments
+const nativeFetch = fetch;
 
 // Helper functions to get environment variables dynamically
 // This allows tests to override them after module import
