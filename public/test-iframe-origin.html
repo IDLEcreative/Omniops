@@ -1,0 +1,63 @@
+<!DOCTYPE html>
+<html>
+<head><title>Test Iframe Origin</title></head>
+<body>
+<h1>Testing Iframe Origins</h1>
+<button onclick="testPostMessage()">Test PostMessage</button>
+<div id="log"></div>
+
+<script>
+function log(msg) {
+  document.getElementById('log').innerHTML += msg + '<br>';
+}
+
+// Create srcdoc iframe
+const iframe = document.createElement('iframe');
+iframe.srcdoc = `
+  <!DOCTYPE html>
+  <html>
+  <body>
+    <script>
+      console.log('[Iframe] window.location.origin:', window.location.origin);
+      console.log('[Iframe] typeof window.location.origin:', typeof window.location.origin);
+      console.log('[Iframe] window.location.origin === "null":', window.location.origin === 'null');
+      
+      window.addEventListener('message', (event) => {
+        console.log('[Iframe] Received message from:', event.origin);
+        console.log('[Iframe] Message:', event.data);
+        
+        // Check our validation logic
+        const inIframe = window !== window.parent;
+        const isSrcdocIframe = window.location.origin === 'null';
+        console.log('[Iframe] inIframe:', inIframe, 'isSrcdocIframe:', isSrcdocIframe);
+        
+        let isAllowedOrigin = false;
+        if (inIframe && isSrcdocIframe) {
+          isAllowedOrigin = event.origin.startsWith('http://localhost') ||
+                           event.origin.startsWith('https://');
+          console.log('[Iframe] Using srcdoc validation, result:', isAllowedOrigin);
+        }
+        
+        window.parent.postMessage({ received: true, origin: event.origin }, '*');
+      });
+    <\/script>
+  </body>
+  </html>
+`;
+
+document.body.appendChild(iframe);
+
+function testPostMessage() {
+  log('Parent origin: ' + window.location.origin);
+  log('Sending message to iframe...');
+  iframe.contentWindow.postMessage({ type: 'test', msg: 'hello' }, window.location.origin);
+}
+
+window.addEventListener('message', (event) => {
+  if (event.data.received) {
+    log('Iframe confirmed receipt from origin: ' + event.data.origin);
+  }
+});
+</script>
+</body>
+</html>

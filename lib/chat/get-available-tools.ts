@@ -31,17 +31,31 @@ export async function checkToolAvailability(domain: string): Promise<ToolAvailab
       .single();
 
     if (error || !data) {
-      // No configuration found - check environment variables as fallback
+      // No configuration found for this domain - NO tools available
+      // Environment variables are only used for the DEFAULT_DOMAIN
+      const isDefaultDomain = domain === process.env.TEST_DOMAIN ||
+                             domain === process.env.DEFAULT_DOMAIN ||
+                             domain === 'thompsonseparts.co.uk'; // Primary customer
+
+      if (isDefaultDomain) {
+        // Only use environment variables for the primary/test domain
+        return {
+          hasWooCommerce: Boolean(
+            process.env.WOOCOMMERCE_URL &&
+            process.env.WOOCOMMERCE_CONSUMER_KEY &&
+            process.env.WOOCOMMERCE_CONSUMER_SECRET
+          ),
+          hasShopify: Boolean(
+            process.env.SHOPIFY_SHOP &&
+            process.env.SHOPIFY_ACCESS_TOKEN
+          )
+        };
+      }
+
+      // For any other domain without configuration, NO e-commerce tools
       return {
-        hasWooCommerce: Boolean(
-          process.env.WOOCOMMERCE_URL &&
-          process.env.WOOCOMMERCE_CONSUMER_KEY &&
-          process.env.WOOCOMMERCE_CONSUMER_SECRET
-        ),
-        hasShopify: Boolean(
-          process.env.SHOPIFY_SHOP &&
-          process.env.SHOPIFY_ACCESS_TOKEN
-        )
+        hasWooCommerce: false,
+        hasShopify: false
       };
     }
 

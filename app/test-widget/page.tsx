@@ -20,6 +20,9 @@ export default function TestWidgetPage() {
         },
         debug: true,
       };
+
+      // Enable debug mode globally
+      (window as any).ChatWidgetDebug = true;
     }
   }, []);
 

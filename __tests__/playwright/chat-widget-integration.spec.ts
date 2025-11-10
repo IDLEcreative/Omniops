@@ -17,6 +17,23 @@ test.describe('Chat Widget Integration E2E', () => {
   test('should load widget, open programmatically, and send message with session metadata', async ({ page }) => {
     console.log('=== Starting E2E Chat Widget Integration Test ===');
 
+    // Capture console logs from the page
+    page.on('console', msg => {
+      const type = msg.type();
+      const text = msg.text();
+      // Log all console messages to see debug output
+      console.log(`[Browser ${type}]:`, text);
+    });
+
+    // Capture console logs from all frames (including iframe)
+    page.on('framenavigated', (frame) => {
+      frame.on('console', msg => {
+        const type = msg.type();
+        const text = msg.text();
+        console.log(`[Iframe ${type}]:`, text);
+      });
+    });
+
     // Step 1: Navigate to page with embedded widget
     console.log('📍 Step 1: Navigating to widget test page');
     await page.goto(`${BASE_URL}/test-widget`, { waitUntil: 'networkidle' });
@@ -58,15 +75,33 @@ test.describe('Chat Widget Integration E2E', () => {
     console.log('📍 Step 4: Waiting for widget to initialize');
     await page.waitForTimeout(3000);
 
-    // Step 5: Open widget programmatically using ChatWidget API
-    console.log('📍 Step 5: Opening widget via ChatWidget.open() API');
+    // Step 5: Check iframe state before opening
+    console.log('📍 Step 5: Checking iframe state before opening');
+
+    const iframeOrigin = await page.evaluate(() => {
+      const iframeEl = document.querySelector('iframe#chat-widget-iframe') as HTMLIFrameElement;
+      if (iframeEl && iframeEl.contentWindow) {
+        try {
+          return iframeEl.contentWindow.location.origin;
+        } catch (e) {
+          return 'Cannot access (cross-origin or srcdoc)';
+        }
+      }
+      return 'Iframe not found';
+    });
+    console.log('Iframe origin:', iframeOrigin);
+
+    // Open widget programmatically
+    console.log('📍 Opening widget via ChatWidget.open() API');
 
     await page.evaluate(() => {
+      console.log('[Parent] Calling ChatWidget.open()...');
       (window as any).ChatWidget?.open();
+      console.log('[Parent] ChatWidget.open() called');
     });
 
     console.log('✅ Widget.open() called, waiting for expansion...');
-    await page.waitForTimeout(2000);
+    await page.waitForTimeout(3000);
 
     // Step 6: Verify widget expanded by checking for input field
     console.log('📍 Step 6: Verifying widget expanded');

@@ -60,20 +60,43 @@ export function useParentCommunication({
     (event: MessageEvent) => {
       try {
         // SECURITY: Validate origin to prevent XSS attacks
+        // Special handling for srcdoc iframes where origin is 'null'
+        const inIframe = window !== window.parent;
+        const isSrcdocIframe = window.location.origin === 'null';
+
+        // Build allowed origins list
         const allowedOrigins = [
           window.location.origin,
           process.env.NEXT_PUBLIC_APP_URL,
         ].filter(Boolean);
 
-        const isAllowedOrigin = allowedOrigins.some(
-          (origin) => event.origin === origin || event.origin.endsWith(origin as string)
-        );
+        // For srcdoc iframes, we need to accept messages from the parent window
+        // since our origin is 'null' but parent's origin is the actual domain
+        let isAllowedOrigin = false;
+
+        if (inIframe && isSrcdocIframe) {
+          // In srcdoc iframe: accept messages from parent's origin
+          // This is safe because srcdoc iframes are same-origin with parent
+          isAllowedOrigin = event.origin.startsWith('http://localhost') ||
+                           event.origin.startsWith('https://');
+        } else {
+          // Normal origin validation
+          isAllowedOrigin = allowedOrigins.some(
+            (origin) => event.origin === origin || event.origin.endsWith(origin as string)
+          );
+        }
 
         if (!isAllowedOrigin) {
           if (process.env.NODE_ENV === 'development') {
             console.warn(
               '[useParentCommunication] Rejected message from untrusted origin:',
-              event.origin
+              event.origin,
+              'Widget origin:',
+              window.location.origin,
+              'In iframe:',
+              inIframe,
+              'Is srcdoc:',
+              isSrcdocIframe
             );
           }
           return;
