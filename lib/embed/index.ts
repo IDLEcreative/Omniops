@@ -17,9 +17,16 @@ import { loadRemoteConfig, loadWidgetBundle, loadConfigByAppId } from './config-
 async function initialize() {
   console.log('[Chat Widget] Initialize function called');
 
-  // Prevent concurrent initialization attempts
+  // Prevent concurrent initialization attempts using DOM-based lock
+  const existingInitFlag = document.querySelector('[data-widget-init-lock="true"]');
+  if (existingInitFlag) {
+    logDebug('Widget initialization already in progress (DOM lock detected), skipping');
+    return;
+  }
+
+  // Also check JavaScript flag as fallback
   if ((window as any)._widgetInitializing) {
-    logDebug('Widget initialization already in progress, skipping');
+    logDebug('Widget initialization already in progress (JS flag), skipping');
     return;
   }
 
@@ -38,7 +45,8 @@ async function initialize() {
     // Check if widget exists - allow re-initialization only if config changed
     const existingIframe = document.getElementById('chat-widget-iframe');
     if (existingIframe) {
-      // Compare current config with previously stored config
+      // Check if page was reloaded (data-ready cleared by beforeunload at line 204)
+      const pageReloaded = !existingIframe.hasAttribute('data-ready');
       const storedLanguage = localStorage.getItem('omniops_ui_language');
       const currentConfigStr = JSON.stringify({
         domain: config.domain,
@@ -47,9 +55,9 @@ async function initialize() {
       });
       const lastConfigStr = (window as any)._lastWidgetConfig;
 
-      // Only reinitialize if config actually changed
-      if (currentConfigStr !== lastConfigStr) {
-        console.log('[Widget] Config changed, cleaning up previous instance');
+      // ALWAYS reinitialize if page was reloaded OR config changed
+      if (pageReloaded || currentConfigStr !== lastConfigStr) {
+        console.log('[Widget] Reinitializing - page reload or config change detected');
         existingIframe.remove();
         delete (window as any)._lastWidgetConfig;
         delete (window as any)._widgetInitializing;
@@ -60,7 +68,11 @@ async function initialize() {
       }
     }
 
-    // Mark initialization as in progress
+    // Mark initialization as in progress using both DOM and JS flags
+    const initLock = document.createElement('meta');
+    initLock.setAttribute('data-widget-init-lock', 'true');
+    initLock.setAttribute('id', 'widget-init-lock');
+    document.head.appendChild(initLock);
     (window as any)._widgetInitializing = true;
 
     // Get stored language preference (used for config comparison and auto-detection)
@@ -188,7 +200,8 @@ async function initialize() {
           console.log('[Chat Widget] Initialization complete, widget ready for interaction');
         }
 
-        // Mark initialization as complete
+        // Mark initialization as complete - remove both DOM and JS locks
+        document.getElementById('widget-init-lock')?.remove();
         (window as any)._widgetInitializing = false;
       }, 100);
     };
@@ -205,9 +218,11 @@ async function initialize() {
       }
       delete (window as any)._lastWidgetConfig;
       delete (window as any)._widgetInitializing;
+      document.getElementById('widget-init-lock')?.remove();
     });
   } catch (error) {
     logError('Failed to initialize chat widget', error);
+    document.getElementById('widget-init-lock')?.remove(); // Remove DOM lock
     (window as any)._widgetInitializing = false; // Reset on error
   }
 }
