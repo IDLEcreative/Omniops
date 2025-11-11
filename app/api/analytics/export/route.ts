@@ -17,7 +17,6 @@
  */
 
 import { NextRequest, NextResponse } from 'next/server';
-import { createServiceRoleClient } from '@/lib/supabase-server';
 import { analyseMessages } from '@/lib/dashboard/analytics';
 import { calculateUserAnalytics } from '@/lib/dashboard/analytics/user-analytics';
 import { requireAuth } from '@/lib/middleware/auth';
@@ -31,6 +30,12 @@ import {
   generatePDFFilename,
   type ExportFormat,
 } from '@/lib/analytics/export';
+import { createServiceRoleClient } from '@/lib/supabase-server';
+
+const formatDate = (date: Date): string => {
+  const [dayPart] = date.toISOString().split('T');
+  return dayPart ?? date.toISOString();
+};
 
 export async function GET(request: NextRequest) {
   try {
@@ -42,7 +47,7 @@ export async function GET(request: NextRequest) {
     const { user, supabase } = authResult;
 
     // 2. Rate Limiting: 10 exports per hour
-    const rateLimitError = await checkAnalyticsRateLimit(user, 'export', 10, 3600);
+    const rateLimitError = await checkAnalyticsRateLimit(user, 'export');
     if (rateLimitError) {
       return rateLimitError;
     }
@@ -98,9 +103,6 @@ export async function GET(request: NextRequest) {
 
     // 8. Fetch analytics data
     const serviceSupabase = await createServiceRoleClient();
-    if (!serviceSupabase) {
-      throw new Error('Failed to create Supabase client');
-    }
 
     // Fetch messages
     let messageAnalytics = null;
@@ -129,16 +131,18 @@ export async function GET(request: NextRequest) {
     }
 
     // 9. Generate export based on format
+    const dateRange = {
+      start: formatDate(startDate),
+      end: formatDate(endDate),
+    };
+
     const exportOptions = {
       includeMessageAnalytics: includeMessage,
       includeUserAnalytics: includeUser,
       includeDailyMetrics,
       includeTopQueries,
       includeLanguageDistribution: includeLanguages,
-      dateRange: {
-        start: startDate.toISOString().split('T')[0],
-        end: endDate.toISOString().split('T')[0],
-      },
+      dateRange,
       organizationName: organization?.name || 'Analytics Report',
     };
 
@@ -170,7 +174,10 @@ export async function GET(request: NextRequest) {
     }
 
     // 10. Return file as download
-    return new NextResponse(fileBuffer, {
+    const responseBody: BodyInit =
+      typeof fileBuffer === 'string' ? fileBuffer : new Blob([fileBuffer]);
+
+    return new NextResponse(responseBody, {
       headers: {
         'Content-Type': contentType,
         'Content-Disposition': `attachment; filename="${filename}"`,

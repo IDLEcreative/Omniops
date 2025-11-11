@@ -55,7 +55,10 @@ export class ConnectionMonitor {
     this.autoRecover = config.autoRecover ?? true;
     this.debug = config.debug ?? false;
     this.isInIframe = window.self !== window.top;
-    this.targetOrigin = process.env.NEXT_PUBLIC_APP_URL || window.location.origin;
+    // SECURITY: Get parent origin from referrer or ancestorOrigins
+    // In iframe context, document.referrer gives us the parent's URL
+    this.targetOrigin = document.referrer ? new URL(document.referrer).origin :
+                        (window.location.ancestorOrigins && window.location.ancestorOrigins[0]) || '*';
 
     if (this.debug) {
       console.log('[ConnectionMonitor] Initialized with config:', {

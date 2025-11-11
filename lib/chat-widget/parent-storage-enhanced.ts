@@ -203,7 +203,10 @@ export class EnhancedParentStorageAdapter {
   }
 
   private sendMessage(message: any): void {
-    const targetOrigin = process.env.NEXT_PUBLIC_APP_URL || window.location.origin;
+    // SECURITY: Get parent origin from referrer or ancestorOrigins
+    // In iframe context, document.referrer gives us the parent's URL
+    const targetOrigin = document.referrer ? new URL(document.referrer).origin :
+                         (window.location.ancestorOrigins && window.location.ancestorOrigins[0]) || '*';
     window.parent.postMessage(message, targetOrigin);
   }
 }

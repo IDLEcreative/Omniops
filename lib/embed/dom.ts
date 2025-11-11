@@ -39,7 +39,8 @@ export function createIframe(config: WidgetConfig, isMobile: boolean): HTMLIFram
 
   iframe.style.cssText = `${styles.join('; ')};`;
   iframe.style.display = 'none';
-  iframe.style.pointerEvents = 'none'; // Start with pointer-events none (widget starts minimized)
+  // Start with pointer-events auto so the minimized button is clickable
+  iframe.style.pointerEvents = 'auto';
 
   return iframe;
 }
@@ -127,7 +128,8 @@ export function registerMessageHandlers(ctx: IframeContext): void {
       iframe.style.pointerEvents = 'auto';
     },
     widgetClosed: () => {
-      iframe.style.pointerEvents = 'none';
+      // Keep pointer-events enabled so the button remains clickable when minimized
+      iframe.style.pointerEvents = 'auto';
     },
     // Handle conversation persistence in parent window
     saveToParentStorage: data => {

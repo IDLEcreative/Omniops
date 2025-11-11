@@ -1,0 +1,183 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Cross-Origin Widget Test</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            padding: 50px;
+            background: #f0f0f0;
+        }
+        .info {
+            background: white;
+            padding: 30px;
+            border-radius: 12px;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+            max-width: 800px;
+            margin: 0 auto 30px;
+        }
+        h1 { color: #333; margin-bottom: 20px; }
+        .log {
+            background: #1e1e1e;
+            color: #d4d4d4;
+            padding: 15px;
+            border-radius: 8px;
+            font-family: 'Courier New', monospace;
+            font-size: 13px;
+            max-height: 400px;
+            overflow-y: auto;
+            margin-top: 20px;
+        }
+        .log div { margin: 5px 0; }
+        .error { color: #f48771; }
+        .success { color: #89d185; }
+        .info-text { color: #6cb6ff; }
+        button {
+            padding: 12px 24px;
+            background: #667eea;
+            color: white;
+            border: none;
+            border-radius: 8px;
+            font-size: 14px;
+            cursor: pointer;
+            margin: 10px 5px;
+        }
+        button:hover { background: #5568d3; }
+    </style>
+</head>
+<body>
+    <div class="info">
+        <h1>🔧 Cross-Origin Widget Test</h1>
+        <p><strong>Simulates:</strong> thompsonseparts.co.uk loading widget from localhost:3000</p>
+        <p><strong>Page Origin:</strong> <span id="page-origin"></span></p>
+        <p><strong>Widget Origin:</strong> http://localhost:3000</p>
+
+        <div>
+            <button onclick="checkIframe()">🔍 Check Iframe</button>
+            <button onclick="checkConsole()">📋 Check Console</button>
+            <button onclick="clearLog()">🗑️ Clear Log</button>
+        </div>
+
+        <div class="log" id="log"></div>
+    </div>
+
+    <script>
+        const logEl = document.getElementById('log');
+        let errorCount = 0;
+        let messageCount = 0;
+
+        document.getElementById('page-origin').textContent = window.location.origin;
+
+        function log(msg, type = 'info-text') {
+            const div = document.createElement('div');
+            div.className = type;
+            div.textContent = `[${new Date().toLocaleTimeString()}] ${msg}`;
+            logEl.appendChild(div);
+            logEl.scrollTop = logEl.scrollHeight;
+        }
+
+        function clearLog() {
+            logEl.innerHTML = '';
+            log('Log cleared', 'info-text');
+        }
+
+        function checkIframe() {
+            const iframe = document.getElementById('chat-widget-iframe');
+            if (iframe) {
+                log('✅ Iframe found!', 'success');
+                log(`   ID: ${iframe.id}`, 'info-text');
+                log(`   Display: ${iframe.style.display}`, 'info-text');
+                log(`   Pointer Events: ${iframe.style.pointerEvents}`, 'info-text');
+                log(`   Width: ${iframe.style.width}`, 'info-text');
+                log(`   Height: ${iframe.style.height}`, 'info-text');
+                log(`   Data-ready: ${iframe.hasAttribute('data-ready')}`, 'info-text');
+
+                // Try to inspect iframe content
+                try {
+                    const iframeDoc = iframe.contentDocument || iframe.contentWindow?.document;
+                    if (iframeDoc) {
+                        log(`   Iframe document origin: ${iframe.contentWindow.location.origin}`, 'info-text');
+                    }
+                } catch (e) {
+                    log(`   Cannot access iframe content (cross-origin): ${e.message}`, 'info-text');
+                }
+            } else {
+                log('❌ Iframe NOT found', 'error');
+            }
+        }
+
+        function checkConsole() {
+            log('📊 Current Stats:', 'info-text');
+            log(`   PostMessage errors: ${errorCount}`, errorCount > 0 ? 'error' : 'success');
+            log(`   Messages received: ${messageCount}`, messageCount > 0 ? 'success' : 'info-text');
+        }
+
+        // Intercept console.error
+        const originalError = console.error;
+        console.error = function(...args) {
+            const message = args.join(' ');
+            if (message.includes('postMessage') && message.includes('origin')) {
+                errorCount++;
+                log(`🚨 POSTMESSAGE ERROR #${errorCount}: ${message}`, 'error');
+            } else {
+                log(`⚠️ ${message}`, 'error');
+            }
+            originalError.apply(console, args);
+        };
+
+        // Listen for messages from widget
+        window.addEventListener('message', (event) => {
+            messageCount++;
+            log(`✅ Message #${messageCount} from: ${event.origin}`, 'success');
+            if (event.data && event.data.type) {
+                log(`   Type: ${event.data.type}`, 'info-text');
+            }
+        });
+
+        // Listen for widget-ready
+        window.addEventListener('widget-ready', (event) => {
+            log('🎉 Widget ready event fired!', 'success');
+            setTimeout(checkIframe, 500);
+        });
+
+        // Initialize
+        log('🚀 Initializing cross-origin test...', 'info-text');
+        log(`📍 This page origin: ${window.location.origin}`, 'info-text');
+        log(`📍 Widget origin: http://localhost:3000`, 'info-text');
+
+        window.ChatWidgetConfig = {
+            serverUrl: "http://localhost:3000",
+            demoConfig: {
+                domain: "www.thompsonseparts.co.uk"
+            },
+            debug: true
+        };
+
+        log('⚙️ ChatWidgetConfig set', 'info-text');
+
+        const script = document.createElement('script');
+        script.src = 'http://localhost:3000/embed.js';
+        script.async = true;
+        script.onload = () => {
+            log('✅ embed.js loaded', 'success');
+            setTimeout(() => {
+                checkIframe();
+                checkConsole();
+            }, 3000);
+        };
+        script.onerror = () => {
+            log('❌ Failed to load embed.js', 'error');
+        };
+        document.body.appendChild(script);
+
+        // Auto-check every 5 seconds
+        setInterval(() => {
+            log('═══════════════════════════', 'info-text');
+            checkConsole();
+            log('═══════════════════════════', 'info-text');
+        }, 5000);
+    </script>
+</body>
+</html>

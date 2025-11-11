@@ -19,6 +19,30 @@ interface ExportButtonProps {
   chartRefs?: React.RefObject<HTMLElement[]>;
 }
 
+type DateRangeValue = { start: string; end: string };
+
+const formatDate = (date: Date): string => {
+  const [day] = date.toISOString().split('T');
+  return day ?? date.toISOString();
+};
+
+const defaultRange = (): DateRangeValue => {
+  const now = new Date();
+  const start = new Date(now);
+  start.setDate(start.getDate() - 30);
+  return {
+    start: formatDate(start),
+    end: formatDate(now),
+  };
+};
+
+const resolveRange = (value?: DateRangeValue): DateRangeValue => {
+  if (value?.start && value?.end) {
+    return value;
+  }
+  return defaultRange();
+};
+
 export function ExportButton({ data, dateRange, chartRefs }: ExportButtonProps) {
   const [exporting, setExporting] = useState<'csv' | 'pdf' | null>(null);
 
@@ -28,7 +52,7 @@ export function ExportButton({ data, dateRange, chartRefs }: ExportButtonProps) 
       const params = new URLSearchParams({
         days: '30',
       });
-      if (dateRange) {
+      if (dateRange?.start && dateRange?.end) {
         params.set('startDate', dateRange.start);
         params.set('endDate', dateRange.end);
       }
@@ -51,10 +75,7 @@ export function ExportButton({ data, dateRange, chartRefs }: ExportButtonProps) 
       return;
     }
 
-    const range = dateRange || {
-      start: new Date(Date.now() - 30 * 24 * 60 * 60 * 1000).toISOString().split('T')[0],
-      end: new Date().toISOString().split('T')[0],
-    };
+    const range = resolveRange(dateRange);
 
     setExporting('csv');
     try {
@@ -70,7 +91,7 @@ export function ExportButton({ data, dateRange, chartRefs }: ExportButtonProps) 
       const params = new URLSearchParams({
         days: '30',
       });
-      if (dateRange) {
+      if (dateRange?.start && dateRange?.end) {
         params.set('startDate', dateRange.start);
         params.set('endDate', dateRange.end);
       }
@@ -93,10 +114,7 @@ export function ExportButton({ data, dateRange, chartRefs }: ExportButtonProps) 
       return;
     }
 
-    const range = dateRange || {
-      start: new Date(Date.now() - 30 * 24 * 60 * 60 * 1000).toISOString().split('T')[0],
-      end: new Date().toISOString().split('T')[0],
-    };
+    const range = resolveRange(dateRange);
 
     const charts = chartRefs?.current || [];
 

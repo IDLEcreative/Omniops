@@ -11,14 +11,20 @@ import { getOperationQueueManager } from '@/lib/autonomous/queue';
 
 export async function GET(
   request: NextRequest,
-  { params }: { params: { operationId: string } }
+  { params }: { params: Promise<{ operationId: string }> }
 ) {
   try {
-    const { operationId } = params;
+    const { operationId } = await params;
 
     // TODO: Add authentication and verify user owns this operation
 
     const supabase = await createServerClient();
+    if (!supabase) {
+      return NextResponse.json(
+        { error: 'Database unavailable' },
+        { status: 503 }
+      );
+    }
     const { data: operation, error } = await supabase
       .from('autonomous_operations')
       .select('*')

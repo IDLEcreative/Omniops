@@ -19,6 +19,7 @@ export interface ExcelExportOptions {
     start: string;
     end: string;
   };
+  organizationName?: string;
 }
 
 /**
@@ -97,6 +98,9 @@ function createSummarySheet(
   // Header
   data.push(['Analytics Report Summary']);
   data.push(['Generated:', new Date().toISOString()]);
+  if (options.organizationName) {
+    data.push(['Organization:', options.organizationName]);
+  }
   if (options.dateRange) {
     data.push(['Date Range:', `${options.dateRange.start} to ${options.dateRange.end}`]);
   }
@@ -107,12 +111,12 @@ function createSummarySheet(
     data.push(['Message Analytics']);
     data.push(['Metric', 'Value']);
     data.push(['Total Messages', messageAnalytics.totalMessages]);
-    data.push(['User Messages', messageAnalytics.userMessages]);
+    data.push(['User Messages', messageAnalytics.totalUserMessages]);
     data.push(['Avg Response Time (seconds)', messageAnalytics.avgResponseTimeSeconds.toFixed(2)]);
     data.push(['Satisfaction Score', messageAnalytics.satisfactionScore.toFixed(2)]);
     data.push(['Resolution Rate', `${(messageAnalytics.resolutionRate * 100).toFixed(1)}%`]);
-    data.push(['Positive Messages', messageAnalytics.positiveMessages]);
-    data.push(['Negative Messages', messageAnalytics.negativeMessages]);
+    data.push(['Positive Messages', messageAnalytics.positiveUserMessages]);
+    data.push(['Negative Messages', messageAnalytics.negativeUserMessages]);
     data.push([]); // Empty row
   }
 
@@ -144,16 +148,19 @@ function createMessageAnalyticsSheet(analytics: MessageAnalytics): any[][] {
   data.push(['Overall Metrics']);
   data.push(['Metric', 'Value']);
   data.push(['Total Messages', analytics.totalMessages]);
-  data.push(['User Messages', analytics.userMessages]);
-  data.push(['AI Messages', analytics.totalMessages - analytics.userMessages]);
+  data.push(['User Messages', analytics.totalUserMessages]);
+  data.push(['AI Messages', analytics.totalMessages - analytics.totalUserMessages]);
   data.push(['Avg Messages Per Day', analytics.avgMessagesPerDay.toFixed(1)]);
   data.push([]);
 
   data.push(['Sentiment Analysis']);
   data.push(['Category', 'Count', 'Percentage']);
-  data.push(['Positive', analytics.positiveMessages, `${((analytics.positiveMessages / analytics.totalMessages) * 100).toFixed(1)}%`]);
-  data.push(['Negative', analytics.negativeMessages, `${((analytics.negativeMessages / analytics.totalMessages) * 100).toFixed(1)}%`]);
-  data.push(['Neutral', analytics.totalMessages - analytics.positiveMessages - analytics.negativeMessages]);
+  data.push(['Positive', analytics.positiveUserMessages, `${((analytics.positiveUserMessages / analytics.totalMessages) * 100).toFixed(1)}%`]);
+  data.push(['Negative', analytics.negativeUserMessages, `${((analytics.negativeUserMessages / analytics.totalMessages) * 100).toFixed(1)}%`]);
+  data.push([
+    'Neutral',
+    analytics.totalMessages - analytics.positiveUserMessages - analytics.negativeUserMessages
+  ]);
   data.push([]);
 
   data.push(['Performance Metrics']);

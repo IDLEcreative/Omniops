@@ -1,0 +1,210 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Simple Widget Test</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            padding: 50px;
+            background: #f0f0f0;
+        }
+        .status {
+            background: white;
+            padding: 30px;
+            border-radius: 12px;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+            max-width: 800px;
+            margin: 0 auto;
+        }
+        h1 { color: #333; margin-bottom: 20px; }
+        .log {
+            background: #1e1e1e;
+            color: #d4d4d4;
+            padding: 15px;
+            border-radius: 8px;
+            font-family: 'Courier New', monospace;
+            font-size: 13px;
+            max-height: 400px;
+            overflow-y: auto;
+            margin-top: 20px;
+        }
+        .log div { margin: 5px 0; }
+        .error { color: #f48771; }
+        .success { color: #89d185; }
+        .info { color: #6cb6ff; }
+        button {
+            padding: 12px 24px;
+            background: #667eea;
+            color: white;
+            border: none;
+            border-radius: 8px;
+            font-size: 14px;
+            cursor: pointer;
+            margin: 10px 5px;
+        }
+        button:hover { background: #5568d3; }
+        #iframe-check {
+            margin-top: 20px;
+            padding: 15px;
+            background: #fff3cd;
+            border: 2px solid #ffc107;
+            border-radius: 8px;
+        }
+    </style>
+</head>
+<body>
+    <div class="status">
+        <h1>🔧 Simple Widget Test</h1>
+        <p>Testing widget initialization and postMessage communication</p>
+
+        <div>
+            <button onclick="checkIframe()">🔍 Check if Iframe Exists</button>
+            <button onclick="openWidget()">🚀 Open Widget</button>
+            <button onclick="checkAPI()">📋 Check ChatWidget API</button>
+            <button onclick="clearLog()">🗑️ Clear Log</button>
+        </div>
+
+        <div id="iframe-check"></div>
+
+        <div class="log" id="log"></div>
+    </div>
+
+    <script>
+        const logEl = document.getElementById('log');
+        let errorCount = 0;
+
+        function log(msg, type = 'info') {
+            const div = document.createElement('div');
+            div.className = type;
+            div.textContent = `[${new Date().toLocaleTimeString()}] ${msg}`;
+            logEl.appendChild(div);
+            logEl.scrollTop = logEl.scrollHeight;
+        }
+
+        function clearLog() {
+            logEl.innerHTML = '';
+            log('Log cleared', 'info');
+        }
+
+        function checkIframe() {
+            const iframe = document.getElementById('chat-widget-iframe');
+            const checkDiv = document.getElementById('iframe-check');
+
+            if (iframe) {
+                log('✅ Iframe found in DOM!', 'success');
+                log(`   ID: ${iframe.id}`, 'info');
+                log(`   Display: ${iframe.style.display}`, 'info');
+                log(`   Width: ${iframe.style.width}`, 'info');
+                log(`   Height: ${iframe.style.height}`, 'info');
+                log(`   Pointer Events: ${iframe.style.pointerEvents}`, 'info');
+                log(`   Has data-ready: ${iframe.hasAttribute('data-ready')}`, 'info');
+
+                checkDiv.innerHTML = `
+                    <strong>Iframe Status:</strong> ✅ Found<br>
+                    Display: ${iframe.style.display}<br>
+                    Size: ${iframe.style.width} × ${iframe.style.height}<br>
+                    Ready: ${iframe.hasAttribute('data-ready') ? 'Yes' : 'No'}
+                `;
+            } else {
+                log('❌ Iframe NOT found in DOM', 'error');
+                checkDiv.innerHTML = '<strong>Iframe Status:</strong> ❌ Not found';
+            }
+        }
+
+        function openWidget() {
+            if (window.ChatWidget) {
+                log('📤 Calling ChatWidget.open()', 'info');
+                window.ChatWidget.open();
+                setTimeout(checkIframe, 500);
+            } else {
+                log('❌ window.ChatWidget not available', 'error');
+            }
+        }
+
+        function checkAPI() {
+            log('🔍 Checking ChatWidget API...', 'info');
+            if (window.ChatWidget) {
+                log('✅ window.ChatWidget exists', 'success');
+                log(`   Methods: ${Object.keys(window.ChatWidget).join(', ')}`, 'info');
+            } else {
+                log('❌ window.ChatWidget does not exist', 'error');
+            }
+
+            if (window.ChatWidgetConfig) {
+                log('✅ window.ChatWidgetConfig exists', 'success');
+                log(`   serverUrl: ${window.ChatWidgetConfig.serverUrl}`, 'info');
+                log(`   domain: ${window.ChatWidgetConfig.demoConfig?.domain}`, 'info');
+            } else {
+                log('❌ window.ChatWidgetConfig does not exist', 'error');
+            }
+        }
+
+        // Intercept console.error
+        const originalError = console.error;
+        console.error = function(...args) {
+            const message = args.join(' ');
+            if (message.includes('postMessage') && message.includes('origin')) {
+                errorCount++;
+                log(`🚨 POSTMESSAGE ERROR: ${message}`, 'error');
+            } else {
+                log(`⚠️ ${message}`, 'error');
+            }
+            originalError.apply(console, args);
+        };
+
+        // Listen for messages
+        window.addEventListener('message', (event) => {
+            log(`✅ Message from: ${event.origin}`, 'success');
+            if (event.data && event.data.type) {
+                log(`   Type: ${event.data.type}`, 'info');
+            }
+        });
+
+        // Listen for widget-ready
+        window.addEventListener('widget-ready', (event) => {
+            log('🎉 Widget ready event fired!', 'success');
+            checkIframe();
+        });
+
+        // Configure and load widget
+        log('🚀 Initializing test...', 'info');
+
+        window.ChatWidgetConfig = {
+            serverUrl: "http://localhost:3000",
+            demoConfig: {
+                domain: "www.thompsonseparts.co.uk"
+            },
+            debug: true
+        };
+
+        log('⚙️ ChatWidgetConfig set', 'info');
+
+        const script = document.createElement('script');
+        script.src = 'http://localhost:3000/embed.js';
+        script.async = true;
+        script.onload = () => {
+            log('✅ embed.js loaded', 'success');
+            setTimeout(() => {
+                checkAPI();
+                checkIframe();
+            }, 2000);
+        };
+        script.onerror = () => {
+            log('❌ Failed to load embed.js', 'error');
+        };
+        document.body.appendChild(script);
+
+        // Auto-check after 5 seconds
+        setTimeout(() => {
+            log('═════════════════════════════════', 'info');
+            log('📊 5-Second Auto-Check:', 'info');
+            checkAPI();
+            checkIframe();
+            log(`PostMessage errors: ${errorCount}`, errorCount > 0 ? 'error' : 'success');
+            log('═════════════════════════════════', 'info');
+        }, 5000);
+    </script>
+</body>
+</html>

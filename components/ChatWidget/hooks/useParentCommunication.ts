@@ -255,6 +255,14 @@ export function useParentCommunication({
         // In iframe context, document.referrer gives us the parent's URL
         const parentOrigin = document.referrer ? new URL(document.referrer).origin :
                              (window.location.ancestorOrigins && window.location.ancestorOrigins[0]) || '*';
+
+        // DEBUG: Log what we detected
+        console.log('[useParentCommunication] Sending ready message');
+        console.log('  document.referrer:', document.referrer);
+        console.log('  ancestorOrigins:', window.location.ancestorOrigins ? Array.from(window.location.ancestorOrigins) : 'N/A');
+        console.log('  Calculated parentOrigin:', parentOrigin);
+        console.log('  window.location.origin:', window.location.origin);
+
         window.parent.postMessage({ type: 'ready' }, parentOrigin);
         setMessagesReceived((prev) => prev + 1);
         setLastMessageType('ready');
@@ -285,6 +293,11 @@ export function useParentCommunication({
         // In iframe context, document.referrer gives us the parent's URL
         const targetOrigin = document.referrer ? new URL(document.referrer).origin :
                              (window.location.ancestorOrigins && window.location.ancestorOrigins[0]) || '*';
+
+        // DEBUG: Log what we're doing
+        console.log(`[useParentCommunication] Widget ${isOpen ? 'opened' : 'closed'}`);
+        console.log('  document.referrer:', document.referrer);
+        console.log('  Calculated targetOrigin:', targetOrigin);
 
         if (isOpen) {
           // Widget is open - request full size and enable pointer events

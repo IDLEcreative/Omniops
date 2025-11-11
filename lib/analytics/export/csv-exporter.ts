@@ -18,6 +18,7 @@ export interface CSVExportOptions {
     start: string;
     end: string;
   };
+  organizationName?: string;
 }
 
 /**
@@ -41,6 +42,9 @@ export function exportToCSV(
   // Header with metadata
   sections.push('# Analytics Report');
   sections.push(`# Generated: ${new Date().toISOString()}`);
+  if (options.organizationName) {
+    sections.push(`# Organization: ${options.organizationName}`);
+  }
   if (options.dateRange) {
     sections.push(`# Date Range: ${options.dateRange.start} to ${options.dateRange.end}`);
   }
@@ -51,12 +55,12 @@ export function exportToCSV(
     sections.push('## Message Analytics');
     sections.push('Metric,Value');
     sections.push(`Total Messages,${messageAnalytics.totalMessages}`);
-    sections.push(`User Messages,${messageAnalytics.userMessages}`);
+    sections.push(`User Messages,${messageAnalytics.totalUserMessages}`);
     sections.push(`Response Time (seconds),${messageAnalytics.avgResponseTimeSeconds.toFixed(2)}`);
     sections.push(`Satisfaction Score,${messageAnalytics.satisfactionScore.toFixed(2)}`);
     sections.push(`Resolution Rate,${(messageAnalytics.resolutionRate * 100).toFixed(1)}%`);
-    sections.push(`Positive Messages,${messageAnalytics.positiveMessages}`);
-    sections.push(`Negative Messages,${messageAnalytics.negativeMessages}`);
+    sections.push(`Positive Messages,${messageAnalytics.positiveUserMessages}`);
+    sections.push(`Negative Messages,${messageAnalytics.negativeUserMessages}`);
     sections.push('');
   }
 

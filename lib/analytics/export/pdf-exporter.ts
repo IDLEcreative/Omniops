@@ -104,12 +104,12 @@ export async function exportToPDF(
 
     const messageData = [
       ['Total Messages', messageAnalytics.totalMessages.toString()],
-      ['User Messages', messageAnalytics.userMessages.toString()],
+      ['User Messages', messageAnalytics.totalUserMessages.toString()],
       ['Avg Response Time', `${messageAnalytics.avgResponseTimeSeconds.toFixed(2)}s`],
       ['Satisfaction Score', `${messageAnalytics.satisfactionScore.toFixed(2)}`],
       ['Resolution Rate', `${(messageAnalytics.resolutionRate * 100).toFixed(1)}%`],
-      ['Positive Messages', messageAnalytics.positiveMessages.toString()],
-      ['Negative Messages', messageAnalytics.negativeMessages.toString()],
+      ['Positive Messages', messageAnalytics.positiveUserMessages.toString()],
+      ['Negative Messages', messageAnalytics.negativeUserMessages.toString()],
     ];
 
     autoTable(doc, {

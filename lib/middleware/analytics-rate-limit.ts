@@ -30,6 +30,11 @@ const RATE_LIMITS = {
     maxRequests: 20,
     windowMs: 60 * 1000, // 1 minute
   },
+  // Analytics exports: heavier payloads, limit to 10/hour
+  export: {
+    maxRequests: 10,
+    windowMs: 60 * 60 * 1000, // 1 hour
+  },
   // Business Intelligence: expensive queries, less frequent
   intelligence: {
     maxRequests: 10,

@@ -47,7 +47,10 @@ export class ParentStorageAdapter {
       const requestId = `request_${++this.requestCounter}_${Date.now()}`;
       this.pendingRequests.set(requestId, resolve);
 
-      const targetOrigin = process.env.NEXT_PUBLIC_APP_URL || window.location.origin;
+      // SECURITY: Get parent origin from referrer or ancestorOrigins
+      // In iframe context, document.referrer gives us the parent's URL
+      const targetOrigin = document.referrer ? new URL(document.referrer).origin :
+                           (window.location.ancestorOrigins && window.location.ancestorOrigins[0]) || '*';
       window.parent.postMessage({
         type: 'getFromParentStorage',
         key,
@@ -79,7 +82,9 @@ export class ParentStorageAdapter {
     }
 
     // In iframe, send to parent
-    const targetOrigin = process.env.NEXT_PUBLIC_APP_URL || window.location.origin;
+    // SECURITY: Get parent origin from referrer or ancestorOrigins
+    const targetOrigin = document.referrer ? new URL(document.referrer).origin :
+                         (window.location.ancestorOrigins && window.location.ancestorOrigins[0]) || '*';
     window.parent.postMessage({
       type: 'saveToParentStorage',
       key,
@@ -102,7 +107,9 @@ export class ParentStorageAdapter {
     }
 
     // In iframe, send to parent
-    const targetOrigin = process.env.NEXT_PUBLIC_APP_URL || window.location.origin;
+    // SECURITY: Get parent origin from referrer or ancestorOrigins
+    const targetOrigin = document.referrer ? new URL(document.referrer).origin :
+                         (window.location.ancestorOrigins && window.location.ancestorOrigins[0]) || '*';
     window.parent.postMessage({
       type: 'removeFromParentStorage',
       key

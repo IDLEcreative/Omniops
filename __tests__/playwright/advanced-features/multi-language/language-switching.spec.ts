@@ -14,6 +14,7 @@
 import { test, expect } from '@playwright/test';
 import {
   setLanguage,
+  switchLanguage,
   getMessageCount,
   reloadAndWaitForWidget,
   waitForWidgetIframe,
@@ -42,8 +43,8 @@ test.describe('Language Switching with Active Conversation', () => {
 
     await inputField.fill('Hello, what products do you have?');
 
-    const sendButton = iframe.locator('button[type="submit"], button:has-text("Send")').first();
-    await sendButton.click();
+    // Use Enter key instead of clicking send button (more reliable)
+    await inputField.press('Enter');
     console.log('✅ English message sent');
 
     // Wait for response
@@ -56,8 +57,7 @@ test.describe('Language Switching with Active Conversation', () => {
 
     // Step 3: Switch to Spanish mid-conversation
     console.log('📍 Step 3: Switch to Spanish mid-conversation');
-    await setLanguage(page, 'es');
-    await reloadAndWaitForWidget(page);
+    await switchLanguage(page, 'es');
     console.log('✅ Switched to Spanish');
 
     // Re-open widget after reload
@@ -79,9 +79,7 @@ test.describe('Language Switching with Active Conversation', () => {
     console.log('📍 Step 5: Continue conversation in Spanish');
     const spanishInput = await getWidgetInputField(iframeAfterReload);
     await spanishInput.fill('Muéstrame los productos más populares');
-
-    const spanishSendButton = iframeAfterReload.locator('button[type="submit"], button:has-text("Enviar"), button:has-text("Send")').first();
-    await spanishSendButton.click();
+    await spanishInput.press('Enter');
     console.log('✅ Spanish message sent in ongoing conversation');
 
     // Step 6: Verify mixed language conversation

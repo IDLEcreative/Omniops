@@ -1,5 +1,5 @@
 import { createServerClient } from '@supabase/ssr'
-import { createClient as createSupabaseClient } from '@supabase/supabase-js'
+import { createClient as createSupabaseClient, type SupabaseClient } from '@supabase/supabase-js'
 import { cookies } from 'next/headers'
 
 // Cache validation results for the duration of the request
@@ -146,8 +146,12 @@ export function createServiceRoleClientSync() {
  * Async version for API routes - calls the sync version
  * Use this in API routes and async contexts
  */
-export async function createServiceRoleClient() {
-  return createServiceRoleClientSync()
+export async function createServiceRoleClient(): Promise<SupabaseClient> {
+  const client = createServiceRoleClientSync()
+  if (!client) {
+    throw new Error('Database service is currently unavailable')
+  }
+  return client
 }
 
 /**
@@ -167,11 +171,7 @@ export async function requireClient() {
  * Use this when service role access is absolutely required
  */
 export async function requireServiceRoleClient() {
-  const client = await createServiceRoleClient()
-  if (!client) {
-    throw new Error('Database service is currently unavailable')
-  }
-  return client
+  return createServiceRoleClient()
 }
 
 // Export validation function for use in API routes
