@@ -20,7 +20,9 @@ jest.mock('@/lib/follow-ups', () => ({
   getFollowUpSummary: jest.fn(),
 }));
 
-const mockedRequireAuth = authModule.requireAuth as jest.Mock;
+const authMock = jest.requireMock('@/lib/middleware/auth') as {
+  requireAuth: jest.Mock;
+};
 
 const createSingleQuery = (data: any) => ({
   select: jest.fn().mockReturnThis(),
@@ -38,7 +40,7 @@ describe('GET /api/follow-ups', () => {
     mockUser = { id: 'user-123', email: 'user@example.com' };
     mockSupabase = { from: jest.fn() };
 
-    mockedRequireAuth.mockResolvedValue({
+    authMock.requireAuth.mockResolvedValue({
       user: mockUser,
       supabase: mockSupabase,
     });
@@ -108,7 +110,7 @@ describe('GET /api/follow-ups', () => {
   });
 
   it('returns 401 when auth fails', async () => {
-    mockedRequireAuth.mockResolvedValueOnce(
+    authMock.requireAuth.mockResolvedValueOnce(
       NextResponse.json({ error: 'Authentication required' }, { status: 401 })
     );
 
