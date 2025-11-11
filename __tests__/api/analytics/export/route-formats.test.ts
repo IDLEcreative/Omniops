@@ -170,61 +170,140 @@ describe('GET /api/analytics/export', () => {
     });
   });
 
-  describe('Authentication and Authorization', () => {
-    it('should return 401 if not authenticated', async () => {
-      mockedRequireAuth.mockResolvedValue(
-        NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
-      );
+  // Authentication & rate limit coverage lives in route.test.ts to keep files under LOC limits.
 
-      const request = createRequest({ format: 'csv' });
+  describe('Format Validation', () => {
+    it('should return 400 for missing format', async () => {
+      const request = createRequest();
       const response = await GET(request);
 
-      expect(response.status).toBe(401);
+      expect(response.status).toBe(400);
       const data = await response.json();
-      expect(data.error).toBe('Unauthorized');
+      expect(data.error).toBe('Invalid format. Must be csv, excel, or pdf');
     });
 
-    it('should return 404 if user has no organization', async () => {
-      mockSupabase.from.mockImplementation(() => ({
-        ...mockSupabase,
-        single: jest.fn().mockResolvedValue({ data: null, error: null }),
-      }));
-
-      const request = createRequest({ format: 'csv' });
+    it('should return 400 for invalid format', async () => {
+      const request = createRequest({ format: 'txt' });
       const response = await GET(request);
 
-      expect(response.status).toBe(404);
+      expect(response.status).toBe(400);
       const data = await response.json();
-      expect(data.error).toBe('No organization found');
+      expect(data.error).toBe('Invalid format. Must be csv, excel, or pdf');
     });
   });
 
-  describe('Rate Limiting', () => {
-    it('should return 429 if rate limit exceeded', async () => {
-      (checkAnalyticsRateLimit as jest.Mock).mockResolvedValue(
-        NextResponse.json({ error: 'Rate limit exceeded' }, { status: 429 })
-      );
-
+  describe('CSV Export', () => {
+    it('should export data as CSV successfully', async () => {
       const request = createRequest({ format: 'csv' });
       const response = await GET(request);
 
-      expect(response.status).toBe(429);
-      const data = await response.json();
-      expect(data.error).toBe('Rate limit exceeded');
+      expect(response.status).toBe(200);
+      expect(response.headers.get('Content-Type')).toBe('text/csv');
+      expect(response.headers.get('Content-Disposition')).toBe('attachment; filename="analytics_2024-01-01.csv"');
+      expect(response.headers.get('Cache-Control')).toBe('no-cache');
+
+      const text = await response.text();
+      expect(text).toBe('csv,data,here');
+      expect(exporters.exportToCSV).toHaveBeenCalled();
     });
 
-    it('should check rate limit with correct parameters', async () => {
+    it('should pass correct options to CSV exporter', async () => {
+      const request = createRequest({
+        format: 'csv',
+        days: '30',
+        includeMessage: 'false',
+        includeUser: 'true',
+        includeTopQueries: 'false',
+      });
+
+      await GET(request);
+
+      expect(exporters.exportToCSV).toHaveBeenCalledWith(
+        null, // messageAnalytics is null when includeMessage is false
+        expect.objectContaining({
+          total_unique_users: 500,
+        }),
+        expect.objectContaining({
+          includeMessageAnalytics: false,
+          includeUserAnalytics: true,
+          includeTopQueries: false,
+        })
+      );
+    });
+  });
+
+  describe('Excel Export', () => {
+    it('should export data as Excel successfully', async () => {
+      const request = createRequest({ format: 'excel' });
+      const response = await GET(request);
+
+      expect(response.status).toBe(200);
+      expect(response.headers.get('Content-Type')).toBe('application/vnd.openxmlformats-officedocument.spreadsheetml.sheet');
+      expect(response.headers.get('Content-Disposition')).toBe('attachment; filename="analytics_2024-01-01.xlsx"');
+
+      const buffer = await response.arrayBuffer();
+      expect(Buffer.from(buffer).toString()).toBe('excel-data');
+      expect(exporters.exportToExcel).toHaveBeenCalled();
+    });
+  });
+
+  describe('PDF Export', () => {
+    it('should export data as PDF successfully', async () => {
+      const request = createRequest({ format: 'pdf' });
+      const response = await GET(request);
+
+      expect(response.status).toBe(200);
+      expect(response.headers.get('Content-Type')).toBe('application/pdf');
+      expect(response.headers.get('Content-Disposition')).toBe('attachment; filename="analytics_2024-01-01.pdf"');
+
+      const buffer = await response.arrayBuffer();
+      expect(Buffer.from(buffer).toString()).toBe('pdf-data');
+      expect(exporters.exportToPDF).toHaveBeenCalled();
+    });
+
+    it('should include organization name in PDF export', async () => {
+      const request = createRequest({ format: 'pdf' });
+      await GET(request);
+
+      expect(exporters.exportToPDF).toHaveBeenCalledWith(
+        expect.anything(),
+        expect.anything(),
+        expect.objectContaining({
+          organizationName: 'Test Organization',
+        })
+      );
+    });
+  });
+
+  describe('Query Parameters', () => {
+    it('should use default values for missing parameters', async () => {
       const request = createRequest({ format: 'csv' });
       await GET(request);
 
-      expect(checkAnalyticsRateLimit).toHaveBeenCalledWith(
-        { id: 'user-123', email: 'test@example.com' },
-        'export',
-        10, // 10 exports
-        3600 // per hour
+      // Should fetch messages for last 7 days by default
+      expect(analyseMessages).toHaveBeenCalledWith(
+        expect.anything(),
+        expect.objectContaining({ days: 7 })
       );
     });
-  });
+
+    it('should respect days parameter', async () => {
+      const request = createRequest({ format: 'csv', days: '30' });
+      await GET(request);
+
+      expect(analyseMessages).toHaveBeenCalledWith(
+        expect.anything(),
+        expect.objectContaining({ days: 30 })
+      );
+
+      expect(calculateUserAnalytics).toHaveBeenCalledWith(
+        expect.anything(),
+        expect.objectContaining({ days: 30 })
+      );
+    });
+
+    it('should skip message analytics when includeMessage is false', async () => {
+      mockServiceSupabase.from.mockImplementation((table: string) => ({
         ...mockServiceSupabase,
         select: jest.fn().mockReturnThis(),
         gte: jest.fn().mockReturnThis(),
