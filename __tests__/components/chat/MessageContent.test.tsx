@@ -214,10 +214,8 @@ describe('MessageContent Component', () => {
     it('should handle messages with only whitespace', () => {
       const { container } = render(<MessageContent content="   \n\t  " />);
       const span = container.querySelector('span');
-      // Component normalizes line endings, trims outer spaces but keeps internal whitespace
-      // After trimming "   \n\t  " becomes "\n\t" (actual newline and tab characters)
       expect(span).toBeInTheDocument();
-      expect(span?.textContent).toMatch(/[\n\t]/);
+      expect(span?.textContent).toBe('\\n\\t');
     });
 
     it('should handle messages with bullet points', () => {
@@ -363,9 +361,10 @@ describe('MessageContent Component', () => {
   describe('Console Logging (Debug)', () => {
     it('should log debug info for messages with bullets', () => {
       const consoleSpy = jest.spyOn(console, 'log').mockImplementation();
+      const originalEnv = process.env.NODE_ENV;
+      process.env.NODE_ENV = 'development';
 
-      const content = '• Item 1\n• Item 2';
-      render(<MessageContent content={content} />);
+      render(<MessageContent content="• Item 1\n• Item 2" />);
 
       expect(consoleSpy).toHaveBeenCalledWith(
         '[MessageContent] Raw content preview:',
@@ -373,6 +372,7 @@ describe('MessageContent Component', () => {
       );
 
       consoleSpy.mockRestore();
+      process.env.NODE_ENV = originalEnv;
     });
 
     it('should not log debug info for regular messages', () => {

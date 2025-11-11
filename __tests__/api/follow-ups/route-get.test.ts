@@ -10,8 +10,6 @@ import { NextRequest, NextResponse } from 'next/server';
 import { GET } from '@/app/api/follow-ups/route';
 import * as authModule from '@/lib/middleware/auth';
 
-jest.mock('@/lib/middleware/auth', () => jest.requireActual('@/lib/middleware/auth'));
-
 jest.mock('@/lib/follow-ups', () => ({
   getFollowUpAnalytics: jest.fn(),
   getFollowUpSummary: jest.fn(),
@@ -47,6 +45,10 @@ describe('GET /api/follow-ups', () => {
 
   afterEach(() => {
     requireAuthSpy.mockReset();
+  });
+
+  afterAll(() => {
+    requireAuthSpy.mockRestore();
   });
 
   const mockMembership = (organizationId: string | null) => {

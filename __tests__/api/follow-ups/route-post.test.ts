@@ -20,8 +20,6 @@ jest.mock('@/lib/supabase-server', () => ({
   createServiceRoleClient: jest.fn(),
 }));
 
-jest.mock('@/lib/middleware/auth', () => jest.requireActual('@/lib/middleware/auth'));
-
 jest.mock('@/lib/follow-ups', () => ({
   detectFollowUpCandidates: jest.fn(),
   prioritizeFollowUps: jest.fn(),
@@ -62,6 +60,10 @@ describe('POST /api/follow-ups', () => {
 
   afterEach(() => {
     requireAuthSpy.mockReset();
+  });
+
+  afterAll(() => {
+    requireAuthSpy.mockRestore();
   });
 
   const mockOrgAndDomains = ({
