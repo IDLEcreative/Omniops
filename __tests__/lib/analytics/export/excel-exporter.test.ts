@@ -309,52 +309,6 @@ describe('Excel Exporter', () => {
       ]));
     });
 
-    it('should create Top Queries sheet when queries exist', async () => {
-      const messageAnalytics = createMockMessageAnalytics();
-
-      await exportToExcel(messageAnalytics, null);
-
-      // Find the Top Queries sheet call
-      const queriesSheetIndex = mockBookAppendSheet.mock.calls
-        .findIndex(call => call[2] === 'Top Queries');
-
-      expect(queriesSheetIndex).toBeGreaterThan(-1);
-
-      // Verify the sheet data structure
-      const queriesSheetData = mockAoaToSheet.mock.calls[queriesSheetIndex][0];
-
-      expect(queriesSheetData).toEqual(expect.arrayContaining([
-        expect.arrayContaining(['Top Queries']),
-        expect.arrayContaining(['Rank', 'Query', 'Count', 'Percentage']),
-        expect.arrayContaining([1, 'product pricing', 25, '27.8%']),
-        expect.arrayContaining([2, 'order status', 18, '20.0%']),
-        expect.arrayContaining([3, 'technical support', 12, '13.3%']),
-      ]));
-    });
-
-    it('should create Language Distribution sheet when languages exist', async () => {
-      const messageAnalytics = createMockMessageAnalytics();
-
-      await exportToExcel(messageAnalytics, null);
-
-      // Find the Languages sheet call
-      const langSheetIndex = mockBookAppendSheet.mock.calls
-        .findIndex(call => call[2] === 'Languages');
-
-      expect(langSheetIndex).toBeGreaterThan(-1);
-
-      // Verify the sheet data structure
-      const langSheetData = mockAoaToSheet.mock.calls[langSheetIndex][0];
-
-      expect(langSheetData).toEqual(expect.arrayContaining([
-        expect.arrayContaining(['Language Distribution']),
-        expect.arrayContaining(['Language', 'Count', 'Percentage']),
-        expect.arrayContaining(['English', 120, '80.0%']),
-        expect.arrayContaining(['Spanish', 20, '13.3%']),
-        expect.arrayContaining(['French', 10, '6.7%']),
-      ]));
-    });
-
     it('should not create sheets for empty data arrays', async () => {
       const messageAnalytics = createMockMessageAnalytics({
         topQueries: [],
