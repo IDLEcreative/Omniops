@@ -9,7 +9,6 @@ import { describe, it, expect, jest, beforeEach } from '@jest/globals';
 import { NextRequest, NextResponse } from 'next/server';
 import { GET } from '@/app/api/follow-ups/route';
 import * as authModule from '@/lib/middleware/auth';
-import { getFollowUpAnalytics, getFollowUpSummary } from '@/lib/follow-ups';
 
 jest.mock('@/lib/middleware/auth', () => ({
   requireAuth: jest.fn(),
@@ -22,6 +21,10 @@ jest.mock('@/lib/follow-ups', () => ({
 
 const authMock = jest.requireMock('@/lib/middleware/auth') as {
   requireAuth: jest.Mock;
+};
+const followUpsMock = jest.requireMock('@/lib/follow-ups') as {
+  getFollowUpAnalytics: jest.Mock;
+  getFollowUpSummary: jest.Mock;
 };
 
 const createSingleQuery = (data: any) => ({
@@ -67,7 +70,7 @@ describe('GET /api/follow-ups', () => {
       least_effective_reason: 'low_satisfaction',
       pending_count: 10,
     };
-    (getFollowUpSummary as jest.Mock).mockResolvedValue(mockSummary);
+    followUpsMock.getFollowUpSummary.mockResolvedValue(mockSummary);
 
     const request = new NextRequest('http://localhost:3000/api/follow-ups');
     const response = await GET(request);
@@ -76,7 +79,7 @@ describe('GET /api/follow-ups', () => {
     expect(response.status).toBe(200);
     expect(data.success).toBe(true);
     expect(data.data).toEqual(mockSummary);
-    expect(getFollowUpSummary as jest.Mock).toHaveBeenCalled();
+    expect(followUpsMock.getFollowUpSummary).toHaveBeenCalled();
   });
 
   it('returns analytics when type=analytics', async () => {
@@ -94,7 +97,7 @@ describe('GET /api/follow-ups', () => {
       by_channel: {},
       trend: [],
     };
-    (getFollowUpAnalytics as jest.Mock).mockResolvedValue(mockAnalytics);
+    followUpsMock.getFollowUpAnalytics.mockResolvedValue(mockAnalytics);
 
     const request = new NextRequest('http://localhost:3000/api/follow-ups?type=analytics&days=7');
     const response = await GET(request);
@@ -103,7 +106,7 @@ describe('GET /api/follow-ups', () => {
     expect(response.status).toBe(200);
     expect(data.success).toBe(true);
     expect(data.data).toEqual(mockAnalytics);
-    expect(getFollowUpAnalytics as jest.Mock).toHaveBeenCalledWith(expect.anything(), {
+    expect(followUpsMock.getFollowUpAnalytics).toHaveBeenCalledWith(expect.anything(), {
       days: 7,
       organizationId: 'org-123',
     });
@@ -144,12 +147,12 @@ describe('GET /api/follow-ups', () => {
   it('parses custom days parameter', async () => {
     mockMembership('org-123');
 
-    (getFollowUpAnalytics as jest.Mock).mockResolvedValue({ overall: {}, by_reason: {} });
+    followUpsMock.getFollowUpAnalytics.mockResolvedValue({ overall: {}, by_reason: {} });
 
     const request = new NextRequest('http://localhost:3000/api/follow-ups?type=analytics&days=14');
     await GET(request);
 
-    expect(getFollowUpAnalytics as jest.Mock).toHaveBeenCalledWith(
+    expect(followUpsMock.getFollowUpAnalytics).toHaveBeenCalledWith(
       expect.anything(),
       expect.objectContaining({ days: 14 })
     );
