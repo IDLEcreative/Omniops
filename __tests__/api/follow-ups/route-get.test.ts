@@ -10,18 +10,14 @@ import { NextRequest, NextResponse } from 'next/server';
 import { GET } from '@/app/api/follow-ups/route';
 import * as authModule from '@/lib/middleware/auth';
 
-jest.mock('@/lib/middleware/auth', () => ({
-  requireAuth: jest.fn(),
-}));
+jest.mock('@/lib/middleware/auth', () => jest.requireActual('@/lib/middleware/auth'));
 
 jest.mock('@/lib/follow-ups', () => ({
   getFollowUpAnalytics: jest.fn(),
   getFollowUpSummary: jest.fn(),
 }));
 
-const authMock = jest.requireMock('@/lib/middleware/auth') as {
-  requireAuth: jest.Mock;
-};
+const requireAuthSpy = jest.spyOn(authModule, 'requireAuth');
 const followUpsMock = jest.requireMock('@/lib/follow-ups') as {
   getFollowUpAnalytics: jest.Mock;
   getFollowUpSummary: jest.Mock;
@@ -43,10 +39,14 @@ describe('GET /api/follow-ups', () => {
     mockUser = { id: 'user-123', email: 'user@example.com' };
     mockSupabase = { from: jest.fn() };
 
-    authMock.requireAuth.mockResolvedValue({
+    requireAuthSpy.mockResolvedValue({
       user: mockUser,
       supabase: mockSupabase,
     });
+  });
+
+  afterEach(() => {
+    requireAuthSpy.mockReset();
   });
 
   const mockMembership = (organizationId: string | null) => {
@@ -113,7 +113,7 @@ describe('GET /api/follow-ups', () => {
   });
 
   it('returns 401 when auth fails', async () => {
-    authMock.requireAuth.mockResolvedValueOnce(
+    requireAuthSpy.mockResolvedValueOnce(
       NextResponse.json({ error: 'Authentication required' }, { status: 401 })
     );
 

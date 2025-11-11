@@ -20,9 +20,7 @@ jest.mock('@/lib/supabase-server', () => ({
   createServiceRoleClient: jest.fn(),
 }));
 
-jest.mock('@/lib/middleware/auth', () => ({
-  requireAuth: jest.fn(),
-}));
+jest.mock('@/lib/middleware/auth', () => jest.requireActual('@/lib/middleware/auth'));
 
 jest.mock('@/lib/follow-ups', () => ({
   detectFollowUpCandidates: jest.fn(),
@@ -30,9 +28,7 @@ jest.mock('@/lib/follow-ups', () => ({
   scheduleFollowUps: jest.fn(),
 }));
 
-const authMock = jest.requireMock('@/lib/middleware/auth') as {
-  requireAuth: jest.Mock;
-};
+const requireAuthSpy = jest.spyOn(authModule, 'requireAuth');
 const mockedServiceClient = createServiceRoleClient as jest.Mock;
 
 const createSingleQuery = (data: any) => ({
@@ -56,12 +52,16 @@ describe('POST /api/follow-ups', () => {
     mockUser = { id: 'user-123', email: 'user@example.com' };
     mockSupabase = { from: jest.fn() };
 
-    authMock.requireAuth.mockResolvedValue({
+    requireAuthSpy.mockResolvedValue({
       user: mockUser,
       supabase: mockSupabase,
     });
 
     mockedServiceClient.mockResolvedValue(mockSupabase);
+  });
+
+  afterEach(() => {
+    requireAuthSpy.mockReset();
   });
 
   const mockOrgAndDomains = ({
@@ -112,7 +112,7 @@ describe('POST /api/follow-ups', () => {
   });
 
   it('returns 401 when auth fails', async () => {
-    authMock.requireAuth.mockResolvedValueOnce(
+    requireAuthSpy.mockResolvedValueOnce(
       NextResponse.json({ error: 'Authentication required' }, { status: 401 })
     );
 
