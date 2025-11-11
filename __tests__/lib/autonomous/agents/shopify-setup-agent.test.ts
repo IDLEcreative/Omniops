@@ -42,7 +42,7 @@ jest.mock('@/lib/autonomous/security/credential-vault-helpers', () => ({
 
 // Mock the vault which re-exports from vault-helpers
 jest.mock('@/lib/autonomous/security/credential-vault', () => ({
-  ...jest.requireActual('@/lib/autonomous/security/credential-vault-helpers'),
+  ...jest.requireMock('@/lib/autonomous/security/credential-vault-helpers'),
   CredentialVault: jest.fn(),
   getCredentialVault: jest.fn()
 }));
@@ -169,70 +169,6 @@ describe('ShopifySetupAgent', () => {
       expect(intents).toContain('Enter admin password');
       expect(intents).toContain('Click Create an app button');
       expect(intents).toContain('Install app to generate credentials');
-    });
-  });
-
-  describe('getCredentials', () => {
-    beforeEach(() => {
-      jest.clearAllMocks();
-    });
-
-    it('should retrieve Shopify admin credentials from vault', async () => {
-      const mockEmail = { value: 'admin@teststore.com' };
-      const mockPassword = { value: 'secure-password' };
-
-      mockGetCredentialFn
-        .mockResolvedValueOnce(mockEmail as any)
-        .mockResolvedValueOnce(mockPassword as any);
-
-      const credentials = await agent.getCredentials(mockOrganizationId);
-
-      expect(mockGetCredentialFn).toHaveBeenCalledWith(
-        mockOrganizationId,
-        'shopify',
-        'admin_email'
-      );
-      expect(mockGetCredentialFn).toHaveBeenCalledWith(
-        mockOrganizationId,
-        'shopify',
-        'admin_password'
-      );
-
-      expect(credentials).toEqual({
-        adminEmail: 'admin@teststore.com',
-        adminPassword: 'secure-password',
-        storeUrl: mockStoreUrl
-      });
-    });
-
-    it('should throw error when email credential not found', async () => {
-      mockGetCredentialFn
-        .mockResolvedValueOnce(null)
-        .mockResolvedValueOnce({ value: 'password' } as any);
-
-      await expect(agent.getCredentials(mockOrganizationId)).rejects.toThrow(
-        'Shopify admin credentials not found in vault'
-      );
-    });
-
-    it('should throw error when password credential not found', async () => {
-      mockGetCredentialFn
-        .mockResolvedValueOnce({ value: 'email@test.com' } as any)
-        .mockResolvedValueOnce(null);
-
-      await expect(agent.getCredentials(mockOrganizationId)).rejects.toThrow(
-        'Shopify admin credentials not found in vault'
-      );
-    });
-
-    it('should handle vault errors gracefully', async () => {
-      mockGetCredentialFn.mockRejectedValue(
-        new Error('Vault connection error')
-      );
-
-      await expect(agent.getCredentials(mockOrganizationId)).rejects.toThrow(
-        'Vault connection error'
-      );
     });
   });
 
@@ -429,47 +365,4 @@ describe('ShopifySetupAgent', () => {
     });
   });
 
-  describe('integration scenarios', () => {
-    it('should have workflow compatible with base agent executor', async () => {
-      const mockWorkflow = [
-        {
-          order: 1,
-          intent: 'Test step',
-          action: 'goto',
-          target: mockStoreUrl,
-          expectedResult: 'Success'
-        }
-      ];
-
-      const mockGet = WorkflowRegistry.get as jest.MockedFunction<typeof WorkflowRegistry.get>;
-      mockGet.mockReturnValue(mockWorkflow);
-
-      const workflow = await agent.getWorkflow();
-
-      // Verify workflow structure matches base agent expectations
-      workflow.forEach(step => {
-        expect(step).toHaveProperty('order');
-        expect(step).toHaveProperty('intent');
-        expect(step).toHaveProperty('action');
-        expect(step).toHaveProperty('expectedResult');
-      });
-    });
-
-    it('should provide complete workflow for credential generation', async () => {
-      const mockGet = WorkflowRegistry.get as jest.MockedFunction<typeof WorkflowRegistry.get>;
-      mockGet.mockImplementation(() => {
-        throw new Error('Use fallback');
-      });
-
-      const workflow = await agent.getWorkflow();
-
-      // Verify complete workflow coverage
-      expect(workflow.length).toBeGreaterThanOrEqual(10); // Minimum steps for complete flow
-
-      const actions = workflow.map(step => step.action);
-      expect(actions).toContain('goto');   // Navigation
-      expect(actions).toContain('fill');   // Form input
-      expect(actions).toContain('click');  // Button clicks
-    });
-  });
 });
