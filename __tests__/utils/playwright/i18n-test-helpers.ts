@@ -286,7 +286,7 @@ export function hasSpanishIndicators(text: string | null | undefined): boolean {
  * This is critical for language switching workflows
  */
 export async function reloadAndWaitForWidget(page: Page): Promise<void> {
-  await page.reload({ waitUntil: 'networkidle' });
+  await page.reload({ waitUntil: 'load' });
 
   // Wait for widget iframe to load and be ready
   await waitForWidgetIframe(page, 30000);
@@ -312,7 +312,7 @@ export async function switchLanguage(page: Page, language: string): Promise<void
   await setRTLDirection(page, rtl);
 
   // Reload page and wait for widget to be ready
-  await page.reload({ waitUntil: 'networkidle' });
+  await page.reload({ waitUntil: 'load' });
   await waitForWidgetIframe(page, 30000);
 
   // Additional stabilization time

@@ -118,13 +118,16 @@ export function usePrivacySettings({
     setPrivacySettings((prev) => ({ ...prev, consentGiven: true }));
 
     try {
-      const targetOrigin = process.env.NEXT_PUBLIC_APP_URL || window.location.origin;
+      // SECURITY: Get parent origin from referrer or ancestorOrigins
+      // In iframe context, document.referrer gives us the parent's URL
+      const parentOrigin = document.referrer ? new URL(document.referrer).origin :
+                           (window.location.ancestorOrigins && window.location.ancestorOrigins[0]) || '*';
       window.parent.postMessage(
         {
           type: 'privacy',
           action: 'giveConsent',
         },
-        targetOrigin
+        parentOrigin
       );
 
       if (process.env.NODE_ENV === 'development') {

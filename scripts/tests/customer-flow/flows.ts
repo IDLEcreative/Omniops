@@ -116,3 +116,11 @@ export async function runCustomerFlow(domain: string) {
   logSuccess(`Flow completed for ${domain}`);
   return true;
 }
+
+export {
+  testDomainValidation,
+  createCustomerConfig,
+  checkScrapeJobStatus,
+  monitorScrapeProgress,
+  getConfigurationStatus
+};

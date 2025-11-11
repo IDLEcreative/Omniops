@@ -224,36 +224,10 @@ export function useParentCommunication({
     ]
   );
 
-  // Set up parent window communication with error handling
+  // Set up message listener (runs when handleMessage changes)
   useEffect(() => {
     try {
       window.addEventListener('message', handleMessage);
-
-      // Send ready message to parent if in iframe
-      if (window.parent !== window) {
-        try {
-          // Use '*' for ready message to handle cross-origin scenarios (localhost vs production)
-          // The parent validates the message content, not just the origin
-          window.parent.postMessage({ type: 'ready' }, '*');
-          setMessagesReceived((prev) => prev + 1);
-          setLastMessageType('ready');
-        } catch (err) {
-          const error = err instanceof Error ? err : new Error('postMessage failed');
-          setError(error);
-          console.error('[useParentCommunication] Error sending ready message:', error);
-        }
-      }
-
-      // Call onReady callback if provided
-      if (onReady) {
-        try {
-          onReady();
-        } catch (err) {
-          if (process.env.NODE_ENV === 'development') {
-            console.error('[useParentCommunication] Error in onReady callback:', err);
-          }
-        }
-      }
     } catch (err) {
       const error = err instanceof Error ? err : new Error('Failed to setup message listener');
       setError(error);
@@ -270,15 +244,47 @@ export function useParentCommunication({
         }
       }
     };
-  }, [handleMessage, onReady]);
+  }, [handleMessage]);
+
+  // Send ready message ONCE on mount (empty dependency array)
+  useEffect(() => {
+    // Send ready message to parent if in iframe
+    if (window.parent !== window) {
+      try {
+        // SECURITY: Get parent origin from referrer or ancestorOrigins
+        // In iframe context, document.referrer gives us the parent's URL
+        const parentOrigin = document.referrer ? new URL(document.referrer).origin :
+                             (window.location.ancestorOrigins && window.location.ancestorOrigins[0]) || '*';
+        window.parent.postMessage({ type: 'ready' }, parentOrigin);
+        setMessagesReceived((prev) => prev + 1);
+        setLastMessageType('ready');
+      } catch (err) {
+        const error = err instanceof Error ? err : new Error('postMessage failed');
+        setError(error);
+        console.error('[useParentCommunication] Error sending ready message:', error);
+      }
+    }
+
+    // Call onReady callback if provided
+    if (onReady) {
+      try {
+        onReady();
+      } catch (err) {
+        if (process.env.NODE_ENV === 'development') {
+          console.error('[useParentCommunication] Error in onReady callback:', err);
+        }
+      }
+    }
+  }, []); // Empty deps = run ONCE on mount only
 
   // Notify parent window when widget opens/closes and request resize
   useEffect(() => {
     if (mounted && window.parent !== window) {
       try {
-        // Use '*' for cross-origin scenarios (localhost vs production)
-        // The parent (embed.js) validates message content
-        const targetOrigin = '*';
+        // SECURITY: Get parent origin from referrer or ancestorOrigins
+        // In iframe context, document.referrer gives us the parent's URL
+        const targetOrigin = document.referrer ? new URL(document.referrer).origin :
+                             (window.location.ancestorOrigins && window.location.ancestorOrigins[0]) || '*';
 
         if (isOpen) {
           // Widget is open - request full size and enable pointer events

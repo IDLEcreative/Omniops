@@ -67,10 +67,13 @@ export function useTranslation(): UseTranslationReturn {
 
       // Notify parent window of language change (for analytics)
       if (window.parent !== window) {
+        // SECURITY: Get parent origin from referrer or ancestorOrigins
+        const parentOrigin = document.referrer ? new URL(document.referrer).origin :
+                             (window.location.ancestorOrigins && window.location.ancestorOrigins[0]) || '*';
         window.parent.postMessage({
           type: 'language_changed',
           language: newLanguage,
-        }, '*');
+        }, parentOrigin);
       }
     }
   }, []);
