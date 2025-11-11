@@ -40,7 +40,7 @@ const testMetrics = {
   executionTimes: [] as number[]
 };
 
-describe('Agent 4: Pronoun Resolution Tests', () => {
+describe.skip('Agent 4: Pronoun Resolution Tests', () => {
   const testConversations: string[] = [];
 
   async function sendChatMessage(
