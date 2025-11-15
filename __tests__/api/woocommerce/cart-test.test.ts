@@ -8,11 +8,59 @@
 import { NextRequest } from 'next/server';
 import { POST, GET } from '@/app/api/woocommerce/cart-test/route';
 
-// Mock the dependencies
-const mockGetDynamicStoreAPIClient = jest.fn();
+// Mock Supabase
+const mockSupabaseClient = {
+  from: jest.fn(() => ({
+    select: jest.fn(() => ({
+      eq: jest.fn(() => ({
+        single: jest.fn(() => ({
+          data: {
+            id: 'domain-1',
+            domain: 'test.com',
+            woocommerce_url: 'https://test.com',
+          },
+          error: null,
+        })),
+      })),
+    })),
+  })),
+};
 
-jest.mock('@/lib/woocommerce-dynamic', () => ({
-  getDynamicStoreAPIClient: jest.fn(() => mockGetDynamicStoreAPIClient()),
+jest.mock('@/lib/supabase-server', () => ({
+  createServiceRoleClient: jest.fn(() => mockSupabaseClient),
+}));
+
+// Mock Cart Session Manager
+const mockSessionManager = {
+  generateGuestId: jest.fn(() => 'guest-123'),
+  getSession: jest.fn(() => Promise.resolve({
+    userId: 'guest-123',
+    domain: 'test.com',
+    nonce: 'test-nonce',
+    createdAt: new Date().toISOString(),
+    expiresAt: new Date(Date.now() + 86400000).toISOString(),
+    isGuest: true,
+  })),
+};
+
+jest.mock('@/lib/cart-session-manager', () => ({
+  getCartSessionManager: jest.fn(() => mockSessionManager),
+}));
+
+// Mock WooCommerceStoreAPI class
+const mockStoreAPIInstance = {
+  isAvailable: jest.fn().mockResolvedValue(true),
+  addItem: jest.fn(),
+  getCart: jest.fn(),
+  updateItem: jest.fn(),
+  removeItem: jest.fn(),
+  applyCoupon: jest.fn(),
+  removeCoupon: jest.fn(),
+  setNonce: jest.fn(),
+};
+
+jest.mock('@/lib/woocommerce-store-api', () => ({
+  WooCommerceStoreAPI: jest.fn(() => mockStoreAPIInstance),
 }));
 
 describe('/api/woocommerce/cart-test', () => {
@@ -21,6 +69,45 @@ describe('/api/woocommerce/cart-test', () => {
     jest.clearAllMocks();
     // Reset environment variables
     process.env.WOOCOMMERCE_STORE_API_ENABLED = 'false';
+
+    // Reset Supabase mock to default successful state
+    mockSupabaseClient.from = jest.fn(() => ({
+      select: jest.fn(() => ({
+        eq: jest.fn(() => ({
+          single: jest.fn(() => ({
+            data: {
+              id: 'domain-1',
+              domain: 'test.com',
+              woocommerce_url: 'https://test.com',
+            },
+            error: null,
+          })),
+        })),
+      })),
+    }));
+
+    // Reset Store API mock to default successful state
+    mockStoreAPIInstance.isAvailable.mockResolvedValue(true);
+    mockStoreAPIInstance.addItem.mockResolvedValue({
+      success: true,
+      data: { items: [], totals: { total: '0.00' } },
+    });
+    mockStoreAPIInstance.getCart.mockResolvedValue({
+      success: true,
+      data: { items: [], totals: { total: '0.00' } },
+    });
+    mockStoreAPIInstance.updateItem.mockResolvedValue({
+      success: true,
+      data: { items: [], totals: { total: '0.00' } },
+    });
+    mockStoreAPIInstance.removeItem.mockResolvedValue({
+      success: true,
+      data: { items: [], totals: { total: '0.00' } },
+    });
+    mockStoreAPIInstance.applyCoupon.mockResolvedValue({
+      success: true,
+      data: { items: [], totals: { total: '0.00' }, coupons: [] },
+    });
   });
 
   describe('GET endpoint', () => {
@@ -81,25 +168,20 @@ describe('/api/woocommerce/cart-test', () => {
     });
 
     it('should handle add to cart action', async () => {
-      const mockStoreAPI = {
-        isAvailable: jest.fn().mockResolvedValue(true),
-        addItem: jest.fn().mockResolvedValue({
-          success: true,
-          data: {
-            items: [
-              {
-                id: 123,
-                name: 'Test Product',
-                quantity: 2,
-                prices: { price: '50.00' },
-              },
-            ],
-            totals: { total: '100.00' },
-          },
-        }),
-      };
-
-      mockGetDynamicStoreAPIClient.mockResolvedValue(mockStoreAPI as any);
+      mockStoreAPIInstance.addItem.mockResolvedValue({
+        success: true,
+        data: {
+          items: [
+            {
+              id: 123,
+              name: 'Test Product',
+              quantity: 2,
+              prices: { price: '50.00' },
+            },
+          ],
+          totals: { total: '100.00' },
+        },
+      });
 
       const request = new NextRequest('http://localhost:3000/api/woocommerce/cart-test', {
         method: 'POST',
@@ -118,23 +200,10 @@ describe('/api/woocommerce/cart-test', () => {
       expect(data.mode).toBe('transactional');
       expect(data.message).toContain('Successfully added');
       expect(data.cart).toBeDefined();
-      expect(mockStoreAPI.addItem).toHaveBeenCalledWith(123, 2);
+      expect(mockStoreAPIInstance.addItem).toHaveBeenCalledWith(123, 2);
     });
 
     it('should handle get cart action', async () => {
-      const mockStoreAPI = {
-        isAvailable: jest.fn().mockResolvedValue(true),
-        getCart: jest.fn().mockResolvedValue({
-          success: true,
-          data: {
-            items: [],
-            totals: { total: '0.00' },
-          },
-        }),
-      };
-
-      mockGetDynamicStoreAPIClient.mockResolvedValue(mockStoreAPI as any);
-
       const request = new NextRequest('http://localhost:3000/api/woocommerce/cart-test', {
         method: 'POST',
         body: JSON.stringify({
@@ -149,22 +218,17 @@ describe('/api/woocommerce/cart-test', () => {
       expect(data.success).toBe(true);
       expect(data.message).toContain('Cart retrieved successfully');
       expect(data.cart).toBeDefined();
-      expect(mockStoreAPI.getCart).toHaveBeenCalled();
+      expect(mockStoreAPIInstance.getCart).toHaveBeenCalled();
     });
 
     it('should handle update cart quantity action', async () => {
-      const mockStoreAPI = {
-        isAvailable: jest.fn().mockResolvedValue(true),
-        updateItem: jest.fn().mockResolvedValue({
-          success: true,
-          data: {
-            items: [],
-            totals: { total: '150.00' },
-          },
-        }),
-      };
-
-      mockGetDynamicStoreAPIClient.mockResolvedValue(mockStoreAPI as any);
+      mockStoreAPIInstance.updateItem.mockResolvedValue({
+        success: true,
+        data: {
+          items: [],
+          totals: { total: '150.00' },
+        },
+      });
 
       const request = new NextRequest('http://localhost:3000/api/woocommerce/cart-test', {
         method: 'POST',
@@ -181,23 +245,10 @@ describe('/api/woocommerce/cart-test', () => {
 
       expect(data.success).toBe(true);
       expect(data.message).toContain('Successfully updated quantity to 3');
-      expect(mockStoreAPI.updateItem).toHaveBeenCalledWith('abc123', 3);
+      expect(mockStoreAPIInstance.updateItem).toHaveBeenCalledWith('abc123', 3);
     });
 
     it('should handle remove from cart action', async () => {
-      const mockStoreAPI = {
-        isAvailable: jest.fn().mockResolvedValue(true),
-        removeItem: jest.fn().mockResolvedValue({
-          success: true,
-          data: {
-            items: [],
-            totals: { total: '0.00' },
-          },
-        }),
-      };
-
-      mockGetDynamicStoreAPIClient.mockResolvedValue(mockStoreAPI as any);
-
       const request = new NextRequest('http://localhost:3000/api/woocommerce/cart-test', {
         method: 'POST',
         body: JSON.stringify({
@@ -212,23 +263,18 @@ describe('/api/woocommerce/cart-test', () => {
 
       expect(data.success).toBe(true);
       expect(data.message).toContain('Item removed from cart successfully');
-      expect(mockStoreAPI.removeItem).toHaveBeenCalledWith('abc123');
+      expect(mockStoreAPIInstance.removeItem).toHaveBeenCalledWith('abc123');
     });
 
     it('should handle apply coupon action', async () => {
-      const mockStoreAPI = {
-        isAvailable: jest.fn().mockResolvedValue(true),
-        applyCoupon: jest.fn().mockResolvedValue({
-          success: true,
-          data: {
-            items: [],
-            totals: { total: '90.00' },
-            coupons: [{ code: 'SAVE10' }],
-          },
-        }),
-      };
-
-      mockGetDynamicStoreAPIClient.mockResolvedValue(mockStoreAPI as any);
+      mockStoreAPIInstance.applyCoupon.mockResolvedValue({
+        success: true,
+        data: {
+          items: [],
+          totals: { total: '90.00' },
+          coupons: [{ code: 'SAVE10' }],
+        },
+      });
 
       const request = new NextRequest('http://localhost:3000/api/woocommerce/cart-test', {
         method: 'POST',
@@ -244,15 +290,11 @@ describe('/api/woocommerce/cart-test', () => {
 
       expect(data.success).toBe(true);
       expect(data.message).toContain('Coupon "SAVE10" applied successfully');
-      expect(mockStoreAPI.applyCoupon).toHaveBeenCalledWith('SAVE10');
+      expect(mockStoreAPIInstance.applyCoupon).toHaveBeenCalledWith('SAVE10');
     });
 
     it('should handle Store API not available', async () => {
-      const mockStoreAPI = {
-        isAvailable: jest.fn().mockResolvedValue(false),
-      };
-
-      mockGetDynamicStoreAPIClient.mockResolvedValue(mockStoreAPI as any);
+      mockStoreAPIInstance.isAvailable.mockResolvedValue(false);
 
       const request = new NextRequest('http://localhost:3000/api/woocommerce/cart-test', {
         method: 'POST',
@@ -271,7 +313,17 @@ describe('/api/woocommerce/cart-test', () => {
     });
 
     it('should handle Store API client initialization failure', async () => {
-      mockGetDynamicStoreAPIClient.mockResolvedValue(null);
+      // Mock Supabase to return no config
+      mockSupabaseClient.from = jest.fn(() => ({
+        select: jest.fn(() => ({
+          eq: jest.fn(() => ({
+            single: jest.fn(() => ({
+              data: null,
+              error: { message: 'No config found' },
+            })),
+          })),
+        })),
+      }));
 
       const request = new NextRequest('http://localhost:3000/api/woocommerce/cart-test', {
         method: 'POST',
@@ -290,12 +342,6 @@ describe('/api/woocommerce/cart-test', () => {
     });
 
     it('should validate required parameters for add action', async () => {
-      const mockStoreAPI = {
-        isAvailable: jest.fn().mockResolvedValue(true),
-      };
-
-      mockGetDynamicStoreAPIClient.mockResolvedValue(mockStoreAPI as any);
-
       const request = new NextRequest('http://localhost:3000/api/woocommerce/cart-test', {
         method: 'POST',
         body: JSON.stringify({
@@ -331,12 +377,6 @@ describe('/api/woocommerce/cart-test', () => {
     });
 
     it('should handle unknown action', async () => {
-      const mockStoreAPI = {
-        isAvailable: jest.fn().mockResolvedValue(true),
-      };
-
-      mockGetDynamicStoreAPIClient.mockResolvedValue(mockStoreAPI as any);
-
       const request = new NextRequest('http://localhost:3000/api/woocommerce/cart-test', {
         method: 'POST',
         body: JSON.stringify({
@@ -357,15 +397,10 @@ describe('/api/woocommerce/cart-test', () => {
     it('should handle Store API errors gracefully', async () => {
       process.env.WOOCOMMERCE_STORE_API_ENABLED = 'true';
 
-      const mockStoreAPI = {
-        isAvailable: jest.fn().mockResolvedValue(true),
-        addItem: jest.fn().mockResolvedValue({
-          success: false,
-          error: { message: 'Product out of stock' },
-        }),
-      };
-
-      mockGetDynamicStoreAPIClient.mockResolvedValue(mockStoreAPI as any);
+      mockStoreAPIInstance.addItem.mockResolvedValue({
+        success: false,
+        error: { message: 'Product out of stock' },
+      });
 
       const request = new NextRequest('http://localhost:3000/api/woocommerce/cart-test', {
         method: 'POST',
@@ -387,7 +422,8 @@ describe('/api/woocommerce/cart-test', () => {
     it('should handle unexpected errors', async () => {
       process.env.WOOCOMMERCE_STORE_API_ENABLED = 'true';
 
-      mockGetDynamicStoreAPIClient.mockRejectedValue(new Error('Network error'));
+      // Mock the session manager to throw an error
+      mockSessionManager.getSession.mockRejectedValue(new Error('Network error'));
 
       const request = new NextRequest('http://localhost:3000/api/woocommerce/cart-test', {
         method: 'POST',
