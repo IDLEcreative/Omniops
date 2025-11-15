@@ -8,13 +8,19 @@ jest.mock('@/lib/supabase-server', () => ({
 }));
 
 const createSupabaseMock = (conversations: unknown[] = []) => {
-  const conversationBuilder = {
-    select: jest.fn().mockReturnThis(),
-    eq: jest.fn().mockReturnThis(),
-    order: jest.fn().mockReturnThis(),
-    limit: jest.fn().mockReturnThis(),
-    single: jest.fn().mockReturnThis(),
-    then: jest.fn().mockResolvedValue({ data: conversations, error: null }),
+  // Create a thenable query builder that resolves to the data
+  const createQueryBuilder = () => {
+    const builder = {
+      select: jest.fn().mockReturnThis(),
+      eq: jest.fn().mockReturnThis(),
+      order: jest.fn().mockReturnThis(),
+      limit: jest.fn().mockReturnThis(),
+      single: jest.fn().mockReturnThis(),
+      then: jest.fn((resolve) => {
+        return Promise.resolve({ data: conversations, error: null }).then(resolve);
+      }),
+    };
+    return builder;
   };
 
   const auditBuilder = {
@@ -24,12 +30,12 @@ const createSupabaseMock = (conversations: unknown[] = []) => {
   return {
     from: jest.fn((table: string) => {
       if (table === 'conversations') {
-        return conversationBuilder;
+        return createQueryBuilder();
       }
       if (table === 'gdpr_audit_log') {
         return auditBuilder;
       }
-      return conversationBuilder;
+      return createQueryBuilder();
     }),
   };
 };
@@ -76,6 +82,7 @@ describe('POST /api/gdpr/export', () => {
     const payload = await response.json();
     expect(payload.conversations).toHaveLength(1);
     expect(payload.metadata.total_conversations).toBe(1);
-    expect(response.headers.get('Content-Disposition')).toContain('chat-export');
+    expect(payload.export_date).toBeDefined();
+    expect(payload.domain).toBe('acme.com');
   });
 });
