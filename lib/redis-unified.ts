@@ -3,4 +3,4 @@
  * Backward compatibility for refactored module
  */
 
-export * from './redis-unified/';
+export * from './redis-unified/index';

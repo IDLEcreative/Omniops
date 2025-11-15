@@ -74,10 +74,14 @@ export function getModelConfig(
 
   // NOTE: GPT-5 mini does not support temperature parameter (only default value 1)
   // Temperature setting is ignored for this model
+  //
+  // CRITICAL: reasoning_effort='low' may cause tool calling issues
+  // Using default (medium) for better tool/function calling compatibility
+  // See: https://community.openai.com/t/gpt-5-mini-responses-api-function-calling-not-working
 
   return {
     model: 'gpt-5-mini',
-    reasoning_effort: 'low',
+    // reasoning_effort omitted to use default 'medium' for tool calling compatibility
     max_completion_tokens: maxTokens
     // temperature not supported by gpt-5-mini
   };

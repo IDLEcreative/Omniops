@@ -56,6 +56,9 @@ const customJestConfig = {
     '^@/lib/embeddings$': '<rootDir>/__mocks__/@/lib/embeddings.ts',
     '^@/lib/redis$': '<rootDir>/__mocks__/@/lib/redis.js',
     '^@/lib/redis-enhanced$': '<rootDir>/__mocks__/@/lib/redis-enhanced.ts',
+    '^@/lib/redis-unified$': '<rootDir>/__mocks__/lib/redis-unified.ts',
+    '^@/lib/queue$': '<rootDir>/__mocks__/lib/queue.ts',
+    '^@/lib/integrations/customer-scraping-integration$': '<rootDir>/__mocks__/lib/integrations/customer-scraping-integration.ts',
     // NOTE: scraper-api and scraper-with-cleanup NOW in moduleNameMapper for reliable mocking
     '^@/lib/scraper-api$': '<rootDir>/__mocks__/@/lib/scraper-api.ts',
     '^@/lib/scraper-with-cleanup$': '<rootDir>/__mocks__/@/lib/scraper-with-cleanup.ts',
