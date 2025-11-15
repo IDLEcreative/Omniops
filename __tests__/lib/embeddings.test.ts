@@ -23,14 +23,16 @@ describe('Embeddings Service', () => {
   beforeEach(() => {
     jest.clearAllMocks()
 
-    // Mock OpenAI instance
+    // Mock OpenAI instance with dynamic response based on batch size
     mockOpenAIInstance = {
       embeddings: {
-        create: jest.fn().mockResolvedValue({
-          data: [
-            { embedding: Array(1536).fill(0.1) },
-            { embedding: Array(1536).fill(0.2) }
-          ]
+        create: jest.fn().mockImplementation((params: any) => {
+          const input = Array.isArray(params.input) ? params.input : [params.input];
+          return Promise.resolve({
+            data: input.map((_, index) => ({
+              embedding: Array(1536).fill(index % 2 === 0 ? 0.1 : 0.2)
+            }))
+          });
         })
       }
     } as any
@@ -44,14 +46,24 @@ describe('Embeddings Service', () => {
     mockSupabaseClient = createServiceRoleMockClient()
 
     // Override specific mock behaviors for embeddings tests
-    mockSupabaseClient.from = jest.fn(() => ({
-      insert: jest.fn().mockReturnThis(),
-      select: jest.fn().mockReturnThis(),
-      eq: jest.fn().mockReturnThis(),
-      single: jest.fn().mockResolvedValue({ data: { id: 'test-id' }, error: null }),
-      update: jest.fn().mockReturnThis(),
-      delete: jest.fn().mockResolvedValue({ error: null })
-    })) as any
+    // Use a shared mock chain to allow verification of nested calls
+    const mockInsert = jest.fn().mockResolvedValue({ error: null });
+    const mockSelect = jest.fn().mockReturnThis();
+    const mockEq = jest.fn().mockReturnThis();
+    const mockSingle = jest.fn().mockResolvedValue({ data: { id: 'test-id' }, error: null });
+    const mockUpdate = jest.fn().mockReturnThis();
+    const mockDelete = jest.fn().mockResolvedValue({ error: null });
+
+    const chainMock = {
+      insert: mockInsert,
+      select: mockSelect,
+      eq: mockEq,
+      single: mockSingle,
+      update: mockUpdate,
+      delete: mockDelete,
+    };
+
+    mockSupabaseClient.from = jest.fn(() => chainMock) as any;
 
     mockSupabaseClient.rpc = jest.fn().mockResolvedValue({
       data: [
