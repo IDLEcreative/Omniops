@@ -273,3 +273,13 @@ export const connectionMonitor = typeof window !== 'undefined'
       debug: (window as any).ChatWidgetDebug,
     })
   : null;
+
+/**
+ * Cleanup connection monitor on page unload to prevent memory leaks
+ * This ensures event listeners and timers are properly cleaned up
+ */
+if (typeof window !== 'undefined' && connectionMonitor) {
+  window.addEventListener('beforeunload', () => {
+    connectionMonitor.stop();
+  });
+}

@@ -13,7 +13,9 @@ const chatSchema = z.object({
 // Lazy initialization - only create OpenAI client when needed (avoids build-time env var requirement)
 function getOpenAIClient() {
   return new OpenAI({
-    apiKey: process.env.OPENAI_API_KEY || ''
+    apiKey: process.env.OPENAI_API_KEY || '',
+    timeout: 30 * 1000,    // 30 seconds (chat completions need 5-15s normally)
+    maxRetries: 2,          // Retry failed requests twice
   });
 }
 

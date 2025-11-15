@@ -9,6 +9,8 @@ import OpenAI from 'openai';
 
 const openai = new OpenAI({
   apiKey: process.env.OPENAI_API_KEY,
+  timeout: 15 * 1000,    // 15 seconds (translation needs 3-8s normally)
+  maxRetries: 2,          // Retry failed requests twice
 });
 
 // ISO 639-1 language codes for 40+ supported languages

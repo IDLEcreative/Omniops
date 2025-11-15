@@ -13,6 +13,7 @@ import { checkExpensiveOpRateLimit } from '@/lib/rate-limit';
 
 export const runtime = 'nodejs';
 export const dynamic = 'force-dynamic';
+export const maxDuration = 300; // 5 minutes for web scraping (long-running crawling operations)
 
 /**
  * POST /api/scrape

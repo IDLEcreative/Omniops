@@ -46,7 +46,11 @@ export class EmbeddingReindexer {
     openaiKey: string
   ) {
     this.supabase = createServiceRoleClientSync();
-    this.openai = new OpenAI({ apiKey: openaiKey });
+    this.openai = new OpenAI({
+      apiKey: openaiKey,
+      timeout: 20 * 1000,    // 20 seconds (embeddings need 1-5s normally)
+      maxRetries: 2,          // Retry failed requests twice
+    });
     this.progress = {
       phase: 'clearing',
       current: 0,

@@ -1,6 +1,7 @@
 import { NextResponse } from 'next/server';
 export const runtime = 'nodejs'
 export const dynamic = 'force-dynamic'
+export const maxDuration = 10; // 10 seconds for health checks (includes DB queries, Redis ping, error log lookups)
 import { createClient } from '@/lib/supabase-server';
 import { errorLogger } from '@/lib/error-logger';
 import { withErrorHandler } from '@/lib/api-error-handler';

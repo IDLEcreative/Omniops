@@ -11,6 +11,8 @@ import OpenAI from 'openai';
 
 const openai = new OpenAI({
   apiKey: process.env.OPENAI_API_KEY,
+  timeout: 30 * 1000,    // 30 seconds (chat completions need 5-15s normally)
+  maxRetries: 2,          // Retry failed requests twice
 });
 
 export interface ContextAnalysis {

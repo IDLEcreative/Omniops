@@ -13,6 +13,8 @@ import OpenAI from 'openai';
 
 const openai = new OpenAI({
   apiKey: process.env.OPENAI_API_KEY,
+  timeout: 20 * 1000,    // 20 seconds (embeddings need 1-5s normally)
+  maxRetries: 2,          // Retry failed requests twice
 });
 
 export interface VectorSimilarityRequest {

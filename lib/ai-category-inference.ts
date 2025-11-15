@@ -19,7 +19,11 @@ export class AICategoryInferencer {
   private cache: Map<string, CategoryInference> = new Map();
   
   constructor(apiKey: string) {
-    this.openai = new OpenAI({ apiKey });
+    this.openai = new OpenAI({
+      apiKey,
+      timeout: 30 * 1000,    // 30 seconds (chat completions need 5-15s normally)
+      maxRetries: 2,          // Retry failed requests twice
+    });
   }
 
   /**

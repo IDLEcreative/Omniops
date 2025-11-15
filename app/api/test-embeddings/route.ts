@@ -2,6 +2,10 @@ import { NextResponse } from 'next/server';
 import { createServiceRoleClient } from '@/lib/supabase-server';
 import { searchSimilarContent } from '@/lib/embeddings';
 
+export const runtime = 'nodejs';
+export const dynamic = 'force-dynamic';
+export const maxDuration = 60; // 60 seconds for testing (includes embedding generation and searches)
+
 /**
  * DEBUG ENDPOINT - Development use only
  * Tests embeddings search functionality

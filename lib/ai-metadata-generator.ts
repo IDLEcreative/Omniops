@@ -50,7 +50,11 @@ export class AIMetadataGenerator {
   private embeddingModel: string;
 
   constructor(openaiApiKey: string, embeddingModel: string = 'text-embedding-3-small') {
-    this.openai = new OpenAI({ apiKey: openaiApiKey });
+    this.openai = new OpenAI({
+      apiKey: openaiApiKey,
+      timeout: 25 * 1000,    // 25 seconds (mixed operations - chat + embeddings)
+      maxRetries: 2,          // Retry failed requests twice
+    });
     this.cache = new MetadataCache();
     this.embeddingModel = embeddingModel;
   }

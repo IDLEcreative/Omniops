@@ -26,7 +26,11 @@ export class AdaptiveEntityExtractor {
     openaiKey: string
   ) {
     this.supabase = createServiceRoleClientSync();
-    this.openai = new OpenAI({ apiKey: openaiKey });
+    this.openai = new OpenAI({
+      apiKey: openaiKey,
+      timeout: 30 * 1000,    // 30 seconds (chat completions need 5-15s normally)
+      maxRetries: 2,          // Retry failed requests twice
+    });
   }
 
   /**

@@ -12,7 +12,11 @@ export class AIQueryInterpreter {
   constructor() {
     const apiKey = process.env.OPENAI_API_KEY;
     if (apiKey) {
-      this.openai = new OpenAI({ apiKey });
+      this.openai = new OpenAI({
+        apiKey,
+        timeout: 30 * 1000,    // 30 seconds (chat completions need 5-15s normally)
+        maxRetries: 2,          // Retry failed requests twice
+      });
     }
   }
 

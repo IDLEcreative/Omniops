@@ -77,7 +77,7 @@ export async function createClient() {
           headers: {
             'x-connection-pooling': 'session',
             'x-pool-timeout': '60',
-            'x-pool-size': '10',
+            'x-pool-size': '20', // Session pool (increased from 10 for 2x headroom under load)
             'x-statement-timeout': '5000', // 5 second query timeout
           },
         },
@@ -124,7 +124,7 @@ export function createServiceRoleClientSync() {
           headers: {
             'x-connection-pooling': 'transaction',
             'x-pool-timeout': '60',
-            'x-pool-size': '20', // Higher pool size for service role
+            'x-pool-size': '40', // Service role pool (increased from 20 for 2x headroom under load)
             'x-statement-timeout': '5000', // 5 second query timeout
             'x-connection-timeout': '10000', // 10 second connection timeout
           },
@@ -133,6 +133,8 @@ export function createServiceRoleClientSync() {
           persistSession: false,
           autoRefreshToken: false,
         },
+        // CRITICAL: Service role should bypass RLS
+        // This is set by using the service role key, but we make it explicit
       }
     )
   } catch (error) {

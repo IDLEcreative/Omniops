@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server';
 export const runtime = 'nodejs'
 export const dynamic = 'force-dynamic'
+export const maxDuration = 60; // 60 seconds for chat completions (AI processing can take 15-30s)
 import { validateSupabaseEnv } from '@/lib/supabase-server';
 import { ChatTelemetry, telemetryManager } from '@/lib/chat-telemetry';
 

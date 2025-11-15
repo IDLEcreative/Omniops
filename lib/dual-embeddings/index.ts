@@ -17,7 +17,11 @@ export class DualEmbeddings {
   private openai: OpenAI;
 
   constructor(apiKey: string) {
-    this.openai = new OpenAI({ apiKey });
+    this.openai = new OpenAI({
+      apiKey,
+      timeout: 20 * 1000,    // 20 seconds (embeddings need 1-5s normally)
+      maxRetries: 2,          // Retry failed requests twice
+    });
   }
 
   async generateDualEmbeddings(text: string, metadata: any) {

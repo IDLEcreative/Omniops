@@ -2,6 +2,10 @@ import { NextResponse } from 'next/server';
 import { createServiceRoleClient } from '@/lib/supabase/server';
 import OpenAI from 'openai';
 
+export const runtime = 'nodejs';
+export const dynamic = 'force-dynamic';
+export const maxDuration = 60; // 60 seconds for debugging (includes embedding generation and searches)
+
 /**
  * DEBUG ENDPOINT - Development use only
  *
@@ -51,6 +55,8 @@ export async function GET(request: Request) {
 
   const openai = new OpenAI({
     apiKey: process.env.OPENAI_API_KEY,
+    timeout: 20 * 1000,    // 20 seconds (embeddings need 1-5s normally)
+    maxRetries: 2,          // Retry failed requests twice
   });
 
   const debug: any = {};

@@ -44,7 +44,11 @@ export class ProductExtractor {
       throw new Error('Supabase client initialization failed - check environment variables');
     }
     this.supabase = client;
-    this.openai = new OpenAI({ apiKey: openaiKey });
+    this.openai = new OpenAI({
+      apiKey: openaiKey,
+      timeout: 25 * 1000,    // 25 seconds (product extraction is mixed operation)
+      maxRetries: 2,          // Retry failed requests twice
+    });
   }
 
   /**

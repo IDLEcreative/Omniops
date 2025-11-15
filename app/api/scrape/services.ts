@@ -10,7 +10,11 @@ export function getOpenAIClient(): OpenAI {
     if (!apiKey) {
       throw new Error('OPENAI_API_KEY is not configured');
     }
-    openai = new OpenAI({ apiKey });
+    openai = new OpenAI({
+      apiKey,
+      timeout: 20 * 1000,    // 20 seconds (embeddings need 1-5s normally)
+      maxRetries: 2,          // Retry failed requests twice
+    });
   }
   return openai;
 }
