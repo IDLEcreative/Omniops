@@ -11,7 +11,7 @@
 
 import { describe, it, expect, beforeAll, afterAll } from '@jest/globals';
 import { createClient } from '@supabase/supabase-js';
-import { initializeTestData, cleanupTestData } from '@/__tests__/utils/customer-config/test-setup';
+import { initializeTestData, cleanupTestData, TEST_PASSWORD } from '@/__tests__/utils/customer-config/test-setup';
 import { getAuthTokenFor, signOutUser } from '@/__tests__/utils/customer-config/auth-helpers';
 import type { TestDataContext } from '@/__tests__/utils/customer-config/test-setup';
 
@@ -35,7 +35,7 @@ describe('RLS Policy Verification', () => {
     const user1Client = createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
     await user1Client.auth.signInWithPassword({
       email: context.user1Email,
-      password: 'testpassword123'
+      password: TEST_PASSWORD
     });
 
     // Try to query config from org2
@@ -57,7 +57,7 @@ describe('RLS Policy Verification', () => {
     const user1Client = createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
     await user1Client.auth.signInWithPassword({
       email: context.user1Email,
-      password: 'testpassword123'
+      password: TEST_PASSWORD
     });
 
     // Query config from org1

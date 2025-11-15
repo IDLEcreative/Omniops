@@ -37,7 +37,7 @@ describe('PUT /api/customer/config - Security', () => {
 
   it('should reject updates to configs from other organizations', async () => {
     // Sign in as user1 (org1)
-    const token = await getAuthTokenFor(context.serviceClient, context.user1Email, 'testpassword123');
+    const token = await getAuthTokenFor(context.serviceClient, context.user1Email, TEST_PASSWORD);
 
     // Try to update org2's config
     const response = await updateConfig(context.config2Id, { business_name: 'Hacked Business' }, token);
@@ -50,7 +50,7 @@ describe('PUT /api/customer/config - Security', () => {
 
   it('should reject regular members', async () => {
     // Sign in as user2 (member, not admin)
-    const token = await getAuthTokenFor(context.serviceClient, context.user2Email, 'testpassword123');
+    const token = await getAuthTokenFor(context.serviceClient, context.user2Email, TEST_PASSWORD);
 
     const response = await updateConfig(context.config2Id, { business_name: 'Updated Business' }, token);
 
@@ -62,7 +62,7 @@ describe('PUT /api/customer/config - Security', () => {
 
   it('should allow admins/owners to update their own org configs', async () => {
     // Sign in as user1 (owner of org1)
-    const token = await getAuthTokenFor(context.serviceClient, context.user1Email, 'testpassword123');
+    const token = await getAuthTokenFor(context.serviceClient, context.user1Email, TEST_PASSWORD);
 
     const response = await updateConfig(context.config1Id, { business_name: 'Updated Business 1' }, token);
 
