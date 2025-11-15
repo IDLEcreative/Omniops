@@ -29,7 +29,8 @@ describe('DELETE /api/customer/config - Security', () => {
     const data = await insertAsAdmin('customer_configs', {
       organization_id: context.org1Id,
       domain: `test-delete-${context.timestamp}.example.com`,
-      business_name: 'Delete Me'
+      business_name: 'Delete Me',
+      app_id: `app_test_delete_${context.timestamp.toString().slice(-8)}`
     });
 
     if (!data) {
@@ -68,7 +69,8 @@ describe('DELETE /api/customer/config - Security', () => {
     const tempConfig = await insertAsAdmin('customer_configs', {
       organization_id: context.org2Id,
       domain: `test-delete-member-${context.timestamp}.example.com`,
-      business_name: 'Delete Me 2'
+      business_name: 'Delete Me 2',
+      app_id: `app_test_member_${context.timestamp.toString().slice(-8)}`
     });
 
     if (!tempConfig) {

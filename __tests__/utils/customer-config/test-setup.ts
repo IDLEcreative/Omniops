@@ -22,6 +22,7 @@ dotenv.config({ path: '.env.test', override: false }); // Don't override existin
 
 import { insertAsAdmin, deleteAsAdmin, createAdminClient, createTestUser, deleteTestUser } from '@/test-utils/rls-test-helpers';
 import type { SupabaseClient } from '@supabase/supabase-js';
+import { randomUUID } from 'crypto';
 
 // Standard test password used by createTestUser helper
 export const TEST_PASSWORD = process.env.TEST_USER_PASSWORD || 'test-password-123';
@@ -45,16 +46,17 @@ export interface TestDataContext {
 export async function initializeTestData(): Promise<TestDataContext> {
   const serviceClient = createAdminClient();
   const timestamp = Date.now();
+  const uniqueId = randomUUID().slice(0, 8); // Use first 8 chars of UUID for uniqueness
 
-  // Create test organizations
+  // Create test organizations with guaranteed unique slugs
   const org1 = await insertAsAdmin('organizations', {
     name: `Test Org 1 - ${timestamp}`,
-    slug: `test-org-1-${timestamp}`
+    slug: `test-org-1-${timestamp}-${uniqueId}`
   });
 
   const org2 = await insertAsAdmin('organizations', {
     name: `Test Org 2 - ${timestamp}`,
-    slug: `test-org-2-${timestamp}`
+    slug: `test-org-2-${timestamp}-${uniqueId}`
   });
 
   if (!org1 || !org2) {
