@@ -70,7 +70,15 @@ export const mockPostMessage = jest.fn();
  */
 export function setupGlobalMocks(): MockStorage {
   const localStorage = new MockStorage();
+  // Set both global and window.localStorage to ensure compatibility
   (global as any).localStorage = localStorage;
+  if (typeof window !== 'undefined') {
+    Object.defineProperty(window, 'localStorage', {
+      value: localStorage,
+      writable: true,
+      configurable: true,
+    });
+  }
 
   // Setup default mock implementation for fetch
   // This handles the /api/widget/config call that happens on mount

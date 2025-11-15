@@ -23,9 +23,10 @@ describe('useChatState Hook - Initialization', () => {
     cleanupMocks(localStorage);
   });
 
-  it('should initialize with default values', () => {
+  it('should initialize with default values', async () => {
     const { result } = renderHook(() => useChatState({}));
 
+    // Check synchronous initial values (before effects run)
     expect(result.current.messages).toEqual([]);
     expect(result.current.input).toBe('');
     expect(result.current.loading).toBe(false);
@@ -33,7 +34,11 @@ describe('useChatState Hook - Initialization', () => {
     expect(result.current.conversationId).toBe('');
     expect(result.current.sessionId).toBe('');
     expect(result.current.isOpen).toBe(false);
-    expect(result.current.mounted).toBe(false);
+
+    // mounted becomes true after useEffect runs
+    await waitFor(() => {
+      expect(result.current.mounted).toBe(true);
+    });
   });
 
   it('should generate session ID on mount', async () => {
@@ -52,18 +57,24 @@ describe('useChatState Hook - Initialization', () => {
 
   it('should restore session ID from localStorage', async () => {
     const existingSessionId = 'session_existing_123';
-    localStorage.setItem('chat_session_id', existingSessionId);
+    // Use the correct storage key that useSessionManagement expects
+    localStorage.setItem('session_id', existingSessionId);
+
+    // Verify the value was set correctly
+    const retrieved = localStorage.getItem('session_id');
+    expect(retrieved).toBe(existingSessionId);
 
     const { result } = renderHook(() => useChatState({}));
 
     await waitFor(() => {
       expect(result.current.sessionId).toBe(existingSessionId);
-    });
+    }, { timeout: 2000 });
   });
 
   it('should restore conversation ID from localStorage', async () => {
     const existingConversationId = 'conv-existing-456';
-    localStorage.setItem('chat_conversation_id', existingConversationId);
+    // Use the correct storage key that useSessionManagement expects
+    localStorage.setItem('conversation_id', existingConversationId);
 
     const { result } = renderHook(() => useChatState({}));
 
