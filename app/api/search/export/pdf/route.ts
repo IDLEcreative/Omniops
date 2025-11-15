@@ -4,6 +4,30 @@ import { searchConversations } from '@/lib/search/conversation-search';
 import { exportToPDF, generateConversationReport } from '@/lib/exports/pdf-generator';
 import { createClient } from '@/lib/supabase/server';
 
+const toBodyInit = (value: Uint8Array): ArrayBuffer => {
+  const arrayBuffer = new ArrayBuffer(value.byteLength);
+  new Uint8Array(arrayBuffer).set(value);
+  return arrayBuffer;
+};
+
+type ConversationDomain = {
+  name: string | null;
+} | null;
+
+interface ConversationRow {
+  id: string;
+  content: string;
+  role: string;
+  created_at: string;
+  sentiment: string | null;
+  conversation_id: string;
+  conversations: {
+    customer_email: string | null;
+    domain_id?: string | null;
+    domains: ConversationDomain;
+  } | null;
+}
+
 const PDFExportRequestSchema = z.object({
   query: z.string().min(1).optional(),
   conversationId: z.string().uuid().optional(),
@@ -24,6 +48,12 @@ export async function POST(request: NextRequest) {
   try {
     // Validate authentication
     const supabase = await createClient();
+    if (!supabase) {
+      return NextResponse.json(
+        { error: 'Database service unavailable' },
+        { status: 503 }
+      );
+    }
     const { data: { user }, error: authError } = await supabase.auth.getUser();
 
     if (authError || !user) {
@@ -57,7 +87,7 @@ export async function POST(request: NextRequest) {
 
     if (format === 'conversation_transcript' && conversationId) {
       // Export single conversation transcript
-      const { data: messages, error } = await supabase
+      const { data: messageRows, error } = await supabase
         .from('messages')
         .select(`
           id,
@@ -76,12 +106,15 @@ export async function POST(request: NextRequest) {
         .eq('conversation_id', conversationId)
         .order('created_at');
 
-      if (error || !messages || messages.length === 0) {
+      if (error || !messageRows || messageRows.length === 0) {
         return NextResponse.json(
           { error: 'Conversation not found' },
           { status: 404 }
         );
       }
+
+      const messages = messageRows as ConversationRow[];
+      const firstMessage = messages[0];
 
       // Map to SearchResult format
       const searchResults = messages.map((msg: any) => ({
@@ -93,15 +126,15 @@ export async function POST(request: NextRequest) {
         sentiment: msg.sentiment,
         relevanceScore: 1,
         highlight: msg.content,
-        customerEmail: msg.conversations?.customer_email,
-        domainName: msg.conversations?.domains?.name
+        customerEmail: msg.conversations?.customer_email ?? null,
+        domainName: msg.conversations?.domains?.name ?? null
       }));
 
       // Get conversation metadata
       const metadata = {
-        customerEmail: messages[0].conversations?.customer_email,
-        domain: messages[0].conversations?.domains?.name,
-        startTime: messages[0].created_at
+        customerEmail: firstMessage?.conversations?.customer_email ?? null,
+        domain: firstMessage?.conversations?.domains?.name ?? null,
+        startTime: firstMessage?.created_at ?? null
       };
 
       pdfBuffer = generateConversationReport(
@@ -143,7 +176,7 @@ export async function POST(request: NextRequest) {
       : `search-results-${timestamp}.pdf`;
 
     // Return PDF response
-    return new NextResponse(pdfBuffer, {
+    return new NextResponse(toBodyInit(pdfBuffer), {
       status: 200,
       headers: {
         'Content-Type': 'application/pdf',

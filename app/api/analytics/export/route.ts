@@ -37,6 +37,15 @@ const formatDate = (date: Date): string => {
   return dayPart ?? date.toISOString();
 };
 
+const bufferToArrayBuffer = (value: Uint8Array): ArrayBuffer => {
+  const arrayBuffer = new ArrayBuffer(value.byteLength);
+  new Uint8Array(arrayBuffer).set(value);
+  return arrayBuffer;
+};
+
+const toBodyInit = (value: string | Uint8Array): BodyInit =>
+  typeof value === 'string' ? value : bufferToArrayBuffer(value);
+
 export async function GET(request: NextRequest) {
   try {
     // 1. Authentication
@@ -174,8 +183,10 @@ export async function GET(request: NextRequest) {
     }
 
     // 10. Return file as download
-    const responseBody: BodyInit =
-      typeof fileBuffer === 'string' ? fileBuffer : new Blob([fileBuffer]);
+    const responseBody =
+      typeof fileBuffer === 'string'
+        ? fileBuffer
+        : toBodyInit(fileBuffer);
 
     return new NextResponse(responseBody, {
       headers: {

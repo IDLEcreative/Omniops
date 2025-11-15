@@ -61,8 +61,9 @@ export async function GET(request: Request) {
     }
 
     // Date range filter
+    const lookbackDays = Number.isFinite(params.days) ? params.days! : 7;
     const startDate = new Date();
-    startDate.setDate(startDate.getDate() - params.days);
+    startDate.setDate(startDate.getDate() - lookbackDays);
     query = query.gte('created_at', startDate.toISOString());
 
     const { data: metrics, error } = await query;

@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { requireAuth } from '@/lib/middleware/auth';
+import { requireAdmin } from '@/lib/middleware/auth';
 import { sendAnalyticsReport } from '@/lib/email/send-report';
 
 /**
@@ -8,12 +8,19 @@ import { sendAnalyticsReport } from '@/lib/email/send-report';
  */
 export async function POST(request: NextRequest) {
   // Require authentication
-  const authResult = await requireAuth();
+  const authResult = await requireAdmin();
   if (authResult instanceof NextResponse) {
     return authResult;
   }
 
-  const { user, organizationId } = authResult;
+  const { user } = authResult;
+
+  const formatDate = (date: Date): string => {
+    const [day] = date.toISOString().split('T');
+    return day ?? date.toISOString();
+  };
+  const startDate = formatDate(new Date(Date.now() - 7 * 24 * 60 * 60 * 1000));
+  const endDate = formatDate(new Date());
 
   try {
     const body = await request.json();
@@ -29,8 +36,8 @@ export async function POST(request: NextRequest) {
     // Send test report with sample data
     const testData = {
       organizationName: 'Test Organization',
-      startDate: new Date(Date.now() - 7 * 24 * 60 * 60 * 1000).toISOString().split('T')[0],
-      endDate: new Date().toISOString().split('T')[0],
+      startDate,
+      endDate,
       totalConversations: 150,
       avgResponseTime: 1.8,
       sentimentScore: 4.2,

@@ -18,6 +18,12 @@ export async function GET(request: NextRequest) {
     // TODO: Add authentication and filter by organization_id
 
     const supabase = await createServerClient();
+    if (!supabase) {
+      return NextResponse.json(
+        { error: 'Database service unavailable' },
+        { status: 503 }
+      );
+    }
     let query = supabase
       .from('autonomous_operations')
       .select('*')

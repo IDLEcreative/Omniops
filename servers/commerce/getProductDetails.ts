@@ -81,17 +81,17 @@ export const metadata: ToolMetadata = {
   examples: [
     {
       description: 'Get product details by SKU',
-      input: { productQuery: 'MU110667601', includeSpecs: true },
+      input: { productQuery: 'SKU-123456', includeSpecs: true },
       expectedOutput: 'Complete product details from commerce provider or exact match with 1.0 similarity'
     },
     {
       description: 'Get product details by name',
-      input: { productQuery: 'equipment model A4VTG90', includeSpecs: true },
+      input: { productQuery: 'Product Model-123', includeSpecs: true },
       expectedOutput: 'Product details with specifications from semantic search'
     },
     {
       description: 'Get product without technical specs',
-      input: { productQuery: 'BP-001', includeSpecs: false },
+      input: { productQuery: 'SKU-001', includeSpecs: false },
       expectedOutput: 'Basic product information without enhanced specification search'
     }
   ],

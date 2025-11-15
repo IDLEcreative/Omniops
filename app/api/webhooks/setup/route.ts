@@ -25,7 +25,7 @@ export const dynamic = 'force-dynamic';
 
 export async function POST(request: NextRequest) {
   try {
-    const supabase = createServiceRoleClient();
+    const supabase = await createServiceRoleClient();
 
     // Check authentication
     const {
@@ -228,7 +228,7 @@ async function handleShopifyWebhook(action: string, domain: string, config: any)
 // GET endpoint to check status
 export async function GET(request: NextRequest) {
   try {
-    const supabase = createServiceRoleClient();
+    const supabase = await createServiceRoleClient();
 
     const {
       data: { user },

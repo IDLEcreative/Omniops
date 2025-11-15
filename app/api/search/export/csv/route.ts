@@ -24,6 +24,12 @@ export async function POST(request: NextRequest) {
   try {
     // Validate authentication
     const supabase = await createClient();
+    if (!supabase) {
+      return NextResponse.json(
+        { error: 'Database service unavailable' },
+        { status: 503 }
+      );
+    }
     const { data: { user }, error: authError } = await supabase.auth.getUser();
 
     if (authError || !user) {

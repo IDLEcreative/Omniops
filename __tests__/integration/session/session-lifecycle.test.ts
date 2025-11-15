@@ -26,6 +26,16 @@ import {
 const mockFetch = jest.fn();
 global.fetch = mockFetch as any;
 
+function createJsonResponse(body: any, init: ResponseInit = {}) {
+  return new Response(JSON.stringify(body), {
+    status: init.status ?? 200,
+    headers: {
+      'Content-Type': 'application/json',
+      ...(init.headers || {}),
+    },
+  });
+}
+
 describe('Session Lifecycle', () => {
   let localStorage: MockStorage;
 
@@ -57,10 +67,7 @@ describe('Session Lifecycle', () => {
     expect(sessionId).toBe(TEST_SESSION_ID);
 
     // Load previous messages
-    mockFetch.mockResolvedValueOnce({
-      ok: true,
-      json: async () => previousMessageResponse,
-    });
+    mockFetch.mockResolvedValueOnce(createJsonResponse(previousMessageResponse));
 
     const response = await fetch(
       buildConversationUrl(conversationId || '', sessionId || ''),
@@ -78,10 +85,7 @@ describe('Session Lifecycle', () => {
     localStorage.setItem('chat_conversation_id', EXPIRED_CONVERSATION_ID);
     localStorage.setItem('chat_session_id', EXPIRED_SESSION_ID);
 
-    mockFetch.mockResolvedValueOnce({
-      ok: true,
-      json: async () => failureResponse,
-    });
+    mockFetch.mockResolvedValueOnce(createJsonResponse(failureResponse));
 
     const conversationId = localStorage.getItem('chat_conversation_id');
     const sessionId = localStorage.getItem('chat_session_id');

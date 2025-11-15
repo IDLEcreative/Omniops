@@ -7,7 +7,6 @@
 
 import { NextRequest, NextResponse } from 'next/server';
 import { getOperationQueueManager } from '@/lib/autonomous/queue';
-import { createServerClient } from '@/lib/supabase/server';
 
 export async function GET(
   request: NextRequest,

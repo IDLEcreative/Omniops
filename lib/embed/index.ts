@@ -13,6 +13,32 @@ import {
 import { WIDGET_VERSION, CLEANUP_KEY } from './embed-types';
 import { logDebug, logError, isMobileViewport, resolveDomain, scheduleConversationCleanup } from './utils';
 import { loadRemoteConfig, loadWidgetBundle, loadConfigByAppId } from './config-loader';
+import { getStorageCookie } from './storage-helpers';
+
+function getPersistedState(key: string): string | null {
+  const storageKey = `chat_widget_${key}`;
+
+  try {
+    const value = localStorage.getItem(storageKey);
+    if (value) {
+      return value;
+    }
+  } catch (error) {
+    console.warn('[Chat Widget] Failed to read localStorage during init:', error);
+  }
+
+  const cookieValue = getStorageCookie(key);
+  if (cookieValue) {
+    try {
+      localStorage.setItem(storageKey, cookieValue);
+    } catch (error) {
+      console.warn('[Chat Widget] Failed to hydrate localStorage from cookie:', error);
+    }
+    return cookieValue;
+  }
+
+  return null;
+}
 
 async function initialize() {
   console.log('[Chat Widget] Initialize function called');
@@ -160,9 +186,9 @@ async function initialize() {
       iframe.style.display = 'block';
       setTimeout(() => {
         // Retrieve stored conversation data from parent localStorage
-        const storedSessionId = localStorage.getItem('chat_widget_session_id');
-        const storedConversationId = localStorage.getItem('chat_widget_conversation_id');
-        const storedWidgetOpen = localStorage.getItem('chat_widget_widget_open');
+        const storedSessionId = getPersistedState('session_id');
+        const storedConversationId = getPersistedState('conversation_id');
+        const storedWidgetOpen = getPersistedState('widget_open');
 
         if (config.debug || (window as any).ChatWidgetDebug) {
           console.log('[Chat Widget] Initializing with stored data:', {

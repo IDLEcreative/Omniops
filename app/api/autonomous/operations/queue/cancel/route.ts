@@ -37,6 +37,12 @@ export async function POST(request: NextRequest) {
 
     // Update operation in database
     const supabase = await createServerClient();
+    if (!supabase) {
+      return NextResponse.json(
+        { error: 'Database service unavailable' },
+        { status: 503 }
+      );
+    }
     await supabase
       .from('autonomous_operations')
       .update({

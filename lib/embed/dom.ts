@@ -1,5 +1,6 @@
 import { WidgetConfig, PrivacyPreferences } from './types';
 import { savePrivacyPreferences, PRIVACY_KEY, getPrivacyPreferences } from './privacy';
+import { setStorageCookie, getStorageCookie, deleteStorageCookie } from './storage-helpers';
 
 export interface IframeContext {
   iframe: HTMLIFrameElement;
@@ -136,6 +137,7 @@ export function registerMessageHandlers(ctx: IframeContext): void {
       if (data?.key && data?.value !== undefined) {
         try {
           localStorage.setItem(`chat_widget_${data.key}`, data.value);
+          setStorageCookie(data.key, data.value);
           if (config.debug || (window as any).ChatWidgetDebug) {
             console.log('[Chat Widget] Saved to parent localStorage:', data.key, data.value);
           }
@@ -147,7 +149,10 @@ export function registerMessageHandlers(ctx: IframeContext): void {
     getFromParentStorage: data => {
       if (data?.key && data?.requestId) {
         try {
-          const value = localStorage.getItem(`chat_widget_${data.key}`);
+          let value = localStorage.getItem(`chat_widget_${data.key}`);
+          if (!value) {
+            value = getStorageCookie(data.key);
+          }
           // Send value back to iframe
           iframe.contentWindow?.postMessage({
             type: 'storageResponse',
@@ -175,6 +180,7 @@ export function registerMessageHandlers(ctx: IframeContext): void {
       if (data?.key) {
         try {
           localStorage.removeItem(`chat_widget_${data.key}`);
+          deleteStorageCookie(data.key);
           if (config.debug || (window as any).ChatWidgetDebug) {
             console.log('[Chat Widget] Removed from parent localStorage:', data.key);
           }

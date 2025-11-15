@@ -20,7 +20,7 @@ export const dynamic = 'force-dynamic';
 export async function GET(request: NextRequest) {
   try {
     // Get user authentication
-    const supabase = createServiceRoleClient();
+    const supabase = await createServiceRoleClient();
     const { data: { user } } = await supabase.auth.getUser();
 
     if (!user) {

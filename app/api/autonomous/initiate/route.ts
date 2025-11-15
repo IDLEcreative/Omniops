@@ -45,7 +45,14 @@ export async function POST(request: NextRequest) {
     const validatedData = InitiateRequestSchema.parse(body);
 
     // Get authenticated user
-    const supabase = createServerClient();
+    const supabase = await createServerClient();
+    if (!supabase) {
+      return NextResponse.json(
+        { error: 'Database service unavailable' },
+        { status: 503 }
+      );
+    }
+
     const { data: { user }, error: authError } = await supabase.auth.getUser();
 
     if (authError || !user) {

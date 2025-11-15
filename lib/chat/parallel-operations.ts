@@ -101,7 +101,7 @@ export async function performConversationOperations(
   const conversationOpsStart = performance.now();
   const results = await Promise.allSettled([
     saveUserMessage(conversationId, message, supabase),
-    getConversationHistory(conversationId, 20, supabase),
+    getConversationHistory(conversationId, 50, supabase), // Increased from 20 to 50 for better context retention
     supabase
       .from('conversations')
       .select('metadata')

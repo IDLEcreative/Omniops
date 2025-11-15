@@ -74,7 +74,6 @@ export async function POST(request: NextRequest) {
       userId: data.userId,
       service: data.service,
       operation: data.operation,
-      status: 'pending',
       metadata: {
         config: data.config,
         priority: data.priority,
@@ -126,6 +125,12 @@ export async function POST(request: NextRequest) {
 
     // Step 6: Update operation with job ID
     const supabase = await createServerClient();
+    if (!supabase) {
+      return NextResponse.json(
+        { error: 'Database service unavailable' },
+        { status: 503 }
+      );
+    }
     await supabase
       .from('autonomous_operations')
       .update({ job_id: jobId })

@@ -29,6 +29,12 @@ export async function POST(request: NextRequest) {
     const feedback = FeedbackSchema.parse(body);
 
     const supabase = await createClient();
+    if (!supabase) {
+      return NextResponse.json(
+        { error: 'Database service unavailable' },
+        { status: 503 }
+      );
+    }
 
     // Determine sentiment
     const sentiment = feedback.rating
@@ -118,6 +124,12 @@ export async function GET(request: NextRequest) {
     const query = FeedbackQuerySchema.parse(params);
 
     const supabase = await createClient();
+    if (!supabase) {
+      return NextResponse.json(
+        { error: 'Database service unavailable' },
+        { status: 503 }
+      );
+    }
 
     // Build query
     const offset = query.offset || 0;

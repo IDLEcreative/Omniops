@@ -72,6 +72,16 @@ export async function POST(
     const validatedData = ChatRequestSchema.parse(body);
     const { message, conversation_id, session_id, domain, config, session_metadata } = validatedData;
 
+    if (!domain) {
+      return NextResponse.json(
+        {
+          error: 'Domain is required',
+          message: 'Please provide a valid domain before initiating a chat session.'
+        },
+        { status: 400, headers: corsHeaders }
+      );
+    }
+
     // Check if GPT-5 mini is enabled
     const useGPT5Mini = process.env.USE_GPT5_MINI === 'true';
 
@@ -118,7 +128,7 @@ export async function POST(
     const perfStart = performance.now();
 
     // Step 1: Domain lookup (must be first - other operations depend on domainId)
-    const domainId = await performDomainLookup(domain, adminSupabase!, telemetry);
+      const domainId = await performDomainLookup(domain, adminSupabase!, telemetry);
 
     // Step 2: Parallel config and conversation operations
     const { widgetConfig, customerProfile, conversationId } = await performParallelConfigAndConversation(
@@ -138,10 +148,20 @@ export async function POST(
       telemetry
     );
 
-    // Load or create metadata manager
-    const metadataManager = convMetadata?.metadata
-      ? ConversationMetadataManager.deserialize(JSON.stringify(convMetadata.metadata))
-      : new ConversationMetadataManager();
+    // Load or create metadata manager with error handling
+    let metadataManager: ConversationMetadataManager;
+    try {
+      metadataManager = convMetadata?.metadata
+        ? ConversationMetadataManager.deserialize(JSON.stringify(convMetadata.metadata))
+        : new ConversationMetadataManager();
+    } catch (error) {
+      console.error('[Chat API] Failed to deserialize metadata, starting fresh:', error);
+      telemetry?.log('error', 'conversation', 'Metadata deserialization failed', {
+        error: error instanceof Error ? error.message : String(error),
+        conversationId
+      });
+      metadataManager = new ConversationMetadataManager();
+    }
 
     // Increment turn counter
     metadataManager.incrementTurn();

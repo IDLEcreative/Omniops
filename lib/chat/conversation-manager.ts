@@ -181,7 +181,15 @@ export async function getConversationHistory(
 
   if (error) {
     console.error('[ConversationManager] Failed to fetch history:', error);
+    console.warn(`[ConversationManager] Conversation ${conversationId} has NO history due to error`);
     return [];
+  }
+
+  const historyLength = data?.length || 0;
+  console.log(`[ConversationManager] Loaded ${historyLength}/${limit} messages for conversation ${conversationId}`);
+
+  if (historyLength === 0) {
+    console.warn(`[ConversationManager] Conversation ${conversationId} has ZERO history messages`);
   }
 
   return data || [];

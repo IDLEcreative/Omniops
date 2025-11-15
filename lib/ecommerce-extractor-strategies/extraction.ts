@@ -17,27 +17,21 @@ import { detectPlatform } from './detection';
 type ProductNormalizerClass = typeof import('@/lib/product-normalizer').ProductNormalizer;
 type PatternLearnerClass = typeof import('@/lib/pattern-learner').PatternLearner;
 
-declare const require: NodeRequire;
+let productNormalizerPromise: Promise<ProductNormalizerClass> | null = null;
+let patternLearnerPromise: Promise<PatternLearnerClass> | null = null;
 
-let cachedProductNormalizer: ProductNormalizerClass | null = null;
-let cachedPatternLearner: PatternLearnerClass | null = null;
-
-const getProductNormalizer = (): ProductNormalizerClass => {
-  if (!cachedProductNormalizer) {
-    // eslint-disable-next-line @typescript-eslint/no-var-requires
-    const mod = require('@/lib/product-normalizer') as { ProductNormalizer: ProductNormalizerClass };
-    cachedProductNormalizer = mod.ProductNormalizer;
+const getProductNormalizer = async (): Promise<ProductNormalizerClass> => {
+  if (!productNormalizerPromise) {
+    productNormalizerPromise = import('@/lib/product-normalizer').then((mod) => mod.ProductNormalizer);
   }
-  return cachedProductNormalizer;
+  return productNormalizerPromise;
 };
 
-const getPatternLearner = (): PatternLearnerClass => {
-  if (!cachedPatternLearner) {
-    // eslint-disable-next-line @typescript-eslint/no-var-requires
-    const mod = require('@/lib/pattern-learner') as { PatternLearner: PatternLearnerClass };
-    cachedPatternLearner = mod.PatternLearner;
+const getPatternLearner = async (): Promise<PatternLearnerClass> => {
+  if (!patternLearnerPromise) {
+    patternLearnerPromise = import('@/lib/pattern-learner').then((mod) => mod.PatternLearner);
   }
-  return cachedPatternLearner;
+  return patternLearnerPromise;
 };
 
 /**
@@ -67,7 +61,8 @@ export async function extractProductData($: CheerioAPI, url: string): Promise<No
     switch (method) {
       case 'learned-patterns':
         if (config.extraction.strategies.patternLearningEnabled) {
-          const learnedProduct = await getPatternLearner().applyPatterns(url, patternContext);
+          const patternLearner = await getPatternLearner();
+          const learnedProduct = await patternLearner.applyPatterns(url, patternContext);
           if (learnedProduct && Object.keys(learnedProduct).length > 0) {
             rawProduct = learnedProduct;
             extractionMethod = 'learned-patterns';
@@ -109,12 +104,13 @@ export async function extractProductData($: CheerioAPI, url: string): Promise<No
     rawProduct.variants = extractVariants($);
 
     // Normalize the product
-    const normalizedProduct = normalizeProductSafely(rawProduct, url);
+    const normalizedProduct = await normalizeProductSafely(rawProduct, url);
 
     // Learn from successful extraction
     if (normalizedProduct && normalizedProduct.name) {
       try {
-        await getPatternLearner().learnFromExtraction(url, [normalizedProduct], {
+        const patternLearner = await getPatternLearner();
+        await patternLearner.learnFromExtraction(url, [normalizedProduct], {
           platform,
           extractionMethod
         });
@@ -179,7 +175,7 @@ export async function extractProductListing($: CheerioAPI, url: string, platform
   // Normalize all products
   const normalizedProducts: NormalizedProduct[] = [];
   for (const product of products) {
-    const normalized = normalizeProductSafely(product, url);
+    const normalized = await normalizeProductSafely(product, url);
     if (normalized) {
       normalizedProducts.push(normalized);
     }
@@ -188,7 +184,8 @@ export async function extractProductListing($: CheerioAPI, url: string, platform
   // Learn from successful extraction if we found products
   if (normalizedProducts.length > 0) {
     try {
-      await getPatternLearner().learnFromExtraction(url, normalizedProducts, {
+      const patternLearner = await getPatternLearner();
+      await patternLearner.learnFromExtraction(url, normalizedProducts, {
         platform,
         extractionMethod: 'dom-listing'
       });
@@ -203,7 +200,7 @@ export async function extractProductListing($: CheerioAPI, url: string, platform
 /**
  * Safely normalize product data with error handling
  */
-function normalizeProductSafely(product: ProductData, url: string): NormalizedProduct | null {
+async function normalizeProductSafely(product: ProductData, url: string): Promise<NormalizedProduct | null> {
   try {
     // Convert ProductData to RawProduct for normalization
     const rawProduct: any = {
@@ -223,7 +220,8 @@ function normalizeProductSafely(product: ProductData, url: string): NormalizedPr
       inStock: product.availability?.inStock,
     };
 
-    const normalized = getProductNormalizer().normalizeProduct(rawProduct);
+    const normalizer = await getProductNormalizer();
+    const normalized = normalizer.normalizeProduct(rawProduct);
     return normalized || null;
   } catch (error) {
     logger.warn('EcommerceExtractor: Failed to normalize product', { url, error });

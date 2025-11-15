@@ -13,6 +13,12 @@ import { searchConversations } from '@/lib/search/conversation-search';
 import { exportToExcel } from '@/lib/exports/excel-generator';
 import { createClient } from '@/lib/supabase/server';
 
+const toBodyInit = (value: Uint8Array): ArrayBuffer => {
+  const arrayBuffer = new ArrayBuffer(value.byteLength);
+  new Uint8Array(arrayBuffer).set(value);
+  return arrayBuffer;
+};
+
 const ExportRequestSchema = z.object({
   query: z.string().min(1),
   filters: z.object({
@@ -31,6 +37,12 @@ export async function POST(request: NextRequest) {
   try {
     // Validate authentication
     const supabase = await createClient();
+    if (!supabase) {
+      return NextResponse.json(
+        { error: 'Database service unavailable' },
+        { status: 503 }
+      );
+    }
     const { data: { user }, error: authError } = await supabase.auth.getUser();
 
     if (authError || !user) {
@@ -82,7 +94,7 @@ export async function POST(request: NextRequest) {
     const filename = `search-export-${timestamp}.xlsx`;
 
     // Return Excel response
-    return new NextResponse(excelBuffer, {
+    return new NextResponse(toBodyInit(excelBuffer), {
       status: 200,
       headers: {
         'Content-Type': 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',
