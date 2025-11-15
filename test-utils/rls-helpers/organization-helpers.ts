@@ -163,40 +163,18 @@ export function setupRLSTest() {
   let user2Client: SupabaseClient;
   let org1Id: string;
   let org2Id: string;
-  const user1Email = 'rls-test-user1@example.com';
-  const user2Email = 'rls-test-user2@example.com';
+  // Generate unique emails per test run to avoid conflicts
+  const timestamp = Date.now();
+  const user1Email = `rls-test-user1-${timestamp}@example.com`;
+  const user2Email = `rls-test-user2-${timestamp}@example.com`;
 
   return {
     async setup() {
-      // Try to get existing users first
-      let existingUser1 = await getExistingUserId(user1Email);
-      let existingUser2 = await getExistingUserId(user2Email);
-
-      if (existingUser1 && existingUser2) {
-        console.log('Using existing test users');
-        user1Id = existingUser1;
-        user2Id = existingUser2;
-
-        // Get their existing organizations
-        const org1Ids = await getExistingOrgIds(user1Id);
-        const org2Ids = await getExistingOrgIds(user2Id);
-
-        if (org1Ids.length > 0 && org2Ids.length > 0) {
-          org1Id = org1Ids[0];
-          org2Id = org2Ids[0];
-          console.log('Using existing test organizations');
-        } else {
-          // Create new organizations
-          org1Id = await createTestOrganization('Test Org 1', user1Id);
-          org2Id = await createTestOrganization('Test Org 2', user2Id);
-        }
-      } else {
-        // Create fresh users and organizations
-        user1Id = await createTestUser(user1Email, { name: 'Test User 1' });
-        user2Id = await createTestUser(user2Email, { name: 'Test User 2' });
-        org1Id = await createTestOrganization('Test Org 1', user1Id);
-        org2Id = await createTestOrganization('Test Org 2', user2Id);
-      }
+      // Create fresh users and organizations with unique emails
+      user1Id = await createTestUser(user1Email, { name: 'Test User 1' });
+      user2Id = await createTestUser(user2Email, { name: 'Test User 2' });
+      org1Id = await createTestOrganization('Test Org 1', user1Id);
+      org2Id = await createTestOrganization('Test Org 2', user2Id);
 
       // Create user clients
       user1Client = await createUserClient(user1Id, user1Email);

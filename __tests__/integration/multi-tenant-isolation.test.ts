@@ -261,7 +261,7 @@ describe('Multi-Tenant Data Isolation', () => {
 
       // Create scraped pages for each domain using REST API
       const page1 = await insertAsAdmin('scraped_pages', {
-        domain_id: domainId1,
+        domain_id: domainId1, // FK references domains.id
         url: 'https://test1.example.com/page1',
         title: 'Org 1 Page',
         content: 'Org 1 content',
@@ -270,7 +270,7 @@ describe('Multi-Tenant Data Isolation', () => {
       page1Id = page1.id;
 
       const page2 = await insertAsAdmin('scraped_pages', {
-        domain_id: domainId2,
+        domain_id: domainId2, // FK references domains.id
         url: 'https://test2.example.com/page2',
         title: 'Org 2 Page',
         content: 'Org 2 content',
