@@ -186,7 +186,7 @@ describe('ProductRecommendations Component', () => {
     it('should navigate to next recommendation', () => {
       render(<ProductRecommendations {...defaultProps} />);
 
-      const nextButton = screen.getByRole('button', { name: '' });
+      const nextButton = screen.getByRole('button', { name: /next recommendation/i });
       fireEvent.click(nextButton);
 
       expect(screen.getByText('product-2')).toBeInTheDocument();

@@ -49,7 +49,7 @@ export function ProductRecommendations({
   if (loading) {
     return (
       <div className="flex items-center justify-center py-8">
-        <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary" />
+        <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary" role="status" aria-label="Loading recommendations" />
       </div>
     );
   }
@@ -134,6 +134,7 @@ export function ProductRecommendations({
                 variant="ghost"
                 onClick={handlePrevious}
                 className="h-8 w-8"
+                aria-label="Previous recommendation"
               >
                 <ChevronLeft className="h-4 w-4" />
               </Button>
@@ -145,6 +146,7 @@ export function ProductRecommendations({
                 variant="ghost"
                 onClick={handleNext}
                 className="h-8 w-8"
+                aria-label="Next recommendation"
               >
                 <ChevronRight className="h-4 w-4" />
               </Button>
