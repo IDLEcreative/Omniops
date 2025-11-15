@@ -18,8 +18,9 @@ export function createIframe(config: WidgetConfig, isMobile: boolean): HTMLIFram
   const startMinimized = config.appearance.startMinimized ?? true;
 
   // Use smaller size if starting minimized (just for the button)
-  const initialWidth = startMinimized && !isMobile ? 64 : (config.appearance.width || 400);
-  const initialHeight = startMinimized && !isMobile ? 64 : (config.appearance.height || 600);
+  // Increased from 64 to 80 to accommodate button (56px) + spacing (16px + 16px = 32px)
+  const initialWidth = startMinimized && !isMobile ? 80 : (config.appearance.width || 400);
+  const initialHeight = startMinimized && !isMobile ? 80 : (config.appearance.height || 600);
 
   const styles = [
     'position: fixed',

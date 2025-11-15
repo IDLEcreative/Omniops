@@ -35,7 +35,7 @@ export function MinimizedButton({
   const minimizedIconUrl = getIconUrl(iconState, demoConfig);
 
   return (
-    <div className="fixed bottom-1 right-1 z-50">
+    <div className="fixed bottom-4 right-4 sm:bottom-5 sm:right-5 z-50">
       {/* Inject animation styles if animation is enabled */}
       {animationType !== 'none' && (
         <AnimationStyles
