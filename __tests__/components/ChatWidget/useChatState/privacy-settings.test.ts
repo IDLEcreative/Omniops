@@ -31,8 +31,8 @@ describe('useChatState Hook - Privacy Settings', () => {
     const { result } = renderHook(() => useChatState({}));
 
     expect(result.current.privacySettings).toEqual({
-      allowOptOut: true,
-      showPrivacyNotice: true,
+      allowOptOut: false,
+      showPrivacyNotice: false,
       requireConsent: false,
       consentGiven: false,
       retentionDays: 30,
