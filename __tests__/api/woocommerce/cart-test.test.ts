@@ -5,59 +5,26 @@
  * for both informational and transactional modes.
  */
 
-import { NextRequest } from 'next/server';
 import { POST, GET } from '@/app/api/woocommerce/cart-test/route';
-
-// Mock Supabase
-const mockSupabaseClient = {
-  from: jest.fn(() => ({
-    select: jest.fn(() => ({
-      eq: jest.fn(() => ({
-        single: jest.fn(() => ({
-          data: {
-            id: 'domain-1',
-            domain: 'test.com',
-            woocommerce_url: 'https://test.com',
-          },
-          error: null,
-        })),
-      })),
-    })),
-  })),
-};
+import {
+  mockSupabaseClient,
+  mockSessionManager,
+  mockStoreAPIInstance,
+  resetAllMocks,
+  mockSupabaseNoConfig,
+  createCartItem,
+  createCartResponse,
+  createGetRequest,
+  createPostRequest,
+} from '@/__tests__/utils/woocommerce/cart-test-fixtures';
 
 jest.mock('@/lib/supabase-server', () => ({
   createServiceRoleClient: jest.fn(() => mockSupabaseClient),
 }));
 
-// Mock Cart Session Manager
-const mockSessionManager = {
-  generateGuestId: jest.fn(() => 'guest-123'),
-  getSession: jest.fn(() => Promise.resolve({
-    userId: 'guest-123',
-    domain: 'test.com',
-    nonce: 'test-nonce',
-    createdAt: new Date().toISOString(),
-    expiresAt: new Date(Date.now() + 86400000).toISOString(),
-    isGuest: true,
-  })),
-};
-
 jest.mock('@/lib/cart-session-manager', () => ({
   getCartSessionManager: jest.fn(() => mockSessionManager),
 }));
-
-// Mock WooCommerceStoreAPI class
-const mockStoreAPIInstance = {
-  isAvailable: jest.fn().mockResolvedValue(true),
-  addItem: jest.fn(),
-  getCart: jest.fn(),
-  updateItem: jest.fn(),
-  removeItem: jest.fn(),
-  applyCoupon: jest.fn(),
-  removeCoupon: jest.fn(),
-  setNonce: jest.fn(),
-};
 
 jest.mock('@/lib/woocommerce-store-api', () => ({
   WooCommerceStoreAPI: jest.fn(() => mockStoreAPIInstance),
@@ -66,55 +33,12 @@ jest.mock('@/lib/woocommerce-store-api', () => ({
 describe('/api/woocommerce/cart-test', () => {
 
   beforeEach(() => {
-    jest.clearAllMocks();
-    // Reset environment variables
-    process.env.WOOCOMMERCE_STORE_API_ENABLED = 'false';
-
-    // Reset Supabase mock to default successful state
-    mockSupabaseClient.from = jest.fn(() => ({
-      select: jest.fn(() => ({
-        eq: jest.fn(() => ({
-          single: jest.fn(() => ({
-            data: {
-              id: 'domain-1',
-              domain: 'test.com',
-              woocommerce_url: 'https://test.com',
-            },
-            error: null,
-          })),
-        })),
-      })),
-    }));
-
-    // Reset Store API mock to default successful state
-    mockStoreAPIInstance.isAvailable.mockResolvedValue(true);
-    mockStoreAPIInstance.addItem.mockResolvedValue({
-      success: true,
-      data: { items: [], totals: { total: '0.00' } },
-    });
-    mockStoreAPIInstance.getCart.mockResolvedValue({
-      success: true,
-      data: { items: [], totals: { total: '0.00' } },
-    });
-    mockStoreAPIInstance.updateItem.mockResolvedValue({
-      success: true,
-      data: { items: [], totals: { total: '0.00' } },
-    });
-    mockStoreAPIInstance.removeItem.mockResolvedValue({
-      success: true,
-      data: { items: [], totals: { total: '0.00' } },
-    });
-    mockStoreAPIInstance.applyCoupon.mockResolvedValue({
-      success: true,
-      data: { items: [], totals: { total: '0.00' }, coupons: [] },
-    });
+    resetAllMocks();
   });
 
   describe('GET endpoint', () => {
     it('should return disabled status when Store API is not enabled', async () => {
-      const request = new NextRequest('http://localhost:3000/api/woocommerce/cart-test');
-
-      const response = await GET(request);
+      const response = await GET(createGetRequest());
       const data = await response.json();
 
       expect(data.enabled).toBe(false);
@@ -126,9 +50,7 @@ describe('/api/woocommerce/cart-test', () => {
     it('should return enabled status when Store API is enabled', async () => {
       process.env.WOOCOMMERCE_STORE_API_ENABLED = 'true';
 
-      const request = new NextRequest('http://localhost:3000/api/woocommerce/cart-test');
-
-      const response = await GET(request);
+      const response = await GET(createGetRequest());
       const data = await response.json();
 
       expect(data.enabled).toBe(true);
@@ -143,17 +65,12 @@ describe('/api/woocommerce/cart-test', () => {
     });
 
     it('should return informational mode message when Store API is disabled', async () => {
-      const request = new NextRequest('http://localhost:3000/api/woocommerce/cart-test', {
-        method: 'POST',
-        body: JSON.stringify({
-          domain: 'test.com',
-          action: 'add',
-          productId: 123,
-          quantity: 2,
-        }),
-      });
-
-      const response = await POST(request);
+      const response = await POST(createPostRequest({
+        domain: 'test.com',
+        action: 'add',
+        productId: 123,
+        quantity: 2,
+      }));
       const data = await response.json();
 
       expect(data.success).toBe(false);
@@ -168,32 +85,17 @@ describe('/api/woocommerce/cart-test', () => {
     });
 
     it('should handle add to cart action', async () => {
-      mockStoreAPIInstance.addItem.mockResolvedValue({
-        success: true,
-        data: {
-          items: [
-            {
-              id: 123,
-              name: 'Test Product',
-              quantity: 2,
-              prices: { price: '50.00' },
-            },
-          ],
-          totals: { total: '100.00' },
-        },
-      });
+      const item = createCartItem({ quantity: 2 });
+      mockStoreAPIInstance.addItem.mockResolvedValue(
+        createCartResponse([item], '100.00')
+      );
 
-      const request = new NextRequest('http://localhost:3000/api/woocommerce/cart-test', {
-        method: 'POST',
-        body: JSON.stringify({
-          domain: 'test.com',
-          action: 'add',
-          productId: 123,
-          quantity: 2,
-        }),
-      });
-
-      const response = await POST(request);
+      const response = await POST(createPostRequest({
+        domain: 'test.com',
+        action: 'add',
+        productId: 123,
+        quantity: 2,
+      }));
       const data = await response.json();
 
       expect(data.success).toBe(true);
@@ -204,15 +106,10 @@ describe('/api/woocommerce/cart-test', () => {
     });
 
     it('should handle get cart action', async () => {
-      const request = new NextRequest('http://localhost:3000/api/woocommerce/cart-test', {
-        method: 'POST',
-        body: JSON.stringify({
-          domain: 'test.com',
-          action: 'get',
-        }),
-      });
-
-      const response = await POST(request);
+      const response = await POST(createPostRequest({
+        domain: 'test.com',
+        action: 'get',
+      }));
       const data = await response.json();
 
       expect(data.success).toBe(true);
@@ -222,25 +119,16 @@ describe('/api/woocommerce/cart-test', () => {
     });
 
     it('should handle update cart quantity action', async () => {
-      mockStoreAPIInstance.updateItem.mockResolvedValue({
-        success: true,
-        data: {
-          items: [],
-          totals: { total: '150.00' },
-        },
-      });
+      mockStoreAPIInstance.updateItem.mockResolvedValue(
+        createCartResponse([], '150.00')
+      );
 
-      const request = new NextRequest('http://localhost:3000/api/woocommerce/cart-test', {
-        method: 'POST',
-        body: JSON.stringify({
-          domain: 'test.com',
-          action: 'update',
-          cartItemKey: 'abc123',
-          quantity: 3,
-        }),
-      });
-
-      const response = await POST(request);
+      const response = await POST(createPostRequest({
+        domain: 'test.com',
+        action: 'update',
+        cartItemKey: 'abc123',
+        quantity: 3,
+      }));
       const data = await response.json();
 
       expect(data.success).toBe(true);
@@ -249,16 +137,11 @@ describe('/api/woocommerce/cart-test', () => {
     });
 
     it('should handle remove from cart action', async () => {
-      const request = new NextRequest('http://localhost:3000/api/woocommerce/cart-test', {
-        method: 'POST',
-        body: JSON.stringify({
-          domain: 'test.com',
-          action: 'remove',
-          cartItemKey: 'abc123',
-        }),
-      });
-
-      const response = await POST(request);
+      const response = await POST(createPostRequest({
+        domain: 'test.com',
+        action: 'remove',
+        cartItemKey: 'abc123',
+      }));
       const data = await response.json();
 
       expect(data.success).toBe(true);
@@ -267,25 +150,15 @@ describe('/api/woocommerce/cart-test', () => {
     });
 
     it('should handle apply coupon action', async () => {
-      mockStoreAPIInstance.applyCoupon.mockResolvedValue({
-        success: true,
-        data: {
-          items: [],
-          totals: { total: '90.00' },
-          coupons: [{ code: 'SAVE10' }],
-        },
-      });
+      mockStoreAPIInstance.applyCoupon.mockResolvedValue(
+        createCartResponse([], '90.00', [{ code: 'SAVE10' }])
+      );
 
-      const request = new NextRequest('http://localhost:3000/api/woocommerce/cart-test', {
-        method: 'POST',
-        body: JSON.stringify({
-          domain: 'test.com',
-          action: 'apply_coupon',
-          couponCode: 'SAVE10',
-        }),
-      });
-
-      const response = await POST(request);
+      const response = await POST(createPostRequest({
+        domain: 'test.com',
+        action: 'apply_coupon',
+        couponCode: 'SAVE10',
+      }));
       const data = await response.json();
 
       expect(data.success).toBe(true);
@@ -296,16 +169,11 @@ describe('/api/woocommerce/cart-test', () => {
     it('should handle Store API not available', async () => {
       mockStoreAPIInstance.isAvailable.mockResolvedValue(false);
 
-      const request = new NextRequest('http://localhost:3000/api/woocommerce/cart-test', {
-        method: 'POST',
-        body: JSON.stringify({
-          domain: 'test.com',
-          action: 'add',
-          productId: 123,
-        }),
-      });
-
-      const response = await POST(request);
+      const response = await POST(createPostRequest({
+        domain: 'test.com',
+        action: 'add',
+        productId: 123,
+      }));
       const data = await response.json();
 
       expect(data.success).toBe(false);
@@ -313,28 +181,13 @@ describe('/api/woocommerce/cart-test', () => {
     });
 
     it('should handle Store API client initialization failure', async () => {
-      // Mock Supabase to return no config
-      mockSupabaseClient.from = jest.fn(() => ({
-        select: jest.fn(() => ({
-          eq: jest.fn(() => ({
-            single: jest.fn(() => ({
-              data: null,
-              error: { message: 'No config found' },
-            })),
-          })),
-        })),
+      mockSupabaseNoConfig();
+
+      const response = await POST(createPostRequest({
+        domain: 'test.com',
+        action: 'add',
+        productId: 123,
       }));
-
-      const request = new NextRequest('http://localhost:3000/api/woocommerce/cart-test', {
-        method: 'POST',
-        body: JSON.stringify({
-          domain: 'test.com',
-          action: 'add',
-          productId: 123,
-        }),
-      });
-
-      const response = await POST(request);
       const data = await response.json();
 
       expect(data.success).toBe(false);
@@ -342,16 +195,11 @@ describe('/api/woocommerce/cart-test', () => {
     });
 
     it('should validate required parameters for add action', async () => {
-      const request = new NextRequest('http://localhost:3000/api/woocommerce/cart-test', {
-        method: 'POST',
-        body: JSON.stringify({
-          domain: 'test.com',
-          action: 'add',
-          // Missing productId
-        }),
-      });
-
-      const response = await POST(request);
+      const response = await POST(createPostRequest({
+        domain: 'test.com',
+        action: 'add',
+        // Missing productId
+      }));
       const data = await response.json();
 
       expect(data.success).toBe(false);
@@ -359,15 +207,9 @@ describe('/api/woocommerce/cart-test', () => {
     });
 
     it('should handle validation errors', async () => {
-      const request = new NextRequest('http://localhost:3000/api/woocommerce/cart-test', {
-        method: 'POST',
-        body: JSON.stringify({
-          // Missing required fields
-          action: 'invalid_action',
-        }),
-      });
-
-      const response = await POST(request);
+      const response = await POST(createPostRequest({
+        action: 'invalid_action',
+      }));
       const data = await response.json();
 
       expect(response.status).toBe(400);
@@ -377,15 +219,10 @@ describe('/api/woocommerce/cart-test', () => {
     });
 
     it('should handle unknown action', async () => {
-      const request = new NextRequest('http://localhost:3000/api/woocommerce/cart-test', {
-        method: 'POST',
-        body: JSON.stringify({
-          domain: 'test.com',
-          action: 'unknown_action' as any,
-        }),
-      });
-
-      const response = await POST(request);
+      const response = await POST(createPostRequest({
+        domain: 'test.com',
+        action: 'unknown_action' as any,
+      }));
       const data = await response.json();
 
       expect(response.status).toBe(400);
@@ -402,17 +239,12 @@ describe('/api/woocommerce/cart-test', () => {
         error: { message: 'Product out of stock' },
       });
 
-      const request = new NextRequest('http://localhost:3000/api/woocommerce/cart-test', {
-        method: 'POST',
-        body: JSON.stringify({
-          domain: 'test.com',
-          action: 'add',
-          productId: 123,
-          quantity: 1,
-        }),
-      });
-
-      const response = await POST(request);
+      const response = await POST(createPostRequest({
+        domain: 'test.com',
+        action: 'add',
+        productId: 123,
+        quantity: 1,
+      }));
       const data = await response.json();
 
       expect(data.success).toBe(false);
@@ -421,20 +253,13 @@ describe('/api/woocommerce/cart-test', () => {
 
     it('should handle unexpected errors', async () => {
       process.env.WOOCOMMERCE_STORE_API_ENABLED = 'true';
-
-      // Mock the session manager to throw an error
       mockSessionManager.getSession.mockRejectedValue(new Error('Network error'));
 
-      const request = new NextRequest('http://localhost:3000/api/woocommerce/cart-test', {
-        method: 'POST',
-        body: JSON.stringify({
-          domain: 'test.com',
-          action: 'add',
-          productId: 123,
-        }),
-      });
-
-      const response = await POST(request);
+      const response = await POST(createPostRequest({
+        domain: 'test.com',
+        action: 'add',
+        productId: 123,
+      }));
       const data = await response.json();
 
       expect(response.status).toBe(500);

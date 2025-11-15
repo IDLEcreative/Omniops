@@ -7,8 +7,14 @@ import {
   searchSimilar
 } from '@/lib/embeddings'
 import OpenAI from 'openai'
-import { createServiceRoleMockClient } from '@/test-utils/supabase-test-helpers'
 import { __setMockSupabaseClient } from '@/lib/supabase-server'
+import {
+  createMockOpenAI,
+  createMockSupabaseForEmbeddings,
+  testFixtures,
+  createEmbeddings,
+  createChunks
+} from '@/__tests__/utils/embeddings-test-helpers'
 
 // Mock dependencies
 jest.mock('openai')
@@ -18,82 +24,24 @@ process.env.OPENAI_API_KEY = 'test-api-key'
 
 describe('Embeddings Service', () => {
   let mockOpenAIInstance: jest.Mocked<OpenAI>
-  let mockSupabaseClient: ReturnType<typeof createServiceRoleMockClient>
+  let mockSupabaseClient: ReturnType<typeof createMockSupabaseForEmbeddings>
 
   beforeEach(() => {
     jest.clearAllMocks()
-
-    // Mock OpenAI instance with dynamic response based on batch size
-    mockOpenAIInstance = {
-      embeddings: {
-        create: jest.fn().mockImplementation((params: any) => {
-          const input = Array.isArray(params.input) ? params.input : [params.input];
-          return Promise.resolve({
-            data: input.map((_, index) => ({
-              embedding: Array(1536).fill(index % 2 === 0 ? 0.1 : 0.2)
-            }))
-          });
-        })
-      }
-    } as any
-
-    // Mock OpenAI constructor
-    const MockedOpenAI = OpenAI as jest.MockedClass<typeof OpenAI>
-    MockedOpenAI.mockClear()
-    MockedOpenAI.mockImplementation(() => mockOpenAIInstance)
-
-    // Mock Supabase client with test helpers
-    mockSupabaseClient = createServiceRoleMockClient()
-
-    // Override specific mock behaviors for embeddings tests
-    // Use a shared mock chain to allow verification of nested calls
-    const mockInsert = jest.fn().mockResolvedValue({ error: null });
-    const mockSelect = jest.fn().mockReturnThis();
-    const mockEq = jest.fn().mockReturnThis();
-    const mockSingle = jest.fn().mockResolvedValue({ data: { id: 'test-id' }, error: null });
-    const mockUpdate = jest.fn().mockReturnThis();
-    const mockDelete = jest.fn().mockResolvedValue({ error: null });
-
-    const chainMock = {
-      insert: mockInsert,
-      select: mockSelect,
-      eq: mockEq,
-      single: mockSingle,
-      update: mockUpdate,
-      delete: mockDelete,
-    };
-
-    mockSupabaseClient.from = jest.fn(() => chainMock) as any;
-
-    mockSupabaseClient.rpc = jest.fn().mockResolvedValue({
-      data: [
-        {
-          id: 'chunk-1',
-          chunk_text: 'Relevant content',
-          page_id: 'page-1',
-          similarity: 0.85
-        }
-      ],
-      error: null
-    })
-
-    // Use helper to set mock Supabase client
+    mockOpenAIInstance = createMockOpenAI()
+    mockSupabaseClient = createMockSupabaseForEmbeddings()
     __setMockSupabaseClient(mockSupabaseClient)
   })
 
   describe('splitIntoChunks', () => {
     it('should split text into chunks based on sentences', () => {
-      const text = 'First sentence. Second sentence. Third sentence. Fourth sentence.'
-      const chunks = splitIntoChunks(text, 50)
-      
+      const chunks = splitIntoChunks(testFixtures.simpleText, 50)
       expect(chunks.length).toBeGreaterThan(1)
       expect(chunks.every(chunk => chunk.length <= 50)).toBe(true)
     })
 
     it('should handle text with various punctuation marks', () => {
-      const text = 'Question? Exclamation! Normal. Another? Yes! Of course.'
-      const chunks = splitIntoChunks(text, 30)
-      
+      const chunks = splitIntoChunks(testFixtures.punctuationText, 30)
       expect(chunks.length).toBeGreaterThan(1)
       expect(chunks.every(chunk => chunk.includes('?') || chunk.includes('!') || chunk.includes('.'))).toBe(true)
     })
@@ -104,24 +52,19 @@ describe('Embeddings Service', () => {
     })
 
     it('should handle text without sentence breaks', () => {
-      const text = 'This is a long text without any sentence breaks that should still be chunked properly'
-      const chunks = splitIntoChunks(text, 20)
-      
+      const chunks = splitIntoChunks(testFixtures.longTextNoBreaks, 20)
       expect(chunks).toHaveLength(1)
-      expect(chunks[0]).toBe(text)
+      expect(chunks[0]).toBe(testFixtures.longTextNoBreaks)
     })
 
     it('should respect max chunk size', () => {
       const text = 'A'.repeat(2000)
       const chunks = splitIntoChunks(text, 1000)
-      
-      expect(chunks).toHaveLength(1) // Single long sentence should stay together
+      expect(chunks).toHaveLength(1)
     })
 
     it('should handle text with multiple spaces', () => {
-      const text = 'First sentence.    Second sentence.   Third sentence.'
-      const chunks = splitIntoChunks(text)
-      
+      const chunks = splitIntoChunks(testFixtures.multiSpaceText)
       expect(chunks).toBeDefined()
       expect(chunks.every(chunk => !chunk.includes('    '))).toBe(true)
     })
@@ -129,12 +72,11 @@ describe('Embeddings Service', () => {
 
   describe('generateEmbeddingVectors', () => {
     it('should generate embeddings for multiple chunks in batches', async () => {
-      const chunks = Array(25).fill('Test chunk') // More than batch size
-      
+      const chunks = createChunks(25)
       const embeddings = await generateEmbeddingVectors(chunks)
-      
+
       expect(embeddings).toHaveLength(25)
-      expect(mockOpenAIInstance.embeddings.create).toHaveBeenCalledTimes(2) // 20 + 5
+      expect(mockOpenAIInstance.embeddings.create).toHaveBeenCalledTimes(2)
       expect(mockOpenAIInstance.embeddings.create).toHaveBeenCalledWith({
         model: 'text-embedding-ada-002',
         input: expect.any(Array)
@@ -143,12 +85,10 @@ describe('Embeddings Service', () => {
 
     it('should handle single chunk', async () => {
       mockOpenAIInstance.embeddings.create.mockResolvedValue({
-        data: [{ embedding: Array(1536).fill(0.5) }]
+        data: [{ embedding: testFixtures.sampleEmbedding }]
       })
 
-      const chunks = ['Single chunk']
-      const embeddings = await generateEmbeddingVectors(chunks)
-      
+      const embeddings = await generateEmbeddingVectors(['Single chunk'])
       expect(embeddings).toHaveLength(1)
       expect(embeddings[0]).toHaveLength(1536)
       expect(mockOpenAIInstance.embeddings.create).toHaveBeenCalledTimes(1)
@@ -156,34 +96,29 @@ describe('Embeddings Service', () => {
 
     it('should handle empty chunks array', async () => {
       const embeddings = await generateEmbeddingVectors([])
-      
       expect(embeddings).toEqual([])
       expect(mockOpenAIInstance.embeddings.create).not.toHaveBeenCalled()
     })
 
     it('should handle API errors gracefully', async () => {
       mockOpenAIInstance.embeddings.create.mockRejectedValue(new Error('OpenAI API error'))
-      
       await expect(generateEmbeddingVectors(['chunk'])).rejects.toThrow('OpenAI API error')
     })
 
     it('should process chunks with concurrent batch limit', async () => {
-      const chunks = Array(100).fill('Test chunk')
-      
-      // Mock different responses for different batches
+      const chunks = createChunks(100)
       let callCount = 0
       mockOpenAIInstance.embeddings.create.mockImplementation(() => {
         callCount++
-        const batchSize = callCount <= 5 ? 20 : 10 // Last batch is smaller
+        const batchSize = callCount <= 5 ? 20 : 10
         return Promise.resolve({
           data: Array(batchSize).fill({ embedding: Array(1536).fill(0.1) })
         })
       })
 
       const embeddings = await generateEmbeddingVectors(chunks)
-      
       expect(embeddings).toHaveLength(100)
-      expect(mockOpenAIInstance.embeddings.create).toHaveBeenCalledTimes(5) // 100 / 20 = 5 batches
+      expect(mockOpenAIInstance.embeddings.create).toHaveBeenCalledTimes(5)
     })
   })
 
@@ -231,28 +166,22 @@ describe('Embeddings Service', () => {
 
   describe('storeEmbeddings', () => {
     it('should store embeddings in database', async () => {
-      const pageId = 'page-123'
-      const chunks = ['Chunk 1', 'Chunk 2']
-      const embeddings = [
-        Array(1536).fill(0.1),
-        Array(1536).fill(0.2)
-      ]
-
-      await storeEmbeddings(pageId, chunks, embeddings)
+      const embeddings = createEmbeddings(2, 0.1)
+      await storeEmbeddings(testFixtures.testPageId, testFixtures.sampleChunks, embeddings)
 
       expect(mockSupabaseClient.from).toHaveBeenCalledWith('embeddings')
       const insertCall = mockSupabaseClient.from().insert
       expect(insertCall).toHaveBeenCalledWith(
         expect.arrayContaining([
           expect.objectContaining({
-            page_id: pageId,
-            chunk_text: 'Chunk 1',
+            page_id: testFixtures.testPageId,
+            chunk_text: testFixtures.sampleChunks[0],
             embedding: embeddings[0],
             chunk_index: 0
           }),
           expect.objectContaining({
-            page_id: pageId,
-            chunk_text: 'Chunk 2',
+            page_id: testFixtures.testPageId,
+            chunk_text: testFixtures.sampleChunks[1],
             embedding: embeddings[1],
             chunk_index: 1
           })
@@ -261,62 +190,42 @@ describe('Embeddings Service', () => {
     })
 
     it('should handle empty chunks and embeddings', async () => {
-      await storeEmbeddings('page-123', [], [])
-      
+      await storeEmbeddings(testFixtures.testPageId, [], [])
       expect(mockSupabaseClient.from).toHaveBeenCalledWith('embeddings')
       expect(mockSupabaseClient.from().insert).toHaveBeenCalledWith([])
     })
 
     it('should handle database errors', async () => {
       mockSupabaseClient.from.mockReturnValue({
-        insert: jest.fn().mockResolvedValue({ 
-          error: new Error('Database error') 
-        })
+        insert: jest.fn().mockResolvedValue({ error: new Error('Database error') })
       })
 
-      await expect(storeEmbeddings('page-123', ['chunk'], [Array(1536).fill(0)]))
+      await expect(storeEmbeddings(testFixtures.testPageId, ['chunk'], createEmbeddings(1)))
         .rejects.toThrow('Failed to store embeddings')
     })
 
     it('should handle mismatched chunks and embeddings lengths', async () => {
-      const chunks = ['Chunk 1', 'Chunk 2']
-      const embeddings = [Array(1536).fill(0.1)] // Only one embedding
-
-      await expect(storeEmbeddings('page-123', chunks, embeddings))
+      await expect(storeEmbeddings(testFixtures.testPageId, testFixtures.sampleChunks, createEmbeddings(1)))
         .rejects.toThrow()
     })
   })
 
   describe('searchSimilar', () => {
     it('should search for similar content', async () => {
-      const queryEmbedding = Array(1536).fill(0.5)
-      const limit = 5
-      const threshold = 0.7
-
-      const results = await searchSimilar(queryEmbedding, limit, threshold)
+      const results = await searchSimilar(testFixtures.sampleEmbedding, 5, 0.7)
 
       expect(mockSupabaseClient.rpc).toHaveBeenCalledWith('match_embeddings', {
-        query_embedding: queryEmbedding,
-        match_threshold: threshold,
-        match_count: limit
+        query_embedding: testFixtures.sampleEmbedding,
+        match_threshold: 0.7,
+        match_count: 5
       })
-      expect(results).toEqual([
-        {
-          id: 'chunk-1',
-          chunk_text: 'Relevant content',
-          page_id: 'page-1',
-          similarity: 0.85
-        }
-      ])
+      expect(results).toEqual([testFixtures.sampleSearchResult])
     })
 
     it('should use default parameters', async () => {
-      const queryEmbedding = Array(1536).fill(0.5)
-      
-      await searchSimilar(queryEmbedding)
-
+      await searchSimilar(testFixtures.sampleEmbedding)
       expect(mockSupabaseClient.rpc).toHaveBeenCalledWith('match_embeddings', {
-        query_embedding: queryEmbedding,
+        query_embedding: testFixtures.sampleEmbedding,
         match_threshold: 0.5,
         match_count: 10
       })
@@ -324,20 +233,13 @@ describe('Embeddings Service', () => {
 
     it('should handle empty results', async () => {
       mockSupabaseClient.rpc.mockResolvedValue({ data: [], error: null })
-      
-      const results = await searchSimilar(Array(1536).fill(0.5))
-      
+      const results = await searchSimilar(testFixtures.sampleEmbedding)
       expect(results).toEqual([])
     })
 
     it('should handle RPC errors', async () => {
-      mockSupabaseClient.rpc.mockResolvedValue({ 
-        data: null, 
-        error: new Error('RPC error') 
-      })
-
-      await expect(searchSimilar(Array(1536).fill(0.5)))
-        .rejects.toThrow('Failed to search embeddings')
+      mockSupabaseClient.rpc.mockResolvedValue({ data: null, error: new Error('RPC error') })
+      await expect(searchSimilar(testFixtures.sampleEmbedding)).rejects.toThrow('Failed to search embeddings')
     })
 
     it('should filter by similarity threshold', async () => {
@@ -349,8 +251,7 @@ describe('Embeddings Service', () => {
         error: null
       })
 
-      await searchSimilar(Array(1536).fill(0.5), 10, 0.8)
-
+      await searchSimilar(testFixtures.sampleEmbedding, 10, 0.8)
       expect(mockSupabaseClient.rpc).toHaveBeenCalledWith('match_embeddings', {
         query_embedding: expect.any(Array),
         match_threshold: 0.8,
@@ -361,30 +262,20 @@ describe('Embeddings Service', () => {
 
   describe('Integration scenarios', () => {
     it('should handle end-to-end embedding generation and storage', async () => {
-      const text = 'This is a test document. It contains multiple sentences. Each sentence should be processed.'
-      const pageId = 'page-integration-test'
-
-      // Split text
-      const chunks = splitIntoChunks(text)
+      const chunks = splitIntoChunks(testFixtures.integrationText)
       expect(chunks.length).toBeGreaterThan(0)
 
-      // Generate embeddings
       const embeddings = await generateEmbeddingVectors(chunks)
       expect(embeddings).toHaveLength(chunks.length)
 
-      // Store embeddings
-      await storeEmbeddings(pageId, chunks, embeddings)
+      await storeEmbeddings(testFixtures.integrationPageId, chunks, embeddings)
       expect(mockSupabaseClient.from).toHaveBeenCalled()
     })
 
     it('should handle search workflow', async () => {
-      const query = 'search query'
-      
-      // Generate query embedding
-      const queryEmbedding = await generateEmbedding(query)
+      const queryEmbedding = await generateEmbedding('search query')
       expect(queryEmbedding).toHaveLength(1536)
 
-      // Search similar
       const results = await searchSimilar(queryEmbedding, 5, 0.6)
       expect(results).toBeDefined()
       expect(mockSupabaseClient.rpc).toHaveBeenCalled()

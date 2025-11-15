@@ -4,7 +4,7 @@
 
 **Test Type:** Test Infrastructure
 
-**Last Updated:** 2025-10-30
+**Last Updated:** 2025-11-15
 
 **Coverage:** Test setup, teardown, data generators, assertion helpers, performance utilities, and mock factories.
 
@@ -28,8 +28,12 @@ __tests__/utils/
 ├── integration-test-helpers-mocks.ts            # Mock service factories
 ├── integration-test-helpers-performance.ts      # Performance monitoring
 ├── integration-test-helpers-setup.ts            # Setup utilities
+├── embeddings-test-helpers.ts                   # Embeddings service test helpers
 ├── supabase-mock.ts                             # Supabase client mocks
-└── test-utils.tsx                               # React Testing Library utilities
+├── test-utils.tsx                               # React Testing Library utilities
+└── woocommerce/
+    ├── cart-test-fixtures.ts                    # WooCommerce cart test mocks & factories
+    └── e2e-helpers.ts                           # E2E test helpers
 ```
 
 ## Files
@@ -423,6 +427,60 @@ export function renderWithProviders(
 // Re-export everything from RTL
 export * from '@testing-library/react'
 export { renderWithProviders as render }
+```
+
+### Embeddings Test Helpers
+
+**embeddings-test-helpers.ts**
+
+Specialized helpers for embeddings service tests.
+
+**Key Exports:**
+```typescript
+// Mock OpenAI instance
+export function createMockOpenAI(): jest.Mocked<OpenAI>
+
+// Mock Supabase client for embeddings tests
+export function createMockSupabaseForEmbeddings()
+
+// Test data fixtures
+export const testFixtures = {
+  simpleText: 'First sentence. Second sentence...',
+  punctuationText: 'Question? Exclamation!...',
+  sampleEmbedding: Array(1536).fill(0.5),
+  sampleChunks: ['Chunk 1', 'Chunk 2'],
+  testPageId: 'page-123'
+}
+
+// Helper functions
+export function createEmbeddings(count: number, fillValue?: number): number[][]
+export function createChunks(count: number, prefix?: string): string[]
+```
+
+**Usage Example:**
+```typescript
+import {
+  createMockOpenAI,
+  createMockSupabaseForEmbeddings,
+  testFixtures,
+  createChunks
+} from '@/__tests__/utils/embeddings-test-helpers'
+
+describe('Embeddings', () => {
+  let mockOpenAI: jest.Mocked<OpenAI>
+  let mockSupabase: ReturnType<typeof createMockSupabaseForEmbeddings>
+
+  beforeEach(() => {
+    mockOpenAI = createMockOpenAI()
+    mockSupabase = createMockSupabaseForEmbeddings()
+  })
+
+  it('should generate embeddings', async () => {
+    const chunks = createChunks(25)
+    const embeddings = await generateEmbeddingVectors(chunks)
+    expect(embeddings).toHaveLength(25)
+  })
+})
 ```
 
 ### Supabase Mocks
