@@ -94,13 +94,12 @@ describe('EcommerceExtractor - JSON-LD Parser', () => {
           sku: 'WIDGET-123',
           description: 'An amazing widget for all your needs',
           brand: 'WidgetCorp',
-          price: expect.objectContaining({
-            value: 29.99,
-            currency: 'USD'
-          }),
-          availability: expect.objectContaining({
-            inStock: true
-          }),
+          // Price and currency are flattened by normalizeProductSafely
+          price: 29.99,
+          currency: 'USD',
+          // Availability is flattened by normalizeProductSafely
+          availability: 'https://schema.org/InStock',
+          inStock: true,
           images: expect.arrayContaining([
             expect.objectContaining({ url: 'https://example.com/widget1.jpg' })
           ]),
@@ -138,10 +137,9 @@ describe('EcommerceExtractor - JSON-LD Parser', () => {
       expect(mockProductNormalizer.normalizeProduct).toHaveBeenCalledWith(
         expect.objectContaining({
           name: 'Second Product',
-          price: expect.objectContaining({
-            value: 15.99,
-            currency: 'EUR'
-          })
+          // Price and currency are flattened by normalizeProductSafely
+          price: 15.99,
+          currency: 'EUR'
         })
       )
     })
@@ -192,10 +190,12 @@ describe('EcommerceExtractor - JSON-LD Parser', () => {
           sku: 'MD-123',
           description: 'A product with microdata',
           brand: 'MicroBrand',
-          price: expect.objectContaining({
-            value: 39.99,
-            currency: 'USD'
-          })
+          // Price and currency are flattened by normalizeProductSafely
+          price: 39.99,
+          currency: 'USD',
+          // Availability is flattened
+          availability: 'https://schema.org/InStock',
+          inStock: true
         })
       )
     })
@@ -217,9 +217,8 @@ describe('EcommerceExtractor - JSON-LD Parser', () => {
       expect(mockProductNormalizer.normalizeProduct).toHaveBeenCalledWith(
         expect.objectContaining({
           name: 'Minimal Product',
-          price: expect.objectContaining({
-            value: 19.99
-          })
+          // Price is flattened by normalizeProductSafely
+          price: 19.99
         })
       )
     })
