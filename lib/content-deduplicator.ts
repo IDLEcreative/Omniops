@@ -72,6 +72,7 @@ export class ContentDeduplicator {
         if (!cached.pages.includes(url)) {
           cached.pages.push(url);
         }
+        this.storageManager.addPageReference(url, hash);
         await this.storageManager.storeInRedis(hash, cached, url);
         return hash;
       }
@@ -83,6 +84,7 @@ export class ContentDeduplicator {
       if (!existingHash.pages.includes(url)) {
         existingHash.pages.push(url);
       }
+      this.storageManager.addPageReference(url, hash);
       return hash;
     }
 

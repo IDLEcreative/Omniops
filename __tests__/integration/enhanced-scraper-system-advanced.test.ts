@@ -57,10 +57,17 @@ describe('Enhanced Scraper System - Advanced Tests', () => {
   describe('4. Rate Limiting Integration', () => {
     it('should handle multiple rapid requests with proper throttling', async () => {
       const domain = 'rate-limit-test.com';
+
+      // Create a rate limiter with lower burst size to ensure throttling
+      const testRateLimiter = new EnhancedRateLimiter({
+        ...RateLimiterPresets.moderate,
+        burstSize: 5 // Lower than 10 requests to force some to be rate limited
+      });
+
       const requests: Promise<RateLimitResponse>[] = [];
 
       for (let i = 0; i < 10; i++) {
-        requests.push(rateLimiter.checkRateLimit(domain));
+        requests.push(testRateLimiter.checkRateLimit(domain));
       }
 
       const responses = await Promise.all(requests);
@@ -77,6 +84,8 @@ describe('Enhanced Scraper System - Advanced Tests', () => {
         expect(response.waitTimeMs).toBeGreaterThan(0);
         expect(response.resetTime).toBeGreaterThan(Date.now());
       });
+
+      await testRateLimiter.close();
     });
 
     it('should apply exponential backoff on 429 responses', async () => {
