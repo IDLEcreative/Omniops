@@ -35,7 +35,7 @@ export async function collectCompanyData(domain: string): Promise<CompanyData> {
 
 function extractCompanyNameFromDomain(domain: string): string {
   // Extract domain name without TLD
-  // e.g., "thompson-parts.co.uk" -> "Thompson Parts"
+  // Example: "acme-widgets.co.uk" -> "Acme Widgets"
   const domainName = domain.split('.')[0] || 'Company';
   return domainName
     .split(/[-_]/)

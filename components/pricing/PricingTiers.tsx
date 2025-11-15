@@ -42,7 +42,7 @@ const PRICING_TIERS = [
     ],
     testimonial: {
       quote: 'Cut our support costs by 65% in the first month',
-      author: 'Sarah Thompson',
+      author: 'Sarah Mitchell',
       company: 'Growing Online Business',
     },
   },

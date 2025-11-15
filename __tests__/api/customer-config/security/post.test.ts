@@ -12,7 +12,7 @@
 
 import { describe, it, expect, beforeAll, afterAll } from '@jest/globals';
 import { createConfig } from '@/__tests__/utils/customer-config/api-request-helpers';
-import { initializeTestData, cleanupTestData } from '@/__tests__/utils/customer-config/test-setup';
+import { initializeTestData, cleanupTestData, TEST_PASSWORD } from '@/__tests__/utils/customer-config/test-setup';
 import { getAuthTokenFor, signOutUser } from '@/__tests__/utils/customer-config/auth-helpers';
 import type { TestDataContext } from '@/__tests__/utils/customer-config/test-setup';
 
@@ -36,7 +36,7 @@ describe('POST /api/customer/config - Security', () => {
 
   it('should reject regular members (non-admin/owner)', async () => {
     // Sign in as user2 (member, not admin)
-    const token = await getAuthTokenFor(context.serviceClient, context.user2Email, 'testpassword123');
+    const token = await getAuthTokenFor(context.serviceClient, context.user2Email, TEST_PASSWORD);
 
     const response = await createConfig(
       `test-new-${context.timestamp}.example.com`,
@@ -52,7 +52,7 @@ describe('POST /api/customer/config - Security', () => {
 
   it('should allow admins and owners to create configs', async () => {
     // Sign in as user1 (owner)
-    const token = await getAuthTokenFor(context.serviceClient, context.user1Email, 'testpassword123');
+    const token = await getAuthTokenFor(context.serviceClient, context.user1Email, TEST_PASSWORD);
 
     const newDomain = `test-create-${context.timestamp}.example.com`;
     const response = await createConfig(newDomain, 'New Business', token);

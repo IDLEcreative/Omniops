@@ -82,7 +82,7 @@ export async function getAvailableTools(domain: string): Promise<any[]> {
       type: "function" as const,
       function: {
         name: "search_website_content",
-        description: "Search scraped website content including FAQs, policies, documentation, and general information. Use this for questions about company policies, help articles, guides, and non-product information. DO NOT use this for live product catalog searches when WooCommerce or Shopify is available - use their respective tools instead.",
+        description: "Search scraped website content including product pages, FAQs, policies, documentation, and general information. For PRODUCT queries, use this IN PARALLEL with woocommerce_operations or shopify_operations to get both live catalog data AND rich page content. For NON-PRODUCT queries (policies, help, guides), use this tool alone.",
         parameters: {
           type: "object",
           properties: {
@@ -188,14 +188,16 @@ export function getToolInstructions(availability: ToolAvailability): string {
   if (availability.hasWooCommerce) {
     instructions.push(
       "✅ WooCommerce is configured - you can perform cart operations, check orders, and manage the shopping experience.",
-      "Use the woocommerce_operations tool for all e-commerce tasks."
+      "For PRODUCT searches: Use woocommerce_operations AND search_website_content IN PARALLEL to get complete information.",
+      "For cart/order operations: Use woocommerce_operations alone."
     );
   }
 
   if (availability.hasShopify) {
     instructions.push(
       "✅ Shopify is configured - you can perform cart operations, check orders, and manage the shopping experience.",
-      "Use the shopify_operations tool for all Shopify e-commerce tasks."
+      "For PRODUCT searches: Use shopify_operations AND search_website_content IN PARALLEL to get complete information.",
+      "For cart/order operations: Use shopify_operations alone."
     );
   }
 

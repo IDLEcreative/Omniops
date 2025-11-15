@@ -12,7 +12,7 @@
 
 import { describe, it, expect, beforeAll, afterAll } from '@jest/globals';
 import { getConfigs } from '@/__tests__/utils/customer-config/api-request-helpers';
-import { initializeTestData, cleanupTestData } from '@/__tests__/utils/customer-config/test-setup';
+import { initializeTestData, cleanupTestData, TEST_PASSWORD } from '@/__tests__/utils/customer-config/test-setup';
 import { getAuthTokenFor, signOutUser } from '@/__tests__/utils/customer-config/auth-helpers';
 import type { TestDataContext } from '@/__tests__/utils/customer-config/test-setup';
 
@@ -35,7 +35,7 @@ describe('GET /api/customer/config - Security', () => {
 
   it('should only return configs for authenticated user\'s organization', async () => {
     // Sign in as user1
-    const token = await getAuthTokenFor(context.serviceClient, context.user1Email, 'testpassword123');
+    const token = await getAuthTokenFor(context.serviceClient, context.user1Email, TEST_PASSWORD);
 
     const response = await getConfigs(token);
 
@@ -50,7 +50,7 @@ describe('GET /api/customer/config - Security', () => {
 
   it('should not allow user to access another organization\'s configs', async () => {
     // Sign in as user1 (org1)
-    const token = await getAuthTokenFor(context.serviceClient, context.user1Email, 'testpassword123');
+    const token = await getAuthTokenFor(context.serviceClient, context.user1Email, TEST_PASSWORD);
 
     const response = await getConfigs(token);
 

@@ -13,7 +13,7 @@
 
 import { describe, it, expect, beforeAll, afterAll } from '@jest/globals';
 import { deleteConfig } from '@/__tests__/utils/customer-config/api-request-helpers';
-import { initializeTestData, cleanupTestData } from '@/__tests__/utils/customer-config/test-setup';
+import { initializeTestData, cleanupTestData, TEST_PASSWORD } from '@/__tests__/utils/customer-config/test-setup';
 import { getAuthTokenFor, signOutUser } from '@/__tests__/utils/customer-config/auth-helpers';
 import { insertAsAdmin, deleteAsAdmin } from '@/test-utils/rls-test-helpers';
 import type { TestDataContext } from '@/__tests__/utils/customer-config/test-setup';
@@ -52,7 +52,7 @@ describe('DELETE /api/customer/config - Security', () => {
 
   it('should reject deletion of configs from other organizations', async () => {
     // Sign in as user1 (org1)
-    const token = await getAuthTokenFor(context.serviceClient, context.user1Email, 'testpassword123');
+    const token = await getAuthTokenFor(context.serviceClient, context.user1Email, TEST_PASSWORD);
 
     // Try to delete org2's config
     const response = await deleteConfig(context.config2Id, token);
@@ -76,7 +76,7 @@ describe('DELETE /api/customer/config - Security', () => {
     }
 
     // Sign in as user2 (member, not admin)
-    const token = await getAuthTokenFor(context.serviceClient, context.user2Email, 'testpassword123');
+    const token = await getAuthTokenFor(context.serviceClient, context.user2Email, TEST_PASSWORD);
 
     const response = await deleteConfig(tempConfig.id, token);
 
@@ -91,7 +91,7 @@ describe('DELETE /api/customer/config - Security', () => {
 
   it('should allow admins/owners to delete their own org configs', async () => {
     // Sign in as user1 (owner of org1)
-    const token = await getAuthTokenFor(context.serviceClient, context.user1Email, 'testpassword123');
+    const token = await getAuthTokenFor(context.serviceClient, context.user1Email, TEST_PASSWORD);
 
     const response = await deleteConfig(tempConfigId, token);
 

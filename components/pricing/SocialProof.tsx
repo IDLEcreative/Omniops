@@ -15,7 +15,7 @@ const testimonials = [
   {
     quote:
       'Setup took 2 minutes. Within a week, 70% of our customer inquiries were handled automatically. Our team now focuses only on complex issues.',
-    author: 'Sarah Thompson',
+    author: 'Sarah Mitchell',
     role: 'Founder',
     company: 'Growing Online Business (5-15 employees)',
     plan: 'Small Business Plan',

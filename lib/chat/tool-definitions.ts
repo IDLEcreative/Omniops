@@ -13,7 +13,7 @@ export const SEARCH_TOOLS = [
     type: "function" as const,
     function: {
       name: "search_website_content",
-      description: "Search scraped website content including FAQs, policies, documentation, and general information. Use this for questions about company policies, help articles, guides, and non-product information. DO NOT use this for live product catalog searches when WooCommerce or Shopify is available - use their respective tools instead.",
+      description: "Search scraped website content including product pages, FAQs, policies, documentation, and general information. For PRODUCT queries, use this IN PARALLEL with woocommerce_operations or shopify_operations to get both live catalog data AND rich page content. For NON-PRODUCT queries (policies, help, guides), use this tool alone.",
       parameters: {
         type: "object",
         properties: {

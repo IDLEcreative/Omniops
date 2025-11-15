@@ -13,7 +13,7 @@
 
 import { describe, it, expect, beforeAll, afterAll } from '@jest/globals';
 import { updateConfig } from '@/__tests__/utils/customer-config/api-request-helpers';
-import { initializeTestData, cleanupTestData } from '@/__tests__/utils/customer-config/test-setup';
+import { initializeTestData, cleanupTestData, TEST_PASSWORD } from '@/__tests__/utils/customer-config/test-setup';
 import { getAuthTokenFor, signOutUser } from '@/__tests__/utils/customer-config/auth-helpers';
 import type { TestDataContext } from '@/__tests__/utils/customer-config/test-setup';
 
