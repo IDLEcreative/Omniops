@@ -1,0 +1,25 @@
+{
+  "teardownTime": "2025-11-15T17:19:39.007Z",
+  "setupTime": "2025-11-15T17:19:36.324Z",
+  "duration": 2683,
+  "testResultsPath": "/Users/jamesguy/Omniops/test-results",
+  "generatedFiles": [
+    "browser-availability.json",
+    "integrations-woocommerce-c-41013-nsactional-Mode-Direct-API--chromium",
+    "integrations-woocommerce-c-41013-nsactional-Mode-Direct-API--firefox",
+    "integrations-woocommerce-c-41013-nsactional-Mode-Direct-API--webkit",
+    "integrations-woocommerce-c-67e96-in-Informational-Mode-URLs--chromium",
+    "integrations-woocommerce-c-67e96-in-Informational-Mode-URLs--firefox",
+    "integrations-woocommerce-c-67e96-in-Informational-Mode-URLs--webkit",
+    "integrations-woocommerce-c-ca0ec-ore-API-failures-gracefully-chromium",
+    "integrations-woocommerce-c-ca0ec-ore-API-failures-gracefully-firefox",
+    "integrations-woocommerce-c-ca0ec-ore-API-failures-gracefully-webkit",
+    "integrations-woocommerce-c-d5075-art-session-across-messages-chromium",
+    "integrations-woocommerce-c-d5075-art-session-across-messages-firefox",
+    "integrations-woocommerce-c-d5075-art-session-across-messages-webkit",
+    "screenshots",
+    "setup-timestamp.txt",
+    "traces",
+    "videos"
+  ]
+}

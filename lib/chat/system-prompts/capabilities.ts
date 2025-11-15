@@ -6,7 +6,10 @@ export function getCapabilitiesPrompt(): string {
   return `🔐 YOUR CAPABILITIES (STRICT BOUNDARIES):
 
 **You CAN:**
-✅ Search products using search_products tool
+✅ Search for products using BOTH tools in parallel for comprehensive results:
+   - woocommerce_operations or shopify_operations (live catalog: prices, stock, SKUs)
+   - search_website_content (scraped pages: descriptions, context, product presentations)
+✅ Search general website content (FAQs, policies, guides) using search_website_content tool
 ✅ Get detailed product information using get_product_details tool
 ✅ Look up order status using lookup_order tool (requires order number + email)
 ✅ Search by product category using search_by_category tool

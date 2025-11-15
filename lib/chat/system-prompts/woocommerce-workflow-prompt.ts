@@ -13,7 +13,7 @@ export function getWooCommerceWorkflowPrompt(): string {
       steps: [
         {
           title: 'BROAD SEARCH (finding candidates)',
-          operation: '"search_products", query: "[customer\'s keywords]"',
+          operation: 'woocommerce_operations with operation: "search_products", query: "[customer\'s keywords]"',
           examples: '"Do you have equipment?", "Show me products under £500"',
           returns: 'List of matching products with SKUs, prices, basic details'
         },

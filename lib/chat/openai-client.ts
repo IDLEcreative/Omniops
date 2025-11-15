@@ -28,7 +28,7 @@ export function getOpenAIClient(): OpenAI | null {
     try {
       openaiInstance = new OpenAI({
         apiKey,
-        timeout: 30 * 1000,    // 30 seconds (chat completions need 5-15s normally)
+        timeout: 60 * 1000,    // 60 seconds (increased for complex multi-turn conversations)
         maxRetries: 2,          // Retry failed requests twice
       });
     } catch (error) {

@@ -115,6 +115,20 @@ export async function processAIConversation(params: AIProcessorParams): Promise<
       break;
     }
 
+    // Log tool selection for debugging and monitoring
+    console.log(`[Tool Selection] AI selected ${toolCalls.length} tool(s):`);
+    toolCalls.forEach((tc, idx) => {
+      const toolName = tc.function.name;
+      let args: any = {};
+      try {
+        args = JSON.parse(tc.function.arguments || '{}');
+      } catch (e) {
+        // Ignore parse errors for logging
+      }
+      const userContext = conversationMessages[conversationMessages.length - 1]?.content?.substring(0, 100) || 'N/A';
+      console.log(`[Tool Selection] ${idx + 1}. ${toolName} (args: ${JSON.stringify(args)}) | User context: "${userContext}..."`);
+    });
+
     // Execute tool calls in parallel
     console.log(`[Intelligent Chat] Executing ${toolCalls.length} tools in parallel for comprehensive search`);
     const toolExecutionResults = await executeToolCallsParallel(

@@ -263,6 +263,7 @@ for (const item of items) {
 | **Brand-Agnostic** | "HARDCODING", "multi-tenant", "Thompson", "pumps" | [#brand-agnostic](#-critical-brand-agnostic-application) |
 | **File Placement** | "root directory", "NEVER create files", "Decision Tree" | [#file-placement](#-critical-file-placement-rules) |
 | **Agent Deployment** | "Deploy agent", "parallel", "Fix Issues Immediately" | [#fix-issues](#fix-issues-immediately-with-agents) |
+| **Pod Orchestration** 🆕 | "pod", "domain-based", "specialized agents", "large-scale" | [docs/02-GUIDES/GUIDE_POD_ORCHESTRATION_PATTERN.md](docs/02-GUIDES/GUIDE_POD_ORCHESTRATION_PATTERN.md) |
 | **Testing** | "Hard to Test", "dependency injection", "mock", "Create Tests" | [#testing-philosophy](#testing--code-quality-philosophy) |
 | **Performance** | "O(n²)", "algorithmic complexity", "optimization" | [#performance-guidelines](#performance-guidelines) |
 | **Security** | "credentials", "encryption", "RLS", "GDPR" | [#security](#security--privacy) |
@@ -1038,6 +1039,12 @@ See [REFERENCE_DATABASE_SCHEMA.md](docs/09-REFERENCE/REFERENCE_DATABASE_SCHEMA.m
   - 📖 5 agent prompt templates (indexed for fast access)
   - 🔧 Troubleshooting common issues
   - ✅ Self-assessments & practice scenarios
+- **[Pod Orchestration Pattern](docs/02-GUIDES/GUIDE_POD_ORCHESTRATION_PATTERN.md)** 🆕 **ADVANCED** - Domain-based agent orchestration (461 lines)
+  - 🎯 For large-scale work (20+ files) with clear domain boundaries
+  - 📦 Specialized agents by domain (tests, scripts, APIs, UI)
+  - ✅ Proven: 72% time savings, 100% success rate (Wave 10: 29 files, 8 pods)
+  - 🔧 Ready-to-use pod templates (test refactoring, scripts, production code)
+  - 📊 Adaptive scaling (split pods when needed: S → S1, S2, S3)
 - **[Orchestration Archive](docs/10-ANALYSIS/ANALYSIS_PARALLEL_AGENT_ORCHESTRATION.md)** - Complete 4-week case study with week-by-week breakdown (reference/archive)
 - **[Agent Hierarchy Guide](.claude/AGENT_HIERARCHY.md)** - Three-tier agent system (Architect → Plan → Explore) and when to use each type
 
@@ -1060,24 +1067,31 @@ Example: Parallel Agent Orchestration has both.
 
 **Trigger Patterns - Use Agents WITHOUT User Prompting When:**
 
-1. **Multiple Independent Categories** (HIGH PRIORITY)
+1. **Large-Scale Domain-Based Work** (NEW - HIGHEST PRIORITY for 20+ files) 🆕
+   - 20+ files across clear domains (tests, scripts, APIs, components, UI)
+   - Each domain requires different expertise (E2E vs unit tests, scripts vs production code)
+   - Use **Pod Orchestration** - specialized agents by domain (Library, API, Integration, Playwright, Scripts)
+   - Example: LOC refactoring (29 files → 8 pods → 72% time savings, 100% success)
+   - **Guide**: [Pod Orchestration Pattern](docs/02-GUIDES/GUIDE_POD_ORCHESTRATION_PATTERN.md)
+
+2. **Multiple Independent Categories** (HIGH PRIORITY)
    - Updating dependencies across different categories (Supabase, types, testing, utilities)
    - Refactoring files in different modules (API routes, components, libs, tests)
    - Running validation across multiple systems (build, lint, tests, types)
    - Analyzing different aspects of a problem (performance, security, architecture)
 
-2. **Repetitive Tasks at Scale**
+3. **Repetitive Tasks at Scale**
    - Fixing 20+ files with similar patterns (import updates, type fixes, etc.)
    - Updating multiple test files with same refactoring
    - Applying consistent changes across module boundaries
 
-3. **Time-Intensive Sequential Work**
+4. **Time-Intensive Sequential Work**
    - Any task that would take >30 minutes sequentially
    - Build verification + tests + linting (can run in parallel)
    - Multiple large file reads/analysis
    - Comprehensive codebase searches
 
-4. **Context Protection**
+5. **Context Protection**
    - When a task might generate >10,000 tokens of output
    - Multiple file reads that would fill context
    - Long-running analysis or validation tasks
@@ -1093,8 +1107,9 @@ When you identify a task suitable for parallel agents:
 4. **Follow** the scenario's specific agent configuration and example prompts
 
 **Quick Scenario Selection:**
+- **Large-Scale Refactoring** (20+ files, domain-based) → **Pod Orchestration** 🆕 - 5-8 pods, Sonnet, 65-75% savings
 - **Dependency Updates** (15+ packages) → Scenario 1 (line 494) - 4 agents, Haiku, 88-92% savings
-- **File Refactoring** (30+ files) → Scenario 2 (line 548) - 3 agents, Opus, 60-75% savings
+- **File Refactoring** (30+ files, uniform) → Scenario 2 (line 548) - 3 agents, Opus, 60-75% savings
 
 **📝 AFTER Deploying Agents - Update the Archive:**
 

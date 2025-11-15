@@ -9,21 +9,42 @@ const mockOnAuthStateChange = jest.fn(() => ({
   },
 }));
 
-// Create a single mock client instance (singleton)
-const mockClient = {
+// Create a comprehensive mock Supabase client
+const createMockClient = () => ({
   auth: {
     getUser: mockGetUser,
     signOut: mockSignOut,
     onAuthStateChange: mockOnAuthStateChange,
   },
-};
+  from: jest.fn().mockReturnValue({
+    select: jest.fn().mockReturnThis(),
+    insert: jest.fn().mockReturnThis(),
+    update: jest.fn().mockReturnThis(),
+    delete: jest.fn().mockReturnThis(),
+    eq: jest.fn().mockReturnThis(),
+    in: jest.fn().mockReturnThis(),
+    order: jest.fn().mockReturnThis(),
+    single: jest.fn().mockResolvedValue({ data: null, error: null }),
+    maybeSingle: jest.fn().mockResolvedValue({ data: null, error: null }),
+  }),
+  channel: jest.fn().mockReturnValue({
+    send: jest.fn().mockResolvedValue('ok'),
+    subscribe: jest.fn().mockReturnThis(),
+    unsubscribe: jest.fn().mockReturnValue('ok'),
+    on: jest.fn().mockReturnThis(),
+  }),
+  removeChannel: jest.fn().mockResolvedValue('ok'),
+  removeAllChannels: jest.fn().mockResolvedValue([]),
+});
 
-// Always return the same instance
-const createBrowserClient = jest.fn(() => mockClient);
+// Browser and server clients
+const createBrowserClient = jest.fn(() => createMockClient());
+const createServerClient = jest.fn(() => createMockClient());
 
 // Export the mock and expose the mock functions for test configuration
 module.exports = {
   createBrowserClient,
+  createServerClient,
   __mockGetUser: mockGetUser,
   __mockSignOut: mockSignOut,
   __mockOnAuthStateChange: mockOnAuthStateChange,

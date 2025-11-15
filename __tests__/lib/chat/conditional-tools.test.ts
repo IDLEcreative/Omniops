@@ -143,7 +143,7 @@ describe('Conditional Tool Availability', () => {
       const toolNames = tools.map(t => t.function.name);
 
       // Should have base tools plus WooCommerce
-      expect(toolNames).toContain('search_products');
+      expect(toolNames).toContain('search_website_content');
       expect(toolNames).toContain('search_by_category');
       expect(toolNames).toContain('search_similar');
       expect(toolNames).toContain('woocommerce_operations');
@@ -166,7 +166,7 @@ describe('Conditional Tool Availability', () => {
       const toolNames = tools.map(t => t.function.name);
 
       // Should only have base tools
-      expect(toolNames).toContain('search_products');
+      expect(toolNames).toContain('search_website_content');
       expect(toolNames).toContain('search_by_category');
       expect(toolNames).toContain('search_similar');
       expect(toolNames).not.toContain('woocommerce_operations');
@@ -189,7 +189,7 @@ describe('Conditional Tool Availability', () => {
       const toolNames = tools.map(t => t.function.name);
 
       // Base tools should always be present
-      expect(toolNames).toContain('search_products');
+      expect(toolNames).toContain('search_website_content');
       expect(toolNames).toContain('search_by_category');
       expect(toolNames).toContain('search_similar');
     });
@@ -225,8 +225,7 @@ describe('Conditional Tool Availability', () => {
       });
 
       expect(instructions).toContain('Shopify is configured');
-      expect(instructions).toContain('e-commerce operations are available');
-      expect(instructions).toContain('not yet implemented');
+      expect(instructions).toContain('shopify_operations tool');
     });
 
     it('should provide both instructions when both configured', () => {

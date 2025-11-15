@@ -3,7 +3,7 @@
 **Type:** Guide | Learning Resource
 **Status:** Active
 **Created:** 2025-11-10
-**Last Updated:** 2025-11-10
+**Last Updated:** 2025-11-15 (Added Pod Orchestration Pattern reference)
 **Verified For:** v0.1.0
 **Dependencies:** [CLAUDE.md](../../CLAUDE.md), [Agent Prompt Templates](.claude/AGENT_PROMPT_TEMPLATES.md)
 **Estimated Read Time:** 5-60 minutes (progressive levels)
@@ -17,6 +17,7 @@ Transform complex parallel agent orchestration from an advanced technique into a
 - [🎯 Scenario Playbooks](#-scenario-playbooks)
 - [📖 Agent Prompt Templates](#-agent-prompt-templates)
 - [📊 Case Studies Archive](../10-ANALYSIS/ANALYSIS_PARALLEL_AGENT_ORCHESTRATION.md)
+- [⭐ Pod Orchestration Pattern](./GUIDE_POD_ORCHESTRATION_PATTERN.md) - NEW: Advanced domain-based orchestration
 
 ## Table of Contents
 - [🚀 5-Minute Quick Start](#-5-minute-quick-start)
@@ -63,9 +64,12 @@ Consolidate results
 |----------|----------|--------------|
 | **"Update 20+ dependencies"** | 4 agents by category | 88-92% |
 | **"Refactor 30+ files"** | 3 agents by module | 60-75% |
+| **"Large-scale refactoring (20+ files)"** | **Pod orchestration** ⭐ NEW | 65-75% |
 | **"Fix all ESLint errors"** | 3 agents by error type | 70-80% |
 | **"Create comprehensive tests"** | 2-3 agents by domain | 40-50% |
 | **"Apply pattern across codebase"** | 3 agents by directory | 40-50% |
+
+⭐ **NEW:** For large-scale work with clear domain boundaries (tests, scripts, APIs), use [Pod Orchestration Pattern](./GUIDE_POD_ORCHESTRATION_PATTERN.md) - specialized agents by domain expertise.
 
 ### Template Selection Guide
 

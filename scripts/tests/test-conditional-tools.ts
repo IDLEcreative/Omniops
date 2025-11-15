@@ -83,7 +83,7 @@ async function testConditionalTools() {
       }
 
       // Check that base search tools are always available
-      const baseTools = ['search_products', 'search_by_category', 'search_similar'];
+      const baseTools = ['search_website_content', 'search_by_category', 'search_similar'];
       const hasAllBaseTools = baseTools.every(tool => toolNames.includes(tool));
       console.log(`\n✅ Base search tools present: ${hasAllBaseTools ? 'PASS' : 'FAIL'}`);
 

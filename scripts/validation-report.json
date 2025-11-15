@@ -1,0 +1,41 @@
+{
+  "compilationStatus": "FAIL",
+  "typeScriptErrors": 205,
+  "testsPass": false,
+  "performanceMetrics": {
+    "tokenReduction": 65,
+    "processingSpeed": 2500,
+    "memoryUsage": 45
+  },
+  "integrationStatus": {
+    "aiOptimization": false,
+    "patternLearning": true,
+    "rateLimiting": true,
+    "configuration": false,
+    "database": false
+  },
+  "productionReady": false,
+  "remainingIssues": [
+    "Missing core file: lib/ai-content-extractor.ts",
+    "Missing core file: lib/ai-metadata-generator.ts",
+    "Missing core file: lib/content-deduplicator.ts",
+    "Missing core file: lib/pattern-learner.ts",
+    "Missing core file: lib/rate-limiter-enhanced.ts",
+    "Missing core file: lib/ecommerce-extractor.ts",
+    "Missing core file: lib/pagination-crawler.ts",
+    "Missing config file: tsconfig.json",
+    "Missing config file: package.json",
+    "Cannot read package.json",
+    "Missing migration: supabase/migrations/001_initial_migration.sql",
+    "Missing migration: supabase/migrations/20250125_add_domain_patterns.sql",
+    "Missing API route: app/api/scrape/route.ts",
+    "Missing API route: app/api/chat/route.ts",
+    "Missing API route: app/api/admin/config/route.ts",
+    "Missing config: lib/scraper-config.ts",
+    "Missing config: lib/crawler-config.ts",
+    "Missing config: mcp-supabase-config.json",
+    "Missing test: __tests__/integration/enhanced-scraper-system.test.ts",
+    "Missing test: __tests__/lib/ai-content-extractor.test.ts",
+    "Missing test: __tests__/lib/pattern-learner.test.ts"
+  ]
+}

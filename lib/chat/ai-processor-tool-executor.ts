@@ -71,7 +71,7 @@ export async function executeToolCallsParallel(
 
     // Normalize optional arguments after validation
     if (
-      (toolName === 'search_products' || toolName === 'search_by_category') &&
+      (toolName === 'search_website_content' || toolName === 'search_by_category') &&
       (typeof parsedArgs.limit !== 'number' || !Number.isFinite(parsedArgs.limit))
     ) {
       delete parsedArgs.limit;
@@ -87,7 +87,7 @@ export async function executeToolCallsParallel(
     try {
       const runTool = async () => {
         switch (toolName) {
-          case 'search_products':
+          case 'search_website_content':
             return await executeSearchProducts(
               (parsedArgs.query as string).trim(),
               parsedArgs.limit,
@@ -219,8 +219,8 @@ export function formatToolResultsForAI(
 
       if (result.source === 'invalid-arguments') {
         switch (toolName) {
-          case 'search_products':
-            toolResponse += 'I want to search our inventory for you, but I need a product name or keywords to look up. Could you share what you are looking for?';
+          case 'search_website_content':
+            toolResponse += 'I want to search our content for you, but I need keywords or a topic to look up. Could you share what information you are looking for?';
             break;
           case 'search_by_category':
             toolResponse += 'I can browse our categories once I know which topic you want—shipping, returns, installation, etc. Let me know and I will pull it up.';

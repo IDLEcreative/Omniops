@@ -91,25 +91,28 @@ jest.mock('@/lib/supabase-server', () => {
     },
   });
 
+  // Use a STATE VARIABLE that tests can modify
+  let currentMockClient = createMockSupabaseClient();
+
   const validateSupabaseEnv = jest.fn().mockReturnValue(true);
-  const createServiceRoleClient = jest.fn().mockImplementation(async () => createMockSupabaseClient());
-  const createClient = jest.fn().mockImplementation(async () => createMockSupabaseClient());
-  const requireClient = jest.fn().mockImplementation(async () => createMockSupabaseClient());
-  const requireServiceRoleClient = jest.fn().mockImplementation(async () => createMockSupabaseClient());
+  const createServiceRoleClient = jest.fn().mockImplementation(async () => {
+    console.log('[MOCK] createServiceRoleClient called, returning client with user:', (await currentMockClient.auth.getUser()).data.user?.id);
+    return currentMockClient;
+  });
+  const createClient = jest.fn().mockImplementation(async () => {
+    const user = await currentMockClient.auth.getUser();
+    console.log('[MOCK] createClient called, returning client with user:', user.data.user?.id);
+    return currentMockClient;
+  });
+  const requireClient = jest.fn().mockImplementation(async () => currentMockClient);
+  const requireServiceRoleClient = jest.fn().mockImplementation(async () => currentMockClient);
 
   const __setMockSupabaseClient = (customMockClient) => {
-    createServiceRoleClient.mockResolvedValue(customMockClient);
-    createClient.mockResolvedValue(customMockClient);
-    requireClient.mockResolvedValue(customMockClient);
-    requireServiceRoleClient.mockResolvedValue(customMockClient);
+    currentMockClient = customMockClient;
   };
 
   const __resetMockSupabaseClient = () => {
-    const mockClient = createMockSupabaseClient();
-    createServiceRoleClient.mockResolvedValue(mockClient);
-    createClient.mockResolvedValue(mockClient);
-    requireClient.mockResolvedValue(mockClient);
-    requireServiceRoleClient.mockResolvedValue(mockClient);
+    currentMockClient = createMockSupabaseClient();
   };
 
   return {
@@ -122,6 +125,9 @@ jest.mock('@/lib/supabase-server', () => {
     __resetMockSupabaseClient,
   };
 });
+
+// Also mock @/lib/supabase/server with the same implementation
+jest.mock('@/lib/supabase/server', () => jest.requireMock('@/lib/supabase-server'));
 
 // Mock ioredis FIRST to prevent real Redis connections during test imports
 jest.mock('ioredis', () => {

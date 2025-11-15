@@ -1,4 +1,13 @@
 import { test, expect, Page } from '@playwright/test';
+import {
+  setupConflictMock,
+  CONFLICT_ERROR_SELECTORS,
+  RESOLUTION_OPTION_SELECTORS,
+  COMPARISON_SELECTORS,
+  SUCCESS_MESSAGE_SELECTORS,
+  ConflictMockState
+} from '../helpers/conflict-helpers';
+import { isAnyVisible } from '../helpers/selector-helpers';
 
 const BASE_URL = process.env.BASE_URL || 'http://localhost:3000';
 
@@ -52,91 +61,8 @@ test.describe('Error Scenario: Database Conflict Resolution', () => {
       console.log('✅ Domain settings loaded directly');
     }
 
-    // Mock concurrent edit scenario with versioning
     console.log('📍 Step 4: Setting up concurrent edit simulation');
-    let currentVersion = 1;
-    let editAttempts = 0;
-    let conflictDetected = false;
-    let resolutionSuccessful = false;
-    
-    await page.route('**/api/domains/*/settings', async (route) => {
-      const method = route.request().method();
-      
-      if (method === 'GET') {
-        // Return current settings with version
-        console.log('📥 GET settings (version ' + currentVersion + ')');
-        await route.fulfill({
-          status: 200,
-          contentType: 'application/json',
-          body: JSON.stringify({
-            success: true,
-            settings: {
-              name: 'Test Domain',
-              description: 'Original description',
-              retentionDays: 30,
-              version: currentVersion
-            }
-          })
-        });
-      } else if (method === 'PUT' || method === 'PATCH') {
-        editAttempts++;
-        const requestBody = route.request().postDataJSON();
-        const submittedVersion = requestBody.version || 0;
-        
-        console.log('📤 PUT/PATCH attempt #' + editAttempts);
-        console.log('   Submitted version: ' + submittedVersion);
-        console.log('   Current version: ' + currentVersion);
-        
-        if (editAttempts === 1) {
-          // Simulate another user's edit between GET and PUT
-          console.log('👥 Simulating concurrent edit by another user');
-          currentVersion = 2;
-          
-          // First edit attempt: conflict (version mismatch)
-          console.log('⚠️  Version mismatch detected - returning 409 Conflict');
-          conflictDetected = true;
-          
-          await route.fulfill({
-            status: 409,
-            contentType: 'application/json',
-            body: JSON.stringify({
-              success: false,
-              error: 'Conflict: Settings were modified by another user',
-              message: 'These settings have been updated by another user while you were editing. Please review the changes and try again.',
-              code: 'EDIT_CONFLICT',
-              currentVersion: currentVersion,
-              currentData: {
-                name: 'Test Domain',
-                description: 'Modified by another user',
-                retentionDays: 60
-              },
-              yourData: requestBody
-            })
-          });
-        } else {
-          // Second edit attempt: success (after resolving conflict)
-          console.log('✅ Version matches - accepting update');
-          currentVersion++;
-          resolutionSuccessful = true;
-          
-          await route.fulfill({
-            status: 200,
-            contentType: 'application/json',
-            body: JSON.stringify({
-              success: true,
-              message: 'Settings updated successfully',
-              settings: {
-                ...requestBody,
-                version: currentVersion
-              }
-            })
-          });
-        }
-      } else {
-        await route.continue();
-      }
-    });
-    console.log('✅ Concurrent edit mock ready');
+    const mockState = await setupConflictMock(page, '**/api/domains/*/settings');
 
     // Edit settings (User A perspective)
     console.log('📍 Step 5: Editing domain settings (User A)');
@@ -197,99 +123,34 @@ test.describe('Error Scenario: Database Conflict Resolution', () => {
 
     await page.waitForTimeout(2000);
 
-    // Verify conflict is detected
     console.log('📍 Step 8: Verifying conflict detection');
-    expect(conflictDetected).toBe(true);
+    expect(mockState.conflictDetected).toBe(true);
     console.log('✅ CONFLICT DETECTED ← First "END" point');
 
-    // Verify conflict error message is displayed
     console.log('📍 Step 9: Verifying conflict error message');
-    const conflictErrorSelectors = [
-      'text=/conflict/i',
-      'text=/modified by another user/i',
-      'text=/updated.*while you were editing/i',
-      '.conflict-error',
-      '.edit-conflict',
-      '[role="alert"]',
-      '.error-message'
-    ];
+    const conflictResult = await isAnyVisible(page, CONFLICT_ERROR_SELECTORS, 3000);
 
-    let conflictMessageFound = false;
-    let conflictMessage = '';
-    
-    for (const selector of conflictErrorSelectors) {
-      const errorElement = page.locator(selector).first();
-      const isVisible = await errorElement.isVisible({ timeout: 3000 }).catch(() => false);
-      
-      if (isVisible) {
-        conflictMessage = await errorElement.textContent() || '';
-        conflictMessageFound = true;
-        console.log('✅ Conflict message found: "' + conflictMessage.substring(0, 60) + '..."');
-        break;
-      }
+    expect(conflictResult.found).toBe(true);
+    if (conflictResult.found && conflictResult.element) {
+      const message = await conflictResult.element.textContent() || '';
+      console.log('✅ Conflict message found: "' + message.substring(0, 60) + '..."');
     }
-
-    expect(conflictMessageFound).toBe(true);
     console.log('✅ USER NOTIFIED OF CONFLICT ← Second "END" point');
 
-    // Verify resolution options are shown
     console.log('📍 Step 10: Verifying resolution options are shown');
-    const resolutionOptions = [
-      'button:has-text("Keep My Changes")',
-      'button:has-text("Use Their Changes")',
-      'button:has-text("Merge")',
-      'button:has-text("Review Changes")',
-      'button:has-text("Retry")',
-      'button:has-text("Reload")'
-    ];
-
     let optionsFound = 0;
-    const availableOptions: string[] = [];
-    
-    for (const selector of resolutionOptions) {
-      const option = page.locator(selector).first();
-      const isVisible = await option.isVisible({ timeout: 2000 }).catch(() => false);
-      
-      if (isVisible) {
-        optionsFound++;
-        const text = await option.textContent();
-        availableOptions.push(text || selector);
-        console.log('✅ Resolution option found: ' + (text || selector));
-      }
+    for (const selector of RESOLUTION_OPTION_SELECTORS) {
+      const isVisible = await page.locator(selector).first().isVisible({ timeout: 2000 }).catch(() => false);
+      if (isVisible) optionsFound++;
     }
-
     if (optionsFound > 0) {
       console.log('✅ ' + optionsFound + ' resolution option(s) available');
-    } else {
-      console.log('⏭️  No explicit resolution buttons - user can re-edit');
     }
 
-    // Show current vs. incoming changes
     console.log('📍 Step 11: Verifying change comparison is shown');
-    const comparisonSelectors = [
-      '.conflict-comparison',
-      '.changes-diff',
-      'text=/your changes/i',
-      'text=/their changes/i',
-      'text=/current.*version/i'
-    ];
-
-    let comparisonShown = false;
-    for (const selector of comparisonSelectors) {
-      const compElement = page.locator(selector).first();
-      const isVisible = await compElement.isVisible({ timeout: 2000 }).catch(() => false);
-      
-      if (isVisible) {
-        comparisonShown = true;
-        console.log('✅ Change comparison visible: ' + selector);
-        break;
-      }
-    }
-
-    if (comparisonShown) {
+    const comparisonResult = await isAnyVisible(page, COMPARISON_SELECTORS, 2000);
+    if (comparisonResult.found) {
       console.log('✅ User can see conflicting changes');
-    } else {
-      console.log('⏭️  Change comparison not explicitly shown');
     }
 
     // Resolve conflict by merging/accepting changes
@@ -317,43 +178,19 @@ test.describe('Error Scenario: Database Conflict Resolution', () => {
 
     await page.waitForTimeout(2000);
 
-    // Verify resolution was successful
     console.log('📍 Step 13: Verifying successful resolution');
-    expect(resolutionSuccessful).toBe(true);
+    expect(mockState.resolutionSuccessful).toBe(true);
     console.log('✅ RESOLUTION SAVED SUCCESSFULLY ← Final "END" point');
 
-    // Verify success message
     console.log('📍 Step 14: Verifying success message');
-    const successSelectors = [
-      'text=/updated successfully/i',
-      'text=/saved successfully/i',
-      'text=/changes saved/i',
-      '.success-message',
-      '[role="alert"]:has-text("success")'
-    ];
-
-    let successFound = false;
-    for (const selector of successSelectors) {
-      const successElement = page.locator(selector).first();
-      const isVisible = await successElement.isVisible({ timeout: 3000 }).catch(() => false);
-      
-      if (isVisible) {
-        successFound = true;
-        console.log('✅ Success message found: ' + selector);
-        break;
-      }
-    }
-
-    if (successFound) {
+    const successResult = await isAnyVisible(page, SUCCESS_MESSAGE_SELECTORS, 3000);
+    if (successResult.found) {
       console.log('✅ User sees confirmation of successful save');
-    } else {
-      console.log('⏭️  Success message not explicitly shown');
     }
 
-    // Verify final state is correct
     console.log('📍 Step 15: Verifying final state');
-    expect(editAttempts).toBe(2);
-    expect(currentVersion).toBe(3);
+    expect(mockState.editAttempts).toBe(2);
+    expect(mockState.currentVersion).toBe(3);
     console.log('✅ Version incremented correctly: v1 → v2 (conflict) → v3 (resolved)');
 
     console.log('🎉 COMPLETE DATABASE CONFLICT RESOLUTION TEST PASSED');

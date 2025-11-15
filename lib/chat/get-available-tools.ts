@@ -81,18 +81,18 @@ export async function getAvailableTools(domain: string): Promise<any[]> {
     {
       type: "function" as const,
       function: {
-        name: "search_products",
-        description: "Search for products or items with a general query. Use this for broad searches, brand names, or when the user asks about specific items.",
+        name: "search_website_content",
+        description: "Search scraped website content including FAQs, policies, documentation, and general information. Use this for questions about company policies, help articles, guides, and non-product information. DO NOT use this for live product catalog searches when WooCommerce or Shopify is available - use their respective tools instead.",
         parameters: {
           type: "object",
           properties: {
             query: {
               type: "string",
-              description: "The search query for products. Should match what the user is looking for."
+              description: "The search query for website content. Should match the information the user is seeking."
             },
             limit: {
               type: "number",
-              description: "Maximum number of products to return (default: 100, max: 1000)",
+              description: "Maximum number of results to return (default: 100, max: 1000)",
               default: 100,
               minimum: 1,
               maximum: 1000
