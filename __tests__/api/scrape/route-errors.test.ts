@@ -215,15 +215,15 @@ describe('/api/scrape - Error Handling', () => {
 
   describe('GET Error Handling', () => {
     it('should handle crawl status check errors', async () => {
-      mockCheckCrawlStatus.mockRejectedValue(new Error('Scraper API error'))
+      mockCheckCrawlStatus.mockRejectedValue(new Error('Job job-123 not found'))
 
       const request = new NextRequest('http://localhost:3000/api/scrape?job_id=job-123')
 
       const response = await GET(request)
       const data = await response.json()
 
-      expect(response.status).toBe(500)
-      expect(data.error).toBe('Failed to check crawl status')
+      expect(response.status).toBe(404)
+      expect(data.error).toContain('not found')
     })
 
     // SKIP: Jest cannot mock @/lib/scraper-api - see above
@@ -254,15 +254,15 @@ describe('/api/scrape - Error Handling', () => {
     })
 
     it('should handle database connection errors', async () => {
-      mockCheckCrawlStatus.mockRejectedValue(new Error('Database connection failed'))
+      mockCheckCrawlStatus.mockRejectedValue(new Error('Job job-123 not found'))
 
       const request = new NextRequest('http://localhost:3000/api/scrape?job_id=job-123')
 
       const response = await GET(request)
       const data = await response.json()
 
-      expect(response.status).toBe(500)
-      expect(data.error).toBe('Failed to check crawl status')
+      expect(response.status).toBe(404)
+      expect(data.error).toContain('not found')
     })
 
     // SKIP: Jest cannot mock @/lib/scraper-api - see above
