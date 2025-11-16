@@ -216,6 +216,9 @@ export default function ChatWidget({
         fontSize={fontSize}
         messagesContainerRef={messagesContainerRef}
         appearance={demoConfig?.appearance}
+        sessionId={sessionId}
+        conversationId={conversationId}
+        storeDomain={storeDomain}
       />
 
       <InputArea

@@ -11,6 +11,7 @@ import { ConversationMetadataManager } from './conversation-metadata';
 import { saveAssistantMessage } from './conversation-manager';
 import { parseAndTrackEntities } from './response-parser';
 import { emitMessageEvent } from '@/lib/analytics/supabase-events';
+import type { ShoppingProduct } from '@/types/shopping';
 
 export async function saveFinalResponse(
   conversationId: string,
@@ -20,10 +21,26 @@ export async function saveFinalResponse(
   supabase: SupabaseClient,
   domainId: string | null,
   perfStart: number,
-  telemetry: ChatTelemetry | null
+  telemetry: ChatTelemetry | null,
+  shoppingProducts?: ShoppingProduct[],
+  shoppingContext?: string
 ): Promise<string | null> {
-  // Save assistant response
-  const assistantMessageId = await saveAssistantMessage(conversationId, finalResponse, supabase);
+  // Build message metadata with shopping data if available
+  const messageMetadata: any = {};
+  if (shoppingProducts && shoppingProducts.length > 0) {
+    messageMetadata.shoppingProducts = shoppingProducts;
+    if (shoppingContext) {
+      messageMetadata.shoppingContext = shoppingContext;
+    }
+  }
+
+  // Save assistant response with metadata
+  const assistantMessageId = await saveAssistantMessage(
+    conversationId,
+    finalResponse,
+    supabase,
+    Object.keys(messageMetadata).length > 0 ? messageMetadata : undefined
+  );
 
   // Emit real-time analytics events
   if (domainId) {
@@ -62,9 +79,11 @@ export function buildChatResponse(
   searchLog: any[],
   iteration: number,
   mcpExecutionMetadata: { executionTime?: number; tokensSaved?: number } | undefined,
-  corsHeaders: Record<string, string>
-): NextResponse<ChatResponse & { searchMetadata?: any; mcpMetadata?: any }> {
-  return NextResponse.json<ChatResponse & { searchMetadata?: any; mcpMetadata?: any }>({
+  corsHeaders: Record<string, string>,
+  shoppingProducts?: ShoppingProduct[],
+  shoppingContext?: string
+): NextResponse<ChatResponse & { searchMetadata?: any; mcpMetadata?: any; shoppingMetadata?: any }> {
+  const response: ChatResponse & { searchMetadata?: any; mcpMetadata?: any; shoppingMetadata?: any } = {
     message: finalResponse,
     conversation_id: conversationId,
     sources: (allSearchResults || []).slice(0, 10).map(r => ({
@@ -76,13 +95,26 @@ export function buildChatResponse(
       iterations: iteration,
       totalSearches: (searchLog || []).length,
       searchLog: searchLog || []
-    },
-    ...(mcpExecutionMetadata && {
-      mcpMetadata: {
-        executed: true,
-        executionTime: mcpExecutionMetadata.executionTime,
-        tokensSaved: mcpExecutionMetadata.tokensSaved
-      }
-    })
-  }, { headers: corsHeaders });
+    }
+  };
+
+  // Add MCP metadata if available
+  if (mcpExecutionMetadata) {
+    response.mcpMetadata = {
+      executed: true,
+      executionTime: mcpExecutionMetadata.executionTime,
+      tokensSaved: mcpExecutionMetadata.tokensSaved
+    };
+  }
+
+  // Add shopping metadata if available
+  if (shoppingProducts && shoppingProducts.length > 0) {
+    response.shoppingMetadata = {
+      products: shoppingProducts,
+      context: shoppingContext,
+      productCount: shoppingProducts.length
+    };
+  }
+
+  return NextResponse.json(response, { headers: corsHeaders });
 }

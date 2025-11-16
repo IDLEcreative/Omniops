@@ -185,7 +185,7 @@ export async function POST(
     }
 
     // Process AI conversation with ReAct loop and tool execution
-    const { finalResponse: aiResponse, allSearchResults, searchLog, iteration } = await processAIConversation({
+    const { finalResponse: aiResponse, allSearchResults, searchLog, iteration, shoppingProducts, shoppingContext } = await processAIConversation({
       conversationMessages,
       domain,
       config,
@@ -219,7 +219,9 @@ export async function POST(
       adminSupabase!,
       domainId ?? null,
       perfStart,
-      telemetry
+      telemetry,
+      shoppingProducts,
+      shoppingContext
     );
 
     // Complete telemetry with success
@@ -233,7 +235,9 @@ export async function POST(
       searchLog,
       iteration,
       mcpExecutionMetadata,
-      corsHeaders
+      corsHeaders,
+      shoppingProducts,
+      shoppingContext
     );
 
   } catch (error) {

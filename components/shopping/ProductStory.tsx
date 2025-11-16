@@ -4,6 +4,18 @@ import { motion } from 'framer-motion';
 import { ShoppingProduct } from '@/types/shopping';
 import Image from 'next/image';
 import { useState } from 'react';
+import {
+  productCardVariants,
+  progressBarVariants,
+  textSlideUpVariants,
+  imageFadeVariants,
+  saleBadgeVariants,
+  pricePulseVariants,
+  doubleTapScaleVariants,
+  staggerContainerVariants,
+  staggerItemVariants,
+} from './transitions';
+import { hapticMedium, hapticSuccess } from '@/lib/haptics';
 
 interface ProductStoryProps {
   product: ShoppingProduct;
@@ -21,6 +33,7 @@ export function ProductStory({
   onAddToCart,
 }: ProductStoryProps) {
   const [lastTap, setLastTap] = useState(0);
+  const [animatePrice, setAnimatePrice] = useState(false);
 
   const handleTap = () => {
     const now = Date.now();
@@ -31,6 +44,7 @@ export function ProductStory({
       handleDoubleTap();
     } else {
       // Single tap - expand details
+      hapticMedium();
       onExpand();
     }
 
@@ -38,10 +52,12 @@ export function ProductStory({
   };
 
   const handleDoubleTap = () => {
-    // Haptic feedback (works on mobile)
-    if (typeof window !== 'undefined' && 'vibrate' in navigator) {
-      navigator.vibrate(50);
-    }
+    // Haptic feedback for add to cart
+    hapticSuccess();
+
+    // Trigger price pulse animation
+    setAnimatePrice(true);
+    setTimeout(() => setAnimatePrice(false), 500);
 
     onAddToCart(product.id);
   };
@@ -53,13 +69,20 @@ export function ProductStory({
   return (
     <motion.div
       className="relative h-full w-full flex-shrink-0 snap-start snap-always"
-      initial={{ opacity: 0, y: 20 }}
-      animate={{ opacity: 1, y: 0 }}
-      transition={{ duration: 0.3 }}
+      custom={index}
+      variants={productCardVariants}
+      initial="hidden"
+      animate="visible"
+      exit="exit"
       onClick={handleTap}
     >
-      {/* Hero Image */}
-      <div className="absolute inset-0">
+      {/* Hero Image with Fade */}
+      <motion.div
+        className="absolute inset-0"
+        variants={imageFadeVariants}
+        initial="hidden"
+        animate="visible"
+      >
         <Image
           src={product.image}
           alt={product.name}
@@ -71,42 +94,57 @@ export function ProductStory({
 
         {/* Gradient overlay for text readability */}
         <div className="absolute inset-0 bg-gradient-to-t from-black/70 via-black/20 to-transparent" />
-      </div>
+      </motion.div>
 
-      {/* Progress Indicators */}
-      <div className="absolute top-4 left-0 right-0 flex gap-1 px-4">
+      {/* Progress Indicators with Stagger */}
+      <motion.div
+        className="absolute top-4 left-0 right-0 flex gap-1 px-4"
+        variants={staggerContainerVariants}
+        initial="hidden"
+        animate="visible"
+      >
         {Array.from({ length: total }).map((_, i) => (
-          <div
+          <motion.div
             key={i}
             className="h-0.5 flex-1 rounded-full bg-white/30 overflow-hidden"
+            variants={staggerItemVariants}
           >
             {i === index && (
               <motion.div
                 className="h-full bg-white"
-                initial={{ width: '0%' }}
-                animate={{ width: '100%' }}
-                transition={{ duration: 3, ease: 'linear' }}
+                variants={progressBarVariants}
+                initial="empty"
+                animate="filling"
               />
             )}
             {i < index && <div className="h-full bg-white" />}
-          </div>
+          </motion.div>
         ))}
-      </div>
+      </motion.div>
 
       {/* Product Info Overlay */}
       <div className="absolute bottom-0 left-0 right-0 p-6 text-white">
         <motion.div
-          initial={{ opacity: 0, y: 20 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ delay: 0.2 }}
+          variants={textSlideUpVariants}
+          initial="hidden"
+          animate="visible"
+          custom={0.2}
         >
           {/* Product Name */}
-          <h2 className="text-2xl font-semibold mb-2 leading-tight">
+          <motion.h2
+            className="text-2xl font-semibold mb-2 leading-tight"
+            variants={textSlideUpVariants}
+            custom={0.3}
+          >
             {product.name}
-          </h2>
+          </motion.h2>
 
-          {/* Price */}
-          <div className="flex items-baseline gap-2 mb-4">
+          {/* Price with Pulse on Add to Cart */}
+          <motion.div
+            className="flex items-baseline gap-2 mb-4"
+            variants={pricePulseVariants}
+            animate={animatePrice ? 'pulse' : 'normal'}
+          >
             <span className="text-3xl font-bold">
               ${displayPrice?.toFixed(2)}
             </span>
@@ -115,7 +153,7 @@ export function ProductStory({
                 ${product.price.toFixed(2)}
               </span>
             )}
-          </div>
+          </motion.div>
 
           {/* Stock Status */}
           {isOutOfStock && (
@@ -131,11 +169,16 @@ export function ProductStory({
         </motion.div>
       </div>
 
-      {/* Sale Badge */}
+      {/* Sale Badge with Bounce */}
       {isOnSale && (
-        <div className="absolute top-16 right-4 px-3 py-1 bg-red-500 rounded-full text-white text-sm font-semibold">
+        <motion.div
+          className="absolute top-16 right-4 px-3 py-1 bg-red-500 rounded-full text-white text-sm font-semibold shadow-lg"
+          variants={saleBadgeVariants}
+          initial="hidden"
+          animate="visible"
+        >
           Sale
-        </div>
+        </motion.div>
       )}
     </motion.div>
   );

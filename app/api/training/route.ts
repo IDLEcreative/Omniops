@@ -25,61 +25,146 @@ export async function GET(request: NextRequest) {
     const limit = parseInt(searchParams.get('limit') || '20');
     const offset = (page - 1) * limit;
 
+    // Get authenticated user
+    const userSupabase = await createClient();
+    if (!userSupabase) {
+      return NextResponse.json(
+        { error: 'Authentication unavailable' },
+        { status: 503 }
+      );
+    }
+
+    const { data: { user } } = await userSupabase.auth.getUser();
+    if (!user) {
+      return NextResponse.json(
+        { error: 'Unauthorized' },
+        { status: 401 }
+      );
+    }
+
     const adminSupabase = await createServiceRoleClient();
     if (!adminSupabase) {
       return NextResponse.json(
-        { 
+        {
           error: 'Database connection failed',
           message: 'Unable to connect to the database. Please try again later.'
         },
         { status: 503 }
       );
     }
-    
-    // Get total count for pagination from scraped_pages
-    const { count } = await adminSupabase
-      .from('scraped_pages')
-      .select('*', { count: 'exact', head: true });
-    
-    // Fetch paginated scraped pages data
-    const { data: scrapedData, error } = await adminSupabase
-      .from('scraped_pages')
-      .select('id, url, title, created_at, metadata')
-      .order('created_at', { ascending: false })
-      .range(offset, offset + limit - 1);
 
-    if (error) {
-      logger.error('GET /api/training DB query failed', error, {
-        page,
-        limit,
-        offset,
-      });
+    // Fetch from BOTH tables to get complete training data for this user
+
+    // 1. Get training_data entries (text, qa, custom) for this user
+    console.log('[DEBUG GET /api/training] User ID:', user.id);
+    const { data: trainingDataEntries, error: trainingError } = await adminSupabase
+      .from('training_data')
+      .select('id, type, content, status, created_at, metadata')
+      .eq('user_id', user.id)
+      .order('created_at', { ascending: false });
+
+    console.log('[DEBUG GET /api/training] Training data count:', trainingDataEntries?.length ?? 0);
+    console.log('[DEBUG GET /api/training] Training data error:', trainingError);
+
+    if (trainingError) {
+      logger.error('GET /api/training training_data query failed', trainingError);
       return NextResponse.json(
-        { error: 'Failed to fetch training data from DB' },
+        { error: 'Failed to fetch training data' },
         { status: 500 }
       );
     }
 
-    // Transform data for frontend - adapting scraped_pages to training data format
-    const items = scrapedData?.map(item => ({
+    // 2. Get scraped_pages entries (URLs) linked via domains -> organizations -> organization_members
+    let scrapedData: any[] = [];
+
+    try {
+      // Get user's organization(s)
+      const { data: userOrgs, error: orgError } = await adminSupabase
+        .from('organization_members')
+        .select('organization_id')
+        .eq('user_id', user.id);
+
+      console.log('[DEBUG GET /api/training] User orgs count:', userOrgs?.length ?? 0);
+
+      if (!orgError && userOrgs && userOrgs.length > 0) {
+        const orgIds = userOrgs.map(org => org.organization_id);
+
+        // Get domains for user's organizations
+        const { data: orgDomains, error: domainsError } = await adminSupabase
+          .from('domains')
+          .select('id')
+          .in('organization_id', orgIds);
+
+        console.log('[DEBUG GET /api/training] Org domains count:', orgDomains?.length ?? 0);
+
+        if (!domainsError && orgDomains && orgDomains.length > 0) {
+          const domainIds = orgDomains.map(d => d.id);
+
+          // Get scraped pages for those domains
+          const { data: scrapedPages, error: scrapedError } = await adminSupabase
+            .from('scraped_pages')
+            .select('id, url, title, created_at, metadata, domain_id')
+            .in('domain_id', domainIds)
+            .order('created_at', { ascending: false });
+
+          if (!scrapedError && scrapedPages) {
+            scrapedData = scrapedPages;
+          }
+        }
+      }
+    } catch (error) {
+      logger.error('GET /api/training scraped_pages query failed', error);
+      // Continue with empty scrapedData - don't fail the entire request
+    }
+
+    console.log('[DEBUG GET /api/training] Scraped data count:', scrapedData?.length ?? 0);
+
+    // 3. Transform and combine both data sources
+    const trainingItems = trainingDataEntries?.map(item => ({
       id: item.id,
-      type: 'url',
+      type: item.type as 'text' | 'qa' | 'url' | 'file',
+      content: item.content,
+      status: item.status as 'pending' | 'processing' | 'completed' | 'error',
+      createdAt: item.created_at,
+      metadata: item.metadata,
+    })) || [];
+
+    const scrapedItems = scrapedData?.map(item => ({
+      id: item.id,
+      type: 'url' as const,
       content: item.title || item.url,
-      status: 'completed',
+      status: 'completed' as const,
       createdAt: item.created_at,
       metadata: {
-        ...item.metadata,
+        ...(item.metadata || {}),
         url: item.url,
-        title: item.title
+        title: item.title,
+        source: 'scraped_pages',
+        domain_id: item.domain_id
       },
     })) || [];
 
-    const response = NextResponse.json({ 
-      items,
-      total: count || 0,
+    // 4. Combine and sort by created_at (newest first)
+    const allItems = [...trainingItems, ...scrapedItems]
+      .sort((a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime());
+
+    console.log('[DEBUG GET /api/training] Training items count:', trainingItems.length);
+    console.log('[DEBUG GET /api/training] Scraped items count:', scrapedItems.length);
+    console.log('[DEBUG GET /api/training] Combined count:', allItems.length);
+
+    // 5. Apply pagination to combined results
+    const paginatedItems = allItems.slice(offset, offset + limit);
+    const totalCount = allItems.length;
+
+    console.log('[DEBUG GET /api/training] Paginated count:', paginatedItems.length);
+    console.log('[DEBUG GET /api/training] Total count:', totalCount);
+
+    const response = NextResponse.json({
+      items: paginatedItems,
+      total: totalCount,
       page,
       limit,
-      hasMore: (count || 0) > offset + limit
+      hasMore: totalCount > offset + limit
     });
     
     // Add cache headers for better performance

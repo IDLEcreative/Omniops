@@ -26,6 +26,19 @@ export interface Message {
     sources?: string[];
     products?: number[];
     orders?: number[];
+    // Shopping integration - structured product data for mobile feed
+    shoppingProducts?: Array<{
+      id: string;
+      name: string;
+      price: number;
+      salePrice?: number;
+      image: string;
+      images?: string[];
+      permalink: string;
+      stockStatus?: 'instock' | 'outofstock' | 'onbackorder';
+      shortDescription?: string;
+    }>;
+    shoppingContext?: string; // e.g., "Search results for 'winter jackets'"
   };
   created_at: string;
 }

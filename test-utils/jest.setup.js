@@ -8,6 +8,24 @@ import { server } from '../__tests__/mocks/server'
 // Set test environment
 process.env.NODE_ENV = 'test'
 
+// Mock window.matchMedia for component tests (required for shopping components)
+// Only mock if window exists (jsdom environment, not Node environment)
+if (typeof window !== 'undefined') {
+  Object.defineProperty(window, 'matchMedia', {
+    writable: true,
+    value: jest.fn().mockImplementation((query) => ({
+      matches: false,
+      media: query,
+      onchange: null,
+      addListener: jest.fn(),
+      removeListener: jest.fn(),
+      addEventListener: jest.fn(),
+      removeEventListener: jest.fn(),
+      dispatchEvent: jest.fn(),
+    })),
+  });
+}
+
 // Mock environment variables (skip for E2E tests that need real connections)
 // E2E tests set E2E_TEST=true to bypass mocking
 if (!process.env.E2E_TEST) {

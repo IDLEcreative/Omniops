@@ -143,15 +143,23 @@ export async function saveUserMessage(
 export async function saveAssistantMessage(
   conversationId: string,
   response: string,
-  supabase: any
+  supabase: any,
+  metadata?: any
 ): Promise<string | null> {
+  const insertData: any = {
+    conversation_id: conversationId,
+    role: 'assistant',
+    content: response,
+  };
+
+  // Add metadata if provided
+  if (metadata) {
+    insertData.metadata = metadata;
+  }
+
   const { data, error } = await supabase
     .from('messages')
-    .insert({
-      conversation_id: conversationId,
-      role: 'assistant',
-      content: response,
-    })
+    .insert(insertData)
     .select('id')
     .single();
 

@@ -1,6 +1,7 @@
-import { RefObject } from 'react';
+import { RefObject, useState } from 'react';
 import { Message } from '@/types';
 import { MessageContent } from '@/components/chat/MessageContent';
+import { ShoppingFeed } from '@/components/shopping/ShoppingFeed';
 
 export interface MessageListProps {
   messages: Message[];
@@ -15,6 +16,10 @@ export interface MessageListProps {
     userMessageTextColor?: string;
     botMessageTextColor?: string;
   };
+  // Context for recommendations
+  sessionId?: string;
+  conversationId?: string;
+  storeDomain?: string | null;
 }
 
 export function MessageList({
@@ -24,24 +29,65 @@ export function MessageList({
   fontSize,
   messagesContainerRef,
   appearance,
+  sessionId,
+  conversationId,
+  storeDomain,
 }: MessageListProps) {
+  // Shopping mode state
+  const [shoppingMode, setShoppingMode] = useState(false);
+  const [shoppingData, setShoppingData] = useState<{
+    products: any[];
+    context?: string;
+  } | null>(null);
+
   // Use config-driven colors with fallbacks to current hardcoded values
   const messageAreaBgColor = appearance?.messageAreaBackgroundColor || '#111111';
   const userMessageBgColor = appearance?.userMessageBackgroundColor || '#3f3f46';
   const userMessageTextColor = appearance?.userMessageTextColor || '#ffffff';
   const botMessageTextColor = appearance?.botMessageTextColor || '#ffffff';
 
+  // Handler to open shopping mode from message
+  const handleOpenShopping = (products: any[], context?: string) => {
+    setShoppingData({ products, context });
+    setShoppingMode(true);
+  };
+
+  // Handler to close shopping mode
+  const handleCloseShopping = () => {
+    setShoppingMode(false);
+    setShoppingData(null);
+  };
+
   return (
-    <div
-      ref={messagesContainerRef}
-      style={{
-        backgroundColor: highContrast ? undefined : messageAreaBgColor,
-      }}
-      className={`flex-1 min-h-0 px-2 sm:px-3 py-3 overflow-y-auto overflow-x-hidden overscroll-contain ${highContrast ? 'bg-black' : ''}`}
-      role="log"
-      aria-live="polite"
-      aria-label="Chat messages"
-    >
+    <>
+      {/* Shopping Mode Overlay */}
+      {shoppingMode && shoppingData && (
+        <ShoppingFeed
+          products={shoppingData.products}
+          onExit={handleCloseShopping}
+          onProductView={(productId) => {
+            console.log('[Shopping] Product viewed:', productId);
+          }}
+          onAddToCart={(productId) => {
+            console.log('[Shopping] Product added to cart:', productId);
+          }}
+          sessionId={sessionId}
+          conversationId={conversationId}
+          storeDomain={storeDomain}
+        />
+      )}
+
+      {/* Main Chat Messages */}
+      <div
+        ref={messagesContainerRef}
+        style={{
+          backgroundColor: highContrast ? undefined : messageAreaBgColor,
+        }}
+        className={`flex-1 min-h-0 px-2 sm:px-3 py-3 overflow-y-auto overflow-x-hidden overscroll-contain ${highContrast ? 'bg-black' : ''}`}
+        role="log"
+        aria-live="polite"
+        aria-label="Chat messages"
+      >
       {messages.length === 0 && (
         <div className="flex items-center justify-center min-h-[100px]">
           <p className={`${highContrast ? 'text-white' : 'text-gray-400'} ${
@@ -81,6 +127,22 @@ export function MessageList({
               } ${highContrast ? 'text-white' : ''}`}
             >
               <MessageContent content={message.content} className="leading-relaxed break-words" />
+
+              {/* Shopping Button - Show if message has shopping products */}
+              {message.metadata?.shoppingProducts && message.metadata.shoppingProducts.length > 0 && (
+                <button
+                  onClick={() => handleOpenShopping(
+                    message.metadata!.shoppingProducts!,
+                    message.metadata?.shoppingContext
+                  )}
+                  className="mt-3 inline-flex items-center gap-2 px-4 py-2 bg-white text-black rounded-full font-medium text-sm hover:bg-gray-100 transition-colors"
+                >
+                  <span>Browse {message.metadata.shoppingProducts.length} Products</span>
+                  <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
+                  </svg>
+                </button>
+              )}
             </div>
             {/* Chat bubble tail - only for user messages */}
             {message.role === 'user' && (
@@ -113,5 +175,6 @@ export function MessageList({
         </div>
       )}
     </div>
+    </>
   );
 }

@@ -61,23 +61,19 @@ describe('POST /api/gdpr/delete', () => {
     const mockSupabase = {
       from: jest.fn((table: string) => {
         if (table === 'conversations') {
-          const selectMock = {
-            select: jest.fn(function (this: any) {
-              return {
-                eq: jest.fn(() => ({
-                  then: () => Promise.resolve({ data: mockConversations, error: null }),
-                })),
-              };
-            }),
-            delete: jest.fn(function (this: any) {
-              return {
-                in: jest.fn(() => ({
-                  then: () => Promise.resolve({ data: null, error: null }),
-                })),
-              };
-            }),
+          return {
+            select: jest.fn(() => ({
+              eq: jest.fn(() => Promise.resolve({ data: mockConversations, error: null })),
+            })),
+            delete: jest.fn(() => ({
+              in: jest.fn(() => Promise.resolve({ data: null, error: null })),
+            })),
           };
-          return selectMock;
+        }
+        if (table === 'gdpr_audit_log') {
+          return {
+            insert: jest.fn(() => Promise.resolve({ data: null, error: null })),
+          };
         }
         return {};
       }),
@@ -105,23 +101,19 @@ describe('POST /api/gdpr/delete', () => {
     const mockSupabase = {
       from: jest.fn((table: string) => {
         if (table === 'conversations') {
-          const selectMock = {
-            select: jest.fn(function (this: any) {
-              return {
-                eq: jest.fn(() => ({
-                  then: () => Promise.resolve({ data: mockConversations, error: null }),
-                })),
-              };
-            }),
-            delete: jest.fn(function (this: any) {
-              return {
-                in: jest.fn(() => ({
-                  then: () => Promise.resolve({ data: null, error: null }),
-                })),
-              };
-            }),
+          return {
+            select: jest.fn(() => ({
+              eq: jest.fn(() => Promise.resolve({ data: mockConversations, error: null })),
+            })),
+            delete: jest.fn(() => ({
+              in: jest.fn(() => Promise.resolve({ data: null, error: null })),
+            })),
           };
-          return selectMock;
+        }
+        if (table === 'gdpr_audit_log') {
+          return {
+            insert: jest.fn(() => Promise.resolve({ data: null, error: null })),
+          };
         }
         return {};
       }),
@@ -158,16 +150,16 @@ describe('POST /api/gdpr/delete', () => {
     const mockSupabase = {
       from: jest.fn((table: string) => {
         if (table === 'conversations') {
-          const selectMock = {
-            select: jest.fn(function (this: any) {
-              return {
-                eq: jest.fn(() => ({
-                  then: () => Promise.resolve({ data: [], error: null }),
-                })),
-              };
-            }),
+          return {
+            select: jest.fn(() => ({
+              eq: jest.fn(() => Promise.resolve({ data: [], error: null })),
+            })),
           };
-          return selectMock;
+        }
+        if (table === 'gdpr_audit_log') {
+          return {
+            insert: jest.fn(() => Promise.resolve({ data: null, error: null })),
+          };
         }
         return {};
       }),
@@ -191,16 +183,11 @@ describe('POST /api/gdpr/delete', () => {
     const mockSupabase = {
       from: jest.fn((table: string) => {
         if (table === 'conversations') {
-          const selectMock = {
-            select: jest.fn(function (this: any) {
-              return {
-                eq: jest.fn(() => ({
-                  then: () => Promise.resolve({ data: null, error: new Error('Fetch failed') }),
-                })),
-              };
-            }),
+          return {
+            select: jest.fn(() => ({
+              eq: jest.fn(() => Promise.resolve({ data: null, error: new Error('Fetch failed') })),
+            })),
           };
-          return selectMock;
         }
         return {};
       }),
@@ -225,23 +212,14 @@ describe('POST /api/gdpr/delete', () => {
     const mockSupabase = {
       from: jest.fn((table: string) => {
         if (table === 'conversations') {
-          const selectMock = {
-            select: jest.fn(function (this: any) {
-              return {
-                eq: jest.fn(() => ({
-                  then: () => Promise.resolve({ data: mockConversations, error: null }),
-                })),
-              };
-            }),
-            delete: jest.fn(function (this: any) {
-              return {
-                in: jest.fn(() => ({
-                  then: () => Promise.resolve({ data: null, error: new Error('Delete failed') }),
-                })),
-              };
-            }),
+          return {
+            select: jest.fn(() => ({
+              eq: jest.fn(() => Promise.resolve({ data: mockConversations, error: null })),
+            })),
+            delete: jest.fn(() => ({
+              in: jest.fn(() => Promise.resolve({ data: null, error: new Error('Delete failed') })),
+            })),
           };
-          return selectMock;
         }
         return {};
       }),

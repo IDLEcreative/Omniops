@@ -15,6 +15,14 @@ import { getAvailableTools, checkToolAvailability, getToolInstructions } from '.
 import type { AIProcessorDependencies, AIProcessorResult, AIProcessorParams } from './ai-processor-types';
 import { executeToolCallsParallel, formatToolResultsForAI } from './ai-processor-tool-executor';
 import { formatResponse, getModelConfig } from './ai-processor-formatter';
+import {
+  transformWooCommerceProducts,
+  transformShopifyProducts,
+  shouldTriggerShoppingMode,
+  createShoppingMetadata,
+  extractShoppingContext
+} from './shopping-message-transformer';
+import { ShoppingProduct } from '@/types/shopping';
 
 /**
  * Process AI conversation with ReAct loop and tool execution
@@ -68,6 +76,11 @@ export async function processAIConversation(params: AIProcessorParams): Promise<
   let iteration = 0;
   const allSearchResults: SearchResult[] = [];
   const searchLog: Array<{ tool: string; query: string; resultCount: number; source: string }> = [];
+  const allProducts: any[] = []; // Collect products from all tool calls
+
+  // Extract last user query for shopping context
+  const lastUserMessage = conversationMessages.slice().reverse().find(m => m.role === 'user');
+  const lastUserQuery = lastUserMessage?.content || '';
 
   // Initial AI call with tools
   const modelConfig = getModelConfig(useGPT5Mini, false, widgetConfig);
@@ -148,6 +161,16 @@ export async function processAIConversation(params: AIProcessorParams): Promise<
       });
 
       allSearchResults.push(...result.results);
+
+      // Collect products from WooCommerce/Shopify tool results
+      // Products are in result.results[].metadata for product-related tools
+      if (result.source === 'woocommerce-api' || result.source === 'woocommerce' || result.source === 'shopify') {
+        for (const searchResult of result.results) {
+          if (searchResult.metadata && searchResult.metadata.id) {
+            allProducts.push(searchResult.metadata);
+          }
+        }
+      }
     }
 
     // Format results for AI
@@ -253,6 +276,37 @@ export async function processAIConversation(params: AIProcessorParams): Promise<
   // Format and sanitize response
   finalResponse = formatResponse(finalResponse, domain, sanitizeFn);
 
+  // Transform products for shopping feed if available
+  let shoppingProducts: ShoppingProduct[] | undefined;
+  let shoppingContext: string | undefined;
+
+  if (allProducts.length > 0) {
+    console.log(`[Shopping Integration] Found ${allProducts.length} products from commerce providers`);
+
+    // Determine platform from search log
+    const hasWooCommerce = searchLog.some(log => log.source.includes('woocommerce'));
+    const hasShopify = searchLog.some(log => log.source.includes('shopify'));
+
+    // Transform products based on platform
+    if (hasWooCommerce) {
+      shoppingProducts = transformWooCommerceProducts(allProducts);
+    } else if (hasShopify) {
+      shoppingProducts = transformShopifyProducts(allProducts);
+    }
+
+    // Check if shopping mode should be triggered
+    if (shoppingProducts && shouldTriggerShoppingMode(finalResponse, shoppingProducts)) {
+      shoppingContext = extractShoppingContext(finalResponse, lastUserQuery);
+      console.log(`[Shopping Integration] Shopping mode triggered with ${shoppingProducts.length} products`);
+      if (shoppingContext) {
+        console.log(`[Shopping Integration] Context: ${shoppingContext}`);
+      }
+    } else {
+      // Don't include shopping products if mode shouldn't be triggered
+      shoppingProducts = undefined;
+    }
+  }
+
   // Log search activity
   console.log('[Intelligent Chat] Search Summary:', {
     totalIterations: iteration,
@@ -261,7 +315,9 @@ export async function processAIConversation(params: AIProcessorParams): Promise<
     totalSearches: searchLog.length,
     totalResults: allSearchResults.length,
     searchBreakdown: searchLog,
-    uniqueUrlsFound: Array.from(new Set(allSearchResults.map(r => r.url))).length
+    uniqueUrlsFound: Array.from(new Set(allSearchResults.map(r => r.url))).length,
+    productsFound: allProducts.length,
+    shoppingModeTriggered: !!shoppingProducts
   });
 
   // Add warning if close to limit
@@ -273,6 +329,8 @@ export async function processAIConversation(params: AIProcessorParams): Promise<
     finalResponse,
     allSearchResults,
     searchLog,
-    iteration
+    iteration,
+    shoppingProducts,
+    shoppingContext
   };
 }

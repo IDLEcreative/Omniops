@@ -73,6 +73,7 @@ export interface TransformedBranding {
 }
 
 export interface TransformedConfig {
+  id: string; // Customer config ID (UUID) - needed for recommendations
   app_id: string | null;
   domain: string;
   woocommerce_enabled: boolean;
@@ -213,6 +214,7 @@ export function transformConfig(
   const branding = transformBranding(customerConfig, widgetConfig, appearance.primaryColor);
 
   return {
+    id: customerConfig.id, // Include customer config ID for recommendations
     app_id: customerConfig.app_id,
     domain: customerConfig.domain,
     woocommerce_enabled: !!customerConfig.woocommerce_url,

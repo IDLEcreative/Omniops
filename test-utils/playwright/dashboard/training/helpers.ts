@@ -35,16 +35,24 @@ export async function uploadUrl(page: Page, url: string) {
   console.log('✅ Clicked Scrape button');
 
   // Wait for API response (network request to complete)
-  // The optimistic UI may not be working, so wait for actual API response
-  await page.waitForResponse(
-    response => response.url().includes('/api/training') && response.status() === 200,
+  // URL submission uses /api/scrape endpoint
+  const apiResponseReceived = await page.waitForResponse(
+    response => response.url().includes('/api/scrape') && response.status() === 200,
     { timeout: 10000 }
-  ).catch(() => {
-    console.log('⚠️ No API response detected, continuing anyway');
+  ).then(() => true).catch(() => {
+    console.log('⚠️ No /api/scrape response detected');
+    return false;
   });
 
-  // Wait additional time for React state update
-  await page.waitForTimeout(2000);
+  if (apiResponseReceived) {
+    console.log('✅ API response received, waiting for UI update');
+    await page.waitForTimeout(2000);
+  } else {
+    // If optimistic UI is not working, reload page to fetch fresh data
+    console.log('🔄 Reloading page to fetch fresh data');
+    await page.reload({ waitUntil: 'networkidle' });
+    await page.waitForTimeout(2000);
+  }
 
   // Scroll list to top to see new item (virtual scrolling)
   const listContainer = page.locator('[data-testid="training-list"], .overflow-auto').first();
@@ -65,23 +73,38 @@ export async function uploadText(page: Page, text: string) {
   const textInput = page.locator('textarea#text').first();
   await expect(textInput).toBeVisible();
 
-  // Clear and fill text
+  // CRITICAL: React controlled components require special handling
+  // Use click + type instead of fill to properly trigger onChange events
+  await textInput.click();
   await textInput.clear();
-  await textInput.fill(text);
+  await textInput.pressSequentially(text, { delay: 10 }); // Type character by character
   console.log(`✅ Entered text (${text.length} chars)`);
+
+  // Wait for React state to update
+  await page.waitForTimeout(500);
 
   // Click submit button (Save Content button)
   const submitButton = page.locator('button:has-text("Save Content")').first();
   await submitButton.click();
   console.log('✅ Clicked Save Content button');
 
-  // Wait for API response
-  await page.waitForResponse(
-    response => response.url().includes('/api/training') && response.status() === 200,
+  // Wait for API response (any status)
+  const apiResponse = await page.waitForResponse(
+    response => response.url().includes('/api/training'),
     { timeout: 10000 }
   ).catch(() => {
     console.log('⚠️ No API response detected, continuing anyway');
+    return null;
   });
+
+  if (apiResponse) {
+    const status = apiResponse.status();
+    console.log(`✅ API response received: ${status}`);
+    if (status !== 200) {
+      const body = await apiResponse.text().catch(() => '');
+      console.log(`⚠️ API error (${status}): ${body.substring(0, 200)}`);
+    }
+  }
 
   // Wait additional time for React state update
   await page.waitForTimeout(2000);
@@ -104,16 +127,21 @@ export async function uploadQA(page: Page, question: string, answer: string) {
   // Find question input
   const questionInput = page.locator('input#question').first();
   await expect(questionInput).toBeVisible();
+  await questionInput.click();
   await questionInput.clear();
-  await questionInput.fill(question);
+  await questionInput.pressSequentially(question, { delay: 10 }); // Trigger React onChange
   console.log(`✅ Entered question: ${question}`);
 
   // Find answer input
   const answerInput = page.locator('textarea#answer').first();
   await expect(answerInput).toBeVisible();
+  await answerInput.click();
   await answerInput.clear();
-  await answerInput.fill(answer);
+  await answerInput.pressSequentially(answer, { delay: 10 }); // Trigger React onChange
   console.log(`✅ Entered answer (${answer.length} chars)`);
+
+  // Wait for React state to update
+  await page.waitForTimeout(500);
 
   // Click submit button (Add Q&A Pair button)
   const submitButton = page.locator('button:has-text("Add Q&A Pair")').first();

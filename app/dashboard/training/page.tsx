@@ -20,6 +20,7 @@ import {
   submitQA,
   deleteTrainingData
 } from '@/lib/dashboard/training-utils';
+import { useCSRFToken } from '@/hooks/use-csrf-token';
 
 // eslint-disable-next-line no-restricted-syntax -- React component path, not product reference
 const ChatWidget = dynamic(() => import('@/components/ChatWidget'), {
@@ -39,6 +40,9 @@ export default function TrainingPage() {
   const [showTestWidget, setShowTestWidget] = useState(false);
   const [widgetMounted, setWidgetMounted] = useState(false);
   const itemsPerPage = 20;
+
+  // Initialize CSRF token on mount
+  const { isReady: csrfReady } = useCSRFToken();
 
   const fetchTrainingData = useCallback(async (pageNum: number = 1, append: boolean = false) => {
     if (!append) {

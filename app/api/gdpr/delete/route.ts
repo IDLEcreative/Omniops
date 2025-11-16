@@ -9,12 +9,22 @@ const DeleteRequestSchema = z.object({
   email: z.string().email().optional(),
   domain: z.string(),
   confirm: z.boolean(),
-});
+}).strict();
 
 export async function POST(request: NextRequest) {
   try {
     const body = await request.json();
-    const { session_id, email, domain, confirm } = DeleteRequestSchema.parse(body);
+
+    // Validate request body
+    const validationResult = DeleteRequestSchema.safeParse(body);
+    if (!validationResult.success) {
+      return NextResponse.json(
+        { error: 'Invalid request data', details: validationResult.error.errors },
+        { status: 400 }
+      );
+    }
+
+    const { session_id, email, domain, confirm } = validationResult.data;
     const actorHeader = request.headers.get('x-actor');
 
     if (!confirm) {

@@ -1,6 +1,6 @@
 # AI Agent Knowledge Base
 
-**Generated:** 2025-11-10T14:53:21.618Z
+**Generated:** 2025-11-16T19:38:29.628Z
 **Purpose:** This document teaches AI agents how to operate the application autonomously
 
 ---
@@ -21,7 +21,7 @@
 
 ---
 
-## 🎯 Available Workflows (156)
+## 🎯 Available Workflows (192)
 
 ### 1. renders metrics and rollup health badge
 
@@ -466,14 +466,14 @@
 
 ---
 
-... 146 more workflows available in JSON export
+... 182 more workflows available in JSON export
 
 ## 🎨 UI Element Catalog (0)
 
 Common UI elements you will interact with:
 
 
-## 🔌 API Reference (28)
+## 🔌 API Reference (27)
 
 ### `/api/dashboard/telemetry**`
 - **Purpose:** Application API endpoint
@@ -515,10 +515,6 @@ Common UI elements you will interact with:
 - **Purpose:** Interact with WooCommerce integration
 - **Used in:** should handle invalid WooCommerce credentials and allow correction
 
-### `/api/domains/*/settings`
-- **Purpose:** Application API endpoint
-- **Used in:** should detect concurrent edits and provide conflict resolution
-
 ### `/api/domains/test/settings`
 - **Purpose:** Application API endpoint
 - **Used in:** should detect concurrent edits and provide conflict resolution
@@ -534,10 +530,6 @@ Common UI elements you will interact with:
 ### `/api/scrape/status?jobId=job-12345`
 - **Purpose:** Initiate web scraping job
 - **Used in:** should prevent concurrent scraping and allow retry after completion
-
-### `/api/widget/config`
-- **Purpose:** Application API endpoint
-- **Used in:** handles save errors gracefully
 
 ### `/api/domains**`
 - **Purpose:** Application API endpoint
@@ -571,6 +563,10 @@ Common UI elements you will interact with:
 - **Purpose:** Retrieve analytics data
 - **Used in:** should handle connection interruptions gracefully
 
+### `/api/widget/config`
+- **Purpose:** Application API endpoint
+- **Used in:** handles save errors gracefully
+
 ### `/api/analytics/export**`
 - **Purpose:** Retrieve analytics data
 - **Used in:** handle request timeout gracefully
@@ -590,7 +586,7 @@ Common UI elements you will interact with:
 
 ## 🔄 Common Patterns
 
-### 1. State Verification (97 uses)
+### 1. State Verification (130 uses)
 Verify expected state or element visibility
 
 **Example:**
@@ -598,7 +594,7 @@ Verify expected state or element visibility
 await expect(element).toBeVisible();
 ```
 
-### 2. Page Navigation (55 uses)
+### 2. Page Navigation (64 uses)
 Navigate to a URL and wait for page load
 
 **Example:**

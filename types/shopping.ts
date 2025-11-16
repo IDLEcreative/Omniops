@@ -15,6 +15,8 @@ export interface ShoppingProduct {
   stockStatus?: 'instock' | 'outofstock' | 'onbackorder';
   shortDescription?: string;
   variants?: ProductVariant[];
+  score?: number;             // Recommendation confidence score (0-1)
+  reason?: string;            // Why this product was recommended
 }
 
 export interface ProductVariant {

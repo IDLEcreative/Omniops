@@ -2,6 +2,8 @@
  * Training utility functions and helpers
  */
 
+import { getCSRFHeaders } from '@/lib/csrf-client';
+
 export interface TrainingData {
   id: string;
   type: 'url' | 'file' | 'qa' | 'text';
@@ -109,9 +111,11 @@ export async function fetchTrainingData(
 export async function submitUrl(url: string): Promise<{ id: string; status: string }> {
   const normalizedUrl = normalizeUrl(url);
 
+  const headers = await getCSRFHeaders({ 'Content-Type': 'application/json' });
+
   const response = await fetch('/api/scrape', {
     method: 'POST',
-    headers: { 'Content-Type': 'application/json' },
+    headers,
     body: JSON.stringify({ url: normalizedUrl, crawl: true, max_pages: 1000 }),
   });
 
@@ -127,9 +131,11 @@ export async function submitUrl(url: string): Promise<{ id: string; status: stri
  * Submit text content
  */
 export async function submitText(content: string): Promise<{ data: TrainingData }> {
+  const headers = await getCSRFHeaders({ 'Content-Type': 'application/json' });
+
   const response = await fetch('/api/training/text', {
     method: 'POST',
-    headers: { 'Content-Type': 'application/json' },
+    headers,
     body: JSON.stringify({ content }),
   });
 
@@ -147,9 +153,11 @@ export async function submitQA(
   question: string,
   answer: string
 ): Promise<{ data: TrainingData }> {
+  const headers = await getCSRFHeaders({ 'Content-Type': 'application/json' });
+
   const response = await fetch('/api/training/qa', {
     method: 'POST',
-    headers: { 'Content-Type': 'application/json' },
+    headers,
     body: JSON.stringify({ question, answer }),
   });
 
@@ -164,7 +172,13 @@ export async function submitQA(
  * Delete training data item
  */
 export async function deleteTrainingData(id: string): Promise<void> {
-  const response = await fetch(`/api/training/${id}`, { method: 'DELETE' });
+  const headers = await getCSRFHeaders();
+
+  const response = await fetch(`/api/training/${id}`, {
+    method: 'DELETE',
+    headers,
+  });
+
   if (!response.ok) {
     throw new Error('Failed to delete training data');
   }

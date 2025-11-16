@@ -9,6 +9,7 @@ import { ChatTelemetry } from '@/lib/chat-telemetry';
 import OpenAI from 'openai';
 import type { WidgetConfig } from './conversation-manager';
 import type { ToolResult } from './tool-handlers/types';
+import type { ShoppingProduct } from '@/types/shopping';
 
 export interface AIProcessorDependencies {
   getCommerceProvider: any;
@@ -21,6 +22,8 @@ export interface AIProcessorResult {
   allSearchResults: SearchResult[];
   searchLog: Array<{ tool: string; query: string; resultCount: number; source: string }>;
   iteration: number;
+  shoppingProducts?: ShoppingProduct[];
+  shoppingContext?: string;
 }
 
 export interface AIProcessorParams {
