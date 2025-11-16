@@ -6,13 +6,14 @@ import type { UserAnalyticsResult } from '@/lib/dashboard/analytics/user-analyti
 // Mock data builders
 const createMockMessageAnalytics = (overrides: Partial<MessageAnalytics> = {}): MessageAnalytics => ({
   totalMessages: 100,
-  userMessages: 60,
+  totalUserMessages: 60,
   avgResponseTimeSeconds: 2.5,
   satisfactionScore: 85.5,
   resolutionRate: 0.75,
-  positiveMessages: 70,
-  negativeMessages: 10,
+  positiveUserMessages: 70,
+  negativeUserMessages: 10,
   avgMessagesPerDay: 14.3,
+  failedSearches: [],
   topQueries: [
     { query: 'product availability', count: 20, percentage: 33.3 },
     { query: 'shipping info', count: 15, percentage: 25.0 },
@@ -271,13 +272,14 @@ describe('CSV Exporter', () => {
     it('should handle missing optional fields gracefully', () => {
       const messageAnalytics: any = {
         totalMessages: 50,
-        userMessages: 30,
+        totalUserMessages: 30,
         avgResponseTimeSeconds: 2.0,
         satisfactionScore: 80,
         resolutionRate: 0.7,
-        positiveMessages: 35,
-        negativeMessages: 5,
+        positiveUserMessages: 35,
+        negativeUserMessages: 5,
         avgMessagesPerDay: 7,
+        failedSearches: [],
         topQueries: [],
         languageDistribution: [],
         // dailySentiment is undefined
