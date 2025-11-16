@@ -108,6 +108,7 @@ describe('/api/chat - Basic Functionality', () => {
       const requestBody = {
         message: 'Hello, I need help',
         session_id: 'test-session-123',
+        domain: 'test.example.com',
         config: {
           features: {
             websiteScraping: { enabled: false },
@@ -132,6 +133,7 @@ describe('/api/chat - Basic Functionality', () => {
       const requestBody = {
         message: 'Follow up question',
         session_id: 'test-session-123',
+        domain: 'test.example.com',
         conversation_id: '550e8400-e29b-41d4-a716-446655440000',
         config: {
           features: {
@@ -141,7 +143,7 @@ describe('/api/chat - Basic Functionality', () => {
         },
       }
 
-      const mockModule = jest.requireMock('@/lib/supabase-server')
+      const mockModule = jest.requireMock('@/lib/supabase/server')
       const mockSupabase = mockChatSupabaseClient({
         conversationId: requestBody.conversation_id,
         messages: [

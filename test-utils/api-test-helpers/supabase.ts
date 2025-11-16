@@ -87,7 +87,14 @@ export function mockChatSupabaseClient(options: MockChatSupabaseOptions = {}) {
       }),
     },
     messages: {
-      insert: jest.fn().mockResolvedValue({ error: null }),
+      insert: jest.fn().mockReturnValue({
+        select: jest.fn().mockReturnValue({
+          single: jest.fn().mockResolvedValue({
+            data: { id: 'msg-123' },
+            error: null,
+          }),
+        }),
+      }),
       select: jest.fn().mockReturnValue({
         eq: jest.fn().mockReturnValue({
           order: jest.fn().mockReturnValue({
