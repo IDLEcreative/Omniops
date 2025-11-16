@@ -45,44 +45,58 @@ describe('ChatWidget - Rendering', () => {
   });
 
   describe('Component Rendering', () => {
-    it('should render minimized widget by default', () => {
+    it('should render minimized widget by default', async () => {
       render(<ChatWidget />);
 
-      const openButton = screen.getByLabelText('Open chat support widget');
-      expect(openButton).toBeInTheDocument();
+      // Wait for component to mount and minimized button to appear
+      await waitFor(() => {
+        const openButton = screen.getByLabelText('Open chat support widget');
+        expect(openButton).toBeInTheDocument();
+      });
       expect(screen.queryByLabelText('Chat support widget')).not.toBeInTheDocument();
     });
 
-    it('should render open widget when initialOpen is true', () => {
+    it('should render open widget when initialOpen is true', async () => {
       render(<ChatWidget initialOpen={true} />);
 
-      const chatDialog = screen.getByLabelText('Chat support widget');
-      expect(chatDialog).toBeInTheDocument();
+      // Wait for component to mount and session to initialize
+      await waitFor(() => {
+        const chatDialog = screen.getByLabelText('Chat support widget');
+        expect(chatDialog).toBeInTheDocument();
+      });
       expect(screen.queryByLabelText('Open chat support widget')).not.toBeInTheDocument();
     });
 
-    it('should display welcome message when no messages exist', () => {
+    it('should display welcome message when no messages exist', async () => {
       render(<ChatWidget initialOpen={true} />);
 
-      expect(screen.getByText('Hello! How can we help you today?')).toBeInTheDocument();
+      // Wait for component to mount and welcome message to appear
+      await waitFor(() => {
+        expect(screen.getByText('Hello! How can we help you today?')).toBeInTheDocument();
+      });
     });
 
-    it('should render with custom demo config', () => {
+    it('should render with custom demo config', async () => {
       const demoConfig = {
         headerTitle: 'Custom Support Chat',
       };
 
       render(<ChatWidget initialOpen={true} demoConfig={demoConfig} />);
 
-      expect(screen.getByText('Custom Support Chat')).toBeInTheDocument();
+      // Wait for component to mount and custom header to appear
+      await waitFor(() => {
+        expect(screen.getByText('Custom Support Chat')).toBeInTheDocument();
+      });
     });
 
-    it('should not render before mounting', () => {
+    it('should not render before mounting', async () => {
       const { container } = render(<ChatWidget />);
 
       // Component uses mounted state to prevent hydration issues
-      // After initial render, it should be visible
-      expect(container.firstChild).toBeTruthy();
+      // Wait for component to mount and render
+      await waitFor(() => {
+        expect(container.firstChild).toBeTruthy();
+      });
     });
   });
 
@@ -92,7 +106,7 @@ describe('ChatWidget - Rendering', () => {
 
       await waitFor(() => {
         expect(mockLocalStorage.setItem).toHaveBeenCalledWith(
-          'chat_session_id',
+          'session_id',
           expect.stringMatching(/^session_\d+_[a-z0-9]+$/)
         );
       });
@@ -100,23 +114,23 @@ describe('ChatWidget - Rendering', () => {
 
     it('should use existing session ID if available', () => {
       mockLocalStorage.getItem.mockImplementation((key: string) => {
-        if (key === 'chat_session_id') return 'existing-session-123';
+        if (key === 'session_id') return 'existing-session-123';
         return null;
       });
 
       render(<ChatWidget />);
 
-      expect(mockLocalStorage.getItem).toHaveBeenCalledWith('chat_session_id');
+      expect(mockLocalStorage.getItem).toHaveBeenCalledWith('session_id');
       // Should not create a new session ID
       expect(mockLocalStorage.setItem).not.toHaveBeenCalledWith(
-        'chat_session_id',
+        'session_id',
         expect.anything()
       );
     });
   });
 
   describe('Privacy and Consent', () => {
-    it('should show privacy consent screen when required', () => {
+    it('should show privacy consent screen when required', async () => {
       render(<ChatWidget
         initialOpen={true}
         privacySettings={{
@@ -125,7 +139,10 @@ describe('ChatWidget - Rendering', () => {
         }}
       />);
 
-      expect(screen.getByText('Privacy Notice')).toBeInTheDocument();
+      // Wait for component to mount and session to initialize
+      await waitFor(() => {
+        expect(screen.getByText('Privacy Notice')).toBeInTheDocument();
+      });
       expect(screen.getByText('Accept')).toBeInTheDocument();
       expect(screen.getByText('Cancel')).toBeInTheDocument();
     });
@@ -139,12 +156,13 @@ describe('ChatWidget - Rendering', () => {
         }}
       />);
 
-      const acceptButton = screen.getByText('Accept');
+      // Wait for privacy banner to render
+      const acceptButton = await screen.findByText('Accept');
       await user.click(acceptButton);
 
       // Chat interface should appear
       await waitFor(() => {
-        expect(screen.getByLabelText('Message input')).toBeInTheDocument();
+        expect(screen.getByLabelText('Type your message...')).toBeInTheDocument();
       });
     });
 
@@ -158,12 +176,15 @@ describe('ChatWidget - Rendering', () => {
       />);
 
       // Give consent first
-      await user.click(screen.getByText('Accept'));
+      const acceptButton = await screen.findByText('Accept');
+      await user.click(acceptButton);
 
-      // Now should be able to send messages
-      const input = screen.getByLabelText('Message input');
+      // Wait for chat interface to render after consent
+      const input = await screen.findByLabelText('Type your message...');
       await user.type(input, 'Test message');
-      await user.click(screen.getByLabelText('Send message'));
+
+      const sendButton = screen.getByLabelText('Send');
+      await user.click(sendButton);
 
       await waitFor(() => {
         expect(screen.getByText('Test message')).toBeInTheDocument();
@@ -179,7 +200,8 @@ describe('ChatWidget - Rendering', () => {
         }}
       />);
 
-      const cancelButton = screen.getByText('Cancel');
+      // Wait for privacy banner to render
+      const cancelButton = await screen.findByText('Cancel');
       await user.click(cancelButton);
 
       // Widget should be minimized
@@ -195,7 +217,7 @@ describe('ChatWidget - Rendering', () => {
       render(<ChatWidget />);
 
       await waitFor(() => {
-        expect(mockLocalStorage.getItem).toHaveBeenCalledWith('chat_session_id');
+        expect(mockLocalStorage.getItem).toHaveBeenCalledWith('session_id');
       });
 
       // Should have called the config endpoint
