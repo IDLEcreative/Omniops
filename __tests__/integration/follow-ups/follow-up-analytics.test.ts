@@ -37,25 +37,48 @@ describe('Follow-up Flow Integration ― Analytics & Cancellation', () => {
 
     mockSupabase.from.mockImplementation((table: string) => {
       if (table === 'follow_up_messages') {
-        return {
-          select: jest.fn().mockReturnThis(),
-          eq: jest.fn().mockReturnThis(),
-          gte: jest.fn().mockResolvedValue({
-            data: [
-              { channel: 'email', status: 'sent', sent_at: '2024-01-01T10:00:00Z' },
-              { channel: 'email', status: 'sent', sent_at: '2024-01-01T11:00:00Z' },
-              { channel: 'in_app', status: 'sent', sent_at: '2024-01-01T12:00:00Z' },
-            ],
+        const mockData = [
+          { channel: 'email', status: 'sent', sent_at: '2024-01-01T10:00:00Z', conversation_id: 'conv-1' },
+          { channel: 'email', status: 'sent', sent_at: '2024-01-01T11:00:00Z', conversation_id: 'conv-2' },
+          { channel: 'in_app', status: 'sent', sent_at: '2024-01-01T12:00:00Z', conversation_id: 'conv-3' },
+        ];
+
+        // Create a fresh chain for each .from() call
+        let hasLt = false;
+
+        const mockChain = {
+          select: jest.fn(function() { return this; }),
+          eq: jest.fn(function() { return this; }),
+          gte: jest.fn(function() { return this; }),
+          lt: jest.fn(function() {
+            hasLt = true;
+            return this;
           }),
-          lt: jest.fn().mockReturnThis(),
-          order: jest.fn().mockReturnThis(),
-          limit: jest.fn().mockReturnThis(),
+          order: jest.fn(function() {
+            // If this is the getTrendData query (no .lt() called), resolve with data
+            if (!hasLt) {
+              return Promise.resolve({ data: mockData, error: null });
+            }
+            // Otherwise, continue the chain for trackFollowUpResponse
+            return this;
+          }),
+          limit: jest.fn(function() { return this; }),
           single: jest.fn().mockResolvedValue({
             data: { id: 'follow-up-1', sent_at: '2024-01-01T10:00:00Z' },
             error: null,
           }),
-          update: jest.fn().mockReturnThis(),
-        } as any;
+          update: jest.fn(function() {
+            // Return an object with .eq() for the update chain
+            return {
+              eq: jest.fn().mockResolvedValue({
+                data: mockData,
+                error: null,
+              }),
+            };
+          }),
+        };
+
+        return mockChain as any;
       }
       return {} as any;
     });

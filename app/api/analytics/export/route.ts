@@ -32,19 +32,20 @@ import {
 } from '@/lib/analytics/export';
 import { createServiceRoleClient } from '@/lib/supabase-server';
 
-const formatDate = (date: Date): string => {
-  const [dayPart] = date.toISOString().split('T');
-  return dayPart ?? date.toISOString();
-};
-
-const bufferToArrayBuffer = (value: Uint8Array): ArrayBuffer => {
+/**
+ * Converts Buffer/Uint8Array to ArrayBuffer for NextResponse body compatibility
+ * Required for binary file downloads (Excel, PDF)
+ */
+const toBodyInit = (value: Buffer | Uint8Array): ArrayBuffer => {
   const arrayBuffer = new ArrayBuffer(value.byteLength);
   new Uint8Array(arrayBuffer).set(value);
   return arrayBuffer;
 };
 
-const toBodyInit = (value: string | Uint8Array): BodyInit =>
-  typeof value === 'string' ? value : bufferToArrayBuffer(value);
+const formatDate = (date: Date): string => {
+  const [dayPart] = date.toISOString().split('T');
+  return dayPart ?? date.toISOString();
+};
 
 export async function GET(request: NextRequest) {
   try {
@@ -183,12 +184,13 @@ export async function GET(request: NextRequest) {
     }
 
     // 10. Return file as download
-    const responseBody =
-      typeof fileBuffer === 'string'
-        ? fileBuffer
-        : toBodyInit(fileBuffer);
+    // CSV is text, can return directly; Excel/PDF are binary and need ArrayBuffer conversion
+    const body = typeof fileBuffer === 'string'
+      ? fileBuffer
+      : toBodyInit(fileBuffer);
 
-    return new NextResponse(responseBody, {
+    return new Response(body, {
+      status: 200,
       headers: {
         'Content-Type': contentType,
         'Content-Disposition': `attachment; filename="${filename}"`,

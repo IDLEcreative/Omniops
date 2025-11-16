@@ -52,6 +52,16 @@ ENV NEXT_TELEMETRY_DISABLED=1
 # Flag to enable standalone output for Docker
 ENV DOCKER_BUILD=true
 
+# Accept build arguments for NEXT_PUBLIC_ env vars (required at build time)
+ARG NEXT_PUBLIC_SUPABASE_URL
+ARG NEXT_PUBLIC_SUPABASE_ANON_KEY
+ARG OPENAI_API_KEY
+
+# Set environment variables for build
+ENV NEXT_PUBLIC_SUPABASE_URL=$NEXT_PUBLIC_SUPABASE_URL
+ENV NEXT_PUBLIC_SUPABASE_ANON_KEY=$NEXT_PUBLIC_SUPABASE_ANON_KEY
+ENV OPENAI_API_KEY=$OPENAI_API_KEY
+
 # Build the application
 RUN npm run build
 

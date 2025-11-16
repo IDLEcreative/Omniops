@@ -10,7 +10,7 @@
 import { Page } from 'playwright';
 import { AutonomousAgent, TaskStep } from '../core/base-agent';
 import { WorkflowRegistry } from '../core/workflow-registry';
-import { getCredential } from '../security/credential-vault';
+import { getCredential } from '@/lib/autonomous/security/credential-vault';
 
 // ============================================================================
 // Types

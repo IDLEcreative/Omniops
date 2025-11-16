@@ -85,7 +85,10 @@ export const TrainingDataList = memo(function TrainingDataList({
     const Icon = config.icon;
 
     return (
-      <div className="group flex items-center justify-between py-2 px-3 border-b hover:bg-muted/50 transition-colors">
+      <div
+        className="group flex items-center justify-between py-2 px-3 border-b hover:bg-muted/50 transition-colors"
+        data-testid="training-item"
+      >
         <div className="flex items-center gap-2 flex-1 min-w-0">
           <Icon className={cn('h-3 w-3 flex-shrink-0', config.color)} />
           <p className="text-sm truncate flex-1">{item.content}</p>
@@ -185,6 +188,7 @@ export const TrainingDataList = memo(function TrainingDataList({
               ref={parentRef}
               className="overflow-auto"
               style={{ height: '500px' }}
+              data-testid="training-list"
             >
               <div
                 style={{

@@ -34,10 +34,10 @@ export async function authenticateUser(
 
   page.on('console', msg => {
     const text = msg.text();
-    consoleMessages.push(`[${msg.type()}] ${text}`);
-    if (msg.type() === 'error') {
-      console.log('🔴 Browser console error:', text);
-    }
+    const logEntry = `[${msg.type()}] ${text}`;
+    consoleMessages.push(logEntry);
+    // Log all messages to help debug
+    console.log('📋', logEntry);
   });
 
   page.on('pageerror', error => {
@@ -46,12 +46,33 @@ export async function authenticateUser(
     console.log('🔴 Page error:', errorText);
   });
 
-  // Navigate to login page
-  await page.goto(`${BASE_URL}/login`, { waitUntil: 'domcontentloaded' });
+  // Monitor network requests
+  page.on('request', request => {
+    if (request.url().includes('auth') || request.url().includes('login')) {
+      console.log('🌐 Request:', request.method(), request.url());
+    }
+  });
+
+  page.on('response', async response => {
+    if (response.url().includes('auth') || response.url().includes('login')) {
+      console.log('📥 Response:', response.status(), response.url());
+    }
+  });
+
+  // Navigate to login page and wait for full load
+  await page.goto(`${BASE_URL}/login`, { waitUntil: 'networkidle' });
+
+  // Wait for React hydration by checking for interactive elements
+  await page.waitForLoadState('domcontentloaded');
+  await page.waitForLoadState('networkidle');
 
   // Wait for login form to be visible
   const emailInput = page.locator('input[id="email"], input[type="email"]').first();
   await emailInput.waitFor({ state: 'visible', timeout: 10000 });
+
+  // Extra wait to ensure React has hydrated
+  await page.waitForTimeout(1000);
+  console.log('📍 Page fully loaded and hydrated');
 
   // Fill in credentials
   console.log('📍 Entering credentials');
@@ -64,29 +85,50 @@ export async function authenticateUser(
   console.log('📍 Submitting login form');
   const submitButton = page.locator('button[type="submit"]').first();
 
-  // Setup promise to wait for navigation before clicking
-  const navigationPromise = page.waitForURL(/\/dashboard/, { timeout: 30000 });
+  // Setup response listener for auth API call
+  const authResponsePromise = page.waitForResponse(
+    response => response.url().includes('/auth/v1/token') && response.status() === 200,
+    { timeout: 15000 }
+  ).catch(() => null);
 
   // Click submit button
   await submitButton.click();
-  console.log('📍 Clicked submit button - waiting for auth flow');
+  console.log('📍 Clicked submit button - waiting for auth API call');
 
-  // Wait for button to show "Signing in..." (indicates auth is processing)
-  const loadingStarted = await page.locator('button:has-text("Signing in...")').waitFor({
-    state: 'visible',
-    timeout: 5000
-  }).then(() => true).catch(() => {
-    console.log('⚠️ Loading state not detected - checking if navigation happened instantly');
-    return false;
-  });
-
-  if (loadingStarted) {
-    console.log('📍 Auth processing - waiting for completion');
+  // Wait for auth API call to complete
+  const authResponse = await authResponsePromise;
+  if (authResponse) {
+    console.log('✅ Auth API call succeeded');
+  } else {
+    console.log('⚠️ No auth API response detected');
   }
 
-  // Wait for navigation to complete
+  // Wait for loading state or direct navigation
+  const loadingStarted = await page.locator('button:has-text("Signing in...")').waitFor({
+    state: 'visible',
+    timeout: 2000
+  }).then(() => true).catch(() => false);
+
+  if (loadingStarted) {
+    console.log('📍 Loading state detected - waiting for completion');
+    // Wait for loading to finish
+    await page.locator('button:has-text("Signing in...")').waitFor({
+      state: 'hidden',
+      timeout: 10000
+    }).catch(() => {
+      console.log('⚠️ Loading state did not clear');
+    });
+  }
+
+  // Wait for navigation - try multiple strategies
   console.log('📍 Waiting for navigation to /dashboard');
-  const navigationSuccess = await navigationPromise.then(() => true).catch(() => false);
+
+  // Strategy 1: Wait for URL change (Next.js client-side navigation)
+  const urlChanged = await page.waitForURL(/\/dashboard/, { timeout: 15000 })
+    .then(() => true)
+    .catch(() => false);
+
+  const navigationSuccess = urlChanged;
 
   if (!navigationSuccess) {
     console.log('⚠️ URL did not change to /dashboard - checking current location');

@@ -2,18 +2,25 @@
  * Tests for Shopify Setup Agent workflow retrieval
  */
 
-import { describe, it, expect, jest, beforeEach } from '@jest/globals';
-import { ShopifySetupAgent } from '@/lib/autonomous/agents/shopify-setup-agent';
-import { WorkflowRegistry } from '@/lib/autonomous/core/workflow-registry';
-import { setupMocks } from './setup';
+import { describe, it, expect, jest, beforeEach, afterEach } from '@jest/globals';
 
+// Create mock function at module level
+const mockWorkflowRegistryGet = jest.fn<typeof import('@/lib/autonomous/core/workflow-registry').WorkflowRegistry.get>();
+
+// Mock the module before any imports
 jest.mock('@/lib/autonomous/core/workflow-registry', () => ({
-  WorkflowRegistry: { get: jest.fn() }
+  WorkflowRegistry: {
+    get: (...args: Parameters<typeof mockWorkflowRegistryGet>) => mockWorkflowRegistryGet(...args)
+  }
 }));
 
 jest.mock('@/lib/autonomous/security/credential-vault-helpers');
 jest.mock('@/lib/autonomous/security/credential-vault');
 jest.mock('@/lib/supabase/server');
+
+// Import after mocking
+import { ShopifySetupAgent } from '@/lib/autonomous/agents/shopify-setup-agent';
+import { setupMocks } from './setup';
 
 describe('ShopifySetupAgent - Workflow', () => {
   let agent: ShopifySetupAgent;
@@ -21,7 +28,13 @@ describe('ShopifySetupAgent - Workflow', () => {
 
   beforeEach(() => {
     setupMocks();
-    agent = new ShopifySetupAgent(mockStoreUrl);
+    // Reset modules to ensure our mock is used
+    jest.resetModules();
+    // Clear mock calls before each test
+    mockWorkflowRegistryGet.mockClear();
+    // Re-import after resetting modules
+    const { ShopifySetupAgent: FreshAgent } = require('@/lib/autonomous/agents/shopify-setup-agent');
+    agent = new FreshAgent(mockStoreUrl);
   });
 
   it('should retrieve workflow from knowledge base', async () => {
@@ -35,16 +48,18 @@ describe('ShopifySetupAgent - Workflow', () => {
       }
     ];
 
-    (WorkflowRegistry.get as any) = jest.fn().mockReturnValue(mockWorkflow);
+    // Setup the mock to return our test workflow
+    mockWorkflowRegistryGet.mockReturnValue(mockWorkflow);
 
     const workflow = await agent.getWorkflow();
 
-    expect(WorkflowRegistry.get).toHaveBeenCalledWith('should-complete-shopify-api-credential-generation');
+    expect(mockWorkflowRegistryGet).toHaveBeenCalledWith('should-complete-shopify-api-credential-generation');
     expect(workflow).toEqual(mockWorkflow);
   });
 
   it('should use fallback workflow when knowledge base unavailable', async () => {
-    (WorkflowRegistry.get as any) = jest.fn().mockImplementation(() => {
+    // Mock the function to throw an error
+    mockWorkflowRegistryGet.mockImplementation(() => {
       throw new Error('Workflow not found');
     });
 
@@ -58,8 +73,8 @@ describe('ShopifySetupAgent - Workflow', () => {
   });
 
   it('should have complete fallback workflow steps', async () => {
-    const mockGet = WorkflowRegistry.get as jest.MockedFunction<typeof WorkflowRegistry.get>;
-    mockGet.mockImplementation(() => {
+    // Mock the function to throw an error
+    mockWorkflowRegistryGet.mockImplementation(() => {
       throw new Error('Workflow not found');
     });
 

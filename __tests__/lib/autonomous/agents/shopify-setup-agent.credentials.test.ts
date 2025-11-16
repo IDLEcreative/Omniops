@@ -1,12 +1,14 @@
 import { describe, it, expect, jest, beforeEach } from '@jest/globals';
-import { ShopifySetupAgent } from '@/lib/autonomous/agents/shopify-setup-agent';
-import * as vaultModule from '@/lib/autonomous/security/credential-vault';
 
-jest.mock('@/lib/autonomous/security/credential-vault', () => ({
-  getCredential: jest.fn(),
-}));
+// Enable the manual mock in __mocks__/@/lib/autonomous/security/credential-vault.ts
+jest.mock('@/lib/autonomous/security/credential-vault');
 
-const mockGetCredential = vaultModule.getCredential as jest.Mock;
+// Use require() to load modules AFTER jest.mock() is processed (avoids ES6 import hoisting)
+const { ShopifySetupAgent } = require('@/lib/autonomous/agents/shopify-setup-agent');
+const { getCredential } = require('@/lib/autonomous/security/credential-vault');
+
+// Get reference to the mocked function
+const mockGetCredential = getCredential;
 
 describe('ShopifySetupAgent.getCredentials', () => {
   const organizationId = 'org-123';
