@@ -48,8 +48,9 @@ describe('ChatWidget - Messaging', () => {
     it('should send message on button click', async () => {
       const { user } = render(<ChatWidget initialOpen={true} />);
 
-      const input = screen.getByLabelText('Message input');
-      const sendButton = screen.getByLabelText('Send message');
+      // Wait for widget to render
+      const input = await waitFor(() => screen.getByLabelText('Type your message...'));
+      const sendButton = screen.getByLabelText('Send');
 
       await user.type(input, 'Hello support');
       await user.click(sendButton);
@@ -66,7 +67,8 @@ describe('ChatWidget - Messaging', () => {
     it('should send message on Enter key press', async () => {
       const { user } = render(<ChatWidget initialOpen={true} />);
 
-      const input = screen.getByLabelText('Message input') as HTMLTextAreaElement;
+      // Wait for widget to render
+      const input = await waitFor(() => screen.getByLabelText('Type your message...')) as HTMLTextAreaElement;
 
       await user.type(input, 'Test message{Enter}');
 
@@ -82,7 +84,8 @@ describe('ChatWidget - Messaging', () => {
     it('should not send message on Shift+Enter', async () => {
       const { user } = render(<ChatWidget initialOpen={true} />);
 
-      const input = screen.getByLabelText('Message input') as HTMLTextAreaElement;
+      // Wait for widget to render
+      const input = await waitFor(() => screen.getByLabelText('Type your message...')) as HTMLTextAreaElement;
 
       await user.type(input, 'Line 1{Shift>}{Enter}{/Shift}Line 2');
 
@@ -97,8 +100,9 @@ describe('ChatWidget - Messaging', () => {
     it('should clear input after sending message', async () => {
       const { user } = render(<ChatWidget initialOpen={true} />);
 
-      const input = screen.getByLabelText('Message input') as HTMLTextAreaElement;
-      const sendButton = screen.getByLabelText('Send message');
+      // Wait for widget to render
+      const input = await waitFor(() => screen.getByLabelText('Type your message...')) as HTMLTextAreaElement;
+      const sendButton = screen.getByLabelText('Send');
 
       await user.type(input, 'Test message');
       await user.click(sendButton);
@@ -123,9 +127,10 @@ describe('ChatWidget - Messaging', () => {
         })
       );
 
-      const input = screen.getByLabelText('Message input');
+      // Wait for widget to render
+      const input = await waitFor(() => screen.getByLabelText('Type your message...'));
       await user.type(input, 'Test');
-      await user.click(screen.getByLabelText('Send message'));
+      await user.click(screen.getByLabelText('Send'));
 
       // Check for loading indicator
       await waitFor(() => {
@@ -147,8 +152,9 @@ describe('ChatWidget - Messaging', () => {
         })
       );
 
-      const input = screen.getByLabelText('Message input');
-      const sendButton = screen.getByLabelText('Send message');
+      // Wait for widget to render
+      const input = await waitFor(() => screen.getByLabelText('Type your message...'));
+      const sendButton = screen.getByLabelText('Send');
 
       await user.type(input, 'First message');
       const clickPromise = user.click(sendButton);
@@ -172,11 +178,12 @@ describe('ChatWidget - Messaging', () => {
     it('should store conversation ID after first message', async () => {
       const { user } = render(<ChatWidget initialOpen={true} />);
 
-      const input = screen.getByLabelText('Message input');
+      // Wait for widget to render
+      const input = await waitFor(() => screen.getByLabelText('Type your message...'));
 
       // Send first message
       await user.type(input, 'First message');
-      await user.click(screen.getByLabelText('Send message'));
+      await user.click(screen.getByLabelText('Send'));
 
       // Check that user message was sent
       await waitFor(() => {
@@ -195,9 +202,10 @@ describe('ChatWidget - Messaging', () => {
       const onMessage = jest.fn();
       const { user } = render(<ChatWidget initialOpen={true} onMessage={onMessage} />);
 
-      const input = screen.getByLabelText('Message input');
+      // Wait for widget to render
+      const input = await waitFor(() => screen.getByLabelText('Type your message...'));
       await user.type(input, 'Test message');
-      await user.click(screen.getByLabelText('Send message'));
+      await user.click(screen.getByLabelText('Send'));
 
       await waitFor(() => {
         expect(onMessage).toHaveBeenCalledWith(
@@ -213,9 +221,10 @@ describe('ChatWidget - Messaging', () => {
       const onMessage = jest.fn();
       const { user } = render(<ChatWidget initialOpen={true} onMessage={onMessage} />);
 
-      const input = screen.getByLabelText('Message input');
+      // Wait for widget to render
+      const input = await waitFor(() => screen.getByLabelText('Type your message...'));
       await user.type(input, 'Test');
-      await user.click(screen.getByLabelText('Send message'));
+      await user.click(screen.getByLabelText('Send'));
 
       // Check that onMessage was called with user message
       await waitFor(() => {
@@ -239,9 +248,10 @@ describe('ChatWidget - Messaging', () => {
 
       const { user } = render(<ChatWidget initialOpen={true} />);
 
-      const input = screen.getByLabelText('Message input');
+      // Wait for widget to render
+      const input = await waitFor(() => screen.getByLabelText('Type your message...'));
       await user.type(input, 'Test');
-      await user.click(screen.getByLabelText('Send message'));
+      await user.click(screen.getByLabelText('Send'));
 
       await waitFor(() => {
         expect(mockPostMessage).toHaveBeenCalledWith(
