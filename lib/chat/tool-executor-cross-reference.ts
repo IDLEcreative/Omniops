@@ -9,6 +9,7 @@ import { mergeAndDeduplicateResults, type CommerceProduct } from '@/lib/search/r
 import { findSimilarProducts, type RecommendedProduct } from '@/lib/recommendations/product-recommender';
 import { generateProductEmbedding } from '@/lib/embeddings/product-embeddings';
 import type { ToolExecutionResult } from './ai-processor-types';
+import { rankProducts, extractBudgetFromQuery } from '@/lib/search/result-ranker';
 
 /**
  * Cross-reference WooCommerce/Shopify products with scraped website pages
@@ -58,23 +59,36 @@ export async function crossReferenceResults(
 
   console.log(`[Cross-Reference] Enriched ${enrichedProducts.length} products, ${uniqueScrapedPages.length} unique pages`);
 
-  // Add product recommendations (top 3 products get recommendations)
-  const topProducts = enrichedProducts.slice(0, 3);
+  // Extract user query for budget-based ranking
+  const userQuery = commerceResult.toolArgs.query || '';
+  const userBudget = extractBudgetFromQuery(userQuery);
+
+  if (userBudget) {
+    console.log(`[Cross-Reference] Extracted budget from query: £${userBudget}`);
+  }
+
+  // Apply multi-signal ranking to enriched products
+  const rankedProducts = rankProducts(enrichedProducts, { userBudget });
+
+  console.log(`[Cross-Reference] Ranked ${rankedProducts.length} products using multi-signal algorithm`);
+
+  // Add product recommendations (top 3 ranked products get recommendations)
+  const topProducts = rankedProducts.slice(0, 3);
   const allProducts = products; // All available products for recommendations
 
   console.log(`[Cross-Reference] Finding recommendations for top ${topProducts.length} products...`);
 
-  for (const enrichedProduct of topProducts) {
+  for (const rankedProduct of topProducts) {
     try {
       // Generate embedding for current product
-      const productText = `${enrichedProduct.name} ${enrichedProduct.short_description || enrichedProduct.description || ''}`;
+      const productText = `${rankedProduct.name} ${rankedProduct.short_description || rankedProduct.description || ''}`;
       const productEmbedding = await generateProductEmbedding(productText);
 
       // Find similar products (excluding only the current product and top 3 already shown)
       // This allows recommending products from the search results that aren't in top 3
       const excludeIds = new Set(topProducts.map(p => p.id));
       const recommendations = await findSimilarProducts(
-        enrichedProduct,
+        rankedProduct,
         allProducts,
         productEmbedding,
         {
@@ -84,49 +98,53 @@ export async function crossReferenceResults(
         }
       );
 
-      enrichedProduct.recommendations = recommendations;
+      rankedProduct.recommendations = recommendations;
 
-      console.log(`[Cross-Reference] Found ${recommendations.length} recommendations for "${enrichedProduct.name}"`);
+      console.log(`[Cross-Reference] Found ${recommendations.length} recommendations for "${rankedProduct.name}"`);
     } catch (error) {
-      console.error(`[Cross-Reference] Failed to find recommendations for product ${enrichedProduct.id}:`, error);
-      enrichedProduct.recommendations = [];
+      console.error(`[Cross-Reference] Failed to find recommendations for product ${rankedProduct.id}:`, error);
+      rankedProduct.recommendations = [];
     }
   }
 
-  // Update commerce result with enriched products
-  commerceResult.result.results = enrichedProducts.map(enriched => ({
-    url: enriched.scrapedPage?.url || enriched.permalink || `product-${enriched.id}`,
-    title: enriched.name,
-    content: enriched.enrichedDescription || enriched.short_description || enriched.description || '',
-    similarity: enriched.finalSimilarity,
+  // Update commerce result with ranked products
+  commerceResult.result.results = rankedProducts.map(ranked => ({
+    url: ranked.scrapedPage?.url || ranked.permalink || `product-${ranked.id}`,
+    title: ranked.name,
+    content: ranked.enrichedDescription || ranked.short_description || ranked.description || '',
+    similarity: ranked.finalScore, // Use ranking score instead of just similarity
     metadata: {
-      ...enriched,
+      ...ranked,
       // Include matched page URL for "Learn more" links
-      matchedPageUrl: enriched.scrapedPage?.url,
+      matchedPageUrl: ranked.scrapedPage?.url,
       // Include related pages for recommendations
-      relatedPages: enriched.relatedPages.map(p => ({
+      relatedPages: ranked.relatedPages.map(p => ({
         title: p.title,
         url: p.url,
         similarity: p.similarity
       })),
       // Include product recommendations
-      recommendations: enriched.recommendations.map(rec => ({
+      recommendations: ranked.recommendations?.map(rec => ({
         id: rec.id,
         name: rec.name,
         price: rec.price,
         permalink: rec.permalink,
         similarity: rec.similarity,
         recommendationReason: rec.recommendationReason
-      })),
+      })) || [],
+      // Include ranking signals for transparency
+      rankingScore: ranked.finalScore,
+      rankingSignals: ranked.rankingSignals,
+      rankingExplanation: ranked.rankingExplanation,
       // Flag sources
-      sources: enriched.sources
+      sources: ranked.sources
     }
   }));
 
   // Update scraped result with only unique pages (no duplicates)
   scrapedResult.result.results = uniqueScrapedPages;
 
-  console.log(`[Cross-Reference] ✅ Complete: ${enrichedProducts.length} enriched products, ${uniqueScrapedPages.length} unique pages`);
+  console.log(`[Cross-Reference] ✅ Complete: ${rankedProducts.length} ranked products, ${uniqueScrapedPages.length} unique pages`);
 
   return toolExecutionResults;
 }

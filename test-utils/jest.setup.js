@@ -18,6 +18,7 @@ if (!process.env.E2E_TEST) {
   process.env.ENCRYPTION_KEY = 'test-encryption-key-exactly-32ch'
   process.env.WOOCOMMERCE_URL = 'https://test-store.com'
   process.env.WOOCOMMERCE_CONSUMER_KEY = 'test-consumer-key'
+  process.env.REDIS_URL = 'redis://localhost:6379' // Mock Redis URL to trigger mock client
   process.env.WOOCOMMERCE_CONSUMER_SECRET = 'test-consumer-secret'
 }
 
@@ -131,17 +132,102 @@ jest.mock('@/lib/supabase/server', () => jest.requireMock('@/lib/supabase-server
 
 // Mock ioredis FIRST to prevent real Redis connections during test imports
 jest.mock('ioredis', () => {
-  const mockData = new Map();
+  // Import the actual mock implementation from __mocks__/@/lib/redis.js
+  // This ensures consistent behavior across all tests
+  let mockRedisData = new Map();
+
+  const createMockPipeline = () => {
+    let pipelineKey = null;
+    let pexpireMs = null;
+
+    const pipeline = {
+      get(key) {
+        pipelineKey = key;
+        return pipeline;
+      },
+      incr(key) {
+        return pipeline;
+      },
+      pexpire(key, ms) {
+        pexpireMs = ms;
+        return pipeline;
+      },
+      async exec() {
+        if (!pipelineKey) return null;
+
+        const entry = mockRedisData.get(pipelineKey);
+
+        // Check if entry is expired
+        const isExpired = entry && entry.expiry && Date.now() > entry.expiry;
+        const currentValue = (entry && !isExpired) ? parseInt(entry.value, 10) : 0;
+        const newValue = currentValue + 1;
+
+        // Set expiry: use existing expiry if entry exists and not expired, otherwise use pexpireMs
+        let expiry;
+        if (entry && !isExpired && entry.expiry) {
+          expiry = entry.expiry;
+        } else if (pexpireMs !== null) {
+          expiry = Date.now() + pexpireMs;
+        } else {
+          expiry = Date.now() + 60000;
+        }
+
+        mockRedisData.set(pipelineKey, {
+          value: String(newValue),
+          expiry
+        });
+
+        return [
+          [null, currentValue > 0 ? String(currentValue) : null],
+          [null, newValue],
+          [null, 1]
+        ];
+      }
+    };
+
+    return pipeline;
+  };
 
   return jest.fn().mockImplementation(() => ({
+    // Pipeline support for rate limiting
+    pipeline: jest.fn(() => createMockPipeline()),
+    pttl: jest.fn().mockResolvedValue(-1),
+    ping: jest.fn().mockResolvedValue('PONG'),
+
     // Basic operations
-    get: jest.fn().mockResolvedValue(null),
+    get: jest.fn(async (key) => {
+      const entry = mockRedisData.get(key);
+      if (!entry) return null;
+      if (Date.now() > entry.expiry) {
+        mockRedisData.delete(key);
+        return null;
+      }
+      return entry.value;
+    }),
     set: jest.fn().mockResolvedValue('OK'),
     setex: jest.fn().mockResolvedValue('OK'),
-    del: jest.fn().mockResolvedValue(1),
+    del: jest.fn((...keys) => {
+      let deleted = 0;
+      for (const key of keys) {
+        if (mockRedisData.has(key)) {
+          mockRedisData.delete(key);
+          deleted++;
+        }
+      }
+      return Promise.resolve(deleted);
+    }),
     exists: jest.fn().mockResolvedValue(0),
     expire: jest.fn().mockResolvedValue(1),
-    incr: jest.fn().mockResolvedValue(1),
+    incr: jest.fn(async (key) => {
+      const entry = mockRedisData.get(key);
+      const currentValue = entry ? parseInt(entry.value, 10) : 0;
+      const newValue = currentValue + 1;
+      mockRedisData.set(key, {
+        value: String(newValue),
+        expiry: entry?.expiry ?? (Date.now() + 60000)
+      });
+      return newValue;
+    }),
 
     // List operations (for queue)
     lpush: jest.fn().mockResolvedValue(1),

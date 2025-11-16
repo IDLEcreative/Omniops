@@ -59,10 +59,17 @@ export class InMemoryStore implements RedisOperations {
   }
 
   async incr(key: string): Promise<number> {
-    const current = await this.get(key);
-    const value = (parseInt(current || '0') || 0) + 1;
-    await this.set(key, value.toString());
-    return value;
+    const item = this.store.get(key);
+    const currentValue = item?.value ? parseInt(item.value, 10) : 0;
+    const newValue = currentValue + 1;
+
+    // Preserve existing expiry if it exists
+    this.store.set(key, {
+      value: newValue.toString(),
+      expiry: item?.expiry
+    });
+
+    return newValue;
   }
 
   async expire(key: string, seconds: number): Promise<number> {

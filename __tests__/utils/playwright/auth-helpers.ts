@@ -28,6 +28,24 @@ export async function authenticateUser(
 ): Promise<void> {
   console.log('🔐 Authenticating user:', email);
 
+  // Setup listeners for debugging
+  const consoleMessages: string[] = [];
+  const pageErrors: string[] = [];
+
+  page.on('console', msg => {
+    const text = msg.text();
+    consoleMessages.push(`[${msg.type()}] ${text}`);
+    if (msg.type() === 'error') {
+      console.log('🔴 Browser console error:', text);
+    }
+  });
+
+  page.on('pageerror', error => {
+    const errorText = error.message;
+    pageErrors.push(errorText);
+    console.log('🔴 Page error:', errorText);
+  });
+
   // Navigate to login page
   await page.goto(`${BASE_URL}/login`, { waitUntil: 'domcontentloaded' });
 
@@ -45,15 +63,76 @@ export async function authenticateUser(
   // Submit login form
   console.log('📍 Submitting login form');
   const submitButton = page.locator('button[type="submit"]').first();
-  await submitButton.click();
 
-  // Wait for redirect to dashboard (or wait for URL change)
-  console.log('📍 Waiting for authentication to complete');
-  await page.waitForURL(/\/dashboard/, { timeout: 15000 }).catch(async () => {
-    // Fallback: check if we're on dashboard by looking for dashboard elements
-    const dashboardIndicator = page.locator('[data-testid="user-menu"], .sidebar, nav').first();
-    await dashboardIndicator.waitFor({ state: 'visible', timeout: 10000 });
+  // Setup promise to wait for navigation before clicking
+  const navigationPromise = page.waitForURL(/\/dashboard/, { timeout: 30000 });
+
+  // Click submit button
+  await submitButton.click();
+  console.log('📍 Clicked submit button - waiting for auth flow');
+
+  // Wait for button to show "Signing in..." (indicates auth is processing)
+  const loadingStarted = await page.locator('button:has-text("Signing in...")').waitFor({
+    state: 'visible',
+    timeout: 5000
+  }).then(() => true).catch(() => {
+    console.log('⚠️ Loading state not detected - checking if navigation happened instantly');
+    return false;
   });
+
+  if (loadingStarted) {
+    console.log('📍 Auth processing - waiting for completion');
+  }
+
+  // Wait for navigation to complete
+  console.log('📍 Waiting for navigation to /dashboard');
+  const navigationSuccess = await navigationPromise.then(() => true).catch(() => false);
+
+  if (!navigationSuccess) {
+    console.log('⚠️ URL did not change to /dashboard - checking current location');
+    console.log(`   Current URL: ${page.url()}`);
+
+    // If still on login page, check for error messages
+    if (page.url().includes('/login')) {
+      console.log('❌ Still on login page after submission');
+
+      // Capture screenshot for debugging
+      await page.screenshot({
+        path: './test-results/screenshots/auth-failure-after-submit.png',
+        fullPage: true
+      }).catch(() => {});
+
+      // Look for error messages
+      const errorMessage = await page.locator('p.text-red-600, .text-destructive, [role="alert"]')
+        .first()
+        .textContent()
+        .catch(() => null);
+
+      if (errorMessage) {
+        console.log('📋 Console messages:', consoleMessages.slice(-10));
+        console.log('📋 Page errors:', pageErrors);
+        throw new Error(`Authentication failed: ${errorMessage}`);
+      }
+
+      // Check if button is still showing "Signing in..." (stuck in loading state)
+      const stillLoading = await page.locator('button:has-text("Signing in...")').isVisible().catch(() => false);
+      if (stillLoading) {
+        console.log('📋 Console messages:', consoleMessages.slice(-10));
+        console.log('📋 Page errors:', pageErrors);
+        throw new Error('Authentication stuck in loading state - possible network issue');
+      }
+
+      // Log debugging info before throwing
+      console.log('📋 Last 10 console messages:', consoleMessages.slice(-10));
+      console.log('📋 Page errors:', pageErrors);
+      throw new Error('Authentication failed: Form submitted but still on login page. Check console/error logs above.');
+    }
+
+    // If not on login page, try to verify dashboard loaded
+    console.log('📍 Not on login page - checking for dashboard elements');
+    const dashboardIndicator = page.locator('[data-testid="user-menu"], .sidebar, nav, aside').first();
+    await dashboardIndicator.waitFor({ state: 'visible', timeout: 10000 });
+  }
 
   // Wait for page to fully load
   await page.waitForLoadState('domcontentloaded');

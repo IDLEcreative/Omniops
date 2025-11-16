@@ -80,7 +80,7 @@ export async function checkRateLimit(
       }
 
       // Increment and set expiry
-      await redis.incr(key);
+      const newCount = await redis.incr(key);
       if (currentCount === 0) {
         // Use expire() with seconds for fallback client compatibility
         const windowSeconds = Math.ceil(windowMs / 1000);
@@ -89,7 +89,7 @@ export async function checkRateLimit(
 
       return {
         allowed: true,
-        remaining: Math.max(0, maxRequests - currentCount - 1),
+        remaining: Math.max(0, maxRequests - newCount),
         resetTime
       };
     }
