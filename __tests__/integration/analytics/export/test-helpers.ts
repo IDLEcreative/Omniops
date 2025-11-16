@@ -1,10 +1,8 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { createServiceRoleClient } from '@/lib/supabase-server';
-import { requireAuth } from '@/lib/middleware/auth';
 import { checkAnalyticsRateLimit } from '@/lib/middleware/analytics-rate-limit';
 
 jest.mock('@/lib/supabase-server');
-jest.mock('@/lib/middleware/auth');
 jest.mock('@/lib/middleware/analytics-rate-limit');
 
 export interface AnalyticsExportTestContext {
@@ -105,10 +103,57 @@ export function setupAnalyticsTestContext(
     conversations: createRealisticConversations(options.conversationCount ?? 100),
   };
 
-  (requireAuth as jest.Mock).mockResolvedValue({
-    user: { id: 'user-123', email: 'test@example.com' },
-    supabase: buildAuthSupabaseMock(),
-  });
+  // Mock the global Supabase client to return a user
+  const { __setMockSupabaseClient } = jest.requireMock('@/lib/supabase-server');
+  const mockClient = {
+    from: jest.fn((table: string) => {
+      if (table === 'organization_members') {
+        return {
+          select: jest.fn().mockReturnThis(),
+          eq: jest.fn().mockReturnThis(),
+          single: jest.fn().mockResolvedValue({
+            data: { organization_id: 'org-123', role: 'admin' },
+            error: null,
+          }),
+        };
+      }
+
+      if (table === 'organizations') {
+        return {
+          select: jest.fn().mockReturnThis(),
+          eq: jest.fn().mockReturnThis(),
+          single: jest.fn().mockResolvedValue({
+            data: { name: 'Acme Corporation' },
+            error: null,
+          }),
+        };
+      }
+
+      if (table === 'customer_configs') {
+        return {
+          select: jest.fn().mockReturnThis(),
+          eq: jest.fn().mockResolvedValue({
+            data: [{ domain: 'test.com' }, { domain: 'example.com' }],
+            error: null,
+          }),
+        };
+      }
+
+      return {
+        select: jest.fn().mockReturnThis(),
+        eq: jest.fn().mockReturnThis(),
+        single: jest.fn().mockResolvedValue({ data: null, error: null }),
+      };
+    }),
+    auth: {
+      getUser: jest.fn().mockResolvedValue({
+        data: { user: { id: 'user-123', email: 'test@example.com' } },
+        error: null,
+      }),
+    },
+  };
+
+  __setMockSupabaseClient(mockClient);
 
   mockServiceRoleClient(buildServiceRoleClientMock(context));
   resetRateLimit();
@@ -165,48 +210,4 @@ export function mockRateLimitImplementation(
 
 export function resetRateLimit() {
   (checkAnalyticsRateLimit as jest.Mock).mockResolvedValue(null);
-}
-
-function buildAuthSupabaseMock() {
-  return {
-    from: jest.fn((table: string) => {
-      if (table === 'organization_members') {
-        return {
-          select: jest.fn().mockReturnThis(),
-          eq: jest.fn().mockReturnThis(),
-          single: jest.fn().mockResolvedValue({
-            data: { organization_id: 'org-123', role: 'admin' },
-            error: null,
-          }),
-        };
-      }
-
-      if (table === 'organizations') {
-        return {
-          select: jest.fn().mockReturnThis(),
-          eq: jest.fn().mockReturnThis(),
-          single: jest.fn().mockResolvedValue({
-            data: { name: 'Acme Corporation' },
-            error: null,
-          }),
-        };
-      }
-
-      if (table === 'customer_configs') {
-        return {
-          select: jest.fn().mockReturnThis(),
-          eq: jest.fn().mockResolvedValue({
-            data: [{ domain: 'test.com' }, { domain: 'example.com' }],
-            error: null,
-          }),
-        };
-      }
-
-      return {
-        select: jest.fn().mockReturnThis(),
-        eq: jest.fn().mockReturnThis(),
-        single: jest.fn().mockResolvedValue({ data: null, error: null }),
-      };
-    }),
-  };
 }

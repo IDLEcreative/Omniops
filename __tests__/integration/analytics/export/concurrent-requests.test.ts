@@ -14,7 +14,7 @@ describe('Analytics Export - Concurrent Requests', () => {
   });
 
   afterEach(() => {
-    jest.resetAllMocks();
+    jest.clearAllMocks();
   });
 
   it('supports parallel CSV, Excel, and PDF exports', async () => {

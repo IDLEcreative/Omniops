@@ -8,7 +8,7 @@ describe('Analytics Export - File Size & Date Range', () => {
   });
 
   afterEach(() => {
-    jest.resetAllMocks();
+    jest.clearAllMocks();
   });
 
   it('generates compact CSV files', async () => {

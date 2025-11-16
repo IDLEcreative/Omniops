@@ -11,11 +11,12 @@ describe('Analytics Export - Error Recovery', () => {
   let context: ReturnType<typeof setupAnalyticsTestContext>;
 
   beforeEach(() => {
+    jest.clearAllMocks();
     context = setupAnalyticsTestContext();
   });
 
   afterEach(() => {
-    jest.resetAllMocks();
+    jest.clearAllMocks();
   });
 
   it('continues export when message fetch fails but user data exists', async () => {

@@ -8,7 +8,7 @@ describe('Analytics Export - Complete Flow', () => {
   });
 
   afterEach(() => {
-    jest.resetAllMocks();
+    jest.clearAllMocks();
   });
 
   it('exports CSV with complete analytics sections', async () => {

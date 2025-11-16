@@ -15,7 +15,7 @@ describe('Analytics Export - Missing Data & Selective Options', () => {
   });
 
   afterEach(() => {
-    jest.resetAllMocks();
+    jest.clearAllMocks();
   });
 
   it('handles export when message analytics returns no rows', async () => {

@@ -15,7 +15,7 @@ describe('Analytics Export - Large Dataset Handling', () => {
   });
 
   afterEach(() => {
-    jest.resetAllMocks();
+    jest.clearAllMocks();
   });
 
   it('handles exports with 1000+ messages', async () => {
