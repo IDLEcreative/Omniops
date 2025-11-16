@@ -5,7 +5,8 @@
 import { describe, it, expect, jest, beforeEach } from '@jest/globals';
 import type { SupabaseClient } from '@supabase/supabase-js';
 import { detectFollowUpCandidates, prioritizeFollowUps } from '@/lib/follow-ups/detector';
-import { scheduleFollowUps, sendPendingFollowUps } from '@/lib/follow-ups/scheduler';
+import { scheduleFollowUps } from '@/lib/follow-ups/scheduler';
+import { sendPendingFollowUps } from '@/lib/follow-ups/message-sender';
 import { trackFollowUpResponse } from '@/lib/follow-ups/analytics';
 
 type MockSupabase = jest.Mocked<SupabaseClient>;
@@ -80,24 +81,37 @@ describe('Follow-up Flow Integration ― Full Workflow', () => {
         } as any;
       }
       if (table === 'follow_up_messages') {
-        return {
-          insert: jest.fn((data) => {
-            const messageWithId = { ...data, id: `msg-${followUpMessageId++}` };
-            scheduledMessages.push(messageWithId);
-            return Promise.resolve({ error: null });
-          }),
-          select: jest.fn().mockReturnThis(),
-          eq: jest.fn().mockReturnThis(),
-          lte: jest.fn().mockReturnThis(),
-          lt: jest.fn().mockReturnThis(),
-          order: jest.fn().mockReturnThis(),
-          limit: jest.fn().mockResolvedValue({ data: scheduledMessages }),
-          update: jest.fn().mockReturnThis(),
-          single: jest.fn().mockResolvedValue({
-            data: scheduledMessages[0],
-            error: null,
-          }),
-        } as any;
+        const createMockChain = () => {
+          const mockChain: any = {
+            insert: jest.fn((data) => {
+              const messageWithId = {
+                ...data,
+                id: `msg-${followUpMessageId++}`,
+                sent_at: new Date().toISOString()
+              };
+              scheduledMessages.push(messageWithId);
+              return Promise.resolve({ error: null });
+            }),
+            select: jest.fn(() => mockChain),
+            eq: jest.fn(() => mockChain),
+            lte: jest.fn(() => mockChain),
+            lt: jest.fn(() => mockChain),
+            order: jest.fn(() => mockChain),
+            limit: jest.fn(() => mockChain),
+            single: jest.fn(() => Promise.resolve({
+              data: scheduledMessages[0] || null,
+              error: null,
+            })),
+            update: jest.fn(() => mockChain),
+            // Make the chain thenable so it can be awaited
+            then: jest.fn((resolve) => {
+              resolve({ data: scheduledMessages, error: null });
+            }),
+          };
+          return mockChain;
+        };
+
+        return createMockChain();
       }
       if (table === 'notifications') {
         return { insert: jest.fn().mockResolvedValue({ error: null }) } as any;
