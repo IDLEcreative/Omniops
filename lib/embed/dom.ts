@@ -17,13 +17,10 @@ export function createIframe(config: WidgetConfig, isMobile: boolean): HTMLIFram
   // Check if widget should start minimized (default is true)
   const startMinimized = config.appearance.startMinimized ?? true;
 
-  // Use smaller circular size when minimized to wrap around button
-  // 64px matches the button diameter (56px) + small buffer
-  const initialWidth = startMinimized && !isMobile ? 64 : (config.appearance.width || 400);
-  const initialHeight = startMinimized && !isMobile ? 64 : (config.appearance.height || 600);
-
-  // Circular when minimized, rounded rectangle when open
-  const initialBorderRadius = startMinimized && !isMobile ? '50%' : (config.appearance.borderRadius || '12px');
+  // Use smaller size if starting minimized (just for the button)
+  // Increased from 64 to 80 to accommodate button (56px) + spacing (16px + 16px = 32px)
+  const initialWidth = startMinimized && !isMobile ? 80 : (config.appearance.width || 400);
+  const initialHeight = startMinimized && !isMobile ? 80 : (config.appearance.height || 600);
 
   const styles = [
     'position: fixed',
@@ -36,12 +33,10 @@ export function createIframe(config: WidgetConfig, isMobile: boolean): HTMLIFram
     `max-width: ${isMobile ? '100vw' : 'calc(100vw - 40px)'}`,
     `max-height: ${isMobile ? '100dvh' : 'calc(100dvh - 40px)'}`,
     'z-index: 9999',
-    `border-radius: ${isMobile ? '0' : initialBorderRadius}`,
+    `border-radius: ${isMobile || startMinimized ? '0' : config.appearance.borderRadius || '12px'}`,
     'box-shadow: none',
     'background: transparent',
     'overflow: hidden',
-    // Add smooth transitions for size and shape changes
-    'transition: width 0.3s cubic-bezier(0.4, 0, 0.2, 1), height 0.3s cubic-bezier(0.4, 0, 0.2, 1), border-radius 0.3s cubic-bezier(0.4, 0, 0.2, 1)',
   ].filter(Boolean);
 
   iframe.style.cssText = `${styles.join('; ')};`;
@@ -130,10 +125,6 @@ export function registerMessageHandlers(ctx: IframeContext): void {
     resize: data => {
       if (typeof data?.width === 'number') iframe.style.width = `${data.width}px`;
       if (typeof data?.height === 'number') iframe.style.height = `${data.height}px`;
-      // Support dynamic border-radius changes for shape morphing
-      if (data?.borderRadius !== undefined) {
-        iframe.style.borderRadius = data.borderRadius;
-      }
     },
     widgetOpened: () => {
       iframe.style.pointerEvents = 'auto';
