@@ -23,6 +23,7 @@ export function createChatRequest(body: unknown): NextRequest {
 
 /**
  * Create a mock OpenAI response for product search tool call
+ * Uses woocommerce_operations tool with search_products operation
  */
 export function createProductSearchToolCall(query: string, limit: number = 100) {
   return {
@@ -36,8 +37,8 @@ export function createProductSearchToolCall(query: string, limit: number = 100) 
               id: 'call_search_products',
               type: 'function',
               function: {
-                name: 'search_products',
-                arguments: JSON.stringify({ query, limit }),
+                name: 'woocommerce_operations',
+                arguments: JSON.stringify({ operation: 'search_products', query, limit }),
               },
             },
           ],

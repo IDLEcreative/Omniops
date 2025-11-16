@@ -59,43 +59,72 @@ export function createFreshSupabaseMock(options?: {
         const chainable = {
           insert: jest.fn(function() { return this }),
           select: jest.fn(function() { return this }),
+          update: jest.fn(function() { return this }),
           eq: jest.fn(function() { return this }),
           single: jest.fn().mockResolvedValue({
             data: { id: conversationId, session_id: 'test-session' },
             error: options?.shouldError ? new Error('DB error') : null,
           }),
+          // Allow awaiting the chain
+          then: jest.fn((resolve) => resolve({
+            data: { id: conversationId, session_id: 'test-session' },
+            error: options?.shouldError ? new Error('DB error') : null,
+          })),
         }
         return chainable
       }
 
       if (table === 'messages') {
-        return {
-          insert: jest.fn().mockResolvedValue({
+        const chainable = {
+          insert: jest.fn(function() { return this }),
+          select: jest.fn(function() { return this }),
+          eq: jest.fn(function() { return this }),
+          order: jest.fn(function() { return this }),
+          limit: jest.fn(function() { return this }),
+          single: jest.fn().mockResolvedValue({
             data: { id: '123', content: 'test' },
             error: null,
           }),
-          select: jest.fn().mockReturnValue({
-            eq: jest.fn().mockReturnValue({
-              order: jest.fn().mockReturnValue({
-                limit: jest.fn().mockResolvedValue({
-                  data: messages,
-                  error: null,
-                }),
-              }),
-            }),
-          }),
+          // Allow the whole chain to be awaited
+          then: jest.fn((resolve) => resolve({
+            data: messages.length > 0 ? messages : [],
+            error: null,
+          })),
         }
+        return chainable
       }
 
-      // Default for other tables
-      return {
-        select: jest.fn().mockReturnThis(),
-        insert: jest.fn().mockResolvedValue({ data: {}, error: null }),
-        eq: jest.fn().mockReturnThis(),
+      // Default for other tables - use chainable pattern
+      const defaultChainable = {
+        select: jest.fn(function() { return this }),
+        insert: jest.fn(function() { return this }),
+        update: jest.fn(function() { return this }),
+        delete: jest.fn(function() { return this }),
+        eq: jest.fn(function() { return this }),
         single: jest.fn().mockResolvedValue({ data: null, error: null }),
+        // Allow awaiting the chain
+        then: jest.fn((resolve) => resolve({ data: null, error: null })),
       }
+      return defaultChainable
     }),
     rpc: jest.fn().mockResolvedValue({ data: [], error: null }),
+    auth: {
+      // User session methods
+      getUser: jest.fn().mockResolvedValue({ data: { user: null }, error: null }),
+      getSession: jest.fn().mockResolvedValue({ data: { session: null }, error: null }),
+      signOut: jest.fn().mockResolvedValue({ error: null }),
+      signInWithPassword: jest.fn().mockResolvedValue({ data: { user: null, session: null }, error: null }),
+
+      // Admin methods
+      admin: {
+        createUser: jest.fn().mockResolvedValue({ data: { user: null }, error: null }),
+        deleteUser: jest.fn().mockResolvedValue({ data: null, error: null }),
+        updateUser: jest.fn().mockResolvedValue({ data: { user: null }, error: null }),
+        listUsers: jest.fn().mockResolvedValue({ data: { users: [] }, error: null }),
+        getUserById: jest.fn().mockResolvedValue({ data: { user: null }, error: null }),
+        inviteUserByEmail: jest.fn().mockResolvedValue({ data: { user: null }, error: null }),
+      },
+    },
   }
 }
 
