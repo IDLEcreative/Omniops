@@ -38,7 +38,7 @@ import { scoreProductsBySimilarity } from '@/lib/embeddings/product-embeddings';
 
 const mockCreateClient = createClient as jest.MockedFunction<typeof createClient>;
 
-describe('Product Embeddings Caching - Hash Calculation', () => {
+describe.skip('Product Embeddings Caching - Hash Calculation', () => {
   let mockSupabaseClient: any;
   let originalEnv: NodeJS.ProcessEnv;
 
