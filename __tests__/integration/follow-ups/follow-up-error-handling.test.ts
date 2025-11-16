@@ -31,10 +31,15 @@ describe('Follow-up Flow Integration ― Error Handling', () => {
 
     mockSupabase.from.mockImplementation((table: string) => {
       if (table === 'follow_up_messages') {
-        return { insert: jest.fn().mockRejectedValue(new Error('Insert failed')) } as any;
+        return {
+          insert: jest.fn().mockResolvedValue({
+            error: new Error('Insert failed'),
+            data: null
+          })
+        } as any;
       }
       if (table === 'follow_up_logs') {
-        return { insert: jest.fn().mockResolvedValue({ error: null }) } as any;
+        return { insert: jest.fn().mockResolvedValue({ error: null, data: {} }) } as any;
       }
       return {} as any;
     });
