@@ -11,6 +11,7 @@ import { getAlternativeProductsPrompt } from './alternative-products-prompt';
 import { buildOrganizationContext } from './sections/organization-context';
 import { getSearchBehaviorPrompt } from './sections/search-behavior';
 import { getResponseFormattingPrompt } from './sections/response-formatting';
+import { getConversationalRefinementPrompt } from './sections/conversational-refinement';
 import { getAntiHallucinationPrompt } from './sections/anti-hallucination';
 import { getLinkFormattingPrompt } from './sections/link-formatting';
 import { getConversationReferencingPrompt } from './conversation-referencing';
@@ -50,6 +51,8 @@ export function getCustomerServicePrompt(
 ${getSearchBehaviorPrompt()}
 
 ${getResponseFormattingPrompt()}
+
+${getConversationalRefinementPrompt()}
 
 ${getWooCommerceWorkflowPrompt()}
 
