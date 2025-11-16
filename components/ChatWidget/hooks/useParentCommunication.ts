@@ -300,24 +300,26 @@ export function useParentCommunication({
         console.log('  Calculated targetOrigin:', targetOrigin);
 
         if (isOpen) {
-          // Widget is open - request full size and enable pointer events
+          // Widget is open - request full size with rounded corners
           window.parent.postMessage({ type: 'widgetOpened' }, targetOrigin);
           window.parent.postMessage(
             {
               type: 'resize',
               width: 400, // Full width for open widget
               height: 580, // Full height for open widget
+              borderRadius: '12px', // Rounded rectangle when open
             },
             targetOrigin
           );
         } else {
-          // Widget is closed - request minimal size for button only
+          // Widget is closed - request circular button shape
           window.parent.postMessage({ type: 'widgetClosed' }, targetOrigin);
           window.parent.postMessage(
             {
               type: 'resize',
-              width: 64, // Just enough for the button (14 * 4 + padding)
+              width: 64, // Just enough for the button
               height: 64, // Just enough for the button
+              borderRadius: '50%', // Circular when minimized
             },
             targetOrigin
           );

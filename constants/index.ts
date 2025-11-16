@@ -13,7 +13,7 @@ export const RATE_LIMITS = {
 export const CHAT_SETTINGS = {
   maxMessageLength: 1000,
   maxConversationHistory: 10,
-  aiModel: 'gpt-4o-mini',  // Using GPT-4o-mini model (fixed from incorrect gpt-5-mini)
+  aiModel: 'gpt-5-mini',  // Using GPT-5-mini model
   embeddingModel: 'text-embedding-3-small',
   temperature: 1,  // Using default temperature for compatibility
   maxTokens: 500,

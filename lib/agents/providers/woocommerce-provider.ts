@@ -5,13 +5,38 @@
 import { CommerceProvider, OrderInfo } from '../commerce-provider';
 import type { WooCommerceAPI } from '@/lib/woocommerce-api';
 import { findSimilarSkus } from '@/lib/fuzzy-matching/sku-matcher';
+import { generateQueryEmbedding } from '@/lib/embeddings/query-embedding';
+import { scoreProductsBySimilarity } from '@/lib/embeddings/product-embeddings';
+
+/**
+ * Embedding generator function type
+ */
+export type EmbeddingGenerator = (query: string) => Promise<number[]>;
+
+/**
+ * Product scorer function type
+ */
+export type ProductScorer<T> = (products: T[], queryEmbedding: number[], domain?: string) => Promise<Array<T & { similarity: number; relevanceReason: string }>>;
 
 export class WooCommerceProvider implements CommerceProvider {
   readonly platform = 'woocommerce';
   private skuCache: { skus: string[], timestamp: number } | null = null;
   private SKU_CACHE_TTL = 5 * 60 * 1000; // 5 minutes
 
-  constructor(private client: WooCommerceAPI) {}
+  /**
+   * Constructor with dependency injection for embedding functions
+   *
+   * @param client - WooCommerce API client
+   * @param domain - Customer domain (for caching product embeddings)
+   * @param embeddingGenerator - Function to generate query embeddings (injected for testability)
+   * @param productScorer - Function to score products by similarity (injected for testability)
+   */
+  constructor(
+    private client: WooCommerceAPI,
+    private domain?: string,
+    private embeddingGenerator: EmbeddingGenerator = (query: string) => generateQueryEmbedding(query, false),
+    private productScorer: ProductScorer<any> = (products, queryEmbedding, domain) => scoreProductsBySimilarity(products, queryEmbedding, domain)
+  ) {}
 
   async lookupOrder(orderId: string, email?: string): Promise<OrderInfo | null> {
     try {
@@ -74,11 +99,28 @@ export class WooCommerceProvider implements CommerceProvider {
 
   async searchProducts(query: string, limit: number = 10): Promise<any[]> {
     try {
-      return await this.client.getProducts({
+      // Get more products than requested to allow for semantic re-ranking
+      // WooCommerce search returns keyword matches, we'll filter by semantic similarity
+      const fetchLimit = Math.min(limit * 2, 50); // Get 2x requested, max 50
+
+      const products = await this.client.getProducts({
         search: query,
-        per_page: limit,
+        per_page: fetchLimit,
         status: 'publish',
       });
+
+      if (products.length === 0) {
+        return [];
+      }
+
+      // Generate query embedding for semantic similarity (using injected dependency)
+      const queryEmbedding = await this.embeddingGenerator(query);
+
+      // Score products by semantic similarity (using injected dependency with domain for caching)
+      const scoredProducts = await this.productScorer(products, queryEmbedding, this.domain);
+
+      // Return top N products sorted by similarity
+      return scoredProducts.slice(0, limit);
     } catch (error) {
       console.error('[WooCommerce Provider] Product search error:', error);
       return [];

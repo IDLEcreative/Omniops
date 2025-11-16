@@ -59,13 +59,10 @@ export async function processAIConversation(params: AIProcessorParams): Promise<
   }
 
   // Configuration
-  // Default to 5 iterations to allow for:
-  // 1. Initial product/order search
-  // 2. Fallback to semantic search if direct search fails
-  // 3. Category refinement based on initial results
-  // 4. Alternative search strategies or related items
-  // 5. Final verification and response composition
-  const maxIterations = config?.ai?.maxSearchIterations || 5;
+  // Reduced to 3 iterations to prevent 60s timeout on complex queries
+  // Most queries complete in 1-2 iterations anyway
+  // Worst case: 3 × 20s = 60s (fits within timeout)
+  const maxIterations = config?.ai?.maxSearchIterations || 3;
   const searchTimeout = config?.ai?.searchTimeout || 10000;
 
   let iteration = 0;

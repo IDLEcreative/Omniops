@@ -53,6 +53,9 @@ const customJestConfig = {
     '^@/lib/woocommerce-full$': '<rootDir>/__mocks__/@/lib/woocommerce-full.ts',
     '^@/lib/woocommerce-dynamic$': '<rootDir>/__mocks__/@/lib/woocommerce-dynamic.ts',
     '^@/lib/shopify-dynamic$': '<rootDir>/__mocks__/@/lib/shopify-dynamic.ts',
+    // Embedding mocks - MUST come before '^@/lib/embeddings$' to match subdirectories first
+    '^@/lib/embeddings/query-embedding$': '<rootDir>/__mocks__/@/lib/embeddings/query-embedding.ts',
+    '^@/lib/embeddings/product-embeddings$': '<rootDir>/__mocks__/@/lib/embeddings/product-embeddings.ts',
     '^@/lib/embeddings$': '<rootDir>/__mocks__/@/lib/embeddings.ts',
     '^@/lib/redis$': '<rootDir>/__mocks__/@/lib/redis.js',
     '^@/lib/redis-enhanced$': '<rootDir>/__mocks__/@/lib/redis-enhanced.ts',

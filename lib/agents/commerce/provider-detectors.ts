@@ -41,7 +41,7 @@ export const detectWooCommerce: ProviderDetector = async ({ domain, config }) =>
     }
 
     const { WooCommerceProvider } = await import('../providers/woocommerce-provider');
-    return new WooCommerceProvider(client);
+    return new WooCommerceProvider(client, domain);
   } catch (error) {
     console.error('[Commerce Provider] Failed to initialize WooCommerce provider:', error);
     return null;

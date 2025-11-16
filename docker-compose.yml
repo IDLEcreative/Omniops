@@ -35,6 +35,7 @@ services:
       - SUPABASE_SERVICE_ROLE_KEY=${SUPABASE_SERVICE_ROLE_KEY}
       # OpenAI configuration
       - OPENAI_API_KEY=${OPENAI_API_KEY}
+      - USE_GPT5_MINI=${USE_GPT5_MINI}
       # Optional WooCommerce configuration
       - WOOCOMMERCE_URL=${WOOCOMMERCE_URL:-}
       - WOOCOMMERCE_CONSUMER_KEY=${WOOCOMMERCE_CONSUMER_KEY:-}

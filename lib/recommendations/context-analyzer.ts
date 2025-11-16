@@ -7,13 +7,7 @@
  * @module recommendations/context-analyzer
  */
 
-import OpenAI from 'openai';
-
-const openai = new OpenAI({
-  apiKey: process.env.OPENAI_API_KEY,
-  timeout: 30 * 1000,    // 30 seconds (chat completions need 5-15s normally)
-  maxRetries: 2,          // Retry failed requests twice
-});
+import { getOpenAIClient } from '@/lib/chat/openai-client';
 
 export interface ContextAnalysis {
   detectedIntent?: string;
@@ -31,6 +25,11 @@ export async function analyzeContext(
   context: string,
   domainId: string
 ): Promise<ContextAnalysis> {
+  const openai = getOpenAIClient();
+  if (!openai) {
+    throw new Error('OpenAI client not configured');
+  }
+
   try {
     // Use GPT-4 to extract structured intent
     const response = await openai.chat.completions.create({

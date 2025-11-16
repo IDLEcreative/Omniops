@@ -3,18 +3,12 @@
  * Uses GPT-4o-mini to analyze business intelligence and recommend pricing tier
  */
 
-import OpenAI from 'openai';
+import { getOpenAIClient } from '@/lib/chat/openai-client';
 import {
   BusinessIntelligence,
   PricingRecommendation,
   PricingSignals
 } from './types';
-
-const openai = new OpenAI({
-  apiKey: process.env.OPENAI_API_KEY,
-  timeout: 30 * 1000,    // 30 seconds (chat completions need 5-15s normally)
-  maxRetries: 2,          // Retry failed requests twice
-});
 
 const TIER_PRICING = {
   small_business: 500,
@@ -26,6 +20,11 @@ const TIER_PRICING = {
 export async function analyzeBusiness(
   intel: BusinessIntelligence
 ): Promise<PricingRecommendation> {
+  const openai = getOpenAIClient();
+  if (!openai) {
+    throw new Error('OpenAI client not configured');
+  }
+
   const prompt = buildAnalysisPrompt(intel);
 
   try {

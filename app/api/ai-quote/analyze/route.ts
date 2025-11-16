@@ -160,6 +160,10 @@ function isValidDomain(domain: string): boolean {
   return domainRegex.test(domain);
 }
 
+// Force dynamic rendering - skip build-time page data collection
+// This prevents OpenAI client initialization during Docker build
+export const dynamic = 'force-dynamic';
+
 export const config = {
   runtime: 'nodejs'
 };

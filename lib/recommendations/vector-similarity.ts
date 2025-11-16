@@ -9,13 +9,7 @@
 
 import { createClient } from '@/lib/supabase/server';
 import { ProductRecommendation } from './engine';
-import OpenAI from 'openai';
-
-const openai = new OpenAI({
-  apiKey: process.env.OPENAI_API_KEY,
-  timeout: 20 * 1000,    // 20 seconds (embeddings need 1-5s normally)
-  maxRetries: 2,          // Retry failed requests twice
-});
+import { getOpenAIClient } from '@/lib/chat/openai-client';
 
 export interface VectorSimilarityRequest {
   domainId: string;
@@ -245,6 +239,11 @@ async function getPopularProducts(
  * Generate embedding for text
  */
 async function generateEmbedding(text: string): Promise<number[]> {
+  const openai = getOpenAIClient();
+  if (!openai) {
+    throw new Error('OpenAI client not configured');
+  }
+
   const response = await openai.embeddings.create({
     model: 'text-embedding-3-small',
     input: text,

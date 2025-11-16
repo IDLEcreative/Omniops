@@ -20,6 +20,10 @@ import {
 } from './tool-handlers';
 import { executeWooCommerceOperation } from './woocommerce-tool';
 import type { ToolExecutionResult, AIProcessorDependencies } from './ai-processor-types';
+import { crossReferenceResults } from './tool-executor-cross-reference';
+
+// Re-export formatToolResultsForAI for backward compatibility
+export { formatToolResultsForAI } from './tool-executor-formatters';
 
 /**
  * Execute all tool calls in parallel and return formatted results
@@ -127,14 +131,51 @@ export async function executeToolCallsParallel(
               domain || ''
             );
 
+            console.log(`[Tool Executor] WooCommerce operation result:`, {
+              operation: parsedArgs.operation,
+              success: wcResult.success,
+              hasData: !!wcResult.data,
+              hasProducts: !!wcResult.data?.products,
+              productCount: wcResult.data?.products?.length || 0
+            });
+
             // Convert WooCommerce result to SearchResult format for consistency
-            const searchResults: SearchResult[] = wcResult.success ? [{
-              url: domain || 'woocommerce',
-              title: `WooCommerce: ${parsedArgs.operation}`,
-              content: wcResult.message,
-              similarity: 1.0,
-              metadata: wcResult.data
-            }] : [];
+            let searchResults: SearchResult[] = [];
+
+            if (wcResult.success) {
+              // Special handling for search_products - unwrap products array
+              if (parsedArgs.operation === 'search_products' && wcResult.data?.products) {
+                // Convert each product to a SearchResult with product as metadata
+                searchResults = wcResult.data.products.map((product: any) => ({
+                  url: product.permalink || `${domain}/product/${product.id}`,
+                  title: product.name,
+                  content: product.shortDescription || product.description || '',
+                  similarity: 1.0,
+                  metadata: {
+                    id: product.id,
+                    name: product.name,
+                    price: product.price,
+                    permalink: product.permalink,
+                    short_description: product.shortDescription,
+                    description: product.description,
+                    stock_status: product.stockStatus,
+                    stock_quantity: product.stockQuantity,
+                    categories: product.categories,
+                    images: product.images
+                  }
+                }));
+                console.log(`[Tool Executor] Converted ${searchResults.length} WooCommerce products to SearchResults`);
+              } else {
+                // For other operations, wrap entire result
+                searchResults = [{
+                  url: domain || 'woocommerce',
+                  title: `WooCommerce: ${parsedArgs.operation}`,
+                  content: wcResult.message,
+                  similarity: 1.0,
+                  metadata: wcResult.data
+                }];
+              }
+            }
 
             return {
               success: wcResult.success,
@@ -185,78 +226,8 @@ export async function executeToolCallsParallel(
     totalResultsFound: toolExecutionResults.reduce((sum, r) => sum + r.result.results.length, 0)
   });
 
-  return toolExecutionResults;
-}
+  // Cross-reference WooCommerce/Shopify products with scraped pages
+  const enrichedResults = await crossReferenceResults(toolExecutionResults);
 
-/**
- * Format tool execution results for AI consumption
- */
-export function formatToolResultsForAI(
-  toolExecutionResults: ToolExecutionResult[]
-): Array<{ tool_call_id: string; content: string }> {
-  return toolExecutionResults.map(({ toolCall, toolName, toolArgs, result }) => {
-    let toolResponse = '';
-
-    // CRITICAL: Surface errorMessage prominently when present
-    // This ensures AI explicitly communicates errors (e.g., "Product X not found") to users
-    if (!result.success && result.errorMessage) {
-      toolResponse = `⚠️ ERROR: ${result.errorMessage}\n\n`;
-      console.log(`[Tool Executor] Surfacing error to AI: ${result.errorMessage}`);
-    }
-
-    if (result.success && result.results.length > 0) {
-      toolResponse += `Found ${result.results.length} results from ${result.source}:\n\n`;
-      result.results.forEach((item, index) => {
-        toolResponse += `${index + 1}. ${item.title}\n`;
-        toolResponse += `   URL: ${item.url}\n`;
-        toolResponse += `   Content: ${item.content.substring(0, 200)}${item.content.length > 200 ? '...' : ''}\n`;
-        toolResponse += `   Relevance: ${(item.similarity * 100).toFixed(1)}%\n\n`;
-      });
-    } else if (!result.errorMessage) {
-      // Only provide generic fallback messages if no explicit errorMessage was set
-      // Provide contextual error messages based on tool type
-      const queryTerm = toolArgs.query || toolArgs.category || toolArgs.productQuery || toolArgs.orderId || 'this search';
-
-      if (result.source === 'invalid-arguments') {
-        switch (toolName) {
-          case 'search_website_content':
-            toolResponse += 'I want to search our content for you, but I need keywords or a topic to look up. Could you share what information you are looking for?';
-            break;
-          case 'search_by_category':
-            toolResponse += 'I can browse our categories once I know which topic you want—shipping, returns, installation, etc. Let me know and I will pull it up.';
-            break;
-          case 'get_product_details':
-            toolResponse += 'To grab detailed specifications I need the product or item number you are checking on. Share that and I will verify the details.';
-            break;
-          case 'get_complete_page_details':
-            toolResponse += 'I need to know which specific page or item you want complete details for. Let me know what you are interested in and I will retrieve all available information about it.';
-            break;
-          case 'lookup_order':
-            toolResponse += 'I can check an order status once I have the order number. Please provide it and I will look it up right away.';
-            break;
-          default:
-            toolResponse += 'I need a little more detail to continue. Could you clarify what you want me to look up?';
-        }
-      } else if (result.source === 'invalid-domain') {
-        toolResponse += `Cannot perform search - domain not configured properly.`;
-      } else if (toolName === 'lookup_order') {
-        toolResponse += `I couldn't find any information about order ${queryTerm}. The order number might be incorrect, or it hasn't been entered into the system yet. Please ask the customer to double-check the order number.`;
-      } else {
-        toolResponse += `I couldn't find any information about "${queryTerm}". This might mean:
-- The search term needs to be more specific or spelled differently
-- The item might not be in the current inventory
-- Try using alternative terms or checking the spelling
-
-Please let me know if you'd like to search for something else or need assistance finding what you're looking for.`;
-      }
-    }
-
-    // Ensure we always return some content (even if just the error message)
-    const finalContent = toolResponse.trim() || 'Search completed with no results.';
-
-    return {
-      tool_call_id: toolCall.id,
-      content: finalContent
-    };
-  });
+  return enrichedResults;
 }

@@ -28,7 +28,7 @@ export function getOpenAIClient(): OpenAI | null {
     try {
       openaiInstance = new OpenAI({
         apiKey,
-        timeout: 60 * 1000,    // 60 seconds (increased for complex multi-turn conversations)
+        timeout: 240 * 1000,   // 240 seconds (4 minutes - reasoning models need unpredictable time for thought processes)
         maxRetries: 2,          // Retry failed requests twice
       });
     } catch (error) {
