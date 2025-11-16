@@ -52,6 +52,7 @@ describe('Commerce Error Handling', () => {
     mockOpenAIInstance.chat.completions.create.mockImplementation(async () => {
       callCount++
       if (callCount === 1) {
+        // First call: AI uses search_website_content tool (which uses commerce provider + semantic fallback)
         return {
           choices: [{
             message: {
@@ -61,7 +62,7 @@ describe('Commerce Error Handling', () => {
                 id: 'call_1',
                 type: 'function',
                 function: {
-                  name: 'search_products',
+                  name: 'search_website_content',
                   arguments: '{"query": "products", "limit": 100}',
                 },
               }],
@@ -69,6 +70,7 @@ describe('Commerce Error Handling', () => {
           }]
         } as any
       } else {
+        // Second call: AI responds with final answer
         return {
           choices: [{
             message: {
@@ -89,7 +91,9 @@ describe('Commerce Error Handling', () => {
 
     expect(response.status).toBe(200)
     expect(data.message).toBe('Here are the products from our catalog.')
+    // Verify provider.searchProducts was called and failed
     expect(provider.searchProducts).toHaveBeenCalled()
+    // Verify fallback to semantic search was triggered
     expect(mockSearchSimilarContent).toHaveBeenCalled()
   })
 })

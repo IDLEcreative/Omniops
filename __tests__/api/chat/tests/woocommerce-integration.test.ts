@@ -60,7 +60,7 @@ describe('WooCommerce Integration', () => {
                 id: 'call_1',
                 type: 'function',
                 function: {
-                  name: 'search_products',
+                  name: 'search_website_content',
                   arguments: '{"query": "product", "limit": 100}',
                 },
               }],
