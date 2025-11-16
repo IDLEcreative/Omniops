@@ -180,6 +180,28 @@ function ensureResponse() {
     }
 
     arrayBuffer() {
+      // Handle Buffer objects (from Node.js)
+      if (this.body && typeof this.body.buffer !== 'undefined' && this.body.byteLength) {
+        return Promise.resolve(this.body.buffer.slice(this.body.byteOffset, this.body.byteOffset + this.body.byteLength));
+      }
+
+      // Handle strings
+      if (typeof this.body === 'string') {
+        const encoder = new TextEncoder();
+        return Promise.resolve(encoder.encode(this.body).buffer);
+      }
+
+      // Handle ArrayBuffer
+      if (this.body instanceof ArrayBuffer) {
+        return Promise.resolve(this.body);
+      }
+
+      // Handle Uint8Array and other typed arrays
+      if (this.body && this.body.buffer instanceof ArrayBuffer) {
+        return Promise.resolve(this.body.buffer);
+      }
+
+      // Fallback to empty ArrayBuffer
       return Promise.resolve(new ArrayBuffer(0));
     }
 
@@ -252,6 +274,28 @@ function ensureRequest() {
     }
 
     arrayBuffer() {
+      // Handle Buffer objects (from Node.js)
+      if (this.body && typeof this.body.buffer !== 'undefined' && this.body.byteLength) {
+        return Promise.resolve(this.body.buffer.slice(this.body.byteOffset, this.body.byteOffset + this.body.byteLength));
+      }
+
+      // Handle strings
+      if (typeof this.body === 'string') {
+        const encoder = new TextEncoder();
+        return Promise.resolve(encoder.encode(this.body).buffer);
+      }
+
+      // Handle ArrayBuffer
+      if (this.body instanceof ArrayBuffer) {
+        return Promise.resolve(this.body);
+      }
+
+      // Handle Uint8Array and other typed arrays
+      if (this.body && this.body.buffer instanceof ArrayBuffer) {
+        return Promise.resolve(this.body.buffer);
+      }
+
+      // Fallback to empty ArrayBuffer
       return Promise.resolve(new ArrayBuffer(0));
     }
 
