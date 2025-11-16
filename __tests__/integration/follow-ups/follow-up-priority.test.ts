@@ -55,6 +55,7 @@ describe('Follow-up Flow Integration ― Priority Handling', () => {
         return {
           select: jest.fn().mockReturnThis(),
           eq: jest.fn().mockResolvedValue({ count: 0 }),
+          insert: jest.fn().mockResolvedValue({ error: null }),
         } as any;
       }
       if (table === 'follow_up_messages') {
