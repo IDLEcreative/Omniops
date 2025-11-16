@@ -132,8 +132,8 @@ const customJestConfig = {
     },
   },
   // Worker configuration to prevent crashes
-  maxWorkers: '50%', // Use 50% of CPU cores to prevent resource exhaustion
-  workerIdleMemoryLimit: '512MB', // Kill workers if they exceed 512MB idle memory
+  maxWorkers: 2, // Use only 2 workers to prevent memory exhaustion (was 50%)
+  workerIdleMemoryLimit: '1024MB', // Kill workers if they exceed 1GB idle memory
 }
 
 // createJestConfig is exported this way to ensure that next/jest can load the Next.js config which is async

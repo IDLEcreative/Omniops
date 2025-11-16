@@ -17,7 +17,7 @@
     "start:server": "NODE_ENV=production tsx server.ts",
     "lint": "eslint . --max-warnings 50",
     "lint:fix": "eslint . --fix",
-    "test": "NODE_OPTIONS='--max-old-space-size=4096' jest",
+    "test": "NODE_OPTIONS='--max-old-space-size=4096 --expose-gc' jest --bail --passWithNoTests",
     "test:unit": "jest --config=config/jest/jest.unit.config.js",
     "test:integration": "jest --config=config/jest/jest.integration.config.js",
     "test:integration:watch": "jest --config=config/jest/jest.integration.config.js --watch",
