@@ -2,17 +2,15 @@
  * Widget config tests for response length and token limits
  */
 
-import { describe, test, expect, beforeEach, jest } from '@jest/globals';
+import { test, expect, beforeEach, jest } from '@jest/globals';
 import { setupMockDatabase, createMockRequest, createMockSupabase, createMockDeps } from './test-helpers';
 import { createCompletionMock } from './mocks-setup';
-
-let POST: typeof import('@/app/api/chat/route').POST;
 
 beforeEach(() => {
   jest.clearAllMocks();
 });
 
-export function defineResponseLengthTests() {
+export function defineResponseLengthTests(getPOST: () => typeof import('@/app/api/chat/route').POST) {
   test('should apply short response length (1000 tokens)', async () => {
     const mockSupabase = createMockSupabase();
 
@@ -46,7 +44,7 @@ export function defineResponseLengthTests() {
       session_id: 'test-session'
     });
 
-    await POST(request, {
+    await getPOST()(request, {
       params: Promise.resolve({}),
       deps: createMockDeps(mockSupabase)
     });
@@ -88,7 +86,7 @@ export function defineResponseLengthTests() {
       session_id: 'test-session'
     });
 
-    await POST(request, {
+    await getPOST()(request, {
       params: Promise.resolve({}),
       deps: createMockDeps(mockSupabase)
     });
@@ -129,7 +127,7 @@ export function defineResponseLengthTests() {
       session_id: 'test-session'
     });
 
-    await POST(request, {
+    await getPOST()(request, {
       params: Promise.resolve({}),
       deps: createMockDeps(mockSupabase)
     });

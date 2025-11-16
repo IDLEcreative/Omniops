@@ -34,21 +34,24 @@ beforeAll(async () => {
   ({ POST } = await import('@/app/api/chat/route'));
 });
 
+// Getter function to access POST after it's loaded
+const getPOST = () => POST;
+
 describe('Widget Config E2E - Chat API Integration', () => {
   describe('Personality Settings', () => {
-    defineFriendlyPersonalityTests();
-    definePersonalityTests();
+    defineFriendlyPersonalityTests(getPOST);
+    definePersonalityTests(getPOST);
   });
 
   describe('Response Length Settings', () => {
-    defineResponseLengthTests();
+    defineResponseLengthTests(getPOST);
   });
 
   describe('Language and Custom Prompts', () => {
-    defineLanguageAndPromptTests();
+    defineLanguageAndPromptTests(getPOST);
   });
 
   describe('Temperature and Defaults', () => {
-    defineTemperatureAndDefaultsTests();
+    defineTemperatureAndDefaultsTests(getPOST);
   });
 });

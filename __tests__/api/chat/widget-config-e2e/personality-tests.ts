@@ -2,17 +2,15 @@
  * Widget config tests for personality and tone settings
  */
 
-import { describe, test, expect, beforeEach, jest } from '@jest/globals';
+import { test, expect, beforeEach, jest } from '@jest/globals';
 import { setupMockDatabase, createMockRequest, createMockSupabase, createMockDeps } from './test-helpers';
 import { createCompletionMock } from './mocks-setup';
-
-let POST: typeof import('@/app/api/chat/route').POST;
 
 beforeEach(() => {
   jest.clearAllMocks();
 });
 
-export function defineFriendlyPersonalityTests() {
+export function defineFriendlyPersonalityTests(getPOST: () => typeof import('@/app/api/chat/route').POST) {
   test('should load and apply friendly personality config', async () => {
     const mockSupabase = createMockSupabase();
 
@@ -46,7 +44,7 @@ export function defineFriendlyPersonalityTests() {
       session_id: 'test-session'
     });
 
-    const response = await POST(request, {
+    const response = await getPOST()(request, {
       params: Promise.resolve({}),
       deps: createMockDeps(mockSupabase)
     });
@@ -64,7 +62,7 @@ export function defineFriendlyPersonalityTests() {
   });
 }
 
-export function definePersonalityTests() {
+export function definePersonalityTests(getPOST: () => typeof import('@/app/api/chat/route').POST) {
   test('should apply professional personality', async () => {
     const mockSupabase = createMockSupabase();
 
@@ -97,7 +95,7 @@ export function definePersonalityTests() {
       session_id: 'test-session'
     });
 
-    await POST(request, {
+    await getPOST()(request, {
       params: Promise.resolve({}),
       deps: createMockDeps(mockSupabase)
     });

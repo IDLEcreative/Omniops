@@ -18,8 +18,11 @@ import { getSessionTracker } from '@/lib/analytics/session-tracker';
  */
 export function SessionTrackerProvider() {
   useEffect(() => {
-    // Only run in browser
-    if (typeof window === 'undefined') return;
+    // ✅ FIX: Only run in browser environment
+    if (typeof window === 'undefined') {
+      console.log('[SessionTracker] Skipping initialization (server environment)');
+      return;
+    }
 
     try {
       // Get domain from window location

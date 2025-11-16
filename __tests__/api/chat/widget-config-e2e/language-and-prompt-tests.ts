@@ -2,17 +2,15 @@
  * Widget config tests for language and custom system prompt settings
  */
 
-import { describe, test, expect, beforeEach, jest } from '@jest/globals';
+import { test, expect, beforeEach, jest } from '@jest/globals';
 import { setupMockDatabase, createMockRequest, createMockSupabase, createMockDeps } from './test-helpers';
 import { createCompletionMock } from './mocks-setup';
-
-let POST: typeof import('@/app/api/chat/route').POST;
 
 beforeEach(() => {
   jest.clearAllMocks();
 });
 
-export function defineLanguageAndPromptTests() {
+export function defineLanguageAndPromptTests(getPOST: () => typeof import('@/app/api/chat/route').POST) {
   test('should apply language setting to system prompt', async () => {
     const mockSupabase = createMockSupabase();
 
@@ -46,7 +44,7 @@ export function defineLanguageAndPromptTests() {
       session_id: 'test-session'
     });
 
-    await POST(request, {
+    await getPOST()(request, {
       params: Promise.resolve({}),
       deps: createMockDeps(mockSupabase)
     });
@@ -89,7 +87,7 @@ export function defineLanguageAndPromptTests() {
       session_id: 'test-session'
     });
 
-    await POST(request, {
+    await getPOST()(request, {
       params: Promise.resolve({}),
       deps: createMockDeps(mockSupabase)
     });

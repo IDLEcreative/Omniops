@@ -48,6 +48,11 @@ export class SessionTracker {
   private activityCheckInterval: NodeJS.Timeout | null = null;
 
   constructor(domain: string) {
+    // ✅ FIX: Add browser environment check
+    if (typeof window === 'undefined' || typeof navigator === 'undefined') {
+      throw new Error('SessionTracker can only be used in browser environment');
+    }
+
     const existing = loadSession();
     const lastActivity = getLastActivity();
     const now = Date.now();

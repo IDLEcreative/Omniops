@@ -14,6 +14,18 @@ import { BrowserInfo } from '@/types/analytics';
  * Detect browser information from user agent
  */
 export function detectBrowser(): BrowserInfo {
+  // ✅ FIX: Add browser environment check
+  if (typeof window === 'undefined' || typeof navigator === 'undefined') {
+    return {
+      name: 'Unknown',
+      version: 'Unknown',
+      os: 'Unknown',
+      device_type: 'desktop',
+      viewport_width: 0,
+      viewport_height: 0,
+    };
+  }
+
   const ua = navigator.userAgent;
   let browserName = 'Unknown';
   let browserVersion = 'Unknown';
