@@ -1,19 +1,35 @@
 import { describe, it, expect, jest, beforeEach } from '@jest/globals';
 
-// Mock the helper module (uses __mocks__ folder)
-jest.mock('@/lib/autonomous/security/credential-vault-helpers');
+// Create mock functions BEFORE jest.mock() (proven pattern from tier-2-alternative-formats.test.ts)
+const mockGetCredential = jest.fn();
+const mockStoreCredential = jest.fn();
+const mockDeleteCredential = jest.fn();
 
-// Import modules
-import { ShopifySetupAgent } from '@/lib/autonomous/agents/shopify-setup-agent';
-import { getCredential } from '@/lib/autonomous/security/credential-vault-helpers';
+// Mock BOTH modules (credential-vault re-exports from credential-vault-helpers)
+jest.mock('@/lib/autonomous/security/credential-vault-helpers', () => ({
+  __esModule: true,
+  getCredential: mockGetCredential,
+  storeCredential: mockStoreCredential,
+  deleteCredential: mockDeleteCredential,
+}));
 
-// Type the mock properly
-const mockGetCredential = jest.mocked(getCredential);
+jest.mock('@/lib/autonomous/security/credential-vault', () => ({
+  __esModule: true,
+  getCredential: mockGetCredential,
+  storeCredential: mockStoreCredential,
+  deleteCredential: mockDeleteCredential,
+  getCredentialVault: jest.fn(),
+  CredentialVault: jest.fn(),
+}));
+
+// Import ShopifySetupAgent using require() to ensure mocks are applied
+// This is critical - ES6 imports are hoisted and load before mocks
+const { ShopifySetupAgent } = require('@/lib/autonomous/agents/shopify-setup-agent');
 
 describe('ShopifySetupAgent.getCredentials', () => {
   const organizationId = 'org-123';
   const storeUrl = 'https://demo.myshopify.com';
-  let agent: ShopifySetupAgent;
+  let agent: typeof ShopifySetupAgent;
 
   beforeEach(() => {
     jest.clearAllMocks();
