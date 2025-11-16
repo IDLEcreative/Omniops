@@ -19,7 +19,9 @@ import { WooCommerceProvider } from '@/lib/agents/providers/woocommerce-provider
 import type { WooCommerceAPI } from '@/lib/woocommerce-api';
 
 import '@/__tests__/lib/agents/providers/woocommerce-tests/order-lookup.test';
-import '@/__tests__/lib/agents/providers/woocommerce-tests/product-search.test';
+import '@/__tests__/lib/agents/providers/woocommerce-tests/product-search-happy-path.test';
+import '@/__tests__/lib/agents/providers/woocommerce-tests/product-search-edge-cases.test';
+import '@/__tests__/lib/agents/providers/woocommerce-tests/product-search-dependency-injection.test';
 import '@/__tests__/lib/agents/providers/woocommerce-tests/stock-details.test';
 
 describe('WooCommerceProvider', () => {
