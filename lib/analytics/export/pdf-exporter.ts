@@ -69,12 +69,12 @@ export async function exportToPDF(
   yPos += 10;
 
   const summaryData: any[] = [];
-  if (messageAnalytics) {
+  if (messageAnalytics && messageAnalytics.totalMessages > 0) {
     summaryData.push(['Total Messages', messageAnalytics.totalMessages.toString()]);
     summaryData.push(['Satisfaction Score', `${messageAnalytics.satisfactionScore.toFixed(1)} / 100`]);
     summaryData.push(['Resolution Rate', `${(messageAnalytics.resolutionRate * 100).toFixed(1)}%`]);
   }
-  if (userAnalytics) {
+  if (userAnalytics && userAnalytics.total_unique_users > 0) {
     summaryData.push(['Total Unique Users', userAnalytics.total_unique_users.toString()]);
     summaryData.push(['Growth Rate', `${(userAnalytics.growth.growth_rate * 100).toFixed(1)}%`]);
     summaryData.push(['Conversion Rate', `${(userAnalytics.shopping_behavior.conversion_rate * 100).toFixed(1)}%`]);
@@ -92,7 +92,7 @@ export async function exportToPDF(
   }
 
   // Message Analytics Section
-  if (includeMessageAnalytics && messageAnalytics) {
+  if (includeMessageAnalytics && messageAnalytics && messageAnalytics.totalMessages > 0) {
     if (yPos > 240) {
       doc.addPage();
       yPos = 20;
@@ -122,7 +122,7 @@ export async function exportToPDF(
   }
 
   // User Analytics Section
-  if (includeUserAnalytics && userAnalytics) {
+  if (includeUserAnalytics && userAnalytics && userAnalytics.total_unique_users > 0) {
     if (yPos > 240) {
       doc.addPage();
       yPos = 20;

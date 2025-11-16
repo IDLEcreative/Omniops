@@ -51,7 +51,7 @@ export function exportToCSV(
   sections.push('');
 
   // Message Analytics Summary
-  if (includeMessageAnalytics && messageAnalytics) {
+  if (includeMessageAnalytics && messageAnalytics && messageAnalytics.totalMessages > 0) {
     sections.push('## Message Analytics');
     sections.push('Metric,Value');
     sections.push(`Total Messages,${messageAnalytics.totalMessages}`);
@@ -65,7 +65,7 @@ export function exportToCSV(
   }
 
   // User Analytics Summary
-  if (includeUserAnalytics && userAnalytics) {
+  if (includeUserAnalytics && userAnalytics && userAnalytics.total_unique_users > 0) {
     sections.push('## User Analytics');
     sections.push('Metric,Value');
     sections.push(`Total Unique Users,${userAnalytics.total_unique_users}`);

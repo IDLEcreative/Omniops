@@ -46,14 +46,14 @@ export async function exportToExcel(
   XLSX.utils.book_append_sheet(workbook, summarySheet, 'Summary');
 
   // Sheet 2: Message Analytics
-  if (includeMessageAnalytics && messageAnalytics) {
+  if (includeMessageAnalytics && messageAnalytics && messageAnalytics.totalMessages > 0) {
     const messageData = createMessageAnalyticsSheet(messageAnalytics);
     const messageSheet = XLSX.utils.aoa_to_sheet(messageData);
     XLSX.utils.book_append_sheet(workbook, messageSheet, 'Message Analytics');
   }
 
   // Sheet 3: User Analytics
-  if (includeUserAnalytics && userAnalytics) {
+  if (includeUserAnalytics && userAnalytics && userAnalytics.total_unique_users > 0) {
     const userData = createUserAnalyticsSheet(userAnalytics);
     const userSheet = XLSX.utils.aoa_to_sheet(userData);
     XLSX.utils.book_append_sheet(workbook, userSheet, 'User Analytics');
@@ -107,7 +107,7 @@ function createSummarySheet(
   data.push([]); // Empty row
 
   // Message Metrics
-  if (messageAnalytics) {
+  if (messageAnalytics && messageAnalytics.totalMessages > 0) {
     data.push(['Message Analytics']);
     data.push(['Metric', 'Value']);
     data.push(['Total Messages', messageAnalytics.totalMessages]);
@@ -121,7 +121,7 @@ function createSummarySheet(
   }
 
   // User Metrics
-  if (userAnalytics) {
+  if (userAnalytics && userAnalytics.total_unique_users > 0) {
     data.push(['User Analytics']);
     data.push(['Metric', 'Value']);
     data.push(['Total Unique Users', userAnalytics.total_unique_users]);
