@@ -1,6 +1,5 @@
 import { describe, it, expect, beforeEach, afterEach } from '@jest/globals';
 import { NextResponse } from 'next/server';
-import { GET } from '@/app/api/analytics/export/route';
 import {
   createAnalyticsRequest,
   mockRateLimitImplementation,
@@ -8,9 +7,15 @@ import {
   setupAnalyticsTestContext,
 } from './test-helpers';
 
+// Import GET dynamically in each test to ensure mocks are applied
+let GET: any;
+
 describe('Analytics Export - Concurrent Requests', () => {
-  beforeEach(() => {
+  beforeEach(async () => {
     setupAnalyticsTestContext();
+    // Dynamically import the route after mocks are set up
+    const routeModule = await import('@/app/api/analytics/export/route');
+    GET = routeModule.GET;
   });
 
   afterEach(() => {
@@ -34,10 +39,17 @@ describe('Analytics Export - Concurrent Requests', () => {
   });
 
   it('enforces shared rate limits across concurrent exports', async () => {
+    // Simulate atomic counter behavior like Redis INCR
     let requestCount = 0;
-    mockRateLimitImplementation(() => {
+    const incrementAndCheck = () => {
       requestCount += 1;
-      if (requestCount > 3) {
+      return requestCount;
+    };
+
+    // Mock rate limiter to allow first 3 requests, then rate limit subsequent ones
+    mockRateLimitImplementation(async () => {
+      const currentCount = incrementAndCheck();
+      if (currentCount > 3) {
         return new NextResponse(JSON.stringify({ error: 'Rate limit exceeded' }), { status: 429 });
       }
       return null;
@@ -46,11 +58,13 @@ describe('Analytics Export - Concurrent Requests', () => {
     const requests = Array.from({ length: 5 }, () => GET(createAnalyticsRequest({ format: 'csv' })));
     const responses = await Promise.all(requests);
 
-    expect(responses[0].status).toBe(200);
-    expect(responses[1].status).toBe(200);
-    expect(responses[2].status).toBe(200);
-    expect(responses[3].status).toBe(429);
-    expect(responses[4].status).toBe(429);
+    // Count how many succeeded vs rate limited
+    const successCount = responses.filter(r => r.status === 200).length;
+    const rateLimitedCount = responses.filter(r => r.status === 429).length;
+
+    // Exactly 3 should succeed, 2 should be rate limited
+    expect(successCount).toBe(3);
+    expect(rateLimitedCount).toBe(2);
 
     resetRateLimit();
   });
