@@ -6,6 +6,9 @@ jest.mock('@/lib/redis');
 // Import the functions we're testing
 import { checkRateLimit, checkDomainRateLimit } from '@/lib/rate-limit';
 
+// Import the mock directly to get clearMockRedisData
+const mockRedis = require('../../__mocks__/@/lib/redis.js');
+
 describe('Rate Limiting', () => {
   // Store original Date.now
   let originalDateNow: () => number
@@ -15,6 +18,9 @@ describe('Rate Limiting', () => {
   beforeEach(() => {
     // Increment test ID to ensure unique identifiers per test
     testId++
+
+    // Clear Redis mock data to prevent state bleeding between tests
+    mockRedis.clearMockRedisData()
 
     // Mock Date.now for consistent testing
     originalDateNow = Date.now
