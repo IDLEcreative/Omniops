@@ -57,9 +57,9 @@ describe('ChatWidget - Error Handling', () => {
         })
       );
 
-      const input = screen.getByLabelText('Message input');
+      const input = await waitFor(() => screen.getByLabelText('Type your message...'));
       await user.type(input, 'This will fail');
-      await user.click(screen.getByLabelText('Send message'));
+      await user.click(screen.getByLabelText('Send'));
 
       await waitFor(() => {
         expect(screen.getByText('Sorry, I encountered an error. Please try again.')).toBeInTheDocument();
@@ -75,9 +75,9 @@ describe('ChatWidget - Error Handling', () => {
         })
       );
 
-      const input = screen.getByLabelText('Message input');
+      const input = await waitFor(() => screen.getByLabelText('Type your message...'));
       await user.type(input, 'Network error test');
-      await user.click(screen.getByLabelText('Send message'));
+      await user.click(screen.getByLabelText('Send'));
 
       await waitFor(() => {
         expect(screen.getByText('Sorry, I encountered an error. Please try again.')).toBeInTheDocument();
@@ -95,9 +95,9 @@ describe('ChatWidget - Error Handling', () => {
         })
       );
 
-      const input = screen.getByLabelText('Message input');
+      const input = await waitFor(() => screen.getByLabelText('Type your message...'));
       await user.type(input, 'Test');
-      await user.click(screen.getByLabelText('Send message'));
+      await user.click(screen.getByLabelText('Send'));
 
       await waitFor(() => {
         expect(screen.getByText('Sorry, I encountered an error. Please try again.')).toBeInTheDocument();
@@ -118,9 +118,9 @@ describe('ChatWidget - Error Handling', () => {
         })
       );
 
-      const input = screen.getByLabelText('Message input');
+      const input = await waitFor(() => screen.getByLabelText('Type your message...'));
       await user.type(input, 'Test');
-      await user.click(screen.getByLabelText('Send message'));
+      await user.click(screen.getByLabelText('Send'));
 
       await waitFor(() => {
         expect(screen.getByText('Sorry, I encountered an error. Please try again.')).toBeInTheDocument();
@@ -139,9 +139,9 @@ describe('ChatWidget - Error Handling', () => {
         })
       );
 
-      const input = screen.getByLabelText('Message input');
+      const input = await waitFor(() => screen.getByLabelText('Type your message...'));
       await user.type(input, 'Test');
-      await user.click(screen.getByLabelText('Send message'));
+      await user.click(screen.getByLabelText('Send'));
 
       await waitFor(() => {
         expect(screen.getByText('Sorry, I encountered an error. Please try again.')).toBeInTheDocument();
@@ -160,9 +160,9 @@ describe('ChatWidget - Error Handling', () => {
         })
       );
 
-      const input = screen.getByLabelText('Message input');
+      const input = await waitFor(() => screen.getByLabelText('Type your message...'));
       await user.type(input, 'Test');
-      await user.click(screen.getByLabelText('Send message'));
+      await user.click(screen.getByLabelText('Send'));
 
       await waitFor(() => {
         expect(screen.getByText('Sorry, I encountered an error. Please try again.')).toBeInTheDocument();
@@ -182,9 +182,9 @@ describe('ChatWidget - Error Handling', () => {
         })
       );
 
-      const input = screen.getByLabelText('Message input');
+      const input = await waitFor(() => screen.getByLabelText('Type your message...'));
       await user.type(input, 'Test');
-      await user.click(screen.getByLabelText('Send message'));
+      await user.click(screen.getByLabelText('Send'));
 
       await waitFor(() => {
         expect(screen.getByText('Sorry, I encountered an error. Please try again.')).toBeInTheDocument();
@@ -202,9 +202,9 @@ describe('ChatWidget - Error Handling', () => {
         })
       );
 
-      const input = screen.getByLabelText('Message input');
+      const input = await waitFor(() => screen.getByLabelText('Type your message...'));
       await user.type(input, 'Test');
-      await user.click(screen.getByLabelText('Send message'));
+      await user.click(screen.getByLabelText('Send'));
 
       await waitFor(() => {
         expect(screen.getByText('Sorry, I encountered an error. Please try again.')).toBeInTheDocument();
@@ -226,9 +226,9 @@ describe('ChatWidget - Error Handling', () => {
         })
       );
 
-      const input = screen.getByLabelText('Message input');
+      const input = await waitFor(() => screen.getByLabelText('Type your message...'));
       await user.type(input, 'First attempt');
-      await user.click(screen.getByLabelText('Send message'));
+      await user.click(screen.getByLabelText('Send'));
 
       await waitFor(() => {
         expect(screen.getByText('Sorry, I encountered an error. Please try again.')).toBeInTheDocument();
@@ -247,7 +247,7 @@ describe('ChatWidget - Error Handling', () => {
 
       // Second attempt should succeed
       await user.type(input, 'Second attempt');
-      await user.click(screen.getByLabelText('Send message'));
+      await user.click(screen.getByLabelText('Send'));
 
       await waitFor(() => {
         expect(screen.getByText('Second attempt')).toBeInTheDocument();
