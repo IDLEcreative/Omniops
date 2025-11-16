@@ -48,8 +48,6 @@ const customJestConfig = {
     '^@/lib/autonomous/security/consent-operations$': '<rootDir>/__mocks__/@/lib/autonomous/security/consent-operations.ts',
     '^@/lib/autonomous/security/consent-manager$': '<rootDir>/__mocks__/@/lib/autonomous/security/consent-manager.ts',
     '^@/lib/autonomous/security/audit-logger$': '<rootDir>/__mocks__/@/lib/autonomous/security/audit-logger.ts',
-    '^@/lib/autonomous/security/credential-vault$': '<rootDir>/__mocks__/@/lib/autonomous/security/credential-vault.ts',
-    '^@/lib/autonomous/security/credential-vault-helpers$': '<rootDir>/__mocks__/@/lib/autonomous/security/credential-vault-helpers.ts',
     '^@/lib/autonomous/core/operation-service$': '<rootDir>/__mocks__/@/lib/autonomous/core/operation-service.ts',
     '^@/lib/encryption/crypto-core$': '<rootDir>/__mocks__/@/lib/encryption/crypto-core.ts',
     '^@/lib/woocommerce-full$': '<rootDir>/__mocks__/@/lib/woocommerce-full.ts',
