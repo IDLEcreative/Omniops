@@ -16,15 +16,18 @@ setupTestEnvironment()
 setupWindowMocks()
 
 // Mock @/lib/supabase-server FIRST before any imports
+// eslint-disable-next-line @typescript-eslint/no-require-imports
 jest.mock('@/lib/supabase-server', () => require('./mocks/supabase-mock'));
 
 // Also mock @/lib/supabase/server with the same implementation
 jest.mock('@/lib/supabase/server', () => jest.requireMock('@/lib/supabase-server'));
 
 // Mock ioredis FIRST to prevent real Redis connections during test imports
+// eslint-disable-next-line @typescript-eslint/no-require-imports
 jest.mock('ioredis', () => require('./mocks/redis-mock'));
 
 // Mock OpenAI to avoid browser detection issues in tests
+// eslint-disable-next-line @typescript-eslint/no-require-imports
 jest.mock('openai', () => require('./mocks/openai-mock'));
 
 // Mock Next.js router

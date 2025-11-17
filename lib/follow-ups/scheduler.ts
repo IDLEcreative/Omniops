@@ -5,7 +5,7 @@
  * Supports email, in-app notifications, and SMS (future)
  */
 
-import type { SupabaseClient } from '@supabase/supabase-js';
+import type { SupabaseClient } from '@/lib/supabase/server';
 import type { FollowUpCandidate, FollowUpReason } from './detector';
 import { generateFollowUpMessage } from './message-templates';
 

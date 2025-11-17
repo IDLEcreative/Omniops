@@ -163,13 +163,13 @@ export async function processAIConversation(params: AIProcessorParams): Promise<
 
       allSearchResults.push(...result.results);
 
-      // Collect products from WooCommerce/Shopify tool results
+      // Collect products from ALL tool results (API and semantic search)
       // Products can be in result.results[].metadata (API) or parsed from embeddings (content/url)
-      if (result.source === 'woocommerce-api' || result.source === 'woocommerce' || result.source === 'shopify') {
-        console.log(`[Shopping Debug] Checking ${result.results.length} results from ${result.source}`);
-        console.log('[Shopping Debug] First result keys:', result.results[0] ? Object.keys(result.results[0]) : []);
-        console.log('[Shopping Debug] First result sample:', result.results[0] ? JSON.stringify(result.results[0]).substring(0, 200) : 'no results');
-        for (const searchResult of result.results) {
+      console.log(`[Shopping Debug] Checking ${result.results.length} results from ${result.source}`);
+      console.log('[Shopping Debug] First result keys:', result.results[0] ? Object.keys(result.results[0]) : []);
+      console.log('[Shopping Debug] First result sample:', result.results[0] ? JSON.stringify(result.results[0]).substring(0, 200) : 'no results');
+
+      for (const searchResult of result.results) {
           console.log('[Shopping Debug] Processing result:', {
             hasMetadata: !!searchResult.metadata,
             hasMetadataId: !!(searchResult.metadata && searchResult.metadata.id),
@@ -206,9 +206,8 @@ export async function processAIConversation(params: AIProcessorParams): Promise<
           } else {
             console.log('[Shopping Debug] ❌ No case matched for this result');
           }
-        }
-        console.log('[Shopping Debug] Total products collected so far:', allProducts.length);
       }
+      console.log('[Shopping Debug] Total products collected so far:', allProducts.length);
     }
 
     // Format results for AI

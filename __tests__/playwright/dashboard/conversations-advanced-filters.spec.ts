@@ -167,7 +167,7 @@ test.describe('Advanced Conversation Filters', () => {
     await applyFilters(page);
 
     // Verify filters are applied
-    let filteredCount = MOCK_CONVERSATIONS.filter(
+    const filteredCount = MOCK_CONVERSATIONS.filter(
       c => c.sentiment === 'positive' && c.domain === 'example.com'
     ).length;
     await verifyConversationResults(page, filteredCount);

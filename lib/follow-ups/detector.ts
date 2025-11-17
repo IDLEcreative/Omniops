@@ -5,7 +5,7 @@
  * Triggers: abandoned conversations, unresolved issues, low satisfaction
  */
 
-import type { SupabaseClient } from '@supabase/supabase-js';
+import type { SupabaseClient } from '@/lib/supabase/server';
 
 export type FollowUpReason =
   | 'abandoned_conversation'

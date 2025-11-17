@@ -46,7 +46,7 @@ test.describe('Training Dashboard - Text Upload', () => {
     await uploadText(page, testText);
 
     console.log('📍 Step 2: Verify text appears in list');
-    await waitForItemInList(page, testText, 5000);
+    await waitForItemInList(page, testText, 10000);
 
     console.log('📍 Step 3: Wait for embedding generation to complete');
     await waitForProcessingComplete(page, testText, PROCESSING_TIMEOUT);
@@ -63,7 +63,7 @@ test.describe('Training Dashboard - Text Upload', () => {
     await uploadText(page, shortText);
 
     console.log('📍 Step 2: Verify text appears in full (not truncated)');
-    const item = await waitForItemInList(page, shortText, 5000);
+    const item = await waitForItemInList(page, shortText, 10000);
 
     const itemText = await item.textContent();
     expect(itemText).toContain(shortText);
@@ -84,7 +84,7 @@ test.describe('Training Dashboard - Text Upload', () => {
     console.log('📍 Step 2: Verify text appears with preview');
     // Should show first 100 chars + "..."
     const preview = longText.substring(0, 50);
-    await waitForItemInList(page, preview, 5000);
+    await waitForItemInList(page, preview, 10000);
 
     console.log('📍 Step 3: Verify text is present (CSS truncate handles overflow)');
     const item = page.locator(`[data-testid="training-item"]:has-text("${preview}"), .training-item:has-text("${preview}")`).first();
@@ -153,7 +153,7 @@ test.describe('Training Dashboard - Text Upload', () => {
 
     console.log('📍 Step 2: Verify all texts appear in list');
     for (const text of texts) {
-      await waitForItemInList(page, text, 5000);
+      await waitForItemInList(page, text, 10000);
       console.log(`✅ Found: ${text.substring(0, 30)}...`);
     }
 

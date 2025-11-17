@@ -69,14 +69,16 @@ async function handlePost(request: NextRequest) {
       );
     }
 
-    // Get the authenticated user's organization ID
+    // Get the authenticated user's ID and organization ID
+    const { data: { user } } = await userSupabase.auth.getUser();
+    const userId = user?.id;
     const organizationId = await getOrganizationId(userSupabase);
 
     // Route to appropriate handler
     if (!scrapeRequest.crawl) {
-      return await handleSinglePageScrape(scrapeRequest, supabase, organizationId);
+      return await handleSinglePageScrape(scrapeRequest, supabase, organizationId, userId);
     } else {
-      return await handleWebsiteCrawl(scrapeRequest, supabase, organizationId);
+      return await handleWebsiteCrawl(scrapeRequest, supabase, organizationId, userId);
     }
   } catch (error) {
     console.error('Scrape API error:', error);

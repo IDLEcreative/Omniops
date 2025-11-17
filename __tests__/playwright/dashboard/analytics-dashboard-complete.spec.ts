@@ -270,20 +270,20 @@ test.describe('Analytics Dashboard - Complete Feature Coverage', () => {
     await waitForAnalyticsAPI(page, 1500);
     console.log('✅ Data refreshed');
 
-    // Switch to Business Intelligence
-    await switchTab(page, 'business intelligence');
-    await waitForAnalyticsAPI(page, 2000);
-    console.log('✅ Business Intelligence tab loaded');
-
-    // Enable auto-refresh
+    // Enable auto-refresh (on Overview tab)
     await page.evaluate(() => window.scrollTo(0, 0));
     await page.waitForTimeout(500);
     await toggleAutoRefresh(page, true);
     console.log('✅ Auto-refresh enabled');
 
-    // Open export dropdown
+    // Test export dropdown (on Overview tab)
     await testExportDropdown(page);
     console.log('✅ Export dropdown tested');
+
+    // Switch to Business Intelligence
+    await switchTab(page, 'business intelligence');
+    await waitForAnalyticsAPI(page, 2000);
+    console.log('✅ Business Intelligence tab loaded');
 
     // Switch back to Overview
     await switchTab(page, 'overview');

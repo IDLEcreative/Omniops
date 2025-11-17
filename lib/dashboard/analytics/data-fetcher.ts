@@ -2,7 +2,7 @@
  * Data fetching utilities for analytics dashboard
  */
 
-import type { SupabaseClient } from '@supabase/supabase-js';
+import type { SupabaseClient } from '@/lib/supabase/server';
 
 export interface FetchMessagesOptions {
   startDate: Date;

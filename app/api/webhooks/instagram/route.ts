@@ -160,7 +160,7 @@ async function handleIncomingMessage(messaging: any) {
   console.log('✅ Found customer:', matchingCreds.customer_id);
 
   // Get or create conversation
-  const { data: conversation, error: convError } = await supabase
+  const { data: conversationData, error: convError } = await supabase
     .from('conversations')
     .select('*')
     .eq('customer_id', matchingCreds.customer_id)
@@ -174,6 +174,8 @@ async function handleIncomingMessage(messaging: any) {
     console.error('❌ Error fetching conversation:', convError);
     return;
   }
+
+  let conversation = conversationData;
 
   if (!conversation) {
     console.log('📍 Creating new Instagram conversation');
@@ -212,8 +214,13 @@ async function handleIncomingMessage(messaging: any) {
       return;
     }
 
+    if (!newConv) {
+      console.error('❌ Failed to create conversation: no data returned');
+      return;
+    }
+
     conversation = newConv;
-    console.log('✅ Created conversation:', conversation!.id);
+    console.log('✅ Created conversation:', conversation.id);
   }
 
   // Save incoming message
@@ -259,8 +266,13 @@ async function handleIncomingMessage(messaging: any) {
   console.log('📍 Processing message with AI...');
 
   // Process with AI
-  const openai = getOpenAIClient();
-  const telemetry = new ChatTelemetry(null, customerConfig.domain);
+  const openaiClient = getOpenAIClient();
+  if (!openaiClient) {
+    console.error('❌ Failed to initialize OpenAI client');
+    return;
+  }
+  const sessionId = `instagram-${conversation!.id}-${Date.now()}`;
+  const telemetry = new ChatTelemetry(sessionId, customerConfig.domain);
 
   try {
     // Prepare conversation messages for AI processor
@@ -283,7 +295,7 @@ async function handleIncomingMessage(messaging: any) {
       config: customerConfig,
       widgetConfig: null,
       telemetry,
-      openaiClient: openai,
+      openaiClient: openaiClient,
       useGPT5Mini: false,
       dependencies: {
         getCommerceProvider: null,

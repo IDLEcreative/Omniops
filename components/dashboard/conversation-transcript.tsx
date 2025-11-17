@@ -151,7 +151,7 @@ interface MessageProps {
  * - message.id (message identity)
  * - message.content (displayed text)
  * - message.role (affects styling/layout)
- * - message.created_at (timestamp display)
+ * - message.timestamp (timestamp display)
  * - message.metadata.sources (optional source links)
  *
  * This optimization is critical for conversations with 50+ messages where
@@ -187,7 +187,7 @@ const Message = ({ message }: MessageProps) => {
             {isUser ? 'Customer' : 'Assistant'}
           </Badge>
           <span className="text-xs text-muted-foreground">
-            {formatTimestamp(message.created_at)}
+            {formatTimestamp(message.timestamp)}
           </span>
         </div>
 
@@ -236,7 +236,7 @@ const MemoizedMessage = memo(Message, (prevProps, nextProps) => {
     prev.id !== next.id ||
     prev.content !== next.content ||
     prev.role !== next.role ||
-    prev.created_at !== next.created_at
+    prev.timestamp !== next.timestamp
   ) {
     return false; // Props changed, re-render needed
   }

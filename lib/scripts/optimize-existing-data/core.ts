@@ -1,3 +1,4 @@
+// eslint-disable-next-line no-restricted-imports
 import { createClient } from '@supabase/supabase-js';
 import { AIContentExtractor } from '../../../lib/ai-content-extractor';
 import { ContentDeduplicator } from '../../../lib/content-deduplicator';

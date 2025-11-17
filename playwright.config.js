@@ -44,7 +44,17 @@ const playwrightConfig = {
   // Global setup and teardown
   globalSetup: require.resolve('./test-utils/playwright-global-setup.js'),
   globalTeardown: require.resolve('./test-utils/playwright-global-teardown.js'),
-  
+
+  // Automatic dev server management
+  webServer: {
+    command: 'npm run dev',
+    url: 'http://localhost:3000',
+    timeout: 120000, // 2 minutes for initial compilation
+    reuseExistingServer: !process.env.CI,
+    stdout: 'pipe',
+    stderr: 'pipe',
+  },
+
   // Use this to configure the default browser settings for all tests
   use: {
     // Base URL for relative paths

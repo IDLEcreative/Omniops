@@ -5,7 +5,7 @@
  * Metrics: Response rate, conversion rate, ROI
  */
 
-import type { SupabaseClient } from '@supabase/supabase-js';
+import type { SupabaseClient } from '@/lib/supabase/server';
 import type { FollowUpReason } from './detector';
 
 export interface FollowUpMetrics {

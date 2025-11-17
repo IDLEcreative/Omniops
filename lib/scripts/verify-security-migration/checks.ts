@@ -2,7 +2,7 @@
  * Security Migration Verification - Check Functions
  */
 
-import type { SupabaseClient } from '@supabase/supabase-js';
+import type { SupabaseClient } from '@/lib/supabase/server';
 
 export interface CheckResult {
   name: string;

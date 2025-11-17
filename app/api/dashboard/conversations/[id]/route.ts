@@ -147,8 +147,8 @@ export async function GET(
         id: msg.id,
         role: validatedRole,
         content: msg.content,
+        timestamp: msg.created_at,
         metadata: msg.metadata || undefined,
-        created_at: msg.created_at,
       };
     });
 

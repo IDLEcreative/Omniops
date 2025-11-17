@@ -9,6 +9,7 @@ import {
 } from './services';
 import { processCrawlResults } from './crawl-processor';
 import type { ScrapeRequest } from './validators';
+import { logger } from '@/lib/logger';
 
 /**
  * Handle single page scraping
@@ -16,7 +17,8 @@ import type { ScrapeRequest } from './validators';
 export async function handleSinglePageScrape(
   request: ScrapeRequest,
   supabase: any,
-  organizationId?: string
+  organizationId?: string,
+  userId?: string
 ): Promise<NextResponse> {
   const { url, turbo } = request;
 
@@ -42,14 +44,15 @@ export async function handleSinglePageScrape(
       .from('domains')
       .insert({
         domain,
-        organization_id: organizationId
+        organization_id: organizationId,
+        user_id: userId  // Always set user_id for domain ownership
       })
       .select()
       .single();
 
     if (createError) {
-      console.error('Error creating domain:', createError);
-      throw createError;
+      logger.error('Failed to create domain', createError, { domain });
+      throw new Error(`Failed to create domain ${domain}: ${createError.message}`);
     }
     domainData = created;
   }
@@ -76,7 +79,7 @@ export async function handleSinglePageScrape(
   // Generate embeddings for the content with deduplication
   const enrichedContent = enrichContent(pageData.content, pageData.metadata);
   const chunks = splitIntoChunks(enrichedContent);
-  console.log(`Generated ${chunks.length} unique chunks for ${url}`);
+  logger.info('Generated chunks for URL', { chunkCount: chunks.length, url });
 
   const embeddings = await generateEmbeddings(chunks);
 
@@ -109,7 +112,8 @@ export async function handleSinglePageScrape(
 export async function handleWebsiteCrawl(
   request: ScrapeRequest,
   supabase: any,
-  organizationId?: string
+  organizationId?: string,
+  userId?: string
 ): Promise<NextResponse> {
   const { url, max_pages, turbo } = request;
 

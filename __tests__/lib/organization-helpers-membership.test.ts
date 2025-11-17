@@ -10,19 +10,39 @@ import {
   isRoleGreaterOrEqual,
   calculateSeatUsage
 } from '@/lib/organization-helpers';
-import { createServerClient } from '@/lib/supabase/server';
 import {
   createMockSupabaseClient,
   mockResponses,
   testScenarios
 } from './__mocks__/organization-test-helpers';
 
+// Get the mocked createServerClient from the global mock (set up in jest.setup.js)
+const supabaseMock = jest.requireMock('@/lib/supabase/server');
+const { createServerClient } = supabaseMock;
+
+// Debug: Check what we're importing
+console.log('Organization helpers exports:', Object.keys({
+  checkUserPermission,
+  validateSeatAvailability,
+  canInviteMembers,
+  canManageOrganization,
+  canViewOrganization,
+  getRoleHierarchy,
+  isRoleGreaterOrEqual,
+  calculateSeatUsage
+}));
+console.log('checkUserPermission type:', typeof checkUserPermission);
+
 describe('Organization Helpers - Membership & Permissions', () => {
   let mockSupabase: any;
 
   beforeEach(() => {
     mockSupabase = createMockSupabaseClient();
-    (createServerClient as jest.Mock).mockReturnValue(mockSupabase);
+
+    // Use mockResolvedValue for async functions
+    if (jest.isMockFunction(createServerClient)) {
+      createServerClient.mockResolvedValue(mockSupabase);
+    }
   });
 
   afterEach(() => {

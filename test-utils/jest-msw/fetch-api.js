@@ -315,6 +315,7 @@ function ensureFetch() {
   if (process.env.E2E_TEST === 'true') {
     console.log('[Fetch API] E2E mode detected, loading undici...');
     try {
+      // eslint-disable-next-line @typescript-eslint/no-require-imports
       const { fetch: undiciFetch, Headers: UndiciHeaders, Request: UndiciRequest, Response: UndiciResponse } = require('undici');
       global.fetch = undiciFetch;
       global.Headers = UndiciHeaders;

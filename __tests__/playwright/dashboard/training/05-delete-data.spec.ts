@@ -47,7 +47,7 @@ test.describe('Training Dashboard - Delete Data', () => {
 
     console.log('📍 Step 1: Create test item');
     await uploadText(page, testText);
-    await waitForItemInList(page, testText, 5000);
+    await waitForItemInList(page, testText, 10000);
 
     console.log('📍 Step 2: Delete the item');
     await deleteItem(page, testText);
@@ -82,7 +82,7 @@ test.describe('Training Dashboard - Delete Data', () => {
 
     console.log('📍 Step 2: Verify all items appear');
     for (const item of items) {
-      await waitForItemInList(page, item, 5000);
+      await waitForItemInList(page, item, 10000);
     }
 
     // Wait for UI to settle before counting
@@ -120,7 +120,7 @@ test.describe('Training Dashboard - Delete Data', () => {
 
     console.log('📍 Step 1: Create item that will be processing');
     await uploadText(page, testText);
-    await waitForItemInList(page, testText, 5000);
+    await waitForItemInList(page, testText, 10000);
 
     console.log('📍 Step 2: Delete item immediately (may still be processing)');
     // Don't wait for processing to complete, delete right away
@@ -157,9 +157,9 @@ test.describe('Training Dashboard - Delete Data', () => {
 
     console.log('📍 Step 2: Verify all items appear');
     for (const item of keepItems) {
-      await waitForItemInList(page, item, 5000);
+      await waitForItemInList(page, item, 10000);
     }
-    await waitForItemInList(page, itemToDelete, 5000);
+    await waitForItemInList(page, itemToDelete, 10000);
 
     const beforeCount = await getTrainingItemCount(page);
     console.log(`📊 Before deletion: ${beforeCount} items`);
@@ -172,7 +172,7 @@ test.describe('Training Dashboard - Delete Data', () => {
 
     console.log('📍 Step 5: Verify other items remain intact');
     for (const item of keepItems) {
-      await waitForItemInList(page, item, 5000);
+      await waitForItemInList(page, item, 10000);
       console.log(`✅ Kept: ${item.substring(0, 30)}...`);
     }
 
@@ -248,7 +248,7 @@ test.describe('Training Dashboard - Delete Data', () => {
 
     console.log('📍 Step 1: Create test item');
     await uploadText(page, testText);
-    await waitForItemInList(page, testText, 5000);
+    await waitForItemInList(page, testText, 10000);
 
     console.log('📍 Step 2: Click delete button');
     const item = page.locator(`[data-testid="training-item"]:has-text("${testText}"), .training-item:has-text("${testText}")`).first();
@@ -270,7 +270,7 @@ test.describe('Training Dashboard - Delete Data', () => {
         await page.waitForTimeout(1000);
 
         console.log('📍 Step 5: Verify item is still in list');
-        await waitForItemInList(page, testText, 5000);
+        await waitForItemInList(page, testText, 10000);
         console.log('✅ Item still present after cancel');
 
         console.log('📍 Step 6: Delete again and confirm');

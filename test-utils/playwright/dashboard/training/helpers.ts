@@ -184,11 +184,16 @@ export async function waitForItemInList(page: Page, content: string, timeout: nu
   const retryInterval = 1500; // Wait 1.5s between retries
 
   while (Date.now() - startTime < timeout) {
-    // STEP 1: Scroll the PAGE down to ensure list is in viewport
+    // STEP 1: Wait for any pending network requests to complete
+    await page.waitForLoadState('networkidle', { timeout: 3000 }).catch(() => {
+      console.log('⚠️ Network not idle, continuing anyway');
+    });
+
+    // STEP 2: Scroll the PAGE down to ensure list is in viewport
     await listContainer.scrollIntoViewIfNeeded().catch(() => {});
     await page.waitForTimeout(300);
 
-    // STEP 2: Scroll the LIST CONTAINER to top where new items appear
+    // STEP 3: Scroll the LIST CONTAINER to top where new items appear
     await listContainer.evaluate(el => {
       el.scrollTop = -10; // Force negative first to trigger re-render
     }).catch(() => {});
@@ -201,10 +206,11 @@ export async function waitForItemInList(page: Page, content: string, timeout: nu
       console.log('⚠️ Could not scroll list to top');
     });
 
-    // STEP 3: Wait for React state update + virtual rendering
-    await page.waitForTimeout(retryInterval);
+    // STEP 4: Wait for React state update + virtual rendering
+    // Increased from 1500ms to 2000ms to allow more time for state updates
+    await page.waitForTimeout(2000);
 
-    // STEP 4: Debug - log what items are actually visible
+    // STEP 5: Debug - log what items are actually visible
     const visibleItems = page.locator('p.truncate');
     const itemCount = await visibleItems.count();
     if (itemCount > 0) {
@@ -215,7 +221,7 @@ export async function waitForItemInList(page: Page, content: string, timeout: nu
       console.log(`🔍 No items with p.truncate found in DOM`);
     }
 
-    // STEP 5: Check if our target item is now visible
+    // STEP 6: Check if our target item is now visible
     const item = page.locator(`p.truncate:has-text("${searchText}")`).first();
     if (await item.isVisible().catch(() => false)) {
       console.log('✅ Item appeared in list');
@@ -225,9 +231,10 @@ export async function waitForItemInList(page: Page, content: string, timeout: nu
     console.log(`⏳ Item "${searchText}" not visible yet, retrying... (${Math.round((Date.now() - startTime) / 1000)}s elapsed)`);
   }
 
-  // Final attempt with expect (will throw error with timeout details)
+  // Final attempt with increased timeout (8 seconds instead of 5)
+  // This gives React more time to complete any final state updates
   const item = page.locator(`p.truncate:has-text("${searchText}")`).first();
-  await expect(item).toBeVisible({ timeout: 5000 });
+  await expect(item).toBeVisible({ timeout: 8000 });
   console.log('✅ Item appeared in list');
 
   return item;

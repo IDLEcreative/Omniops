@@ -125,7 +125,10 @@ export function InputArea({
           <Type className="h-5 w-5" aria-hidden="true" />
         </button>
         <button
-          onClick={onSend}
+          onClick={() => {
+            console.log('[InputArea] 🖱️ SEND BUTTON CLICKED - input:', input, 'loading:', loading, 'disabled:', !input.trim() || loading);
+            onSend();
+          }}
           disabled={!input.trim() || loading}
           aria-label={t('chat.send')}
           className="p-2 flex items-center justify-center flex-shrink-0 text-gray-400 hover:text-white disabled:opacity-30 transition-colors duration-200 focus:outline-none bg-transparent border-0 rounded-md hover:bg-gray-800/50 disabled:hover:bg-transparent"

@@ -14,6 +14,14 @@ export interface TrainingData {
 }
 
 /**
+ * Type guard to validate training data status
+ */
+export function isValidTrainingStatus(status: unknown): status is TrainingData['status'] {
+  return typeof status === 'string' &&
+    ['pending', 'processing', 'completed', 'error'].includes(status);
+}
+
+/**
  * Normalize URL by adding https:// if no protocol specified
  */
 export function normalizeUrl(url: string): string {
@@ -131,9 +139,12 @@ export async function submitUrl(url: string): Promise<{ id: string; status: stri
   const data = await response.json();
 
   // handleSinglePageScrape returns { id, status, pages_scraped, message }
+  // Use type guard to validate status, fallback to 'completed' if invalid
+  const validStatus = isValidTrainingStatus(data.status) ? data.status : 'completed';
+
   return {
     id: data.id,
-    status: data.status || 'completed'
+    status: validStatus
   };
 }
 

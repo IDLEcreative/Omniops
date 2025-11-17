@@ -117,7 +117,11 @@ const eslintConfig = [
     }
   },
   {
-    files: ["lib/supabase/**/*", "lib/db-optimization/**/*"],
+    files: [
+      "lib/supabase/**/*",
+      "lib/db-optimization/**/*",
+      "app/api/dashboard/analytics/route.ts"
+    ],
     rules: {
       "no-restricted-imports": "off"
     }
@@ -129,7 +133,8 @@ const eslintConfig = [
       "test-utils/**/*",
       "**/test-utils/**/*",
       "__mocks__/**/*",
-      "**/__mocks__/**/*"
+      "**/__mocks__/**/*",
+      "app/widget-test/**/*"
     ],
     rules: {
       "no-restricted-imports": "off",

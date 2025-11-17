@@ -1,3 +1,4 @@
+// eslint-disable-next-line no-restricted-imports
 import { createClient } from '@supabase/supabase-js';
 
 export interface AnomalyResult {

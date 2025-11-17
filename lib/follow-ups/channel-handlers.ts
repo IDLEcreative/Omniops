@@ -5,7 +5,7 @@
  * (email, in-app notifications, SMS)
  */
 
-import type { SupabaseClient } from '@supabase/supabase-js';
+import type { SupabaseClient } from '@/lib/supabase/server';
 
 /**
  * Send email follow-up (placeholder - integrate with email service)

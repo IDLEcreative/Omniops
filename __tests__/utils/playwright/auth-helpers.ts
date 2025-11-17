@@ -59,8 +59,33 @@ export async function authenticateUser(
     }
   });
 
-  // Navigate to login page and wait for full load
-  await page.goto(`${BASE_URL}/login`, { waitUntil: 'networkidle' });
+  // Navigate to login page with retry logic for Next.js on-demand compilation
+  // First-time route compilation can take 5-10 seconds
+  let loginPageLoaded = false;
+  let retryCount = 0;
+  const maxRetries = 3;
+
+  while (!loginPageLoaded && retryCount < maxRetries) {
+    try {
+      console.log(`📍 Attempting navigation to /login (attempt ${retryCount + 1}/${maxRetries})`);
+      await page.goto(`${BASE_URL}/login`, {
+        waitUntil: 'networkidle',
+        timeout: 60000 // 60 seconds for initial compilation
+      });
+      loginPageLoaded = true;
+      console.log('✅ Successfully navigated to /login');
+    } catch (error) {
+      retryCount++;
+      if (retryCount < maxRetries) {
+        const waitTime = retryCount * 2000; // Exponential backoff: 2s, 4s
+        console.log(`⚠️ Navigation failed, retrying in ${waitTime}ms...`);
+        await page.waitForTimeout(waitTime);
+      } else {
+        console.error('❌ Navigation failed after all retries');
+        throw error;
+      }
+    }
+  }
 
   // Wait for React hydration by checking for interactive elements
   await page.waitForLoadState('domcontentloaded');

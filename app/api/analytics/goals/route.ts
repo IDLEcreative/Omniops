@@ -157,7 +157,7 @@ export async function PUT(request: NextRequest) {
 
     // 4. Build update object (only include fields that are provided)
     const updates: Partial<MetricGoal> = {};
-    if (target_value !== undefined) updates.target_value = target_value;
+    if (target_value !== undefined) updates.targetValue = target_value;
     if (period !== undefined) updates.period = period;
 
     if (Object.keys(updates).length === 0) {

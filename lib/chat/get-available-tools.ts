@@ -36,7 +36,7 @@ export async function checkToolAvailability(domain: string): Promise<ToolAvailab
       // Environment variables are only used for the DEFAULT_DOMAIN
       const isDefaultDomain = domain === process.env.TEST_DOMAIN ||
                              domain === process.env.DEFAULT_DOMAIN ||
-                             domain === 'thompsonseparts.co.uk'; // Primary customer
+                             domain === process.env.PRIMARY_CUSTOMER_DOMAIN; // Primary customer
 
       if (isDefaultDomain) {
         // Only use environment variables for the primary/test domain

@@ -12,7 +12,7 @@
  */
 
 import { createClient } from '@/lib/supabase/server';
-import type { SupabaseClient } from '@supabase/supabase-js';
+import type { SupabaseClient } from '@/lib/supabase/server';
 import { vectorSimilarityRecommendations } from './vector-similarity';
 import { collaborativeFilterRecommendations } from './collaborative-filter';
 import { contentBasedRecommendations } from './content-filter';

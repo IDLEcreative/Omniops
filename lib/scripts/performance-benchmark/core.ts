@@ -1,4 +1,5 @@
 // Use type-only import for SupabaseClient since this is a script
+// eslint-disable-next-line no-restricted-imports
 import type { SupabaseClient } from '@supabase/supabase-js';
 // Import the actual createClient from Supabase directly as this is a script, not production code
 // Scripts are allowed to use direct Supabase imports

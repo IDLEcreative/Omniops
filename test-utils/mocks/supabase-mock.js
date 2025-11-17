@@ -97,6 +97,15 @@ const __resetMockSupabaseClient = () => {
   currentMockClient = createMockSupabaseClient();
 };
 
+// Create independent mock functions for aliases (needed for tests that mock these directly)
+const createServerClient = jest.fn().mockImplementation(async () => {
+  const user = await currentMockClient.auth.getUser();
+  console.log('[MOCK] createServerClient (alias) called, returning client with user:', user.data.user?.id);
+  return currentMockClient;
+});
+
+const createServiceClient = jest.fn().mockImplementation(async () => currentMockClient);
+
 module.exports = {
   validateSupabaseEnv,
   createServiceRoleClient,
@@ -105,4 +114,7 @@ module.exports = {
   requireServiceRoleClient,
   __setMockSupabaseClient,
   __resetMockSupabaseClient,
+  // Export aliases as independent jest.fn() instances (matches lib/supabase/server.ts)
+  createServerClient,
+  createServiceClient,
 };

@@ -174,7 +174,7 @@ export async function PUT(request: NextRequest) {
       if (typeof annotation_date !== 'string') {
         return NextResponse.json({ error: 'annotation_date must be a string (ISO date)' }, { status: 400 });
       }
-      updates.annotation_date = annotation_date;
+      updates.date = annotation_date;
     }
 
     if (title !== undefined) {

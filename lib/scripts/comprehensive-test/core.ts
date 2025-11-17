@@ -3,7 +3,7 @@
  * Extracted from scripts/comprehensive-test.js
  */
 import * as crypto from 'node:crypto';
-import { SupabaseClient } from '@supabase/supabase-js';
+import type { SupabaseClient } from '@/lib/supabase/server';
 
 export interface TestPayload {
   message?: string;

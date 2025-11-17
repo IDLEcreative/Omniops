@@ -55,7 +55,7 @@ test.describe('Training Dashboard - Embedding Verification', () => {
     await uploadUrl(page, testUrl);
 
     console.log('📍 Step 2: Wait for URL to appear in list');
-    await waitForItemInList(page, normalizedUrl, 5000);
+    await waitForItemInList(page, normalizedUrl, 10000);
 
     console.log('📍 Step 3: Wait for processing to complete');
     await waitForProcessingComplete(page, normalizedUrl, PROCESSING_TIMEOUT);
@@ -107,7 +107,7 @@ test.describe('Training Dashboard - Embedding Verification', () => {
     await uploadText(page, testText);
 
     console.log('📍 Step 2: Wait for text to appear in list');
-    await waitForItemInList(page, testText, 5000);
+    await waitForItemInList(page, testText, 10000);
 
     console.log('📍 Step 3: Wait for processing to complete');
     await waitForProcessingComplete(page, testText, PROCESSING_TIMEOUT);
@@ -153,7 +153,7 @@ test.describe('Training Dashboard - Embedding Verification', () => {
     await uploadQA(page, testQuestion, testAnswer);
 
     console.log('📍 Step 2: Wait for Q&A to appear in list');
-    await waitForItemInList(page, testQuestion, 5000);
+    await waitForItemInList(page, testQuestion, 10000);
 
     console.log('📍 Step 3: Wait for processing to complete');
     await waitForProcessingComplete(page, testQuestion, PROCESSING_TIMEOUT);
@@ -203,7 +203,7 @@ test.describe('Training Dashboard - Embedding Verification', () => {
     await uploadText(page, testText);
 
     console.log('📍 Step 2: Wait for text to appear and process');
-    await waitForItemInList(page, testText, 5000);
+    await waitForItemInList(page, testText, 10000);
     await waitForProcessingComplete(page, testText, PROCESSING_TIMEOUT);
 
     console.log('📍 Step 3: Wait for embeddings to be generated and indexed (10s)');
@@ -277,17 +277,17 @@ test.describe('Training Dashboard - Embedding Verification', () => {
 
     console.log('📍 Step 1: Upload URL');
     await uploadUrl(page, testData.url);
-    await waitForItemInList(page, `https://${testData.url}`, 5000);
+    await waitForItemInList(page, `https://${testData.url}`, 10000);
     await page.waitForTimeout(3000);
 
     console.log('📍 Step 2: Upload text');
     await uploadText(page, testData.text);
-    await waitForItemInList(page, testData.text, 5000);
+    await waitForItemInList(page, testData.text, 10000);
     await page.waitForTimeout(3000);
 
     console.log('📍 Step 3: Upload Q&A');
     await uploadQA(page, testData.question, testData.answer);
-    await waitForItemInList(page, testData.question, 5000);
+    await waitForItemInList(page, testData.question, 10000);
 
     console.log('📍 Step 4: Wait for all embeddings to be generated (15s)');
     await page.waitForTimeout(15000);

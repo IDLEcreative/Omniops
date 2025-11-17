@@ -74,14 +74,18 @@ export async function GET(request: NextRequest) {
       comparison = null;
     }
 
-    // 8. Calculate user analytics
-    const userAnalytics = await calculateUserAnalytics(serviceSupabase, {
-      organizationId: membership.organization_id,
-      domains: allowedDomains,
-      startDate,
-      endDate: new Date(),
-      days
-    });
+    // 8. Fetch conversations for user analytics
+    const conversationsQuery = await serviceSupabase
+      .from('conversations')
+      .select('session_id, created_at, metadata')
+      .in('domain', allowedDomains)
+      .gte('created_at', startDate.toISOString())
+      .order('created_at', { ascending: false });
+
+    const conversations = conversationsQuery.data || [];
+
+    // Calculate user analytics
+    const userAnalytics = calculateUserAnalytics(conversations, { days });
 
     // 9. Detect anomalies (simplified - actual property mapping needed)
     const historicalData = await fetchHistoricalData(
@@ -113,7 +117,7 @@ export async function GET(request: NextRequest) {
       alerts: thresholdAlerts
     });
 
-    return addRateLimitHeaders(response);
+    return addRateLimitHeaders(response, user, 'dashboard');
   } catch (error) {
     console.error('Error fetching analytics:', error);
     return NextResponse.json(
@@ -145,6 +149,10 @@ async function fetchHistoricalData(
 
   messages.forEach((msg: any) => {
     const date = new Date(msg.created_at).toISOString().split('T')[0];
+    // Ensure date is defined before using as index
+    if (!date) {
+      return;
+    }
     if (!dailyMetrics[date]) {
       dailyMetrics[date] = {
         count: 0,
@@ -152,14 +160,17 @@ async function fetchHistoricalData(
         satisfaction: []
       };
     }
-    dailyMetrics[date].count++;
+    const metrics = dailyMetrics[date];
+    if (metrics) {
+      metrics.count++;
 
-    // Extract metrics from metadata if available
-    if (msg.metadata?.responseTime) {
-      dailyMetrics[date].responseTime.push(msg.metadata.responseTime);
-    }
-    if (msg.metadata?.satisfaction) {
-      dailyMetrics[date].satisfaction.push(msg.metadata.satisfaction);
+      // Extract metrics from metadata if available
+      if (msg.metadata?.responseTime) {
+        metrics.responseTime.push(msg.metadata.responseTime);
+      }
+      if (msg.metadata?.satisfaction) {
+        metrics.satisfaction.push(msg.metadata.satisfaction);
+      }
     }
   });
 
@@ -174,26 +185,28 @@ async function fetchHistoricalData(
     errorRate: []
   };
 
-  Object.entries(dailyMetrics).forEach(([date, metrics]) => {
-    historicalData.trafficVolume.push({
-      timestamp: date,
-      value: metrics.count
-    });
-
-    if (metrics.responseTime.length > 0) {
-      const avgResponseTime = metrics.responseTime.reduce((a: number, b: number) => a + b, 0) / metrics.responseTime.length;
-      historicalData.responseTime.push({
+  Object.entries(dailyMetrics).forEach(([date, metrics]: [string, any]) => {
+    if (metrics && typeof metrics === 'object') {
+      historicalData.trafficVolume.push({
         timestamp: date,
-        value: avgResponseTime
+        value: metrics.count || 0
       });
-    }
 
-    if (metrics.satisfaction.length > 0) {
-      const avgSatisfaction = metrics.satisfaction.reduce((a: number, b: number) => a + b, 0) / metrics.satisfaction.length;
-      historicalData.satisfactionScore.push({
-        timestamp: date,
-        value: avgSatisfaction
-      });
+      if (metrics.responseTime && metrics.responseTime.length > 0) {
+        const avgResponseTime = metrics.responseTime.reduce((a: number, b: number) => a + b, 0) / metrics.responseTime.length;
+        historicalData.responseTime.push({
+          timestamp: date,
+          value: avgResponseTime
+        });
+      }
+
+      if (metrics.satisfaction && metrics.satisfaction.length > 0) {
+        const avgSatisfaction = metrics.satisfaction.reduce((a: number, b: number) => a + b, 0) / metrics.satisfaction.length;
+        historicalData.satisfactionScore.push({
+          timestamp: date,
+          value: avgSatisfaction
+        });
+      }
     }
   });
 

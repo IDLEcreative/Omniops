@@ -74,7 +74,11 @@ export default function ChatWidget({
   // Performance: Memoized to prevent recreation on every render
   // and maintain stable reference for InputArea child component
   const sendMessage = useCallback(async () => {
-    if (!input.trim() || loading) return;
+    console.log('[ChatWidget.sendMessage] 🚀 HANDLER CALLED - input:', input, 'loading:', loading);
+    if (!input.trim() || loading) {
+      console.log('[ChatWidget.sendMessage] ❌ EARLY RETURN - input empty or loading');
+      return;
+    }
 
     if (privacySettings.requireConsent && !privacySettings.consentGiven) {
       alert('Please accept our privacy policy before starting a conversation.');

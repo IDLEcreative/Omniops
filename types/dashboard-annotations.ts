@@ -31,7 +31,7 @@ export interface MetricGoal {
 }
 
 export interface ConversationTranscript {
-  id: string;
+  id?: string;
   conversationId: string;
   messages: Array<{
     id: string;
@@ -41,6 +41,7 @@ export interface ConversationTranscript {
     metadata?: Record<string, any>;
   }>;
   summary?: string;
-  duration: number;
-  createdAt: string;
+  duration?: number;
+  createdAt?: string;
+  metadata?: Record<string, any>;
 }

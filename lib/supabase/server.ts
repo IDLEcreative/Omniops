@@ -1,6 +1,9 @@
 import { createServerClient } from '@supabase/ssr'
-import { createClient as createSupabaseClient, type SupabaseClient } from '@supabase/supabase-js'
+import { createClient as createSupabaseClient, type SupabaseClient, type User } from '@supabase/supabase-js'
 import { cookies } from 'next/headers'
+
+// Re-export User type
+export type { User }
 
 // Cache validation results for the duration of the request
 let envValidated = false

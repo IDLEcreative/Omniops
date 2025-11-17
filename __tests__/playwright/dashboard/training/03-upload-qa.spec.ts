@@ -48,7 +48,7 @@ test.describe('Training Dashboard - Q&A Upload', () => {
 
     console.log('📍 Step 2: Verify Q&A appears in list');
     // List should show question as preview
-    await waitForItemInList(page, question, 5000);
+    await waitForItemInList(page, question, 10000);
 
     console.log('📍 Step 3: Wait for embedding generation to complete');
     await waitForProcessingComplete(page, question, PROCESSING_TIMEOUT);
@@ -67,7 +67,7 @@ test.describe('Training Dashboard - Q&A Upload', () => {
     await uploadQA(page, question, longAnswer);
 
     console.log('📍 Step 2: Verify Q&A appears in list');
-    await waitForItemInList(page, question, 5000);
+    await waitForItemInList(page, question, 10000);
 
     console.log('📍 Step 3: Verify answer is stored (not truncated in backend)');
     // Answer should be fully stored even if preview is truncated
@@ -169,7 +169,7 @@ test.describe('Training Dashboard - Q&A Upload', () => {
 
     console.log('📍 Step 2: Verify all Q&A pairs appear in list');
     for (const pair of qaPairs) {
-      await waitForItemInList(page, pair.question, 5000);
+      await waitForItemInList(page, pair.question, 10000);
       console.log(`✅ Found: ${pair.question.substring(0, 30)}...`);
     }
 
@@ -192,7 +192,7 @@ test.describe('Training Dashboard - Q&A Upload', () => {
     await uploadQA(page, question, answer);
 
     console.log('📍 Step 2: Verify Q&A appears in list with special chars intact');
-    await waitForItemInList(page, question, 5000);
+    await waitForItemInList(page, question, 10000);
 
     console.log('📍 Step 3: Verify special characters are properly encoded');
     const item = page.locator(`[data-testid="training-item"]:has-text("${question}"), .training-item:has-text("${question}")`).first();

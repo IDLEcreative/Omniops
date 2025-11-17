@@ -8,6 +8,9 @@ import OpenAI from 'openai';
 import { createServiceRoleClient } from '@/lib/supabase/server';
 import { embeddingCache } from '@/lib/embedding-cache';
 
+// Re-export types
+export type { SearchResult } from '@/lib/embeddings/types';
+
 // Lazy load OpenAI client
 let openai: OpenAI | null = null;
 

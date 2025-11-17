@@ -92,7 +92,25 @@ export default function ConversationsPage() {
 
   const availableLanguages = useMemo(() => {
     if (!data) return [];
-    return data.languages.map(lang => lang.language);
+    return data.languages.map((lang) => lang.language);
+  }, [data]);
+
+  const metricsCardsData = useMemo(() => {
+    if (!data) return null;
+    return {
+      total: data.metrics.totalConversations,
+      change: 0, // Placeholder - would need historical data for real change %
+      statusCounts: {
+        active: data.statusCounts.active ?? 0,
+        waiting: data.statusCounts.waiting ?? 0,
+        resolved: data.statusCounts.resolved ?? 0,
+      },
+      peakHours: [], // Placeholder - would need hourly data
+      languages: data.languages.map((lang) => ({
+        language: lang.language,
+        percentage: Math.round(lang.percentage),
+      })),
+    };
   }, [data]);
 
   const activeFilterCount = useActiveFilterCount(advancedFilters);
@@ -203,7 +221,7 @@ export default function ConversationsPage() {
 
       {mainView === 'conversations' && (
         <ConversationMetricsCards
-          data={data ? { ...data, languages: data.languages } : null}
+          data={metricsCardsData}
           loading={loading}
           totalStatus={totalStatus}
         />

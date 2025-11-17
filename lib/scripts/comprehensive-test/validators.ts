@@ -3,7 +3,7 @@
  * Extracted from scripts/comprehensive-test.js
  */
 
-import { SupabaseClient } from '@supabase/supabase-js';
+import type { SupabaseClient } from '@/lib/supabase/server';
 import * as core from './core.js';
 import { TestResult } from './core.js';
 import { section, log, TestResults } from './reporters.js';

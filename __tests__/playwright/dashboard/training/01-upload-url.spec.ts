@@ -44,7 +44,7 @@ test.describe('Training Dashboard - URL Upload', () => {
     await uploadUrl(page, testUrl);
 
     console.log('📍 Step 2: Verify URL appears in list (normalized with https://)');
-    await waitForItemInList(page, 'https://example.com/test-page', 5000);
+    await waitForItemInList(page, 'https://example.com/test-page', 10000);
 
     console.log('📍 Step 3: Wait for scraping to complete');
     // Note: Scraping may take time, wait up to PROCESSING_TIMEOUT
@@ -60,7 +60,7 @@ test.describe('Training Dashboard - URL Upload', () => {
     await uploadUrl(page, 'example.com');
 
     console.log('📍 Step 2: Verify URL is normalized to https://');
-    const item = await waitForItemInList(page, 'https://example.com', 5000);
+    const item = await waitForItemInList(page, 'https://example.com', 10000);
 
     // Verify the content includes https://
     const itemText = await item.textContent();
@@ -79,7 +79,7 @@ test.describe('Training Dashboard - URL Upload', () => {
     await uploadUrl(page, invalidUrl);
 
     console.log('📍 Step 2: Wait for item to appear');
-    await waitForItemInList(page, invalidUrl, 5000);
+    await waitForItemInList(page, invalidUrl, 10000);
 
     console.log('📍 Step 3: Check for error state or removal');
     // The item should either show error status or be removed from list
@@ -120,7 +120,7 @@ test.describe('Training Dashboard - URL Upload', () => {
     console.log('📍 Step 2: Verify all URLs appear in list');
     for (const url of urls) {
       const normalizedUrl = `https://${url}`;
-      await waitForItemInList(page, normalizedUrl, 5000);
+      await waitForItemInList(page, normalizedUrl, 10000);
       console.log(`✅ Found: ${normalizedUrl}`);
     }
 

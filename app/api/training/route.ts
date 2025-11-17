@@ -79,42 +79,49 @@ export async function GET(request: NextRequest) {
       );
     }
 
-    // 2. Get scraped_pages entries (URLs) linked via domains -> organizations -> organization_members
+    // 2. Get scraped_pages entries (URLs) linked via domains
+    // Look for domains owned by either:
+    // - The user directly (user_id)
+    // - User's organizations (organization_id)
     let scrapedData: any[] = [];
 
     try {
-      // Get user's organization(s)
-      const { data: userOrgs, error: orgError } = await adminSupabase
+      // Build domain query conditions
+      const domainConditions = [`user_id.eq.${user.id}`];
+
+      // Also check user's organization(s) if they have any
+      const { data: userOrgs } = await adminSupabase
         .from('organization_members')
         .select('organization_id')
         .eq('user_id', user.id);
 
       console.log('[DEBUG GET /api/training] User orgs count:', userOrgs?.length ?? 0);
 
-      if (!orgError && userOrgs && userOrgs.length > 0) {
+      if (userOrgs && userOrgs.length > 0) {
         const orgIds = userOrgs.map(org => org.organization_id);
+        domainConditions.push(`organization_id.in.(${orgIds.join(',')})`);
+      }
 
-        // Get domains for user's organizations
-        const { data: orgDomains, error: domainsError } = await adminSupabase
-          .from('domains')
-          .select('id')
-          .in('organization_id', orgIds);
+      // Get all domains accessible to this user (either by user_id or organization_id)
+      const { data: userDomains, error: domainsError } = await adminSupabase
+        .from('domains')
+        .select('id')
+        .or(domainConditions.join(','));
 
-        console.log('[DEBUG GET /api/training] Org domains count:', orgDomains?.length ?? 0);
+      console.log('[DEBUG GET /api/training] User domains count:', userDomains?.length ?? 0);
 
-        if (!domainsError && orgDomains && orgDomains.length > 0) {
-          const domainIds = orgDomains.map(d => d.id);
+      if (!domainsError && userDomains && userDomains.length > 0) {
+        const domainIds = userDomains.map(d => d.id);
 
-          // Get scraped pages for those domains
-          const { data: scrapedPages, error: scrapedError } = await adminSupabase
-            .from('scraped_pages')
-            .select('id, url, title, created_at, metadata, domain_id')
-            .in('domain_id', domainIds)
-            .order('created_at', { ascending: false });
+        // Get scraped pages for those domains
+        const { data: scrapedPages, error: scrapedError } = await adminSupabase
+          .from('scraped_pages')
+          .select('id, url, title, created_at, metadata, domain_id')
+          .in('domain_id', domainIds)
+          .order('created_at', { ascending: false });
 
-          if (!scrapedError && scrapedPages) {
-            scrapedData = scrapedPages;
-          }
+        if (!scrapedError && scrapedPages) {
+          scrapedData = scrapedPages;
         }
       }
     } catch (error) {

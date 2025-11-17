@@ -6,25 +6,16 @@
  */
 
 import { generateQueryEmbedding } from './query-embedding';
-import { createClient } from '@supabase/supabase-js';
 import { createHash } from 'crypto';
+import { createServiceRoleClientSync } from '@/lib/supabase/server';
 
 // Supabase client for caching (using service role for background operations)
 const getSupabaseClient = () => {
-  if (!process.env.NEXT_PUBLIC_SUPABASE_URL || !process.env.SUPABASE_SERVICE_ROLE_KEY) {
+  const client = createServiceRoleClientSync();
+  if (!client) {
     throw new Error('Missing Supabase environment variables');
   }
-
-  return createClient(
-    process.env.NEXT_PUBLIC_SUPABASE_URL,
-    process.env.SUPABASE_SERVICE_ROLE_KEY,
-    {
-      auth: {
-        autoRefreshToken: false,
-        persistSession: false
-      }
-    }
-  );
+  return client;
 };
 
 /**

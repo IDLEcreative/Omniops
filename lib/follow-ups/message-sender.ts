@@ -5,7 +5,7 @@
  * Called by cron jobs to process scheduled messages
  */
 
-import type { SupabaseClient } from '@supabase/supabase-js';
+import type { SupabaseClient } from '@/lib/supabase/server';
 import { sendEmail, sendInAppNotification } from './channel-handlers';
 
 /**
