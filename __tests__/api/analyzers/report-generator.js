@@ -3,7 +3,7 @@
  * Generates summary reports and recommendations
  */
 
-const { printFinding } = require('../helpers/error-analysis-helpers');
+import { printFinding } from '../helpers/error-analysis-helpers.js';
 
 function generateReport(tracker) {
   console.log('\n========== ANALYSIS RESULTS ==========\n');
@@ -115,4 +115,4 @@ function printRecommendations() {
   });
 }
 
-module.exports = { generateReport };
+export { generateReport };

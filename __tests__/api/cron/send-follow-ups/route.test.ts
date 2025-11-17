@@ -7,18 +7,17 @@
  * - Health check endpoint
  */
 
-import { describe, it, expect, jest, beforeEach } from '@jest/globals';
+import { describe, it, expect, jest, beforeEach, afterEach } from '@jest/globals';
 import { NextRequest, NextResponse } from 'next/server';
 import { POST, GET } from '@/app/api/cron/send-follow-ups/route';
 
-// Mock dependencies
-jest.mock('@/lib/supabase-server', () => ({
-  createServiceRoleClient: jest.fn(),
-}));
+// Import the mocked modules to access the mock functions
+import * as supabaseServer from '@/lib/supabase-server';
+import * as followUps from '@/lib/follow-ups';
 
-jest.mock('@/lib/follow-ups', () => ({
-  sendPendingFollowUps: jest.fn(),
-}));
+// Get mock functions
+const mockCreateServiceRoleClient = supabaseServer.createServiceRoleClient as jest.MockedFunction<typeof supabaseServer.createServiceRoleClient>;
+const mockSendPendingFollowUps = followUps.sendPendingFollowUps as jest.MockedFunction<typeof followUps.sendPendingFollowUps>;
 
 describe('/api/cron/send-follow-ups', () => {
   let mockSupabase: any;
@@ -32,14 +31,30 @@ describe('/api/cron/send-follow-ups', () => {
     // Reset environment
     process.env = { ...originalEnv };
 
-    // Setup mock Supabase client
+    // Setup mock Supabase client with proper from method
     mockSupabase = {
-      from: jest.fn(),
+      from: jest.fn().mockReturnValue({
+        select: jest.fn().mockReturnValue({
+          eq: jest.fn().mockReturnValue({
+            order: jest.fn().mockReturnValue({
+              limit: jest.fn().mockResolvedValue({ data: [], error: null })
+            })
+          })
+        }),
+        update: jest.fn().mockReturnValue({
+          eq: jest.fn().mockResolvedValue({ error: null })
+        })
+      })
     };
 
     // Setup service client mock
-    const supabaseModule = jest.requireMock('@/lib/supabase-server');
-    supabaseModule.createServiceRoleClient.mockResolvedValue(mockSupabase);
+    mockCreateServiceRoleClient.mockResolvedValue(mockSupabase);
+
+    // Setup follow-ups mock to return resolved value by default
+    mockSendPendingFollowUps.mockResolvedValue({
+      sent: 0,
+      failed: 0
+    });
 
     // Spy on console methods
     consoleLogSpy = jest.spyOn(console, 'log').mockImplementation();
@@ -57,9 +72,8 @@ describe('/api/cron/send-follow-ups', () => {
       // Setup cron secret
       process.env.CRON_SECRET = 'test-cron-secret';
 
-      // Mock sendPendingFollowUps
-      const followUpsModule = jest.requireMock('@/lib/follow-ups');
-      followUpsModule.sendPendingFollowUps.mockResolvedValue({
+      // Mock sendPendingFollowUps with specific values for this test
+      mockSendPendingFollowUps.mockResolvedValueOnce({
         sent: 10,
         failed: 2,
       });
@@ -80,7 +94,7 @@ describe('/api/cron/send-follow-ups', () => {
       expect(data.failed).toBe(2);
       expect(data.timestamp).toBeDefined();
 
-      expect(followUpsModule.sendPendingFollowUps).toHaveBeenCalledWith(
+      expect(mockSendPendingFollowUps).toHaveBeenCalledWith(
         mockSupabase,
         100 // Default limit
       );
@@ -109,8 +123,7 @@ describe('/api/cron/send-follow-ups', () => {
       expect(data.error).toBe('Unauthorized');
 
       // Should not call sendPendingFollowUps
-      const followUpsModule = jest.requireMock('@/lib/follow-ups');
-      expect(followUpsModule.sendPendingFollowUps).not.toHaveBeenCalled();
+      expect(mockSendPendingFollowUps).not.toHaveBeenCalled();
     });
 
     it('should return 401 for missing authorization header', async () => {
@@ -131,8 +144,7 @@ describe('/api/cron/send-follow-ups', () => {
       // No CRON_SECRET set (development mode)
       delete process.env.CRON_SECRET;
 
-      const followUpsModule = jest.requireMock('@/lib/follow-ups');
-      followUpsModule.sendPendingFollowUps.mockResolvedValue({
+      mockSendPendingFollowUps.mockResolvedValueOnce({
         sent: 5,
         failed: 0,
       });
@@ -152,8 +164,7 @@ describe('/api/cron/send-follow-ups', () => {
     it('should handle Supabase client creation failure', async () => {
       process.env.CRON_SECRET = 'test-cron-secret';
 
-      const supabaseModule = jest.requireMock('@/lib/supabase-server');
-      supabaseModule.createServiceRoleClient.mockResolvedValue(null);
+      mockCreateServiceRoleClient.mockResolvedValueOnce(null);
 
       const request = new NextRequest('http://localhost:3000/api/cron/send-follow-ups', {
         method: 'POST',
@@ -173,8 +184,7 @@ describe('/api/cron/send-follow-ups', () => {
     it('should handle errors in sendPendingFollowUps', async () => {
       process.env.CRON_SECRET = 'test-cron-secret';
 
-      const followUpsModule = jest.requireMock('@/lib/follow-ups');
-      followUpsModule.sendPendingFollowUps.mockRejectedValue(
+      mockSendPendingFollowUps.mockRejectedValueOnce(
         new Error('Database connection failed')
       );
 
@@ -201,8 +211,7 @@ describe('/api/cron/send-follow-ups', () => {
     it('should send up to configured limit of messages', async () => {
       process.env.CRON_SECRET = 'test-cron-secret';
 
-      const followUpsModule = jest.requireMock('@/lib/follow-ups');
-      followUpsModule.sendPendingFollowUps.mockResolvedValue({
+      mockSendPendingFollowUps.mockResolvedValueOnce({
         sent: 100,
         failed: 0,
       });
@@ -217,7 +226,7 @@ describe('/api/cron/send-follow-ups', () => {
       await POST(request);
 
       // Should pass limit of 100 to sendPendingFollowUps
-      expect(followUpsModule.sendPendingFollowUps).toHaveBeenCalledWith(
+      expect(mockSendPendingFollowUps).toHaveBeenCalledWith(
         expect.anything(),
         100
       );
@@ -226,8 +235,7 @@ describe('/api/cron/send-follow-ups', () => {
     it('should handle zero pending messages gracefully', async () => {
       process.env.CRON_SECRET = 'test-cron-secret';
 
-      const followUpsModule = jest.requireMock('@/lib/follow-ups');
-      followUpsModule.sendPendingFollowUps.mockResolvedValue({
+      mockSendPendingFollowUps.mockResolvedValueOnce({
         sent: 0,
         failed: 0,
       });
@@ -273,9 +281,9 @@ describe('/api/cron/send-follow-ups', () => {
   });
 
   describe('Runtime configuration', () => {
-    it('should have correct runtime settings', () => {
+    it('should have correct runtime settings', async () => {
       // Import the module to check exports
-      const routeModule = require('@/app/api/cron/send-follow-ups/route');
+      const routeModule = await import('@/app/api/cron/send-follow-ups/route');
 
       expect(routeModule.runtime).toBe('nodejs');
       expect(routeModule.maxDuration).toBe(300); // 5 minutes

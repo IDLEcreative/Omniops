@@ -5,7 +5,7 @@ import { render, screen, waitFor, act, cleanup } from '@/__tests__/utils/test-ut
 jest.mock('@supabase/ssr');
 
 // Import the mock functions
-const { __mockGetUser, __mockSignOut, __mockOnAuthStateChange } = require('@supabase/ssr');
+import { __mockGetUser, __mockSignOut, __mockOnAuthStateChange } from '@supabase/ssr';
 
 // Import component AFTER mocks are set up
 import { UserMenu } from '@/components/auth/user-menu';

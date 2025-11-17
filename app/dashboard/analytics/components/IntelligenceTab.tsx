@@ -9,13 +9,15 @@ import { Alert, AlertDescription } from '@/components/ui/alert';
 import { CustomerJourneyFlow } from '@/components/analytics/CustomerJourneyFlow';
 import { ConversionFunnelChart } from '@/components/analytics/ConversionFunnelChart';
 import { PeakUsageChart } from '@/components/analytics/PeakUsageChart';
+import type { MetricGoal } from '@/types/dashboard';
 
 interface IntelligenceTabProps {
   loading: boolean;
   data: any;
+  goals?: MetricGoal[];
 }
 
-export function IntelligenceTab({ loading, data }: IntelligenceTabProps) {
+export function IntelligenceTab({ loading, data, goals = [] }: IntelligenceTabProps) {
   if (loading && !data) {
     return (
       <div className="flex items-center justify-center h-64">

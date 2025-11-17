@@ -256,6 +256,7 @@ export function ShoppingFeed({
   return (
     <AnimatePresence>
       <motion.div
+        data-testid="shopping-feed"
         variants={chatToShoppingVariants}
         initial="shoppingEnter"
         animate="shoppingEnter"

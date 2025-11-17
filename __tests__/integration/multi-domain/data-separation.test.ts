@@ -22,7 +22,7 @@ import {
 import { join } from 'path';
 
 describe('Data Separation Tests', () => {
-  let results: DomainTestResult[] = [];
+  const results: DomainTestResult[] = [];
 
   /**
    * Test 1: Verify cache doesn't favor specific domains

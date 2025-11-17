@@ -83,18 +83,20 @@ test.describe('Training Dashboard - Q&A Upload', () => {
 
     console.log('📍 Step 1: Switch to Q&A tab');
     await switchToTab(page, 'Q&A');
+    await page.waitForTimeout(500);
 
     console.log('📍 Step 2: Try to submit with only question (no answer)');
-    const questionInput = page.locator('input[placeholder*="question"], textarea[placeholder*="question"], input[name="question"]').first();
-    await expect(questionInput).toBeVisible();
+    // Use correct selectors for Q&A tab inputs
+    const questionInput = page.locator('input#question, textarea[placeholder*="Question"], input[placeholder*="Question"]').first();
+    await expect(questionInput).toBeVisible({ timeout: 5000 });
     await questionInput.clear();
     await questionInput.fill('Test question without answer?');
 
-    const answerInput = page.locator('textarea[placeholder*="answer"], textarea[name="answer"]').first();
-    await expect(answerInput).toBeVisible();
+    const answerInput = page.locator('textarea#answer, textarea[placeholder*="Answer"]').first();
+    await expect(answerInput).toBeVisible({ timeout: 5000 });
     await answerInput.clear(); // Leave answer empty
 
-    const submitButton = page.locator('button:has-text("Upload"), button:has-text("Submit"), button:has-text("Add")').first();
+    const submitButton = page.locator('button:has-text("Add Q&A Pair")').first();
 
     console.log('📍 Step 3: Verify validation prevents submission');
     const isDisabled = await submitButton.isDisabled();

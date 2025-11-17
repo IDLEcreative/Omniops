@@ -21,7 +21,7 @@ import {
 import { join } from 'path';
 
 describe('Domain Isolation Tests', () => {
-  let results: DomainTestResult[] = [];
+  const results: DomainTestResult[] = [];
 
   /**
    * Test Restaurant Domain - Verifies domain independence

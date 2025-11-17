@@ -1,9 +1,9 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useMemo } from 'react';
+import { subDays } from 'date-fns';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Button } from '@/components/ui/button';
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Switch } from '@/components/ui/switch';
 import { Label } from '@/components/ui/label';
 import { Alert, AlertDescription } from '@/components/ui/alert';
@@ -12,23 +12,42 @@ import { RefreshCw, AlertCircle, TrendingUp, BarChart3 } from 'lucide-react';
 import { useDashboardAnalytics } from '@/hooks/use-dashboard-analytics';
 import { useBusinessIntelligence } from '@/hooks/use-business-intelligence';
 import { useSupabaseRealtimeAnalytics } from '@/hooks/use-supabase-realtime-analytics';
+import { useMetricGoals } from '@/hooks/use-metric-goals';
 import { useAnalyticsRefresh } from './hooks/useAnalyticsRefresh';
 
 import { OverviewTab } from './components/OverviewTab';
 import { IntelligenceTab } from './components/IntelligenceTab';
 import { ExportButtons } from './components/ExportButtons';
+import { DateRangePicker } from '@/components/dashboard/analytics/DateRangePicker';
+import { AnomalyAlerts } from '@/components/dashboard/analytics/AnomalyAlerts';
+import { GoalSettings } from '@/components/dashboard/analytics/GoalSettings';
+import type { DateRange } from '@/types/dashboard';
 
 export default function AnalyticsPage() {
-  const [timeRange, setTimeRange] = useState<number>(7);
+  const [dateRange, setDateRange] = useState<DateRange>({
+    from: subDays(new Date(), 7),
+    to: new Date(),
+  });
   const [autoRefresh, setAutoRefresh] = useState<boolean>(false);
+  const [comparisonMode, setComparisonMode] = useState<boolean>(false);
   const [activeTab, setActiveTab] = useState<string>('overview');
+
+  // Calculate days for export functionality (backwards compatibility)
+  const timeRangeDays = useMemo(() => {
+    if (!dateRange.from || !dateRange.to) return 7;
+    return Math.ceil((dateRange.to.getTime() - dateRange.from.getTime()) / (1000 * 60 * 60 * 24));
+  }, [dateRange]);
 
   const {
     data: analyticsData,
     loading: analyticsLoading,
     error: analyticsError,
     refresh: refreshAnalytics
-  } = useDashboardAnalytics({ days: timeRange });
+  } = useDashboardAnalytics({
+    startDate: dateRange.from,
+    endDate: dateRange.to,
+    compare: comparisonMode,
+  });
 
   const {
     data: biData,
@@ -36,12 +55,15 @@ export default function AnalyticsPage() {
     error: biError,
     refresh: refreshBI
   } = useBusinessIntelligence({
-    days: timeRange,
+    startDate: dateRange.from,
+    endDate: dateRange.to,
     metric: 'all',
     disabled: activeTab !== 'intelligence'
   });
 
   const organizationId = analyticsData?.metrics ? '1' : null;
+
+  const { goals, refresh: refreshGoals } = useMetricGoals();
 
   const { isConnected, latestUpdate } = useSupabaseRealtimeAnalytics({
     organizationId,
@@ -91,21 +113,14 @@ export default function AnalyticsPage() {
         </div>
 
         <div className="flex items-center gap-3">
-          <ExportButtons days={timeRange} />
+          <GoalSettings onGoalUpdate={refreshGoals} />
 
-          <Select
-            value={timeRange.toString()}
-            onValueChange={(value) => setTimeRange(parseInt(value))}
-          >
-            <SelectTrigger className="w-[140px]">
-              <SelectValue />
-            </SelectTrigger>
-            <SelectContent>
-              <SelectItem value="7">Last 7 days</SelectItem>
-              <SelectItem value="30">Last 30 days</SelectItem>
-              <SelectItem value="90">Last 90 days</SelectItem>
-            </SelectContent>
-          </Select>
+          <ExportButtons days={timeRangeDays} />
+
+          <DateRangePicker
+            value={dateRange}
+            onChange={setDateRange}
+          />
 
           <Button
             variant="outline"
@@ -118,15 +133,28 @@ export default function AnalyticsPage() {
         </div>
       </div>
 
-      <div className="flex items-center gap-2">
-        <Switch
-          id="auto-refresh"
-          checked={autoRefresh}
-          onCheckedChange={setAutoRefresh}
-        />
-        <Label htmlFor="auto-refresh" className="text-sm text-muted-foreground">
-          Auto-refresh every 5 minutes
-        </Label>
+      <div className="flex items-center gap-6">
+        <div className="flex items-center gap-2">
+          <Switch
+            id="auto-refresh"
+            checked={autoRefresh}
+            onCheckedChange={setAutoRefresh}
+          />
+          <Label htmlFor="auto-refresh" className="text-sm text-muted-foreground">
+            Auto-refresh every 5 minutes
+          </Label>
+        </div>
+
+        <div className="flex items-center gap-2">
+          <Switch
+            id="comparison-mode"
+            checked={comparisonMode}
+            onCheckedChange={setComparisonMode}
+          />
+          <Label htmlFor="comparison-mode" className="text-sm text-muted-foreground">
+            Compare to previous period
+          </Label>
+        </div>
       </div>
 
       {hasError && (
@@ -136,6 +164,10 @@ export default function AnalyticsPage() {
             {hasError.message || 'Failed to load analytics data. Please try again.'}
           </AlertDescription>
         </Alert>
+      )}
+
+      {analyticsData?.anomalies && analyticsData.anomalies.length > 0 && (
+        <AnomalyAlerts anomalies={analyticsData.anomalies as any} />
       )}
 
       <Tabs value={activeTab} onValueChange={setActiveTab} className="space-y-6">
@@ -151,11 +183,11 @@ export default function AnalyticsPage() {
         </TabsList>
 
         <TabsContent value="overview" className="space-y-6">
-          <OverviewTab loading={isLoading} data={analyticsData} />
+          <OverviewTab loading={isLoading} data={analyticsData} goals={goals} />
         </TabsContent>
 
         <TabsContent value="intelligence" className="space-y-6">
-          <IntelligenceTab loading={isLoading} data={biData} />
+          <IntelligenceTab loading={isLoading} data={biData} goals={goals} />
         </TabsContent>
       </Tabs>
     </div>

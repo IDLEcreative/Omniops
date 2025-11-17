@@ -257,11 +257,13 @@ export function useParentCommunication({
                              (window.location.ancestorOrigins && window.location.ancestorOrigins[0]) || '*';
 
         // DEBUG: Log what we detected
-        console.log('[useParentCommunication] Sending ready message');
-        console.log('  document.referrer:', document.referrer);
-        console.log('  ancestorOrigins:', window.location.ancestorOrigins ? Array.from(window.location.ancestorOrigins) : 'N/A');
-        console.log('  Calculated parentOrigin:', parentOrigin);
-        console.log('  window.location.origin:', window.location.origin);
+        if (process.env.NODE_ENV === 'development' || (window as any).ChatWidgetDebug) {
+          console.log('[useParentCommunication] Sending ready message');
+          console.log('  document.referrer:', document.referrer);
+          console.log('  ancestorOrigins:', window.location.ancestorOrigins ? Array.from(window.location.ancestorOrigins) : 'N/A');
+          console.log('  Calculated parentOrigin:', parentOrigin);
+          console.log('  window.location.origin:', window.location.origin);
+        }
 
         window.parent.postMessage({ type: 'ready' }, parentOrigin);
         setMessagesReceived((prev) => prev + 1);
@@ -295,9 +297,11 @@ export function useParentCommunication({
                              (window.location.ancestorOrigins && window.location.ancestorOrigins[0]) || '*';
 
         // DEBUG: Log what we're doing
-        console.log(`[useParentCommunication] Widget ${isOpen ? 'opened' : 'closed'}`);
-        console.log('  document.referrer:', document.referrer);
-        console.log('  Calculated targetOrigin:', targetOrigin);
+        if (process.env.NODE_ENV === 'development' || (window as any).ChatWidgetDebug) {
+          console.log(`[useParentCommunication] Widget ${isOpen ? 'opened' : 'closed'}`);
+          console.log('  document.referrer:', document.referrer);
+          console.log('  Calculated targetOrigin:', targetOrigin);
+        }
 
         if (isOpen) {
           // Widget is open - request full size and enable pointer events

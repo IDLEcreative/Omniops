@@ -164,7 +164,7 @@ export class DocumentationReviewScheduler {
 
     let title = '';
     let body = '';
-    let labels = ['documentation'];
+    const labels = ['documentation'];
 
     if (review.type === 'monthly') {
       title = `📋 Monthly Documentation Review - ${month} ${year}`;

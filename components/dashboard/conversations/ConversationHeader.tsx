@@ -109,9 +109,9 @@ function ConversationHeaderComponent({ conversation, onActionComplete }: Convers
   }, [conversation.id, onActionComplete]);
 
   return (
-    <div className="border-b p-3">
+    <div className="border-b p-2">
       <div className="flex items-center justify-between">
-        <div className="flex items-center space-x-2.5">
+        <div className="flex items-center space-x-2">
           <Avatar className="h-8 w-8">
             <AvatarFallback className="text-xs">
               {(conversation.customerName?.charAt(0) ?? "C").toUpperCase()}

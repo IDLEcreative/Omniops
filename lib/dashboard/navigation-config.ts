@@ -12,7 +12,6 @@ import {
   Download,
   ShoppingBag,
   Activity,
-  Search,
   Zap,
   type LucideIcon
 } from "lucide-react";
@@ -62,13 +61,6 @@ export const navigation: NavigationSection[] = [
         name: "Real-Time Analytics",
         href: "/dashboard/analytics/realtime",
         icon: Zap,
-        badge: "NEW",
-        badgeVariant: "secondary",
-      },
-      {
-        name: "Search Conversations",
-        href: "/dashboard/search",
-        icon: Search,
         badge: "NEW",
         badgeVariant: "secondary",
       },

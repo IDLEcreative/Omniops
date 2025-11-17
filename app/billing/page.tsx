@@ -51,7 +51,11 @@ export default async function BillingPage() {
     );
   }
 
-  const typedMemberships = memberships as Membership[];
+  // Fix type mapping - the query returns organizations as an array
+  const typedMemberships = memberships.map((m: any) => ({
+    ...m,
+    organizations: Array.isArray(m.organizations) ? m.organizations[0] : m.organizations
+  })) as Membership[];
 
   return (
     <div className="min-h-screen bg-background flex items-center justify-center">

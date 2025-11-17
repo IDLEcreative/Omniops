@@ -12,6 +12,11 @@
 import { describe, it, expect, beforeAll, afterAll } from '@jest/globals';
 import { createClient } from '@supabase/supabase-js';
 
+// Skip these tests if running in CI or if explicitly disabled
+// These are E2E tests that require external services
+const SKIP_E2E = process.env.CI === 'true' || process.env.SKIP_E2E === 'true';
+const describeE2E = SKIP_E2E ? describe.skip : describe;
+
 beforeAll(() => {
   // MSW is started globally, but we don't want it to intercept our E2E test requests
   // The global setup uses 'bypass' for unhandled requests, which should allow our requests through
@@ -21,12 +26,12 @@ afterAll(() => {
   // No cleanup needed - MSW will be reset after each test
 });
 
-const supabase = createClient(
+const supabase = SKIP_E2E ? null : createClient(
   process.env.NEXT_PUBLIC_SUPABASE_URL!,
   process.env.SUPABASE_SERVICE_ROLE_KEY!
 );
 
-describe('Agent Flow E2E - Error Handling', () => {
+describeE2E('Agent Flow E2E - Error Handling [Requires External Services]', () => {
   describe('Commerce Provider Integration', () => {
     it('TEST 11: should fall back to generic search when no provider configured', async () => {
       /**

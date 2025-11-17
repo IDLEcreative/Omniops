@@ -113,7 +113,11 @@ export async function POST(request: NextRequest) {
         );
       }
 
-      const messages = messageRows as ConversationRow[];
+      // Fix type mapping - the query returns a single conversation object, not an array
+      const messages = messageRows.map((row: any) => ({
+        ...row,
+        conversations: row.conversations?.[0] || row.conversations || null
+      })) as ConversationRow[];
       const firstMessage = messages[0];
 
       // Map to SearchResult format

@@ -116,7 +116,11 @@ export async function submitUrl(url: string): Promise<{ id: string; status: stri
   const response = await fetch('/api/scrape', {
     method: 'POST',
     headers,
-    body: JSON.stringify({ url: normalizedUrl, crawl: true, max_pages: 1000 }),
+    body: JSON.stringify({
+      url: normalizedUrl,
+      crawl: false,  // Use single-page scraping for immediate results
+      turbo: true    // Enable turbo mode for faster scraping
+    }),
   });
 
   if (!response.ok) {
@@ -124,7 +128,13 @@ export async function submitUrl(url: string): Promise<{ id: string; status: stri
     throw new Error(errorData?.error || response.statusText || 'Unknown error');
   }
 
-  return await response.json();
+  const data = await response.json();
+
+  // handleSinglePageScrape returns { id, status, pages_scraped, message }
+  return {
+    id: data.id,
+    status: data.status || 'completed'
+  };
 }
 
 /**

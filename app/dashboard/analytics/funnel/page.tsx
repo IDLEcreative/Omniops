@@ -30,8 +30,8 @@ export default function FunnelDashboardPage() {
     const start = new Date();
     start.setDate(start.getDate() - 30);
     setDateRange({
-      start: start.toISOString().split('T')[0],
-      end: end.toISOString().split('T')[0],
+      start: start.toISOString().split('T')[0] || start.toISOString().substring(0, 10),
+      end: end.toISOString().split('T')[0] || end.toISOString().substring(0, 10),
     });
   }, []);
 

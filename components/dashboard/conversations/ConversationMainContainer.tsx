@@ -63,7 +63,7 @@ export function ConversationMainContainer({
   const [mobileView, setMobileView] = useState<'list' | 'detail'>('list');
 
   return (
-    <div className="flex flex-col border rounded-lg">
+    <div className="flex flex-col border rounded-lg h-full overflow-hidden">
       <SearchAndFiltersBar
         searchTerm={searchTerm}
         onSearchChange={onSearchChange}
@@ -97,7 +97,7 @@ export function ConversationMainContainer({
         </Button>
       </div>
 
-      <div className="flex flex-col sm:flex-row gap-0 max-h-[calc(100vh-200px)] sm:h-[580px]">
+      <div className="flex flex-col sm:flex-row gap-0 flex-1 min-h-0">
         {/* Sidebar: Show on desktop always, on mobile only if mobileView='list' */}
         <div className={cn(
           "w-full sm:w-[400px] lg:w-[450px]",

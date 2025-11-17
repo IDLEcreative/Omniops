@@ -22,6 +22,66 @@ export const createMockRequest = (body: object) => {
   });
 };
 
+export const createCombinedMockSupabase = (conversationData?: any, configData?: any, updateError?: any) => {
+  return {
+    auth: {
+      getUser: jest.fn().mockResolvedValue({
+        data: { user: { id: TEST_IDS.userId } },
+        error: null,
+      }),
+    },
+    from: jest.fn((table: string) => {
+      if (table === 'conversations') {
+        const chainable = {
+          select: jest.fn().mockReturnThis(),
+          eq: jest.fn().mockReturnThis(),
+          single: jest.fn().mockResolvedValueOnce({
+            data: conversationData || mockConversationData(),
+            error: conversationData === null ? { message: 'Not found' } : null,
+          }),
+          update: jest.fn().mockReturnThis(),
+        };
+        // Add the update chain
+        if (updateError) {
+          chainable.update = jest.fn().mockReturnValue({
+            eq: jest.fn().mockResolvedValue({ error: updateError }),
+          });
+        } else {
+          chainable.update = jest.fn().mockReturnValue({
+            eq: jest.fn().mockResolvedValue({ error: null }),
+          });
+        }
+        return chainable;
+      }
+      if (table === 'customer_configs') {
+        return {
+          select: jest.fn().mockReturnThis(),
+          eq: jest.fn().mockReturnThis(),
+          single: jest.fn().mockResolvedValueOnce({
+            data: configData || mockCustomerConfigData(),
+            error: configData === null ? { message: 'Not found' } : null,
+          }),
+        };
+      }
+      if (table === 'organization_members') {
+        return {
+          select: jest.fn().mockReturnThis(),
+          eq: jest.fn().mockReturnThis(),
+          single: jest.fn().mockResolvedValue({
+            data: { organization_id: TEST_IDS.orgId },
+            error: null,
+          }),
+        };
+      }
+      return {
+        select: jest.fn().mockReturnThis(),
+        eq: jest.fn().mockReturnThis(),
+        single: jest.fn().mockResolvedValue({ data: null, error: null }),
+      };
+    }),
+  };
+};
+
 export const setupAuthenticatedMocks = () => {
   const userSupabase = {
     auth: {

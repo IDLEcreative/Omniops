@@ -108,6 +108,8 @@ export const TrainingDataList = memo(function TrainingDataList({
           <Button
             variant="ghost"
             size="icon"
+            aria-label="delete"
+            data-action="delete"
             onClick={() => onDelete(item.id)}
             className="opacity-0 group-hover:opacity-100 transition-opacity h-6 w-6"
           >

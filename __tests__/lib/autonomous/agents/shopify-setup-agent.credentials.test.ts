@@ -22,9 +22,8 @@ jest.mock('@/lib/autonomous/security/credential-vault', () => ({
   CredentialVault: jest.fn(),
 }));
 
-// Import ShopifySetupAgent using require() to ensure mocks are applied
-// This is critical - ES6 imports are hoisted and load before mocks
-const { ShopifySetupAgent } = require('@/lib/autonomous/agents/shopify-setup-agent');
+// Import ShopifySetupAgent after mocks are applied
+import { ShopifySetupAgent } from '@/lib/autonomous/agents/shopify-setup-agent';
 
 describe('ShopifySetupAgent.getCredentials', () => {
   const organizationId = 'org-123';

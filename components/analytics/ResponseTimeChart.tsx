@@ -1,12 +1,15 @@
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
 import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer } from 'recharts';
-import type { DashboardAnalyticsData } from '@/types/dashboard';
+import { AnnotationMarker } from '@/components/dashboard/analytics/AnnotationMarker';
+import type { DashboardAnalyticsData, ChartAnnotation } from '@/types/dashboard';
 
 interface ResponseTimeChartProps {
   data: DashboardAnalyticsData;
+  annotations?: ChartAnnotation[];
+  onAnnotationClick?: (annotation: ChartAnnotation) => void;
 }
 
-export function ResponseTimeChart({ data }: ResponseTimeChartProps) {
+export function ResponseTimeChart({ data, annotations = [], onAnnotationClick }: ResponseTimeChartProps) {
   const chartData = data.dailySentiment.map(day => ({
     date: new Date(day.date).toLocaleDateString('en-US', { month: 'short', day: 'numeric' }),
     responseTime: data.responseTime,
@@ -43,6 +46,14 @@ export function ResponseTimeChart({ data }: ResponseTimeChartProps) {
               }}
             />
             <Legend />
+            {annotations.map((annotation) => (
+              <AnnotationMarker
+                key={annotation.id}
+                annotation={annotation}
+                dateKey="date"
+                onClick={onAnnotationClick}
+              />
+            ))}
             <Line
               type="monotone"
               dataKey="responseTime"

@@ -6,39 +6,54 @@
  */
 
 // Supabase mocks
-export { mockSupabaseClient } from './mocks/supabase-mocks';
+import { mockSupabaseClient } from './mocks/supabase-mocks';
+export { mockSupabaseClient };
 
 // WooCommerce mocks and data factories
-export {
+import {
   mockWooCommerceClient,
   createMockProduct,
   createMockOrder,
   createMockCustomer,
 } from './mocks/woocommerce-mocks';
+export {
+  mockWooCommerceClient,
+  createMockProduct,
+  createMockOrder,
+  createMockCustomer,
+};
 
 // API mocks
-export {
+import {
   mockNextRequest,
   mockStreamResponse,
 } from './mocks/api-mocks';
+export {
+  mockNextRequest,
+  mockStreamResponse,
+};
 
 // Test environment utilities
-export {
+import {
   setupTestEnv,
   cleanupTestEnv,
 } from './mocks/test-env';
+export {
+  setupTestEnv,
+  cleanupTestEnv,
+};
 
 // Default export for backward compatibility
 const mockHelpers = {
-  mockSupabaseClient: require('./mocks/supabase-mocks').mockSupabaseClient,
-  mockWooCommerceClient: require('./mocks/woocommerce-mocks').mockWooCommerceClient,
-  mockNextRequest: require('./mocks/api-mocks').mockNextRequest,
-  mockStreamResponse: require('./mocks/api-mocks').mockStreamResponse,
-  createMockProduct: require('./mocks/woocommerce-mocks').createMockProduct,
-  createMockOrder: require('./mocks/woocommerce-mocks').createMockOrder,
-  createMockCustomer: require('./mocks/woocommerce-mocks').createMockCustomer,
-  setupTestEnv: require('./mocks/test-env').setupTestEnv,
-  cleanupTestEnv: require('./mocks/test-env').cleanupTestEnv,
+  mockSupabaseClient,
+  mockWooCommerceClient,
+  mockNextRequest,
+  mockStreamResponse,
+  createMockProduct,
+  createMockOrder,
+  createMockCustomer,
+  setupTestEnv,
+  cleanupTestEnv,
 };
 
 export default mockHelpers;

@@ -6,12 +6,21 @@ import { Page, FrameLocator } from '@playwright/test';
  */
 
 /**
- * Set mobile viewport for iPhone X dimensions
+ * Set mobile viewport for iPhone X dimensions with mobile User-Agent
  */
 export async function setMobileViewport(page: Page): Promise<void> {
   console.log('📱 Setting mobile viewport (iPhone X: 375x812)');
+
+  // Set viewport size
   await page.setViewportSize({ width: 375, height: 812 });
-  console.log('✅ Mobile viewport set');
+
+  // Set mobile User-Agent to trigger mobile detection in backend
+  const iPhoneUserAgent = 'Mozilla/5.0 (iPhone; CPU iPhone OS 14_7_1 like Mac OS X) AppleWebKit/605.1.15 (KHTML, like Gecko) Version/14.1.2 Mobile/15E148 Safari/604.1';
+  await page.setExtraHTTPHeaders({
+    'User-Agent': iPhoneUserAgent
+  });
+
+  console.log('✅ Mobile viewport and User-Agent set');
 }
 
 /**
@@ -30,13 +39,16 @@ export async function enableMobileFeatures(page: Page): Promise<void> {
 export async function mockShoppingAPI(page: Page): Promise<void> {
   console.log('🔧 Setting up shopping API mock...');
 
-  await page.route('**/api/chat', async (route) => {
+  // Use page.route() instead of context.route() to intercept iframe requests
+  // This ensures the mock applies to fetch calls from within iframes
+  await page.route(/\/api\/chat/, async (route) => {
     const requestData = route.request().postDataJSON();
     console.log('🔍 Shopping request:', requestData.message?.substring(0, 50));
 
     const responseData = {
       message: 'Here are some great products for you!',
       conversation_id: 'test-conversation-123',
+      id: `msg_${Date.now()}`,
       shoppingMetadata: {
         products: [
         {
@@ -93,11 +105,23 @@ export async function mockShoppingAPI(page: Page): Promise<void> {
       },
     };
 
-    await route.fulfill({
-      status: 200,
-      contentType: 'application/json',
-      body: JSON.stringify(responseData),
+    console.log('📦 Mock response:', {
+      hasShoppingMetadata: !!responseData.shoppingMetadata,
+      productCount: responseData.shoppingMetadata?.products?.length || 0
     });
+
+    console.log('🔧 About to call route.fulfill()');
+    try {
+      await route.fulfill({
+        status: 200,
+        contentType: 'application/json',
+        body: JSON.stringify(responseData),
+      });
+      console.log('✅ route.fulfill() completed successfully');
+    } catch (error) {
+      console.error('❌ route.fulfill() failed:', error);
+      throw error;
+    }
   });
 
   console.log('✅ Shopping API mock ready');

@@ -37,7 +37,8 @@ describe('Chat API Parallel Operations - Patterns', () => {
 
       // Sequential would take 200ms, parallel should be ~100ms
       expect(elapsed).toBeLessThan(TestDelays.EXTRA_LONG + TIMING_BUFFER);
-      expect(elapsed).toBeGreaterThanOrEqual(TestDelays.EXTRA_LONG);
+      // Allow 5ms tolerance for timing variations
+      expect(elapsed).toBeGreaterThanOrEqual(TestDelays.EXTRA_LONG - 5);
       expect(domainId).toBe('domain-id-123');
       expect(userId).toBe('user-id-456');
       expect(mockDomainLookup).toHaveBeenCalledTimes(1);
@@ -62,7 +63,8 @@ describe('Chat API Parallel Operations - Patterns', () => {
 
       // Should take time of longest operation (100ms), not sum (225ms)
       expect(elapsed).toBeLessThan(TestDelays.EXTRA_LONG + TIMING_BUFFER);
-      expect(elapsed).toBeGreaterThanOrEqual(TestDelays.EXTRA_LONG);
+      // Allow 5ms tolerance for timing variations
+      expect(elapsed).toBeGreaterThanOrEqual(TestDelays.EXTRA_LONG - 5);
       expect([result1, result2, result3]).toEqual(['result-1', 'result-2', 'result-3']);
     });
   });

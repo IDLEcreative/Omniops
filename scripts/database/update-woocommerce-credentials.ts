@@ -8,8 +8,8 @@
 import * as dotenv from 'dotenv';
 import { resolve } from 'path';
 import { createClient } from '@supabase/supabase-js';
-import { encrypt } from './lib/encryption';
-import { clearCommerceProviderCache } from './lib/agents/commerce-provider';
+import { encrypt } from '../../lib/encryption';
+import { clearCommerceProviderCache } from '../../lib/agents/commerce-provider';
 
 dotenv.config({ path: resolve(process.cwd(), '.env.local') });
 

@@ -36,7 +36,8 @@ export async function processAIConversation(params: AIProcessorParams): Promise<
     telemetry,
     openaiClient,
     useGPT5Mini,
-    dependencies
+    dependencies,
+    isMobile
   } = params;
 
   const { getCommerceProvider: getProviderFn, searchSimilarContent: searchFn, sanitizeOutboundLinks: sanitizeFn } = dependencies;
@@ -165,6 +166,9 @@ export async function processAIConversation(params: AIProcessorParams): Promise<
       // Collect products from WooCommerce/Shopify tool results
       // Products are in result.results[].metadata for product-related tools
       if (result.source === 'woocommerce-api' || result.source === 'woocommerce' || result.source === 'shopify') {
+        console.log(`[Shopping Debug] Checking ${result.results.length} results from ${result.source}`);
+        console.log('[Shopping Debug] First result keys:', result.results[0] ? Object.keys(result.results[0]) : []);
+        console.log('[Shopping Debug] First result sample:', result.results[0] ? JSON.stringify(result.results[0]).substring(0, 200) : 'no results');
         for (const searchResult of result.results) {
           if (searchResult.metadata && searchResult.metadata.id) {
             allProducts.push(searchResult.metadata);
@@ -283,9 +287,18 @@ export async function processAIConversation(params: AIProcessorParams): Promise<
   if (allProducts.length > 0) {
     console.log(`[Shopping Integration] Found ${allProducts.length} products from commerce providers`);
 
+    // DEBUG: Check searchLog structure
+    console.log('[Shopping Debug] searchLog length:', searchLog.length);
+    console.log('[Shopping Debug] searchLog full structure:', JSON.stringify(searchLog, null, 2));
+    console.log('[Shopping Debug] searchLog sources:', searchLog.map(log => log.source));
+    console.log('[Shopping Debug] searchLog tools:', searchLog.map(log => log.tool));
+
     // Determine platform from search log
     const hasWooCommerce = searchLog.some(log => log.source.includes('woocommerce'));
     const hasShopify = searchLog.some(log => log.source.includes('shopify'));
+
+    console.log('[Shopping Debug] hasWooCommerce:', hasWooCommerce);
+    console.log('[Shopping Debug] hasShopify:', hasShopify);
 
     // Transform products based on platform
     if (hasWooCommerce) {
@@ -295,9 +308,9 @@ export async function processAIConversation(params: AIProcessorParams): Promise<
     }
 
     // Check if shopping mode should be triggered
-    if (shoppingProducts && shouldTriggerShoppingMode(finalResponse, shoppingProducts)) {
+    if (shoppingProducts && shouldTriggerShoppingMode(finalResponse, shoppingProducts, isMobile)) {
       shoppingContext = extractShoppingContext(finalResponse, lastUserQuery);
-      console.log(`[Shopping Integration] Shopping mode triggered with ${shoppingProducts.length} products`);
+      console.log(`[Shopping Integration] Shopping mode triggered with ${shoppingProducts.length} products${isMobile ? ' (mobile)' : ''}`);
       if (shoppingContext) {
         console.log(`[Shopping Integration] Context: ${shoppingContext}`);
       }

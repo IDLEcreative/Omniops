@@ -59,9 +59,10 @@ describe('OperationQueueManager', () => {
   let queueManager: OperationQueueManager;
   let mockQueue: any;
 
-  beforeEach(() => {
+  beforeEach(async () => {
     // Get the mocked Queue constructor to verify it's being called
-    const { Queue } = require('bullmq');
+    const bullmq = await import('bullmq');
+    const { Queue } = bullmq;
 
     // The Queue constructor should return our mockQueueInstance
     // If mockQueueInstance is still undefined, it means jest.mock() hasn't initialized it yet

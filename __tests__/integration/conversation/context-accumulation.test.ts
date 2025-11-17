@@ -15,7 +15,12 @@ import {
   cleanupConversations
 } from '@/__tests__/utils/conversation/helpers';
 
-describe('Context Accumulation (86% Accuracy Validation)', () => {
+// Skip these tests if running in CI or if explicitly disabled
+// These are E2E tests that require test domain setup
+const SKIP_E2E = process.env.CI === 'true' || process.env.SKIP_E2E === 'true';
+const describeE2E = SKIP_E2E ? describe.skip : describe;
+
+describeE2E('Context Accumulation (86% Accuracy Validation) [Requires Test Domain]', () => {
   let testDomainId: string;
   const testConversations: string[] = [];
 

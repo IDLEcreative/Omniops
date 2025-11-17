@@ -42,6 +42,11 @@ export async function GET(request: NextRequest) {
       );
     }
 
+    console.log('[DEBUG GET /api/training] Authenticated user:', {
+      id: user.id,
+      email: user.email
+    });
+
     const adminSupabase = await createServiceRoleClient();
     if (!adminSupabase) {
       return NextResponse.json(

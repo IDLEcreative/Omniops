@@ -42,6 +42,17 @@ test.describe('Mobile Shopping Core Flows', () => {
   test('user discovers products and adds to cart via mobile shopping feed', async ({ page }) => {
     console.log('=== Mobile Shopping: Product Discovery to Cart ===');
 
+    // Capture ALL browser console logs and errors for debugging
+    page.on('console', msg => {
+      console.log(`[Browser ${msg.type()}] ${msg.text()}`);
+    });
+    page.on('pageerror', err => {
+      console.error('[Page Error]', err.message);
+    });
+    page.on('requestfailed', request => {
+      console.error('[Request Failed]', request.url(), request.failure()?.errorText);
+    });
+
     console.log('📍 Step 1: Set mobile viewport and enable touch features');
     await setMobileViewport(page);
     await enableMobileFeatures(page);
@@ -53,38 +64,78 @@ test.describe('Mobile Shopping Core Flows', () => {
 
     console.log('📍 Step 3: Wait for chat widget iframe');
     const iframe = await waitForChatWidget(page);
+
+    // CRITICAL: Listen to iframe console logs (iframe content has separate console)
+    const iframeElement = page.frameLocator('iframe#chat-widget-iframe, iframe[title*="chat" i]');
+    const actualFrame = await page.frame({ url: /embed/ });
+    if (actualFrame) {
+      actualFrame.on('console', msg => {
+        console.log(`[IFrame Console ${msg.type()}] ${msg.text()}`);
+      });
+    }
+
     console.log('✅ Chat widget ready');
 
-    console.log('📍 Step 4: Setup shopping API mock with product data');
-    await mockShoppingAPI(page);
-    console.log('✅ Shopping API mocked');
+    console.log('📍 Step 4: Click open button to open widget');
+    const openButton = iframe.locator('button[aria-label*="chat" i]').first();
+    await openButton.waitFor({ state: 'visible', timeout: 10000 });
 
-    console.log('📍 Step 5: Send product search query');
-    await sendChatMessage(iframe, 'Show me headphones');
+    // Use JavaScript evaluation to click the button directly (bypasses Playwright click issues)
+    await openButton.evaluate((button: HTMLButtonElement) => {
+      console.log('[E2E] Clicking button via JavaScript');
+      button.click();
+    });
+
+    // Wait for widget to open
+    await page.waitForTimeout(1000);
+
+    // Verify widget actually opened by checking for input field
+    console.log('📍 Step 4a: Verify widget opened (check for input field)');
+    const inputField = iframe.locator('textarea, input[type="text"]');
+    await inputField.waitFor({ state: 'visible', timeout: 5000 });
+    console.log('✅ Widget opened successfully');
+
+    console.log('📍 Step 5: Using real Thompson\'s Parts API (www.thompsonseparts.co.uk)');
+    // Mock disabled - using real API with Thompson's account
+    // await mockShoppingAPI(page);
+    console.log('✅ Real API will be used for product search');
+
+    console.log('📍 Step 6: Send product search query that triggers shopping feed');
+    // Use a specific product query that will definitely trigger WooCommerce search
+    await sendChatMessage(iframe, 'Do you have any pumps in stock?');
     console.log('✅ Query sent');
 
-    console.log('📍 Step 6: Wait for chat → shopping feed transition');
+    console.log('📍 Step 7: Wait for Browse Products button (real API response)');
+    const browseButton = iframe.locator('[data-testid="browse-products-button"]');
+    await browseButton.waitFor({ state: 'visible', timeout: 60000 }); // 60s timeout for real API with OpenAI
+    console.log('✅ Browse Products button appeared');
+
+    console.log('📍 Step 8: Click Browse Products to open shopping feed');
+    await browseButton.click();
+    console.log('✅ Button clicked');
+
+    console.log('📍 Step 9: Wait for shopping feed transition');
     const shoppingFeedVisible = await waitForShoppingFeed(iframe, 10000);
     expect(shoppingFeedVisible).toBe(true);
     console.log('✅ Shopping feed activated');
 
-    console.log('📍 Step 7: Verify product cards loaded');
+    console.log('📍 Step 10: Verify product cards loaded');
     const productCount = await getProductCardCount(iframe);
     expect(productCount).toBeGreaterThan(0);
     console.log(`✅ ${productCount} product card(s) displayed`);
 
-    console.log('📍 Step 8: Swipe down to view next product');
+    console.log('📍 Step 11: Swipe down to view next product');
     await verticalSwipe(page, 'down');
     await page.waitForTimeout(1000);
     console.log('✅ Swiped to next product');
 
-    console.log('📍 Step 9: Tap product card to expand details');
+    console.log('📍 Step 11: Tap product card to expand details');
     await tapProductCard(iframe, 0);
     const detailsExpanded = await verifyProductDetailsExpanded(iframe);
     expect(detailsExpanded).toBe(true);
     console.log('✅ Product details expanded');
 
-    console.log('📍 Step 10: Select product variant (Color: White)');
+    console.log('📍 Step 12: Select product variant (Color: White)');
     const variantButton = iframe.locator('button:has-text("White")');
     const variantExists = (await variantButton.count()) > 0;
 
@@ -95,7 +146,7 @@ test.describe('Mobile Shopping Core Flows', () => {
       console.log('⏭️ No variants available, skipping variant selection');
     }
 
-    console.log('📍 Step 11: Double-tap product to add to cart');
+    console.log('📍 Step 13: Double-tap product to add to cart');
     const productCard = iframe.locator('[data-testid="product-card"], .product-story').first();
     const box = await productCard.boundingBox();
 
@@ -144,7 +195,8 @@ test.describe('Mobile Shopping Core Flows', () => {
     console.log('📍 Step 2: Load widget and trigger shopping mode');
     await page.goto(`${BASE_URL}/widget-test`, { waitUntil: 'networkidle' });
     const iframe = await waitForChatWidget(page);
-    await mockShoppingAPI(page);
+    // Mock disabled - using real Thompson's API
+    // await mockShoppingAPI(page);
     await sendChatMessage(iframe, 'Show me products');
 
     console.log('📍 Step 3: Wait for shopping feed');

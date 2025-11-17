@@ -30,8 +30,17 @@ export async function sendChatMessage(iframe: FrameLocator, message: string): Pr
   await inputField.waitFor({ state: 'visible', timeout: 10000 });
   await inputField.fill(message);
 
-  const sendButton = iframe.locator('button[type="submit"]').first();
-  await sendButton.click();
+  // Look for send button - try multiple selectors
+  const sendButton = iframe.locator(
+    'button[type="submit"], button:has-text("Send"), button[aria-label*="Send" i], button:has(img)'
+  ).last(); // Use .last() to get the send button (last button in input area)
+
+  await sendButton.waitFor({ state: 'visible', timeout: 10000 });
+
+  // Wait a bit for any animations or state updates
+  await iframe.locator('body').evaluate(() => new Promise(resolve => setTimeout(resolve, 500)));
+
+  await sendButton.click({ force: true }); // Force click in case there's an overlay
 
   console.log('✅ Message sent');
 }

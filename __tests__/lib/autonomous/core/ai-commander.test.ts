@@ -283,7 +283,11 @@ describe('AICommander', () => {
     it('should create OpenAI instance with correct configuration', () => {
       new AICommander('my-api-key');
 
-      expect(OpenAI).toHaveBeenCalledWith({ apiKey: 'my-api-key' });
+      expect(OpenAI).toHaveBeenCalledWith({
+        apiKey: 'my-api-key',
+        timeout: 30 * 1000,
+        maxRetries: 2
+      });
     });
   });
 });

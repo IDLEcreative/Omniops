@@ -44,7 +44,7 @@ export function ConversationTabbedList({
 
   return (
     <Tabs value={activeTab} onValueChange={(val) => onTabChange(val as typeof activeTab)} defaultValue="all" className="flex h-full flex-col">
-      <TabsList className="grid grid-cols-4 px-3 h-9" role="tablist" aria-label="Filter conversations by status">
+      <TabsList className="!w-full grid grid-cols-4" role="tablist" aria-label="Filter conversations by status">
         {tabConfigs.map(({ value, label }) => (
           <TabsTrigger key={value} value={value}>{label}</TabsTrigger>
         ))}

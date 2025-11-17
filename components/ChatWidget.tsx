@@ -118,10 +118,23 @@ export default function ChatWidget({
       demoConfig,
       woocommerceEnabled,
       onSuccess: (assistantMessage, newConversationId) => {
+        console.log('[ChatWidget] 📨 onSuccess called with message:', {
+          hasMetadata: !!assistantMessage.metadata,
+          productCount: assistantMessage.metadata?.shoppingProducts?.length || 0,
+          fullMessage: assistantMessage
+        });
         if (!conversationId && newConversationId) {
           setConversationId(newConversationId);
         }
-        setMessages(prev => [...prev, assistantMessage]);
+        setMessages(prev => {
+          console.log('[ChatWidget] 🔄 setMessages - Adding message to state:', {
+            currentStateLength: prev.length,
+            newMessageId: assistantMessage.id,
+            hasMetadata: !!assistantMessage.metadata,
+            productCount: assistantMessage.metadata?.shoppingProducts?.length || 0
+          });
+          return [...prev, assistantMessage];
+        });
         if (onMessageFromHook) {
           onMessageFromHook(assistantMessage);
         }

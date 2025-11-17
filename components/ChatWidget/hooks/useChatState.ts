@@ -254,11 +254,15 @@ export function useChatState({
   }, [isOpen, mounted, storage]);
 
   // Load previous messages when widget opens with existing conversation
+  // FIXED: Removed messageState.loadPreviousMessages from deps to prevent race condition
+  // where fresh messages with metadata get overwritten by stale DB fetch.
+  // The guard in useMessageState.ts ensures we only load on initial mount (empty state).
   useEffect(() => {
     if (isOpen && mounted && session.conversationId && session.sessionId) {
       messageState.loadPreviousMessages(session.conversationId, session.sessionId);
     }
-  }, [isOpen, mounted, session.conversationId, session.sessionId, messageState]);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [isOpen, mounted, session.conversationId, session.sessionId]);
 
   // Auto-scroll to bottom when messages change
   useEffect(() => {

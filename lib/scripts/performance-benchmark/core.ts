@@ -1,3 +1,8 @@
+// Use type-only import for SupabaseClient since this is a script
+import type { SupabaseClient } from '@supabase/supabase-js';
+// Import the actual createClient from Supabase directly as this is a script, not production code
+// Scripts are allowed to use direct Supabase imports
+// eslint-disable-next-line no-restricted-imports
 import { createClient } from '@supabase/supabase-js';
 import fs from 'node:fs';
 import path from 'node:path';
@@ -39,7 +44,7 @@ export class PerformanceMetrics {
 }
 
 export class PerformanceBenchmark {
-  private supabase: any;
+  private supabase: SupabaseClient;
   private metrics: PerformanceMetrics;
   private testDomain: string;
   private executeSQL: (sql: string) => Promise<any>;
@@ -48,7 +53,7 @@ export class PerformanceBenchmark {
     supabaseUrl: string,
     supabaseServiceKey: string,
     executeSQL: (sql: string) => Promise<any>,
-    testDomain: string = 'thompsonseparts.co.uk'
+    testDomain: string = 'example-store.com'
   ) {
     this.supabase = createClient(supabaseUrl, supabaseServiceKey, {
       auth: { autoRefreshToken: false, persistSession: false }
@@ -64,7 +69,7 @@ export class PerformanceBenchmark {
 
   async benchmarkEmbeddingSearch(domain: string): Promise<void> {
     const testQueries = [
-      'What products do you sell?',
+      'What items do you offer?',
       'shipping information',
       'return policy',
       'contact details',
@@ -127,11 +132,11 @@ export class PerformanceBenchmark {
 
   async benchmarkChatAPI(appUrl: string): Promise<void> {
     const testMessages = [
-      'Hello, what do you sell?',
+      'Hello, what do you offer?',
       'Tell me about your shipping options',
       'I need help with my order #12345',
       'What are your business hours?',
-      'How can I return a product?'
+      'How can I return an item?'
     ];
 
     for (const message of testMessages) {

@@ -128,12 +128,14 @@ export function createCartResponse(items = [], total = '0.00', coupons = []) {
 // Request factory helpers
 const BASE_URL = 'http://localhost:3000/api/woocommerce/cart-test';
 
-export function createGetRequest() {
-  return new (require('next/server').NextRequest)(BASE_URL);
+export async function createGetRequest() {
+  const { NextRequest } = await import('next/server');
+  return new NextRequest(BASE_URL);
 }
 
-export function createPostRequest(body: Record<string, any>) {
-  return new (require('next/server').NextRequest)(BASE_URL, {
+export async function createPostRequest(body: Record<string, any>) {
+  const { NextRequest } = await import('next/server');
+  return new NextRequest(BASE_URL, {
     method: 'POST',
     body: JSON.stringify(body),
   });

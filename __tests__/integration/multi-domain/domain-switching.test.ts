@@ -21,7 +21,7 @@ import {
 import { join } from 'path';
 
 describe('Domain Switching Tests', () => {
-  let results: DomainTestResult[] = [];
+  const results: DomainTestResult[] = [];
 
   /**
    * Test 1: API supports switching between domains

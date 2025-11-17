@@ -50,15 +50,28 @@ export function transformShopifyProducts(products: any[]): ShoppingProduct[] {
 /**
  * Detect if AI response contains product recommendations
  * that should trigger shopping mode
+ *
+ * @param aiResponse - The AI's response text
+ * @param products - Array of products returned
+ * @param isMobile - Whether the user is on a mobile device
  */
 export function shouldTriggerShoppingMode(
   aiResponse: string,
-  products?: any[]
+  products?: any[],
+  isMobile?: boolean
 ): boolean {
   if (!products || products.length === 0) {
     return false;
   }
 
+  // MOBILE OPTIMIZATION: Always use shopping feed on mobile for better UX
+  // Mobile users should see swipeable product carousel instead of text links
+  if (isMobile && products.length > 0) {
+    console.log('[Shopping] Mobile detected - forcing shopping mode for', products.length, 'products');
+    return true;
+  }
+
+  // DESKTOP: Use keyword detection for desktop users
   // Keywords that indicate product browsing intent
   const browseKeywords = [
     'here are',

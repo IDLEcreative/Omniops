@@ -10,6 +10,7 @@ interface MetricCardProps {
   description?: string;
   formatValue?: (value: number | string) => string;
   className?: string;
+  rightSlot?: React.ReactNode;
 }
 
 export function MetricCard({
@@ -19,7 +20,8 @@ export function MetricCard({
   icon: Icon,
   description,
   formatValue,
-  className
+  className,
+  rightSlot
 }: MetricCardProps) {
   const displayValue = formatValue && typeof value === 'number'
     ? formatValue(value)
@@ -35,11 +37,14 @@ export function MetricCard({
         {Icon && <Icon className="h-4 w-4 text-muted-foreground" />}
       </CardHeader>
       <CardContent>
-        <div className="text-2xl font-bold">{displayValue}</div>
+        <div className="flex items-start justify-between">
+          <div className="text-2xl font-bold">{displayValue}</div>
+          {rightSlot && <div className="ml-2">{rightSlot}</div>}
+        </div>
         {description && (
           <p className="text-xs text-muted-foreground mt-1">{description}</p>
         )}
-        {trend !== undefined && (
+        {trend !== undefined && !rightSlot && (
           <div className={cn(
             'flex items-center text-xs mt-2',
             trendPositive && 'text-green-600',

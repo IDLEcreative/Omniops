@@ -22,7 +22,7 @@ import {
 } from '../../utils/domain/multi-domain-test-helpers';
 
 describe('Multi-Tenant Workflows Tests', () => {
-  let results: DomainTestResult[] = [];
+  const results: DomainTestResult[] = [];
 
   /**
    * Test 1: Restaurant workflow is brand-agnostic

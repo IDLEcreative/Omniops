@@ -184,6 +184,22 @@ export async function POST(
       throw new Error('OpenAI client not available');
     }
 
+    // Detect mobile device from client-side detection (request body) or User-Agent header fallback
+    const clientMobileDetection = body.is_mobile;
+    const userAgent = request.headers.get('user-agent') || '';
+    const userAgentMobile = /Mobile|Android|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(userAgent);
+
+    // Prefer client-side detection (more reliable for iframes), fallback to User-Agent
+    const isMobile = clientMobileDetection !== undefined ? clientMobileDetection : userAgentMobile;
+
+    if (isMobile) {
+      console.log('[Chat API] Mobile device detected - shopping feed mode enabled', {
+        clientDetection: clientMobileDetection,
+        userAgentDetection: userAgentMobile,
+        userAgent: userAgent.substring(0, 100)
+      });
+    }
+
     // Process AI conversation with ReAct loop and tool execution
     const { finalResponse: aiResponse, allSearchResults, searchLog, iteration, shoppingProducts, shoppingContext } = await processAIConversation({
       conversationMessages,
@@ -197,7 +213,8 @@ export async function POST(
         getCommerceProvider: getProviderFn,
         searchSimilarContent: searchFn,
         sanitizeOutboundLinks: sanitizeFn
-      }
+      },
+      isMobile // Pass mobile detection flag for shopping UX optimization
     });
 
     // MCP CODE EXECUTION: Check if AI response contains executable code (uses extracted handler)

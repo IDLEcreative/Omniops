@@ -87,13 +87,13 @@ test.describe('Complete Multi-Language Workflow', () => {
     await inputField.fill('Hola, ¿qué productos tienes disponibles?');
     console.log('   Typed Spanish message: "Hola, ¿qué productos tienes disponibles?"');
 
-    let sendButton = await getWidgetSendButton(iframe);
+    const sendButton = await getWidgetSendButton(iframe);
     await sendButton.click();
     console.log('✅ Spanish message sent');
 
     // Wait for response
     await page.waitForTimeout(5000);
-    let messageCount = await getMessageCount(page);
+    const messageCount = await getMessageCount(page);
     console.log(`   Messages in conversation: ${messageCount}`);
 
     // Step 7: Change to Arabic

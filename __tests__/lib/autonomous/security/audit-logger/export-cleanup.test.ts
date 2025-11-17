@@ -21,9 +21,10 @@ describe('AuditLogger.exportAuditTrail', () => {
   let mockOperations: any;
   let auditQueries: any;
 
-  beforeEach(() => {
+  beforeEach(async () => {
     // Import the mocked module
-    auditQueries = require('@/lib/autonomous/security/audit-queries');
+    const auditQueriesModule = await import('@/lib/autonomous/security/audit-queries');
+    auditQueries = auditQueriesModule;
 
     mockSupabaseClient = createMockSupabaseClient();
 
@@ -114,9 +115,10 @@ describe('AuditLogger.deleteOldLogs', () => {
   let mockOperations: any;
   let auditQueries: any;
 
-  beforeEach(() => {
+  beforeEach(async () => {
     // Import the mocked module
-    auditQueries = require('@/lib/autonomous/security/audit-queries');
+    const auditQueriesModule = await import('@/lib/autonomous/security/audit-queries');
+    auditQueries = auditQueriesModule;
 
     mockSupabaseClient = createMockSupabaseClient();
 

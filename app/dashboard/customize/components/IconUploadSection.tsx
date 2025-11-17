@@ -14,7 +14,7 @@ interface IconUploadSectionProps {
   value: string;
   iconType: IconType;
   isUploading: boolean;
-  fileInputRef: RefObject<HTMLInputElement>;
+  fileInputRef: RefObject<HTMLInputElement | null>;
   placeholder: string;
   borderColor?: string;
   onChange: (value: string) => void;

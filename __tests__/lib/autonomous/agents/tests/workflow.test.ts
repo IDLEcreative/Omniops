@@ -33,7 +33,7 @@ describe('ShopifySetupAgent - Workflow', () => {
     // Clear mock calls before each test
     mockWorkflowRegistryGet.mockClear();
     // Re-import after resetting modules
-    const { ShopifySetupAgent: FreshAgent } = require('@/lib/autonomous/agents/shopify-setup-agent');
+    const FreshAgent = await import('@/lib/autonomous/agents/shopify-setup-agent').then(m => m.ShopifySetupAgent);
     agent = new FreshAgent(mockStoreUrl);
   });
 

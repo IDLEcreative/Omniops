@@ -7,7 +7,7 @@ jest.mock('@/lib/redis');
 import { checkRateLimit, checkDomainRateLimit } from '@/lib/rate-limit';
 
 // Import the mock directly to get clearMockRedisData
-const mockRedis = require('../../__mocks__/@/lib/redis.js');
+import mockRedis from '../../__mocks__/@/lib/redis.js';
 
 describe('Rate Limiting', () => {
   // Store original Date.now

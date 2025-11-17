@@ -97,11 +97,65 @@ export function useMessageState({
 
           if (!isMountedRef.current) return;
 
+          console.log('[useMessageState] 📥 Received API response:', {
+            success: data.success,
+            messageCount: data.messages?.length || 0,
+            allMessages: data.messages?.map((m: any) => ({
+              role: m.role,
+              hasMetadata: !!m.metadata,
+              metadataKeys: m.metadata ? Object.keys(m.metadata) : [],
+              shoppingProducts: m.metadata?.shoppingProducts?.length || 0,
+              metadata: m.metadata
+            }))
+          });
+
           if (data.success && data.messages && data.messages.length > 0) {
-            if (process.env.NODE_ENV === 'development') {
-              console.log('[useMessageState] Loaded previous messages:', data.messages.length);
-            }
-            setMessages(data.messages);
+            console.log('[useMessageState] 📦 Loaded previous messages from DB:', {
+              count: data.messages.length,
+              lastMessage: data.messages[data.messages.length - 1],
+              hasMetadata: !!data.messages[data.messages.length - 1]?.metadata?.shoppingProducts
+            });
+
+            // SMART MERGE: If DB has more messages or fresh metadata, use DB version
+            // Otherwise keep current state to prevent overwriting optimistic updates
+            setMessages(prev => {
+              console.log('[useMessageState] 🤔 Smart merge decision - Current state:', {
+                currentLength: prev.length,
+                dbLength: data.messages.length,
+                lastStateMsg: prev[prev.length - 1],
+                lastDbMsg: data.messages[data.messages.length - 1]
+              });
+
+              if (prev.length === 0) {
+                console.log('[useMessageState] ✅ Loading messages (state was empty)');
+                return data.messages;
+              } else if (data.messages.length > prev.length) {
+                console.log('[useMessageState] ✅ Loading messages (DB has more:', data.messages.length, 'vs', prev.length, ')');
+                return data.messages;
+              } else if (data.messages.length === prev.length) {
+                // Check if last DB message has metadata that's missing in state
+                const lastDbMsg = data.messages[data.messages.length - 1];
+                const lastStateMsg = prev[prev.length - 1];
+
+                console.log('[useMessageState] 🔍 Comparing last messages:', {
+                  sameId: lastDbMsg.id === lastStateMsg.id,
+                  dbHasMetadata: !!lastDbMsg.metadata?.shoppingProducts,
+                  stateHasMetadata: !!lastStateMsg.metadata?.shoppingProducts,
+                  dbProducts: lastDbMsg.metadata?.shoppingProducts?.length || 0,
+                  stateProducts: lastStateMsg.metadata?.shoppingProducts?.length || 0
+                });
+
+                if (lastDbMsg.id === lastStateMsg.id &&
+                    lastDbMsg.metadata?.shoppingProducts &&
+                    !lastStateMsg.metadata?.shoppingProducts) {
+                  console.log('[useMessageState] ✅ Loading messages (DB has metadata, state missing it)');
+                  return data.messages;
+                }
+              }
+
+              console.log('[useMessageState] ⚠️ Skipping load - current state is up to date');
+              return prev;
+            });
           } else {
             // Conversation not found or expired - clear stored ID
             if (process.env.NODE_ENV === 'development') {

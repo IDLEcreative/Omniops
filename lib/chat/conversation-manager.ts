@@ -157,16 +157,30 @@ export async function saveAssistantMessage(
     insertData.metadata = metadata;
   }
 
+  console.log('[ConversationManager] 💾 Saving assistant message with metadata:', {
+    conversationId,
+    hasMetadata: !!metadata,
+    metadataKeys: metadata ? Object.keys(metadata) : [],
+    shoppingProducts: metadata?.shoppingProducts?.length || 0,
+    fullMetadata: metadata
+  });
+
   const { data, error } = await supabase
     .from('messages')
     .insert(insertData)
-    .select('id')
+    .select('id, metadata')
     .single();
 
   if (error) {
     console.error('[ConversationManager] Failed to save assistant message:', error);
     return null;
   }
+
+  console.log('[ConversationManager] ✅ Message saved to DB:', {
+    messageId: data?.id,
+    savedMetadata: data?.metadata,
+    metadataMatch: JSON.stringify(data?.metadata) === JSON.stringify(metadata)
+  });
 
   return data?.id || null;
 }

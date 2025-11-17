@@ -88,7 +88,7 @@ function ConversationListItemComponent({
     <button
       type="button"
       className={`
-        w-full border-b px-3 py-2 text-left transition-all duration-200
+        w-full border-b px-2 py-1.5 text-left transition-all duration-200
         hover:bg-accent/50 focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2
         ${
         isSelected ? "bg-accent/70 border-l-2 border-l-primary shadow-sm" : "hover:shadow-sm"
@@ -96,7 +96,7 @@ function ConversationListItemComponent({
       onClick={handleClick}
       aria-label={`Conversation with ${conversation.customerName || "customer"}, ${formatRelativeTime(conversation.timestamp)}, status: ${STATUS_LABELS[conversation.status]}`}
     >
-      <div className="flex items-start gap-2.5">
+      <div className="flex items-start gap-2">
         {isSelectionMode && onToggleSelect && (
           <div className="pt-0.5">
             <Checkbox
@@ -108,7 +108,7 @@ function ConversationListItemComponent({
             />
           </div>
         )}
-        <div className="flex-1 min-w-0 space-y-1">
+        <div className="flex-1 min-w-0 space-y-0.5">
           <div className="flex items-center justify-between gap-2">
             <p className="text-sm font-medium truncate">
               {conversation.customerName ?? "Customer"}

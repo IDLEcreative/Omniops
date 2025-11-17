@@ -31,6 +31,8 @@ interface BusinessIntelligenceData {
 
 interface UseBusinessIntelligenceOptions {
   days?: number;
+  startDate?: Date;
+  endDate?: Date;
   domain?: string;
   metric?: 'journey' | 'content-gaps' | 'peak-usage' | 'conversion-funnel' | 'all';
   disabled?: boolean;
@@ -46,7 +48,7 @@ interface UseBusinessIntelligenceResult {
 export function useBusinessIntelligence(
   options: UseBusinessIntelligenceOptions = {},
 ): UseBusinessIntelligenceResult {
-  const { days = 30, domain, metric = 'all', disabled = false } = options;
+  const { days, startDate, endDate, domain, metric = 'all', disabled = false } = options;
   const [data, setData] = useState<BusinessIntelligenceData | null>(null);
   const [loading, setLoading] = useState<boolean>(false);
   const [error, setError] = useState<Error | null>(null);
@@ -64,9 +66,19 @@ export function useBusinessIntelligence(
 
     try {
       const params = new URLSearchParams({
-        days: days.toString(),
         metric
       });
+
+      // Use startDate/endDate if provided, otherwise fall back to days
+      if (startDate && endDate) {
+        params.append('startDate', startDate.toISOString());
+        params.append('endDate', endDate.toISOString());
+      } else if (days !== undefined) {
+        params.append('days', days.toString());
+      } else {
+        // Default to 30 days
+        params.append('days', '30');
+      }
 
       if (domain) {
         params.append('domain', domain);
@@ -92,7 +104,7 @@ export function useBusinessIntelligence(
     } finally {
       setLoading(false);
     }
-  }, [days, domain, metric, disabled]);
+  }, [days, startDate, endDate, domain, metric, disabled]);
 
   useEffect(() => {
     fetchIntelligence();

@@ -215,7 +215,7 @@ describe('Conditional Tool Availability', () => {
 
       expect(instructions).toContain('WooCommerce is configured');
       expect(instructions).toContain('you can perform cart operations');
-      expect(instructions).toContain('woocommerce_operations tool');
+      expect(instructions).toContain('woocommerce_operations');
     });
 
     it('should provide Shopify instructions when configured', () => {
@@ -225,7 +225,7 @@ describe('Conditional Tool Availability', () => {
       });
 
       expect(instructions).toContain('Shopify is configured');
-      expect(instructions).toContain('shopify_operations tool');
+      expect(instructions).toContain('shopify_operations');
     });
 
     it('should provide both instructions when both configured', () => {

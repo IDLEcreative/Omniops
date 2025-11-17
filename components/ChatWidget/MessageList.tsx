@@ -33,6 +33,23 @@ export function MessageList({
   conversationId,
   storeDomain,
 }: MessageListProps) {
+  // CRITICAL DEBUG: Log on EVERY render
+  console.log('[MessageList] ⚡ RENDER TRIGGERED - Message count:', messages.length);
+  console.log('[MessageList] ⚡ Last message:', messages[messages.length - 1]);
+
+  // Log messages metadata for debugging
+  console.log('[MessageList] 🎨 Rendering with messages:', {
+    count: messages.length,
+    messagesWithMetadata: messages.filter(m => m.metadata && Object.keys(m.metadata).length > 0).length,
+    allMessages: messages.map(m => ({
+      role: m.role,
+      hasMetadata: !!m.metadata,
+      metadataKeys: m.metadata ? Object.keys(m.metadata) : [],
+      shoppingProducts: m.metadata?.shoppingProducts?.length || 0,
+      metadata: m.metadata
+    }))
+  });
+
   // Shopping mode state
   const [shoppingMode, setShoppingMode] = useState(false);
   const [shoppingData, setShoppingData] = useState<{
@@ -128,9 +145,38 @@ export function MessageList({
             >
               <MessageContent content={message.content} className="leading-relaxed break-words" />
 
+              {/* DEBUG INDICATOR - Will show in screenshot */}
+              {message.role === 'assistant' && (
+                <div style={{
+                  padding: '4px 8px',
+                  margin: '8px 0',
+                  fontSize: '10px',
+                  border: '2px solid red',
+                  backgroundColor: 'yellow',
+                  color: 'black',
+                  fontFamily: 'monospace'
+                }}>
+                  DEBUG: metadata={!!message.metadata ? 'YES' : 'NO'} |
+                  shoppingProducts={!!message.metadata?.shoppingProducts ? 'YES' : 'NO'} |
+                  count={message.metadata?.shoppingProducts?.length || 0}
+                </div>
+              )}
+
               {/* Shopping Button - Show if message has shopping products */}
+              {(() => {
+                if (message.role === 'assistant') {
+                  console.log('[MessageList] Assistant message metadata:', {
+                    hasMetadata: !!message.metadata,
+                    metadata: message.metadata,
+                    hasShoppingProducts: !!message.metadata?.shoppingProducts,
+                    productCount: message.metadata?.shoppingProducts?.length
+                  });
+                }
+                return null;
+              })()}
               {message.metadata?.shoppingProducts && message.metadata.shoppingProducts.length > 0 && (
                 <button
+                  data-testid="browse-products-button"
                   onClick={() => handleOpenShopping(
                     message.metadata!.shoppingProducts!,
                     message.metadata?.shoppingContext

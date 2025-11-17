@@ -20,7 +20,7 @@ import {
 } from '../../utils/domain/multi-domain-test-helpers';
 
 describe('Cross-Domain Prevention Tests', () => {
-  let results: DomainTestResult[] = [];
+  const results: DomainTestResult[] = [];
 
   /**
    * Test 1: Prevent hardcoded brand references in production code

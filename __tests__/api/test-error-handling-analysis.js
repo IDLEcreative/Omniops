@@ -10,15 +10,15 @@
  * - analyzers/report-generator.js (summary and recommendations)
  */
 
-const { ErrorFindingTracker } = require('./helpers/error-analysis-helpers');
-const { analyzeAPIErrorHandling } = require('./analyzers/api-error-analyzer');
-const {
+import { ErrorFindingTracker } from './helpers/error-analysis-helpers.js';
+import { analyzeAPIErrorHandling } from './analyzers/api-error-analyzer.js';
+import {
   analyzeFrontendErrorHandling,
   analyzeEdgeCaseHandling,
   analyzeTimeoutPatterns
-} = require('./analyzers/frontend-error-analyzer');
-const { analyzeErrorMessages } = require('./analyzers/error-message-analyzer');
-const { generateReport } = require('./analyzers/report-generator');
+} from './analyzers/frontend-error-analyzer.js';
+import { analyzeErrorMessages } from './analyzers/error-message-analyzer.js';
+import { generateReport } from './analyzers/report-generator.js';
 
 class ErrorHandlingAnalyzer {
   constructor() {

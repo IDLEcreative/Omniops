@@ -31,7 +31,7 @@ export default function TestWidgetPage() {
     // Configure widget
     (window as any).ChatWidgetConfig = {
       serverUrl: process.env.NEXT_PUBLIC_APP_URL || window.location.origin,
-      domain: 'www.thompsonseparts.co.uk',
+      domain: 'www.example-store.com',
       skipRemoteConfig: true,
       appearance: {
         position: 'bottom-right',

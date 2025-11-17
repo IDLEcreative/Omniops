@@ -5,7 +5,10 @@ export type { DashboardAnalyticsData } from '@/types/dashboard';
 
 interface DashboardAnalyticsOptions {
   days?: number;
+  startDate?: Date;
+  endDate?: Date;
   disabled?: boolean;
+  compare?: boolean;
 }
 
 interface UseDashboardAnalyticsResult {
@@ -18,7 +21,7 @@ interface UseDashboardAnalyticsResult {
 export function useDashboardAnalytics(
   options: DashboardAnalyticsOptions = {},
 ): UseDashboardAnalyticsResult {
-  const { days = 7, disabled = false } = options;
+  const { days, startDate, endDate, disabled = false, compare = false } = options;
   const [data, setData] = useState<DashboardAnalyticsData | null>(null);
   const [loading, setLoading] = useState<boolean>(false);
   const [error, setError] = useState<Error | null>(null);
@@ -35,7 +38,24 @@ export function useDashboardAnalytics(
     setError(null);
 
     try {
-      const params = new URLSearchParams({ days: days.toString() });
+      const params = new URLSearchParams();
+
+      // Use startDate/endDate if provided, otherwise fall back to days
+      if (startDate && endDate) {
+        params.append('startDate', startDate.toISOString());
+        params.append('endDate', endDate.toISOString());
+      } else if (days !== undefined) {
+        params.append('days', days.toString());
+      } else {
+        // Default to 7 days
+        params.append('days', '7');
+      }
+
+      // Add comparison flag if enabled
+      if (compare) {
+        params.append('compare', 'true');
+      }
+
       const response = await fetch(`/api/dashboard/analytics?${params.toString()}`, {
         signal: controller.signal,
       });
@@ -53,7 +73,7 @@ export function useDashboardAnalytics(
     } finally {
       setLoading(false);
     }
-  }, [days, disabled]);
+  }, [days, startDate, endDate, disabled, compare]);
 
   useEffect(() => {
     fetchAnalytics();

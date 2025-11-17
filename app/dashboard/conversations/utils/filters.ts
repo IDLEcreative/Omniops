@@ -46,6 +46,9 @@ export function useActiveFilterCount(advancedFilters: AdvancedFilterState) {
     if (advancedFilters.customerType !== 'all') count++;
     if (advancedFilters.messageLength !== 'all') count++;
     if (advancedFilters.dateRange) count++;
+    if (advancedFilters.sentiment) count++;
+    if (advancedFilters.domainId) count++;
+    if (advancedFilters.customerEmail) count++;
     return count;
   }, [advancedFilters]);
 }

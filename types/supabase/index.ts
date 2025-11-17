@@ -23,6 +23,8 @@ export type {
 } from './database.types'
 
 // Re-export Supabase client types
+// These are type-only exports which are allowed from @supabase/supabase-js
+// eslint-disable-next-line no-restricted-imports
 export type {
   SupabaseClient,
   User,

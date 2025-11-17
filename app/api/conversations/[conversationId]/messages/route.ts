@@ -4,13 +4,13 @@ import { z } from 'zod';
 
 // CORS headers for cross-origin requests (widget embedding)
 function getCorsHeaders(origin: string | null) {
-  const headers: Record<string, string> = {
+  return {
     'Access-Control-Allow-Methods': 'GET, OPTIONS',
     'Access-Control-Allow-Headers': 'Content-Type, Authorization',
     'Access-Control-Allow-Origin': origin || '*',
     'Access-Control-Allow-Credentials': 'true',
-  };
-  return headers;
+    'Content-Type': 'application/json',
+  } as const;
 }
 
 // Handle preflight OPTIONS requests
@@ -45,8 +45,8 @@ export async function GET(
     // Create Supabase client
     const supabase = await createServiceRoleClient();
     if (!supabase) {
-      return NextResponse.json(
-        { error: 'Service temporarily unavailable' },
+      return new NextResponse(
+        JSON.stringify({ error: 'Service temporarily unavailable' }),
         { status: 503, headers: corsHeaders }
       );
     }
@@ -66,12 +66,12 @@ export async function GET(
 
     if (convError || !conversation) {
       // Don't reveal whether conversation exists or session mismatch
-      return NextResponse.json(
-        {
+      return new NextResponse(
+        JSON.stringify({
           success: false,
           messages: [],
           conversation: null
-        },
+        }),
         { status: 200, headers: corsHeaders }
       );
     }
@@ -79,45 +79,66 @@ export async function GET(
     // Fetch messages for the conversation
     const { data: messages, error: messagesError } = await supabase
       .from('messages')
-      .select('id, role, content, created_at')
+      .select('id, role, content, created_at, metadata')
       .eq('conversation_id', conversationId)
       .order('created_at', { ascending: true })
       .limit(limit);
 
     if (messagesError) {
       console.error('[Messages API] Error fetching messages:', messagesError);
-      return NextResponse.json(
-        {
+      return new NextResponse(
+        JSON.stringify({
           success: false,
           messages: [],
           error: 'Failed to retrieve messages'
-        },
+        }),
         { status: 500, headers: corsHeaders }
       );
     }
 
-    // Return messages and conversation info
-    return NextResponse.json(
-      {
-        success: true,
-        conversation: {
-          id: conversation.id,
-          created_at: conversation.created_at
-        },
-        messages: messages || [],
-        count: messages?.length || 0
+    console.log('[Messages API] 🔍 Fetched messages from DB:', {
+      count: messages?.length || 0,
+      hasMetadata: messages?.some(m => m.metadata && Object.keys(m.metadata).length > 0),
+      lastMessageMetadata: messages?.[messages.length - 1]?.metadata,
+      allMessagesMetadata: messages?.map(m => ({
+        role: m.role,
+        hasMetadata: !!m.metadata,
+        metadataKeys: m.metadata ? Object.keys(m.metadata) : [],
+        shoppingProducts: m.metadata?.shoppingProducts?.length || 0,
+        metadata: m.metadata
+      }))
+    });
+
+    // Log the exact JSON being returned
+    const responseBody = {
+      success: true,
+      conversation: {
+        id: conversation.id,
+        created_at: conversation.created_at
       },
+      messages: messages || [],
+      count: messages?.length || 0
+    };
+
+    console.log('[Messages API] 📤 Returning response with messages:', {
+      messageCount: responseBody.messages.length,
+      lastMessage: responseBody.messages[responseBody.messages.length - 1]
+    });
+
+    // Return messages and conversation info
+    return new NextResponse(
+      JSON.stringify(responseBody),
       { status: 200, headers: corsHeaders }
     );
 
   } catch (error) {
     console.error('[Messages API] Unexpected error:', error);
-    return NextResponse.json(
-      {
+    return new NextResponse(
+      JSON.stringify({
         success: false,
         messages: [],
         error: 'An unexpected error occurred'
-      },
+      }),
       { status: 500, headers: corsHeaders }
     );
   }

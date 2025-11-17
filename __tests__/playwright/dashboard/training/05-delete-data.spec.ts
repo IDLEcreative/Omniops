@@ -77,7 +77,7 @@ test.describe('Training Dashboard - Delete Data', () => {
     console.log('📍 Step 1: Create multiple test items');
     for (const item of items) {
       await uploadText(page, item);
-      await page.waitForTimeout(500);
+      await page.waitForTimeout(1000); // Increased wait time
     }
 
     console.log('📍 Step 2: Verify all items appear');
@@ -85,8 +85,14 @@ test.describe('Training Dashboard - Delete Data', () => {
       await waitForItemInList(page, item, 5000);
     }
 
+    // Wait for UI to settle before counting
+    await page.waitForTimeout(2000);
+
     const initialCount = await getTrainingItemCount(page);
     console.log(`📊 Initial count: ${initialCount} items`);
+
+    // Ensure we have items to delete
+    expect(initialCount).toBeGreaterThanOrEqual(3);
 
     console.log('📍 Step 3: Delete items one by one');
     for (const item of items) {
@@ -139,30 +145,30 @@ test.describe('Training Dashboard - Delete Data', () => {
       'Keep item 1 - ' + Date.now(),
       'Keep item 2 - ' + Date.now()
     ];
-    const deleteItem = 'Delete this item - ' + Date.now();
+    const itemToDelete = 'Delete this item - ' + Date.now();
 
     console.log('📍 Step 1: Create items to keep and one to delete');
     for (const item of keepItems) {
       await uploadText(page, item);
       await page.waitForTimeout(500);
     }
-    await uploadText(page, deleteItem);
+    await uploadText(page, itemToDelete);
     await page.waitForTimeout(500);
 
     console.log('📍 Step 2: Verify all items appear');
     for (const item of keepItems) {
       await waitForItemInList(page, item, 5000);
     }
-    await waitForItemInList(page, deleteItem, 5000);
+    await waitForItemInList(page, itemToDelete, 5000);
 
     const beforeCount = await getTrainingItemCount(page);
     console.log(`📊 Before deletion: ${beforeCount} items`);
 
     console.log('📍 Step 3: Delete one item');
-    await deleteItem(page, deleteItem);
+    await deleteItem(page, itemToDelete);
 
     console.log('📍 Step 4: Verify deleted item is gone');
-    await verifyItemNotInList(page, deleteItem);
+    await verifyItemNotInList(page, itemToDelete);
 
     console.log('📍 Step 5: Verify other items remain intact');
     for (const item of keepItems) {

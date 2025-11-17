@@ -227,13 +227,13 @@ export async function waitForItemInList(page: Page, content: string, timeout: nu
 
   // Final attempt with expect (will throw error with timeout details)
   const item = page.locator(`p.truncate:has-text("${searchText}")`).first();
-  await expect(item).toBeVisible({ timeout: 1000 });
+  await expect(item).toBeVisible({ timeout: 5000 });
   console.log('✅ Item appeared in list');
 
   return item;
 }
 
-export async function waitForProcessingComplete(page: Page, content: string, timeout: number = 60000) {
+export async function waitForProcessingComplete(page: Page, content: string, timeout: number = 90000) {
   console.log(`📍 Step: Wait for processing complete - ${content.substring(0, 50)}...`);
 
   // CRITICAL: Scroll to top where new items appear
@@ -272,7 +272,8 @@ export async function waitForProcessingComplete(page: Page, content: string, tim
       }
     }
 
-    await page.waitForTimeout(2000);
+    // Longer wait interval for scraping operations (3s instead of 2s)
+    await page.waitForTimeout(3000);
   }
 
   throw new Error(`Processing did not complete within ${timeout}ms`);

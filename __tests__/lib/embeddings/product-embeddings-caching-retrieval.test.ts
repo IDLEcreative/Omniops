@@ -20,15 +20,25 @@ jest.mock('@supabase/supabase-js', () => ({
   createClient: jest.fn(),
 }));
 
-// Mock embedding generation
-const mockGenerateProductEmbedding = jest.fn();
-jest.mock('@/lib/embeddings/product-embeddings', () => {
-  const actual = jest.requireActual('@/lib/embeddings/product-embeddings');
-  return {
-    ...actual,
-    generateProductEmbedding: (...args: any[]) => mockGenerateProductEmbedding(...args),
-  };
-});
+// Mock embedding cache to prevent caching interference
+jest.mock('@/lib/embedding-cache', () => ({
+  embeddingCache: {
+    get: jest.fn(() => null), // Always return null to force generation
+    set: jest.fn(),
+    clear: jest.fn(),
+    getStats: jest.fn(() => ({ hits: 0, misses: 0, evictions: 0 })),
+  },
+}));
+
+// Mock OpenAI client
+const mockOpenAIEmbeddings = jest.fn();
+jest.mock('@/lib/embeddings/openai-client', () => ({
+  getOpenAIClient: () => ({
+    embeddings: {
+      create: mockOpenAIEmbeddings,
+    },
+  }),
+}));
 
 // Import after mocking
 import { scoreProductsBySimilarity } from '@/lib/embeddings/product-embeddings';
@@ -63,6 +73,11 @@ describe('Product Embeddings Caching - Retrieval and Integration', () => {
     };
 
     mockCreateClient.mockReturnValue(mockSupabaseClient as any);
+
+    // Default mock for OpenAI embeddings
+    mockOpenAIEmbeddings.mockImplementation(async () => ({
+      data: [{ embedding: new Array(1536).fill(0.1) }],
+    }));
   });
 
   describe('scoreProductsBySimilarity - WITH Domain (Caching Enabled)', () => {
@@ -73,12 +88,12 @@ describe('Product Embeddings Caching - Retrieval and Integration', () => {
       ];
       const domain = 'example.com';
 
-      const expectedHash = calculateExpectedHash('Cached Product ');
+      const expectedHash = calculateExpectedHash('Cached Product');
       setupCacheHitMock(mockSupabaseClient, cachedEmbedding, expectedHash);
 
       const result = await scoreProductsBySimilarity(products, new Array(1536).fill(0.5), domain);
 
-      expect(mockGenerateProductEmbedding).not.toHaveBeenCalled();
+      expect(mockOpenAIEmbeddings).not.toHaveBeenCalled();
       expect(result).toHaveLength(1);
       expect(result[0]).toHaveProperty('similarity');
     });
@@ -90,11 +105,16 @@ describe('Product Embeddings Caching - Retrieval and Integration', () => {
       const domain = 'example.com';
 
       setupCacheMissMock(mockSupabaseClient);
-      mockGenerateProductEmbedding.mockResolvedValue(new Array(1536).fill(0.1));
+      mockOpenAIEmbeddings.mockResolvedValue({
+        data: [{ embedding: new Array(1536).fill(0.1) }],
+      });
 
       const result = await scoreProductsBySimilarity(products, new Array(1536).fill(0.5), domain);
 
-      expect(mockGenerateProductEmbedding).toHaveBeenCalledWith('New Product ', false);
+      expect(mockOpenAIEmbeddings).toHaveBeenCalledWith({
+        model: 'text-embedding-3-small',
+        input: 'New Product',
+      });
       verifyCacheSave(mockSupabaseClient, domain);
       expect(result).toHaveLength(1);
     });
@@ -106,7 +126,9 @@ describe('Product Embeddings Caching - Retrieval and Integration', () => {
       ];
 
       setupCacheMissMock(mockSupabaseClient);
-      mockGenerateProductEmbedding.mockResolvedValue(new Array(1536).fill(0.1));
+      mockOpenAIEmbeddings.mockResolvedValue({
+        data: [{ embedding: new Array(1536).fill(0.1) }],
+      });
 
       await scoreProductsBySimilarity(products, new Array(1536).fill(0.5), domain);
 
@@ -131,10 +153,10 @@ describe('Product Embeddings Caching - Retrieval and Integration', () => {
       mockSupabaseClient.upsert.mockResolvedValue({ data: null, error: null });
 
       // Generate different embeddings with varying similarity
-      mockGenerateProductEmbedding
-        .mockResolvedValueOnce(new Array(1536).fill(0.1)) // Low similarity
-        .mockResolvedValueOnce(new Array(1536).fill(0.5)) // High similarity (same as query)
-        .mockResolvedValueOnce(new Array(1536).fill(0.3)); // Medium similarity
+      mockOpenAIEmbeddings
+        .mockResolvedValueOnce({ data: [{ embedding: new Array(1536).fill(0.1) }] }) // Low similarity
+        .mockResolvedValueOnce({ data: [{ embedding: new Array(1536).fill(0.5) }] }) // High similarity (same as query)
+        .mockResolvedValueOnce({ data: [{ embedding: new Array(1536).fill(0.3) }] }); // Medium similarity
 
       const queryEmbedding = new Array(1536).fill(0.5);
       const result = await scoreProductsBySimilarity(products, queryEmbedding, domain);
@@ -152,12 +174,14 @@ describe('Product Embeddings Caching - Retrieval and Integration', () => {
         { id: '123', name: 'Product', short_description: '' }
       ];
 
-      mockGenerateProductEmbedding.mockResolvedValue(new Array(1536).fill(0.1));
+      mockOpenAIEmbeddings.mockResolvedValue({
+        data: [{ embedding: new Array(1536).fill(0.1) }],
+      });
 
       // Call WITHOUT domain
       const result = await scoreProductsBySimilarity(products, new Array(1536).fill(0.5));
 
-      expect(mockGenerateProductEmbedding).toHaveBeenCalled();
+      expect(mockOpenAIEmbeddings).toHaveBeenCalled();
       expect(mockSupabaseClient.from).not.toHaveBeenCalled();
       expect(mockSupabaseClient.upsert).not.toHaveBeenCalled();
       expect(result).toHaveLength(1);
@@ -169,11 +193,13 @@ describe('Product Embeddings Caching - Retrieval and Integration', () => {
         { id: '123', name: 'Product', short_description: '' }
       ];
 
-      mockGenerateProductEmbedding.mockResolvedValue(new Array(1536).fill(0.1));
+      mockOpenAIEmbeddings.mockResolvedValue({
+        data: [{ embedding: new Array(1536).fill(0.1) }],
+      });
 
       const result = await scoreProductsBySimilarity(products, new Array(1536).fill(0.5), undefined);
 
-      expect(mockGenerateProductEmbedding).toHaveBeenCalled();
+      expect(mockOpenAIEmbeddings).toHaveBeenCalled();
       expect(mockSupabaseClient.from).not.toHaveBeenCalled();
       expect(result).toHaveLength(1);
     });
@@ -184,9 +210,9 @@ describe('Product Embeddings Caching - Retrieval and Integration', () => {
         { id: '2', name: 'Product B', description: 'Description B' },
       ];
 
-      mockGenerateProductEmbedding
-        .mockResolvedValueOnce(new Array(1536).fill(0.8))
-        .mockResolvedValueOnce(new Array(1536).fill(0.2));
+      mockOpenAIEmbeddings
+        .mockResolvedValueOnce({ data: [{ embedding: new Array(1536).fill(0.8) }] })
+        .mockResolvedValueOnce({ data: [{ embedding: new Array(1536).fill(0.2) }] });
 
       // Old-style call without domain parameter
       const result = await scoreProductsBySimilarity(products, new Array(1536).fill(0.8));
@@ -206,12 +232,14 @@ describe('Product Embeddings Caching - Retrieval and Integration', () => {
 
       mockSupabaseClient.single.mockRejectedValueOnce(new Error('DB connection failed'));
       mockSupabaseClient.upsert.mockResolvedValueOnce({ data: null, error: null });
-      mockGenerateProductEmbedding.mockResolvedValue(new Array(1536).fill(0.1));
+      mockOpenAIEmbeddings.mockResolvedValue({
+        data: [{ embedding: new Array(1536).fill(0.1) }],
+      });
 
       const result = await scoreProductsBySimilarity(products, new Array(1536).fill(0.5), domain);
 
       expect(result).toHaveLength(1);
-      expect(mockGenerateProductEmbedding).toHaveBeenCalled();
+      expect(mockOpenAIEmbeddings).toHaveBeenCalled();
     });
 
     it('continues when cache save fails', async () => {
@@ -222,7 +250,9 @@ describe('Product Embeddings Caching - Retrieval and Integration', () => {
 
       setupCacheMissMock(mockSupabaseClient);
       mockSupabaseClient.upsert.mockRejectedValueOnce(new Error('Write failed'));
-      mockGenerateProductEmbedding.mockResolvedValue(new Array(1536).fill(0.1));
+      mockOpenAIEmbeddings.mockResolvedValue({
+        data: [{ embedding: new Array(1536).fill(0.1) }],
+      });
 
       const result = await scoreProductsBySimilarity(products, new Array(1536).fill(0.5), domain);
 
@@ -239,7 +269,9 @@ describe('Product Embeddings Caching - Retrieval and Integration', () => {
       ];
       const domain = 'example.com';
 
-      mockGenerateProductEmbedding.mockResolvedValue(new Array(1536).fill(0.1));
+      mockOpenAIEmbeddings.mockResolvedValue({
+        data: [{ embedding: new Array(1536).fill(0.1) }],
+      });
 
       const result = await scoreProductsBySimilarity(products, new Array(1536).fill(0.5), domain);
 

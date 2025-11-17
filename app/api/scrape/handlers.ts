@@ -15,7 +15,8 @@ import type { ScrapeRequest } from './validators';
  */
 export async function handleSinglePageScrape(
   request: ScrapeRequest,
-  supabase: any
+  supabase: any,
+  organizationId?: string
 ): Promise<NextResponse> {
   const { url, turbo } = request;
 
@@ -24,11 +25,34 @@ export async function handleSinglePageScrape(
 
   // Get or create domain
   const domain = new URL(url).hostname.replace('www.', '');
-  const { data: domainData } = await supabase
+
+  // First try to get existing domain
+  let domainData;
+  const { data: existing } = await supabase
     .from('domains')
-    .upsert({ domain })
-    .select()
-    .single();
+    .select('*')
+    .eq('domain', domain)
+    .maybeSingle();
+
+  if (existing) {
+    domainData = existing;
+  } else {
+    // Create new domain if it doesn't exist
+    const { data: created, error: createError } = await supabase
+      .from('domains')
+      .insert({
+        domain,
+        organization_id: organizationId
+      })
+      .select()
+      .single();
+
+    if (createError) {
+      console.error('Error creating domain:', createError);
+      throw createError;
+    }
+    domainData = created;
+  }
 
   // Save to database
   const { data: savedPage, error: pageError } = await supabase
@@ -72,6 +96,7 @@ export async function handleSinglePageScrape(
   if (embError) throw embError;
 
   return NextResponse.json({
+    id: savedPage.id,           // Return scraped_pages ID for tracking
     status: 'completed',
     pages_scraped: 1,
     message: `Successfully scraped and indexed ${url}`,

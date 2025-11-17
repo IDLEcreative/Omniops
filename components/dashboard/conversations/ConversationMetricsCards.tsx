@@ -54,9 +54,9 @@ export function ConversationMetricsCards({
   const topLanguages = data?.languages?.slice(0, 2) ?? [];
 
   return (
-    <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-2">
+    <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-1.5">
       <Card className="border-border/50 shadow-sm">
-        <CardContent className="p-2.5">
+        <CardContent className="p-2">
           <h3 className="text-xs font-semibold uppercase tracking-wider text-foreground">
             Total Conversations
           </h3>
@@ -76,7 +76,7 @@ export function ConversationMetricsCards({
       </Card>
 
       <Card className="border-border/50 shadow-sm">
-        <CardContent className="p-2.5">
+        <CardContent className="p-2">
           <h3 className="text-xs font-semibold uppercase tracking-wider text-foreground">
             Status Distribution
           </h3>
@@ -99,7 +99,7 @@ export function ConversationMetricsCards({
       </Card>
 
       <Card className="border-border/50 shadow-sm">
-        <CardContent className="p-2.5">
+        <CardContent className="p-2">
           <h3 className="text-xs font-semibold uppercase tracking-wider text-foreground">
             Peak Activity
           </h3>
@@ -125,7 +125,7 @@ export function ConversationMetricsCards({
       </Card>
 
       <Card className="border-border/50 shadow-sm">
-        <CardContent className="p-2.5">
+        <CardContent className="p-2">
           <h3 className="text-xs font-semibold uppercase tracking-wider text-foreground">
             Languages
           </h3>

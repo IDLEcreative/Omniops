@@ -74,7 +74,7 @@ async function handlePost(request: NextRequest) {
 
     // Route to appropriate handler
     if (!scrapeRequest.crawl) {
-      return await handleSinglePageScrape(scrapeRequest, supabase);
+      return await handleSinglePageScrape(scrapeRequest, supabase, organizationId);
     } else {
       return await handleWebsiteCrawl(scrapeRequest, supabase, organizationId);
     }

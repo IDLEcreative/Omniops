@@ -358,6 +358,11 @@ jest.mock('@/lib/recommendations/content-filter', () => ({
   contentBasedRecommendations: jest.fn().mockResolvedValue([]),
 }))
 
+// Mock follow-ups module for cron job tests
+jest.mock('@/lib/follow-ups', () => ({
+  sendPendingFollowUps: jest.fn().mockResolvedValue({ sent: 0, failed: 0 }),
+}))
+
 // Establish API mocking before all tests (guarded for Node/MSW compatibility)
 beforeAll(() => {
   try {

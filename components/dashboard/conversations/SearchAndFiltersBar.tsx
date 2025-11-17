@@ -23,7 +23,7 @@ export function SearchAndFiltersBar({
   activeFilterCount,
 }: SearchAndFiltersBarProps) {
   return (
-    <div className="p-3 border-b flex items-center gap-2">
+    <div className="p-2 border-b flex items-center gap-2">
       <div className="relative flex-1">
         <Search className="absolute left-2.5 top-2 h-4 w-4 text-muted-foreground" aria-hidden="true" />
         <Input

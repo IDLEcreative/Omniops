@@ -114,7 +114,17 @@ export function buildChatResponse(
       context: shoppingContext,
       productCount: shoppingProducts.length
     };
+    console.log('[Response Handler] ✅ Shopping metadata added to response:', {
+      productCount: shoppingProducts.length,
+      context: shoppingContext,
+      firstProductName: shoppingProducts[0]?.name
+    });
+  } else {
+    console.log('[Response Handler] ❌ No shopping products - products:', shoppingProducts);
   }
+
+  console.log('[Response Handler] Final API response keys:', Object.keys(response));
+  console.log('[Response Handler] Has shoppingMetadata?', !!response.shoppingMetadata);
 
   return NextResponse.json(response, { headers: corsHeaders });
 }

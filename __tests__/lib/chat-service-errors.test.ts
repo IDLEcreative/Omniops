@@ -102,30 +102,45 @@ describe('ChatService - Error Handling', () => {
     })
 
     it('should distinguish between not found and other errors', async () => {
-      // Not found should return null
-      mockSupabaseClient.from.mockReturnValueOnce({
-        select: jest.fn().mockReturnThis(),
-        or: jest.fn().mockReturnThis(),
-        single: jest.fn().mockResolvedValue({
-          data: null,
-          error: { code: 'PGRST116' }
-        })
+      // Set up mock to handle both calls
+      let callCount = 0;
+      mockSupabaseClient.from.mockImplementation(() => {
+        callCount++;
+        if (callCount === 1) {
+          // First call - not found error
+          return {
+            select: jest.fn().mockReturnThis(),
+            or: jest.fn().mockReturnThis(),
+            single: jest.fn().mockResolvedValue({
+              data: null,
+              error: { code: 'PGRST116' }
+            })
+          }
+        } else {
+          // Second call - other error that should throw
+          return {
+            select: jest.fn().mockReturnThis(),
+            or: jest.fn().mockReturnThis(),
+            single: jest.fn().mockResolvedValue({
+              data: null,
+              error: { code: 'OTHER_ERROR', message: 'Database error' }
+            })
+          }
+        }
       })
 
       const result1 = await chatService.getSession('not-found')
       expect(result1).toBeNull()
 
-      // Other errors should throw
-      mockSupabaseClient.from.mockReturnValueOnce({
-        select: jest.fn().mockReturnThis(),
-        or: jest.fn().mockReturnThis(),
-        single: jest.fn().mockResolvedValue({
-          data: null,
-          error: { code: 'OTHER_ERROR', message: 'Database error' }
-        })
-      })
-
-      await expect(chatService.getSession('error-case')).rejects.toThrow()
+      try {
+        await chatService.getSession('error-case')
+        // If we get here, the function didn't throw
+        throw new Error('Expected getSession to throw but it did not')
+      } catch (error: any) {
+        // Check that it threw the right kind of error
+        expect(error.code).toBe('OTHER_ERROR')
+        expect(error.message).toBe('Database error')
+      }
     })
   })
 

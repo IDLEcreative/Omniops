@@ -35,6 +35,7 @@ export interface AIProcessorParams {
   openaiClient: OpenAI;
   useGPT5Mini: boolean;
   dependencies: AIProcessorDependencies;
+  isMobile?: boolean; // Whether the user is on a mobile device
 }
 
 export interface ToolExecutionResult {

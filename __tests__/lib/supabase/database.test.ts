@@ -1,10 +1,10 @@
 import { describe, it, expect, jest, beforeEach } from '@jest/globals'
-import { createClient, createServiceRoleClient } from '@/lib/supabase-server'
-
-// Mock the Supabase module
-jest.mock('@supabase/supabase-js', () => ({
-  createClient: jest.fn(),
-}))
+import {
+  createClient,
+  createServiceRoleClient,
+  __setMockSupabaseClient,
+  __resetMockSupabaseClient
+} from '@/lib/supabase-server'
 
 // Mock cookies
 jest.mock('next/headers', () => ({
@@ -16,10 +16,11 @@ jest.mock('next/headers', () => ({
 }))
 
 describe('Supabase Database Integration', () => {
-  let mockSupabaseClient: ReturnType<typeof createClient>
+  let mockSupabaseClient: any
 
-  beforeEach(() => {
+  beforeEach(async () => {
     jest.clearAllMocks()
+    __resetMockSupabaseClient()
 
     // Create a mock Supabase client
     mockSupabaseClient = {
@@ -28,6 +29,7 @@ describe('Supabase Database Integration', () => {
         insert: jest.fn().mockReturnThis(),
         update: jest.fn().mockReturnThis(),
         delete: jest.fn().mockReturnThis(),
+        upsert: jest.fn().mockReturnThis(),
         eq: jest.fn().mockReturnThis(),
         neq: jest.fn().mockReturnThis(),
         single: jest.fn().mockResolvedValue({ data: null, error: null }),
@@ -41,8 +43,8 @@ describe('Supabase Database Integration', () => {
       },
     }
 
-    const supabaseModule = await import('@supabase/supabase-js')
-    ;(supabaseModule.createClient as jest.Mock).mockReturnValue(mockSupabaseClient)
+    // Set our custom mock client
+    __setMockSupabaseClient(mockSupabaseClient)
   })
 
   describe('Database Operations', () => {

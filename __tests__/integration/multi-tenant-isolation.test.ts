@@ -46,7 +46,12 @@ const shouldRun = supabaseUrl &&
   process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY &&
   process.env.SUPABASE_SERVICE_ROLE_KEY;
 
-describe('Multi-Tenant Data Isolation', () => {
+// Skip these tests if running in CI or if explicitly disabled
+// These are E2E tests that require real Supabase user authentication
+const SKIP_E2E = process.env.CI === 'true' || process.env.SKIP_E2E === 'true';
+const describeE2E = SKIP_E2E ? describe.skip : describe;
+
+describeE2E('Multi-Tenant Data Isolation [Requires Real Supabase]', () => {
   const rlsTest = setupRLSTest();
   let configId1: string;
   let configId2: string;

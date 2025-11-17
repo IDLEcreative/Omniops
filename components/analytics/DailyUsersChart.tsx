@@ -14,6 +14,8 @@ import {
   ResponsiveContainer,
 } from 'recharts';
 import { Users } from 'lucide-react';
+import { AnnotationMarker } from '@/components/dashboard/analytics/AnnotationMarker';
+import type { ChartAnnotation } from '@/types/dashboard';
 
 interface DailyUserData {
   date: string;
@@ -28,9 +30,16 @@ interface DailyUserData {
 interface DailyUsersChartProps {
   data: DailyUserData[];
   showNewVsReturning?: boolean;
+  annotations?: ChartAnnotation[];
+  onAnnotationClick?: (annotation: ChartAnnotation) => void;
 }
 
-export function DailyUsersChart({ data, showNewVsReturning = true }: DailyUsersChartProps) {
+export function DailyUsersChart({
+  data,
+  showNewVsReturning = true,
+  annotations = [],
+  onAnnotationClick,
+}: DailyUsersChartProps) {
   // Format date for display
   const formattedData = data.map(day => ({
     ...day,
@@ -67,6 +76,14 @@ export function DailyUsersChart({ data, showNewVsReturning = true }: DailyUsersC
               labelStyle={{ color: 'hsl(var(--foreground))' }}
             />
             <Legend />
+            {annotations.map((annotation) => (
+              <AnnotationMarker
+                key={annotation.id}
+                annotation={annotation}
+                dateKey="displayDate"
+                onClick={onAnnotationClick}
+              />
+            ))}
             <Area
               type="monotone"
               dataKey="newUsers"
@@ -101,6 +118,14 @@ export function DailyUsersChart({ data, showNewVsReturning = true }: DailyUsersC
               labelStyle={{ color: 'hsl(var(--foreground))' }}
             />
             <Legend />
+            {annotations.map((annotation) => (
+              <AnnotationMarker
+                key={annotation.id}
+                annotation={annotation}
+                dateKey="displayDate"
+                onClick={onAnnotationClick}
+              />
+            ))}
             <Line
               type="monotone"
               dataKey="users"

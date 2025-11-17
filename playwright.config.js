@@ -67,6 +67,10 @@ const playwrightConfig = {
 
     // Capture trace for debugging (includes screenshots, DOM, network)
     trace: 'on-first-retry',
+
+    // CRITICAL: Block Service Workers to allow route() interception
+    // Service Workers can intercept fetch requests before Playwright's route() handlers
+    serviceWorkers: 'block',
   },
   
   // Browser projects configuration

@@ -93,11 +93,13 @@ export const createMockEmbeddingProduct = (options: {
   description: options.description,
 });
 
+// Import crypto at module level
+import * as crypto from 'crypto';
+
 /**
  * Calculates expected MD5 hash for product text
  */
 export const calculateExpectedHash = (productText: string): string => {
-  const crypto = require('crypto');
   return crypto.createHash('md5').update(productText).digest('hex');
 };
 
@@ -116,7 +118,18 @@ export const setupCacheHitMock = (
     },
     error: null,
   });
-  mockClient.update.mockResolvedValueOnce({ data: null, error: null });
+  // Setup update chaining properly - need to support two .eq() calls
+  const updateChain = {
+    eq: jest.fn().mockReturnThis(),
+  };
+  // Make it chainable and eventually resolvable
+  updateChain.eq.mockImplementation(() => {
+    // Return same object for chaining, but also make it a thenable
+    return Object.assign(updateChain, {
+      then: (resolve: any) => resolve({ data: null, error: null })
+    });
+  });
+  mockClient.update.mockReturnValue(updateChain);
 };
 
 /**

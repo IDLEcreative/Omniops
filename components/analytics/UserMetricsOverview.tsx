@@ -1,5 +1,8 @@
-import { MetricCard } from './MetricCard';
+import { MetricCardWithGoal } from '@/components/dashboard/analytics/MetricCardWithGoal';
+import { ComparisonIndicator } from '@/components/dashboard/analytics/ComparisonIndicator';
 import { Users, TrendingUp, Clock, MousePointerClick, ShoppingCart, Target } from 'lucide-react';
+import type { MetricGoal, MetricProgress, DashboardAnalyticsComparison } from '@/types/dashboard';
+import { calculateMetricProgress } from '@/lib/analytics/calculate-metric-progress';
 
 interface UserMetrics {
   dailyActiveUsers: number;
@@ -28,6 +31,8 @@ interface UserMetricsOverviewProps {
   userMetrics: UserMetrics;
   sessionMetrics: SessionMetrics;
   shoppingBehavior: ShoppingBehavior;
+  goals?: MetricGoal[];
+  comparison?: DashboardAnalyticsComparison;
 }
 
 function formatDuration(seconds: number): string {
@@ -40,7 +45,8 @@ function formatDuration(seconds: number): string {
 export function UserMetricsOverview({
   userMetrics,
   sessionMetrics,
-  shoppingBehavior
+  shoppingBehavior,
+  goals = [],
 }: UserMetricsOverviewProps) {
   const growthDescription = userMetrics.growthRate > 0
     ? `+${userMetrics.growthAbsolute} users (${userMetrics.growthRate}%)`
@@ -48,21 +54,25 @@ export function UserMetricsOverview({
     ? `${userMetrics.growthAbsolute} users (${userMetrics.growthRate}%)`
     : 'No change from last period';
 
+  const dauProgress = calculateMetricProgress('daily_active_users', userMetrics.dailyActiveUsers, goals);
+  const conversionProgress = calculateMetricProgress('conversion_rate', shoppingBehavior.conversionRate, goals);
+
   return (
     <div className="space-y-6">
       {/* User Metrics */}
       <div>
         <h3 className="text-lg font-semibold mb-4">User Metrics</h3>
         <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
-          <MetricCard
+          <MetricCardWithGoal
             title="Daily Active Users"
             value={userMetrics.dailyActiveUsers}
             icon={Users}
             description="Average DAU in period"
             trend={userMetrics.growthRate}
+            progress={dauProgress || undefined}
           />
 
-          <MetricCard
+          <MetricCardWithGoal
             title="Total Unique Users"
             value={userMetrics.totalUniqueUsers}
             icon={Users}
@@ -70,14 +80,14 @@ export function UserMetricsOverview({
             trend={userMetrics.growthRate}
           />
 
-          <MetricCard
+          <MetricCardWithGoal
             title="Avg Session Duration"
             value={formatDuration(sessionMetrics.avgDuration)}
             icon={Clock}
             description={`${sessionMetrics.totalSessions} total sessions`}
           />
 
-          <MetricCard
+          <MetricCardWithGoal
             title="Bounce Rate"
             value={`${sessionMetrics.bounceRate}%`}
             icon={MousePointerClick}
@@ -91,32 +101,33 @@ export function UserMetricsOverview({
         <div>
           <h3 className="text-lg font-semibold mb-4">Shopping Behavior</h3>
           <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
-            <MetricCard
+            <MetricCardWithGoal
               title="Product Views"
               value={shoppingBehavior.productViews}
               icon={ShoppingCart}
               description={`${shoppingBehavior.uniqueProducts} unique products`}
             />
 
-            <MetricCard
+            <MetricCardWithGoal
               title="Cart Views"
               value={shoppingBehavior.cartViews}
               icon={ShoppingCart}
               description="Users viewing cart"
             />
 
-            <MetricCard
+            <MetricCardWithGoal
               title="Checkout Views"
               value={shoppingBehavior.checkoutViews}
               icon={Target}
               description="Reached checkout"
             />
 
-            <MetricCard
+            <MetricCardWithGoal
               title="Conversion Rate"
               value={`${shoppingBehavior.conversionRate}%`}
               icon={TrendingUp}
               description="Product → Checkout"
+              progress={conversionProgress || undefined}
             />
           </div>
         </div>

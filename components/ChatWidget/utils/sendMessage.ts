@@ -34,6 +34,7 @@ export async function sendChatMessage({
   onSuccess,
   onError,
 }: SendMessageParams): Promise<void> {
+  console.log('[sendMessage] 🚀 ENTRY - Starting sendChatMessage');
   try {
     // First check if domain is provided via demoConfig (for dashboard preview)
     let domain = (demoConfig as any)?.domain;
@@ -83,6 +84,11 @@ export async function sendChatMessage({
       console.warn('[ChatWidget] Could not export session data:', error);
     }
 
+    // Detect mobile device on client side
+    const isMobile = /Mobile|Android|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent);
+    console.log('[sendMessage] 📱 Mobile detected:', isMobile, 'User-Agent:', navigator.userAgent);
+    console.log('[sendMessage] 🌐 About to fetch API:', { apiUrl, conversationId, sessionId, isMobile });
+
     const response = await fetch(apiUrl, {
       method: 'POST',
       headers: {
@@ -96,14 +102,19 @@ export async function sendChatMessage({
         demoId: demoId || undefined,
         config: chatConfig,
         session_metadata: sessionMetadata,
+        is_mobile: isMobile, // Pass mobile detection flag from client
       }),
     });
+
+    console.log('[sendMessage] ✅ Fetch completed, status:', response.status);
 
     let data;
     const contentType = response.headers.get('content-type');
 
     if (contentType && contentType.includes('application/json')) {
+      console.log('[sendMessage] 📦 Parsing JSON response');
       data = await response.json();
+      console.log('[sendMessage] 📦 JSON parsed successfully');
     } else {
       const text = await response.text();
       console.error('Received non-JSON response:', text.substring(0, 200));
@@ -114,15 +125,36 @@ export async function sendChatMessage({
       throw new Error(data.error || 'Failed to send message');
     }
 
+    console.log('[ChatWidget] 🔍 API response data:', {
+      hasShoppingMetadata: !!data.shoppingMetadata,
+      productCount: data.shoppingMetadata?.products?.length || 0,
+      message: data.message?.substring(0, 50)
+    });
+
+    console.log('[ChatWidget] 🔍 Full API response shopping metadata:', data.shoppingMetadata);
+
     const assistantMessage: Message = {
       id: data.id || `temp_${Date.now()}_assistant`,
       conversation_id: data.conversation_id,
       role: 'assistant',
       content: data.message || data.content,
       created_at: new Date().toISOString(),
+      // Transform API's shoppingMetadata to message metadata format
+      metadata: data.shoppingMetadata ? {
+        shoppingProducts: data.shoppingMetadata.products,
+        shoppingContext: data.shoppingMetadata.context,
+      } : undefined,
     };
 
+    console.log('[ChatWidget] ✅ Created message with metadata:', {
+      hasMetadata: !!assistantMessage.metadata,
+      productCount: assistantMessage.metadata?.shoppingProducts?.length || 0,
+      fullMetadata: assistantMessage.metadata
+    });
+
+    console.log('[sendMessage] 🎯 Calling onSuccess with message');
     onSuccess(assistantMessage, data.conversation_id);
+    console.log('[sendMessage] ✅ onSuccess completed');
 
   } catch (error) {
     console.error('Error sending message:', error);

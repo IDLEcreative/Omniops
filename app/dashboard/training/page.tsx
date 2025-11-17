@@ -84,7 +84,10 @@ export default function TrainingPage() {
     try {
       const data = await submitUrl(normalizedUrl);
       setTrainingData(prev =>
-        updateOptimisticItem(prev, optimisticItem.id, { id: data.id, status: 'pending' })
+        updateOptimisticItem(prev, optimisticItem.id, {
+          id: data.id,
+          status: data.status as 'pending' | 'processing' | 'completed' | 'error'
+        })
       );
     } catch (error) {
       console.error('Error submitting URL:', error);

@@ -1,12 +1,15 @@
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
 import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer } from 'recharts';
-import type { DashboardAnalyticsData } from '@/types/dashboard';
+import { AnnotationMarker } from '@/components/dashboard/analytics/AnnotationMarker';
+import type { DashboardAnalyticsData, ChartAnnotation } from '@/types/dashboard';
 
 interface MessageVolumeChartProps {
   data: DashboardAnalyticsData;
+  annotations?: ChartAnnotation[];
+  onAnnotationClick?: (annotation: ChartAnnotation) => void;
 }
 
-export function MessageVolumeChart({ data }: MessageVolumeChartProps) {
+export function MessageVolumeChart({ data, annotations = [], onAnnotationClick }: MessageVolumeChartProps) {
   const chartData = data.dailySentiment.map(day => {
     const userMessages = Math.round(day.total * 0.5);
     const assistantMessages = day.total - userMessages;
@@ -49,6 +52,14 @@ export function MessageVolumeChart({ data }: MessageVolumeChartProps) {
               }}
             />
             <Legend />
+            {annotations.map((annotation) => (
+              <AnnotationMarker
+                key={annotation.id}
+                annotation={annotation}
+                dateKey="date"
+                onClick={onAnnotationClick}
+              />
+            ))}
             <Bar
               dataKey="userMessages"
               stackId="a"

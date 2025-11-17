@@ -21,7 +21,7 @@ import {
 import { join } from 'path';
 
 describe('Domain Configuration Tests', () => {
-  let results: DomainTestResult[] = [];
+  const results: DomainTestResult[] = [];
 
   /**
    * Test 1: Verify prompts use generic placeholders
