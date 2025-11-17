@@ -260,26 +260,41 @@ describeE2E('Multi-Tenant Data Isolation [Requires Real Supabase]', () => {
     let page2Id: string;
     let embed1Id: string;
     let embed2Id: string;
+    const testTimestamp = Date.now();
 
     beforeAll(async () => {
       if (!shouldRun) return;
 
+      // Clean up any existing test data from previous failed runs
+      // This prevents duplicate key violations on the unique url constraint
+      try {
+        await deleteAsAdmin('scraped_pages', { url: `https://test1-${testTimestamp}.example.com/page1` });
+      } catch (e) {
+        // Ignore errors if records don't exist
+      }
+      try {
+        await deleteAsAdmin('scraped_pages', { url: `https://test2-${testTimestamp}.example.com/page2` });
+      } catch (e) {
+        // Ignore errors if records don't exist
+      }
+
       // Create scraped pages for each domain using REST API
+      // Use unique URLs per test run to avoid conflicts
       const page1 = await insertAsAdmin('scraped_pages', {
         domain_id: domainId1, // FK references domains.id
-        url: 'https://test1.example.com/page1',
+        url: `https://test1-${testTimestamp}.example.com/page1`,
         title: 'Org 1 Page',
         content: 'Org 1 content',
-        content_hash: 'hash1'
+        content_hash: `hash1-${testTimestamp}`
       });
       page1Id = page1.id;
 
       const page2 = await insertAsAdmin('scraped_pages', {
         domain_id: domainId2, // FK references domains.id
-        url: 'https://test2.example.com/page2',
+        url: `https://test2-${testTimestamp}.example.com/page2`,
         title: 'Org 2 Page',
         content: 'Org 2 content',
-        content_hash: 'hash2'
+        content_hash: `hash2-${testTimestamp}`
       });
       page2Id = page2.id;
 
