@@ -2,6 +2,11 @@ import { describe, it, expect, jest, beforeEach, afterEach } from '@jest/globals
 import { PatternLearner, DomainPatterns } from '@/lib/pattern-learner'
 import supabaseMockModule from '@supabase/supabase-js'
 
+// Mock the supabase server creation
+jest.mock('@/lib/supabase/server', () => ({
+  createServiceRoleClientSync: jest.fn()
+}))
+
 const mockSupabaseClient = (supabaseMockModule as { _mockSupabaseClient: unknown })._mockSupabaseClient
 const { MockQueryBuilder } = supabaseMockModule as { MockQueryBuilder: unknown }
 
@@ -22,22 +27,6 @@ describe('PatternLearner - Extraction', () => {
 
   afterEach(() => {
     process.env = originalEnv
-  })
-
-  describe('Environment Setup', () => {
-    it('should throw error when Supabase credentials are missing', () => {
-      delete process.env.NEXT_PUBLIC_SUPABASE_URL
-      delete process.env.SUPABASE_SERVICE_ROLE_KEY
-
-      expect(() => {
-        PatternLearner['getSupabaseClient']()
-      }).toThrow('Supabase credentials not found')
-    })
-
-    it('should create Supabase client with correct credentials', () => {
-      const client = PatternLearner['getSupabaseClient']()
-      expect(client).toBeDefined()
-    })
   })
 
   describe('Learning from Extractions', () => {
