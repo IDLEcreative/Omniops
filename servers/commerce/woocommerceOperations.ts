@@ -328,6 +328,14 @@ export async function woocommerceOperations(
         source: result.success ? 'woocommerce' : 'error',
         executionTime
       },
+      // Add error property when operation fails
+      ...(result.success ? {} : {
+        error: {
+          code: 'WOOCOMMERCE_OPERATION_ERROR',
+          message: result.message,
+          details: result
+        }
+      }),
       metadata: {
         executionTime,
         cached: false,

@@ -4,6 +4,16 @@
  * Coverage: Error handling (8 tests), edge cases (2 tests), response format (4 tests)
  */
 
+// Mock dependencies MUST be at the top before imports
+jest.mock('@/lib/chat/woocommerce-tool');
+jest.mock('@/lib/chat/tool-handlers/domain-utils');
+jest.mock('../../shared/utils/logger', () => ({
+  logToolExecution: jest.fn(),
+  PerformanceTimer: jest.fn().mockImplementation(() => ({
+    elapsed: jest.fn().mockReturnValue(150)
+  }))
+}));
+
 import { woocommerceOperations, metadata } from '../woocommerceOperations';
 import {
   mockContext,
