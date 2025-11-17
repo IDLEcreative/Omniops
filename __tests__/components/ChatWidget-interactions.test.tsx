@@ -48,7 +48,7 @@ describe('ChatWidget - Interactions', () => {
     it('should toggle widget open/closed', async () => {
       const { user } = render(<ChatWidget />);
 
-      const openButton = screen.getByLabelText('Open chat support widget');
+      const openButton = await waitFor(() => screen.getByLabelText('Open chat support widget'));
       await user.click(openButton);
 
       // Widget should be open
@@ -68,18 +68,18 @@ describe('ChatWidget - Interactions', () => {
     it('should persist widget state to localStorage', async () => {
       const { user } = render(<ChatWidget />);
 
-      const openButton = screen.getByLabelText('Open chat support widget');
+      const openButton = await waitFor(() => screen.getByLabelText('Open chat support widget'));
       await user.click(openButton);
 
       await waitFor(() => {
-        expect(mockLocalStorage.setItem).toHaveBeenCalledWith('chat_widget_open', 'true');
+        expect(mockLocalStorage.setItem).toHaveBeenCalledWith('widget_open', 'true');
       });
 
       const closeButton = screen.getByLabelText('Close chat widget');
       await user.click(closeButton);
 
       await waitFor(() => {
-        expect(mockLocalStorage.setItem).toHaveBeenCalledWith('chat_widget_open', 'false');
+        expect(mockLocalStorage.setItem).toHaveBeenCalledWith('widget_open', 'false');
       });
     });
   });
@@ -88,7 +88,7 @@ describe('ChatWidget - Interactions', () => {
     it('should auto-resize textarea as user types', async () => {
       const { user } = render(<ChatWidget initialOpen={true} />);
 
-      const textarea = screen.getByLabelText('Message input') as HTMLTextAreaElement;
+      const textarea = await waitFor(() => screen.getByLabelText('Type your message...')) as HTMLTextAreaElement;
 
       // Mock scrollHeight to simulate multi-line content
       Object.defineProperty(textarea, 'scrollHeight', {
@@ -114,10 +114,10 @@ describe('ChatWidget - Interactions', () => {
     it('should reset textarea height after sending message', async () => {
       const { user } = render(<ChatWidget initialOpen={true} />);
 
-      const textarea = screen.getByLabelText('Message input') as HTMLTextAreaElement;
+      const textarea = await waitFor(() => screen.getByLabelText('Type your message...')) as HTMLTextAreaElement;
 
       await user.type(textarea, 'Line 1\nLine 2\nLine 3');
-      await user.click(screen.getByLabelText('Send message'));
+      await user.click(screen.getByLabelText('Send'));
 
       // Wait for reset
       await waitFor(() => {
@@ -130,7 +130,7 @@ describe('ChatWidget - Interactions', () => {
     it('should toggle high contrast mode', async () => {
       const { user } = render(<ChatWidget initialOpen={true} />);
 
-      const contrastButton = screen.getByLabelText(/Toggle high contrast mode/);
+      const contrastButton = await waitFor(() => screen.getByLabelText(/Toggle high contrast mode/));
       await user.click(contrastButton);
 
       // Check that aria-label updates
@@ -140,7 +140,7 @@ describe('ChatWidget - Interactions', () => {
     it('should cycle through font sizes', async () => {
       const { user } = render(<ChatWidget initialOpen={true} />);
 
-      const fontSizeButton = screen.getByLabelText(/Change text size/);
+      const fontSizeButton = await waitFor(() => screen.getByLabelText(/Change text size/));
 
       // Initial state: normal
       expect(fontSizeButton).toHaveAttribute('aria-label', expect.stringContaining('normal'));
@@ -169,13 +169,13 @@ describe('ChatWidget - Interactions', () => {
     it('should prevent sending empty messages', async () => {
       const { user } = render(<ChatWidget initialOpen={true} />);
 
-      const sendButton = screen.getByLabelText('Send message');
+      const sendButton = await waitFor(() => screen.getByLabelText('Send'));
 
       // Try to send without typing anything
       expect(sendButton).toBeDisabled();
 
       // Try with whitespace only
-      const input = screen.getByLabelText('Message input');
+      const input = screen.getByLabelText('Type your message...');
       await user.type(input, '   ');
 
       expect(sendButton).toBeDisabled();
@@ -184,8 +184,8 @@ describe('ChatWidget - Interactions', () => {
     it('should disable send button when input is empty', async () => {
       const { user } = render(<ChatWidget initialOpen={true} />);
 
-      const input = screen.getByLabelText('Message input');
-      const sendButton = screen.getByLabelText('Send message');
+      const input = await waitFor(() => screen.getByLabelText('Type your message...'));
+      const sendButton = screen.getByLabelText('Send');
 
       // Initially, send button should be disabled (empty input)
       expect(sendButton).toBeDisabled();
@@ -211,9 +211,9 @@ describe('ChatWidget - Interactions', () => {
       const { user } = render(<ChatWidget initialOpen={true} />);
 
       const specialMessage = 'Test <script>alert("xss")</script> & "quotes"';
-      const input = screen.getByLabelText('Message input');
+      const input = await waitFor(() => screen.getByLabelText('Type your message...'));
       await user.type(input, specialMessage);
-      await user.click(screen.getByLabelText('Send message'));
+      await user.click(screen.getByLabelText('Send'));
 
       await waitFor(() => {
         expect(screen.getByText(specialMessage)).toBeInTheDocument();
@@ -224,9 +224,12 @@ describe('ChatWidget - Interactions', () => {
       const { user } = render(<ChatWidget initialOpen={true} />);
 
       const longMessage = 'A'.repeat(1000);
-      const input = screen.getByLabelText('Message input');
-      await user.type(input, longMessage);
-      await user.click(screen.getByLabelText('Send message'));
+      const input = await waitFor(() => screen.getByLabelText('Type your message...'));
+
+      // Use paste instead of type for long messages to avoid timeout
+      await user.click(input);
+      await user.paste(longMessage);
+      await user.click(screen.getByLabelText('Send'));
 
       await waitFor(() => {
         expect(screen.getByText(longMessage)).toBeInTheDocument();
