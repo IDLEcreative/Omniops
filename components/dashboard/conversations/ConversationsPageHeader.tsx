@@ -2,7 +2,7 @@ import { Button } from "@/components/ui/button";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Calendar, RefreshCw, CheckSquare, MessageCircle, BarChart3 } from "lucide-react";
-import { LiveStatusIndicator } from "./LiveStatusIndicator";
+import { Badge } from "@/components/ui/badge";
 import { ExportDialog } from "./ExportDialog";
 import { KeyboardShortcutsModal } from "./KeyboardShortcutsModal";
 
@@ -14,9 +14,6 @@ interface ConversationsPageHeaderProps {
   onMainViewChange: (view: MainView) => void;
   selectedRange: DateRangeValue;
   onRangeChange: (range: DateRangeValue) => void;
-  isLive: boolean;
-  onToggleLive: () => void;
-  lastFetch: Date | null;
   newCount: number;
   onAcknowledgeNew: () => void;
   onRefresh: () => void;
@@ -36,9 +33,6 @@ export function ConversationsPageHeader({
   onMainViewChange,
   selectedRange,
   onRangeChange,
-  isLive,
-  onToggleLive,
-  lastFetch,
   newCount,
   onAcknowledgeNew,
   onRefresh,
@@ -53,19 +47,14 @@ export function ConversationsPageHeader({
   displayShortcuts,
 }: ConversationsPageHeaderProps) {
   return (
-    <div className="space-y-2">
+    <div className="space-y-1.5">
       {/* Combined Title and Controls Section */}
       <div className="flex items-center justify-between">
-        <div>
-          <h1 className="text-2xl font-bold tracking-tight">Conversations</h1>
-          <p className="text-xs text-muted-foreground mt-0.5">
-            Monitor live conversations and customer engagement
-          </p>
-        </div>
+        <h1 className="text-xl font-bold tracking-tight">Conversations</h1>
       </div>
 
       {/* Controls Section - Better organized with visual grouping */}
-      <div className="flex flex-wrap items-center gap-2">
+      <div className="flex flex-wrap items-center gap-1.5">
         {/* View Toggle */}
         <Tabs value={mainView} onValueChange={(val) => onMainViewChange(val as MainView)}>
           <TabsList className="h-9">
@@ -97,14 +86,21 @@ export function ConversationsPageHeader({
           </SelectContent>
         </Select>
 
-        {/* Live Status */}
-        <LiveStatusIndicator
-          isLive={isLive}
-          onToggle={onToggleLive}
-          lastFetchTime={lastFetch ? lastFetch.getTime() : Date.now()}
-          newCount={newCount}
-          onAcknowledge={onAcknowledgeNew}
-        />
+        {/* New Conversations Notification - Always-on live updates */}
+        {newCount > 0 && (
+          <Button
+            variant="outline"
+            size="sm"
+            onClick={onAcknowledgeNew}
+            className="animate-pulse border-green-500 text-green-600 hover:bg-green-50 h-9"
+            aria-label={`Load ${newCount} new conversation${newCount !== 1 ? 's' : ''}`}
+          >
+            <Badge variant="secondary" className="bg-green-500/10 text-green-600 border-0 mr-2">
+              {newCount}
+            </Badge>
+            new conversation{newCount !== 1 ? 's' : ''}
+          </Button>
+        )}
 
         {/* Spacer to push action buttons to the right on larger screens */}
         <div className="flex-1 min-w-0 hidden lg:block" />

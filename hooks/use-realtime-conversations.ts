@@ -5,32 +5,29 @@ import type { DashboardConversationsData } from '@/types/dashboard';
 interface UseRealtimeConversationsOptions {
   days?: number;
   intervalMs?: number;
-  enabled?: boolean;
 }
 
+/**
+ * Hook for real-time conversation updates
+ *
+ * Always-on live updates with automatic pause when tab is hidden.
+ * Follows industry best practices (Intercom, Zendesk, Stripe) - live data is the default.
+ */
 export function useRealtimeConversations({
   days = 7,
   intervalMs = 30000, // 30 seconds default
-  enabled = true
 }: UseRealtimeConversationsOptions = {}) {
   const { data, loading, error, refresh, loadMore, loadingMore, hasMore } = useDashboardConversations({ days });
   const [lastFetch, setLastFetch] = useState<Date | null>(new Date());
-  const [isLive, setIsLive] = useState(enabled);
   const [newConversationsCount, setNewConversationsCount] = useState(0);
   const [previousData, setPreviousData] = useState<DashboardConversationsData | null>(null);
 
-  // Auto-refresh with polling
+  // Always-on auto-refresh with smart pausing
   useEffect(() => {
-    if (!isLive || loading) return;
-
-    // Pause polling when page is not visible
-    const handleVisibilityChange = () => {
-      setIsLive(!document.hidden && enabled);
-    };
-
-    document.addEventListener('visibilitychange', handleVisibilityChange);
+    if (loading) return;
 
     const interval = setInterval(async () => {
+      // Only refresh when tab is visible (automatic resource optimization)
       if (!document.hidden) {
         const oldCount = data?.recent.length || 0;
         await refresh();
@@ -54,9 +51,8 @@ export function useRealtimeConversations({
 
     return () => {
       clearInterval(interval);
-      document.removeEventListener('visibilitychange', handleVisibilityChange);
     };
-  }, [isLive, loading, intervalMs, refresh, data, previousData, enabled]);
+  }, [loading, intervalMs, refresh, data, previousData]);
 
   // Update previous data when data changes
   useEffect(() => {
@@ -64,10 +60,6 @@ export function useRealtimeConversations({
       setPreviousData(data);
     }
   }, [data, loading]);
-
-  const toggleLive = useCallback(() => {
-    setIsLive(prev => !prev);
-  }, []);
 
   const acknowledgeNew = useCallback(() => {
     setNewConversationsCount(0);
@@ -81,8 +73,6 @@ export function useRealtimeConversations({
     loadMore,
     loadingMore,
     hasMore,
-    isLive,
-    toggleLive,
     lastFetch,
     newConversationsCount,
     acknowledgeNew

@@ -57,12 +57,10 @@ export default function ConversationsPage() {
     loadMore,
     loadingMore,
     hasMore,
-    isLive,
-    toggleLive,
     lastFetch,
     newConversationsCount,
     acknowledgeNew
-  } = useRealtimeConversations({ days, enabled: true });
+  } = useRealtimeConversations({ days });
 
   const dateRangeForExport = useMemo(() => {
     const now = new Date();
@@ -144,7 +142,7 @@ export default function ConversationsPage() {
   useKeyboardShortcuts(shortcuts);
 
   return (
-    <div className="flex-1 space-y-3 p-4">
+    <div className="flex flex-col h-[calc(100vh-64px)] overflow-hidden p-2 gap-2">
       {/* Skip Navigation - Visible on focus */}
       <a
         href="#main-content"
@@ -181,9 +179,6 @@ export default function ConversationsPage() {
         onMainViewChange={setMainView}
         selectedRange={selectedRange}
         onRangeChange={setSelectedRange}
-        isLive={isLive}
-        onToggleLive={toggleLive}
-        lastFetch={lastFetch}
         newCount={newConversationsCount}
         onAcknowledgeNew={handleAcknowledgeNew}
         onRefresh={handleRefresh}
@@ -215,11 +210,11 @@ export default function ConversationsPage() {
       )}
 
       {mainView === 'analytics' ? (
-        <main id="main-content" tabIndex={-1}>
+        <main id="main-content" tabIndex={-1} className="flex-1 min-h-0">
           <ConversationAnalytics days={days} />
         </main>
       ) : (
-        <main id="main-content" tabIndex={-1}>
+        <main id="main-content" tabIndex={-1} className="flex-1 min-h-0">
           <ConversationMainContainer
           searchTerm={searchTerm}
           onSearchChange={setSearchTerm}
