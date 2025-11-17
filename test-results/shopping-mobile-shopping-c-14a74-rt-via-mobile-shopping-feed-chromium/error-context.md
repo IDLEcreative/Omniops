@@ -1,0 +1,66 @@
+# Page snapshot
+
+```yaml
+- generic [ref=e1]:
+  - generic [ref=e6]: Test Mode
+  - region "Notifications alt+T"
+  - alert [ref=e7]
+  - iframe [active] [ref=e8]:
+    - dialog "Chat support widget" [ref=f1e3]:
+      - generic [ref=f1e4]:
+        - generic [ref=f1e5]:
+          - generic "Online" [ref=f1e6]
+          - generic [ref=f1e7]:
+            - heading "Support" [level=3] [ref=f1e8]
+            - paragraph [ref=f1e9]: Online - We typically reply instantly
+        - generic [ref=f1e10]:
+          - button "Toggle high contrast mode. Currently off" [ref=f1e11] [cursor=pointer]:
+            - img [ref=f1e12]
+          - button "Close chat widget" [ref=f1e15] [cursor=pointer]:
+            - img [ref=f1e16]
+      - log "Chat messages" [ref=f1e19]:
+        - 'article "You said: Do you have any pumps in stock?" [ref=f1e21]':
+          - generic [ref=f1e22]: Do you have any pumps in stock?
+          - generic [ref=f1e24]: Sent at 10:22:20 PM
+        - article [ref=f1e26]:
+          - generic [ref=f1e28]:
+            - text: "Yes — I found several pumps in stock. Here are the top matches (ranked by relevance): -"
+            - link "Binotto Pump" [ref=f1e29] [cursor=pointer]:
+              - /url: https://www.thompsonseparts.co.uk/product/binotto-pump/
+            - text: "— £630 (90% match) ✅ Matches keyword \"pump\" ✅ SKU: 60100110643 -"
+            - link "OMFB Pump 60200110753" [ref=f1e30] [cursor=pointer]:
+              - /url: https://www.thompsonseparts.co.uk/product/omfb-pump-60200110753/
+            - text: "— £950 (90% match) ✅ Matches model/SKU in the listing ✅ SKU: 60200110753 -"
+            - link "Harsh XPI-80 Piston Pump (SPL)" [ref=f1e31] [cursor=pointer]:
+              - /url: https://www.thompsonseparts.co.uk/product/harsh-xpi-80-piston-pump-spl-2/
+            - text: "— £995 (90% match) ✅ Piston pump (exact pump type match) ✅ SKU: HARSHX80 -"
+            - link "Harsh Pump to suit K110" [ref=f1e32] [cursor=pointer]:
+              - /url: https://www.thompsonseparts.co.uk/product/harsh-pump-to-suit-k110/
+            - text: "— £700 (90% match) ✅ Listed as pump for K110 application ✅ SKU: HARSHX50 -"
+            - link "Power Pack 24Vdc - 2.0KW - 2.1CC pump – 10L steel tank – P&T ports" [ref=f1e33] [cursor=pointer]:
+              - /url: https://www.thompsonseparts.co.uk/product/power-pack-24vdc-2-0kw-2-1cc-pump-10l-steel-tank-pt-ports/
+            - text: "— £696 (90% match) ✅ Self-contained power pack with pump included ✅ SKU: BSP-1446 -"
+            - link "HYVA GEAR PUMP 065L-BI-4H5-2R-20BSP20-250 CVP" [ref=f1e34] [cursor=pointer]:
+              - /url: https://www.thompsonseparts.co.uk/product/hyva-gear-pump-065l-bi-4h5-2r-20bsp20-250-cvp/
+            - text: "— £600 (90% match) ✅ Gear pump — matches pump category ✅ SKU: 14571410 -"
+            - link "OMFB Gear Pump 32CC" [ref=f1e35] [cursor=pointer]:
+              - /url: https://www.thompsonseparts.co.uk/product/omfb-gear-pump-32cc/
+            - text: "— £360 (90% match) ✅ Gear pump, compact capacity listed ✅ SKU: 10500320322 -"
+            - link "Bezares Piston Pump FR 4b bz (350) 60cc 8 Spline Clock" [ref=f1e36] [cursor=pointer]:
+              - /url: https://www.thompsonseparts.co.uk/product/bezares-piston-pump-fr-4b-bz-350-60cc-8-spline-clock/
+            - text: "— £893.87 (90% match) ✅ Piston pump, specifies displacement and spline type ✅ SKU: FRD60RB -"
+            - link "Cifa Mixer Alpha POMPE Water Pump" [ref=f1e37] [cursor=pointer]:
+              - /url: https://www.thompsonseparts.co.uk/product/cifa-mixer-alpha-pompe-water-pump/
+            - text: "— £540.48 (90% match) ✅ Water pump used on Cifa mixers ✅ SKU: K000214823 -"
+            - link "Cifa Mixer PMP Pump Body PCL 9045.4/V1" [ref=f1e38] [cursor=pointer]:
+              - /url: https://www.thompsonseparts.co.uk/product/cifa-mixer-pmp-pump-body-pcl-9045-4-v1/
+            - text: "— £2,650.12 (90% match) ✅ Pump body assembly for mixer application ✅ SKU: K2053463 Would you like to: - See more results (I have more pump listings), or - Check exact stock quantities for any of these (I can check availability per SKU), or - Get full product details/specifications for a specific item? Tell me which product(s) (by name or SKU) you want me to check next."
+          - generic [ref=f1e39]: Sent at 10:22:45 PM
+      - generic [ref=f1e41]:
+        - generic [ref=f1e42]: Type your message...
+        - textbox "Type your message..." [ref=f1e43]
+        - 'button "Change text size. Current: normal" [ref=f1e44]':
+          - img [ref=f1e45]
+        - button "Send" [disabled] [ref=f1e47]:
+          - img [ref=f1e48]
+```

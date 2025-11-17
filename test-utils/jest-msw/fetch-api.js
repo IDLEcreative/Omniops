@@ -306,10 +306,34 @@ function ensureRequest() {
 }
 
 function ensureFetch() {
+  console.log('[Fetch API] ensureFetch called, E2E_TEST=' + process.env.E2E_TEST + ', typeof fetch=' + typeof fetch);
+
+  // E2E tests (E2E_TEST=true) need real HTTP calls to dev server
+  // Use undici (Node.js's built-in fetch implementation) for E2E tests
+  // CRITICAL: Check E2E_TEST FIRST, before checking if fetch exists
+  // This ensures undici is used even if Node.js has built-in fetch
+  if (process.env.E2E_TEST === 'true') {
+    console.log('[Fetch API] E2E mode detected, loading undici...');
+    try {
+      const { fetch: undiciFetch, Headers: UndiciHeaders, Request: UndiciRequest, Response: UndiciResponse } = require('undici');
+      global.fetch = undiciFetch;
+      global.Headers = UndiciHeaders;
+      global.Request = UndiciRequest;
+      global.Response = UndiciResponse;
+      console.log('[E2E Setup] ✅ Using undici for real HTTP calls');
+      return;
+    } catch (e) {
+      console.warn('[E2E Setup] ❌ Failed to load undici for E2E tests:', e.message);
+      // Fall through to mock if undici not available
+    }
+  }
+
   if (typeof fetch !== 'undefined') {
+    console.log('[Fetch API] fetch already exists, skipping setup');
     return;
   }
 
+  console.log('[Fetch API] Setting up mock fetch (returns empty {})');
   global.fetch = jest.fn(() =>
     Promise.resolve(
       new Response(JSON.stringify({}), {

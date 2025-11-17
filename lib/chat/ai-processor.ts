@@ -164,16 +164,50 @@ export async function processAIConversation(params: AIProcessorParams): Promise<
       allSearchResults.push(...result.results);
 
       // Collect products from WooCommerce/Shopify tool results
-      // Products are in result.results[].metadata for product-related tools
+      // Products can be in result.results[].metadata (API) or parsed from embeddings (content/url)
       if (result.source === 'woocommerce-api' || result.source === 'woocommerce' || result.source === 'shopify') {
         console.log(`[Shopping Debug] Checking ${result.results.length} results from ${result.source}`);
         console.log('[Shopping Debug] First result keys:', result.results[0] ? Object.keys(result.results[0]) : []);
         console.log('[Shopping Debug] First result sample:', result.results[0] ? JSON.stringify(result.results[0]).substring(0, 200) : 'no results');
         for (const searchResult of result.results) {
+          console.log('[Shopping Debug] Processing result:', {
+            hasMetadata: !!searchResult.metadata,
+            hasMetadataId: !!(searchResult.metadata && searchResult.metadata.id),
+            hasUrl: !!searchResult.url,
+            urlIncludesProduct: searchResult.url ? searchResult.url.includes('/product/') : false,
+            hasContent: !!searchResult.content,
+            url: searchResult.url
+          });
+
+          // Case 1: Direct API results with metadata.id
           if (searchResult.metadata && searchResult.metadata.id) {
+            console.log('[Shopping Debug] ✅ Case 1 matched - API result with metadata.id');
             allProducts.push(searchResult.metadata);
           }
+          // Case 2: Embeddings results with product URL (e.g., /product/pump-name/)
+          else if (searchResult.url && searchResult.url.includes('/product/') && searchResult.content) {
+            console.log('[Shopping Debug] ✅ Case 2 matched - Embeddings result with /product/ URL');
+            // Parse product data from embeddings result
+            const priceMatch = searchResult.content.match(/Price:\s*([0-9,.]+)/i);
+            const skuMatch = searchResult.content.match(/SKU:\s*([^\s\n]+)/i);
+
+            const product = {
+              id: searchResult.url, // Use URL as unique ID
+              name: searchResult.title || 'Product',
+              price: priceMatch ? parseFloat(priceMatch[1].replace(/,/g, '')) : 0,
+              sku: skuMatch ? skuMatch[1] : '',
+              permalink: searchResult.url,
+              images: [], // Embeddings don't have image data
+              stockStatus: 'instock', // Assume in stock from embeddings
+              shortDescription: searchResult.content.split('\n')[0] || '',
+            };
+            console.log('[Shopping Debug] Parsed product:', product);
+            allProducts.push(product);
+          } else {
+            console.log('[Shopping Debug] ❌ No case matched for this result');
+          }
         }
+        console.log('[Shopping Debug] Total products collected so far:', allProducts.length);
       }
     }
 

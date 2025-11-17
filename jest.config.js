@@ -92,6 +92,7 @@ const customJestConfig = {
     '__tests__/integration/shopify-ux-flow.test.ts', // Uses Vitest describe/it/expect
     // Integration tests requiring running dev server (not suitable for pre-push)
     '__tests__/integration/agent4-correction-tracking.test.ts', // Requires dev server
+    '__tests__/integration/agent-flow-metadata-tracking.test.ts', // Requires dev server (E2E test)
     // Now using MSW mocks: '__tests__/integration/multi-turn-conversation-e2e-agent-tests.test.ts',
     // TEMPORARY: Organizations tests have Supabase mocking issues - needs refactoring
     '__tests__/api/organizations/', // TODO: Fix Supabase mocking in these tests

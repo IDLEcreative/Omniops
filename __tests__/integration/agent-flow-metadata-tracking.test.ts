@@ -9,13 +9,58 @@
  * - Dev server must be running on port 3000: npm run dev
  * - Redis must be running: docker-compose up -d redis
  * - OpenAI API key must be set
+ *
+ * HOW TO RUN:
+ * This test is excluded from the standard test suite (pre-push hook) because it requires
+ * a running dev server. To run it manually:
+ *
+ * 1. Start dev server in one terminal: npm run dev
+ * 2. Run this test in another terminal: npm run test:integration:e2e
+ *
+ * Note: This test is automatically skipped in CI and pre-push hooks.
  */
 
 import fs from 'node:fs';
 import path from 'node:path';
 import dotenv from 'dotenv';
 
+// CRITICAL: Override global fetch with real Node.js fetch for E2E tests
+// Jest setup uses mock fetch that returns {}, but E2E tests need real HTTP calls
+// We can't use undici directly due to jsdom compatibility issues
+// Instead, we dynamically import and call fetch directly, bypassing global.fetch
 process.env.E2E_TEST = 'true';
+
+// CRITICAL: Unmock node-fetch for E2E tests - we need real HTTP calls
+jest.unmock('node-fetch');
+
+// Helper to make real fetch calls (bypassing Jest's mock)
+async function realFetch(url: string, options?: RequestInit) {
+  console.log('[realFetch] Making request to:', url);
+
+  try {
+    // Use jest.requireActual to bypass __mocks__/node-fetch.js
+    const nodeFetch = jest.requireActual<typeof import('node-fetch')>('node-fetch').default;
+    console.log('[realFetch] Using REAL node-fetch, type:', typeof nodeFetch);
+
+    const response = await nodeFetch(url, options as any);
+    console.log('[realFetch] ✅ Got response - status:', response.status, response.statusText);
+
+    const text = await response.text();
+    console.log('[realFetch] Response text length:', text.length);
+    console.log('[realFetch] Response text preview:', text.substring(0, 200));
+
+    // Re-create response with text for consumption
+    const nodeFetchModule = jest.requireActual<typeof import('node-fetch')>('node-fetch');
+    return new nodeFetchModule.Response(text, {
+      status: response.status,
+      statusText: response.statusText,
+      headers: response.headers as any
+    });
+  } catch (error) {
+    console.error('[realFetch] ❌ ERROR:', error instanceof Error ? error.message : String(error));
+    throw error;
+  }
+}
 
 // Load environment variables BEFORE any imports
 if (process.env.NODE_ENV !== 'production') {
@@ -115,24 +160,12 @@ describeE2E('Complete Agent Flow - E2E (Metadata Tracking) [Requires Dev Server]
     }
 
     // Stop MSW for these E2E tests - we need real API calls
-    // IMPORTANT: Must close server BEFORE replacing fetch, otherwise MSW can't restore properly
     server.close();
-
-    // CRITICAL FIX: The jest.fn() fetch mock from jest.setup.msw.js always returns {}
-    // For E2E tests, we need REAL HTTP calls to the dev server
-    // Solution: Import and use node-fetch which makes real HTTP calls
-    const { fetch: nodeFetch, Headers: NodeHeaders, Request: NodeRequest, Response: NodeResponse } = await import('node-fetch');
-
-    // Replace global fetch with node-fetch for this test suite
-    global.fetch = nodeFetch as any;
-    global.Headers = NodeHeaders as any;
-    global.Request = NodeRequest as any;
-    global.Response = NodeResponse as any;
 
     // Check if dev server is running (don't fail in CI)
     if (!process.env.CI) {
       try {
-        const healthCheck = await fetch('http://localhost:3000/api/health').catch(() => null);
+        const healthCheck = await realFetch('http://localhost:3000/api/health').catch(() => null);
         if (!healthCheck || !healthCheck.ok) {
           console.warn('Dev server is not running on port 3000. These tests require: npm run dev');
         }
@@ -173,7 +206,7 @@ describeE2E('Complete Agent Flow - E2E (Metadata Tracking) [Requires Dev Server]
       );
 
       try {
-        const response = await fetch('http://localhost:3000/api/chat', {
+        const response = await realFetch('http://localhost:3000/api/chat', {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify({
@@ -186,10 +219,15 @@ describeE2E('Complete Agent Flow - E2E (Metadata Tracking) [Requires Dev Server]
               }
             }
           })
-        });
+        }) as any;
 
+        console.log('[TEST] Response status:', response.status, response.statusText);
         expect(response.ok).toBe(true);
-        const data = await response.json();
+        const text = await response.text();
+        console.log('[TEST] Response text length:', text.length);
+        console.log('[TEST] Response text preview:', text.substring(0, 200));
+        const data = JSON.parse(text);
+        console.log('[TEST] Parsed data keys:', Object.keys(data));
 
         expect(data.message).toBeTruthy();
         expect(data.searchMetadata).toBeDefined();
@@ -222,7 +260,7 @@ describeE2E('Complete Agent Flow - E2E (Metadata Tracking) [Requires Dev Server]
 
       try {
 
-        const response1 = await fetch('http://localhost:3000/api/chat', {
+        const response1 = await realFetch('http://localhost:3000/api/chat', {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify({
@@ -230,13 +268,13 @@ describeE2E('Complete Agent Flow - E2E (Metadata Tracking) [Requires Dev Server]
             domain: testDomain,
             session_id: sessionId
           })
-        });
+        }) as any;
 
         expect(response1.ok).toBe(true);
         const data1 = await response1.json();
         const conversationId = data1.conversation_id;
 
-        const response2 = await fetch('http://localhost:3000/api/chat', {
+        const response2 = await realFetch('http://localhost:3000/api/chat', {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify({
@@ -245,7 +283,7 @@ describeE2E('Complete Agent Flow - E2E (Metadata Tracking) [Requires Dev Server]
             session_id: sessionId,
             conversation_id: conversationId
           })
-        });
+        }) as any;
 
         expect(response2.ok).toBe(true);
         const data2 = await response2.json();
@@ -297,7 +335,7 @@ describeE2E('Complete Agent Flow - E2E (Metadata Tracking) [Requires Dev Server]
 
       try {
 
-        const response1 = await fetch('http://localhost:3000/api/chat', {
+        const response1 = await realFetch('http://localhost:3000/api/chat', {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify({
@@ -305,12 +343,12 @@ describeE2E('Complete Agent Flow - E2E (Metadata Tracking) [Requires Dev Server]
             domain: testDomain,
             session_id: sessionId
           })
-        });
+        }) as any;
 
         const data1 = await response1.json();
         const conversationId = data1.conversation_id;
 
-        const response2 = await fetch('http://localhost:3000/api/chat', {
+        const response2 = await realFetch('http://localhost:3000/api/chat', {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify({
@@ -319,7 +357,7 @@ describeE2E('Complete Agent Flow - E2E (Metadata Tracking) [Requires Dev Server]
             session_id: sessionId,
             conversation_id: conversationId
           })
-        });
+        }) as any;
 
         const data2 = await response2.json();
         const responseLower = data2.message.toLowerCase();
