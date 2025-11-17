@@ -1,4 +1,4 @@
-**Last Updated:** 2025-11-10 (Added comprehensive "E2E Tests as Agent Training Data" guidelines)
+**Last Updated:** 2025-11-17 (Added mandatory rule: all agents must read CLAUDE.md first)
 **Verified Accurate For:** v0.1.0
 
 # CLAUDE.md
@@ -6,12 +6,12 @@
 **AI Assistant Instructions for Omniops Codebase**
 
 **📊 Metadata:**
-- **Last Updated:** 2025-11-10
+- **Last Updated:** 2025-11-17
 - **Version:** v0.1.0
 - **File Purpose:** Primary instruction set for Claude Code AI assistant
-- **Critical Sections:** Lines 6-165 (brand-agnostic, file placement, agents), 785-1044 (fix issues, create tests)
-- **Total MUST/NEVER Rules:** 52 directives
-- **Line Count:** ~1,700 lines (exempt from 300 LOC rule - must be fully loaded into AI memory)
+- **Critical Sections:** Lines 6-165 (brand-agnostic, file placement), 1101-1171 (agents MUST read CLAUDE.md), 1142-1281 (fix issues, create tests)
+- **Total MUST/NEVER Rules:** 53 directives
+- **Line Count:** ~1,770 lines (exempt from 300 LOC rule - must be fully loaded into AI memory)
 - **Estimated Parse Time:** 30 seconds
 
 **⚡ Quick Navigation:**
@@ -30,10 +30,11 @@
 2. **[Line 68]** NEVER create files in root (only config files allowed)
 3. **[Line 1008]** Code files MUST be under 300 LOC (AI instruction files exempt - need full context)
 4. **[Line 1018]** ALWAYS read entire file before making any changes
-5. **[Line 783]** Deploy agents immediately for parallelizable tasks (no user permission needed)
-6. **[Line 787]** Deploy agent immediately when encountering ANY issue
-7. **[Line 879]** Deploy testing agent immediately after completing any code
-8. **[Line 1152]** ALWAYS validate fixes with actual commands (`npm test`, `npm run build`)
+5. **[Line 1101]** 🚨 ALL AGENTS MUST READ CLAUDE.md AS FIRST STEP - agents don't inherit project rules
+6. **[Line 783]** Deploy agents immediately for parallelizable tasks (no user permission needed)
+7. **[Line 787]** Deploy agent immediately when encountering ANY issue
+8. **[Line 879]** Deploy testing agent immediately after completing any code
+9. **[Line 1152]** ALWAYS validate fixes with actual commands (`npm test`, `npm run build`)
 
 **NEVER Rules (Prohibited Actions):**
 1. **[Line 10-17]** NEVER hardcode brand-specific data (Thompson's, pumps, etc.) in production code
@@ -262,6 +263,7 @@ for (const item of items) {
 |-------|-------------|---------|
 | **Brand-Agnostic** | "HARDCODING", "multi-tenant", "Thompson", "pumps" | [#brand-agnostic](#-critical-brand-agnostic-application) |
 | **File Placement** | "root directory", "NEVER create files", "Decision Tree" | [#file-placement](#-critical-file-placement-rules) |
+| **Agent Rules** 🚨 | "agents MUST read", "CLAUDE.md first", "agent prompt template" | [#critical-all-agents-must-read-claudemd-first](#-critical-all-agents-must-read-claudemd-first) |
 | **Agent Deployment** | "Deploy agent", "parallel", "Fix Issues Immediately" | [#fix-issues](#fix-issues-immediately-with-agents) |
 | **Pod Orchestration** 🆕 | "pod", "domain-based", "specialized agents", "large-scale" | [docs/02-GUIDES/GUIDE_POD_ORCHESTRATION_PATTERN.md](docs/02-GUIDES/GUIDE_POD_ORCHESTRATION_PATTERN.md) |
 | **Testing** | "Hard to Test", "dependency injection", "mock", "Create Tests" | [#testing-philosophy](#testing--code-quality-philosophy) |
@@ -274,10 +276,11 @@ for (const item of items) {
 ```
 #brand-agnostic → Line 6
 #file-placement-rules → Line 66
+#critical-all-agents-must-read-claudemd-first → Line 1101 🚨 NEW
+#agent-orchestration--parallelization → Line 743
 #fix-issues-immediately-with-agents → Line 785
 #create-comprehensive-tests → Line 877
 #testing--code-quality-philosophy → Line 1130
-#agent-orchestration--parallelization → Line 743
 #performance-guidelines → Line 1605
 ```
 
@@ -1097,6 +1100,77 @@ Example: Parallel Agent Orchestration has both.
    - Long-running analysis or validation tasks
 
 **DO NOT Wait for User Permission** - If you identify a parallelizable task, immediately orchestrate agents!
+
+#### 🚨 CRITICAL: All Agents MUST Read CLAUDE.md First
+
+**MANDATORY RULE:** Every agent you deploy must read CLAUDE.md as its first action to understand project rules and guidelines.
+
+**Why This Matters:**
+- Agents start with clean context - they don't automatically know project rules
+- Without reading CLAUDE.md, agents may violate critical guidelines:
+  - Creating files in root directory (violation of file placement rules)
+  - Exceeding 300 LOC limit
+  - Hardcoding brand-specific data
+  - Not validating fixes with actual commands
+  - Using poor testing patterns
+
+**How to Implement:**
+
+```typescript
+// ✅ CORRECT: Agent reads CLAUDE.md first
+Task({
+  subagent_type: 'the-fixer',
+  description: 'Fix test failures',
+  prompt: `STEP 1: Read /Users/jamesguy/Omniops/CLAUDE.md to understand all project rules
+
+STEP 2: Fix the following test failures while adhering to all rules from CLAUDE.md:
+- test1.ts - import error
+- test2.ts - type mismatch
+- test3.ts - assertion failure
+
+STEP 3: Validate fixes with:
+- npm test
+- npm run build
+- npm run lint
+
+Report back with verification results.`
+});
+
+// ❌ WRONG: Agent doesn't know the rules
+Task({
+  subagent_type: 'the-fixer',
+  description: 'Fix test failures',
+  prompt: 'Fix test1.ts, test2.ts, test3.ts'
+  // Agent might violate file placement, LOC limits, or other rules!
+});
+```
+
+**Agent Prompt Template (Use This):**
+
+```markdown
+STEP 1: Read /Users/jamesguy/Omniops/CLAUDE.md
+- Understand all MUST/NEVER/ALWAYS rules
+- Pay special attention to:
+  - Brand-agnostic requirements (line 6-165)
+  - File placement rules (line 66-165)
+  - 300 LOC limit (line 1008)
+  - Testing philosophy (line 1130+)
+
+STEP 2: [Your specific task]
+[Task details...]
+
+STEP 3: Validate your work
+- Run concrete commands (npm test, npm run build, etc.)
+- Verify no rules were violated
+- Report verification results
+```
+
+**Enforcement Checklist:**
+Before launching ANY agent, verify your prompt includes:
+- [ ] Instruction to read CLAUDE.md as Step 1
+- [ ] Clear task description
+- [ ] Success criteria with validation commands
+- [ ] Reference to relevant CLAUDE.md sections if applicable
 
 **📖 BEFORE Deploying Agents - Consult the Learning Guide:**
 
