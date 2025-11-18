@@ -1,4 +1,6 @@
 import React, { useMemo, useCallback } from 'react';
+import { Prism as SyntaxHighlighter } from 'react-syntax-highlighter';
+import { vscDarkPlus } from 'react-syntax-highlighter/dist/esm/styles/prism';
 
 interface MessageContentProps {
   content: string;
@@ -53,6 +55,69 @@ export const MessageContent = React.memo(({ content, className = '' }: MessageCo
 
       return part;
     });
+  }, []);
+
+  // Parse code blocks and render with syntax highlighting
+  const renderContentWithCodeBlocks = useCallback((text: string): React.ReactNode[] => {
+    const elements: React.ReactNode[] = [];
+
+    // Match code blocks with optional language: ```language\ncode\n```
+    const codeBlockRegex = /```(\w+)?\n([\s\S]*?)```/g;
+    let lastIndex = 0;
+    let match;
+    let blockIndex = 0;
+
+    while ((match = codeBlockRegex.exec(text)) !== null) {
+      // Add text before code block (with link processing)
+      if (match.index > lastIndex) {
+        const textBefore = text.substring(lastIndex, match.index);
+        elements.push(
+          <span key={`text-${blockIndex}`}>
+            {renderContentWithLinks(textBefore)}
+          </span>
+        );
+      }
+
+      const language = match[1] || 'text';
+      const code = match[2]?.trim() || '';
+
+      // Add syntax-highlighted code block
+      elements.push(
+        <div key={`code-${blockIndex}`} className="my-2 rounded-md overflow-hidden">
+          <SyntaxHighlighter
+            language={language}
+            style={vscDarkPlus}
+            customStyle={{
+              margin: 0,
+              borderRadius: '0.375rem',
+              fontSize: '0.875rem',
+            }}
+            wrapLongLines={true}
+          >
+            {code}
+          </SyntaxHighlighter>
+        </div>
+      );
+
+      lastIndex = match.index + match[0].length;
+      blockIndex++;
+    }
+
+    // Add remaining text after last code block
+    if (lastIndex < text.length) {
+      elements.push(
+        <span key={`text-${blockIndex}`}>
+          {renderContentWithLinks(text.substring(lastIndex))}
+        </span>
+      );
+    }
+
+    // If no code blocks found, just process links
+    if (elements.length === 0) {
+      return [renderContentWithLinks(text)];
+    }
+
+    return elements;
   }, []);
 
   // Memoized function to convert URLs in text to clickable links
@@ -114,7 +179,7 @@ export const MessageContent = React.memo(({ content, className = '' }: MessageCo
     return elements;
   }, [processPlainUrlsCallback]);
 
-  // Memoize the rendered content - first format markdown, then process links
+  // Memoize the rendered content - format markdown, then process code blocks and links
   const renderedContent = useMemo(() => {
     // Debug: Check if content has line breaks (development only)
     if (process.env.NODE_ENV === 'development' && content.includes('•')) {
@@ -123,13 +188,13 @@ export const MessageContent = React.memo(({ content, className = '' }: MessageCo
     }
 
     const formattedContent = formatMarkdown(content);
-    return renderContentWithLinks(formattedContent);
-  }, [content, formatMarkdown, renderContentWithLinks]);
+    return renderContentWithCodeBlocks(formattedContent);
+  }, [content, formatMarkdown, renderContentWithCodeBlocks]);
 
   return (
-    <span className={`whitespace-pre-wrap ${className}`}>
+    <div className={`whitespace-pre-wrap ${className}`}>
       {renderedContent}
-    </span>
+    </div>
   );
 }, (prevProps, nextProps) => {
   // Custom comparison function for React.memo
