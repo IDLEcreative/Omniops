@@ -2,20 +2,20 @@
 
 **Type:** Reference
 **Status:** Active
-**Last Updated:** 2025-11-10
+**Last Updated:** 2025-11-18
 **Purpose:** Single source of truth for all bugs, technical debt, and problems discovered in the codebase
 
 ## Quick Reference
 
-**Total Issues:** 24
+**Total Issues:** 30
 - 🔴 Critical: 4
-- 🟠 High: 7
-- 🟡 Medium: 7
-- 🟢 Low: 6
+- 🟠 High: 8
+- 🟡 Medium: 11
+- 🟢 Low: 7
 
 **Status Breakdown:**
-- Open: 23
-- In Progress: 0
+- Open: 26
+- In Progress: 3
 - Resolved: 1
 
 ---
@@ -1287,6 +1287,297 @@ console.log('[Search] Provider result', { resultCount, source, fallbackUsed });
 
 ---
 
+### 🟠 [HIGH] No Batch Operations for Embeddings/Scraping - 45,000x Slower {#issue-025}
+
+**Status:** In Progress
+**Severity:** High
+**Category:** Performance
+**Location:** `lib/embeddings.ts`, `lib/crawler-config.ts`
+**Discovered:** 2025-11-18
+**Effort:** 2 hours
+**Analysis:** [ANALYSIS_SUPABASE_PERFORMANCE.md](10-ANALYSIS/ANALYSIS_SUPABASE_PERFORMANCE.md) (Issue #14)
+
+**Description:**
+Embedding and scraping operations insert rows one-by-one instead of using batch operations. A page with 45 chunks requires 45 individual INSERT statements instead of 1 batch INSERT.
+
+**Impact:**
+- 45,000x slower embedding ingestion (45 queries vs 1 query)
+- Same issue affects scraping (100+ pages = 100+ individual inserts)
+- Blocks content ingestion pipeline during high-volume scraping
+- Wastes database connection pool capacity
+- Increases likelihood of partial failures (some chunks succeed, others fail)
+
+**Root Cause:**
+```typescript
+// Current pattern in lib/embeddings.ts
+for (const chunk of chunks) {
+  await supabase
+    .from('page_embeddings')
+    .insert({
+      page_id: pageId,
+      chunk_text: chunk,
+      embedding: vectors[idx]
+    });
+  // 45 chunks = 45 separate database round trips!
+}
+```
+
+**Proposed Solution:**
+```typescript
+// Batch all insertions into single query
+const embeddingsToInsert = chunks.map((chunk, idx) => ({
+  page_id: pageId,
+  chunk_text: chunk,
+  embedding: vectors[idx],
+  metadata: { chunk_index: idx, total_chunks: chunks.length }
+}));
+
+// Single query for all embeddings
+const { error } = await supabase
+  .from('page_embeddings')
+  .insert(embeddingsToInsert);
+```
+
+**Expected Improvement:** 95% reduction in embedding ingestion time (45 queries → 1 query)
+
+**Verification Steps:**
+```bash
+# Before fix: Time embedding ingestion for 1 page with 45 chunks
+# After fix: Should be 95% faster
+
+# Measure with:
+console.time('embedding-ingestion');
+await ingestPageEmbeddings(pageId, content);
+console.timeEnd('embedding-ingestion');
+```
+
+**Related Issues:** None
+
+---
+
+### 🟡 [MEDIUM] Vector Search Missing Pagination - Memory Bloat Risk {#issue-026}
+
+**Status:** Open
+**Severity:** Medium
+**Category:** Performance | Feature Request
+**Location:** `lib/search/hybrid-search.ts:24-28`
+**Discovered:** 2025-11-18
+**Effort:** 2 hours
+**Analysis:** [ANALYSIS_SUPABASE_PERFORMANCE.md](10-ANALYSIS/ANALYSIS_SUPABASE_PERFORMANCE.md) (Issue #6)
+
+**Description:**
+Hard-coded 50 result limit in vector search with no cursor-based pagination support. Cannot implement "Load More" UI pattern or paginate through large result sets.
+
+**Impact:**
+- Memory bloat when returning large result sets
+- No way to implement progressive loading in UI
+- Score calculation performed on all results before filtering
+- Users can't navigate beyond first 50 results
+
+**Root Cause:**
+```typescript
+const DEFAULT_CONFIG: HybridSearchConfig = {
+  ftsWeight: 0.6,
+  semanticWeight: 0.4,
+  minScore: 0.1,
+  maxResults: 50  // Hard-coded, no pagination
+};
+```
+
+**Proposed Solution:**
+Implement keyset pagination using score + ID cursor:
+```typescript
+interface SearchPagination {
+  limit: number;      // Items per page (default 25)
+  cursor?: string;    // Opaque pagination cursor
+}
+
+export async function hybridSearchPaginated(
+  query: string,
+  filters?: SearchFilters,
+  pagination?: SearchPagination
+): Promise<PaginatedSearchResult> {
+  // Decode cursor, filter by score + ID
+  // Return results + hasMore + nextCursor
+}
+```
+
+**Expected Improvement:** Enables pagination, reduces memory usage, better UX
+
+**Related Issues:** None
+
+---
+
+### 🟡 [MEDIUM] RLS Policies Use Subqueries - 30-40% Further Optimization Possible {#issue-027}
+
+**Status:** Open
+**Severity:** Medium
+**Category:** Performance
+**Location:** `supabase/migrations/20251107230000_optimize_conversations_performance.sql`
+**Discovered:** 2025-11-18
+**Effort:** 2-3 hours
+**Analysis:** [ANALYSIS_SUPABASE_PERFORMANCE.md](10-ANALYSIS/ANALYSIS_SUPABASE_PERFORMANCE.md) (Issue #4)
+
+**Description:**
+RLS policies recently optimized (50-70% improvement) with security definer functions, but still use IN subqueries. Could be further optimized with JOIN pattern.
+
+**Impact:**
+- 50-100ms query overhead on conversations/messages tables
+- Subquery evaluated for each row (even with function optimization)
+- JOIN would be 30-40% faster
+
+**Current Pattern:**
+```sql
+-- Current (after recent optimization):
+WHERE domain_id IN (
+  SELECT domain_id FROM get_user_domain_ids(auth.uid())
+)
+```
+
+**Proposed Solution:**
+```sql
+-- Optimized with JOIN:
+FROM conversations c
+INNER JOIN get_user_domain_ids(auth.uid()) ud
+  ON c.domain_id = ud.domain_id
+```
+
+**Expected Improvement:** 30-40% faster queries on conversations/messages
+
+**Related Issues:** None
+
+---
+
+### 🟡 [MEDIUM] No Two-Tier Cache (Database + Redis) {#issue-028}
+
+**Status:** Open
+**Severity:** Medium
+**Category:** Performance
+**Location:** `lib/embeddings-functions.ts`, `lib/query-cache.ts`
+**Discovered:** 2025-11-18
+**Effort:** 4-6 hours
+**Analysis:** [ANALYSIS_SUPABASE_PERFORMANCE.md](10-ANALYSIS/ANALYSIS_SUPABASE_PERFORMANCE.md)
+
+**Description:**
+Only database-level caching (`query_cache` table) exists. No Redis integration for frequently accessed data like widget configs, customer profiles, or search results.
+
+**Impact:**
+- Database queries for data that could be cached in-memory
+- 20-30% slower on repeated queries
+- Database connection pool consumed by cacheable queries
+- No TTL-based expiration (only manual invalidation)
+
+**Proposed Solution:**
+```typescript
+// Two-tier cache pattern
+async function getWidgetConfig(domain: string) {
+  // L1: Redis (hot cache)
+  const cached = await redis.get(`widget:${domain}`);
+  if (cached) return JSON.parse(cached);
+
+  // L2: Database
+  const config = await supabase
+    .from('widget_configs')
+    .select('*')
+    .eq('domain', domain)
+    .single();
+
+  // Populate Redis with 5-minute TTL
+  await redis.setex(`widget:${domain}`, 300, JSON.stringify(config));
+
+  return config;
+}
+```
+
+**Expected Improvement:** 20-30% faster on repeated queries, reduced DB load
+
+**Related Issues:** None
+
+---
+
+### 🟡 [MEDIUM] No Materialized Views for Analytics - 50-80% Slower Dashboards {#issue-029}
+
+**Status:** Open
+**Severity:** Medium
+**Category:** Performance
+**Location:** `lib/analytics/*.ts`
+**Discovered:** 2025-11-18
+**Effort:** 3-4 hours
+**Analysis:** [ANALYSIS_SUPABASE_PERFORMANCE.md](10-ANALYSIS/ANALYSIS_SUPABASE_PERFORMANCE.md)
+
+**Description:**
+Analytics dashboards query raw tables with aggregations on every page load. No materialized views for pre-computed statistics.
+
+**Impact:**
+- Dashboard queries take 500-2000ms (recalculating on every load)
+- Heavy queries consume connection pool
+- Analytics queries block production queries
+- No incremental refresh (always full recalculation)
+
+**Proposed Solution:**
+Create materialized views for common aggregations:
+```sql
+CREATE MATERIALIZED VIEW chat_telemetry_daily AS
+SELECT
+  domain,
+  DATE(created_at) as date,
+  COUNT(*) as total_chats,
+  SUM(cost_usd) as total_cost,
+  AVG(duration_ms) as avg_duration,
+  COUNT(*) FILTER (WHERE success = true) as successful_chats
+FROM chat_telemetry
+GROUP BY domain, DATE(created_at);
+
+-- Refresh daily
+CREATE INDEX ON chat_telemetry_daily(domain, date DESC);
+```
+
+**Expected Improvement:** 50-80% faster dashboard queries (2000ms → 400ms)
+
+**Related Issues:** None
+
+---
+
+### 🟢 [LOW] 54 Undocumented Database Tables {#issue-030}
+
+**Status:** In Progress
+**Severity:** Low
+**Category:** Documentation
+**Location:** `docs/09-REFERENCE/REFERENCE_DATABASE_SCHEMA.md`
+**Discovered:** 2025-11-18
+**Effort:** 4-6 hours
+**Analysis:** [ANALYSIS_SUPABASE_PERFORMANCE.md](10-ANALYSIS/ANALYSIS_SUPABASE_PERFORMANCE.md) (Issue #1)
+
+**Description:**
+85 total tables exist in database, but only 31 are documented in schema reference. 54 tables are undocumented, making debugging and optimization difficult.
+
+**Impact:**
+- Unknown performance characteristics for 54 tables
+- Hidden dependencies not obvious
+- Difficult to identify optimization opportunities
+- New developers can't understand full schema
+
+**Undocumented Table Categories:**
+- Cart Analytics: 4 tables (cart_abandonments, cart_analytics_daily, etc.)
+- Funnel Tracking: 4 tables (conversation_funnel, custom_funnels, etc.)
+- Autonomous Operations: 4 tables (autonomous_consent, credentials, etc.)
+- Feature Management: 5 tables (customer/organization feature flags, etc.)
+- Alerts & Monitoring: 4 tables (alert_history, alert_thresholds, etc.)
+- User Management: 3 tables (customer_sessions, notifications, feedback)
+- Advanced Features: 22+ more tables
+
+**Proposed Solution:**
+1. Query database for all table schemas systematically
+2. Document each table with: purpose, columns, indexes, RLS policies
+3. Update REFERENCE_DATABASE_SCHEMA.md with complete documentation
+4. Add cross-references to related tables
+
+**Expected Improvement:** Better debugging, faster optimization discovery
+
+**Related Issues:** None
+
+---
+
 ## In Progress Issues
 
 <!-- Issues currently being worked on -->
@@ -1322,20 +1613,22 @@ console.log('[Search] Provider result', { resultCount, source, fallbackUsed });
 ## Statistics
 
 **Most Common Categories:**
+- Performance: 8 issues (#007, #008, #021, #025, #026, #027, #028, #029)
 - Tech Debt: 5 issues
+- Feature Request: 5 issues
 - Testing: 4 issues
 - Code Quality: 4 issues
-- Feature Request: 5 issues
 - Bug: 2 issues
 - Architecture: 1 issue
-- Performance: 2 issues
+- Documentation: 1 issue (#030)
 
 **Most Affected Areas:**
+- Database/Supabase: 6 issues (#025, #026, #027, #028, #029, #030)
 - Testing infrastructure: 5 issues (#001, #003, #004, #005, #007)
-- Search system: 1 issue (#021)
+- Missing features: 5 issues (#016, #017, #018, #019, #020)
 - Agent files: 3 issues (#009, #010, #011)
 - API routes: 3 issues (#001, #012, #013)
-- Missing features: 5 issues (#016, #017, #018, #019, #020)
+- Search system: 1 issue (#021)
 
 **Average Effort:**
 - Critical: 2-3 weeks
