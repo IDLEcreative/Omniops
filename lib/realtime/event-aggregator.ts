@@ -53,7 +53,7 @@ export async function getActiveSessionsCount(): Promise<number> {
   const cached = metricsCache.get(cacheKey);
   if (cached !== null) return cached;
 
-  const supabase = getSupabaseClient();
+  const supabase = await getSupabaseClient();
   const fiveMinutesAgo = new Date(Date.now() - 5 * 60000).toISOString();
 
   // Count unique sessions that had activity in last 5 minutes
@@ -68,7 +68,7 @@ export async function getActiveSessionsCount(): Promise<number> {
     return 0;
   }
 
-  const uniqueSessions = new Set(data?.map(d => d.session_id) || []);
+  const uniqueSessions = new Set(data?.map((d: any) => d.session_id) || []);
   const count = uniqueSessions.size;
 
   metricsCache.set(cacheKey, count);
@@ -80,7 +80,7 @@ export async function getMessagesPerMinute(): Promise<number> {
   const cached = metricsCache.get(cacheKey);
   if (cached !== null) return cached;
 
-  const supabase = getSupabaseClient();
+  const supabase = await getSupabaseClient();
   const oneMinuteAgo = new Date(Date.now() - 60000).toISOString();
 
   const { count, error } = await supabase
@@ -104,7 +104,7 @@ export async function getResponseTimes(): Promise<ResponseTimeMetrics> {
   const cached = metricsCache.get(cacheKey);
   if (cached !== null) return cached;
 
-  const supabase = getSupabaseClient();
+  const supabase = await getSupabaseClient();
   const oneHourAgo = new Date(Date.now() - 3600000).toISOString();
 
   // Get response_completed events with response_time_ms
@@ -122,9 +122,9 @@ export async function getResponseTimes(): Promise<ResponseTimeMetrics> {
 
   // Extract response times and sort
   const responseTimes = data
-    .map(d => d.data?.response_time_ms)
-    .filter(t => typeof t === 'number')
-    .sort((a, b) => a - b);
+    .map((d: any) => d.data?.response_time_ms)
+    .filter((t: any): t is number => typeof t === 'number')
+    .sort((a: number, b: number) => a - b);
 
   if (responseTimes.length === 0) {
     return { p50: 0, p95: 0, p99: 0 };
@@ -150,7 +150,7 @@ export async function getUserEngagementMetrics(): Promise<SessionMetrics> {
   const cached = metricsCache.get(cacheKey);
   if (cached !== null) return cached;
 
-  const supabase = getSupabaseClient();
+  const supabase = await getSupabaseClient();
   const oneHourAgo = new Date(Date.now() - 3600000).toISOString();
 
   // Get session start and end events
@@ -172,7 +172,7 @@ export async function getUserEngagementMetrics(): Promise<SessionMetrics> {
 
   // Group by session
   const sessionMap = new Map<string, any[]>();
-  sessionData.forEach(event => {
+  sessionData.forEach((event: any) => {
     if (event.session_id) {
       if (!sessionMap.has(event.session_id)) {
         sessionMap.set(event.session_id, []);
@@ -216,7 +216,7 @@ export async function getRecentActivityFeed(limit: number = 10) {
   const cached = metricsCache.get(cacheKey);
   if (cached !== null) return cached;
 
-  const supabase = getSupabaseClient();
+  const supabase = await getSupabaseClient();
 
   const { data, error } = await supabase
     .from('analytics_events')

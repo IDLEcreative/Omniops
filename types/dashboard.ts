@@ -71,11 +71,11 @@ export interface ConversationMessage {
 }
 
 export interface DateRange {
-  from: Date;
-  to: Date;
+  from?: Date;
+  to?: Date;
 }
 
-export type DateRangePreset = '7d' | '30d' | '90d' | 'custom';
+export type DateRangePreset = 'last-7-days' | 'last-30-days' | 'last-90-days' | 'this-month' | 'last-month' | 'this-quarter' | 'custom';
 
 export type AnnotationCategory = 'campaign' | 'release' | 'incident' | 'event' | 'other';
 
