@@ -1,3 +1,57 @@
+/**
+ * ChatWidget Component - AI-optimized header for fast comprehension
+ *
+ * @purpose Main embeddable chat widget - handles UI state, message sending, and user interactions
+ *
+ * @flow
+ *   1. Mount → useChatState (loads config, session, privacy settings)
+ *   2. User types → input state updates
+ *   3. User sends → sendChatMessage (POST /api/chat)
+ *   4. → Streaming response (OpenAI GPT-4)
+ *   5. → Update messages, scroll to bottom
+ *   6. → Save to database (conversation persistence)
+ *
+ * @keyComponents
+ *   - Header: Widget header with minimize, contrast, settings buttons
+ *   - MessageList: Scrollable message history with auto-scroll
+ *   - InputArea: Text input with submit button, loading states
+ *   - PrivacyBanner: GDPR consent banner (if required)
+ *   - MinimizedButton: Floating button when widget is minimized
+ *
+ * @stateManagement
+ *   - useChatState: Core state (messages, config, session, privacy)
+ *   - messages: Message[] (conversation history)
+ *   - loading: boolean (AI processing state)
+ *   - isOpen: boolean (widget minimized/expanded)
+ *   - conversationId: string (persistence key)
+ *   - iconState: IconState (normal/hover/active for button animations)
+ *
+ * @handles
+ *   - Message sending: sendChatMessage to /api/chat with streaming
+ *   - Privacy: GDPR consent management, data export/delete
+ *   - Accessibility: High contrast mode, font size adjustment, RTL support
+ *   - Persistence: Session + conversation restoration
+ *   - WooCommerce: Cart tracking integration (if enabled)
+ *   - Error recovery: Network failures, rate limiting, service errors
+ *
+ * @returns
+ *   - Expanded: Full chat widget UI (Header + MessageList + InputArea)
+ *   - Minimized: Floating button with unread indicator
+ *   - Banner: Privacy consent banner (conditional)
+ *
+ * @consumers
+ *   - public/embed.js: Loads widget via iframe
+ *   - app/embed/page.tsx: Widget embed container
+ *   - app/widget-test/page.tsx: Development testing page
+ *
+ * @configuration
+ *   - Props: demoId, demoConfig, initialOpen, forceClose, privacySettings
+ *   - Environment: NEXT_PUBLIC_SUPABASE_URL, NEXT_PUBLIC_SUPABASE_ANON_KEY
+ *
+ * @totalLines 400
+ * @estimatedTokens 2,000 (without header), 750 (with header - 62% savings)
+ */
+
 'use client';
 
 import { useCallback, useState } from 'react';

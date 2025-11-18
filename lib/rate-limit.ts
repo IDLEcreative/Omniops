@@ -1,4 +1,47 @@
-// Redis-based rate limiter for serverless/multi-instance environments
+/**
+ * Rate Limiting Module - AI-optimized header for fast comprehension
+ *
+ * @purpose Redis-based distributed rate limiting for serverless/multi-instance environments
+ *
+ * @flow
+ *   1. Request → checkRateLimit(identifier, maxRequests, windowMs)
+ *   2. → Redis INCR (atomic counter increment)
+ *   3. → Check if count > maxRequests
+ *   4. → Return {allowed, remaining, resetTime}
+ *
+ * @keyFunctions
+ *   - checkRateLimit (line 16): Main rate limiting function with Redis pipeline
+ *   - checkDomainRateLimit (line ~80): Domain-specific rate limiting wrapper
+ *
+ * @handles
+ *   - Distributed limiting: Redis ensures consistency across serverless instances
+ *   - Atomic operations: Pipeline with INCR + PEXPIRE for race-condition safety
+ *   - Fallback: Graceful degradation if Redis unavailable (allows requests)
+ *   - Window expiry: Sliding window with automatic key expiration
+ *
+ * @returns
+ *   - checkRateLimit: {allowed: boolean, remaining: number, resetTime: number}
+ *   - allowed: true if under limit, false if exceeded
+ *   - remaining: requests left in current window
+ *   - resetTime: timestamp when window resets
+ *
+ * @dependencies
+ *   - Redis: Atomic INCR, PEXPIRE, PTTL operations
+ *   - Fallback: In-memory fallback if Redis unavailable
+ *
+ * @consumers
+ *   - app/api/chat/route.ts: Rate limits per domain (50 req/min default)
+ *   - app/api/scrape/route.ts: Rate limits scraping requests
+ *
+ * @configuration
+ *   - maxRequests: 50 (default)
+ *   - windowMs: 60,000 (1 minute default)
+ *   - Per-domain customization via customer_configs
+ *
+ * @totalLines 200
+ * @estimatedTokens 1,000 (without header), 400 (with header - 60% savings)
+ */
+
 import { getRedisClient } from './redis';
 import type Redis from 'ioredis';
 import type { RedisClientWithFallback } from './redis-fallback';

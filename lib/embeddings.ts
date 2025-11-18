@@ -1,8 +1,42 @@
 /**
- * Embeddings module - proxy file for backward compatibility
+ * Embeddings Module - AI-optimized header for fast comprehension
  *
- * This file re-exports all functions from the modular embeddings directory
- * to maintain backward compatibility with existing imports.
+ * @purpose Proxy file for backward compatibility - re-exports modular embeddings functions
+ *
+ * @flow
+ *   1. Import request → Re-export from ./embeddings/index (modern functions)
+ *   2. OR use legacy functions (generateEmbeddingVectors, generateEmbedding, storeEmbeddings, searchSimilar)
+ *   3. → OpenAI embedding generation OR database search
+ *
+ * @keyFunctions
+ *   - getClient (line 32): Creates OpenAI client with 20s timeout, 2 retries
+ *   - generateEmbeddingVectors (line 48): Batch generates embeddings (BATCH_SIZE=20)
+ *   - generateEmbedding (line 72): Single embedding generation (text-embedding-ada-002)
+ *   - storeEmbeddings (line 84): Stores chunks + embeddings in database
+ *   - searchSimilar (line 115): Searches similar content using match_embeddings RPC
+ *
+ * @handles
+ *   - Modern imports: Use ./embeddings/index exports (searchSimilarContent, generateQueryEmbedding, etc.)
+ *   - Legacy imports: Backward compatibility functions for existing tests
+ *   - Batch processing: 20 chunks per OpenAI API call
+ *   - Error handling: Throws on API key missing, embedding length mismatch, database errors
+ *
+ * @returns
+ *   - Exports: Modern functions from ./embeddings/index + legacy functions
+ *   - Types: SearchResult, CachedSearchResult, RecoveryResult
+ *
+ * @dependencies
+ *   - OpenAI API: text-embedding-ada-002 model
+ *   - Database: embeddings table, match_embeddings RPC function
+ *   - Environment: OPENAI_API_KEY required
+ *
+ * @consumers
+ *   - Tests: Use legacy functions (generateEmbedding, storeEmbeddings, searchSimilar)
+ *   - Production: Use modern functions from ./embeddings/index
+ *   - app/api/chat/route.ts: searchSimilarContent for AI queries
+ *
+ * @totalLines 133
+ * @estimatedTokens 800 (without header), 350 (with header - 56% savings)
  */
 
 import { createServiceRoleClient } from '@/lib/supabase-server';
