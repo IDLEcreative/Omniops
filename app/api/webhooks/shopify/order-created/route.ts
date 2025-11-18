@@ -11,12 +11,26 @@ import { parseShopifyOrder, shouldTrackShopifyOrder } from '@/lib/webhooks/shopi
 import { attributePurchaseToConversation } from '@/lib/attribution/purchase-attributor';
 import { recordPurchaseStage } from '@/lib/analytics/funnel-analytics';
 import { createServiceRoleClient } from '@/lib/supabase-server';
+import { checkRateLimit } from '@/lib/rate-limit';
+import { validateWebhookEvent, logWebhookEvent } from '@/lib/webhooks/replay-prevention';
 import type { ShopifyOrderWebhook } from '@/types/purchase-attribution';
 
 export const runtime = 'nodejs';
 export const dynamic = 'force-dynamic';
 
 export async function POST(request: NextRequest) {
+  // SECURITY: Rate limit webhook endpoint (100 requests per minute per IP)
+  const forwardedFor = request.headers.get('x-forwarded-for');
+  const clientIp = forwardedFor?.split(',')[0]?.trim() ||
+                   request.headers.get('x-real-ip') ||
+                   'unknown';
+
+  const { allowed } = await checkRateLimit(clientIp, 100, 60 * 1000);
+
+  if (!allowed) {
+    return NextResponse.json({ error: 'Too Many Requests' }, { status: 429 });
+  }
+
   try {
     // Get raw body for HMAC verification
     const rawBody = await request.text();
@@ -53,7 +67,7 @@ export async function POST(request: NextRequest) {
     const supabase = await createServiceRoleClient();
     const { data: config } = await supabase
       .from('customer_configs')
-      .select('domain, shopify_access_token')
+      .select('domain, shopify_access_token, encrypted_credentials')
       .eq('shopify_shop', shopDomain)
       .single();
 
@@ -64,10 +78,32 @@ export async function POST(request: NextRequest) {
 
     const domain = config.domain;
 
-    // Get webhook secret (use Shopify API secret key)
-    // Note: In production, this should be stored in encrypted_credentials
-    if (!config.shopify_access_token) {
-      console.warn(`[Shopify Webhook] No Shopify secret configured for ${domain}`);
+    // Get webhook secret from encrypted_credentials (preferred) or fall back to access_token (deprecated)
+    let webhookSecret: string | undefined;
+
+    if (config.encrypted_credentials) {
+      try {
+        const credentials = typeof config.encrypted_credentials === 'string'
+          ? JSON.parse(config.encrypted_credentials)
+          : config.encrypted_credentials;
+
+        webhookSecret = credentials.shopify?.webhook_secret;
+
+        if (!webhookSecret) {
+          console.warn(`[Shopify Webhook] No webhook_secret in encrypted_credentials for ${domain}, falling back to access_token (insecure)`);
+          webhookSecret = config.shopify_access_token;
+        }
+      } catch (error) {
+        console.error(`[Shopify Webhook] Failed to parse encrypted_credentials for ${domain}`, error);
+        webhookSecret = config.shopify_access_token;
+      }
+    } else {
+      console.warn(`[Shopify Webhook] Using deprecated shopify_access_token as webhook secret for ${domain} - migrate to encrypted_credentials.shopify.webhook_secret`);
+      webhookSecret = config.shopify_access_token;
+    }
+
+    if (!webhookSecret) {
+      console.warn(`[Shopify Webhook] No webhook secret configured for ${domain}`);
       return NextResponse.json({ status: 'ignored', reason: 'no_secret_configured' });
     }
 
@@ -75,7 +111,7 @@ export async function POST(request: NextRequest) {
     const isValid = verifyShopifyWebhook(
       rawBody,
       headers['x-shopify-hmac-sha256'],
-      config.shopify_access_token
+      webhookSecret
     );
 
     if (!isValid) {
@@ -85,6 +121,34 @@ export async function POST(request: NextRequest) {
         { status: 401 }
       );
     }
+
+    // SECURITY: Validate timestamp and check for replay attacks
+    const eventId = payload.id?.toString();
+    const eventTime = payload.created_at ? new Date(payload.created_at).getTime() / 1000 : 0;
+
+    if (!eventId) {
+      console.error('[Shopify Webhook] Missing event ID');
+      return NextResponse.json(
+        { error: 'Missing event ID' },
+        { status: 400 }
+      );
+    }
+
+    const replayCheck = await validateWebhookEvent(eventId, eventTime, 'shopify_order');
+
+    if (!replayCheck.valid) {
+      console.warn('[Shopify Webhook] Replay attack prevented', {
+        eventId,
+        reason: replayCheck.reason,
+      });
+      return NextResponse.json(
+        { error: replayCheck.reason },
+        { status: 400 }
+      );
+    }
+
+    // Log event for audit trail (prevents future replay)
+    await logWebhookEvent(eventId, 'shopify_order', payload);
 
     // Check if we should track this order
     if (!shouldTrackShopifyOrder(payload)) {

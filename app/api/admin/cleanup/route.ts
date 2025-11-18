@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { createClient } from '@/lib/supabase/server';
 import { DatabaseCleaner } from '@/lib/database-cleaner';
+import { withCSRF } from '@/lib/middleware/csrf';
 import { z } from 'zod';
 
 const cleanupSchema = z.object({
@@ -11,7 +12,7 @@ const cleanupSchema = z.object({
   action: z.enum(['clean', 'stats']).default('stats')
 });
 
-export async function POST(request: NextRequest) {
+async function handlePost(request: NextRequest) {
   try {
     const supabase = await createClient();
     
@@ -66,6 +67,9 @@ export async function POST(request: NextRequest) {
     );
   }
 }
+
+// Export POST handler with CSRF protection
+export const POST = withCSRF(handlePost);
 
 export async function GET(request: NextRequest) {
   try {

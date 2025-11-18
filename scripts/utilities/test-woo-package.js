@@ -5,9 +5,9 @@ dotenv.config({ path: '.env.local' });
 import WooCommerceRestApi from "@woocommerce/woocommerce-rest-api";
 
 console.log('=== Testing with WooCommerce Package ===\n');
-console.log('URL:', process.env.WOOCOMMERCE_URL);
-console.log('Consumer Key:', process.env.WOOCOMMERCE_CONSUMER_KEY?.substring(0, 20) + '...');
-console.log('Consumer Secret:', process.env.WOOCOMMERCE_CONSUMER_SECRET?.substring(0, 20) + '...\n');
+console.log('URL:', process.env.WOOCOMMERCE_URL || '❌ NOT SET');
+console.log('Consumer Key:', process.env.WOOCOMMERCE_CONSUMER_KEY ? '✅ SET' : '❌ NOT SET');
+console.log('Consumer Secret:', process.env.WOOCOMMERCE_CONSUMER_SECRET ? '✅ SET' : '❌ NOT SET\n');
 
 // Initialize WooCommerce API
 const WooCommerce = new WooCommerceRestApi({

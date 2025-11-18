@@ -24,7 +24,7 @@ async function test() {
   const testDomain = `test-debug-${Date.now()}.example.com`;
 
   console.log('Testing insert with domain:', testDomain);
-  console.log('Service role key:', process.env.SUPABASE_SERVICE_ROLE_KEY?.substring(0, 20) + '...');
+  console.log('Service role key:', process.env.SUPABASE_SERVICE_ROLE_KEY ? '✅ SET' : '❌ NOT SET');
 
   const { data, error } = await supabase
     .from('customer_configs')

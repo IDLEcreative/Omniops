@@ -8,6 +8,62 @@ interface LogEntry {
   error?: Error;
 }
 
+/**
+ * List of sensitive key patterns that should be redacted in logs
+ * Matches keys containing these terms (case-insensitive)
+ */
+const SENSITIVE_KEYS = [
+  'password',
+  'token',
+  'secret',
+  'key',
+  'session_id',
+  'api_key',
+  'consumer_key',
+  'consumer_secret',
+  'access_token',
+  'refresh_token',
+  'encryption_key',
+  'private_key',
+  'credential',
+  'auth',
+  'bearer',
+  'jwt',
+  'cookie',
+  'session',
+];
+
+/**
+ * Recursively sanitizes an object, redacting any sensitive data
+ * @param data - The data to sanitize
+ * @returns Sanitized copy of the data
+ */
+function sanitizeData(data: any): any {
+  if (!data) return data;
+  if (typeof data !== 'object') return data;
+
+  if (Array.isArray(data)) {
+    return data.map(sanitizeData);
+  }
+
+  const sanitized: Record<string, any> = {};
+
+  for (const key in data) {
+    const lowerKey = key.toLowerCase();
+
+    // Check if key contains sensitive terms
+    if (SENSITIVE_KEYS.some(term => lowerKey.includes(term))) {
+      sanitized[key] = '[REDACTED]';
+    } else if (typeof data[key] === 'object' && data[key] !== null) {
+      sanitized[key] = sanitizeData(data[key]);
+    } else {
+      sanitized[key] = data[key];
+    }
+  }
+
+  return sanitized;
+}
+
 class Logger {
   private isDevelopment = process.env.NODE_ENV === 'development';
   private logs: LogEntry[] = [];
@@ -15,12 +71,19 @@ class Logger {
 
   private formatMessage(level: LogLevel, message: string, context?: Record<string, any>): string {
     const timestamp = new Date().toISOString();
-    const contextStr = context ? ` ${JSON.stringify(context)}` : '';
+    // Sanitize context before logging
+    const sanitizedContext = context ? sanitizeData(context) : undefined;
+    const contextStr = sanitizedContext ? ` ${JSON.stringify(sanitizedContext)}` : '';
     return `[${timestamp}] [${level.toUpperCase()}] ${message}${contextStr}`;
   }
 
   private addToHistory(entry: LogEntry) {
-    this.logs.push(entry);
+    // Sanitize context before storing in history
+    const sanitizedEntry = {
+      ...entry,
+      context: entry.context ? sanitizeData(entry.context) : undefined
+    };
+    this.logs.push(sanitizedEntry);
     if (this.logs.length > this.maxLogs) {
       this.logs.shift();
     }
@@ -48,18 +111,20 @@ class Logger {
 
   error(message: string, error?: Error | unknown, context?: Record<string, any>) {
     const errorObj = error instanceof Error ? error : new Error(String(error));
-    const entry: LogEntry = { 
-      level: 'error', 
-      message, 
-      timestamp: new Date().toISOString(), 
-      context, 
-      error: errorObj 
+    // Sanitize error object if it contains sensitive data
+    const sanitizedError = sanitizeData(errorObj);
+    const entry: LogEntry = {
+      level: 'error',
+      message,
+      timestamp: new Date().toISOString(),
+      context,
+      error: errorObj
     };
     this.addToHistory(entry);
-    
+
     console.error(this.formatMessage('error', message, context));
     if (error) {
-      console.error(error);
+      console.error(sanitizedError);
     }
 
     // In production, you could send this to an error tracking service
@@ -106,3 +171,6 @@ export async function withErrorHandling<T>(
 export function useLogger() {
   return logger;
 }
+
+// Export sanitization function for manual use if needed
+export { sanitizeData };

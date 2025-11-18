@@ -104,14 +104,36 @@ export async function POST(request: NextRequest) {
  * This prevents unauthorized parties from sending fake webhooks.
  */
 function verifyWebhookSignature(body: string, signature: string | null): boolean {
-  if (!signature) return false;
+  if (!signature) {
+    console.error('[Security] Missing webhook signature');
+    return false;
+  }
+
+  const secret = process.env.WHATSAPP_APP_SECRET;
+  if (!secret) {
+    console.error('[Security] WHATSAPP_APP_SECRET not configured');
+    return false; // Fail closed
+  }
 
   const expectedSignature = crypto
-    .createHmac('sha256', process.env.WHATSAPP_APP_SECRET!)
+    .createHmac('sha256', secret)
     .update(body)
     .digest('hex');
 
-  return `sha256=${expectedSignature}` === signature;
+  // Use timing-safe comparison to prevent timing attacks
+  try {
+    const expected = Buffer.from(`sha256=${expectedSignature}`);
+    const actual = Buffer.from(signature);
+
+    if (expected.length !== actual.length) {
+      return false;
+    }
+
+    return crypto.timingSafeEqual(expected, actual);
+  } catch (error) {
+    console.error('[Security] Signature comparison failed:', error);
+    return false;
+  }
 }
 
 /**

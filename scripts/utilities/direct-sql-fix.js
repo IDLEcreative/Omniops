@@ -6,8 +6,8 @@ dotenv.config({ path: '.env.local' });
 const SUPABASE_URL = process.env.NEXT_PUBLIC_SUPABASE_URL;
 const projectRef = SUPABASE_URL.match(/https:\/\/([^.]+)\.supabase\.co/)[1];
 
-// Construct direct database URL
-const DATABASE_URL = `postgresql://postgres.${projectRef}:${process.env.SUPABASE_SERVICE_ROLE_KEY.substring(0, 40)}@aws-0-us-west-1.pooler.supabase.com:5432/postgres`;
+// Construct direct database URL (using full service role key - not logged)
+const DATABASE_URL = `postgresql://postgres.${projectRef}:${process.env.SUPABASE_SERVICE_ROLE_KEY}@aws-0-us-west-1.pooler.supabase.com:5432/postgres`;
 
 async function applyFixes() {
   const client = new Client({

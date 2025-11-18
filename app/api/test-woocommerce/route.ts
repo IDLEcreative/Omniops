@@ -67,12 +67,21 @@ export async function GET(request: Request) {
       }, { status: 404 });
     }
 
-    // Prepare WooCommerce API credentials
+    // Prepare WooCommerce API credentials (never expose in response)
     const wooConfig = {
       url: config.woocommerce_url,
       consumerKey: config.woocommerce_consumer_key,
       consumerSecret: config.woocommerce_consumer_secret,
       version: 'wc/v3'
+    };
+
+    // Redacted configuration for safe response (never expose credentials)
+    const safeConfig = {
+      domain: config.domain,
+      business_name: config.business_name,
+      woocommerce_url: config.woocommerce_url,
+      woocommerce_enabled: config.woocommerce_enabled,
+      credentials_configured: !!(config.woocommerce_consumer_key && config.woocommerce_consumer_secret)
     };
 
     // Test API endpoints
@@ -193,12 +202,7 @@ export async function GET(request: Request) {
     const failedCount = tests.filter(t => t.status !== 'success').length;
 
     return NextResponse.json({
-      configuration: {
-        domain: config.domain,
-        business_name: config.business_name,
-        woocommerce_url: config.woocommerce_url,
-        woocommerce_enabled: config.woocommerce_enabled
-      },
+      configuration: safeConfig, // Use safe config without credentials
       test_results: tests,
       summary: {
         total_tests: tests.length,

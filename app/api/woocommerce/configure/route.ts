@@ -2,6 +2,11 @@ import { NextRequest, NextResponse } from 'next/server';
 import { createClient } from '@/lib/supabase-server';
 import { encrypt } from '@/lib/encryption';
 import { withCSRF } from '@/lib/middleware/csrf';
+import { logger } from '@/lib/logger';
+
+// Input validation constants
+const MAX_URL_LENGTH = 2048;
+const MAX_KEY_LENGTH = 255;
 
 /**
  * GET /api/woocommerce/configure
@@ -68,7 +73,7 @@ export async function GET(request: NextRequest) {
       // Security: Never return actual consumer_key or consumer_secret values
     });
   } catch (error) {
-    console.error('Error fetching WooCommerce configuration:', error);
+    logger.error('Error fetching WooCommerce configuration', error);
     return NextResponse.json(
       { success: false, error: 'Failed to fetch configuration' },
       { status: 500 }
@@ -88,6 +93,15 @@ export async function GET(request: NextRequest) {
  */
 async function handlePost(request: NextRequest) {
   try {
+    // Validate Content-Type
+    const contentType = request.headers.get('content-type');
+    if (!contentType?.includes('application/json')) {
+      return NextResponse.json(
+        { success: false, error: 'Content-Type must be application/json' },
+        { status: 415 }
+      );
+    }
+
     const supabase = await createClient();
 
     if (!supabase) {
@@ -126,7 +140,7 @@ async function handlePost(request: NextRequest) {
     const body = await request.json();
     const { url, consumerKey, consumerSecret } = body;
 
-    // Validation
+    // Validation - Required fields
     if (!url || !consumerKey || !consumerSecret) {
       return NextResponse.json(
         { success: false, error: 'URL, consumer key, and consumer secret are required' },
@@ -134,12 +148,48 @@ async function handlePost(request: NextRequest) {
       );
     }
 
-    // Validate URL format
+    // Validation - Input length
+    if (url.length > MAX_URL_LENGTH) {
+      return NextResponse.json(
+        { success: false, error: 'URL exceeds maximum length' },
+        { status: 400 }
+      );
+    }
+
+    if (consumerKey.length > MAX_KEY_LENGTH || consumerSecret.length > MAX_KEY_LENGTH) {
+      return NextResponse.json(
+        { success: false, error: 'Credentials exceed maximum length' },
+        { status: 400 }
+      );
+    }
+
+    // Validate URL format and protect against SSRF
     try {
       const parsedUrl = new URL(url);
       if (!parsedUrl.protocol.match(/^https?:$/)) {
         return NextResponse.json(
           { success: false, error: 'Store URL must use HTTP or HTTPS protocol' },
+          { status: 400 }
+        );
+      }
+
+      // SECURITY: Block private IP ranges and localhost to prevent SSRF attacks
+      const hostname = parsedUrl.hostname;
+      const blockedPatterns = [
+        /^localhost$/i,
+        /^127\./,                    // 127.0.0.0/8
+        /^10\./,                     // 10.0.0.0/8
+        /^172\.(1[6-9]|2[0-9]|3[01])\./, // 172.16.0.0/12
+        /^192\.168\./,               // 192.168.0.0/16
+        /^169\.254\./,               // 169.254.0.0/16 (AWS metadata)
+        /^::1$/,                     // IPv6 localhost
+        /^fd[0-9a-f]{2}:/i,         // IPv6 private
+        /^fe80:/i,                   // IPv6 link-local
+      ];
+
+      if (blockedPatterns.some(pattern => pattern.test(hostname))) {
+        return NextResponse.json(
+          { success: false, error: 'Invalid URL: private addresses not allowed' },
           { status: 400 }
         );
       }
@@ -190,7 +240,7 @@ async function handlePost(request: NextRequest) {
         .eq('organization_id', organizationId);
 
       if (error) {
-        console.error('Error updating WooCommerce configuration:', error);
+        logger.error('Error updating WooCommerce configuration', error);
         return NextResponse.json(
           { success: false, error: 'Failed to update configuration' },
           { status: 500 }
@@ -212,7 +262,7 @@ async function handlePost(request: NextRequest) {
         });
 
       if (error) {
-        console.error('Error creating WooCommerce configuration:', error);
+        logger.error('Error creating WooCommerce configuration', error);
         return NextResponse.json(
           { success: false, error: 'Failed to save configuration' },
           { status: 500 }
@@ -225,7 +275,7 @@ async function handlePost(request: NextRequest) {
       message: 'WooCommerce configuration saved successfully',
     });
   } catch (error) {
-    console.error('Error saving WooCommerce configuration:', error);
+    logger.error('Error saving WooCommerce configuration', error);
     return NextResponse.json(
       { success: false, error: 'Failed to save configuration' },
       { status: 500 }

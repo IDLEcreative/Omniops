@@ -1,6 +1,7 @@
 import { createServerClient } from '@supabase/ssr'
 import { createClient as createSupabaseClient, type SupabaseClient, type User } from '@supabase/supabase-js'
 import { cookies } from 'next/headers'
+import { logger } from '@/lib/logger'
 
 // Re-export types
 export type { User, SupabaseClient }
@@ -15,23 +16,23 @@ let envValid = false
  */
 function validateSupabaseEnv(): boolean {
   if (envValidated) return envValid
-  
+
   const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL
   const supabaseAnonKey = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY
   const serviceRoleKey = process.env.SUPABASE_SERVICE_ROLE_KEY
-  
+
   envValid = !!(supabaseUrl && supabaseAnonKey)
   envValidated = true
-  
+
   if (!envValid) {
-    console.error('[Supabase] Missing required environment variables', {
+    logger.error('Missing required Supabase environment variables', undefined, {
       hasUrl: !!supabaseUrl,
       hasAnonKey: !!supabaseAnonKey,
       hasServiceKey: !!serviceRoleKey,
       env: process.env.NODE_ENV
     })
   }
-  
+
   return envValid
 }
 
@@ -46,7 +47,7 @@ export async function createClient() {
     
     if (!supabaseUrl || !supabaseAnonKey) {
       if (process.env.NODE_ENV === 'development') {
-        console.warn('[Supabase] Missing environment variables for createClient')
+        logger.warn('Missing environment variables for createClient')
       }
       return null
     }
@@ -91,7 +92,7 @@ export async function createClient() {
       }
     )
   } catch (error) {
-    console.error('[Supabase] Failed to create client:', error)
+    logger.error('Failed to create Supabase client', error)
     return null
   }
 }
@@ -109,7 +110,7 @@ export function createServiceRoleClientSync() {
 
     if (!supabaseUrl || !serviceRoleKey) {
       if (process.env.NODE_ENV === 'development') {
-        console.warn('[Supabase] Missing environment variables for service role client')
+        logger.warn('Missing environment variables for service role client')
       }
       return null
     }
@@ -141,7 +142,7 @@ export function createServiceRoleClientSync() {
       }
     )
   } catch (error) {
-    console.error('[Supabase] Failed to create service role client:', error)
+    logger.error('Failed to create service role client', error)
     return null
   }
 }
