@@ -1,9 +1,13 @@
 /**
  * Race Condition Testing Utilities
  *
- * **Purpose:** Shared helpers for concurrency testing across all race condition test suites
- * **Last Updated:** 2025-11-09
+ * **Type:** Test Infrastructure
  * **Status:** Active
+ * **Last Updated:** 2025-11-18
+ * **Verified For:** v0.1.0
+ * **Estimated Read Time:** 1 minute
+ *
+ * **Purpose:** Shared helpers for concurrency testing across all race condition test suites
  * **Related:** `__tests__/edge-cases/race-conditions/`
  *
  * ## Exports

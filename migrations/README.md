@@ -1,8 +1,55 @@
 # Database Migrations
 
-**Purpose:** SQL migration files for database schema evolution and optimization
-**Last Updated:** 2025-10-30
-**Usage:** Apply migrations using `psql` or Supabase Management API
+**Type:** Reference
+**Status:** Active
+**Last Updated:** 2025-11-18
+**Verified For:** v0.1.0
+**Dependencies:** PostgreSQL 14+, Supabase (optional)
+**Estimated Read Time:** 15 minutes
+
+## Purpose
+
+SQL migration files for database schema evolution, performance optimization, RLS policy updates, and feature additions. These migrations are independent of Supabase's migration system and can be applied directly via SQL.
+
+## Quick Links
+
+- [Database Schema Reference](/home/user/Omniops/docs/09-REFERENCE/REFERENCE_DATABASE_SCHEMA.md)
+- [Supabase Configuration](/home/user/Omniops/supabase/README.md)
+- [Performance Optimization](/home/user/Omniops/docs/09-REFERENCE/REFERENCE_PERFORMANCE_OPTIMIZATION.md)
+- [Main Scripts README](/home/user/Omniops/scripts/README.md)
+- [CLAUDE.md Database Operations](/home/user/Omniops/CLAUDE.md#database-operations-via-supabase-management-api)
+
+## Table of Contents
+
+- [Overview](#overview)
+- [Directory Structure](#directory-structure)
+- [Key Migration Files](#key-migration-files)
+  - [Performance Optimization](#performance-optimization)
+  - [Row Level Security (RLS) Optimization](#row-level-security-rls-optimization)
+  - [Vector Search Setup](#vector-search-setup)
+  - [Feature Additions](#feature-additions)
+  - [Batch Application](#batch-application)
+- [Migration Application Methods](#migration-application-methods)
+- [Migration Naming Convention](#migration-naming-convention)
+- [Migration Best Practices](#migration-best-practices)
+- [Rollback Strategy](#rollback-strategy)
+- [Migration Versioning](#migration-versioning)
+- [Common Migration Tasks](#common-migration-tasks)
+- [Troubleshooting](#troubleshooting)
+- [Related Directories](#related-directories)
+- [Related Documentation](#related-documentation)
+
+## Keywords
+
+**Search Terms:** database migrations, SQL, schema evolution, performance optimization, RLS policies, pgvector, indexes, Supabase, PostgreSQL
+
+**Aliases:**
+- "SQL migrations" (files)
+- "Schema updates" (purpose)
+- "Database evolution" (process)
+- "Migration scripts" (category)
+
+---
 
 ## Overview
 

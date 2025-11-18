@@ -1,8 +1,13 @@
 # Chat Widget Tests
 
+**Type:** Test Documentation
+**Status:** Active
+**Last Updated:** 2025-11-18
+**Verified For:** v0.1.0
+**Estimated Read Time:** 5 minutes
+
 **Purpose:** Tests for chat widget core functionality including cross-frame communication, storage persistence, and iframe integration.
 
-**Last Updated:** 2025-11-03
 **Test Count:** 25 tests across 1 file
 **Related:** [lib/chat-widget/](../../../lib/chat-widget/), [components/ChatWidget/](../../../components/ChatWidget/)
 

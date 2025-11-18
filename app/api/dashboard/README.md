@@ -1,6 +1,50 @@
 # Dashboard API
 
-Business intelligence and analytics endpoints for customer dashboards, configuration management, and performance monitoring.
+**Type:** Reference
+**Status:** Active
+**Last Updated:** 2025-11-18
+**Verified For:** v0.1.0
+**Dependencies:** [Authentication API](/home/user/Omniops/app/api/auth/README.md), [WooCommerce Integration](/home/user/Omniops/lib/woocommerce-api/README.md), [Analytics System](/home/user/Omniops/lib/analytics/README.md)
+**Estimated Read Time:** 14 minutes
+
+## Purpose
+
+Complete technical reference for the Dashboard API providing business intelligence, analytics, configuration management, and performance monitoring for authenticated customers. This API enables real-time dashboard functionality with WooCommerce integration, Shopify integration, and comprehensive business metrics tracking.
+
+## Quick Links
+
+- [API Routes Documentation](/home/user/Omniops/app/api/README.md)
+- [Authentication API](/home/user/Omniops/app/api/auth/README.md)
+- [WooCommerce API](/home/user/Omniops/app/api/woocommerce/README.md)
+- [Monitoring API](/home/user/Omniops/app/api/monitoring/README.md)
+- [Customer Configuration](/home/user/Omniops/app/api/customer/README.md)
+
+## Table of Contents
+
+- [Purpose](#purpose)
+- [Quick Links](#quick-links)
+- [Overview](#overview)
+- [Endpoints](#endpoints)
+  - [GET /api/dashboard/config](#get-apidashboardconfig)
+  - [POST /api/dashboard/config](#post-apidashboardconfig)
+  - [GET /api/dashboard/test-connection](#get-apidashboardtest-connection)
+  - [GET /api/dashboard/analytics](#get-apidashboardanalytics)
+  - [GET /api/dashboard/woocommerce/[...path]](#get-apidashboardwoocommercepath)
+- [Features](#features)
+- [Configuration Schema](#configuration-schema)
+- [Security Features](#security-features)
+- [Performance Optimization](#performance-optimization)
+- [Examples](#examples)
+- [Error Handling](#error-handling)
+- [Analytics Metrics](#analytics-metrics)
+- [Integration with External Services](#integration-with-external-services)
+- [Real-time Features](#real-time-features)
+- [Best Practices](#best-practices)
+- [Related Endpoints](#related-endpoints)
+- [Future Enhancements](#future-enhancements)
+- [Keywords](#keywords)
+
+---
 
 ## Overview
 
@@ -522,3 +566,25 @@ curl -X GET 'http://localhost:3000/api/dashboard/woocommerce/products?per_page=1
 - **API Versioning**: Versioned API for backward compatibility
 - **Rate Limiting Tiers**: Tiered rate limiting based on subscription
 - **Advanced Analytics**: Machine learning-powered analytics
+
+## Keywords
+
+**API Categories:** dashboard API, business intelligence, analytics API, configuration management, performance monitoring
+
+**Core Features:** customer dashboard, WooCommerce integration, Shopify integration, real-time analytics, configuration management, connection testing, business metrics, trend analysis, performance tracking
+
+**Technologies:** Supabase Auth, Next.js API Routes, TypeScript, AES-256 encryption, WebSocket, real-time updates, Redis caching
+
+**Operations:** configuration CRUD, integration testing, analytics retrieval, credential encryption, session management, health monitoring, data visualization
+
+**Integrations:** WooCommerce REST API, Shopify Admin API, Google Analytics, SEO tools, social media, email marketing, customer support systems
+
+**Security:** Supabase Auth, customer isolation, role-based access, credential encryption, audit logging, CORS protection, XSS prevention, SQL injection protection
+
+**Metrics:** chat analytics, e-commerce analytics, website analytics, system analytics, conversation volume, satisfaction scores, product performance, inventory status, content freshness, API performance
+
+**Aliases:**
+- "dashboard config" (also known as: customer configuration, integration settings, dashboard settings)
+- "analytics endpoint" (also known as: business intelligence API, metrics API, BI endpoint)
+- "connection testing" (also known as: integration health check, credential validation, connectivity test)
+- "WooCommerce proxy" (also known as: WooCommerce passthrough, e-commerce API proxy)

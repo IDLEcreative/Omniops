@@ -1,5 +1,25 @@
 # Documentation Metadata
 
+**Type:** Reference
+**Status:** Active
+**Last Updated:** 2025-11-18
+**Verified For:** v0.1.0
+**Dependencies:** None
+**Estimated Read Time:** 20 minutes
+
+## Purpose
+
+Metadata and tracking system for documentation version control, maintenance schedules, audit procedures, and automated tooling to ensure documentation stays synchronized with code changes.
+
+## Quick Links
+- [Version Matrix](/home/user/Omniops/docs/.metadata/version-matrix.md)
+- [Maintenance Schedule](/home/user/Omniops/docs/.metadata/DOCUMENTATION_MAINTENANCE_SCHEDULE.md)
+- [Documentation Standards](/home/user/Omniops/CLAUDE.md#documentation-standards-for-ai-discoverability)
+
+**Keywords:** documentation, metadata, versioning, maintenance, audit, tracking, CI/CD
+
+---
+
 This directory contains metadata and tracking information for the documentation system.
 
 ## Purpose

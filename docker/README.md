@@ -1,5 +1,56 @@
 # Docker Setup Documentation
 
+**Type:** Reference
+**Status:** Active
+**Last Updated:** 2025-11-18
+**Verified For:** v0.1.0
+**Dependencies:** Docker Desktop 28.3.2+, Docker Compose v2.38.2+
+**Estimated Read Time:** 18 minutes
+
+## Purpose
+
+Comprehensive Docker configuration documentation for containerized Redis services, development workflows, production deployment, and troubleshooting.
+
+## Quick Links
+
+- [Production Docker Setup](/home/user/Omniops/docs/00-GETTING-STARTED/SETUP_DOCKER_PRODUCTION.md)
+- [Main README](/home/user/Omniops/README.md)
+- [CLAUDE.md Development Guide](/home/user/Omniops/CLAUDE.md)
+- [Database Schema](/home/user/Omniops/docs/09-REFERENCE/REFERENCE_DATABASE_SCHEMA.md)
+
+## Table of Contents
+
+- [Overview](#overview)
+- [Directory Structure](#directory-structure)
+- [Quick Start](#quick-start)
+- [Service Configurations](#service-configurations)
+- [Common Commands](#common-commands)
+- [Development Workflow](#development-workflow)
+- [Data Persistence](#data-persistence)
+- [Health Monitoring](#health-monitoring)
+- [Troubleshooting](#troubleshooting)
+- [Performance Optimization](#performance-optimization)
+- [Security Considerations](#security-considerations)
+- [Integration with Application](#integration-with-application)
+- [Monitoring and Logging](#monitoring-and-logging)
+- [Backup and Recovery](#backup-and-recovery)
+- [Advanced Configurations](#advanced-configurations)
+- [Maintenance](#maintenance)
+- [Support](#support)
+- [Related Documentation](#related-documentation)
+
+## Keywords
+
+**Search Terms:** Docker, Redis, containerization, docker-compose, health checks, data persistence, backup, monitoring, production deployment
+
+**Aliases:**
+- "Docker setup" (configuration)
+- "Redis container" (service)
+- "Container orchestration" (docker-compose)
+- "Docker volumes" (persistence)
+
+---
+
 This document provides comprehensive information about the Docker configuration for the Customer Service Agent application.
 
 ## Overview

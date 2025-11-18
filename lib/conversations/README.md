@@ -1,8 +1,15 @@
 # Conversations Directory
 
-**Purpose:** Conversation-related constants and configuration
-**Last Updated:** 2025-10-30
-**Related:** [Chat](/lib/chat), [Hooks](/hooks)
+**Type:** Utility
+**Status:** Active
+**Last Updated:** 2025-11-18
+**Verified For:** v0.1.0
+**Dependencies:** [Chat](/home/user/Omniops/lib/chat), [Hooks](/home/user/Omniops/hooks)
+**Estimated Read Time:** 1 minute
+
+## Purpose
+
+Conversation-related constants and configuration including limits, timeouts, and other conversation management settings.
 
 ## Overview
 

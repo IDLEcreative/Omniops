@@ -1,10 +1,14 @@
 # Shopify Provider Tests
 
+**Type:** Test Documentation
+**Status:** Active
+**Last Updated:** 2025-11-18
+**Verified For:** v0.1.0
+**Estimated Read Time:** 2 minutes
+
 **Purpose:** Focused test modules for ShopifyProvider e-commerce integration, split by functional area for maintainability.
 
-**Last Updated:** 2025-11-10
-**Related:** [ShopifyProvider](../../../../../lib/agents/providers/shopify-provider.ts), [Test Helpers](/test-utils/shopify-test-helpers.ts)
-**Status:** Complete - Original shopify-provider.test.ts (706 LOC) successfully split and deleted
+**Related:** [ShopifyProvider](/home/user/Omniops/lib/agents/providers/shopify-provider.ts), [Test Helpers](/home/user/Omniops/test-utils/shopify-test-helpers.ts)
 
 ## Test Modules
 

@@ -1,10 +1,26 @@
 # AI Agents System
 
-**Purpose:** Intelligent AI agent orchestration system for customer service interactions with specialized prompt engineering and provider-specific integrations.
-
-**Integration Type:** System
-**Last Updated:** 2025-10-30
+**Type:** System
 **Status:** Active
+**Last Updated:** 2025-11-18
+**Verified For:** v0.1.0
+**Dependencies:** [OpenAI](/home/user/Omniops/lib/chat/openai-client.ts), [WooCommerce Provider](providers/woocommerce-provider.ts), [Shopify Provider](providers/shopify-provider.ts)
+**Estimated Read Time:** 5 minutes
+
+## Purpose
+
+Intelligent AI agent orchestration system for customer service interactions with specialized prompt engineering and provider-specific integrations.
+
+## Quick Links
+- [Customer Service Agent](customer-service-agent.ts) - Main agent implementation
+- [E-commerce Agent Interface](ecommerce-agent.ts) - Contract definition
+- [Agent Providers](providers/README.md) - WooCommerce & Shopify integrations
+- [Agent Router](router.ts) - Agent selection logic
+
+## Keywords
+- AI Agents, Customer Service, Prompt Engineering, WooCommerce, Shopify, Verification, Anti-Hallucination
+
+---
 
 This directory contains intelligent AI agents that handle customer service interactions with specialized prompt engineering and context building capabilities. The agents provide a modular, provider-agnostic approach to handling different types of customer queries.
 

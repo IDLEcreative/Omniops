@@ -1,5 +1,30 @@
 # Search MCP Servers
 
+**Type:** Architecture
+**Status:** Active
+**Last Updated:** 2025-11-18
+**Verified For:** v0.1.0
+**Dependencies:** [MCP Servers](/home/user/Omniops/servers/README.md)
+**Estimated Read Time:** 5 minutes
+
+## Purpose
+
+Tools for searching products, content, and FAQs using multi-strategy semantic search with embeddings, exact SKU matching, and commerce provider integration.
+
+## Quick Links
+- [Parent: MCP Servers](/home/user/Omniops/servers/README.md)
+- [Search Architecture](/home/user/Omniops/docs/01-ARCHITECTURE/ARCHITECTURE_SEARCH_SYSTEM.md)
+- [Embeddings Optimization](/home/user/Omniops/lib/embeddings-optimized.ts)
+
+## Table of Contents
+- [Available Tools](#available-tools)
+- [Usage](#usage)
+- [Performance](#performance)
+
+**Keywords:** search, semantic search, embeddings, products, categories, SKU, WooCommerce, Shopify
+
+---
+
 Tools for searching products, content, and FAQs using semantic search with embeddings.
 
 ## Available Tools

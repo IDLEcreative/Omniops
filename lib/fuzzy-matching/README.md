@@ -1,10 +1,15 @@
 # Fuzzy Matching Module
 
-**Purpose:** Provides fuzzy string matching utilities for SKU suggestions when exact matches fail.
-
-**Last Updated:** 2025-11-05
+**Type:** Utility
 **Status:** Active
-**Related:** [WooCommerce Provider](../agents/providers/woocommerce-provider.ts), [Product Details Tool](../chat/tool-handlers/product-details.ts)
+**Last Updated:** 2025-11-18
+**Verified For:** v0.1.0
+**Dependencies:** [WooCommerce Provider](/home/user/Omniops/lib/agents/providers/woocommerce-provider.ts), [Product Details Tool](/home/user/Omniops/lib/chat/tool-handlers/product-details.ts), [Commerce Provider Interface](/home/user/Omniops/lib/agents/commerce-provider.ts)
+**Estimated Read Time:** 3 minutes
+
+## Purpose
+
+Provides fuzzy string matching utilities for SKU suggestions when exact matches fail using Levenshtein distance algorithm.
 
 ## Overview
 

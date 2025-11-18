@@ -1,8 +1,15 @@
 # Feature Flags Core Modules
 
-**Purpose:** Modular architecture for feature flag management system
-**Last Updated:** 2025-11-08
+**Type:** System
 **Status:** Active
+**Last Updated:** 2025-11-18
+**Verified For:** v0.1.0
+**Dependencies:** [Feature Flags Admin API](/home/user/Omniops/app/api/admin/feature-flags/route.ts), [Chat Widget Config](/home/user/Omniops/lib/chat-widget/default-config.ts), [Pilot Rollout Manager](/home/user/Omniops/lib/rollout/pilot-manager.ts)
+**Estimated Read Time:** 4 minutes
+
+## Purpose
+
+Modular architecture for feature flag management system with focused modules under 300 LOC, following single-responsibility principle.
 
 ## Architecture Overview
 

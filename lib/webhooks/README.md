@@ -1,9 +1,26 @@
 # Webhook System
 
-**Purpose:** Secure webhook handlers for receiving order creation events from WooCommerce and Shopify, with automated purchase attribution to chat conversations.
-
-**Last Updated:** 2025-01-09
+**Type:** Service
 **Status:** Active
+**Last Updated:** 2025-11-18
+**Verified For:** v0.1.0
+**Dependencies:** [Purchase Attribution](/home/user/Omniops/lib/attribution/purchase-attributor.ts), [Revenue Analytics](/home/user/Omniops/lib/analytics/revenue-analytics.ts)
+**Estimated Read Time:** 5 minutes
+
+## Purpose
+
+Secure webhook handlers for receiving order creation events from WooCommerce and Shopify, with automated purchase attribution to chat conversations using HMAC signature verification.
+
+## Quick Links
+- [WooCommerce Verifier](woocommerce-verifier.ts) - Signature verification
+- [WooCommerce Parser](woocommerce-order-parser.ts) - Order data extraction
+- [Shopify Verifier](shopify-verifier.ts) - HMAC verification
+- [Attribution System](/home/user/Omniops/lib/attribution/purchase-attributor.ts) - Purchase attribution logic
+
+## Keywords
+- Webhooks, WooCommerce, Shopify, Order Events, HMAC, Signature Verification, Attribution
+
+---
 
 ## Overview
 

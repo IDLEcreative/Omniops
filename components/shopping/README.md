@@ -1,8 +1,28 @@
 # Shopping Components
 
-**Purpose:** Next-level mobile shopping experience with Instagram Stories-style product browsing.
+**Type:** Reference
+**Status:** Active
+**Last Updated:** 2025-11-18
+**Verified For:** v0.1.0
+**Dependencies:** [Framer Motion](https://www.framer.com/motion/), [Next.js Image](https://nextjs.org/docs/api-reference/next/image), [UI Components](/home/user/Omniops/components/ui/README.md), [Shopping Types](/home/user/Omniops/types/shopping.ts)
+**Estimated Read Time:** 6 minutes
 
-**Last Updated:** 2025-01-16
+## Purpose
+
+Next-level mobile shopping experience with Instagram Stories-style product browsing, featuring full-screen vertical scrolling, smooth animations, and zero-friction interactions.
+
+## Quick Links
+
+- [Main Components Directory](/home/user/Omniops/components/README.md)
+- [Shopping Types](/home/user/Omniops/types/shopping.ts)
+- [Tailwind Config](/home/user/Omniops/tailwind.config.js)
+- [CLAUDE.md](/home/user/Omniops/CLAUDE.md)
+
+---
+
+## Keywords
+
+shopping, product feed, Instagram Stories, mobile commerce, vertical scroll, product detail, cart, framer motion
 
 ---
 

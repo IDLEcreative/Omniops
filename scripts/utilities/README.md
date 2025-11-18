@@ -1,8 +1,25 @@
 # Utility Scripts
 
-**Purpose:** General-purpose utility scripts for various development tasks
-**Last Updated:** 2025-10-30
-**Usage:** Run utilities from project root
+**Type:** Reference
+**Status:** Active
+**Last Updated:** 2025-11-18
+**Verified For:** v0.1.0
+**Dependencies:** [Docker Setup](/home/user/Omniops/docs/00-GETTING-STARTED/SETUP_DOCKER_PRODUCTION.md), [Database Schema](/home/user/Omniops/docs/09-REFERENCE/REFERENCE_DATABASE_SCHEMA.md), [Main Scripts README](/home/user/Omniops/scripts/README.md)
+**Estimated Read Time:** 5 minutes
+
+## Purpose
+
+General-purpose utility scripts for development, testing, and maintenance tasks including embeddings management, Docker utilities, database operations, and quick fixes.
+
+## Quick Links
+
+- [Main Scripts README](/home/user/Omniops/scripts/README.md)
+- [Docker Setup](/home/user/Omniops/docs/00-GETTING-STARTED/SETUP_DOCKER_PRODUCTION.md)
+- [Database Schema](/home/user/Omniops/docs/09-REFERENCE/REFERENCE_DATABASE_SCHEMA.md)
+
+## Keywords
+
+utilities, tools, embeddings, Docker, database, migrations, quick fixes, automation, development helpers
 
 ## Overview
 
@@ -309,6 +326,6 @@ open -a "Docker"
 
 ## Related Documentation
 
-- [Main Scripts README](../README.md)
-- [Docker Setup](../../docs/00-GETTING-STARTED/SETUP_DOCKER_PRODUCTION.md)
-- [Database Schema](../../docs/07-REFERENCE/REFERENCE_DATABASE_SCHEMA.md)
+- [Main Scripts README](/home/user/Omniops/scripts/README.md)
+- [Docker Setup](/home/user/Omniops/docs/00-GETTING-STARTED/SETUP_DOCKER_PRODUCTION.md)
+- [Database Schema](/home/user/Omniops/docs/09-REFERENCE/REFERENCE_DATABASE_SCHEMA.md)

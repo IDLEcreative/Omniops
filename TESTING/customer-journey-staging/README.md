@@ -1,6 +1,15 @@
 # Customer Journey Testing - Staging Domain
 
-**Purpose:** End-to-end testing documentation for staging domain onboarding and A/B comparison with production.
+**Type:** Guide
+**Status:** Active
+**Last Updated:** 2025-10-30
+**Verified For:** v0.1.0
+**Dependencies:** [E2E_TESTING_PLAN.md](/home/user/Omniops/TESTING/customer-journey-staging/E2E_TESTING_PLAN.md), [FINDINGS_AND_ISSUES.md](/home/user/Omniops/TESTING/customer-journey-staging/FINDINGS_AND_ISSUES.md)
+**Estimated Read Time:** 6 minutes
+
+## Purpose
+
+End-to-end testing documentation for staging domain onboarding and A/B comparison with production.
 
 **Test Scenario:** Pretend to be a new customer setting up an AI chat agent on `epartstaging.wpengine.com` and compare results with production (`thompsonseparts.co.uk`).
 

@@ -1,9 +1,15 @@
 # CSV Export Utilities
 
-**Purpose:** Modular utilities for CSV generation, extracted from `csv-generator.ts` to comply with the 300 LOC file limit.
+**Type:** Utility
+**Status:** Active
+**Last Updated:** 2025-11-18
+**Verified For:** v0.1.0
+**Dependencies:** [CSV Generator](/home/user/Omniops/lib/exports/csv-generator.ts), [Conversation Search](/home/user/Omniops/lib/search/conversation-search.ts), [Analytics Export API](/home/user/Omniops/app/api/analytics/export/route.ts)
+**Estimated Read Time:** 2 minutes
 
-**Last Updated:** 2025-11-10
-**Parent Module:** `lib/exports/csv-generator.ts`
+## Purpose
+
+Modular utilities for CSV generation, extracted from csv-generator.ts to comply with the 300 LOC file limit.
 
 ## Module Breakdown
 

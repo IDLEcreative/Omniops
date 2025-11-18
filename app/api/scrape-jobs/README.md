@@ -1,5 +1,45 @@
 # Scrape Jobs API
 
+**Type:** Reference
+**Status:** Active
+**Last Updated:** 2025-11-18
+**Verified For:** v0.1.0
+**Dependencies:** [Queue Management](/home/user/Omniops/app/api/queue/README.md), [Scraping API](/home/user/Omniops/app/api/scrape/README.md), [Database Schema](/home/user/Omniops/docs/09-REFERENCE/REFERENCE_DATABASE_SCHEMA.md)
+**Estimated Read Time:** 12 minutes
+
+## Purpose
+
+Complete technical reference for the Scrape Jobs API managing the database-backed scraping job system. This API provides job creation, listing, filtering, pagination, and management for web scraping operations with persistent Supabase storage, priority scheduling, and duplicate prevention.
+
+## Quick Links
+
+- [API Routes Documentation](/home/user/Omniops/app/api/README.md)
+- [Queue Management API](/home/user/Omniops/app/api/queue/README.md)
+- [Scraping API](/home/user/Omniops/app/api/scrape/README.md)
+- [Individual Job API](/home/user/Omniops/app/api/scrape-jobs/[id]/README.md)
+- [Job Statistics API](/home/user/Omniops/app/api/scrape-jobs/stats/README.md)
+
+## Table of Contents
+
+- [Purpose](#purpose)
+- [Quick Links](#quick-links)
+- [Endpoints](#endpoints)
+  - [GET /api/scrape-jobs](#get-apiscrape-jobs)
+  - [POST /api/scrape-jobs](#post-apiscrape-jobs)
+- [Job Status Values](#job-status-values)
+- [Job Types](#job-types)
+- [Priority Levels](#priority-levels)
+- [Error Handling](#error-handling)
+- [ScrapeJob Interface](#scrapejob-interface)
+- [Usage Examples](#usage-examples)
+- [Database Integration](#database-integration)
+- [Performance Considerations](#performance-considerations)
+- [Security](#security)
+- [Related APIs](#related-apis)
+- [Keywords](#keywords)
+
+---
+
 The Scrape Jobs API manages the database-backed scraping job system. This API handles job creation, listing, and management for web scraping operations with persistent storage in Supabase.
 
 ## Endpoints
@@ -460,8 +500,36 @@ The system uses database triggers to:
 
 ## Related APIs
 
-- [Individual Scrape Job API](/app/api/scrape-jobs/[id]/README.md) - Single job management
-- [Job Queue API](/app/api/scrape-jobs/next/README.md) - Worker job retrieval
-- [Job Statistics API](/app/api/scrape-jobs/stats/README.md) - Analytics and reporting
-- [Job Retry API](/app/api/scrape-jobs/[id]/retry/README.md) - Failure recovery
-- [Webhooks API](/app/api/webhooks/customer/README.md) - Event notifications
+- [Individual Scrape Job API](/home/user/Omniops/app/api/scrape-jobs/[id]/README.md) - Single job management
+- [Job Queue API](/home/user/Omniops/app/api/scrape-jobs/next/README.md) - Worker job retrieval
+- [Job Statistics API](/home/user/Omniops/app/api/scrape-jobs/stats/README.md) - Analytics and reporting
+- [Job Retry API](/home/user/Omniops/app/api/scrape-jobs/[id]/retry/README.md) - Failure recovery
+- [Webhooks API](/home/user/Omniops/app/api/webhooks/customer/README.md) - Event notifications
+- [Queue Management API](/home/user/Omniops/app/api/queue/README.md) - Queue health and maintenance
+- [Scraping API](/home/user/Omniops/app/api/scrape/README.md) - Content scraping operations
+
+## Keywords
+
+**API Categories:** scrape jobs, job management, web scraping, content extraction, background jobs
+
+**Core Features:** job creation, job listing, filtering, pagination, sorting, priority scheduling, duplicate prevention, retry logic, job status tracking, domain validation
+
+**Technologies:** Supabase, PostgreSQL, job queue, database triggers, BullMQ, web scraping, Playwright, Crawlee
+
+**Operations:** create job, list jobs, filter jobs, paginate results, sort jobs, update job status, retry failed jobs, cancel jobs, job statistics
+
+**Job Types:** domain scrape, single page, sitemap crawl, product catalog, content update
+
+**Job Statuses:** pending, running, completed, failed, cancelled
+
+**Priority Levels:** low priority (1-2), below normal (3-4), normal (5), above normal (6-7), high (8-9), critical (10)
+
+**Integrations:** Supabase database, domains table, customer_configs table, scrape_results table, webhooks system
+
+**Security:** domain validation, priority limits, job metadata sanitization, rate limiting, row-level security
+
+**Aliases:**
+- "scrape jobs" (also known as: scraping jobs, crawl jobs, web scraping tasks)
+- "job status" (also known as: scraping status, job state, processing status)
+- "priority scheduling" (also known as: job priority, task prioritization, queue priority)
+- "job filtering" (also known as: job search, job query, job selection)

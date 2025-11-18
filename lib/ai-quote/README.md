@@ -1,10 +1,26 @@
 # AI Quote System Module
 
-**Purpose:** Intelligent quote generation system that analyzes businesses and recommends pricing tiers automatically using GPT-4o-mini.
+**Type:** Service
+**Status:** Active
+**Last Updated:** 2025-11-18
+**Verified For:** v0.1.0
+**Dependencies:** [OpenAI](/home/user/Omniops/lib/openai-client.ts), [Companies House API](collectors/company-collector.ts)
+**Estimated Read Time:** 6 minutes
 
-**Status:** Complete - MVP ready for testing
+## Purpose
 
-**Created:** 2025-11-03
+Intelligent quote generation system that analyzes businesses and recommends pricing tiers automatically using GPT-4o-mini with multi-source data collection.
+
+## Quick Links
+- [Data Collector](data-collector.ts) - Orchestrates data gathering
+- [AI Analyzer](ai-analyzer.ts) - GPT-4o-mini powered analysis
+- [API Endpoint](/home/user/Omniops/app/api/ai-quote/analyze/route.ts) - HTTP interface
+- [Type Definitions](types.ts) - TypeScript types
+
+## Keywords
+- AI Quote, Pricing, Business Intelligence, GPT-4o-mini, Traffic Estimation, Company Data, Rate Limiting
+
+---
 
 **Key Features:**
 - ✅ Business intelligence collection (parallel data gathering)

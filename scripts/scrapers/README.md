@@ -1,8 +1,26 @@
 # Web Scraping Utilities
 
-**Purpose:** Diagnostic and testing tools for web scraping functionality
-**Last Updated:** 2025-10-30
-**Usage:** Run scraping utilities from project root
+**Type:** Reference
+**Status:** Active
+**Last Updated:** 2025-11-18
+**Verified For:** v0.1.0
+**Dependencies:** [Crawler Configuration](/home/user/Omniops/lib/crawler-config.ts), [Content Extraction](/home/user/Omniops/lib/content-extractor.ts), [Scraping API](/home/user/Omniops/app/api/scrape/route.ts), [Main Scripts README](/home/user/Omniops/scripts/README.md)
+**Estimated Read Time:** 5 minutes
+
+## Purpose
+
+Diagnostic and testing tools for web scraping functionality using Crawlee and Playwright to extract content from websites with diagnostic capabilities and full scraping examples.
+
+## Quick Links
+
+- [Main Scripts README](/home/user/Omniops/scripts/README.md)
+- [Crawler Configuration](/home/user/Omniops/lib/crawler-config.ts)
+- [Content Extraction](/home/user/Omniops/lib/content-extractor.ts)
+- [Scraping API](/home/user/Omniops/app/api/scrape/route.ts)
+
+## Keywords
+
+web scraping, Crawlee, Playwright, content extraction, diagnostics, Mozilla Readability, embeddings, browser automation
 
 ## Overview
 
@@ -311,7 +329,7 @@ const config = {
 
 ## Related Documentation
 
-- [Crawler Configuration](../../lib/crawler-config.ts)
-- [Content Extraction](../../lib/content-extractor.ts)
-- [Scraping API](../../app/api/scrape/route.ts)
-- [Main Scripts README](../README.md)
+- [Crawler Configuration](/home/user/Omniops/lib/crawler-config.ts)
+- [Content Extraction](/home/user/Omniops/lib/content-extractor.ts)
+- [Scraping API](/home/user/Omniops/app/api/scrape/route.ts)
+- [Main Scripts README](/home/user/Omniops/scripts/README.md)

@@ -1,12 +1,15 @@
 # WooCommerce Configure Page Components
 
-**Purpose:** React components for the WooCommerce integration configuration page, extracted from page.tsx to comply with 300 LOC limit.
+**Type:** Utility
+**Status:** Active
+**Last Updated:** 2025-11-18
+**Verified For:** v0.1.0
+**Dependencies:** [Configure Page](/home/user/Omniops/app/dashboard/integrations/woocommerce/configure/page.tsx), [WooCommerce Hook](/home/user/Omniops/hooks/woocommerce/useWooCommerceConfiguration.ts), [Shared Components](/home/user/Omniops/components/dashboard/integrations/woocommerce/configure/)
+**Estimated Read Time:** 2 minutes
 
-**Last Updated:** 2025-11-08
-**Related:**
-- [Main Configure Page](../page.tsx)
-- [WooCommerce Hook](/hooks/woocommerce/useWooCommerceConfiguration.ts)
-- [Shared Components](/components/dashboard/integrations/woocommerce/configure/)
+## Purpose
+
+React components for the WooCommerce integration configuration page, extracted from page.tsx to comply with 300 LOC limit.
 
 ## Components
 

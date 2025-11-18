@@ -1,5 +1,12 @@
 # Setup Tests Directory
 
+**Type:** Test Infrastructure
+**Status:** Active
+**Last Updated:** 2025-11-18
+**Verified For:** v0.1.0
+**Estimated Read Time:** 1 minutes
+
+
 **Purpose:** Tests for application setup, initialization, and configuration processes.
 
 **Test Type:** Integration | Setup Validation

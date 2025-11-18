@@ -1,6 +1,28 @@
 # Chat Components Directory
 
-Chat-specific React components for the Customer Service Agent application, focusing on real-time messaging, content rendering, and user interaction.
+**Type:** Reference
+**Status:** Active
+**Last Updated:** 2025-11-18
+**Verified For:** v0.1.0
+**Dependencies:** [ChatWidget](/home/user/Omniops/components/ChatWidget/README.md), [UI Components](/home/user/Omniops/components/ui/README.md), [Chat API](/home/user/Omniops/app/api/chat/route.ts)
+**Estimated Read Time:** 8 minutes
+
+## Purpose
+
+Chat-specific React components for real-time messaging, content rendering, and user interaction with advanced text processing, link detection, and accessibility features.
+
+## Quick Links
+
+- [Main Components Directory](/home/user/Omniops/components/README.md)
+- [ChatWidget Directory](/home/user/Omniops/components/ChatWidget/README.md)
+- [UI Components](/home/user/Omniops/components/ui/README.md)
+- [Chat API Documentation](/home/user/Omniops/app/api/chat/route.ts)
+
+---
+
+## Keywords
+
+chat components, MessageContent, real-time messaging, link detection, markdown rendering, XSS protection, performance optimization
 
 ## Overview
 

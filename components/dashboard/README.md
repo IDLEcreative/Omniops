@@ -1,6 +1,28 @@
 # Dashboard Components Directory
 
-Dashboard data visualization components for the Customer Service Agent application, providing real-time analytics, performance metrics, and business intelligence.
+**Type:** Reference
+**Status:** Active
+**Last Updated:** 2025-11-18
+**Verified For:** v0.1.0
+**Dependencies:** [UI Components](/home/user/Omniops/components/ui/README.md), [Dashboard API](/home/user/Omniops/app/api/dashboard), [Auth Components](/home/user/Omniops/components/auth/README.md)
+**Estimated Read Time:** 10 minutes
+
+## Purpose
+
+Dashboard data visualization components providing real-time analytics, performance metrics, and business intelligence with parallel data loading, error handling, and auto-refresh capabilities.
+
+## Quick Links
+
+- [Main Components Directory](/home/user/Omniops/components/README.md)
+- [UI Components](/home/user/Omniops/components/ui/README.md)
+- [Dashboard API](/home/user/Omniops/app/api/dashboard)
+- [Analytics Documentation](/home/user/Omniops/docs/ANALYTICS.md)
+
+---
+
+## Keywords
+
+dashboard, data visualization, analytics, metrics, real-time updates, performance monitoring, business intelligence
 
 ## Overview
 

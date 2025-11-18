@@ -1,10 +1,25 @@
 # External Integrations
 
-**Purpose:** Service orchestration layer for coordinating external APIs and complex multi-service workflows.
-
-**Integration Type:** Service
-**Last Updated:** 2025-10-30
+**Type:** Service
 **Status:** Active
+**Last Updated:** 2025-11-18
+**Verified For:** v0.1.0
+**Dependencies:** [OpenAI](/home/user/Omniops/lib/openai-client.ts), [WooCommerce](/home/user/Omniops/lib/woocommerce-full.ts), [Redis](/home/user/Omniops/lib/redis.ts), [Supabase](/home/user/Omniops/lib/supabase-server.ts)
+**Estimated Read Time:** 9 minutes
+
+## Purpose
+
+Service orchestration layer for coordinating external APIs and complex multi-service workflows with robust error handling and performance optimization.
+
+## Quick Links
+- [Customer Scraping Integration](customer-scraping-integration.ts) - Main orchestrator
+- [OpenAI Integration](/home/user/Omniops/lib/embeddings.ts) - AI processing
+- [WooCommerce Integration](/home/user/Omniops/lib/woocommerce-full.ts) - E-commerce API
+
+## Keywords
+- Integration, Service Orchestration, External APIs, OpenAI, WooCommerce, Redis, Error Handling
+
+---
 
 This directory contains integrations with external services and APIs that extend the platform's capabilities. These integrations handle complex data flows, third-party service connections, and advanced business logic coordination.
 

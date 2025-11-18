@@ -1,5 +1,12 @@
 # Multi-Language Support E2E Tests
 
+**Type:** Test Documentation
+**Status:** Active
+**Last Updated:** 2025-11-18
+**Verified For:** v0.1.0
+**Estimated Read Time:** 5 minutes
+
+
 **Type:** Playwright E2E Test Suite
 **Status:** Active
 **Last Updated:** 2025-11-10

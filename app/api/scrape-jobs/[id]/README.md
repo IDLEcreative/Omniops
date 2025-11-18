@@ -1,6 +1,21 @@
 # Individual Scrape Job API
 
-The Individual Scrape Job API provides endpoints to manage specific scrape jobs by their ID. This includes retrieving job details, updating job status, and cancelling jobs.
+**Type:** Reference
+**Status:** Active
+**Last Updated:** 2025-11-18
+**Verified For:** v0.1.0
+**Dependencies:** [Scrape Jobs API](/home/user/Omniops/app/api/scrape-jobs/README.md), [Job Retry API](/home/user/Omniops/app/api/scrape-jobs/[id]/retry/README.md)
+**Estimated Read Time:** 14 minutes
+
+## Purpose
+
+Complete API reference for managing specific scrape jobs by ID, including retrieving job details, updating job status, and cancelling jobs.
+
+## Quick Links
+
+- [Job Retry API](/home/user/Omniops/app/api/scrape-jobs/[id]/retry/README.md)
+- [Job Queue API](/home/user/Omniops/app/api/scrape-jobs/next/README.md)
+- [Job Statistics API](/home/user/Omniops/app/api/scrape-jobs/stats/README.md)
 
 ## Endpoints
 

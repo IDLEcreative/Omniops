@@ -1,9 +1,15 @@
 # Conversations Service Modules
 
-**Purpose:** Extracted modules from the main conversations service to comply with the 300 LOC limit while maintaining clean separation of concerns.
+**Type:** Service
+**Status:** Active
+**Last Updated:** 2025-11-18
+**Verified For:** v0.1.0
+**Dependencies:** [Conversations Service](/home/user/Omniops/lib/services/dashboard/conversations-service.ts), [Dashboard API](/home/user/Omniops/app/api/dashboard/conversations/route.ts), [Dashboard Types](/home/user/Omniops/types/dashboard)
+**Estimated Read Time:** 2 minutes
 
-**Last Updated:** 2025-11-10
-**Related:** [lib/services/dashboard/conversations-service.ts](../conversations-service.ts)
+## Purpose
+
+Extracted modules from the main conversations service to comply with the 300 LOC limit while maintaining clean separation of concerns.
 
 ## Overview
 

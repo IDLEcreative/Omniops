@@ -1,8 +1,11 @@
 # WebSocket Real-time Updates System
 
+**Type:** Reference
+**Status:** Deprecated
 **Last Updated:** 2025-11-07
-**Status:** Active
-**Type:** Infrastructure
+**Verified For:** v0.1.0
+**Dependencies:** [/home/user/Omniops/ARCHIVE/deprecated-websocket-2025-11/README.md](/home/user/Omniops/ARCHIVE/deprecated-websocket-2025-11/README.md)
+**Estimated Read Time:** 11 minutes
 
 ## Purpose
 

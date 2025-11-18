@@ -1,5 +1,12 @@
 # Performance Tests Directory
 
+**Type:** Test Documentation
+**Status:** Active
+**Last Updated:** 2025-11-18
+**Verified For:** v0.1.0
+**Estimated Read Time:** 1 minutes
+
+
 **Purpose:** Performance benchmarking and load testing for critical application components.
 
 **Test Type:** Performance | Load Testing

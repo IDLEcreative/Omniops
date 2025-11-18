@@ -1,5 +1,26 @@
 # Testing Guide
 
+**Type:** Guide
+**Status:** Active
+**Last Updated:** 2025-11-18
+**Verified For:** v0.1.0
+**Dependencies:** [Testing Philosophy](/home/user/Omniops/CLAUDE.md#testing--code-quality-philosophy)
+**Estimated Read Time:** 45 minutes
+
+## Purpose
+
+Comprehensive testing guide with real codebase examples covering unit tests, integration tests, E2E tests, mocking strategies, and CI/CD integration for the Omniops platform.
+
+## Quick Links
+- [Testing Philosophy](/home/user/Omniops/CLAUDE.md#testing--code-quality-philosophy)
+- [E2E as Agent Training](/home/user/Omniops/CLAUDE.md#e2e-tests-as-agent-training-data)
+- [Test Directory](/home/user/Omniops/__tests__/README.md)
+- [MSW Mocks](/home/user/Omniops/__tests__/mocks/README.md)
+
+**Keywords:** testing, Jest, Playwright, MSW, mocking, E2E, integration tests, unit tests, TDD
+
+---
+
 **Comprehensive testing documentation with real codebase examples from Omniops**
 
 ## Table of Contents

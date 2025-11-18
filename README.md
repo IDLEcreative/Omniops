@@ -1,7 +1,51 @@
-**Last Updated:** 2025-10-31
-**Verified Accurate For:** v0.1.0
-
 # OmniOps AI Customer Service Platform
+
+**Type:** Guide
+**Status:** Active
+**Last Updated:** 2025-11-18
+**Verified For:** v0.1.0
+**Dependencies:** None
+**Estimated Read Time:** 20 minutes
+
+## Purpose
+
+This is the main documentation for OmniOps, a multi-tenant AI-powered customer service platform providing embeddable chat widgets with WooCommerce/Shopify integration, intelligent web scraping, and GDPR-compliant data handling. This guide covers installation, development setup, deployment, and all major features.
+
+## Quick Links
+
+- [Installation for Customers](#-widget-installation-for-customers)
+- [Developer Quick Start](#-development-quick-start)
+- [API Documentation](/home/user/Omniops/docs/README.md)
+- [Testing Guide](/home/user/Omniops/docs/04-DEVELOPMENT/testing/TESTING_GUIDE.md)
+- [Docker Setup](/home/user/Omniops/docs/00-GETTING-STARTED/SETUP_DOCKER_PRODUCTION.md)
+- [Database Schema](/home/user/Omniops/docs/09-REFERENCE/REFERENCE_DATABASE_SCHEMA.md)
+
+## Table of Contents
+
+- [What is OmniOps?](#what-is-omniops)
+- [Widget Installation (For Customers)](#-widget-installation-for-customers)
+- [Development Quick Start](#-development-quick-start)
+- [Quality Metrics](#-quality-metrics)
+- [Tech Stack](#️-tech-stack)
+- [Key Features](#-key-features)
+- [Documentation](#-documentation)
+- [Development](#-development)
+- [Deployment](#-deployment)
+- [Contributing](#-contributing)
+- [Support](#-support)
+- [License](#-license)
+
+## Keywords
+
+**Search Terms:** omniops, AI customer service, chat widget, WooCommerce integration, Shopify integration, Next.js, TypeScript, Supabase, GPT-4, RAG, vector embeddings, GDPR compliance, multi-tenant, web scraping
+
+**Aliases:**
+- "OmniOps" (product name)
+- "Customer Service Agent" (legacy name)
+- "Chat widget" (feature)
+- "AI assistant" (capability)
+
+---
 
 A modern, AI-powered customer service platform providing embeddable chat widgets for businesses. Built with Next.js 15, React 19, and TypeScript.
 

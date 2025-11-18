@@ -1,8 +1,26 @@
 # Analysis Scripts
 
-**Purpose:** Diagnostic and investigation tools for system troubleshooting and analysis
-**Last Updated:** 2025-10-30
-**Usage:** Run analysis scripts using `npx tsx` or `node` from project root
+**Type:** Reference
+**Status:** Active
+**Last Updated:** 2025-11-18
+**Verified For:** v0.1.0
+**Dependencies:** [Database Schema](/home/user/Omniops/docs/09-REFERENCE/REFERENCE_DATABASE_SCHEMA.md), [Performance Optimization](/home/user/Omniops/docs/09-REFERENCE/REFERENCE_PERFORMANCE_OPTIMIZATION.md), [Main Scripts README](/home/user/Omniops/scripts/README.md)
+**Estimated Read Time:** 5 minutes
+
+## Purpose
+
+Diagnostic and investigation tools for system troubleshooting, performance analysis, and problem identification across embeddings, scraping, and customer data.
+
+## Quick Links
+
+- [Main Scripts README](/home/user/Omniops/scripts/README.md)
+- [Database Schema](/home/user/Omniops/docs/09-REFERENCE/REFERENCE_DATABASE_SCHEMA.md)
+- [Performance Optimization](/home/user/Omniops/docs/09-REFERENCE/REFERENCE_PERFORMANCE_OPTIMIZATION.md)
+- [Search Architecture](/home/user/Omniops/docs/01-ARCHITECTURE/ARCHITECTURE_SEARCH_SYSTEM.md)
+
+## Keywords
+
+analysis, diagnostics, troubleshooting, investigation, embeddings, scraping, performance profiling, customer data, system health
 
 ## Overview
 
@@ -255,7 +273,7 @@ chmod +x scripts/analysis/*.js
 
 ## Related Documentation
 
-- [Database Schema Reference](../../docs/07-REFERENCE/REFERENCE_DATABASE_SCHEMA.md)
-- [Performance Optimization](../../docs/07-REFERENCE/REFERENCE_PERFORMANCE_OPTIMIZATION.md)
-- [Search Architecture](../../docs/01-ARCHITECTURE/ARCHITECTURE_SEARCH_SYSTEM.md)
-- [Main Scripts README](../README.md)
+- [Database Schema Reference](/home/user/Omniops/docs/09-REFERENCE/REFERENCE_DATABASE_SCHEMA.md)
+- [Performance Optimization](/home/user/Omniops/docs/09-REFERENCE/REFERENCE_PERFORMANCE_OPTIMIZATION.md)
+- [Search Architecture](/home/user/Omniops/docs/01-ARCHITECTURE/ARCHITECTURE_SEARCH_SYSTEM.md)
+- [Main Scripts README](/home/user/Omniops/scripts/README.md)
