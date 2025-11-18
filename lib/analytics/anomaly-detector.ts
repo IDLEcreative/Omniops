@@ -200,3 +200,27 @@ function createAnomalyMessage(
 
   return `${metricName} has ${severityText}${direction} by ${absChange}%`;
 }
+
+/**
+ * Calculate statistical baselines for historical data
+ * Useful for understanding normal ranges before detecting anomalies
+ */
+export function calculateBaselines(
+  historicalData: Partial<Record<AnomalyMetric, HistoricalDataPoint[]>>
+): Partial<Record<AnomalyMetric, { mean: number; median: number; stdDev: number }>> {
+  const baselines: Partial<Record<AnomalyMetric, { mean: number; median: number; stdDev: number }>> = {};
+
+  (Object.keys(historicalData) as AnomalyMetric[]).forEach(metric => {
+    const points = historicalData[metric];
+    if (!points || points.length === 0) return;
+
+    const values = points.map(p => p.value);
+    const mean = calculateMean(values);
+    const median = calculateMedian(values);
+    const stdDev = calculateStdDev(values, mean);
+
+    baselines[metric] = { mean, median, stdDev };
+  });
+
+  return baselines;
+}

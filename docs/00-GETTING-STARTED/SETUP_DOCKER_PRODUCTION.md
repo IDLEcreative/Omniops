@@ -47,7 +47,7 @@ This guide explains how to build and run the Omniops application using Docker.
 Copy the example environment file and add your credentials:
 
 ```bash
-cp .env.docker.example .env
+cp .env.example .env
 ```
 
 Edit `.env` and add your:
@@ -92,7 +92,7 @@ docker logs omniops-app
 
 ### Supporting Files
 - `.dockerignore` - Excludes unnecessary files from build
-- `.env.docker.example` - Example environment configuration
+- `.env.example` - Example environment configuration (use for all environments)
 
 ## Common Commands
 

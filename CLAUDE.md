@@ -1,4 +1,4 @@
-**Last Updated:** 2025-11-17 (Added mandatory rule: all agents must read CLAUDE.md first)
+**Last Updated:** 2025-11-18 (Documentation audit: updated statistics and fixed references)
 **Verified Accurate For:** v0.1.0
 
 # CLAUDE.md
@@ -6,12 +6,12 @@
 **AI Assistant Instructions for Omniops Codebase**
 
 **📊 Metadata:**
-- **Last Updated:** 2025-11-17
+- **Last Updated:** 2025-11-18
 - **Version:** v0.1.0
 - **File Purpose:** Primary instruction set for Claude Code AI assistant
 - **Critical Sections:** Lines 6-165 (brand-agnostic, file placement), 1101-1171 (agents MUST read CLAUDE.md), 1142-1281 (fix issues, create tests)
 - **Total MUST/NEVER Rules:** 53 directives
-- **Line Count:** ~1,770 lines (exempt from 300 LOC rule - must be fully loaded into AI memory)
+- **Line Count:** ~2,600 lines (exempt from 300 LOC rule - must be fully loaded into AI memory)
 - **Estimated Parse Time:** 30 seconds
 
 **⚡ Quick Navigation:**
@@ -381,7 +381,7 @@ When creating ANY file, you MUST follow these placement rules:
 - `.dockerignore`
 
 **Environment/Git Files:**
-- `.env.example`, `.env.docker.example`, `.env.monitoring.example`
+- `.env.example` (covers all environments: development, Docker, monitoring)
 - `.gitignore`, `.eslintignore`, `.vercelignore`
 - `.mcp.json`
 
@@ -911,46 +911,35 @@ See [REFERENCE_DATABASE_SCHEMA.md](docs/09-REFERENCE/REFERENCE_DATABASE_SCHEMA.m
 
 ## 📚 Directory Documentation Status
 
-**Last Audit:** 2025-11-18
-**Status:** ✅ Complete - All 205 README files standardized with AI-readable metadata
+**Last Audit:** 2025-10-30
+**Status:** ✅ Complete - All directories documented with AI-readable READMEs
 
 ### Documentation Coverage
 
-**Total README Files:** 205 across all directories (up from 109 in Oct 2025)
+**Total README Files:** 205 across all directories
 
-| Category | READMEs | Updated | Status |
-|----------|---------|---------|--------|
-| **Source Code** (app/, components/, lib/, hooks/, types/) | 101 | 101 | ✅ 100% complete |
-| **Testing** (__tests__/, test-utils/) | 76 | 76 | ✅ 100% complete |
-| **Infrastructure** (scripts/, config/, docker/, supabase/) | 17 | 17 | ✅ 100% complete |
-| **Documentation** (docs/) | 11 | 11 | ✅ 100% complete |
+| Category | READMEs | Status |
+|----------|---------|--------|
+| **Source Code** (app/, components/, lib/, hooks/, types/) | 60 | ✅ Complete |
+| **Testing** (__tests__/, test-utils/) | 18 | ✅ Complete |
+| **Infrastructure** (scripts/, config/, docker/, supabase/) | 24 | ✅ Complete |
+| **Integration** (lib/integrations/, lib/agents/, lib/woocommerce-api/) | 7 | ✅ Complete |
 
-**Overall Compliance:** 205/205 files (100%) meet full CLAUDE.md documentation standards ✅
+### Recent Documentation Work (Oct 2025)
 
-### Recent Documentation Work (Nov 2025)
-
-**Comprehensive Standardization (2025-11-18):**
-- **Files Audited:** 205 README files across entire repository
-- **Files Updated:** 205 with complete metadata headers and TOCs
-- **Critical Fixes:** 1 empty file created (docs/10-ANALYSIS/README.md)
-- **Metadata Fields Added:** 1,230+ fields across all files (Type, Status, Last Updated, Verified For, Dependencies, Estimated Read Time)
-- **TOCs Generated:** 145+ tables of contents for files >100 lines
-- **Paths Standardized:** 200+ cross-references converted to full absolute paths
+**Comprehensive Audit Results:**
+- **Created:** 40 new README files
+- **Updated:** 9 existing READMEs with AI discoverability metadata
+- **Coverage:** 100% of source directories documented
+- **Standards Compliance:** All READMEs follow documentation standards above
 
 **Key Improvements:**
-- ✅ Complete 6-field metadata headers on ALL 205 files (Type, Status, Last Updated, Verified For, Dependencies, Estimated Read Time)
-- ✅ Purpose statements in dedicated sections for every README
-- ✅ Quick Links sections for fast navigation
-- ✅ Keywords/Aliases sections for searchability
-- ✅ Comprehensive tables of contents for all files >100 lines
-- ✅ All cross-references use absolute paths
-- ✅ Estimated read times calculated for every file
-
-**Completion Achievements:**
-- ✅ 100% compliance across all directories
-- ✅ Zero files missing required metadata
-- ✅ All 205 READMEs follow consistent structure
-- ✅ Ready for optimal AI agent efficiency
+- ✅ All directories have PURPOSE statements in first 2 sentences
+- ✅ Metadata headers added (Last Updated, Related, Status)
+- ✅ Cross-references use full paths
+- ✅ Usage examples with annotated code
+- ✅ Troubleshooting sections for complex modules
+- ✅ Consistent terminology across all docs
 
 ### Where to Find Documentation
 
@@ -962,7 +951,7 @@ See [REFERENCE_DATABASE_SCHEMA.md](docs/09-REFERENCE/REFERENCE_DATABASE_SCHEMA.m
 - [types/README.md](types/README.md) - TypeScript type definitions
 
 **Testing Documentation:**
-- [__tests__/README.md](__tests__/README.md) - Complete test suite (1,210+ tests)
+- [__tests__/README.md](__tests__/README.md) - Complete test suite (1,048+ tests)
 - [__tests__/components/README.md](__tests__/components/README.md) - Component tests (138 tests)
 - [__tests__/lib/agents/README.md](__tests__/lib/agents/README.md) - AI agent tests (80+ tests)
 - [__tests__/mocks/README.md](__tests__/mocks/README.md) - MSW setup guide
@@ -2038,7 +2027,7 @@ docker exec -it omniops-app sh         # Shell into app container
 - `docker-compose.yml` - Production orchestration
 - `docker-compose.dev.yml` - Development orchestration
 - `.dockerignore` - Build exclusions
-- `.env.docker.example` - Environment template
+- `.env.example` - Environment template (use for all environments)
 
 ## Development Workflow
 

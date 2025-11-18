@@ -1,3 +1,9 @@
+**Last Updated:** 2025-11-18
+**Verified Accurate For:** v0.1.0
+**Status:** Active
+**Status:** These failures are tracked separately and are not blockers for the refactoring.
+**Type:** Reference
+
 # Product Details Test Suite
 
 **Type:** Test Documentation

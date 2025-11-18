@@ -1,3 +1,8 @@
+**Last Updated:** 2025-11-18
+**Verified Accurate For:** v0.1.0
+**Status:** Active
+**Type:** Reference
+
 # Documentation Hub
 
 **Type:** Reference
@@ -200,7 +205,7 @@ Our documentation is organized into numbered categories for easy navigation:
 **Production Files:**
 - `Dockerfile` - Production multi-stage build
 - `docker-compose.yml` - Production orchestration
-- `.env.docker.example` - Environment template
+- `.env.example` - Environment template (use for all environments)
 
 **Performance Monitoring:**
 ```bash

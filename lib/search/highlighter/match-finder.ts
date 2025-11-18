@@ -48,11 +48,16 @@ export function findMatches(
 export function mergeOverlappingMatches(matches: Match[]): Match[] {
   if (matches.length === 0) return matches;
 
-  const merged: Match[] = [matches[0]];
+  const firstMatch = matches[0];
+  if (!firstMatch) return [];
+
+  const merged: Match[] = [firstMatch];
 
   for (let i = 1; i < matches.length; i++) {
     const current = matches[i];
     const last = merged[merged.length - 1];
+
+    if (!current || !last) continue;
 
     if (current.start <= last.end) {
       // Overlapping or adjacent - merge

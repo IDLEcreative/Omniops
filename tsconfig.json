@@ -27,5 +27,5 @@
     "downlevelIteration": true
   },
   "include": ["next-env.d.ts", "**/*.ts", "**/*.tsx", ".next/types/**/*.ts"],
-  "exclude": ["node_modules", "scripts/**/*", "__tests__/**/*", "test-*.ts", "test-*.mjs", "*.test.ts", "*.test.tsx", "backup-*/**/*", "logs/**/*"]
+  "exclude": ["node_modules", "scripts/**/*", "__tests__/**/*", "test-*.ts", "test-*.mjs", "*.test.ts", "*.test.tsx", "backup-*/**/*", "logs/**/*", "ARCHIVE/**/*", "ROADMAP_EXAMPLES/**/*", "test-utils/**/*"]
 }

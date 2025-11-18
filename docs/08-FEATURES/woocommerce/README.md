@@ -1,11 +1,12 @@
+**Last Updated:** 2025-10-24
+**Verified Accurate For:** v0.1.0
+
+**Status:** Active
+**Type:** Reference
+
 # WooCommerce Integration Guide
 
-**Type:** Guide
-**Status:** Active
-**Last Updated:** 2025-11-18
-**Verified For:** v0.1.0
-**Dependencies:** [Commerce MCP Tools](/home/user/Omniops/servers/commerce/README.md), [Database Schema](/home/user/Omniops/docs/09-REFERENCE/REFERENCE_DATABASE_SCHEMA.md)
-**Estimated Read Time:** 90 minutes
+**Last Updated: 2025-10-24**
 
 ## Table of Contents
 
@@ -22,20 +23,6 @@
 11. [Troubleshooting](#troubleshooting)
 12. [Performance Optimization](#performance-optimization)
 13. [Code Examples](#code-examples)
-
----
-
-## Purpose
-
-Complete WooCommerce integration guide covering setup, API operations, customer verification, cart tracking, abandoned cart recovery, security, and privacy compliance.
-
-## Quick Links
-- [Commerce MCP Tools](/home/user/Omniops/servers/commerce/README.md)
-- [WooCommerce API Client](/home/user/Omniops/lib/woocommerce-api.ts)
-- [WooCommerce Provider](/home/user/Omniops/lib/agents/providers/woocommerce-provider.ts)
-- [Customer Verification](/home/user/Omniops/lib/customer-verification-simple.ts)
-
-**Keywords:** WooCommerce, e-commerce, orders, products, cart, customer verification, REST API, security, GDPR
 
 ---
 

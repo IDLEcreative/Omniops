@@ -1,40 +1,11 @@
+**Last Updated:** 2025-11-18
+**Verified Accurate For:** v0.1.0
+**Status:** Active
+**Type:** Reference
+
 # Scripts Directory
 
-**Type:** Reference
-**Status:** Active
-**Last Updated:** 2025-11-18
-**Verified For:** v0.1.0
-**Dependencies:** [Database Schema](/home/user/Omniops/docs/09-REFERENCE/REFERENCE_DATABASE_SCHEMA.md), [NPX Tools Reference](/home/user/Omniops/docs/09-REFERENCE/REFERENCE_NPX_SCRIPTS.md)
-**Estimated Read Time:** 8 minutes
-
-## Purpose
-
-Comprehensive collection of 200+ utility scripts organized in 15 categories for database maintenance, performance monitoring, testing, diagnostics, and development tasks with standardized execution patterns and comprehensive documentation.
-
-## Quick Links
-
-- [NPX Scripts Reference](/home/user/Omniops/docs/09-REFERENCE/REFERENCE_NPX_SCRIPTS.md)
-- [Database Schema](/home/user/Omniops/docs/09-REFERENCE/REFERENCE_DATABASE_SCHEMA.md)
-- [Testing Guide](/home/user/Omniops/docs/TESTING_GUIDE.md)
-- [Monitoring Tools](monitoring/)
-
-## Table of Contents
-
-- [Overview](#overview)
-- [Directory Structure](#directory-structure)
-- [Script Categories](#script-categories)
-  - [Analysis](#analysis)
-  - [Database](#database)
-  - [Monitoring](#monitoring)
-  - [Testing](#testing)
-  - [Validation](#validation)
-- [Usage Patterns](#usage-patterns)
-- [Common Scripts](#common-scripts)
-- [Best Practices](#best-practices)
-- [Related Documentation](#related-documentation)
-
----
-
+**Purpose:** Comprehensive collection of utility scripts for maintenance, testing, monitoring, and development tasks
 **Usage:** Run scripts using `npx tsx <script-name>.ts` or directly with Node.js
 
 ## Overview

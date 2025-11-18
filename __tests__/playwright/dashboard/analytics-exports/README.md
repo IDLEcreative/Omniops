@@ -1,3 +1,7 @@
+**Last Updated:** 2025-11-18
+**Verified Accurate For:** v0.1.0
+**Type:** Reference
+
 # Analytics Export E2E Tests
 
 **Type:** Test Documentation
