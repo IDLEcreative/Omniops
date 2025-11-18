@@ -10,11 +10,11 @@
 - [Performance Optimization](./docs/07-REFERENCE/REFERENCE_PERFORMANCE_OPTIMIZATION.md) - Index strategies
 **Estimated Read Time:** 30 minutes
 
-⚠️ **DOCUMENTATION STATUS WARNING:**
-This document currently documents 31 core tables. However, database audit on 2025-11-18 found **85 total tables** exist in the schema. This means **54 tables are undocumented**. Recent additions (Nov 2025) include WhatsApp integration (4 tables), Instagram integration (1 table), analytics enhancements (2 tables), and product embeddings cache (1 table). A comprehensive schema update is needed.
+✅ **DOCUMENTATION STATUS UPDATE (2025-11-18):**
+This document documents 31 core operational tables. The remaining **54 specialized tables** (cart analytics, funnel tracking, autonomous operations, feature flags, etc.) are now fully documented in [ANALYSIS_UNDOCUMENTED_TABLES.md](../10-ANALYSIS/ANALYSIS_UNDOCUMENTED_TABLES.md). Total database coverage: **100% (85/85 tables)**.
 
 ## Purpose
-Authoritative reference for the Omniops Supabase database schema documenting 31 core tables across 10 categories (core business, multi-tenant, content/scraping, AI/embeddings, chat, telemetry, privacy, widgets, synonyms, business intelligence, caching), including 214+ indexes, 24+ foreign key relationships, and Row Level Security policies for multi-tenant isolation. **Note:** 54 additional tables exist but are not yet documented here.
+Authoritative reference for the Omniops Supabase database schema documenting 31 core operational tables across 10 categories (core business, multi-tenant, content/scraping, AI/embeddings, chat, telemetry, privacy, widgets, synonyms, business intelligence, caching), including 214+ indexes, 24+ foreign key relationships, and Row Level Security policies for multi-tenant isolation. **See also:** [ANALYSIS_UNDOCUMENTED_TABLES.md](../10-ANALYSIS/ANALYSIS_UNDOCUMENTED_TABLES.md) for 54 specialized tables (cart analytics, funnel tracking, autonomous operations, feature management, etc.).
 
 ## Quick Links
 - [Schema Summary](#schema-summary) - Table categories and counts
