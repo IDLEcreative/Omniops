@@ -26,8 +26,8 @@ export async function GET(request: NextRequest) {
 
     // Return default values on error
     return NextResponse.json(
-      getDefaultTelemetryResponse(),
-      { status: 200 }
+      { ...getDefaultTelemetryResponse(), error: 'Failed to fetch telemetry data' },
+      { status: 500 }
     );
   }
 }

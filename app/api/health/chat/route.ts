@@ -29,6 +29,7 @@ export async function GET() {
       };
     }
   } catch (error) {
+    console.error('[Health Check] OpenAI check failed:', error);
     checks.openai = {
       status: 'error',
       message: error instanceof Error ? error.message : 'Unknown error'
@@ -59,6 +60,7 @@ export async function GET() {
       };
     }
   } catch (error) {
+    console.error('[Health Check] Supabase check failed:', error);
     checks.supabase = {
       status: 'error',
       message: error instanceof Error ? error.message : 'Unknown error'
@@ -87,6 +89,7 @@ export async function GET() {
       };
     }
   } catch (error) {
+    console.error('[Health Check] Encryption check failed:', error);
     checks.encryption = {
       status: 'error',
       message: error instanceof Error ? error.message : 'Unknown error'
@@ -101,6 +104,7 @@ export async function GET() {
       message: `Model configured: ${useGPT5Mini ? 'gpt-5-mini' : 'gpt-4'}`
     };
   } catch (error) {
+    console.error('[Health Check] Model config check failed:', error);
     checks.model = {
       status: 'error',
       message: error instanceof Error ? error.message : 'Unknown error'
@@ -121,6 +125,7 @@ export async function GET() {
       };
     }
   } catch (error) {
+    console.error('[Health Check] Redis check failed:', error);
     checks.redis = {
       status: 'error',
       message: error instanceof Error ? error.message : 'Unknown error'

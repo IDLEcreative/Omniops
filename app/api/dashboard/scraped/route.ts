@@ -135,7 +135,7 @@ export async function GET(request: NextRequest) {
   } catch (error) {
     console.error('[Dashboard] Error fetching scraped data:', error);
     return NextResponse.json(
-      { 
+      {
         totalPages: 0,
         lastUpdated: new Date().toISOString(),
         queuedJobs: 0,
@@ -145,9 +145,10 @@ export async function GET(request: NextRequest) {
           avgContentLength: 0,
           embeddingCoverage: 0
         },
-        domains: []
+        domains: [],
+        error: 'Failed to fetch scraped data'
       },
-      { status: 200 }
+      { status: 500 }
     );
   }
 }

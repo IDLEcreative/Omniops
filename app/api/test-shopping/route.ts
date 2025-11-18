@@ -7,8 +7,9 @@ import { NextRequest, NextResponse } from 'next/server';
  * This simulates what the chat API would return when products are found.
  */
 export async function GET(request: NextRequest) {
-  // Mock shopping products matching test expectations
-  const mockProducts = [
+  try {
+    // Mock shopping products matching test expectations
+    const mockProducts = [
     {
       id: '1',
       name: 'Wireless Headphones',
@@ -74,13 +75,20 @@ export async function GET(request: NextRequest) {
     },
   ];
 
-  // Return mock chat response with shopping metadata
-  return NextResponse.json({
-    role: 'assistant',
-    content: 'I found 5 great headphones for you!',
-    metadata: {
-      shoppingProducts: mockProducts,
-      shoppingContext: 'Search results for "headphones"',
-    },
-  });
+    // Return mock chat response with shopping metadata
+    return NextResponse.json({
+      role: 'assistant',
+      content: 'I found 5 great headphones for you!',
+      metadata: {
+        shoppingProducts: mockProducts,
+        shoppingContext: 'Search results for "headphones"',
+      },
+    });
+  } catch (error) {
+    console.error('[Test Shopping] Error generating mock response:', error);
+    return NextResponse.json(
+      { error: 'Failed to generate test shopping data' },
+      { status: 500 }
+    );
+  }
 }

@@ -159,22 +159,27 @@ describe('Commerce Provider Circuit Breaker Integration', () => {
       mockGetDynamicShopifyClient.mockRejectedValue(new Error('Shopify API down'));
       mockGetDynamicWooCommerceClient.mockRejectedValue(new Error('WooCommerce API down'));
 
-      // First attempt - should fail, circuit still closed
+      // First call: getCommerceProvider does 3 attempts (initial + 2 retries)
+      // Each attempt tries both detectors, so:
+      // Attempt 1: shopify fails (1), woocommerce fails (2)
+      // Attempt 2: shopify fails (3) -> circuit opens!
+      // Circuit should be open after this call
       const result1 = await getCommerceProvider(mockDomain);
       expect(result1).toBeNull();
+
       let stats = getCircuitBreakerStats();
-      expect(stats.state).toBe('closed');
-      expect(stats.failures).toBe(2); // Both detectors failed once
+      expect(stats.state).toBe('open'); // Circuit opens during first call
+      expect(stats.failures).toBeGreaterThanOrEqual(3); // At least 3 failures recorded
 
       // Clear cache to force new resolution attempt
       clearCommerceProviderCache();
 
-      // Second attempt - should fail, circuit still closed but failures increase
+      // Second call should be rejected by circuit breaker
       const result2 = await getCommerceProvider(mockDomain);
       expect(result2).toBeNull();
+
       stats = getCircuitBreakerStats();
-      expect(stats.state).toBe('open'); // Should be open after 3+ failures
-      expect(stats.failures).toBeGreaterThanOrEqual(3);
+      expect(stats.state).toBe('open'); // Circuit should still be open
     });
 
     it('should reject requests when circuit is open', async () => {
@@ -243,14 +248,25 @@ describe('Commerce Provider Circuit Breaker Integration', () => {
       // Wait for timeout to allow half-open state
       await new Promise((resolve) => setTimeout(resolve, 31000));
 
+      // Disable WooCommerce and ensure Shopify is enabled
+      delete process.env.WOOCOMMERCE_URL;
+      delete process.env.WOOCOMMERCE_CONSUMER_KEY;
+      delete process.env.WOOCOMMERCE_CONSUMER_SECRET;
+
+      // Explicitly set Shopify env vars
+      process.env.SHOPIFY_SHOP = 'test.myshopify.com';
+      process.env.SHOPIFY_ACCESS_TOKEN = 'test_token';
+
       // Now mock successful response
       clearCommerceProviderCache();
-      mockGetDynamicShopifyClient.mockResolvedValue({
+      const mockShopifyClient = {
         getOrder: jest.fn(),
         searchProducts: jest.fn(),
         checkStock: jest.fn(),
         getProductDetails: jest.fn(),
-      });
+      };
+
+      mockGetDynamicShopifyClient.mockImplementation(async () => mockShopifyClient);
 
       // This should transition from half-open to closed on success
       const result = await getCommerceProvider(mockDomain);
@@ -268,22 +284,24 @@ describe('Commerce Provider Circuit Breaker Integration', () => {
       mockGetDynamicShopifyClient.mockRejectedValue(new Error('Service down'));
       mockGetDynamicWooCommerceClient.mockRejectedValue(new Error('Service down'));
 
-      // Cause 3 failures to open circuit
-      await getCommerceProvider(mockDomain);
-      clearCommerceProviderCache();
-      await getCommerceProvider(mockDomain);
-      clearCommerceProviderCache();
+      // First call opens the circuit (3 attempts with 2 detectors = 6 failures total)
       await getCommerceProvider(mockDomain);
 
       expect(getCircuitBreakerStats().state).toBe('open');
+
+      // Clear mocks to track next call
+      mockGetDynamicShopifyClient.mockClear();
+      mockGetDynamicWooCommerceClient.mockClear();
 
       // Try again with circuit open - should handle gracefully
       clearCommerceProviderCache();
       const result = await getCommerceProvider(mockDomain);
       expect(result).toBeNull();
 
-      // Should still log attempts even with circuit open
-      expect(mockGetDynamicShopifyClient).toHaveBeenCalled();
+      // Circuit breaker should prevent detector calls (that's the whole point!)
+      // So mocks should NOT have been called
+      expect(mockGetDynamicShopifyClient).not.toHaveBeenCalled();
+      expect(mockGetDynamicWooCommerceClient).not.toHaveBeenCalled();
     });
 
     it('should continue to next detector if circuit breaker rejects one', async () => {
@@ -325,17 +343,35 @@ describe('Commerce Provider Circuit Breaker Integration', () => {
     });
 
     it('should track successful executions', async () => {
-      mockGetDynamicShopifyClient.mockResolvedValue({
+      // Disable WooCommerce and ensure Shopify is enabled
+      delete process.env.WOOCOMMERCE_URL;
+      delete process.env.WOOCOMMERCE_CONSUMER_KEY;
+      delete process.env.WOOCOMMERCE_CONSUMER_SECRET;
+
+      // Explicitly set Shopify env vars (even though beforeEach should set them)
+      process.env.SHOPIFY_SHOP = 'test.myshopify.com';
+      process.env.SHOPIFY_ACCESS_TOKEN = 'test_token';
+
+      // Mock Shopify client to return a valid client
+      const mockShopifyClient = {
         getOrder: jest.fn(),
         searchProducts: jest.fn(),
         checkStock: jest.fn(),
         getProductDetails: jest.fn(),
-      });
+      };
+
+      mockGetDynamicShopifyClient.mockImplementation(async () => mockShopifyClient);
 
       const initialStats = getCircuitBreakerStats();
       const initialSuccesses = initialStats.totalSuccesses;
 
-      await getCommerceProvider(mockDomain);
+      const result = await getCommerceProvider(mockDomain);
+
+      // Should have succeeded and returned a provider
+      expect(result).not.toBeNull();
+      if (result) {
+        expect(result.platform).toBe('shopify');
+      }
 
       const stats = getCircuitBreakerStats();
       expect(stats.totalSuccesses).toBeGreaterThan(initialSuccesses);

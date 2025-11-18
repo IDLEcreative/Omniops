@@ -52,65 +52,52 @@ export async function resolveProviderWithRetry(
           // Wrap detector call in circuit breaker to prevent cascading failures
           const circuitBreakerStats = providerCircuitBreaker.getStats();
           const provider = await providerCircuitBreaker.execute(async () => {
-            return await detector({ domain, config });
+            const result = await detector({ domain, config });
+            // Treat null as failure for circuit breaker
+            if (!result) {
+              throw new Error(`${detectorName} detector returned null`);
+            }
+            return result;
           });
 
-          if (provider) {
-            const duration = Date.now() - attemptStartTime;
-            finalProvider = provider;
-            finalPlatform = provider.platform;
+          // If we get here, provider is not null (would have thrown above)
+          const duration = Date.now() - attemptStartTime;
+          finalProvider = provider;
+          finalPlatform = provider.platform;
 
-            // Track successful provider resolution
-            await trackProviderResolution({
-              domain,
-              attempt,
-              success: true,
-              duration_ms: duration,
-              platform: provider.platform,
-              error_message: null,
-              cache_hit: false,
-              circuit_breaker_state: circuitBreakerStats.state as any,
-              timestamp: new Date(),
-            });
-
-            console.log('[Provider] Resolution completed', {
-              domain,
-              hasProvider: true,
-              platform: provider.platform,
-              duration,
-              totalAttempts: attempt,
-            });
-
-            // Track overall retry pattern
-            await trackRetryPattern({
-              domain,
-              retry_count: attempt - 1,
-              final_success: true,
-              total_duration_ms: Date.now() - startTime,
-              platform: provider.platform,
-              error_message: null,
-              timestamp: new Date(),
-            });
-
-            return provider;
-          }
-          console.log(`[Provider] Detector returned null: ${detectorName}`, {
-            domain,
-            attempt,
-          });
-
-          // Track failed attempt
+          // Track successful provider resolution
           await trackProviderResolution({
             domain,
             attempt,
-            success: false,
-            duration_ms: Date.now() - attemptStartTime,
-            platform: null,
-            error_message: 'Detector returned null',
+            success: true,
+            duration_ms: duration,
+            platform: provider.platform,
+            error_message: null,
             cache_hit: false,
             circuit_breaker_state: circuitBreakerStats.state as any,
             timestamp: new Date(),
           });
+
+          console.log('[Provider] Resolution completed', {
+            domain,
+            hasProvider: true,
+            platform: provider.platform,
+            duration,
+            totalAttempts: attempt,
+          });
+
+          // Track overall retry pattern
+          await trackRetryPattern({
+            domain,
+            retry_count: attempt - 1,
+            final_success: true,
+            total_duration_ms: Date.now() - startTime,
+            platform: provider.platform,
+            error_message: null,
+            timestamp: new Date(),
+          });
+
+          return provider;
 
         } catch (error) {
           const willRetry = attempt < maxRetries + 1;
@@ -149,7 +136,8 @@ export async function resolveProviderWithRetry(
             continue;
           }
 
-          console.error(`[Provider] Detector failed: ${detectorName}`, {
+          // Log detector failure (including null returns)
+          console.log(`[Provider] Detector failed: ${detectorName}`, {
             domain,
             error: errorMessage,
             errorCategory,
@@ -166,6 +154,7 @@ export async function resolveProviderWithRetry(
             platform: null,
             error_message: errorMessage,
             cache_hit: false,
+            circuit_breaker_state: circuitBreakerStats.state as any,
             timestamp: new Date(),
           });
 

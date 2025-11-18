@@ -57,6 +57,7 @@ export async function GET(request: Request) {
         } : null,
       });
     } catch (apiError: any) {
+      console.error('[Shopify Test] API connection failed:', apiError);
       return NextResponse.json(
         {
           success: false,
@@ -68,6 +69,7 @@ export async function GET(request: Request) {
       );
     }
   } catch (error: any) {
+    console.error('[Shopify Test] Client initialization failed:', error);
     return NextResponse.json(
       {
         success: false,

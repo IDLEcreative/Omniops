@@ -1,7 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { z } from 'zod';
 import {
-  WooCommerceCustomerActions,
+  createWooCommerceCustomerActions,
   WooCommerceOrderActions
 } from '@/lib/woocommerce-customer-actions';
 import { CustomerVerification } from '@/lib/customer-verification';
@@ -55,9 +55,18 @@ export async function POST(request: NextRequest) {
     let result;
 
     switch (action) {
-      case 'get-info':
-        result = await WooCommerceCustomerActions.getCustomerInfo(email, domain);
+      case 'get-info': {
+        // Create instance with dependency injection
+        const customerActions = await createWooCommerceCustomerActions(domain);
+        if (!customerActions) {
+          return NextResponse.json({
+            success: false,
+            message: 'WooCommerce not configured for this domain'
+          }, { status: 400 });
+        }
+        result = await customerActions.getCustomerInfo(email);
         break;
+      }
 
       case 'get-order-status':
         if (!data?.orderNumber) {
@@ -91,19 +100,24 @@ export async function POST(request: NextRequest) {
         );
         break;
 
-      case 'update-address':
+      case 'update-address': {
         if (!data?.address) {
           return NextResponse.json({
             success: false,
             message: 'Address information is required'
           }, { status: 400 });
         }
-        result = await WooCommerceCustomerActions.updateShippingAddress(
-          email,
-          domain,
-          data.address
-        );
+        // Create instance with dependency injection
+        const customerActions = await createWooCommerceCustomerActions(domain);
+        if (!customerActions) {
+          return NextResponse.json({
+            success: false,
+            message: 'WooCommerce not configured for this domain'
+          }, { status: 400 });
+        }
+        result = await customerActions.updateShippingAddress(email, data.address);
         break;
+      }
 
       case 'cancel-order':
         if (!data?.orderNumber) {

@@ -26,20 +26,24 @@ interface ChatMessage {
   updated_at?: string;
 }
 
-export class ChatService {
-  private supabase: SupabaseClient | null = null;
-
-  constructor() {
-    this.initializeClient();
-  }
-
-  private async initializeClient() {
-    this.supabase = await createServiceRoleClient();
-  }
+/**
+   * ChatService with explicit dependency injection
+   *
+   * @param supabase - Injected Supabase client (explicit dependency)
+   *
+   * @example
+   * // Production usage
+   * const service = await createChatService();
+   *
+   * @example
+   * // Testing usage
+   * const mockClient = createMockSupabaseClient();
+   * const service = new ChatService(mockClient);
+   */
+  export class ChatService {
+  constructor(private supabase: SupabaseClient) {}
 
   async createSession(userId?: string, metadata?: Record<string, unknown>): Promise<ChatSession> {
-    if (!this.supabase) await this.initializeClient();
-    
     const sessionData = {
       user_id: userId || null,
       started_at: new Date().toISOString(),
@@ -48,7 +52,7 @@ export class ChatService {
       updated_at: new Date().toISOString()
     };
 
-    const { data, error } = await this.supabase!
+    const { data, error } = await this.supabase
       .from('conversations')
       .insert(sessionData)
       .select()
@@ -63,10 +67,8 @@ export class ChatService {
   }
 
   async getSession(sessionId: string): Promise<ChatSession | null> {
-    if (!this.supabase) await this.initializeClient();
-
     // Try both id and session_id fields
-    const { data, error } = await this.supabase!
+    const { data, error } = await this.supabase
       .from('conversations')
       .select('*')
       .or(`id.eq.${sessionId},session_id.eq.${sessionId}`)
@@ -82,13 +84,11 @@ export class ChatService {
   }
 
   async addMessage(
-    sessionId: string, 
-    role: 'user' | 'assistant' | 'system', 
-    content: string, 
+    sessionId: string,
+    role: 'user' | 'assistant' | 'system',
+    content: string,
     metadata?: Record<string, unknown>
   ): Promise<ChatMessage> {
-    if (!this.supabase) await this.initializeClient();
-
     const messageData = {
       conversation_id: sessionId,
       session_id: sessionId,
@@ -99,7 +99,7 @@ export class ChatService {
       updated_at: new Date().toISOString()
     };
 
-    const { data, error } = await this.supabase!
+    const { data, error } = await this.supabase
       .from('messages')
       .insert(messageData)
       .select()
@@ -119,10 +119,8 @@ export class ChatService {
   }
 
   async getConversationHistory(sessionId: string, limit: number = 10): Promise<ChatMessage[]> {
-    if (!this.supabase) await this.initializeClient();
-
     // Try both conversation_id and session_id fields
-    const { data, error } = await this.supabase!
+    const { data, error } = await this.supabase
       .from('messages')
       .select('*')
       .or(`conversation_id.eq.${sessionId},session_id.eq.${sessionId}`)
@@ -138,9 +136,7 @@ export class ChatService {
   }
 
   async updateSessionMetadata(sessionId: string, updates: Partial<ChatSession>): Promise<void> {
-    if (!this.supabase) await this.initializeClient();
-
-    const { error } = await this.supabase!
+    const { error } = await this.supabase
       .from('conversations')
       .update({
         ...updates,
@@ -202,12 +198,10 @@ export class ChatService {
   }
 
   async cleanupOldSessions(daysOld: number = 30): Promise<void> {
-    if (!this.supabase) await this.initializeClient();
-
     const cutoffDate = new Date();
     cutoffDate.setDate(cutoffDate.getDate() - daysOld);
 
-    const { error } = await this.supabase!
+    const { error } = await this.supabase
       .from('conversations')
       .delete()
       .lt('created_at', cutoffDate.toISOString())
@@ -220,4 +214,37 @@ export class ChatService {
   }
 }
 
-export const chatService = new ChatService();
+/**
+ * Factory function to create ChatService with production dependencies
+ */
+export async function createChatService(): Promise<ChatService> {
+  const supabase = await createServiceRoleClient();
+  return new ChatService(supabase);
+}
+
+/**
+ * Cached singleton instance for convenience
+ * Use getChatService() for consistent singleton access
+ */
+let cachedService: ChatService | null = null;
+
+/**
+ * Get or create singleton ChatService instance
+ */
+export async function getChatService(): Promise<ChatService> {
+  if (!cachedService) {
+    cachedService = await createChatService();
+  }
+  return cachedService;
+}
+
+// Legacy export for backward compatibility
+// TODO: Migrate all usages to getChatService() and remove this
+export const chatService = {
+  get instance() {
+    throw new Error(
+      'Direct access to chatService.instance is no longer supported. ' +
+      'Use getChatService() instead: const service = await getChatService();'
+    );
+  }
+};

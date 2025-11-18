@@ -1,7 +1,5 @@
 import { describe, it, expect, jest, beforeEach } from '@jest/globals'
 import { ChatService } from '@/lib/chat-service'
-import { __setMockSupabaseClient } from '@/lib/supabase-server'
-
 
 describe('ChatService - Error Handling', () => {
   let chatService: ChatService
@@ -20,8 +18,8 @@ describe('ChatService - Error Handling', () => {
       }
     }
 
-    __setMockSupabaseClient(mockSupabaseClient)
-    chatService = new ChatService()
+    // Direct dependency injection - no global mocking needed!
+    chatService = new ChatService(mockSupabaseClient)
   })
 
   describe('createSession errors', () => {

@@ -162,7 +162,7 @@ export async function GET(request: NextRequest) {
   } catch (error) {
     console.error('[Dashboard] Error analyzing missing products:', error);
     return NextResponse.json(
-      { 
+      {
         missingProducts: [],
         statistics: {
           totalMissingProducts: 0,
@@ -176,9 +176,10 @@ export async function GET(request: NextRequest) {
           equipment: [],
           other: []
         } satisfies ProductCategory,
-        recommendations: []
+        recommendations: [],
+        error: 'Failed to fetch missing products data'
       },
-      { status: 200 }
+      { status: 500 }
     );
   }
 }

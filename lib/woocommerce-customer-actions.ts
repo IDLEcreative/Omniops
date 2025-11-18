@@ -7,6 +7,7 @@
 
 import { WooCommerceCustomer } from './woocommerce-customer';
 import { getDynamicWooCommerceClient } from './woocommerce-dynamic';
+import type { WooCommerceAPI } from './woocommerce-api';
 import {
   CustomerActionResult,
   ShippingAddressUpdate
@@ -21,25 +22,37 @@ export { WooCommerceCartActions } from './woocommerce-customer-actions-cart';
 
 /**
  * Main customer actions class for account and profile management
+ *
+ * Refactored to use dependency injection for better testability
+ *
+ * @param client - Injected WooCommerce API client (explicit dependency)
+ * @param domain - Customer domain (for WooCommerceCustomer operations)
+ *
+ * @example
+ * // Production usage
+ * const actions = await createWooCommerceCustomerActions('example.com');
+ *
+ * @example
+ * // Testing usage
+ * const mockClient = createMockWooCommerceClient();
+ * const actions = new WooCommerceCustomerActions(mockClient, 'example.com');
  */
 export class WooCommerceCustomerActions {
+  private wcCustomer: WooCommerceCustomer;
+
+  constructor(
+    private client: WooCommerceAPI,
+    private domain: string
+  ) {
+    this.wcCustomer = new WooCommerceCustomer(client, domain);
+  }
+
   /**
    * Get full customer information including addresses
    */
-  static async getCustomerInfo(
-    email: string,
-    domain: string
-  ): Promise<CustomerActionResult> {
+  async getCustomerInfo(email: string): Promise<CustomerActionResult> {
     try {
-      const wcCustomer = await WooCommerceCustomer.forDomain(domain);
-      if (!wcCustomer) {
-        return {
-          success: false,
-          message: 'WooCommerce not configured for this domain'
-        };
-      }
-
-      const customer = await wcCustomer.searchCustomerByEmail(email);
+      const customer = await this.wcCustomer.searchCustomerByEmail(email);
       if (!customer) {
         return {
           success: false,
@@ -72,22 +85,13 @@ export class WooCommerceCustomerActions {
   /**
    * Update customer shipping address
    */
-  static async updateShippingAddress(
+  async updateShippingAddress(
     email: string,
-    domain: string,
     newAddress: ShippingAddressUpdate
   ): Promise<CustomerActionResult> {
     try {
-      const wc = await getDynamicWooCommerceClient(domain);
-      if (!wc) {
-        return {
-          success: false,
-          message: 'WooCommerce not configured for this domain'
-        };
-      }
-
       // First, find the customer
-      const customer = await wc.getCustomerByEmail(email);
+      const customer = await this.client.getCustomerByEmail(email);
       if (!customer) {
         return {
           success: false,
@@ -96,7 +100,7 @@ export class WooCommerceCustomerActions {
       }
 
       // Update shipping address
-      const updatedCustomer = await wc.updateCustomer(customer.id, {
+      const updatedCustomer = await this.client.updateCustomer(customer.id, {
         shipping: {
           ...customer.shipping,
           ...newAddress
@@ -122,22 +126,13 @@ export class WooCommerceCustomerActions {
   /**
    * Update customer billing address
    */
-  static async updateBillingAddress(
+  async updateBillingAddress(
     email: string,
-    domain: string,
     newAddress: ShippingAddressUpdate
   ): Promise<CustomerActionResult> {
     try {
-      const wc = await getDynamicWooCommerceClient(domain);
-      if (!wc) {
-        return {
-          success: false,
-          message: 'WooCommerce not configured for this domain'
-        };
-      }
-
       // First, find the customer
-      const customer = await wc.getCustomerByEmail(email);
+      const customer = await this.client.getCustomerByEmail(email);
       if (!customer) {
         return {
           success: false,
@@ -146,7 +141,7 @@ export class WooCommerceCustomerActions {
       }
 
       // Update billing address
-      const updatedCustomer = await wc.updateCustomer(customer.id, {
+      const updatedCustomer = await this.client.updateCustomer(customer.id, {
         billing: {
           ...customer.billing,
           ...newAddress
@@ -172,9 +167,8 @@ export class WooCommerceCustomerActions {
   /**
    * Update customer profile information
    */
-  static async updateProfile(
+  async updateProfile(
     email: string,
-    domain: string,
     updates: {
       first_name?: string;
       last_name?: string;
@@ -182,16 +176,8 @@ export class WooCommerceCustomerActions {
     }
   ): Promise<CustomerActionResult> {
     try {
-      const wc = await getDynamicWooCommerceClient(domain);
-      if (!wc) {
-        return {
-          success: false,
-          message: 'WooCommerce not configured for this domain'
-        };
-      }
-
       // First, find the customer
-      const customer = await wc.getCustomerByEmail(email);
+      const customer = await this.client.getCustomerByEmail(email);
       if (!customer) {
         return {
           success: false,
@@ -200,7 +186,7 @@ export class WooCommerceCustomerActions {
       }
 
       // Update customer profile
-      const updatedCustomer = await wc.updateCustomer(customer.id, updates);
+      const updatedCustomer = await this.client.updateCustomer(customer.id, updates);
 
       return {
         success: true,
@@ -219,4 +205,17 @@ export class WooCommerceCustomerActions {
       };
     }
   }
+}
+
+/**
+ * Factory function to create WooCommerceCustomerActions with production dependencies
+ */
+export async function createWooCommerceCustomerActions(
+  domain: string
+): Promise<WooCommerceCustomerActions | null> {
+  const client = await getDynamicWooCommerceClient(domain);
+  if (!client) {
+    return null;
+  }
+  return new WooCommerceCustomerActions(client, domain);
 }

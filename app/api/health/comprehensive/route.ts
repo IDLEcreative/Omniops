@@ -36,68 +36,85 @@ export const dynamic = 'force-dynamic';
  */
 export async function GET(request: NextRequest) {
   const startTime = Date.now();
-  const verbose = request.nextUrl.searchParams.get('verbose') === 'true';
 
-  const healthChecks: HealthCheckResult[] = [];
+  try {
+    const verbose = request.nextUrl.searchParams.get('verbose') === 'true';
 
-  // 1. API Health Check
-  healthChecks.push(checkAPI());
+    const healthChecks: HealthCheckResult[] = [];
 
-  // 2. Database Health Check
-  const dbCheck = await checkDatabase();
-  healthChecks.push(dbCheck);
+    // 1. API Health Check
+    healthChecks.push(checkAPI());
 
-  // 3. Redis Health Check
-  const redisCheck = await checkRedis();
-  healthChecks.push(redisCheck);
+    // 2. Database Health Check
+    const dbCheck = await checkDatabase();
+    healthChecks.push(dbCheck);
 
-  // 4. Queue System Health Check
-  const queues = [
-    QUEUE_NAMESPACES.SCRAPE.NORMAL,
-    QUEUE_NAMESPACES.EMBEDDINGS.GENERATE,
-    QUEUE_NAMESPACES.WOOCOMMERCE.SYNC,
-  ];
-  const queueCheck = await checkQueues(queues);
-  healthChecks.push(queueCheck);
+    // 3. Redis Health Check
+    const redisCheck = await checkRedis();
+    healthChecks.push(redisCheck);
 
-  // 5. Worker Health Check
-  const workerCheck = await checkWorkers();
-  healthChecks.push(workerCheck);
+    // 4. Queue System Health Check
+    const queues = [
+      QUEUE_NAMESPACES.SCRAPE.NORMAL,
+      QUEUE_NAMESPACES.EMBEDDINGS.GENERATE,
+      QUEUE_NAMESPACES.WOOCOMMERCE.SYNC,
+    ];
+    const queueCheck = await checkQueues(queues);
+    healthChecks.push(queueCheck);
 
-  // 6. System Resources Check
-  const systemCheck = checkSystemResources();
-  healthChecks.push(systemCheck);
+    // 5. Worker Health Check
+    const workerCheck = await checkWorkers();
+    healthChecks.push(workerCheck);
 
-  // 7. External Services Check (if verbose)
-  if (verbose) {
-    const openaiCheck = await checkOpenAI();
-    healthChecks.push(openaiCheck);
+    // 6. System Resources Check
+    const systemCheck = checkSystemResources();
+    healthChecks.push(systemCheck);
+
+    // 7. External Services Check (if verbose)
+    if (verbose) {
+      const openaiCheck = await checkOpenAI();
+      healthChecks.push(openaiCheck);
+    }
+
+    const responseTime = Date.now() - startTime;
+
+    // Calculate overall status
+    const overallStatus = calculateOverallStatus(healthChecks);
+
+    // Get detailed metrics if verbose
+    const metrics = verbose ? await getDetailedMetrics() : undefined;
+
+    // Build response
+    const response = buildHealthResponse(healthChecks, overallStatus, responseTime, metrics);
+
+    // Log health check
+    logger.debug('Comprehensive health check performed', {
+      status: overallStatus,
+      responseTime,
+      summary: response.summary,
+    });
+
+    // Set HTTP status and headers
+    const httpStatus = getHTTPStatus(overallStatus);
+    const headers = buildResponseHeaders(responseTime, overallStatus);
+
+    return NextResponse.json(response, {
+      status: httpStatus,
+      headers,
+    });
+  } catch (error) {
+    console.error('[Health Check] Comprehensive check failed:', error);
+    logger.error('Comprehensive health check error', { error });
+
+    return NextResponse.json(
+      {
+        status: 'error',
+        checks: [],
+        summary: { healthy: 0, unhealthy: 0, total: 0 },
+        responseTime: Date.now() - startTime,
+        error: 'Failed to perform health check'
+      },
+      { status: 500 }
+    );
   }
-
-  const responseTime = Date.now() - startTime;
-
-  // Calculate overall status
-  const overallStatus = calculateOverallStatus(healthChecks);
-
-  // Get detailed metrics if verbose
-  const metrics = verbose ? await getDetailedMetrics() : undefined;
-
-  // Build response
-  const response = buildHealthResponse(healthChecks, overallStatus, responseTime, metrics);
-
-  // Log health check
-  logger.debug('Comprehensive health check performed', {
-    status: overallStatus,
-    responseTime,
-    summary: response.summary,
-  });
-
-  // Set HTTP status and headers
-  const httpStatus = getHTTPStatus(overallStatus);
-  const headers = buildResponseHeaders(responseTime, overallStatus);
-
-  return NextResponse.json(response, {
-    status: httpStatus,
-    headers,
-  });
 }

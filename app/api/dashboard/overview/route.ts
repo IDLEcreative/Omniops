@@ -30,6 +30,9 @@ export async function GET(request: NextRequest) {
     return NextResponse.json(overview);
   } catch (error) {
     console.error('[Dashboard] Error building overview:', error);
-    return NextResponse.json(getDefaultOverview(), { status: 200 });
+    return NextResponse.json(
+      { ...getDefaultOverview(), error: 'Failed to fetch dashboard overview' },
+      { status: 500 }
+    );
   }
 }

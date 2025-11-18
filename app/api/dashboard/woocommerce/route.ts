@@ -97,14 +97,14 @@ export async function GET(request: NextRequest) {
   } catch (error) {
     console.error('[Dashboard] Error fetching WooCommerce data:', error);
     return NextResponse.json(
-      { 
+      {
         totalProducts: 0,
         totalOrders: 0,
         revenue: 0,
         status: 'error',
         message: 'Failed to fetch WooCommerce data'
       },
-      { status: 200 }
+      { status: 500 }
     );
   }
 }
