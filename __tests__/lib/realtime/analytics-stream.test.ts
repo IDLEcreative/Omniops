@@ -1,18 +1,29 @@
 import { describe, it, expect, jest, beforeEach, afterEach } from '@jest/globals';
+
+// Variable to track calls
+let createServiceRoleClientSyncCalls: any[][] = [];
+
+// Create a plain mock that will be configured in beforeEach
+const mockSupabaseOperations = {
+  channel: jest.fn(),
+  removeChannel: jest.fn(),
+  from: jest.fn()
+};
+
+// Mock the Supabase server module with a manual mock
+jest.mock('@/lib/supabase/server', () => ({
+  createServiceRoleClientSync: (...args: any[]) => {
+    createServiceRoleClientSyncCalls.push(args);
+    return mockSupabaseOperations;
+  }
+}));
+
+// Import module under test AFTER mocking
 import {
   getAnalyticsStreamManager,
   createAnalyticsStream,
   resetAnalyticsStreamManager
 } from '@/lib/realtime/analytics-stream';
-import { createServiceRoleClientSync } from '@/lib/supabase/server';
-
-// Create mock function
-const mockCreateServiceRoleClientSync = jest.fn();
-
-// Mock Supabase server module (the actual module used by the implementation)
-jest.mock('@/lib/supabase/server', () => ({
-  createServiceRoleClientSync: (...args: any[]) => mockCreateServiceRoleClientSync(...args)
-}));
 
 describe('Analytics Stream Manager', () => {
   let mockSupabaseClient: any;
@@ -26,11 +37,14 @@ describe('Analytics Stream Manager', () => {
   let mockInsert: jest.Mock;
 
   beforeEach(() => {
+    // Reset singleton FIRST before any other setup
+    resetAnalyticsStreamManager();
+
+    // Reset call tracking
+    createServiceRoleClientSyncCalls = [];
+
     // Use fake timers to control intervals and prevent real timers
     jest.useFakeTimers();
-
-    // Reset singleton before setting up mocks
-    resetAnalyticsStreamManager();
 
     // Mock Supabase channel and subscription
     mockSubscription = {
@@ -66,19 +80,21 @@ describe('Analytics Stream Manager', () => {
       insert: mockInsert
     });
 
-    mockSupabaseClient = {
-      channel: jest.fn().mockReturnValue(mockChannel),
-      removeChannel: jest.fn(),
-      from: mockFrom
-    };
-
-    // Reset and configure the mock for createServiceRoleClientSync
-    mockCreateServiceRoleClientSync.mockReset();
-    mockCreateServiceRoleClientSync.mockReturnValue(mockSupabaseClient as any);
-
-    // Set required env vars
+    // Set required env vars BEFORE configuring mock
     process.env.NEXT_PUBLIC_SUPABASE_URL = 'https://test.supabase.co';
     process.env.SUPABASE_SERVICE_ROLE_KEY = 'test-key';
+
+    // Reset and configure the mock Supabase operations
+    (mockSupabaseOperations.channel as jest.Mock).mockClear();
+    (mockSupabaseOperations.channel as jest.Mock).mockReturnValue(mockChannel);
+
+    (mockSupabaseOperations.removeChannel as jest.Mock).mockClear();
+
+    (mockSupabaseOperations.from as jest.Mock).mockClear();
+    (mockSupabaseOperations.from as jest.Mock).mockImplementation(mockFrom);
+
+    // Note: mockSupabaseClient is now just a reference to mockSupabaseOperations
+    mockSupabaseClient = mockSupabaseOperations;
   });
 
   afterEach(() => {
@@ -94,7 +110,7 @@ describe('Analytics Stream Manager', () => {
     it('should initialize Supabase client with correct credentials', () => {
       manager = getAnalyticsStreamManager();
 
-      expect(mockCreateServiceRoleClientSync).toHaveBeenCalled();
+      expect(createServiceRoleClientSyncCalls.length).toBeGreaterThan(0);
     });
 
     it('should throw error if Supabase credentials are missing', () => {
