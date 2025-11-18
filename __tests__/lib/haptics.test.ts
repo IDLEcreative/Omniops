@@ -21,17 +21,32 @@ import {
 
 describe('Haptic Feedback Utility', () => {
   let vibrateMock: jest.Mock;
+  let originalNavigator: Navigator;
 
   beforeEach(() => {
     vibrateMock = jest.fn();
-    // Mock navigator.vibrate
-    Object.defineProperty(navigator, 'vibrate', {
-      writable: true,
-      value: vibrateMock,
+    // Save original navigator
+    originalNavigator = window.navigator;
+
+    // Create a mock navigator object
+    const mockNavigator = {
+      ...window.navigator,
+      vibrate: vibrateMock,
+    };
+
+    // Mock window.navigator
+    Object.defineProperty(window, 'navigator', {
+      value: mockNavigator,
+      configurable: true,
     });
   });
 
   afterEach(() => {
+    // Restore original navigator
+    Object.defineProperty(window, 'navigator', {
+      value: originalNavigator,
+      configurable: true,
+    });
     jest.clearAllMocks();
   });
 
@@ -41,24 +56,29 @@ describe('Haptic Feedback Utility', () => {
     });
 
     it('should return false when vibration API is not available', () => {
-      // Save original
-      const originalVibrate = Object.getOwnPropertyDescriptor(
-        navigator,
-        'vibrate'
-      );
+      // Create a mock navigator without vibrate by deleting the property
+      const mockNavigator = Object.create(Object.getPrototypeOf(window.navigator));
 
-      // Remove vibrate
-      Object.defineProperty(navigator, 'vibrate', {
-        value: undefined,
+      // Copy all properties except vibrate
+      Object.keys(window.navigator).forEach(key => {
+        if (key !== 'vibrate') {
+          try {
+            const descriptor = Object.getOwnPropertyDescriptor(window.navigator, key);
+            if (descriptor) {
+              Object.defineProperty(mockNavigator, key, descriptor);
+            }
+          } catch {
+            // Skip properties that can't be copied
+          }
+        }
+      });
+
+      Object.defineProperty(window, 'navigator', {
+        value: mockNavigator,
         configurable: true,
       });
 
       expect(isHapticSupported()).toBe(false);
-
-      // Restore
-      if (originalVibrate) {
-        Object.defineProperty(navigator, 'vibrate', originalVibrate);
-      }
     });
   });
 
@@ -94,23 +114,30 @@ describe('Haptic Feedback Utility', () => {
     });
 
     it('should return false when haptic is not supported', () => {
-      const originalVibrate = Object.getOwnPropertyDescriptor(
-        navigator,
-        'vibrate'
-      );
+      // Create a mock navigator without vibrate
+      const mockNavigator = Object.create(Object.getPrototypeOf(window.navigator));
 
-      Object.defineProperty(navigator, 'vibrate', {
-        value: undefined,
+      // Copy all properties except vibrate
+      Object.keys(window.navigator).forEach(key => {
+        if (key !== 'vibrate') {
+          try {
+            const descriptor = Object.getOwnPropertyDescriptor(window.navigator, key);
+            if (descriptor) {
+              Object.defineProperty(mockNavigator, key, descriptor);
+            }
+          } catch {
+            // Skip properties that can't be copied
+          }
+        }
+      });
+
+      Object.defineProperty(window, 'navigator', {
+        value: mockNavigator,
         configurable: true,
       });
 
       const result = triggerHaptic('light');
       expect(result).toBe(false);
-
-      // Restore
-      if (originalVibrate) {
-        Object.defineProperty(navigator, 'vibrate', originalVibrate);
-      }
     });
 
     it('should return true when haptic is successfully triggered', () => {
@@ -185,23 +212,30 @@ describe('Haptic Feedback Utility', () => {
     });
 
     it('should return false when not supported', () => {
-      const originalVibrate = Object.getOwnPropertyDescriptor(
-        navigator,
-        'vibrate'
-      );
+      // Create a mock navigator without vibrate
+      const mockNavigator = Object.create(Object.getPrototypeOf(window.navigator));
 
-      Object.defineProperty(navigator, 'vibrate', {
-        value: undefined,
+      // Copy all properties except vibrate
+      Object.keys(window.navigator).forEach(key => {
+        if (key !== 'vibrate') {
+          try {
+            const descriptor = Object.getOwnPropertyDescriptor(window.navigator, key);
+            if (descriptor) {
+              Object.defineProperty(mockNavigator, key, descriptor);
+            }
+          } catch {
+            // Skip properties that can't be copied
+          }
+        }
+      });
+
+      Object.defineProperty(window, 'navigator', {
+        value: mockNavigator,
         configurable: true,
       });
 
       const result = hapticProductChange();
       expect(result).toBe(false);
-
-      // Restore
-      if (originalVibrate) {
-        Object.defineProperty(navigator, 'vibrate', originalVibrate);
-      }
     });
   });
 
@@ -212,22 +246,29 @@ describe('Haptic Feedback Utility', () => {
     });
 
     it('should not throw when vibrate is not available', () => {
-      const originalVibrate = Object.getOwnPropertyDescriptor(
-        navigator,
-        'vibrate'
-      );
+      // Create a mock navigator without vibrate
+      const mockNavigator = Object.create(Object.getPrototypeOf(window.navigator));
 
-      Object.defineProperty(navigator, 'vibrate', {
-        value: undefined,
+      // Copy all properties except vibrate
+      Object.keys(window.navigator).forEach(key => {
+        if (key !== 'vibrate') {
+          try {
+            const descriptor = Object.getOwnPropertyDescriptor(window.navigator, key);
+            if (descriptor) {
+              Object.defineProperty(mockNavigator, key, descriptor);
+            }
+          } catch {
+            // Skip properties that can't be copied
+          }
+        }
+      });
+
+      Object.defineProperty(window, 'navigator', {
+        value: mockNavigator,
         configurable: true,
       });
 
       expect(() => cancelHaptic()).not.toThrow();
-
-      // Restore
-      if (originalVibrate) {
-        Object.defineProperty(navigator, 'vibrate', originalVibrate);
-      }
     });
   });
 
