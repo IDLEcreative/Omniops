@@ -78,10 +78,18 @@ let currentMockClient = createMockSupabaseClient();
 
 const validateSupabaseEnv = jest.fn().mockReturnValue(true);
 const createServiceRoleClient = jest.fn().mockImplementation(async () => {
+  if (currentMockClient === null) {
+    console.log('[MOCK] createServiceRoleClient called, returning null (database unavailable)');
+    return null;
+  }
   console.log('[MOCK] createServiceRoleClient called, returning client with user:', (await currentMockClient.auth.getUser()).data.user?.id);
   return currentMockClient;
 });
 const createClient = jest.fn().mockImplementation(async () => {
+  if (currentMockClient === null) {
+    console.log('[MOCK] createClient called, returning null (database unavailable)');
+    return null;
+  }
   const user = await currentMockClient.auth.getUser();
   console.log('[MOCK] createClient called, returning client with user:', user.data.user?.id);
   return currentMockClient;
@@ -99,6 +107,10 @@ const __resetMockSupabaseClient = () => {
 
 // Create independent mock functions for aliases (needed for tests that mock these directly)
 const createServerClient = jest.fn().mockImplementation(async () => {
+  if (currentMockClient === null) {
+    console.log('[MOCK] createServerClient (alias) called, returning null (database unavailable)');
+    return null;
+  }
   const user = await currentMockClient.auth.getUser();
   console.log('[MOCK] createServerClient (alias) called, returning client with user:', user.data.user?.id);
   return currentMockClient;
