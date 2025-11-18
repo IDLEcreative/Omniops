@@ -5,8 +5,12 @@
 
 # Metadata System E2E Tests
 
+**Type:** Test Documentation
 **Status:** Active
-**Last Updated:** 2025-11-10
+**Last Updated:** 2025-11-18
+**Verified For:** v0.1.0
+**Estimated Read Time:** 5 minutes
+
 **Related:** `__tests__/integration/test-metadata-system-e2e.ts`, `__tests__/utils/metadata/metadata-system-helpers.ts`
 
 ## Purpose

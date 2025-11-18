@@ -5,7 +5,44 @@
 
 # Configuration Files
 
-This directory contains configuration files for various tools and services used in the Omniops project.
+**Type:** Reference
+**Status:** Active
+**Last Updated:** 2025-11-18
+**Verified For:** v0.1.0
+**Dependencies:** None
+**Estimated Read Time:** 5 minutes
+
+## Purpose
+
+Configuration files for Jest testing framework and Model Context Protocol (MCP) integrations, organized by tool/service category.
+
+## Quick Links
+
+- [Testing Documentation](/home/user/Omniops/docs/04-DEVELOPMENT/testing/)
+- [Environment Setup](/home/user/Omniops/docs/environment-setup.md)
+- [Development Workflow](/home/user/Omniops/CLAUDE.md#development-workflow)
+
+## Table of Contents
+
+- [Directory Structure](#directory-structure)
+- [Configuration Files](#configuration-files)
+  - [Jest Testing Configuration](#jest-testing-configuration)
+  - [MCP (Model Context Protocol)](#mcp-model-context-protocol)
+- [Usage Guidelines](#usage-guidelines)
+- [Integration with Project](#integration-with-project)
+- [Troubleshooting](#troubleshooting)
+- [Related Documentation](#related-documentation)
+
+## Keywords
+
+**Search Terms:** configuration, Jest, testing, MCP, Model Context Protocol, Supabase, test setup, environment variables
+
+**Aliases:**
+- "Config files" (directory)
+- "Test configuration" (Jest)
+- "MCP config" (Model Context Protocol)
+
+---
 
 ## Directory Structure
 

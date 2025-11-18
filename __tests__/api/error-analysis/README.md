@@ -5,9 +5,14 @@
 
 # Error Handling Analysis Modules
 
+**Type:** Test Documentation
+**Status:** Active
+**Last Updated:** 2025-11-18
+**Verified For:** v0.1.0
+**Estimated Read Time:** 2 minutes
+
 **Purpose:** Modular error handling analysis for static code quality checks.
 
-**Last Updated:** 2025-11-15
 **Related:** [../README.md](../README.md), [../../README.md](../../README.md)
 
 ## Overview

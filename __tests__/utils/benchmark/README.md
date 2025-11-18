@@ -5,9 +5,14 @@
 
 # Benchmark Utilities
 
+**Type:** Test Infrastructure
+**Status:** Active
+**Last Updated:** 2025-11-18
+**Verified For:** v0.1.0
+**Estimated Read Time:** 4 minutes
+
 **Purpose:** Shared utilities for performance benchmarking across the test suite.
 
-**Last Updated:** 2025-11-08
 **Related:** [Agent Performance Benchmarks](../../agents/performance/)
 
 ## Overview

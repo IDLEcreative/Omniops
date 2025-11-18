@@ -5,9 +5,13 @@
 
 # PostMessage Security Tests
 
-**Purpose:** Modular test suite for postMessage cross-frame communication security.
+**Type:** Test Documentation
+**Status:** Active
+**Last Updated:** 2025-11-18
+**Verified For:** v0.1.0
+**Estimated Read Time:** 1 minute
 
-**Last Updated:** 2025-11-10
+**Purpose:** Modular test suite for postMessage cross-frame communication security.
 
 This directory contains focused security tests for the chat widget's postMessage API, split into logical modules for maintainability and clarity.
 

@@ -5,7 +5,27 @@
 
 # WooCommerce Full Types
 
-Comprehensive Zod schemas and TypeScript types for the WooCommerce REST API v3.
+**Type:** Utility
+**Status:** Active
+**Last Updated:** 2025-11-18
+**Verified For:** v0.1.0
+**Dependencies:** [WooCommerce API](/home/user/Omniops/lib/woocommerce-api)
+**Estimated Read Time:** 2 minutes
+
+## Purpose
+
+Comprehensive Zod schemas and TypeScript types for the WooCommerce REST API v3 with modular architecture and full type safety.
+
+## Quick Links
+- [Type Definitions Index](index.ts) - Main exports
+- [Product Types](products.ts) - Product schemas
+- [Order Types](orders.ts) - Order schemas
+- [WooCommerce API](/home/user/Omniops/lib/woocommerce-api/README.md) - Integration layer
+
+## Keywords
+- WooCommerce, REST API, TypeScript, Zod, Type Safety, Schema Validation
+
+---
 
 ## Structure
 

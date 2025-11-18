@@ -5,6 +5,12 @@
 
 # Cross-Frame Test Utilities
 
+**Type:** Test Infrastructure
+**Status:** Active
+**Last Updated:** 2025-11-18
+**Verified For:** v0.1.0
+**Estimated Read Time:** 2 minutes
+
 Reusable mock and helper utilities for cross-frame communication tests.
 
 ## Usage

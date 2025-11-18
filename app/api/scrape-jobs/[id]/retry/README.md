@@ -5,7 +5,22 @@
 
 # Job Retry API
 
-The Job Retry API provides endpoints to retry failed scrape jobs. This API handles intelligent retry logic, tracks retry attempts, and manages retry limits to prevent infinite retry loops.
+**Type:** Reference
+**Status:** Active
+**Last Updated:** 2025-11-18
+**Verified For:** v0.1.0
+**Dependencies:** [Individual Scrape Job API](/home/user/Omniops/app/api/scrape-jobs/[id]/README.md), [Job Statistics API](/home/user/Omniops/app/api/scrape-jobs/stats/README.md)
+**Estimated Read Time:** 15 minutes
+
+## Purpose
+
+Complete API reference for retrying failed scrape jobs with intelligent retry logic, automatic retry count management, failure analysis, and retry limit enforcement to prevent infinite retry loops.
+
+## Quick Links
+
+- [Individual Scrape Job API](/home/user/Omniops/app/api/scrape-jobs/[id]/README.md)
+- [Scrape Jobs API](/home/user/Omniops/app/api/scrape-jobs/README.md)
+- [Job Statistics API](/home/user/Omniops/app/api/scrape-jobs/stats/README.md)
 
 ## Endpoints
 

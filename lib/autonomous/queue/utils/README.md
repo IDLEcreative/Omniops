@@ -5,10 +5,16 @@
 
 # Queue Utilities
 
-**Purpose:** Shared utilities for operation job processing (progress tracking, consent validation, event logging).
+**Type:** Utility
+**Status:** Active
+**Last Updated:** 2025-11-18
+**Verified For:** v0.1.0
+**Dependencies:** [Operation Job Processor](/home/user/Omniops/lib/autonomous/queue/operation-job-processor.ts), [Handlers](/home/user/Omniops/lib/autonomous/queue/handlers/)
+**Estimated Read Time:** 1 minute
 
-**Last Updated:** 2025-11-10
-**Related:** [../operation-job-processor.ts](../operation-job-processor.ts), [../handlers/](../handlers/)
+## Purpose
+
+Shared utilities for operation job processing including progress tracking, consent validation, and event logging.
 
 ## Overview
 

@@ -5,10 +5,16 @@
 
 # Widget Configuration Module
 
-**Purpose:** Provides modular services for loading, validating, transforming, and serving widget configuration from the database.
+**Type:** Service
+**Status:** Active
+**Last Updated:** 2025-11-18
+**Verified For:** v0.1.0
+**Dependencies:** [Widget Config API](/home/user/Omniops/app/api/widget/config/route.ts), [Widget Customization Guide](/home/user/Omniops/docs/02-GUIDES/GUIDE_WIDGET_CUSTOMIZATION.md), [Multi-Domain Support](/home/user/Omniops/docs/02-GUIDES/GUIDE_MULTI_DOMAIN_SUPPORT.md)
+**Estimated Read Time:** 3 minutes
 
-**Last Updated:** 2025-11-08
-**Related:** [app/api/widget/config/route.ts](../../app/api/widget/config/route.ts)
+## Purpose
+
+Provides modular services for loading, validating, transforming, and serving widget configuration from the database.
 
 ## Overview
 

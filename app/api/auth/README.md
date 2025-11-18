@@ -5,6 +5,56 @@
 
 # Authentication API
 
+**Type:** Reference
+**Status:** Active
+**Last Updated:** 2025-11-18
+**Verified For:** v0.1.0
+**Dependencies:** [Customer API](/home/user/Omniops/app/api/customer/README.md), [Database Schema](/home/user/Omniops/docs/09-REFERENCE/REFERENCE_DATABASE_SCHEMA.md)
+**Estimated Read Time:** 14 minutes
+
+## Purpose
+
+This document provides comprehensive technical reference for authentication services including Supabase Auth integration, customer verification, JWT token management, and multi-tenant user session handling with role-based access control.
+
+## Quick Links
+
+- [Customer Management API](/home/user/Omniops/app/api/customer/README.md)
+- [API Routes Documentation](/home/user/Omniops/app/api/README.md)
+- [Dashboard Authentication](/home/user/Omniops/app/dashboard/README.md)
+- [Privacy Endpoints](/home/user/Omniops/app/api/privacy/README.md)
+
+## Keywords
+
+**Primary**: authentication, Supabase Auth, customer management, JWT tokens, session management, user verification
+**Aliases**: auth API, user authentication, customer auth, access control
+**Related**: customer verification, domain isolation, role-based access, multi-tenancy, feature gating
+
+## Table of Contents
+
+- [Overview](#overview)
+- [Endpoints](#endpoints)
+  - [GET /api/auth/customer](#get-apiauthcustomer)
+  - [POST /api/auth/login (Handled by Supabase)](#post-apiauthlogin-handled-by-supabase)
+  - [POST /api/auth/signup (Handled by Supabase)](#post-apiauthsignup-handled-by-supabase)
+  - [POST /api/auth/logout (Handled by Supabase)](#post-apiauthlogout-handled-by-supabase)
+- [Features](#features)
+- [Authentication Flow](#authentication-flow)
+- [Security Features](#security-features)
+- [Examples](#examples)
+- [Error Handling](#error-handling)
+- [Customer Data Model](#customer-data-model)
+- [Integration](#integration)
+- [Performance](#performance)
+- [Security Best Practices](#security-best-practices)
+- [Multi-tenancy](#multi-tenancy)
+- [Monitoring and Analytics](#monitoring-and-analytics)
+- [Testing](#testing)
+- [Troubleshooting](#troubleshooting)
+- [Related Endpoints](#related-endpoints)
+- [Migration and Updates](#migration-and-updates)
+
+---
+
 User authentication and customer management endpoints for secure access control and user session management.
 
 ## Overview

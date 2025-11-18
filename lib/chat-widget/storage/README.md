@@ -5,9 +5,12 @@
 
 # Storage Module
 
-**Last Updated:** 2025-11-08
+**Type:** Utility
 **Status:** Active
-**Related:** [../README.md](../README.md), [connection-monitor.ts](../connection-monitor.ts)
+**Last Updated:** 2025-11-18
+**Verified For:** v0.1.0
+**Dependencies:** [Chat Widget](/home/user/Omniops/lib/chat-widget), [Connection Monitor](../connection-monitor.ts)
+**Estimated Read Time:** 2 minutes
 
 ## Purpose
 

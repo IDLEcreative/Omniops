@@ -5,7 +5,41 @@
 
 # Auth Components Directory
 
-Authentication components for the Customer Service Agent application, providing Supabase-based user authentication, session management, and user interface elements.
+**Type:** Reference
+**Status:** Active
+**Last Updated:** 2025-11-18
+**Verified For:** v0.1.0
+**Dependencies:** [Supabase Auth](https://supabase.com/docs/guides/auth), [UI Components](/home/user/Omniops/components/ui/README.md), [Auth API](/home/user/Omniops/app/api/auth)
+**Estimated Read Time:** 10 minutes
+
+## Purpose
+
+Authentication components providing Supabase-based user authentication, session management, and user interface elements with React Context, real-time session synchronization, and comprehensive error handling.
+
+## Quick Links
+
+- [Main Components Directory](/home/user/Omniops/components/README.md)
+- [UI Components](/home/user/Omniops/components/ui/README.md)
+- [Supabase Documentation](https://supabase.com/docs/guides/auth)
+- [Auth API Routes](/home/user/Omniops/app/api/auth)
+
+## Table of Contents
+
+- [Components](#components)
+- [Architecture Patterns](#architecture-patterns)
+- [Authentication Flow](#authentication-flow)
+- [Development Guidelines](#development-guidelines)
+- [Testing Strategy](#testing-strategy)
+- [Security Considerations](#security-considerations)
+- [Accessibility Features](#accessibility-features)
+- [Performance Optimizations](#performance-optimizations)
+- [Future Enhancements](#future-enhancements)
+
+---
+
+## Keywords
+
+authentication, Supabase, auth provider, user menu, session management, sign in, sign out, React Context
 
 ## Overview
 

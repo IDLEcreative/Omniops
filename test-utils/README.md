@@ -5,6 +5,35 @@
 
 # Test Utils Directory
 
+**Type:** Reference
+**Status:** Active
+**Last Updated:** 2025-11-18
+**Verified For:** v0.1.0
+**Dependencies:** Jest, Mock Service Worker (MSW)
+**Estimated Read Time:** 3 minutes
+
+## Purpose
+
+Testing utilities, Jest setup files, and Mock Service Worker (MSW) configuration for browser/React tests and Node.js environment tests.
+
+## Quick Links
+
+- [Testing Guide](/home/user/Omniops/docs/04-DEVELOPMENT/testing/TESTING_GUIDE.md)
+- [Test Suite Overview](/home/user/Omniops/__tests__/README.md)
+- [MSW Mocks](/home/user/Omniops/__tests__/mocks/README.md)
+
+## Keywords
+
+**Search Terms:** test utilities, Jest setup, MSW, Mock Service Worker, test configuration, environment mocks, testing helpers
+
+**Aliases:**
+- "Test setup" (Jest configuration)
+- "MSW setup" (API mocking)
+- "Test helpers" (utilities)
+- "Test environment" (configuration)
+
+---
+
 Testing utilities and setup files for the Customer Service Agent application.
 
 ## Structure

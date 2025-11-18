@@ -5,6 +5,15 @@
 
 # Workers System
 
+**Type:** System
+**Status:** Active
+**Last Updated:** 2025-11-18
+**Verified For:** v0.1.0
+**Dependencies:** [Queue Management](/home/user/Omniops/lib/queue/README.md), [Monitoring System](/home/user/Omniops/lib/monitoring/README.md), [Auth Utilities](/home/user/Omniops/lib/auth/README.md)
+**Estimated Read Time:** 14 minutes
+
+## Purpose
+
 Advanced multi-worker system for processing scraping jobs with robust error handling, memory management, and health monitoring.
 
 ## Overview

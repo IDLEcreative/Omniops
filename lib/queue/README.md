@@ -5,11 +5,27 @@
 
 # Job Queue System
 
-**Purpose:** Comprehensive background job processing system built on Redis and BullMQ for scalable, reliable task execution with priority management and real-time monitoring.
-
-**Integration Type:** System
-**Last Updated:** 2025-10-30
+**Type:** System
 **Status:** Active
+**Last Updated:** 2025-11-18
+**Verified For:** v0.1.0
+**Dependencies:** [Redis](/home/user/Omniops/lib/redis.ts), [Scraper API](/home/user/Omniops/lib/scraper-api.ts), [Embeddings](/home/user/Omniops/lib/embeddings.ts)
+**Estimated Read Time:** 15 minutes
+
+## Purpose
+
+Comprehensive background job processing system built on Redis and BullMQ for scalable, reliable task execution with priority management and real-time monitoring.
+
+## Quick Links
+- [Queue Manager](queue-manager.ts) - Core queue management
+- [Job Processor](job-processor.ts) - Worker implementation
+- [Scrape Queue](scrape-queue.ts) - Specialized scraping queue
+- [Queue Utils](queue-utils.ts) - Monitoring and utilities
+
+## Keywords
+- Job Queue, Background Jobs, Redis, BullMQ, Priority, Retry, Monitoring, Scraping
+
+---
 
 This directory contains a comprehensive job queue management system built with Redis and BullMQ for handling background tasks, primarily focused on web scraping operations. The system provides robust job processing, monitoring, and management capabilities.
 

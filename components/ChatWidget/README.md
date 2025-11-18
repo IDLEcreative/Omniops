@@ -5,9 +5,28 @@
 
 # ChatWidget Directory
 
-**Purpose:** Core chat widget component architecture (modular approach)
-**Last Updated:** 2025-10-30
-**Related:** [ChatWidget.tsx](/components/ChatWidget.tsx), [Embed](/app/embed)
+**Type:** Reference
+**Status:** Active
+**Last Updated:** 2025-11-18
+**Verified For:** v0.1.0
+**Dependencies:** [ChatWidget.tsx](/home/user/Omniops/components/ChatWidget.tsx), [Embed](/home/user/Omniops/app/embed), [UI Components](/home/user/Omniops/components/ui/README.md)
+**Estimated Read Time:** 2 minutes
+
+## Purpose
+
+Core chat widget component architecture using a modular approach that breaks down the monolithic ChatWidget into focused, reusable components.
+
+## Quick Links
+
+- [Main Components Directory](/home/user/Omniops/components/README.md)
+- [Chat Components](/home/user/Omniops/components/chat/README.md)
+- [UI Components](/home/user/Omniops/components/ui/README.md)
+
+---
+
+## Keywords
+
+chat widget, modular components, embeddable widget, privacy banner, message list, input area
 
 ## Overview
 

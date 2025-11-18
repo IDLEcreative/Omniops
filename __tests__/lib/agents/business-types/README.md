@@ -5,13 +5,16 @@
 
 # Domain-Agnostic Agent Business Types Tests
 
+**Type:** Test Documentation
+**Status:** Active
+**Last Updated:** 2025-11-18
+**Verified For:** v0.1.0
+**Estimated Read Time:** 4 minutes
+
 **Purpose:** Comprehensive test suite for multi-tenant business type support in the domain-agnostic agent system. Ensures the system works equally well for e-commerce, education, legal, automotive, and any other business type.
 
-**Type:** Test Suite
-**Status:** Active
-**Last Updated:** 2025-11-10
 **Related:**
-- [DomainAgnosticAgent Implementation](/lib/agents/domain-agnostic-agent.ts)
+- [DomainAgnosticAgent Implementation](/home/user/Omniops/lib/agents/domain-agnostic-agent.ts)
 - [Agent Tests Directory](../)
 
 ## Test Coverage

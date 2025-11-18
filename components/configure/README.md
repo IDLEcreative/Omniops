@@ -5,9 +5,28 @@
 
 # Configure Directory
 
-**Purpose:** Widget configuration and customization components
-**Last Updated:** 2025-10-30
-**Related:** [Configure Page](/app/configure), [Dashboard Settings](/app/dashboard/settings)
+**Type:** Reference
+**Status:** Active
+**Last Updated:** 2025-11-18
+**Verified For:** v0.1.0
+**Dependencies:** [Configure Page](/home/user/Omniops/app/configure), [Dashboard Settings](/home/user/Omniops/app/dashboard/settings), [UI Components](/home/user/Omniops/components/ui/README.md)
+**Estimated Read Time:** 2 minutes
+
+## Purpose
+
+Widget configuration and customization components including a multi-step wizard, appearance customizer, theme selector, behavior settings, and embed code generator.
+
+## Quick Links
+
+- [Main Components Directory](/home/user/Omniops/components/README.md)
+- [ChatWidget Directory](/home/user/Omniops/components/ChatWidget/README.md)
+- [Dashboard Components](/home/user/Omniops/components/dashboard/README.md)
+
+---
+
+## Keywords
+
+widget configuration, customization wizard, theme selector, appearance, behavior settings, embed code
 
 ## Overview
 

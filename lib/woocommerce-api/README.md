@@ -5,11 +5,27 @@
 
 # WooCommerce API Integration
 
-**Purpose:** Complete TypeScript implementation of WooCommerce REST API v3 with modular architecture, type safety, and comprehensive error handling.
-
-**Integration Type:** API
-**Last Updated:** 2025-10-30
+**Type:** API
 **Status:** Active
+**Last Updated:** 2025-11-18
+**Verified For:** v0.1.0
+**Dependencies:** [WooCommerce Full Client](/home/user/Omniops/lib/woocommerce-full.ts), [WooCommerce Types](/home/user/Omniops/lib/woocommerce-full-types), [Encryption](/home/user/Omniops/lib/encryption.ts)
+**Estimated Read Time:** 11 minutes
+
+## Purpose
+
+Complete TypeScript implementation of WooCommerce REST API v3 with modular architecture, type safety, comprehensive error handling, and efficient resource management.
+
+## Quick Links
+- [Main API Class](index.ts) - Unified interface
+- [Products API](products.ts) - Product operations
+- [Orders API](orders.ts) - Order management
+- [Customers API](customers.ts) - Customer operations
+
+## Keywords
+- WooCommerce, REST API, E-commerce, TypeScript, Products, Orders, Customers, Error Handling
+
+---
 
 This directory contains a structured, modular implementation of the WooCommerce REST API v3 with TypeScript support, comprehensive error handling, and efficient resource management. It provides a clean abstraction layer for all WooCommerce operations.
 

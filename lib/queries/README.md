@@ -5,9 +5,21 @@
 
 # Queries Directory
 
-**Purpose:** Reusable database query functions for dashboard and analytics
-**Last Updated:** 2025-10-30
-**Related:** [Analytics](/lib/analytics), [Dashboard](/app/dashboard)
+**Type:** Utility
+**Status:** Active
+**Last Updated:** 2025-11-18
+**Verified For:** v0.1.0
+**Dependencies:** [Analytics](/home/user/Omniops/lib/analytics), [Supabase](/home/user/Omniops/lib/supabase-server.ts)
+**Estimated Read Time:** 1 minute
+
+## Purpose
+
+Reusable, optimized database query functions for dashboard statistics and reporting with efficient SQL aggregation.
+
+## Keywords
+- Database Queries, Dashboard Stats, Analytics, SQL, Optimization, Supabase
+
+---
 
 ## Overview
 

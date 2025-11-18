@@ -5,9 +5,16 @@
 
 # Contexts Directory
 
-**Purpose:** React Context providers for organization and multi-tenant state management
-**Last Updated:** 2025-10-30
-**Related:** [Components](/components), [Auth](/lib/auth)
+**Type:** Utility
+**Status:** Active
+**Last Updated:** 2025-11-18
+**Verified For:** v0.1.0
+**Dependencies:** [Components](/home/user/Omniops/components), [Auth](/home/user/Omniops/lib/auth)
+**Estimated Read Time:** 1 minute
+
+## Purpose
+
+React Context providers for organization and multi-tenant state management with real-time updates and permission handling.
 
 ## Overview
 

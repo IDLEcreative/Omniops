@@ -5,10 +5,47 @@
 
 # Test Mock Utilities
 
-**Purpose:** Centralized mock utilities organized by category for testing across the application.
-
-**Last Updated:** 2025-01-15
+**Type:** Reference
 **Status:** Active
+**Last Updated:** 2025-11-18
+**Verified For:** v0.1.0
+**Dependencies:** Jest, @testing-library/react
+**Estimated Read Time:** 10 minutes
+
+## Purpose
+
+Centralized mock utilities organized by category (Supabase, WooCommerce, API, Environment) providing data factories and client mocks for comprehensive testing across the application.
+
+## Quick Links
+
+- [Testing Guide](/home/user/Omniops/docs/04-DEVELOPMENT/testing/TESTING_GUIDE.md)
+- [Test Utils Parent](/home/user/Omniops/test-utils/README.md)
+- [MSW Setup](/home/user/Omniops/__tests__/mocks/README.md)
+
+## Table of Contents
+
+- [Directory Structure](#directory-structure)
+- [Import Patterns](#import-patterns)
+- [Module Details](#module-details)
+  - [supabase-mocks.ts](#supabase-mocksts-64-loc)
+  - [woocommerce-mocks.ts](#woocommerce-mocksts-180-loc)
+  - [api-mocks.ts](#api-mocksts-68-loc)
+  - [test-env.ts](#test-envts-23-loc)
+- [Best Practices](#best-practices)
+- [Common Patterns](#common-patterns)
+- [Maintenance](#maintenance)
+
+## Keywords
+
+**Search Terms:** test mocks, mock utilities, Supabase mocks, WooCommerce mocks, data factories, API mocks, NextRequest mock, streaming response
+
+**Aliases:**
+- "Mock helpers" (utilities)
+- "Test data factories" (creation functions)
+- "Client mocks" (Supabase, WooCommerce)
+- "Mock utilities" (category)
+
+---
 
 ## Directory Structure
 

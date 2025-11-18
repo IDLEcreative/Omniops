@@ -5,6 +5,28 @@
 
 # Stripe Integration Scripts
 
+**Type:** Reference
+**Status:** Active
+**Last Updated:** 2025-11-18
+**Verified For:** v0.1.0
+**Dependencies:** [Environment Variables](/home/user/Omniops/.env.example), [Main Scripts README](/home/user/Omniops/scripts/README.md)
+**Estimated Read Time:** 4 minutes
+
+## Purpose
+
+Automation scripts for managing Stripe billing integration including product creation, webhook setup, and integration testing for local development.
+
+## Quick Links
+
+- [Main Scripts README](/home/user/Omniops/scripts/README.md)
+- [Environment Variables](/home/user/Omniops/.env.example)
+- [Stripe CLI Documentation](https://stripe.com/docs/stripe-cli)
+- [Stripe API Documentation](https://stripe.com/docs/api)
+
+## Keywords
+
+Stripe, billing, payments, webhooks, integration, testing, subscriptions, products, prices
+
 This directory contains automation scripts for managing the Stripe billing integration.
 
 ---
@@ -214,10 +236,9 @@ Follow this naming convention:
 
 - **Complete Integration Guide**: `/tmp/claude/STRIPE_COMPLETE_GUIDE.md`
 - **Test Plan**: `/tmp/claude/STRIPE_INTEGRATION_TEST_PLAN.md`
-- **Deployment Checklist**: `scripts/stripe/DEPLOYMENT_CHECKLIST.md`
-- **Main Documentation**: `docs/STRIPE_INTEGRATION.md`
-
----
+- **Deployment Checklist**: `/home/user/Omniops/scripts/stripe/DEPLOYMENT_CHECKLIST.md`
+- **Main Documentation**: `/home/user/Omniops/docs/STRIPE_INTEGRATION.md`
+- **Main Scripts README**: `/home/user/Omniops/scripts/README.md`
 
 ## Support
 
@@ -227,8 +248,3 @@ If scripts fail or behave unexpectedly:
 3. Verify environment variables are set
 4. Check Stripe CLI is up to date: `brew upgrade stripe/stripe-cli/stripe`
 5. Refer to Stripe CLI docs: https://stripe.com/docs/stripe-cli
-
----
-
-**Last Updated**: October 2025
-**Version**: 1.0.0

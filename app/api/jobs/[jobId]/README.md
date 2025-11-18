@@ -5,7 +5,16 @@
 
 # Job Status API
 
-The Job Status API provides endpoints to manage individual jobs by their ID. This includes retrieving job status, updating job state (pause/resume/cancel), and deleting jobs.
+**Type:** Reference
+**Status:** Active
+**Last Updated:** 2025-11-18
+**Verified For:** v0.1.0
+**Dependencies:** [Jobs API](/home/user/Omniops/app/api/jobs/README.md), [Queue API](/home/user/Omniops/app/api/queue/README.md)
+**Estimated Read Time:** 9 minutes
+
+## Purpose
+
+Complete API reference for managing individual jobs by ID, including retrieving job status, updating job state (pause/resume/cancel), and deleting jobs.
 
 ## Endpoints
 

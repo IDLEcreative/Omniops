@@ -5,11 +5,13 @@
 
 # AI Agents Tests Directory
 
+**Type:** Test Documentation
+**Status:** Active
+**Last Updated:** 2025-11-18
+**Verified For:** v0.1.0
+**Estimated Read Time:** 8 minutes
+
 **Purpose:** Comprehensive test suite for AI agent routing, commerce providers, customer service agents, and intelligent query processing.
-
-**Test Type:** Unit | Integration
-
-**Last Updated:** 2025-10-30
 
 **Coverage:** Agent routing logic, WooCommerce/Shopify providers, domain-agnostic agents, and intelligent customer service responses.
 

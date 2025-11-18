@@ -5,9 +5,16 @@
 
 # Configure Directory
 
-**Purpose:** Widget configuration wizard utilities
-**Last Updated:** 2025-10-30
-**Related:** [Components Configure](/components/configure), [Dashboard Settings](/app/dashboard/settings)
+**Type:** Utility
+**Status:** Active
+**Last Updated:** 2025-11-18
+**Verified For:** v0.1.0
+**Dependencies:** [Components Configure](/home/user/Omniops/components/configure), [Dashboard Settings](/home/user/Omniops/app/dashboard/settings)
+**Estimated Read Time:** 1 minute
+
+## Purpose
+
+Widget configuration wizard utilities for setup process and configuration validation.
 
 ## Overview
 

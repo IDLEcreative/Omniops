@@ -5,6 +5,12 @@
 
 # Cross-Frame Communication Tests
 
+**Type:** Test Documentation
+**Status:** Active
+**Last Updated:** 2025-11-18
+**Verified For:** v0.1.0
+**Estimated Read Time:** 2 minutes
+
 This directory contains refactored tests for cross-frame communication features, split into focused modules for better maintainability.
 
 ## Test Files

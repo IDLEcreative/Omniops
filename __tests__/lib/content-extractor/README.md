@@ -5,10 +5,14 @@
 
 # Content Extractor Tests
 
+**Type:** Test Documentation
+**Status:** Active
+**Last Updated:** 2025-11-18
+**Verified For:** v0.1.0
+**Estimated Read Time:** 5 minutes
+
 **Purpose:** Test suite for the refactored content extraction modules.
 
-**Last Updated:** 2025-11-10
-**Status:** Structure Created - Implementation Pending
 **Related:** [lib/content-extractor/](../../../lib/content-extractor/)
 
 ## Overview

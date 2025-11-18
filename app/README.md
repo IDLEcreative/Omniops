@@ -5,9 +5,41 @@
 
 # App Directory - OmniOps AI Customer Service Platform
 
-This directory contains the complete Next.js 15 App Router implementation for the OmniOps AI Customer Service Platform. Features a modern, performance-optimized architecture with Server Components, streaming UI, and comprehensive API endpoints.
+**Type:** Reference
+**Status:** Active
+**Last Updated:** 2025-11-18
+**Verified For:** v0.1.0
+**Dependencies:** [Components](/home/user/Omniops/components), [Lib](/home/user/Omniops/lib), [Types](/home/user/Omniops/types)
+**Estimated Read Time:** 9 minutes
 
-**Architecture Highlights:**
+## Purpose
+
+Complete Next.js 15 App Router implementation featuring 60+ API endpoints, multi-tenant pages, Server Components, streaming UI, and comprehensive coverage of AI chat, e-commerce integration, GDPR compliance, and analytics features.
+
+## Quick Links
+
+- [API Tests](/home/user/Omniops/__tests__/api/README.md)
+- [Components Directory](/home/user/Omniops/components/README.md)
+- [API Documentation](/home/user/Omniops/docs/03-API/reference.md)
+- [Architecture Overview](/home/user/Omniops/docs/01-ARCHITECTURE/overview.md)
+
+## Table of Contents
+
+- [Architecture Highlights](#architecture-highlights)
+- [Core Features Implementation](#core-features-implementation)
+- [Directory Structure](#directory-structure)
+- [API Routes](#api-routes)
+- [Pages & Layouts](#pages--layouts)
+- [Performance Optimization](#performance-optimization)
+- [Security & Authentication](#security--authentication)
+- [Testing](#testing)
+- [Best Practices](#best-practices)
+- [Related Documentation](#related-documentation)
+
+---
+
+## Architecture Highlights
+
 - **60+ API Endpoints**: Comprehensive REST API coverage for all features
 - **Multi-Tenant Pages**: Domain-based customer isolation and management
 - **Server Components First**: Optimized performance with selective client-side interactivity

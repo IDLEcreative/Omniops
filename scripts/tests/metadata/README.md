@@ -5,6 +5,28 @@
 
 # Conversation Competency Test Suite
 
+**Type:** Reference
+**Status:** Active
+**Last Updated:** 2025-11-18
+**Verified For:** v0.1.0
+**Dependencies:** [Conversation Metadata System](/home/user/Omniops/lib/chat/conversation-metadata.ts), [Response Parser](/home/user/Omniops/lib/chat/response-parser.ts), [Testing README](/home/user/Omniops/scripts/tests/README.md)
+**Estimated Read Time:** 4 minutes
+
+## Purpose
+
+Tests for measuring real-world conversation accuracy improvements through the metadata tracking system covering correction tracking, list references, and pronoun resolution.
+
+## Quick Links
+
+- [Testing README](/home/user/Omniops/scripts/tests/README.md)
+- [Main Scripts README](/home/user/Omniops/scripts/README.md)
+- [Conversation Metadata System](/home/user/Omniops/lib/chat/conversation-metadata.ts)
+- [Response Parser](/home/user/Omniops/lib/chat/response-parser.ts)
+
+## Keywords
+
+conversation accuracy, metadata tracking, pronoun resolution, correction tracking, list references, competency testing, AI accuracy
+
 This directory contains tests for measuring real-world conversation accuracy improvements through the metadata tracking system.
 
 ## Overview
@@ -222,8 +244,10 @@ scripts/tests/
 4. **Integrate with CI/CD** for automatic testing
 5. **Monitor production accuracy** against these benchmarks
 
-## References
+## Related Documentation
 
-- Expert Level Improvement Plan: `docs/EXPERT_LEVEL_IMPROVEMENT_PLAN.md`
-- Metadata System Architecture: `lib/chat/conversation-metadata.ts`
-- Response Parser Logic: `lib/chat/response-parser.ts`
+- [Expert Level Improvement Plan](/home/user/Omniops/docs/EXPERT_LEVEL_IMPROVEMENT_PLAN.md)
+- [Conversation Metadata System](/home/user/Omniops/lib/chat/conversation-metadata.ts)
+- [Response Parser](/home/user/Omniops/lib/chat/response-parser.ts)
+- [Testing README](/home/user/Omniops/scripts/tests/README.md)
+- [Main Scripts README](/home/user/Omniops/scripts/README.md)

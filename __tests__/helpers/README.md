@@ -5,11 +5,15 @@
 
 # Test Helpers Directory
 
+**Type:** Test Infrastructure
+**Status:** Active
+**Last Updated:** 2025-11-18
+**Verified For:** v0.1.0
+**Estimated Read Time:** 1 minute
+
 **Purpose:** Reusable test helper functions and utilities shared across test suites.
 
 **Test Type:** Test Infrastructure
-
-**Last Updated:** 2025-10-30
 
 **Coverage:** Common test helpers, assertion utilities, and shared test logic.
 

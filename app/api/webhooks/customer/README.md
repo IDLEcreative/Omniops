@@ -5,6 +5,44 @@
 
 # Customer Webhooks API
 
+**Type:** Reference
+**Status:** Active
+**Last Updated:** 2025-11-18
+**Verified For:** v0.1.0
+**Dependencies:** [Scrape Jobs API](/home/user/Omniops/app/api/scrape-jobs/README.md), [Queue Management](/home/user/Omniops/app/api/queue/README.md), [Database Schema](/home/user/Omniops/docs/09-REFERENCE/REFERENCE_DATABASE_SCHEMA.md)
+**Estimated Read Time:** 15 minutes
+
+## Purpose
+
+Complete technical reference for the Customer Webhooks API handling incoming webhooks from Supabase database changes and external scraping job notifications. This API processes webhook events, triggers automated job creation, manages database change workflows, and provides signature verification for secure webhook processing.
+
+## Quick Links
+
+- [API Routes Documentation](/home/user/Omniops/app/api/README.md)
+- [Scrape Jobs API](/home/user/Omniops/app/api/scrape-jobs/README.md)
+- [Queue Management API](/home/user/Omniops/app/api/queue/README.md)
+- [Database Schema](/home/user/Omniops/docs/09-REFERENCE/REFERENCE_DATABASE_SCHEMA.md)
+
+## Table of Contents
+
+- [Purpose](#purpose)
+- [Quick Links](#quick-links)
+- [Endpoints](#endpoints)
+  - [POST /api/webhooks/customer](#post-apiwebhookscustomer)
+  - [GET /api/webhooks/customer](#get-apiwebhookscustomer)
+- [Webhook Payload Types](#webhook-payload-types)
+  - [1. Scrape Job Notifications](#1-scrape-job-notifications)
+  - [2. Database Change Events](#2-database-change-events)
+- [Error Handling](#error-handling)
+- [Security](#security)
+- [Usage Examples](#usage-examples)
+- [Monitoring and Observability](#monitoring-and-observability)
+- [Best Practices](#best-practices)
+- [Related APIs](#related-apis)
+- [Keywords](#keywords)
+
+---
+
 The Customer Webhooks API handles incoming webhooks from Supabase database changes and external scraping job notifications. This endpoint processes events and triggers automated job creation and processing workflows.
 
 ## Endpoints
@@ -561,6 +599,33 @@ Handle duplicate webhooks gracefully:
 
 ## Related APIs
 
-- [Scrape Jobs API](/app/api/scrape-jobs/README.md) - Job creation triggered by webhooks
-- [Individual Scrape Job API](/app/api/scrape-jobs/[id]/README.md) - Job status updates
-- [Queue API](/app/api/queue/README.md) - Queue management for webhook processing
+- [Scrape Jobs API](/home/user/Omniops/app/api/scrape-jobs/README.md) - Job creation triggered by webhooks
+- [Individual Scrape Job API](/home/user/Omniops/app/api/scrape-jobs/[id]/README.md) - Job status updates
+- [Queue API](/home/user/Omniops/app/api/queue/README.md) - Queue management for webhook processing
+- [Customer Configuration](/home/user/Omniops/app/api/customer/README.md) - Customer config management
+
+## Keywords
+
+**API Categories:** webhooks, event processing, database triggers, automation, job orchestration
+
+**Core Features:** webhook handling, signature verification, event processing, job creation, database change notifications, automated workflows, health check endpoint
+
+**Technologies:** Supabase webhooks, database triggers, PostgreSQL, HMAC signatures, webhook security, event-driven architecture
+
+**Operations:** process webhooks, verify signatures, queue jobs, handle database changes, trigger workflows, validate payloads, health checks
+
+**Webhook Types:** scrape job notifications, database change events, customer config changes, domain changes
+
+**Events:** scrape_job_created, scrape_job_updated, scrape_job_completed, scrape_job_failed, INSERT, UPDATE
+
+**Tables:** customer_configs, domains, scrape_jobs
+
+**Security:** signature verification, HMAC validation, webhook authentication, HTTPS enforcement, rate limiting
+
+**Integrations:** Supabase database functions, job queue system, scraping jobs, customer configurations
+
+**Aliases:**
+- "webhook endpoint" (also known as: webhook handler, event receiver, notification endpoint)
+- "signature verification" (also known as: webhook authentication, HMAC validation, webhook security)
+- "database triggers" (also known as: database webhooks, change notifications, database events)
+- "automated workflows" (also known as: event-driven automation, webhook automation, triggered actions)

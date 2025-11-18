@@ -5,10 +5,26 @@
 
 # Web Scraping System - Complete Reference
 
-> **Last Updated:** 2025-10-24
-**Verified Accurate For:** v0.1.0 24, 2025
-> **Version:** 2.0 (Post-Optimization)
-> **Status:** Production Ready
+**Type:** Guide
+**Status:** Active
+**Last Updated:** 2025-11-18
+**Verified For:** v0.1.0
+**Dependencies:** [Content Extractor](/home/user/Omniops/lib/content-extractor.ts), [Crawler Config](/home/user/Omniops/lib/crawler-config.ts)
+**Estimated Read Time:** 75 minutes
+
+## Purpose
+
+Complete reference for the high-performance web scraping system including architecture, API reference, content extraction strategies, embedding generation, performance optimization, monitoring, troubleshooting, and production deployment.
+
+## Quick Links
+- [Content Extractor Implementation](/home/user/Omniops/lib/content-extractor.ts)
+- [Crawler Configuration](/home/user/Omniops/lib/crawler-config.ts)
+- [Database Schema](/home/user/Omniops/docs/09-REFERENCE/REFERENCE_DATABASE_SCHEMA.md)
+- [Performance Optimization](/home/user/Omniops/docs/09-REFERENCE/REFERENCE_PERFORMANCE_OPTIMIZATION.md)
+
+**Keywords:** web scraping, Playwright, Crawlee, Readability, embeddings, e-commerce extraction, semantic search, Redis, performance
+
+---
 
 ## Table of Contents
 

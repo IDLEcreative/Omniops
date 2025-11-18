@@ -5,7 +5,38 @@
 
 # Utility Functions Documentation
 
-This directory contains utility functions and helper modules that provide common functionality across the application. These utilities handle validation, formatting, security, and other cross-cutting concerns.
+**Type:** Utility
+**Status:** Active
+**Last Updated:** 2025-11-18
+**Verified For:** v0.1.0
+**Dependencies:** None (standalone utilities)
+**Estimated Read Time:** 4 minutes
+
+## Purpose
+
+Utility functions and helper modules that provide common functionality across the application. These utilities handle validation, formatting, security, and other cross-cutting concerns including domain validation, input sanitization, and data transformation.
+
+## Quick Links
+- [Config](/home/user/Omniops/lib/config.ts) - Configuration validation and schemas
+- [Encryption](/home/user/Omniops/lib/encryption.ts) - Security and encryption utilities
+- [Logger](/home/user/Omniops/lib/logger.ts) - Logging utilities
+- [Rate Limit](/home/user/Omniops/lib/rate-limit.ts) - Rate limiting utilities
+
+## Table of Contents
+- [Architecture](#architecture)
+- [Core Components](#core-components)
+- [Validation Patterns](#validation-patterns)
+- [Error Handling](#error-handling)
+- [Performance Optimizations](#performance-optimizations)
+- [Testing](#testing)
+- [Security Considerations](#security-considerations)
+- [Integration Examples](#integration-examples)
+- [Future Utilities](#future-utilities)
+- [Best Practices](#best-practices)
+- [Related Components](#related-components)
+- [Contributing](#contributing)
+
+---
 
 ## Overview
 
@@ -423,10 +454,10 @@ function parseJson<T>(jsonString: string): T | null {
 
 ## Related Components
 
-- `/lib/config.ts` - Configuration validation and schemas
-- `/lib/encryption.ts` - Security and encryption utilities
-- `/lib/logger.ts` - Logging utilities
-- `/lib/rate-limit.ts` - Rate limiting utilities
+- [Config](/home/user/Omniops/lib/config.ts) - Configuration validation and schemas
+- [Encryption](/home/user/Omniops/lib/encryption.ts) - Security and encryption utilities
+- [Logger](/home/user/Omniops/lib/logger.ts) - Logging utilities
+- [Rate Limit](/home/user/Omniops/lib/rate-limit.ts) - Rate limiting utilities
 
 ## Contributing
 

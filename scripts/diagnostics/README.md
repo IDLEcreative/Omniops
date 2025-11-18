@@ -5,9 +5,27 @@
 
 # Diagnostic Scripts
 
-**Purpose:** Service-specific diagnostic tools for troubleshooting integrations
-**Last Updated:** 2025-10-30
-**Usage:** Run diagnostic scripts using `npx tsx` from project root
+**Type:** Reference
+**Status:** Active
+**Last Updated:** 2025-11-18
+**Verified For:** v0.1.0
+**Dependencies:** [WooCommerce Integration](/home/user/Omniops/docs/06-INTEGRATIONS/INTEGRATION_WOOCOMMERCE.md), [Main Scripts README](/home/user/Omniops/scripts/README.md)
+**Estimated Read Time:** 4 minutes
+
+## Purpose
+
+Service-specific diagnostic tools for troubleshooting WooCommerce and external service integrations with comprehensive connectivity testing and configuration validation.
+
+## Quick Links
+
+- [Main Scripts README](/home/user/Omniops/scripts/README.md)
+- [WooCommerce Integration](/home/user/Omniops/docs/06-INTEGRATIONS/INTEGRATION_WOOCOMMERCE.md)
+- [Monitoring Tools](/home/user/Omniops/scripts/monitoring/README.md)
+- [Database Tools](/home/user/Omniops/scripts/database/README.md)
+
+## Keywords
+
+diagnostics, troubleshooting, WooCommerce, API, connectivity, configuration, widget, integration testing
 
 ## Overview
 
@@ -251,6 +269,6 @@ curl https://your-app.vercel.app/embed.js
 
 ## Related Documentation
 
-- [WooCommerce Integration](../../docs/06-INTEGRATIONS/INTEGRATION_WOOCOMMERCE.md)
-- [Widget Embedding](../../docs/widget-embedding.md)
-- [Main Scripts README](../README.md)
+- [WooCommerce Integration](/home/user/Omniops/docs/06-INTEGRATIONS/INTEGRATION_WOOCOMMERCE.md)
+- [Widget Embedding](/home/user/Omniops/docs/widget-embedding.md)
+- [Main Scripts README](/home/user/Omniops/scripts/README.md)

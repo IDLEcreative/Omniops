@@ -5,8 +5,27 @@
 
 # Dashboard Overview API Module
 
-**Location:** `/lib/api/dashboard-overview/`
-**Purpose:** Modular, reusable business logic for dashboard overview API endpoint
+**Type:** API
+**Status:** Active
+**Last Updated:** 2025-11-18
+**Verified For:** v0.1.0
+**Dependencies:** [Supabase](/home/user/Omniops/lib/supabase-server.ts), [Dashboard Analytics](/home/user/Omniops/lib/dashboard/analytics.ts)
+**Estimated Read Time:** 4 minutes
+
+## Purpose
+
+Modular, reusable business logic for dashboard overview API endpoint with type-safe data fetching and transformation.
+
+## Quick Links
+- [Main Handler](handlers.ts) - Business logic orchestration
+- [Services](services.ts) - Data fetching
+- [Types](types.ts) - TypeScript definitions
+- [API Route](/home/user/Omniops/app/api/dashboard/overview/route.ts) - HTTP endpoint
+
+## Keywords
+- Dashboard, Overview, Analytics, API, Business Logic, Data Services
+
+---
 
 ## Module Structure
 

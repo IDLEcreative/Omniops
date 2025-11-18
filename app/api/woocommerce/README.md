@@ -5,6 +5,59 @@
 
 # WooCommerce API
 
+**Type:** Reference
+**Status:** Active
+**Last Updated:** 2025-11-18
+**Verified For:** v0.1.0
+**Dependencies:** [WooCommerce Integration Guide](/home/user/Omniops/lib/woocommerce-api/README.md), [Customer Configuration](/home/user/Omniops/app/api/customer/README.md)
+**Estimated Read Time:** 15 minutes
+
+## Purpose
+
+This document provides comprehensive technical reference for WooCommerce integration endpoints including product search, inventory management, order tracking, cart operations, and secure credential management with AES-256 encryption.
+
+## Quick Links
+
+- [API Routes Documentation](/home/user/Omniops/app/api/README.md)
+- [Chat API Integration](/home/user/Omniops/app/api/chat/README.md)
+- [WooCommerce Provider Implementation](/home/user/Omniops/lib/agents/providers/README.md)
+- [Database Schema](/home/user/Omniops/docs/09-REFERENCE/REFERENCE_DATABASE_SCHEMA.md)
+
+## Keywords
+
+**Primary**: WooCommerce API, e-commerce integration, product search, order management, cart operations, inventory management
+**Aliases**: woocommerce endpoints, WC API, commerce integration, product API
+**Related**: WooCommerce agent, customer verification, abandoned cart recovery, stock management
+
+## Table of Contents
+
+- [Overview](#overview)
+- [Endpoints](#endpoints)
+  - [POST /api/woocommerce/products](#post-apiwoocommerceproducts)
+  - [GET /api/woocommerce/products](#get-apiwoocommerceproducts)
+  - [POST /api/woocommerce/abandoned-carts](#post-apiwoocommerceabandoned-carts)
+  - [GET /api/woocommerce/stock](#get-apiwoocommercestock)
+  - [POST /api/woocommerce/customer-action](#post-apiwoocommercecustomer-action)
+  - [GET /api/woocommerce/dashboard](#get-apiwoocommercedashboard)
+- [Features](#features)
+  - [Product Management](#product-management)
+  - [Order Processing](#order-processing)
+  - [Cart Operations](#cart-operations)
+  - [Inventory Management](#inventory-management)
+- [Configuration](#configuration)
+- [Performance](#performance)
+- [Examples](#examples)
+- [Security Features](#security-features)
+- [Error Handling](#error-handling)
+- [Integration](#integration)
+- [WooCommerce Agent Operations](#woocommerce-agent-operations)
+- [Best Practices](#best-practices)
+- [Troubleshooting](#troubleshooting)
+- [Related Endpoints](#related-endpoints)
+- [Migration & Updates](#migration--updates)
+
+---
+
 E-commerce integration endpoints for product management, order processing, and customer service automation.
 
 ## Overview

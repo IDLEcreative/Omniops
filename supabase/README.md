@@ -5,7 +5,16 @@
 
 # Supabase Directory
 
-Database migrations, configurations, and Supabase-specific files.
+**Type:** Reference
+**Status:** Active
+**Last Updated:** 2025-11-18
+**Verified For:** v0.1.0
+**Dependencies:** [Database Schema Reference](/home/user/Omniops/docs/09-REFERENCE/REFERENCE_DATABASE_SCHEMA.md), [Migrations README](/home/user/Omniops/supabase/migrations/README.md)
+**Estimated Read Time:** 8 minutes
+
+## Purpose
+
+Complete reference for database migrations, configurations, and Supabase-specific files including schema definitions, migration procedures, and database management best practices.
 
 ## Structure
 

@@ -5,6 +5,13 @@
 
 # Playwright Test Helpers
 
+**Type:** Test Infrastructure
+**Status:** Active
+**Last Updated:** 2025-11-18
+**Verified For:** v0.1.0
+**Estimated Read Time:** 1 minutes
+
+
 **Purpose:** Shared utilities and setup functions for E2E integration tests.
 
 **Last Updated:** 2025-11-15

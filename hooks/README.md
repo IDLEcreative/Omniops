@@ -5,9 +5,40 @@
 
 # Hooks Directory
 
-**Purpose:** Custom React hooks for state management and API integration across the OmniOps application
-**Last Updated:** 2025-10-30
-**Related:** [Components](/components), [Lib](/lib), [Types](/types)
+**Type:** Reference
+**Status:** Active
+**Last Updated:** 2025-11-18
+**Verified For:** v0.1.0
+**Dependencies:** [Components](/home/user/Omniops/components), [Lib](/home/user/Omniops/lib), [Types](/home/user/Omniops/types)
+**Estimated Read Time:** 8 minutes
+
+## Purpose
+
+Custom React hooks for state management and API integration across the OmniOps application, providing reusable logic for dashboard data fetching, GDPR compliance, keyboard shortcuts, and real-time subscriptions with proper cleanup and error handling.
+
+## Quick Links
+
+- [Components Directory](/home/user/Omniops/components/README.md)
+- [Hook Tests](/home/user/Omniops/__tests__/hooks)
+- [Testing Guide](/home/user/Omniops/docs/TESTING_GUIDE.md)
+- [Types Directory](/home/user/Omniops/types/README.md)
+
+## Table of Contents
+
+- [Overview](#overview)
+- [Directory Structure](#directory-structure)
+- [Key Hooks](#key-hooks)
+  - [Dashboard Data Fetching](#dashboard-data-fetching)
+  - [GDPR Compliance](#gdpr-compliance)
+  - [Real-time Features](#real-time-features)
+  - [UI Utilities](#ui-utilities)
+- [Hook Patterns](#hook-patterns)
+- [Performance Considerations](#performance-considerations)
+- [Testing Hooks](#testing-hooks)
+- [Best Practices](#best-practices)
+- [Related Documentation](#related-documentation)
+
+---
 
 ## Overview
 

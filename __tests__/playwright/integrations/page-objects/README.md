@@ -5,6 +5,13 @@
 
 # Playwright Page Objects
 
+**Type:** Test Infrastructure
+**Status:** Active
+**Last Updated:** 2025-11-18
+**Verified For:** v0.1.0
+**Estimated Read Time:** 1 minutes
+
+
 **Purpose:** Reusable page object models for E2E test interactions.
 
 **Last Updated:** 2025-11-15

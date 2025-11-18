@@ -5,7 +5,23 @@
 
 # Job Statistics API
 
-The Job Statistics API provides comprehensive analytics and reporting for scrape jobs. This endpoint offers insights into job performance, success rates, domain-specific metrics, and system health indicators.
+**Type:** Reference
+**Status:** Active
+**Last Updated:** 2025-11-18
+**Verified For:** v0.1.0
+**Dependencies:** [Scrape Jobs API](/home/user/Omniops/app/api/scrape-jobs/README.md), [Individual Scrape Job API](/home/user/Omniops/app/api/scrape-jobs/[id]/README.md)
+**Estimated Read Time:** 15 minutes
+
+## Purpose
+
+Complete API reference for comprehensive analytics and reporting on scrape jobs, including job performance metrics, success rates, domain-specific analytics, error analysis, and system health indicators.
+
+## Quick Links
+
+- [Scrape Jobs API](/home/user/Omniops/app/api/scrape-jobs/README.md)
+- [Individual Scrape Job API](/home/user/Omniops/app/api/scrape-jobs/[id]/README.md)
+- [Job Queue API](/home/user/Omniops/app/api/scrape-jobs/next/README.md)
+- [Job Retry API](/home/user/Omniops/app/api/scrape-jobs/[id]/retry/README.md)
 
 ## Endpoints
 

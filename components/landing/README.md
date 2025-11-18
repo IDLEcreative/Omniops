@@ -5,9 +5,28 @@
 
 # Landing Directory
 
-**Purpose:** Landing page marketing components
-**Last Updated:** 2025-10-30
-**Related:** [Home Page](/app/page.tsx)
+**Type:** Reference
+**Status:** Active
+**Last Updated:** 2025-11-18
+**Verified For:** v0.1.0
+**Dependencies:** [Home Page](/home/user/Omniops/app/page.tsx), [Pricing Components](/home/user/Omniops/components/pricing/README.md), [UI Components](/home/user/Omniops/components/ui/README.md)
+**Estimated Read Time:** 2 minutes
+
+## Purpose
+
+Landing page marketing components for the public-facing homepage, including hero section, features showcase, pricing display, call-to-action sections, and footer.
+
+## Quick Links
+
+- [Main Components Directory](/home/user/Omniops/components/README.md)
+- [Demo Components](/home/user/Omniops/components/demo/README.md)
+- [Pricing Components](/home/user/Omniops/components/pricing/README.md)
+
+---
+
+## Keywords
+
+landing page, marketing, hero section, features, pricing, CTA, footer, SEO
 
 ## Overview
 

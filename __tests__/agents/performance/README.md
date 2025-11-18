@@ -5,9 +5,14 @@
 
 # Agent Performance Benchmark Modules
 
+**Type:** Test Documentation
+**Status:** Active
+**Last Updated:** 2025-11-18
+**Verified For:** v0.1.0
+**Estimated Read Time:** 2 minutes
+
 **Purpose:** Modular performance benchmarks for the customer agent system, split into focused categories to comply with 300 LOC limit.
 
-**Last Updated:** 2025-11-08
 **Related:** [Benchmark Helpers](../../utils/benchmark/helpers.ts), [Main Runner](../test-agent-performance-benchmark.ts)
 
 ## Structure

@@ -5,11 +5,26 @@
 
 # E-commerce Provider System
 
-**Purpose:** E-commerce provider implementations for WooCommerce and Shopify integrations with the AI agent system.
-
-**Integration Type:** Service Provider
-**Last Updated:** 2025-10-30
+**Type:** Service
 **Status:** Active
+**Last Updated:** 2025-11-18
+**Verified For:** v0.1.0
+**Dependencies:** [WooCommerce Dynamic](/home/user/Omniops/lib/woocommerce-dynamic.ts), [Shopify Dynamic](/home/user/Omniops/lib/shopify-dynamic.ts), [Encryption](/home/user/Omniops/lib/encryption.ts)
+**Estimated Read Time:** 6 minutes
+
+## Purpose
+
+E-commerce provider implementations for WooCommerce and Shopify integrations with the AI agent system, handling platform-specific data retrieval and customer verification.
+
+## Quick Links
+- [WooCommerce Provider](woocommerce-provider.ts) - WooCommerce integration
+- [Shopify Provider](shopify-provider.ts) - Shopify integration
+- [AI Agents](/home/user/Omniops/lib/agents/README.md) - Agent system documentation
+
+## Keywords
+- E-commerce, Providers, WooCommerce, Shopify, Integration, Customer Verification, Order Management
+
+---
 
 ## Overview
 

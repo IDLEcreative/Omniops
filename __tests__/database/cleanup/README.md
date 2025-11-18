@@ -5,10 +5,13 @@
 
 # Database Cleanup Modules
 
-**Purpose:** Modular components for the database cleanup CLI tool
-
+**Type:** Test Documentation
 **Status:** Active
-**Last Updated:** 2025-11-10
+**Last Updated:** 2025-11-18
+**Verified For:** v0.1.0
+**Estimated Read Time:** 1 minute
+
+**Purpose:** Modular components for the database cleanup CLI tool
 
 ## Modules
 

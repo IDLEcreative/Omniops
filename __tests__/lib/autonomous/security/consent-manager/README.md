@@ -5,11 +5,15 @@
 
 # ConsentManager Test Suite
 
+**Type:** Test Documentation
+**Status:** Active
+**Last Updated:** 2025-11-18
+**Verified For:** v0.1.0
+**Estimated Read Time:** 2 minutes
+
 **Purpose:** Modular test suite for the ConsentManager class with focused test files organized by functionality.
 
-**Last Updated:** 2025-11-10
-**Status:** Active
-**Related:** `/lib/autonomous/security/consent-manager.ts`
+**Related:** `/home/user/Omniops/lib/autonomous/security/consent-manager.ts`
 
 ## Test Files
 

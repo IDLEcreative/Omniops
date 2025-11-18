@@ -5,9 +5,52 @@
 
 # GitHub Workflows
 
-**Purpose:** CI/CD pipelines and automated workflow documentation
-**Last Updated:** 2025-10-30
-**Usage:** Workflows run automatically on GitHub Actions
+**Type:** Reference
+**Status:** Active
+**Last Updated:** 2025-11-18
+**Verified For:** v0.1.0
+**Dependencies:** None
+**Estimated Read Time:** 12 minutes
+
+## Purpose
+
+Documentation for all GitHub Actions workflows including brand-agnostic compliance checks, documentation link validation, GDPR/CCPA compliance verification, and automated review reminders.
+
+## Quick Links
+
+- [Brand-Agnostic Requirements](/home/user/Omniops/CLAUDE.md#-critical-brand-agnostic-application-)
+- [Documentation Standards](/home/user/Omniops/CLAUDE.md#documentation-standards-for-ai-discoverability)
+- [Privacy Compliance](/home/user/Omniops/docs/PRIVACY_COMPLIANCE.md)
+- [GitHub Actions Documentation](https://docs.github.com/en/actions)
+
+## Table of Contents
+
+- [Overview](#overview)
+- [Available Workflows](#available-workflows)
+  - [brand-check.yml](#brand-checkyml)
+  - [doc-link-check.yml](#doc-link-checkyml)
+  - [doc-review-reminders.yml](#doc-review-remindersyml)
+  - [doc-version-check.yml](#doc-version-checkyml)
+  - [nightly-telemetry-gdpr.yml](#nightly-telemetry-gdpryml)
+- [Workflow Configuration](#workflow-configuration)
+- [Adding New Workflows](#adding-new-workflows)
+- [Workflow Status Badges](#workflow-status-badges)
+- [Secrets and Environment Variables](#secrets-and-environment-variables)
+- [Troubleshooting](#troubleshooting)
+- [Scheduled Workflow Times](#scheduled-workflow-times-utc)
+- [Related Documentation](#related-documentation)
+
+## Keywords
+
+**Search Terms:** GitHub Actions, CI/CD, workflows, automation, brand-check, documentation validation, GDPR compliance, privacy checks
+
+**Aliases:**
+- "GitHub Actions" (service)
+- "CI/CD pipelines" (category)
+- "Automated workflows" (function)
+- "Compliance checks" (feature)
+
+---
 
 ## Overview
 

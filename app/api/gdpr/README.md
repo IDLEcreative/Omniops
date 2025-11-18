@@ -5,6 +5,55 @@
 
 # GDPR Compliance API
 
+**Type:** Reference
+**Status:** Active
+**Last Updated:** 2025-11-18
+**Verified For:** v0.1.0
+**Dependencies:** [Privacy API](/home/user/Omniops/app/api/privacy/README.md), [Database Schema](/home/user/Omniops/docs/09-REFERENCE/REFERENCE_DATABASE_SCHEMA.md)
+**Estimated Read Time:** 15 minutes
+
+## Purpose
+
+This document provides comprehensive technical reference for GDPR, CCPA, and data protection compliance features including Article 15 (Right of Access) data export, Article 17 (Right to Erasure) data deletion, and comprehensive privacy request management with audit logging.
+
+## Quick Links
+
+- [Privacy API](/home/user/Omniops/app/api/privacy/README.md)
+- [API Routes Documentation](/home/user/Omniops/app/api/README.md)
+- [Customer Configuration](/home/user/Omniops/app/api/customer/README.md)
+- [Monitoring Endpoints](/home/user/Omniops/app/api/monitoring/README.md)
+
+## Keywords
+
+**Primary**: GDPR compliance, CCPA compliance, data export, data deletion, privacy requests, Article 15, Article 17
+**Aliases**: GDPR endpoints, privacy compliance, data protection, regulatory compliance
+**Related**: right of access, right to erasure, data portability, audit logging, privacy regulations
+
+## Table of Contents
+
+- [Overview](#overview)
+- [Endpoints](#endpoints)
+  - [POST /api/gdpr/export](#post-apigdprexport)
+  - [POST /api/gdpr/delete](#post-apigdprdelete)
+- [Features](#features)
+  - [Data Export (GDPR Article 15)](#data-export-gdpr-article-15)
+  - [Data Deletion (GDPR Article 17)](#data-deletion-gdpr-article-17)
+  - [Privacy Request Management](#privacy-request-management)
+- [Data Scope](#data-scope)
+- [Compliance Features](#compliance-features)
+- [Security Measures](#security-measures)
+- [Examples](#examples)
+- [Error Handling](#error-handling)
+- [Performance](#performance)
+- [Audit and Logging](#audit-and-logging)
+- [Integration](#integration)
+- [Best Practices](#best-practices)
+- [Regulatory Timelines](#regulatory-timelines)
+- [Related Endpoints](#related-endpoints)
+- [Legal Disclaimers](#legal-disclaimers)
+
+---
+
 Privacy-compliant data management endpoints supporting GDPR, CCPA, and other data protection regulations.
 
 ## Overview
