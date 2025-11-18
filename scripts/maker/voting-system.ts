@@ -132,11 +132,19 @@ export function firstToAheadByK(
  *
  * We hash the meaningful parts of the result (files, changes, verification)
  * and ignore metadata like timestamps and agent IDs.
+ *
+ * NOTE: We use "buckets" for line counts to allow minor variations
+ * (±20% is considered equivalent) since different agents may make
+ * slightly different but equally correct changes.
  */
 function hashResult(result: AgentResult): string {
+  // Bucket line counts to allow ±20% variation
+  // e.g., 42 lines and 50 lines both map to bucket "40-60"
+  const lineBucket = Math.floor(result.changes.lines_changed / 20) * 20;
+
   const meaningful = {
     files: result.changes.files_modified.sort(),
-    lines: result.changes.lines_changed,
+    lineBucket, // Use bucket instead of exact count
     verification: result.verification.exit_code,
     approach: normalizeApproach(result.approach),
   };
