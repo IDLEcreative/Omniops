@@ -8,18 +8,20 @@ import { generateEmbeddingVectors } from '@/lib/embeddings-functions';
 import OpenAI from 'openai';
 
 // Mock OpenAI
+const mockCreateFn = jest.fn().mockResolvedValue({
+  data: [
+    { embedding: new Array(1536).fill(0.1) },
+    { embedding: new Array(1536).fill(0.2) },
+    { embedding: new Array(1536).fill(0.3) },
+  ]
+});
+
 jest.mock('openai', () => {
   return {
     __esModule: true,
     default: jest.fn().mockImplementation(() => ({
       embeddings: {
-        create: jest.fn().mockResolvedValue({
-          data: [
-            { embedding: new Array(1536).fill(0.1) },
-            { embedding: new Array(1536).fill(0.2) },
-            { embedding: new Array(1536).fill(0.3) },
-          ]
-        })
+        create: mockCreateFn
       }
     }))
   };
@@ -171,8 +173,7 @@ describe('Embedding Cache', () => {
       const firstResult = await generateEmbeddingVectors(chunks);
 
       // Clear mock call history
-      const mockCreate = (OpenAI as jest.MockedClass<typeof OpenAI>).mock.results[0].value.embeddings.create;
-      mockCreate.mockClear();
+      mockCreateFn.mockClear();
 
       // Second call - should use cache
       const secondResult = await generateEmbeddingVectors(chunks);
@@ -181,7 +182,7 @@ describe('Embedding Cache', () => {
       expect(secondResult).toEqual(firstResult);
 
       // Should NOT call OpenAI API
-      expect(mockCreate).not.toHaveBeenCalled();
+      expect(mockCreateFn).not.toHaveBeenCalled();
     });
 
     it('uses partial cache for mixed hits and misses', async () => {
