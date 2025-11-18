@@ -23,10 +23,13 @@ jest.mock('@/lib/logger', () => ({
   }
 }));
 
-// Mock rate-limit - define mocks in factory
+// Mock rate-limit module
 jest.mock('@/lib/rate-limit', () => ({
   checkRateLimit: jest.fn(),
-  resetRateLimit: jest.fn()
+  resetRateLimit: jest.fn(),
+  checkDomainRateLimit: jest.fn(),
+  checkExpensiveOpRateLimit: jest.fn(),
+  getRateLimitStatus: jest.fn()
 }));
 
 import {
@@ -35,20 +38,20 @@ import {
   withAPIRateLimit,
   RATE_LIMIT_TIERS
 } from '@/lib/middleware/api-rate-limit';
+import { checkRateLimit, resetRateLimit } from '@/lib/rate-limit';
 
-// Get references to the mocked functions after import
-import * as rateLimitModule from '@/lib/rate-limit';
-const mockCheckRateLimit = jest.mocked(rateLimitModule.checkRateLimit);
-const mockResetRateLimit = jest.mocked(rateLimitModule.resetRateLimit);
+// Get references to mocked functions using jest.mocked
+const mockedCheckRateLimit = jest.mocked(checkRateLimit);
+const mockedResetRateLimit = jest.mocked(resetRateLimit);
 
-// TODO: Fix Jest mocking issues - mock functions not being called correctly
-// Issue: jest.mock() factory pattern not working with external mock references
-// Need to refactor to use proper Jest mocking patterns
+// TODO: Fix Jest mocking issue - jest.mocked() not working correctly with ES module imports
+// The mock is set up correctly but jest.mocked() returns a non-function value
+// Need to investigate proper pattern for mocking async functions from ES modules
 describe.skip('API Rate Limiting - Enforcement & Headers', () => {
   beforeEach(() => {
     jest.clearAllMocks();
     // Default: allow requests
-    mockCheckRateLimit.mockResolvedValue({
+    mockedCheckRateLimit.mockResolvedValue({
       allowed: true,
       remaining: 10,
       resetTime: Date.now() + 60000
@@ -57,7 +60,7 @@ describe.skip('API Rate Limiting - Enforcement & Headers', () => {
 
   describe('applyRateLimit', () => {
     it('should allow requests within rate limit', async () => {
-      mockCheckRateLimit.mockResolvedValue({
+      mockedCheckRateLimit.mockResolvedValue({
         allowed: true,
         remaining: 10,
         resetTime: Date.now() + 60000
@@ -70,7 +73,7 @@ describe.skip('API Rate Limiting - Enforcement & Headers', () => {
 
       const result = await applyRateLimit(request);
       expect(result).toBeNull();
-      expect(mockCheckRateLimit).toHaveBeenCalledWith(
+      expect(mockedCheckRateLimit).toHaveBeenCalledWith(
         'api:chat:ip:192.168.1.1',
         RATE_LIMIT_TIERS.chat.maxRequests,
         RATE_LIMIT_TIERS.chat.windowMs
@@ -79,7 +82,7 @@ describe.skip('API Rate Limiting - Enforcement & Headers', () => {
 
     it('should return 429 when rate limit exceeded', async () => {
       const resetTime = Date.now() + 60000;
-      mockCheckRateLimit.mockResolvedValue({
+      mockedCheckRateLimit.mockResolvedValue({
         allowed: false,
         remaining: 0,
         resetTime
@@ -113,7 +116,7 @@ describe.skip('API Rate Limiting - Enforcement & Headers', () => {
 
       await applyRateLimit(request, user);
 
-      expect(mockCheckRateLimit).toHaveBeenCalledWith(
+      expect(mockedCheckRateLimit).toHaveBeenCalledWith(
         'api:chat:user:user-123',
         expect.any(Number),
         expect.any(Number)
@@ -127,7 +130,7 @@ describe.skip('API Rate Limiting - Enforcement & Headers', () => {
 
       const result = await applyRateLimit(request);
       expect(result).toBeNull();
-      expect(mockCheckRateLimit).not.toHaveBeenCalled();
+      expect(mockedCheckRateLimit).not.toHaveBeenCalled();
     });
 
     it('should bypass rate limiting for trusted IPs', async () => {
@@ -140,13 +143,13 @@ describe.skip('API Rate Limiting - Enforcement & Headers', () => {
 
       const result = await applyRateLimit(request);
       expect(result).toBeNull();
-      expect(mockCheckRateLimit).not.toHaveBeenCalled();
+      expect(mockedCheckRateLimit).not.toHaveBeenCalled();
 
       delete process.env.TRUSTED_IPS;
     });
 
     it('should fail open when Redis fails', async () => {
-      mockCheckRateLimit.mockRejectedValue(new Error('Redis connection failed'));
+      mockedCheckRateLimit.mockRejectedValue(new Error('Redis connection failed'));
 
       const request = new NextRequest('http://localhost/api/chat', {
         method: 'POST',
@@ -166,7 +169,7 @@ describe.skip('API Rate Limiting - Enforcement & Headers', () => {
       ];
 
       for (const endpoint of endpoints) {
-        mockCheckRateLimit.mockResolvedValue({
+        mockedCheckRateLimit.mockResolvedValue({
           allowed: true,
           remaining: 10,
           resetTime: Date.now() + 60000
@@ -179,8 +182,8 @@ describe.skip('API Rate Limiting - Enforcement & Headers', () => {
 
         await applyRateLimit(request);
 
-        expect(mockCheckRateLimit).toHaveBeenCalled();
-        const lastCall = mockCheckRateLimit.mock.calls[mockCheckRateLimit.mock.calls.length - 1];
+        expect(mockedCheckRateLimit).toHaveBeenCalled();
+        const lastCall = mockedCheckRateLimit.mock.calls[mockedCheckRateLimit.mock.calls.length - 1];
         expect(lastCall[0]).toContain(`api:${endpoint.tier}:ip:`);
         expect(lastCall[1]).toBe(endpoint.limit);
 
@@ -191,7 +194,7 @@ describe.skip('API Rate Limiting - Enforcement & Headers', () => {
 
   describe('addRateLimitHeaders', () => {
     it('should add rate limit headers to response', async () => {
-      mockCheckRateLimit.mockResolvedValue({
+      mockedCheckRateLimit.mockResolvedValue({
         allowed: true,
         remaining: 45,
         resetTime: Date.now() + 60000
@@ -224,7 +227,7 @@ describe.skip('API Rate Limiting - Enforcement & Headers', () => {
 
     it('should handle errors gracefully', async () => {
       jest.clearAllMocks();
-      mockCheckRateLimit.mockRejectedValue(new Error('Redis error'));
+      mockedCheckRateLimit.mockRejectedValue(new Error('Redis error'));
 
       const response = NextResponse.json({ success: true });
       const request = new NextRequest('http://localhost/api/chat', {
@@ -243,7 +246,7 @@ describe.skip('API Rate Limiting - Enforcement & Headers', () => {
         headers: { 'x-forwarded-for': '192.168.1.1' }
       });
 
-      mockCheckRateLimit.mockResolvedValue({
+      mockedCheckRateLimit.mockResolvedValue({
         allowed: true,
         remaining: 10,
         resetTime: Date.now() + 60000
@@ -266,7 +269,7 @@ describe.skip('API Rate Limiting - Enforcement & Headers', () => {
         headers: { 'x-forwarded-for': '192.168.1.1' }
       });
 
-      mockCheckRateLimit.mockResolvedValueOnce({
+      mockedCheckRateLimit.mockResolvedValueOnce({
         allowed: false,
         remaining: 0,
         resetTime: Date.now() + 60000
@@ -285,7 +288,7 @@ describe.skip('API Rate Limiting - Enforcement & Headers', () => {
         headers: { 'x-forwarded-for': '192.168.1.1' }
       });
 
-      mockCheckRateLimit.mockResolvedValue({
+      mockedCheckRateLimit.mockResolvedValue({
         allowed: true,
         remaining: 150,
         resetTime: Date.now() + 60000

@@ -83,8 +83,10 @@ jest.mock('@/lib/redis-fallback', () => ({
   })),
 }));
 
-// TODO: Fix fallback scenarios - missing USE_GPT5_MINI env var
-describe.skip('WooCommerce E2E: Fallback Scenarios', () => {
+// Set required environment variable
+process.env.USE_GPT5_MINI = 'true';
+
+describe('WooCommerce E2E: Fallback Scenarios', () => {
   let mockOpenAIInstance: jest.Mocked<OpenAI>;
   let commerceModule: any;
   let embeddingsModule: any;

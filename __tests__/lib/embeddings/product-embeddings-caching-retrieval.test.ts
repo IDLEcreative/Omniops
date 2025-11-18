@@ -81,7 +81,9 @@ describe('Product Embeddings Caching - Retrieval and Integration', () => {
   });
 
   describe('scoreProductsBySimilarity - WITH Domain (Caching Enabled)', () => {
-    // TODO: Fix cache mock - OpenAI is being called even with cached data
+    // TODO: Fix cache mock - OpenAI is being called even when cache hit mock is set up
+    // The setupCacheHitMock appears to correctly mock the Supabase response
+    // but the product-embeddings code is still calling OpenAI
     it.skip('uses cached embeddings when available', async () => {
       const cachedEmbedding = new Array(1536).fill(0.1);
       const products = [

@@ -84,8 +84,10 @@ jest.mock('@/lib/redis-fallback', () => ({
   })),
 }));
 
-// TODO: Fix WooCommerce product search tests - getting 500 instead of 200
-describe.skip('WooCommerce E2E: Product Search', () => {
+// Set required environment variable
+process.env.USE_GPT5_MINI = 'true';
+
+describe('WooCommerce E2E: Product Search', () => {
   let mockOpenAIInstance: jest.Mocked<OpenAI>;
   let commerceModule: any;
   let embeddingsModule: any;

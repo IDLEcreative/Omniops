@@ -42,7 +42,7 @@ function setupMocks() {
   return mockSupabaseClient;
 }
 
-// TODO: Fix engagement metrics test - activeCount is 0 instead of 2
+// TODO: Fix activeCount calculation - mocks aren't returning expected values
 describe.skip('Event Aggregator - Engagement & Activity', () => {
   beforeEach(() => {
     originalDateNow = Date.now;
