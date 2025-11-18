@@ -38,9 +38,11 @@ export function calculateCosineSimilarity(a: number[], b: number[]): number {
   let normB = 0;
 
   for (let i = 0; i < a.length; i++) {
-    dotProduct += a[i] * b[i];
-    normA += a[i] * a[i];
-    normB += b[i] * b[i];
+    const ai = a[i] ?? 0;
+    const bi = b[i] ?? 0;
+    dotProduct += ai * bi;
+    normA += ai * ai;
+    normB += bi * bi;
   }
 
   normA = Math.sqrt(normA);
@@ -128,17 +130,21 @@ export function deduplicateResults(results: ScoredResult[]): ScoredResult[] {
     convResults.sort((a, b) => b.combinedScore - a.combinedScore);
 
     // Take top result and maybe one more if significantly different
-    deduplicated.push(convResults[0]);
+    const topResult = convResults[0];
+    if (topResult) {
+      deduplicated.push(topResult);
+    }
 
-    if (convResults.length > 1 && convResults[1].combinedScore > 0.5) {
+    const secondResult = convResults[1];
+    if (convResults.length > 1 && secondResult && secondResult.combinedScore > 0.5 && topResult) {
       // Check if messages are not adjacent
-      const time1 = new Date(convResults[0].createdAt).getTime();
-      const time2 = new Date(convResults[1].createdAt).getTime();
+      const time1 = new Date(topResult.createdAt).getTime();
+      const time2 = new Date(secondResult.createdAt).getTime();
       const timeDiff = Math.abs(time1 - time2) / 1000; // seconds
 
       if (timeDiff > 60) {
         // Messages are more than 1 minute apart
-        deduplicated.push(convResults[1]);
+        deduplicated.push(secondResult);
       }
     }
   });

@@ -3,7 +3,7 @@
  * Combines multiple signals to rank search results intelligently
  */
 
-import type { CommerceProduct } from '@/types/supabase/commerce';
+import type { CommerceProduct, EnrichedProduct } from '@/lib/search/result-consolidator';
 
 export interface RankingSignal {
   semanticSimilarity: number;    // 0-1 from embeddings
@@ -23,7 +23,7 @@ export interface RankingWeights {
   recency: number;               // default: 0.02
 }
 
-export interface RankedProduct extends CommerceProduct {
+export interface RankedProduct extends EnrichedProduct {
   finalScore: number;
   rankingSignals: RankingSignal;
   rankingExplanation: string;
@@ -187,7 +187,7 @@ export function generateRankingExplanation(
  * Rank products using multi-signal algorithm
  */
 export function rankProducts(
-  products: CommerceProduct[],
+  products: EnrichedProduct[],
   options: {
     userBudget?: number;
     weights?: Partial<RankingWeights>;
