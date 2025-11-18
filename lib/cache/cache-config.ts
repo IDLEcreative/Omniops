@@ -32,4 +32,22 @@ export const CACHE_TTL = {
    * Short TTL for real-time accuracy
    */
   STATUS_COUNTS: 60,
+
+  /**
+   * Widget configurations (5 minutes)
+   * Changes infrequently - loaded on every chat initialization
+   */
+  WIDGET_CONFIG: 300,
+
+  /**
+   * Customer profiles (10 minutes)
+   * Very stable data - rarely changes
+   */
+  CUSTOMER_PROFILE: 600,
+
+  /**
+   * Domain lookups (15 minutes)
+   * Almost never changes - used in every request
+   */
+  DOMAIN_LOOKUP: 900,
 } as const;

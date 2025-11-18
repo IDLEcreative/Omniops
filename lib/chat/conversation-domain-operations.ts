@@ -2,11 +2,23 @@
  * Conversation Domain Operations
  *
  * Handles domain lookup and normalization for conversations
+ * with two-tier caching (Redis + Database)
  */
 
+import { TwoTierCache } from '@/lib/cache/two-tier-cache';
+import { CACHE_TTL } from '@/lib/cache/cache-config';
+
+// Cache instance for domain lookups
+const domainLookupCache = new TwoTierCache<string | null>({
+  ttl: CACHE_TTL.DOMAIN_LOOKUP,
+  prefix: 'domain-lookup',
+});
+
 /**
- * Look up domain ID from domain string
+ * Look up domain ID from domain string with caching
  * Returns null if domain not found or on error
+ *
+ * Cache: L1 (Redis 15min) → L2 (Database)
  */
 export async function lookupDomain(
   domain: string | undefined,
@@ -16,19 +28,34 @@ export async function lookupDomain(
     return null;
   }
 
-  try {
-    const normalizedDomain = domain.replace(/^https?:\/\//, '').replace('www.', '');
-    const { data: domainData } = await supabase
-      .from('domains')
-      .select('id')
-      .eq('domain', normalizedDomain)
-      .single();
+  const normalizedDomain = domain.replace(/^https?:\/\//, '').replace('www.', '');
 
-    return domainData?.id || null;
+  try {
+    return await domainLookupCache.get(
+      normalizedDomain,
+      async () => {
+        const { data: domainData } = await supabase
+          .from('domains')
+          .select('id')
+          .eq('domain', normalizedDomain)
+          .single();
+
+        return domainData?.id || null;
+      }
+    );
   } catch (error) {
     console.error('[ConversationManager] Domain lookup error:', error);
     return null;
   }
+}
+
+/**
+ * Invalidate domain lookup cache
+ * Call this after adding/updating/deleting domains
+ */
+export async function invalidateDomainLookup(domain: string): Promise<void> {
+  const normalizedDomain = domain.replace(/^https?:\/\//, '').replace('www.', '');
+  await domainLookupCache.invalidate(normalizedDomain);
 }
 
 /**
