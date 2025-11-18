@@ -1,4 +1,38 @@
+**Last Updated:** 2025-11-18
+**Verified Accurate For:** v0.1.0
+**Status:** Active
+**Type:** Reference
+
 # Public Directory
+
+**Type:** Reference
+**Status:** Active
+**Last Updated:** 2025-11-18
+**Verified For:** v0.1.0
+**Dependencies:** None
+**Estimated Read Time:** 4 minutes
+
+## Purpose
+
+Static assets and client-side widget embed script for the Customer Service Agent, including the main embed.js loader script and SVG assets.
+
+## Quick Links
+
+- [Widget Integration Guide](/home/user/Omniops/README.md#-widget-installation-for-customers)
+- [Main README](/home/user/Omniops/README.md)
+- [Production Deployment](/home/user/Omniops/docs/PRODUCTION-DEPLOYMENT.md)
+
+## Keywords
+
+**Search Terms:** public directory, static assets, embed.js, widget loader, client-side scripts, SVG icons, favicon
+
+**Aliases:**
+- "Static files" (directory)
+- "Widget loader" (embed.js)
+- "Client assets" (purpose)
+- "Public assets" (category)
+
+---
 
 Static assets and client-side scripts for the Customer Service Agent.
 

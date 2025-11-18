@@ -1,8 +1,31 @@
+**Last Updated:** 2025-11-18
+**Verified Accurate For:** v0.1.0
+**Status:** Active
+**Type:** Reference
+
 # Benchmark Scripts
 
-**Purpose:** Performance benchmarking and analysis tools
-**Last Updated:** 2025-10-30
-**Usage:** Run benchmarks using `npx tsx` from project root
+**Type:** Reference
+**Status:** Active
+**Last Updated:** 2025-11-18
+**Verified For:** v0.1.0
+**Dependencies:** [Performance Optimization](/home/user/Omniops/docs/09-REFERENCE/REFERENCE_PERFORMANCE_OPTIMIZATION.md), [Search Architecture](/home/user/Omniops/docs/01-ARCHITECTURE/ARCHITECTURE_SEARCH_SYSTEM.md), [Main Scripts README](/home/user/Omniops/scripts/README.md)
+**Estimated Read Time:** 4 minutes
+
+## Purpose
+
+Performance benchmarking and analysis tools for measuring system performance, establishing baselines, tracking improvements, and identifying bottlenecks.
+
+## Quick Links
+
+- [Main Scripts README](/home/user/Omniops/scripts/README.md)
+- [Performance Optimization Guide](/home/user/Omniops/docs/09-REFERENCE/REFERENCE_PERFORMANCE_OPTIMIZATION.md)
+- [Search Architecture](/home/user/Omniops/docs/01-ARCHITECTURE/ARCHITECTURE_SEARCH_SYSTEM.md)
+- [Database Schema](/home/user/Omniops/docs/09-REFERENCE/REFERENCE_DATABASE_SCHEMA.md)
+
+## Keywords
+
+benchmarking, performance, metrics, vector search, latency, throughput, optimization, profiling, baselines
 
 ## Overview
 
@@ -199,7 +222,7 @@ npx tsx scripts/benchmarks/benchmark-vector-graph-analysis.ts \
 
 ## Related Documentation
 
-- [Performance Optimization Guide](../../docs/07-REFERENCE/REFERENCE_PERFORMANCE_OPTIMIZATION.md)
-- [Search Architecture](../../docs/01-ARCHITECTURE/ARCHITECTURE_SEARCH_SYSTEM.md)
-- [Database Schema](../../docs/07-REFERENCE/REFERENCE_DATABASE_SCHEMA.md)
-- [Main Scripts README](../README.md)
+- [Performance Optimization Guide](/home/user/Omniops/docs/09-REFERENCE/REFERENCE_PERFORMANCE_OPTIMIZATION.md)
+- [Search Architecture](/home/user/Omniops/docs/01-ARCHITECTURE/ARCHITECTURE_SEARCH_SYSTEM.md)
+- [Database Schema](/home/user/Omniops/docs/09-REFERENCE/REFERENCE_DATABASE_SCHEMA.md)
+- [Main Scripts README](/home/user/Omniops/scripts/README.md)

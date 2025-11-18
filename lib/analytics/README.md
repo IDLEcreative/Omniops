@@ -1,10 +1,31 @@
+**Last Updated:** 2025-11-18
+**Verified Accurate For:** v0.1.0
+**Status:** Active
+**Type:** Reference
+
 # Business Intelligence Analytics
 
-**Purpose:** Advanced business intelligence system for customer journey analysis, content gap detection, usage pattern prediction, and conversion funnel optimization.
-
-**Integration Type:** Service
-**Last Updated:** 2025-10-30
+**Type:** Service
 **Status:** Active
+**Last Updated:** 2025-11-18
+**Verified For:** v0.1.0
+**Dependencies:** [Supabase Client](/home/user/Omniops/lib/supabase-server.ts), [OpenAI](/home/user/Omniops/lib/openai-client.ts), [Search Cache](/home/user/Omniops/lib/search-cache.ts)
+**Estimated Read Time:** 9 minutes
+
+## Purpose
+
+Advanced business intelligence system for customer journey analysis, content gap detection, usage pattern prediction, and conversion funnel optimization.
+
+## Quick Links
+- [Main Orchestrator](business-intelligence.ts) - Core BI class
+- [Type Definitions](business-intelligence-types.ts) - TypeScript types
+- [Database Queries](business-intelligence-queries.ts) - Optimized queries
+- [Calculation Engine](business-intelligence-calculators.ts) - Metric calculations
+
+## Keywords
+- Business Intelligence, Analytics, Customer Journey, Content Gaps, Peak Usage, Conversion Funnel, Metrics
+
+---
 
 ## Overview
 

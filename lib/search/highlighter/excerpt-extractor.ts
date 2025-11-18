@@ -93,30 +93,41 @@ export function findBestCluster(
   textLength: number,
   maxLength: number
 ): Cluster {
+  if (matches.length === 0) {
+    return {
+      start: 0,
+      end: Math.min(maxLength, textLength),
+      density: 0,
+      count: 0
+    };
+  }
+
   if (matches.length === 1) {
     return {
-      start: matches[0].start,
-      end: matches[0].end,
+      start: matches[0]!.start,
+      end: matches[0]!.end,
       density: 1,
       count: 1
     };
   }
 
   let bestCluster: Cluster = {
-    start: matches[0].start,
-    end: matches[0].end,
+    start: matches[0]!.start,
+    end: matches[0]!.end,
     density: 0,
     count: 1
   };
 
   // Try different window sizes
   for (let i = 0; i < matches.length; i++) {
-    let clusterEnd = matches[i].end;
+    const currentMatch = matches[i]!;
+    let clusterEnd = currentMatch.end;
     let clusterCount = 1;
 
     for (let j = i + 1; j < matches.length; j++) {
-      const potentialEnd = matches[j].end;
-      const potentialLength = potentialEnd - matches[i].start;
+      const nextMatch = matches[j]!;
+      const potentialEnd = nextMatch.end;
+      const potentialLength = potentialEnd - currentMatch.start;
 
       if (potentialLength > maxLength) {
         break;
@@ -130,7 +141,7 @@ export function findBestCluster(
 
       if (density > bestCluster.density) {
         bestCluster = {
-          start: matches[i].start,
+          start: currentMatch.start,
           end: clusterEnd,
           density,
           count: clusterCount

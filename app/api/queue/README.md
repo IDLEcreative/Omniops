@@ -1,4 +1,46 @@
+**Last Updated:** 2025-11-18
+**Verified Accurate For:** v0.1.0
+**Status:** Active
+**Type:** Reference
+
 # Queue Management API
+
+**Type:** Reference
+**Status:** Active
+**Last Updated:** 2025-11-18
+**Verified For:** v0.1.0
+**Dependencies:** [Queue System](/home/user/Omniops/lib/queue/README.md), [Jobs API](/home/user/Omniops/app/api/jobs/README.md), [Redis Configuration](/home/user/Omniops/lib/redis.ts)
+**Estimated Read Time:** 14 minutes
+
+## Purpose
+
+Complete technical reference for the Queue Management API, providing comprehensive queue health monitoring, maintenance operations, administrative controls, and performance metrics for the Redis-backed BullMQ job processing system.
+
+## Quick Links
+
+- [API Routes Documentation](/home/user/Omniops/app/api/README.md)
+- [Jobs API](/home/user/Omniops/app/api/jobs/README.md)
+- [Job Status API](/home/user/Omniops/app/api/jobs/[jobId]/README.md)
+- [Queue System Library](/home/user/Omniops/lib/queue/README.md)
+- [Scraping API](/home/user/Omniops/app/api/scrape/README.md)
+
+## Table of Contents
+
+- [Purpose](#purpose)
+- [Quick Links](#quick-links)
+- [Endpoints](#endpoints)
+  - [GET /api/queue](#get-apiqueue)
+  - [POST /api/queue](#post-apiqueue)
+  - [DELETE /api/queue](#delete-apiqueue)
+- [Queue Health Indicators](#queue-health-indicators)
+- [Error Handling](#error-handling)
+- [Usage Examples](#usage-examples)
+- [Maintenance Scheduling](#maintenance-scheduling)
+- [Security and Performance](#security-and-performance)
+- [Related APIs](#related-apis)
+- [Keywords](#keywords)
+
+---
 
 The Queue Management API provides comprehensive queue health monitoring, maintenance operations, and administrative controls for the job processing system.
 
@@ -523,5 +565,29 @@ Set up alerts for:
 
 ## Related APIs
 
-- [Jobs API](/app/api/jobs/README.md) - Job creation and management
-- [Job Status API](/app/api/jobs/[jobId]/README.md) - Individual job operations
+- [Jobs API](/home/user/Omniops/app/api/jobs/README.md) - Job creation and management
+- [Job Status API](/home/user/Omniops/app/api/jobs/[jobId]/README.md) - Individual job operations
+- [Scrape Jobs API](/home/user/Omniops/app/api/scrape-jobs/README.md) - Scraping job management
+- [Queue System Library](/home/user/Omniops/lib/queue/README.md) - Queue utilities and classes
+
+## Keywords
+
+**API Categories:** queue management, job queue, system administration, health monitoring, maintenance operations
+
+**Core Features:** queue health monitoring, worker status, job statistics, maintenance operations, pause/resume, cleanup operations, retry failed jobs, deduplication cache, performance metrics
+
+**Technologies:** BullMQ, Redis, job queue, background processing, worker management, task scheduling
+
+**Operations:** health checks, queue statistics, maintenance, pause queue, resume queue, cleanup old jobs, retry failed jobs, clear deduplication cache, worker monitoring
+
+**Metrics:** throughput, processing rate, error rate, queue depth, latency, memory usage, CPU usage, worker health, Redis performance
+
+**Administration:** queue maintenance, job cleanup, worker management, performance monitoring, error tracking, system health
+
+**Security:** rate limiting, authentication, administrative controls, access control
+
+**Aliases:**
+- "queue health" (also known as: queue status, worker status, system health)
+- "maintenance operations" (also known as: queue maintenance, cleanup operations, administrative tasks)
+- "deduplication cache" (also known as: job deduplication, duplicate prevention, cache management)
+- "job statistics" (also known as: queue stats, processing metrics, performance data)

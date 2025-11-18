@@ -1,8 +1,25 @@
+**Last Updated:** 2025-11-18
+**Verified Accurate For:** v0.1.0
+**Status:** Active
+**Type:** Reference
+
 # Alerts Directory
 
-**Purpose:** Notification system for alerting users and administrators about important events
-**Last Updated:** 2025-10-30
-**Related:** [Lib](/lib), [Monitoring](/lib/monitoring)
+**Type:** Service
+**Status:** Active
+**Last Updated:** 2025-11-18
+**Verified For:** v0.1.0
+**Dependencies:** [Monitoring](/home/user/Omniops/lib/monitoring)
+**Estimated Read Time:** 1 minute
+
+## Purpose
+
+Notification system for alerting users and administrators about important events via multiple channels (email, in-app notifications).
+
+## Keywords
+- Alerts, Notifications, Email, In-App, Event System
+
+---
 
 ## Overview
 

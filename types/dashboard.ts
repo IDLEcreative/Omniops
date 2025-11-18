@@ -49,6 +49,11 @@ export type {
 // Re-export AnomalySeverity for backward compatibility
 export type { AnomalySeverity } from '@/lib/analytics/anomaly-types';
 
+// Import types needed for backward compatibility aliases
+import type { DashboardAnalytics } from './dashboard-analytics';
+import type { DashboardConversationItem, DashboardConversationMetrics, DashboardConversationStatus, DashboardLanguageDistribution } from './dashboard-conversations';
+import type { DashboardTelemetrySnapshot } from './dashboard-overview';
+
 // Backward compatibility aliases
 export type DashboardAnalyticsData = DashboardAnalytics;
 export type DashboardConversation = DashboardConversationItem;
@@ -71,11 +76,11 @@ export interface ConversationMessage {
 }
 
 export interface DateRange {
-  from: Date;
-  to: Date;
+  from?: Date;
+  to?: Date;
 }
 
-export type DateRangePreset = '7d' | '30d' | '90d' | 'custom';
+export type DateRangePreset = 'last-7-days' | 'last-30-days' | 'last-90-days' | 'this-month' | 'last-month' | 'this-quarter' | 'custom';
 
 export type AnnotationCategory = 'campaign' | 'release' | 'incident' | 'event' | 'other';
 

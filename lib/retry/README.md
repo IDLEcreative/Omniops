@@ -1,8 +1,30 @@
+**Last Updated:** 2025-11-18
+**Verified Accurate For:** v0.1.0
+**Status:** Active
+**Type:** Reference
+
 # Retry System
 
-**Purpose:** Adaptive retry strategies with error classification, exponential backoff, and jitter to handle transient failures gracefully.
+**Type:** Utility
+**Status:** Active
+**Last Updated:** 2025-11-18
+**Verified For:** v0.1.0
+**Dependencies:** [Commerce Provider](/home/user/Omniops/lib/agents/commerce-provider.ts)
+**Estimated Read Time:** 4 minutes
 
-**Last Updated:** 2025-11-05
+## Purpose
+
+Adaptive retry strategies with error classification, exponential backoff, and jitter to handle transient failures gracefully.
+
+## Quick Links
+- [Error Classifier](error-classifier.ts) - Error categorization
+- [Adaptive Backoff](adaptive-backoff.ts) - Retry delay calculation
+- [Configuration](config.ts) - Retry policies
+
+## Keywords
+- Retry Logic, Error Classification, Exponential Backoff, Jitter, Resilience, Transient Failures
+
+---
 
 ## Overview
 

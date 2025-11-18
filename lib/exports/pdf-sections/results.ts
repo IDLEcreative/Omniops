@@ -47,10 +47,10 @@ export function addResults(
     doc.setTextColor(100);
 
     const customerInfo = [];
-    if (firstMsg.customerEmail) {
+    if (firstMsg?.customerEmail) {
       customerInfo.push(`Customer: ${firstMsg.customerEmail}`);
     }
-    if (firstMsg.domainName) {
+    if (firstMsg?.domainName) {
       customerInfo.push(`Domain: ${firstMsg.domainName}`);
     }
 

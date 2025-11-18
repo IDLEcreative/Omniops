@@ -1,8 +1,31 @@
+**Last Updated:** 2025-11-18
+**Verified Accurate For:** v0.1.0
+**Status:** Active
+**Type:** Reference
+
 # Testing & Verification Scripts
 
-**Purpose:** Test utilities and system verification tools
-**Last Updated:** 2025-10-30
-**Usage:** Run tests using `npx tsx` from project root
+**Type:** Reference
+**Status:** Active
+**Last Updated:** 2025-11-18
+**Verified For:** v0.1.0
+**Dependencies:** [Hallucination Prevention](/home/user/Omniops/docs/HALLUCINATION_PREVENTION.md), [Conversation Accuracy](/home/user/Omniops/docs/CONVERSATION_ACCURACY_IMPROVEMENTS.md), [Testing Philosophy](/home/user/Omniops/CLAUDE.md#testing--code-quality-philosophy), [Main Scripts README](/home/user/Omniops/scripts/README.md)
+**Estimated Read Time:** 7 minutes
+
+## Purpose
+
+Test utilities and system verification tools for testing system functionality, verifying AI accuracy, and ensuring quality standards are met with end-to-end verification scripts (not Jest/unit tests).
+
+## Quick Links
+
+- [Main Scripts README](/home/user/Omniops/scripts/README.md)
+- [Hallucination Prevention](/home/user/Omniops/docs/HALLUCINATION_PREVENTION.md)
+- [Conversation Accuracy](/home/user/Omniops/docs/CONVERSATION_ACCURACY_IMPROVEMENTS.md)
+- [Testing Philosophy](/home/user/Omniops/CLAUDE.md#testing--code-quality-philosophy)
+
+## Keywords
+
+testing, verification, hallucination prevention, accuracy, E2E, chat testing, metadata tracking, system health, quality assurance
 
 ## Overview
 
@@ -406,7 +429,7 @@ npx tsx scripts/tests/test-metadata-tracking.ts
 
 ## Related Documentation
 
-- [Hallucination Prevention](../../docs/HALLUCINATION_PREVENTION.md)
-- [Conversation Accuracy](../../docs/CONVERSATION_ACCURACY_IMPROVEMENTS.md)
-- [Testing Philosophy](../../CLAUDE.md#testing--code-quality-philosophy)
-- [Main Scripts README](../README.md)
+- [Hallucination Prevention](/home/user/Omniops/docs/HALLUCINATION_PREVENTION.md)
+- [Conversation Accuracy](/home/user/Omniops/docs/CONVERSATION_ACCURACY_IMPROVEMENTS.md)
+- [Testing Philosophy](/home/user/Omniops/CLAUDE.md#testing--code-quality-philosophy)
+- [Main Scripts README](/home/user/Omniops/scripts/README.md)

@@ -1,6 +1,45 @@
+**Last Updated:** 2025-11-18
+**Verified Accurate For:** v0.1.0
+**Status:** Active
+**Type:** Reference
+
 # Types Directory
 
-TypeScript type definitions and interfaces for the entire Customer Service Agent application.
+**Type:** Reference
+**Status:** Active
+**Last Updated:** 2025-11-18
+**Verified For:** v0.1.0
+**Dependencies:** [Database Schema](/home/user/Omniops/docs/09-REFERENCE/REFERENCE_DATABASE_SCHEMA.md)
+**Estimated Read Time:** 13 minutes
+
+## Purpose
+
+Complete TypeScript type definitions and interfaces for the entire Customer Service Agent application, providing compile-time safety, IntelliSense support, and comprehensive documentation for database, API, and domain-specific types.
+
+## Quick Links
+
+- [Database Schema Reference](/home/user/Omniops/docs/09-REFERENCE/REFERENCE_DATABASE_SCHEMA.md)
+- [API Documentation](/home/user/Omniops/docs/03-API/reference.md)
+- [Main README](/home/user/Omniops/README.md)
+- [Type Tests](/home/user/Omniops/__tests__/types)
+
+## Table of Contents
+
+- [Overview](#overview)
+- [Directory Structure](#directory-structure)
+- [Core Type Categories](#core-type-categories)
+  - [Database Types (database.ts)](#1-database-types-databasets)
+  - [API Types (api.ts)](#2-api-types-apits)
+  - [Common Types (index.ts)](#3-common-types-indexts)
+- [Type Import Patterns](#type-import-patterns)
+- [Type Safety Guidelines](#type-safety-guidelines)
+- [Zod Schema Validation](#zod-schema-validation)
+- [Extending Types](#extending-types)
+- [Type Utilities](#type-utilities)
+- [Best Practices](#best-practices)
+- [Related Documentation](#related-documentation)
+
+---
 
 ## Overview
 

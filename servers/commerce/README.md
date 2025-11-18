@@ -1,18 +1,38 @@
+**Last Updated:** 2025-11-18
+**Verified Accurate For:** v0.1.0
+**Status:** Active
+**Type:** Reference
+
 # Commerce MCP Tools
 
-**Type**: MCP Server Category
-**Status**: Active
-**Last Updated**: 2025-11-05
-**Version**: 1.0.0
+**Type:** Architecture
+**Status:** Active
+**Last Updated:** 2025-11-18
+**Verified For:** v0.1.0
+**Dependencies:** [MCP Servers](/home/user/Omniops/servers/README.md)
+**Estimated Read Time:** 45 minutes
 
 ## Purpose
-Order management, product operations, and e-commerce integrations for WooCommerce and Shopify platforms.
+
+Order management, product operations, and e-commerce integrations for WooCommerce and Shopify platforms, providing 25+ distinct operations across products, orders, cart, store configuration, and analytics.
 
 ## Quick Links
-- [Main MCP Registry](../index.ts)
-- [Shared Types](../shared/types/)
-- [WooCommerce Provider](/lib/agents/providers/woocommerce-provider.ts)
-- [Shopify Provider](/lib/agents/providers/shopify-provider.ts)
+- [Parent: MCP Servers](/home/user/Omniops/servers/README.md)
+- [Main MCP Registry](/home/user/Omniops/servers/index.ts)
+- [WooCommerce Provider](/home/user/Omniops/lib/agents/providers/woocommerce-provider.ts)
+- [Shopify Provider](/home/user/Omniops/lib/agents/providers/shopify-provider.ts)
+
+## Table of Contents
+- [Available Tools](#available-tools)
+- [Architecture](#architecture)
+- [Testing](#testing)
+- [Migration Notes](#migration-notes)
+- [Common Use Cases](#common-use-cases)
+- [Troubleshooting](#troubleshooting)
+
+**Keywords:** commerce, e-commerce, WooCommerce, Shopify, orders, products, cart, payments, shipping, analytics
+
+---
 
 ## Available Tools
 

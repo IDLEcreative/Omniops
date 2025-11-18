@@ -1,10 +1,20 @@
+**Last Updated:** 2025-11-18
+**Verified Accurate For:** v0.1.0
+**Status:** Active
+**Type:** Reference
+
 # Feature Flags Library
 
-**Purpose:** Centralized feature flag evaluation system with database overrides, environment-based defaults, and per-customer/organization customization.
-
-**Last Updated:** 2025-11-03
+**Type:** Service
 **Status:** Active
-**Related:** [Feature Flag Deployment Guide](../../docs/02-GUIDES/GUIDE_FEATURE_FLAG_DEPLOYMENT.md)
+**Last Updated:** 2025-11-18
+**Verified For:** v0.1.0
+**Dependencies:** [Feature Flag Deployment Guide](/home/user/Omniops/docs/02-GUIDES/GUIDE_FEATURE_FLAG_DEPLOYMENT.md), [Rollout Infrastructure](/home/user/Omniops/lib/rollout/README.md), [Default Config](/home/user/Omniops/lib/chat-widget/default-config.ts)
+**Estimated Read Time:** 9 minutes
+
+## Purpose
+
+Centralized feature flag evaluation system with database overrides, environment-based defaults, and per-customer/organization customization.
 
 ## Overview
 

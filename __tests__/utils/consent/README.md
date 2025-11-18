@@ -1,9 +1,18 @@
+**Last Updated:** 2025-11-18
+**Verified Accurate For:** v0.1.0
+**Status:** Active
+**Type:** Reference
+
 # Consent Test Utilities
+
+**Type:** Test Infrastructure
+**Status:** Active
+**Last Updated:** 2025-11-18
+**Verified For:** v0.1.0
+**Estimated Read Time:** 3 minutes
 
 **Purpose:** Reusable test fixtures and mock factories for consent management testing.
 
-**Last Updated:** 2025-11-10
-**Status:** Active
 **Related:** `__tests__/lib/autonomous/security/consent-manager/`
 
 ## Files

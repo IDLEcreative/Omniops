@@ -15,12 +15,11 @@ import {
 } from '@/lib/autonomous/queue';
 import { createOperation } from '@/lib/autonomous/core/operation-service';
 import { verifyConsent } from '@/lib/autonomous/security/consent-manager';
-import { createServerClient } from '@/lib/supabase/server';
+import { requireAuth } from '@/lib/middleware/auth';
+import { getUserOrganization } from '@/lib/auth/api-helpers';
 
-// Request validation schema
+// Request validation schema (organizationId and userId come from auth, not request body)
 const SubmitOperationSchema = z.object({
-  organizationId: z.string().min(1),
-  userId: z.string().min(1),
   service: z.enum(['woocommerce', 'shopify', 'bigcommerce', 'stripe']),
   operation: z.string().min(1),
   config: z.object({
@@ -34,11 +33,25 @@ const SubmitOperationSchema = z.object({
 
 export async function POST(request: NextRequest) {
   try {
+    // Authenticate user
+    const authResult = await requireAuth();
+    if (authResult instanceof NextResponse) {
+      return authResult; // Return auth error
+    }
+
+    const { user, supabase } = authResult;
+
+    // Get user's organization
+    const orgResult = await getUserOrganization(user.id, supabase);
+    if (orgResult instanceof NextResponse) {
+      return orgResult;
+    }
+
+    const { organizationId, userId } = orgResult;
+
     // Parse and validate request body
     const body = await request.json();
     const data = SubmitOperationSchema.parse(body);
-
-    // TODO: Add authentication and verify user permissions
 
     // Map priority string to enum
     const priorityMap: Record<string, OperationPriority> = {
@@ -53,7 +66,7 @@ export async function POST(request: NextRequest) {
 
     // Step 1: Verify user has granted consent
     const hasConsent = await verifyConsent(
-      data.organizationId,
+      organizationId,
       data.service,
       data.operation
     );
@@ -70,8 +83,8 @@ export async function POST(request: NextRequest) {
 
     // Step 2: Create operation record in database
     const operation = await createOperation({
-      organizationId: data.organizationId,
-      userId: data.userId,
+      organizationId,
+      userId,
       service: data.service,
       operation: data.operation,
       metadata: {
@@ -104,8 +117,8 @@ export async function POST(request: NextRequest) {
     // Step 4: Create job data
     const jobData: WooCommerceSetupJobData | ShopifySetupJobData = {
       operationId: operation.id,
-      organizationId: data.organizationId,
-      userId: data.userId,
+      organizationId,
+      userId,
       service: data.service,
       operation: data.operation,
       jobType,
@@ -123,14 +136,7 @@ export async function POST(request: NextRequest) {
     const queueManager = getOperationQueueManager();
     const jobId = await queueManager.addOperation(jobData);
 
-    // Step 6: Update operation with job ID
-    const supabase = await createServerClient();
-    if (!supabase) {
-      return NextResponse.json(
-        { error: 'Database service unavailable' },
-        { status: 503 }
-      );
-    }
+    // Step 6: Update operation with job ID (use supabase from auth)
     await supabase
       .from('autonomous_operations')
       .update({ job_id: jobId })

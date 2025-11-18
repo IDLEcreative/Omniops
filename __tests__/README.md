@@ -1,6 +1,56 @@
+**Last Updated:** 2025-11-18
+**Verified Accurate For:** v0.1.0
+**Status:** Active
+**Type:** Reference
+
 # Tests Directory
 
-Comprehensive test suite for the OmniOps Customer Service Platform.
+**Type:** Test Documentation
+**Status:** Active
+**Last Updated:** 2025-11-18
+**Verified For:** v0.1.0
+**Dependencies:** [CLAUDE.md](/home/user/Omniops/CLAUDE.md), [Testing Guide](/home/user/Omniops/docs/TESTING_GUIDE.md)
+**Estimated Read Time:** 11 minutes
+
+## Purpose
+
+Comprehensive test suite for the OmniOps Customer Service Platform with 1,048+ tests across components, hooks, APIs, and business logic, ensuring 80%+ code coverage and system reliability.
+
+## Quick Links
+
+- [Integration Tests README](/home/user/Omniops/__tests__/integration/README.md)
+- [API Tests README](/home/user/Omniops/__tests__/api/README.md)
+- [Lib Tests README](/home/user/Omniops/__tests__/lib/README.md)
+- [Testing Guide](/home/user/Omniops/docs/TESTING_GUIDE.md)
+- [CLAUDE.md Testing Philosophy](/home/user/Omniops/CLAUDE.md#testing--code-quality-philosophy)
+
+## Table of Contents
+
+- [Test Suite Statistics](#test-suite-statistics)
+- [Structure](#structure)
+- [Test Categories](#test-categories)
+  - [Unit Tests](#unit-tests)
+  - [Integration Tests](#integration-tests)
+  - [Component Tests](#component-tests)
+  - [Hook Tests](#hook-tests)
+  - [Business Logic Tests](#business-logic-tests)
+- [Test Configuration](#test-configuration)
+  - [Jest Configuration](#jest-configuration)
+  - [Setup Files and Utilities](#setup-files-and-utilities)
+- [Running Tests](#running-tests)
+- [Mock Service Worker (MSW)](#mock-service-worker-msw)
+- [Test Utilities](#test-utilities)
+  - [Custom Render](#custom-render)
+  - [Mock Data](#mock-data)
+  - [Database Mocks](#database-mocks)
+- [Writing Tests](#writing-tests)
+- [Coverage Reports](#coverage-reports)
+- [CI/CD Integration](#cicd-integration)
+- [Debugging Tests](#debugging-tests)
+- [Common Issues](#common-issues)
+- [Recent Improvements (2025-10-25)](#recent-improvements-2025-10-25)
+
+---
 
 ## Test Suite Statistics
 
@@ -8,7 +58,6 @@ Comprehensive test suite for the OmniOps Customer Service Platform.
 - **Total Tests:** 1,048+
 - **Total Test Code:** 23,677 LOC
 - **Coverage Target:** 80%+
-- **Last Updated:** 2025-10-25
 
 ### Test Distribution
 - **Component Tests:** 138 tests (2,542 LOC)

@@ -107,6 +107,13 @@ export class WooCommerceStoreAPI {
   async isAvailable(): Promise<boolean> {
     return this.client.isAvailable();
   }
+
+  /**
+   * Get session nonce (for tracking)
+   */
+  getSessionNonce(): string {
+    return this.client.getNonce() || '';
+  }
 }
 
 // Re-export types

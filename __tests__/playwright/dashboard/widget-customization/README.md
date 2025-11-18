@@ -1,4 +1,16 @@
+**Last Updated:** 2025-11-18
+**Verified Accurate For:** v0.1.0
+**Status:** Active
+**Type:** Reference
+
 # Widget Customization E2E Tests
+
+**Type:** Test Documentation
+**Status:** Active
+**Last Updated:** 2025-11-18
+**Verified For:** v0.1.0
+**Estimated Read Time:** 2 minutes
+
 
 Modular organization of widget customization Playwright tests for end-to-end UI testing.
 

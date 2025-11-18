@@ -77,6 +77,7 @@ export function ProductRecommendations({
 
   const currentRec = recommendations[currentIndex];
 
+  // Guard against undefined currentRec
   if (!currentRec) {
     return null;
   }

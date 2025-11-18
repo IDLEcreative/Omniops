@@ -1,8 +1,31 @@
+**Last Updated:** 2025-11-18
+**Verified Accurate For:** v0.1.0
+**Status:** Active
+**Type:** Reference
+
 # Deployment Scripts
 
-**Purpose:** Production deployment and cleanup utilities
-**Last Updated:** 2025-10-30
-**Usage:** Run deployment scripts from project root
+**Type:** Reference
+**Status:** Active
+**Last Updated:** 2025-11-18
+**Verified For:** v0.1.0
+**Dependencies:** [Docker Setup](/home/user/Omniops/docs/00-GETTING-STARTED/SETUP_DOCKER_PRODUCTION.md), [Environment Variables](/home/user/Omniops/.env.example), [Main Scripts README](/home/user/Omniops/scripts/README.md)
+**Estimated Read Time:** 5 minutes
+
+## Purpose
+
+Production deployment and cleanup utilities for deploying the application to Vercel and performing pre-deployment cleanup tasks.
+
+## Quick Links
+
+- [Main Scripts README](/home/user/Omniops/scripts/README.md)
+- [Vercel Deployment Docs](https://vercel.com/docs)
+- [Docker Setup](/home/user/Omniops/docs/00-GETTING-STARTED/SETUP_DOCKER_PRODUCTION.md)
+- [Environment Variables](/home/user/Omniops/.env.example)
+
+## Keywords
+
+deployment, vercel, production, cleanup, CI/CD, automation, rollback, environment variables
 
 ## Overview
 
@@ -328,6 +351,6 @@ jobs:
 ## Related Documentation
 
 - [Vercel Deployment Docs](https://vercel.com/docs)
-- [Docker Setup](../../docs/00-GETTING-STARTED/SETUP_DOCKER_PRODUCTION.md)
-- [Environment Variables](../../.env.example)
-- [Main Scripts README](../README.md)
+- [Docker Setup](/home/user/Omniops/docs/00-GETTING-STARTED/SETUP_DOCKER_PRODUCTION.md)
+- [Environment Variables](/home/user/Omniops/.env.example)
+- [Main Scripts README](/home/user/Omniops/scripts/README.md)

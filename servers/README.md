@@ -1,4 +1,37 @@
+**Last Updated:** 2025-11-18
+**Verified Accurate For:** v0.1.0
+**Status:** Active
+**Type:** Reference
+
 # MCP Servers
+
+**Type:** Architecture
+**Status:** Active
+**Last Updated:** 2025-11-18
+**Verified For:** v0.1.0
+**Dependencies:** None
+**Estimated Read Time:** 3 minutes
+
+## Purpose
+
+Documentation for MCP (Model Context Protocol) servers organized by category, providing tools for search, commerce, content operations, and shared utilities across the Omniops platform.
+
+## Quick Links
+- [Search MCP Servers](/home/user/Omniops/servers/search/README.md)
+- [Commerce MCP Tools](/home/user/Omniops/servers/commerce/README.md)
+- [Content MCP Tools](/home/user/Omniops/servers/content/README.md)
+- [Contributing Guide](/home/user/Omniops/docs/CONTRIBUTING.md)
+
+## Table of Contents
+- [Directory Structure](#directory-structure)
+- [Quick Start](#quick-start)
+- [Adding New Tools](#adding-new-tools)
+- [Categories](#categories)
+- [Security](#security)
+
+**Keywords:** MCP, Model Context Protocol, servers, tools, search, commerce, content
+
+---
 
 This directory contains all MCP (Model Context Protocol) servers organized by category.
 

@@ -1,4 +1,4 @@
-import { ExecutionContext } from '../../../shared/types';
+import { ExecutionContext } from '../../../../shared/types';
 import { searchSimilarContent } from '@/lib/embeddings-optimized';
 import { normalizeDomain } from '@/lib/chat/tool-handlers/domain-utils';
 

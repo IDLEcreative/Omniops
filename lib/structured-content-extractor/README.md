@@ -1,8 +1,25 @@
+**Last Updated:** 2025-11-18
+**Verified Accurate For:** v0.1.0
+**Status:** Active
+**Type:** Reference
+
 # Structured Content Extractor
 
-**Purpose:** Extract structured data from web pages (products, breadcrumbs, etc.)
-**Last Updated:** 2025-10-30
-**Related:** [Product Content Extractor](/lib/product-content-extractor), [Content Extractor](/lib/content-extractor.ts)
+**Type:** Utility
+**Status:** Active
+**Last Updated:** 2025-11-18
+**Verified For:** v0.1.0
+**Dependencies:** [Product Content Extractor](/home/user/Omniops/lib/product-content-extractor), [Content Extractor](/home/user/Omniops/lib/content-extractor.ts)
+**Estimated Read Time:** 1 minute
+
+## Purpose
+
+Generic structured content extraction system for web scraping with multiple extraction strategies and Schema.org support.
+
+## Keywords
+- Structured Content, Web Scraping, Product Extraction, Breadcrumbs, Schema.org, Fallback Strategies
+
+---
 
 ## Overview
 

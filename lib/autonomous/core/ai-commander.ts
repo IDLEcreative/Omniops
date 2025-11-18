@@ -84,7 +84,7 @@ Your command:`;
 
     // Extract command from code blocks
     const codeMatch = textContent.match(/```(?:typescript|javascript)?\n?(.*?)\n?```/s);
-    if (codeMatch) {
+    if (codeMatch && codeMatch[1]) {
       return codeMatch[1].trim();
     }
 

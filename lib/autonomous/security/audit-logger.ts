@@ -8,7 +8,6 @@
  */
 
 import type { SupabaseClient } from '@supabase/supabase-js';
-import { createServiceRoleClientSync } from '@/lib/supabase/server';
 import type { AuditStepData, AuditRecord, OperationSummary } from './audit-logger-types';
 
 export type { AuditStepData, AuditRecord, OperationSummary } from './audit-logger-types';
@@ -92,6 +91,8 @@ export class AuditLogger {
     client?: SupabaseClient | null,
     operations?: Partial<AuditOperations>
   ) {
+    // Import here to avoid circular dependency
+    const { createServiceRoleClientSync } = require('@/lib/supabase/server');
     this.supabase = client || createServiceRoleClientSync();
 
     // Use provided operations or defaults
@@ -121,6 +122,7 @@ export class AuditLogger {
       if (!this.supabase) {
         throw new Error('Supabase client not initialized');
       }
+
       const record = await this.operations.insertAuditStep(this.supabase, {
         operation_id: data.operationId,
         step_number: data.stepNumber,
@@ -161,6 +163,7 @@ export class AuditLogger {
       if (!this.supabase) {
         throw new Error('Supabase client not initialized');
       }
+
       const data = await this.operations.selectOperationLogs(this.supabase, operationId);
       return data.map(d => this.operations.mapToAuditRecord(d));
     } catch (error) {
@@ -211,6 +214,10 @@ export class AuditLogger {
    * Get failed steps for an operation (for debugging)
    */
   async getFailedSteps(operationId: string): Promise<AuditRecord[]> {
+    if (!this.supabase) {
+      throw new Error('Supabase client not initialized');
+    }
+
     const { getFailedSteps } = await import('./audit-queries');
     return getFailedSteps(operationId, this.supabase, this.operations.mapToAuditRecord);
   }
@@ -219,6 +226,10 @@ export class AuditLogger {
    * Get recent audit logs (for monitoring dashboard)
    */
   async getRecentLogs(limit: number = 100): Promise<AuditRecord[]> {
+    if (!this.supabase) {
+      throw new Error('Supabase client not initialized');
+    }
+
     const { getRecentLogs } = await import('./audit-queries');
     return getRecentLogs(limit, this.supabase, this.operations.mapToAuditRecord);
   }
@@ -227,6 +238,10 @@ export class AuditLogger {
    * Export audit trail for GDPR/compliance
    */
   async exportAuditTrail(organizationId: string, startDate?: Date, endDate?: Date): Promise<AuditRecord[]> {
+    if (!this.supabase) {
+      throw new Error('Supabase client not initialized');
+    }
+
     const { exportAuditTrail } = await import('./audit-queries');
     return exportAuditTrail(organizationId, startDate, endDate, this.supabase, this.operations.mapToAuditRecord);
   }
@@ -235,6 +250,10 @@ export class AuditLogger {
    * Delete old audit logs (retention policy)
    */
   async deleteOldLogs(retentionDays: number = 90): Promise<number> {
+    if (!this.supabase) {
+      throw new Error('Supabase client not initialized');
+    }
+
     const { deleteOldLogs } = await import('./audit-queries');
     return deleteOldLogs(retentionDays, this.supabase);
   }

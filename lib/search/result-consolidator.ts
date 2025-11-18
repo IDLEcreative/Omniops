@@ -26,6 +26,10 @@ export interface CommerceProduct {
   sku?: string;
   similarity?: number;
   relevanceReason?: string;
+  relevance?: number;
+  total_sales?: number;
+  date_created?: string;
+  date_modified?: string;
 }
 
 /**
@@ -89,7 +93,7 @@ function matchProductWithPage(
   if (product.permalink) {
     const permalinkMatch = scrapedResults.find(scraped =>
       scraped.url === product.permalink ||
-      scraped.url.endsWith(product.permalink)
+      (product.permalink && scraped.url.endsWith(product.permalink))
     );
     if (permalinkMatch) {
       console.log(`[Consolidator] Matched product "${product.name}" by permalink`);

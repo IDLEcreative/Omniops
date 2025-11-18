@@ -1,6 +1,26 @@
+**Last Updated:** 2025-11-18
+**Verified Accurate For:** v0.1.0
+**Status:** Active
+**Type:** Reference
+
 # Database Migrations
 
-Database schema evolution for the Customer Service Agent. This directory contains all SQL migration files that define the database structure and changes over time.
+**Type:** Reference
+**Status:** Active
+**Last Updated:** 2025-11-18
+**Verified For:** v0.1.0
+**Dependencies:** [Supabase README](/home/user/Omniops/supabase/README.md), [Database Schema Reference](/home/user/Omniops/docs/09-REFERENCE/REFERENCE_DATABASE_SCHEMA.md)
+**Estimated Read Time:** 14 minutes
+
+## Purpose
+
+Complete reference for database schema evolution containing all SQL migration files that define the database structure and changes over time, including migration procedures, schema overview, and troubleshooting guides.
+
+## Quick Links
+
+- [Supabase README](/home/user/Omniops/supabase/README.md)
+- [Database Schema Reference](/home/user/Omniops/docs/09-REFERENCE/REFERENCE_DATABASE_SCHEMA.md)
+- [Performance Optimization](/home/user/Omniops/docs/09-REFERENCE/REFERENCE_PERFORMANCE_OPTIMIZATION.md)
 
 ## Migration Files (In Chronological Order)
 

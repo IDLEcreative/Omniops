@@ -12,7 +12,7 @@ describe('searchByCategory – Threshold validation', () => {
     const result = await searchByCategory({ category: 'pumps', limit: 10 }, baseContext);
 
     expect(result.success).toBe(true);
-    expect(result.data.threshold).toBe(0.15);
+    expect(result.data?.threshold).toBe(0.15);
   });
 
   it('accepts custom threshold', async () => {
@@ -21,7 +21,7 @@ describe('searchByCategory – Threshold validation', () => {
     const result = await searchByCategory({ category: 'pumps', limit: 10, threshold: 0.5 }, baseContext);
 
     expect(result.success).toBe(true);
-    expect(result.data.threshold).toBe(0.5);
+    expect(result.data?.threshold).toBe(0.5);
   });
 
   it('allows threshold of 0', async () => {

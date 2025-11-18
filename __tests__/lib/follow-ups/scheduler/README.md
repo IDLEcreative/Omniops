@@ -1,12 +1,19 @@
+**Last Updated:** 2025-11-18
+**Verified Accurate For:** v0.1.0
+**Status:** Active
+**Type:** Reference
+
 # Follow-up Scheduler Tests
+
+**Type:** Test Documentation
+**Status:** Active
+**Last Updated:** 2025-11-18
+**Verified For:** v0.1.0
+**Estimated Read Time:** 3 minutes
 
 **Purpose:** Unit tests for the follow-up scheduling system that validates message scheduling, sending, and cancellation operations.
 
 **Module:** `lib/follow-ups/scheduler.ts`
-
-**Last Updated:** 2025-11-10
-
-**Status:** Active
 
 ---
 

@@ -59,7 +59,7 @@ export class BrowserManager {
     credentials: Record<string, string>
   ): Promise<void> {
     const methodMatch = command.match(/page\.(\w+)/);
-    if (!methodMatch) {
+    if (!methodMatch || !methodMatch[1]) {
       throw new Error('Invalid command format');
     }
 

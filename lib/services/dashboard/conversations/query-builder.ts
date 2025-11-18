@@ -10,6 +10,7 @@ export interface QueryOptions {
   startDate: Date;
   limit: number;
   cursor?: string | null;
+  organizationId: string;
 }
 
 export interface ConversationQueryResult {
@@ -19,21 +20,27 @@ export interface ConversationQueryResult {
 }
 
 /**
- * Fetch total count of conversations within a date range
+ * Fetch total count of conversations within a date range for an organization
  */
 export async function fetchCount(
   supabase: any,
   startDate: Date,
-  endDate?: Date
+  endDate?: Date,
+  organizationId?: string
 ): Promise<number> {
   try {
+    // Join with customer_configs to filter by organization
     let query = supabase
       .from('conversations')
-      .select('*', { count: 'exact', head: true })
+      .select('*, customer_configs!inner(organization_id)', { count: 'exact', head: true })
       .gte('created_at', startDate.toISOString());
 
     if (endDate) {
       query = query.lt('created_at', endDate.toISOString());
+    }
+
+    if (organizationId) {
+      query = query.eq('customer_configs.organization_id', organizationId);
     }
 
     const { count, error } = await query;
@@ -59,7 +66,7 @@ export async function fetchConversations(
   statusDeterminer: (metadata: any, endedAt: string | null) => 'active' | 'waiting' | 'resolved',
   languageExtractor: (metadata: any) => string
 ): Promise<ConversationQueryResult> {
-  const { startDate, limit, cursor } = options;
+  const { startDate, limit, cursor, organizationId } = options;
   const conversations: DashboardConversation[] = [];
   const statusCounts: Record<'active' | 'waiting' | 'resolved', number> = {
     active: 0,
@@ -69,9 +76,11 @@ export async function fetchConversations(
   const languageCounts: Record<string, number> = {};
 
   try {
+    // Join with customer_configs to filter by organization
     let conversationsQuery = supabase
       .from('conversations')
-      .select('id, created_at, ended_at, metadata')
+      .select('id, created_at, ended_at, metadata, customer_configs!inner(organization_id)')
+      .eq('customer_configs.organization_id', organizationId)
       .order('created_at', { ascending: false })
       .gte('created_at', startDate.toISOString());
 
@@ -153,18 +162,21 @@ export async function fetchConversations(
 }
 
 /**
- * Fetch message counts grouped by hour to identify peak activity times
+ * Fetch message counts grouped by hour to identify peak activity times for an organization
  */
 export async function fetchPeakHours(
   supabase: any,
-  startDate: Date
+  startDate: Date,
+  organizationId: string
 ): Promise<Record<number, number>> {
   const peakHourCounts: Record<number, number> = {};
 
   try {
+    // Join through conversations to customer_configs to filter by organization
     const { data: messageTimes } = await supabase
       .from('messages')
-      .select('created_at')
+      .select('created_at, conversations!inner(domain_id, customer_configs!inner(organization_id))')
+      .eq('conversations.customer_configs.organization_id', organizationId)
       .gte('created_at', startDate.toISOString())
       .lte('created_at', new Date().toISOString())
       .limit(5000);

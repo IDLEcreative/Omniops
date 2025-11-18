@@ -1,9 +1,30 @@
+**Last Updated:** 2025-11-18
+**Verified Accurate For:** v0.1.0
+**Status:** Active
+**Type:** Reference
+
 # Comprehensive Test Suite
 
-**Purpose:** Business logic for comprehensive integration testing of the chat system with Supabase.
+**Type:** Utility
+**Status:** Active
+**Last Updated:** 2025-11-18
+**Verified For:** v0.1.0
+**Dependencies:** [Supabase Client](/home/user/Omniops/lib/supabase-server.ts), [CLI Wrapper](/home/user/Omniops/scripts/comprehensive-test.js)
+**Estimated Read Time:** 3 minutes
 
-**Last Updated:** 2025-11-15
-**Related:** scripts/comprehensive-test.js (CLI wrapper)
+## Purpose
+
+Business logic for comprehensive integration testing of the chat system with Supabase, following CLI Separation Pattern.
+
+## Quick Links
+- [Core Tests](core.ts) - Test implementations
+- [Validators](validators.ts) - Test orchestration
+- [Reporters](reporters.ts) - Output formatting
+
+## Keywords
+- Integration Tests, Chat System, UUID Validation, Concurrency, Embeddings, Error Recovery
+
+---
 
 ## Architecture
 

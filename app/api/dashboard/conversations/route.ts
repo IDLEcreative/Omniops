@@ -3,14 +3,22 @@ import { ConversationCache } from '@/lib/cache/conversation-cache';
 import { checkDashboardRateLimit } from '@/lib/middleware/dashboard-rate-limit';
 import { ConversationsQuerySchema } from '@/lib/services/dashboard/validation-schemas';
 import { ConversationsService } from '@/lib/services/dashboard/conversations-service';
+import { requireOrgWithDomains } from '@/lib/middleware/auth';
 
 export async function GET(request: NextRequest) {
   const performanceStart = Date.now();
 
   try {
+    // Authenticate user and get organization
+    const authResult = await requireOrgWithDomains();
+    if (authResult instanceof NextResponse) {
+      return authResult; // Return auth error
+    }
+
+    const { user, organizationId, allowedDomains } = authResult;
+
     // Apply rate limiting
-    const userId = 'anonymous'; // TODO: Extract from authenticated user
-    const rateLimitResponse = await checkDashboardRateLimit(userId, 'dashboard');
+    const rateLimitResponse = await checkDashboardRateLimit(user.id, 'dashboard');
     if (rateLimitResponse) {
       return rateLimitResponse;
     }
@@ -35,12 +43,11 @@ export async function GET(request: NextRequest) {
 
     const { days, limit, cursor } = queryValidation.data;
 
-    // Try cache first
-    const domainId = 'default'; // TODO: Extract from authenticated user's domain
+    // Try cache first (use organizationId for cache key)
     const cacheFilters = { days, cursor, limit };
 
     const cached = await ConversationCache.getConversationsList(
-      domainId,
+      organizationId,
       cacheFilters
     );
     if (cached) {
@@ -56,15 +63,16 @@ export async function GET(request: NextRequest) {
 
     console.log('[Dashboard] Cache miss - fetching from database');
 
-    // Fetch data using service
+    // Fetch data using service with organization filter
     const responseData = await ConversationsService.getConversationStats({
       days,
       limit,
       cursor,
+      organizationId,
     });
 
     // Cache the response (fire and forget)
-    ConversationCache.setConversationsList(domainId, cacheFilters, responseData).catch(
+    ConversationCache.setConversationsList(organizationId, cacheFilters, responseData).catch(
       (err) => console.error('[Dashboard] Failed to cache response:', err)
     );
 

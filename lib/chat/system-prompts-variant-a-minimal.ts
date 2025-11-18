@@ -41,7 +41,9 @@ export function getEnhancedCustomerServicePromptVariantA(
   // Only include if corrections exist
   if (corrections.length > 0) {
     const latestCorrection = corrections[corrections.length - 1];
-    parts.push(`Correction: ${latestCorrection.originalValue} → ${latestCorrection.correctedValue}`);
+    if (latestCorrection) {
+      parts.push(`Correction: ${latestCorrection.originalValue} → ${latestCorrection.correctedValue}`);
+    }
   }
 
   // Only include if recent entities exist
@@ -55,8 +57,10 @@ export function getEnhancedCustomerServicePromptVariantA(
   // Only include if active numbered list exists
   if (lists.length > 0) {
     const latestList = lists[lists.length - 1];
-    const listItems = latestList.items.map((item, idx) => `${idx + 1}:${item.text}`).join(', ');
-    parts.push(`List: ${listItems}`);
+    if (latestList) {
+      const listItems = latestList.items.map((item, idx) => `${idx + 1}:${item.name}`).join(', ');
+      parts.push(`List: ${listItems}`);
+    }
   }
 
   // Return base prompt + minimal context (no instructions!)

@@ -1,4 +1,58 @@
+**Last Updated:** 2025-11-18
+**Verified Accurate For:** v0.1.0
+**Status:** Active
+**Type:** Reference
+
 # Privacy API
+
+**Type:** Reference
+**Status:** Active
+**Last Updated:** 2025-11-18
+**Verified For:** v0.1.0
+**Dependencies:** [GDPR API](/home/user/Omniops/app/api/gdpr/README.md), [Database Schema](/home/user/Omniops/docs/09-REFERENCE/REFERENCE_DATABASE_SCHEMA.md)
+**Estimated Read Time:** 14 minutes
+
+## Purpose
+
+This document provides comprehensive technical reference for user-centric privacy control endpoints including simplified data deletion, privacy request tracking, and data management features designed for direct user access alongside GDPR compliance endpoints.
+
+## Quick Links
+
+- [GDPR Compliance API](/home/user/Omniops/app/api/gdpr/README.md)
+- [API Routes Documentation](/home/user/Omniops/app/api/README.md)
+- [Chat System Integration](/home/user/Omniops/app/api/chat/README.md)
+- [Customer Configuration](/home/user/Omniops/app/api/customer/README.md)
+
+## Keywords
+
+**Primary**: privacy API, data deletion, privacy preferences, user data control, privacy requests
+**Aliases**: privacy endpoints, user privacy, data rights, privacy management
+**Related**: GDPR compliance, data export, privacy settings, consent management, audit logging
+
+## Table of Contents
+
+- [Overview](#overview)
+- [Endpoints](#endpoints)
+  - [POST /api/privacy/delete](#post-apiprivacydelete)
+  - [GET /api/privacy/export (Planned)](#get-apiprivacyexport-planned)
+  - [POST /api/privacy/preferences (Planned)](#post-apiprivacypreferences-planned)
+  - [GET /api/privacy/status (Planned)](#get-apiprivacystatus-planned)
+- [Features](#features)
+- [Database Operations](#database-operations)
+- [Security Features](#security-features)
+- [Performance](#performance)
+- [Examples](#examples)
+- [Error Handling](#error-handling)
+- [Integration](#integration)
+- [Privacy Request Types](#privacy-request-types)
+- [Monitoring and Analytics](#monitoring-and-analytics)
+- [Best Practices](#best-practices)
+- [Compliance Considerations](#compliance-considerations)
+- [Testing and Validation](#testing-and-validation)
+- [Related Endpoints](#related-endpoints)
+- [Future Enhancements](#future-enhancements)
+
+---
 
 User privacy and data control endpoints for managing personal data and privacy preferences.
 

@@ -1,4 +1,20 @@
+**Last Updated:** 2025-11-18
+**Verified Accurate For:** v0.1.0
+**Status:** Active
+**Type:** Reference
+
 # WebSocket to Supabase Realtime Migration
+
+**Type:** Guide
+**Status:** Deprecated
+**Last Updated:** 2025-11-09
+**Verified For:** v0.1.0
+**Dependencies:** [Supabase Realtime Documentation](https://supabase.com/docs/guides/realtime)
+**Estimated Read Time:** 4 minutes
+
+## Purpose
+
+Migration guide for transitioning from custom Socket.IO WebSocket server to Supabase Realtime Broadcast channels, necessitated by Vercel serverless platform limitations.
 
 **Date**: 2025-11-09
 **Reason**: Vercel serverless platform doesn't support custom HTTP servers or long-running WebSocket connections

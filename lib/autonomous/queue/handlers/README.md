@@ -1,9 +1,20 @@
+**Last Updated:** 2025-11-18
+**Verified Accurate For:** v0.1.0
+**Status:** Active
+**Type:** Reference
+
 # Operation Job Handlers
 
-**Purpose:** Individual job type handlers for autonomous operation processing.
+**Type:** System
+**Status:** Active
+**Last Updated:** 2025-11-18
+**Verified For:** v0.1.0
+**Dependencies:** [Operation Job Processor](/home/user/Omniops/lib/autonomous/queue/operation-job-processor.ts), [Utils](/home/user/Omniops/lib/autonomous/queue/utils/)
+**Estimated Read Time:** 2 minutes
 
-**Last Updated:** 2025-11-10
-**Related:** [../operation-job-processor.ts](../operation-job-processor.ts), [../utils/](../utils/)
+## Purpose
+
+Individual job type handlers for autonomous operation processing, handling WooCommerce setup, Shopify setup, and other autonomous tasks.
 
 ## Overview
 

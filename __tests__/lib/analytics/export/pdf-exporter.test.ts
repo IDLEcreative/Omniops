@@ -1,5 +1,5 @@
 import { describe, it, expect, beforeEach } from '@jest/globals';
-import { exportToPDF, generatePDFFilename, type PDFExportOptions } from '@/lib/analytics/export/pdf-exporter';
+// IMPORTANT: Import mocks BEFORE implementation to ensure jest.mock() is called first
 import {
   mockSetFontSize,
   mockText,
@@ -7,6 +7,7 @@ import {
   createMockMessageAnalytics,
   createMockUserAnalytics,
 } from './pdf-exporter-test-utils';
+import { exportToPDF, generatePDFFilename, type PDFExportOptions } from '@/lib/analytics/export/pdf-exporter';
 
 describe('PDF Exporter — Core Behavior', () => {
   beforeEach(() => {

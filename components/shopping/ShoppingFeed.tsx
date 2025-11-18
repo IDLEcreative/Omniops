@@ -133,6 +133,12 @@ export function ShoppingFeed({
     return () => container.removeEventListener('scroll', handleScroll);
   }, [currentIndex, products.length]);
 
+  // Define handleExit first so it can be used in handleTouchEnd
+  const handleExit = useCallback(() => {
+    hapticMedium();
+    onExit();
+  }, [onExit]);
+
   // Enhanced swipe gesture handling
   const handleTouchStart = useCallback((e: React.TouchEvent) => {
     if (e.touches[0]) {

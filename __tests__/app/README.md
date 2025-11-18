@@ -1,10 +1,19 @@
+**Last Updated:** 2025-11-18
+**Verified Accurate For:** v0.1.0
+**Status:** Active
+**Type:** Reference
+
 # App Tests Directory
+
+**Type:** Test Documentation
+**Status:** Active
+**Last Updated:** 2025-11-18
+**Verified For:** v0.1.0
+**Estimated Read Time:** 1 minute
 
 **Purpose:** Tests for Next.js page components and app-level routing.
 
 **Test Type:** Integration | Page Component
-
-**Last Updated:** 2025-10-30
 
 **Coverage:** Page component rendering, routing, layouts, and app-level functionality.
 

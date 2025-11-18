@@ -1,4 +1,15 @@
+**Last Updated:** 2025-11-18
+**Verified Accurate For:** v0.1.0
+**Type:** Reference
+
 # Analytics Export E2E Tests
+
+**Type:** Test Documentation
+**Status:** Active
+**Last Updated:** 2025-11-18
+**Verified For:** v0.1.0
+**Estimated Read Time:** 5 minutes
+
 
 This directory contains Playwright E2E tests for analytics export functionality. The tests verify CSV, PDF, and Excel export workflows, data accuracy, error handling, and performance.
 

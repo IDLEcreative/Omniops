@@ -1,8 +1,32 @@
+**Last Updated:** 2025-11-18
+**Verified Accurate For:** v0.1.0
+**Status:** Active
+**Type:** Reference
+
 # Billing Directory
 
-**Purpose:** Billing and subscription management components
-**Last Updated:** 2025-10-30
-**Related:** [Dashboard Billing](/app/billing), [Stripe Integration](/lib/integrations)
+**Type:** Reference
+**Status:** Active
+**Last Updated:** 2025-11-18
+**Verified For:** v0.1.0
+**Dependencies:** [Dashboard Billing](/home/user/Omniops/app/billing), [Stripe Integration](/home/user/Omniops/lib/integrations), [UI Components](/home/user/Omniops/components/ui/README.md)
+**Estimated Read Time:** 2 minutes
+
+## Purpose
+
+Billing and subscription management components for handling subscriptions, invoices, payment methods, and plan upgrades/downgrades with Stripe integration.
+
+## Quick Links
+
+- [Main Components Directory](/home/user/Omniops/components/README.md)
+- [Pricing Components](/home/user/Omniops/components/pricing/README.md)
+- [Dashboard Components](/home/user/Omniops/components/dashboard/README.md)
+
+---
+
+## Keywords
+
+billing, subscriptions, stripe, invoices, payment methods, plan upgrades
 
 ## Overview
 

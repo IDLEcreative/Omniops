@@ -1,6 +1,46 @@
+**Last Updated:** 2025-11-18
+**Verified Accurate For:** v0.1.0
+**Status:** Active
+**Type:** Reference
+
 # Library Tests Directory
 
-Comprehensive test suite for business logic and service layer components in the Customer Service Agent application, covering core functionality, data processing, and external integrations.
+**Type:** Test Documentation
+**Status:** Active
+**Last Updated:** 2025-11-18
+**Verified For:** v0.1.0
+**Dependencies:** [Parent Tests README](/home/user/Omniops/__tests__/README.md), [Lib Directory](/home/user/Omniops/lib/README.md)
+**Estimated Read Time:** 12 minutes
+
+## Purpose
+
+Comprehensive test suite for business logic and service layer components covering AI services, data extraction, e-commerce integration, encryption, embeddings, and system utilities with 400+ tests.
+
+## Quick Links
+
+- [Parent Tests Directory](/home/user/Omniops/__tests__/README.md)
+- [Lib Directory](/home/user/Omniops/lib/README.md)
+- [Testing Guide](/home/user/Omniops/docs/TESTING_GUIDE.md)
+- [CLAUDE.md Testing Philosophy](/home/user/Omniops/CLAUDE.md#testing--code-quality-philosophy)
+
+## Table of Contents
+
+- [Overview](#overview)
+- [Directory Structure](#directory-structure)
+- [Test Categories](#test-categories)
+  - [AI & Agent Tests](#ai--agent-tests)
+  - [Analytics & Monitoring](#analytics--monitoring)
+  - [E-commerce Integration](#e-commerce-integration)
+  - [Data Processing](#data-processing)
+  - [Security & Encryption](#security--encryption)
+  - [System Utilities](#system-utilities)
+- [Running Tests](#running-tests)
+- [Test Patterns](#test-patterns)
+- [Mocking Strategies](#mocking-strategies)
+- [Performance Testing](#performance-testing)
+- [Best Practices](#best-practices)
+
+---
 
 ## Overview
 

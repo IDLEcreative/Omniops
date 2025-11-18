@@ -71,38 +71,46 @@ export async function getRecommendations(
 
     // Route to appropriate algorithm
     switch (algorithm) {
-      case 'vector_similarity':
-        recommendations = await vectorSimilarityRecommendations({
+      case 'vector_similarity': {
+        const result = await vectorSimilarityRecommendations({
           ...request,
           limit,
           context: contextAnalysis,
-        }) || [];
+        });
+        recommendations = result ?? [];
         break;
+      }
 
-      case 'collaborative':
-        recommendations = await collaborativeFilterRecommendations({
+      case 'collaborative': {
+        const result = await collaborativeFilterRecommendations({
           ...request,
           limit,
           context: contextAnalysis,
-        }) || [];
+        });
+        recommendations = result ?? [];
         break;
+      }
 
-      case 'content_based':
-        recommendations = await contentBasedRecommendations({
+      case 'content_based': {
+        const result = await contentBasedRecommendations({
           ...request,
           limit,
           context: contextAnalysis,
-        }) || [];
+        });
+        recommendations = result ?? [];
         break;
+      }
 
       case 'hybrid':
-      default:
-        recommendations = await hybridRanker({
+      default: {
+        const result = await hybridRanker({
           ...request,
           limit,
           context: contextAnalysis,
-        }) || [];
+        });
+        recommendations = result ?? [];
         break;
+      }
     }
 
     // Filter out excluded products
@@ -113,10 +121,11 @@ export async function getRecommendations(
     }
 
     // Apply business rules (inventory, pricing, etc.)
-    recommendations = (await applyBusinessRules(
+    const filtered = await applyBusinessRules(
       recommendations,
       request.domainId
-    )) || [];
+    );
+    recommendations = filtered ?? [];
 
     // Track recommendations
     await trackRecommendations(recommendations, request, request.supabaseClient);
@@ -165,6 +174,7 @@ async function trackRecommendations(
 
   try {
     const supabase = supabaseClient ?? (await createClient());
+    if (!supabase) return;
 
     const events = recommendations.map((rec) => ({
       session_id: request.sessionId,
@@ -202,6 +212,7 @@ export async function trackRecommendationEvent(
 ): Promise<void> {
   try {
     const supabase = supabaseClient ?? (await createClient());
+    if (!supabase) return;
 
     // Find the most recent recommendation event for this product
     const { data: event, error: findError } = await supabase
@@ -249,6 +260,7 @@ export async function getRecommendationMetrics(
 ) {
   try {
     const supabase = supabaseClient ?? (await createClient());
+    if (!supabase) throw new Error('Failed to initialize Supabase client');
 
     const { data, error } = await supabase
       .rpc('get_recommendation_metrics', {

@@ -75,6 +75,11 @@ async function findSimilarProducts(
 ): Promise<ProductRecommendation[]> {
   const supabase = await createClient();
 
+  if (!supabase) {
+    console.error('[VectorSimilarity] Supabase client unavailable');
+    return [];
+  }
+
   try {
     // Get embeddings for reference products
     const { data: refEmbeddings, error: refError } = await supabase
@@ -149,6 +154,11 @@ async function searchByIntent(
 
     const supabase = await createClient();
 
+    if (!supabase) {
+      console.error('[VectorSimilarity] Supabase client unavailable');
+      return [];
+    }
+
     // Search for matching products
     const { data: matches, error } = await supabase.rpc('match_products', {
       query_embedding: embedding,
@@ -196,6 +206,11 @@ async function getPopularProducts(
   excludeIds?: string[]
 ): Promise<ProductRecommendation[]> {
   const supabase = await createClient();
+
+  if (!supabase) {
+    console.error('[VectorSimilarity] Supabase client unavailable');
+    return [];
+  }
 
   try {
     // Get products with most recommendations/clicks
@@ -249,7 +264,12 @@ async function generateEmbedding(text: string): Promise<number[]> {
     input: text,
   });
 
-  return response.data[0].embedding;
+  const embedding = response.data[0]?.embedding;
+  if (!embedding) {
+    throw new Error('Failed to generate embedding');
+  }
+
+  return embedding;
 }
 
 /**
@@ -258,12 +278,15 @@ async function generateEmbedding(text: string): Promise<number[]> {
 function averageEmbeddings(embeddings: number[][]): number[] {
   if (!embeddings.length) return [];
 
-  const dimension = embeddings[0].length;
+  const firstEmbedding = embeddings[0];
+  if (!firstEmbedding) return [];
+
+  const dimension = firstEmbedding.length;
   const avg = new Array(dimension).fill(0);
 
   embeddings.forEach((emb) => {
     emb.forEach((val, i) => {
-      avg[i] += val;
+      avg[i]! += val;
     });
   });
 

@@ -1,6 +1,42 @@
+**Last Updated:** 2025-11-18
+**Verified Accurate For:** v0.1.0
+**Status:** Active
+**Type:** Reference
+
 # Authentication Logic Documentation
 
-This directory contains authentication utilities and helper functions that support secure user authentication, session management, and authorization throughout the application.
+**Type:** Service
+**Status:** Active
+**Last Updated:** 2025-11-18
+**Verified For:** v0.1.0
+**Dependencies:** [Supabase](/home/user/Omniops/lib/supabase/README.md), [Encryption](/home/user/Omniops/lib/encryption.ts), [Rate Limiting](/home/user/Omniops/lib/rate-limit.ts)
+**Estimated Read Time:** 5 minutes
+
+## Purpose
+
+Authentication utilities and helper functions that support secure user authentication, session management, and authorization throughout the application. Provides session validation, role-based access control, and security operations.
+
+## Quick Links
+- [Supabase Server Client](/home/user/Omniops/lib/supabase/server.ts)
+- [Supabase Client](/home/user/Omniops/lib/supabase/client.ts)
+- [Encryption Utilities](/home/user/Omniops/lib/encryption.ts)
+- [Rate Limiting](/home/user/Omniops/lib/rate-limit.ts)
+- [API Auth Routes](/home/user/Omniops/app/api/auth/)
+
+## Table of Contents
+- [Architecture](#architecture)
+- [Core Components](#core-components)
+- [Authentication Patterns](#authentication-patterns)
+- [Integration with Supabase Auth](#integration-with-supabase-auth)
+- [Security Features](#security-features)
+- [Middleware Integration](#middleware-integration)
+- [Error Handling](#error-handling)
+- [Testing](#testing)
+- [Security Best Practices](#security-best-practices)
+- [Related Components](#related-components)
+- [Contributing](#contributing)
+
+---
 
 ## Overview
 
@@ -510,11 +546,11 @@ function setSessionCookie(response: Response, token: string): void {
 
 ## Related Components
 
-- `/lib/supabase/server.ts` - Server-side Supabase client with auth
-- `/lib/supabase/client.ts` - Client-side Supabase client with auth
-- `/lib/encryption.ts` - Encryption utilities for sensitive data
-- `/lib/rate-limit.ts` - Rate limiting for auth endpoints
-- `/app/api/auth/` - Authentication API routes
+- [Supabase Server Client](/home/user/Omniops/lib/supabase/server.ts) - Server-side Supabase client with auth
+- [Supabase Client](/home/user/Omniops/lib/supabase/client.ts) - Client-side Supabase client with auth
+- [Encryption Utilities](/home/user/Omniops/lib/encryption.ts) - Encryption utilities for sensitive data
+- [Rate Limiting](/home/user/Omniops/lib/rate-limit.ts) - Rate limiting for auth endpoints
+- [Authentication API Routes](/home/user/Omniops/app/api/auth/) - Authentication API routes
 
 ## Contributing
 

@@ -9,8 +9,8 @@
  * @module lib/autonomous/core/operation-service
  */
 
-import type { SupabaseClient } from '@supabase/supabase-js';
 import { createServiceRoleClientSync } from '@/lib/supabase/server';
+import type { SupabaseClient } from '@supabase/supabase-js';
 import { verifyConsent as defaultVerifyConsent } from '../security/consent-manager';
 import {
   insertOperation as defaultInsertOperation,
@@ -76,7 +76,7 @@ export interface OperationDependencies {
 // ============================================================================
 
 export class OperationService {
-  private supabase: SupabaseClient;
+  private supabase: SupabaseClient | null;
   private operations: OperationDatabaseOps;
   private verifyConsent: typeof defaultVerifyConsent;
 
@@ -87,11 +87,11 @@ export class OperationService {
    * @param dependencies Optional dependencies including verifyConsent (for testing).
    */
   constructor(
-    client?: ReturnType<typeof createServerClient>,
+    client?: SupabaseClient | null,
     operations?: Partial<OperationDatabaseOps>,
     dependencies?: OperationDependencies
   ) {
-    this.supabase = client || createServerClient();
+    this.supabase = client || createServiceRoleClientSync();
 
     // Use provided operations or defaults
     this.operations = {
@@ -111,6 +111,10 @@ export class OperationService {
    * Create a new autonomous operation
    */
   async create(request: CreateOperationRequest): Promise<OperationRecord> {
+    if (!this.supabase) {
+      throw new Error('Supabase client not initialized');
+    }
+
     const consentVerification = await this.verifyConsent(request.organizationId, request.service, request.operation);
     const status = consentVerification.hasConsent ? 'pending' : 'awaiting_consent';
     const consent_given = consentVerification.hasConsent;
@@ -142,6 +146,10 @@ export class OperationService {
    * Get operation by ID
    */
   async get(operationId: string): Promise<OperationRecord | null> {
+    if (!this.supabase) {
+      throw new Error('Supabase client not initialized');
+    }
+
     const data = await this.operations.selectOperationById(this.supabase, operationId);
     if (!data) return null;
     return this.operations.mapToOperationRecord(data);
@@ -154,6 +162,10 @@ export class OperationService {
     organizationId: string,
     options?: { status?: string; service?: string; limit?: number }
   ): Promise<OperationRecord[]> {
+    if (!this.supabase) {
+      throw new Error('Supabase client not initialized');
+    }
+
     const data = await this.operations.selectOperations(this.supabase, organizationId, options);
     return data.map(item => this.operations.mapToOperationRecord(item));
   }
@@ -163,6 +175,10 @@ export class OperationService {
    */
   async grantConsent(operationId: string): Promise<void> {
     try {
+      if (!this.supabase) {
+        throw new Error('Supabase client not initialized');
+      }
+
       await this.operations.updateOperationConsent(this.supabase, operationId);
       console.log('[OperationService] Consent granted for operation:', operationId);
     } catch (error) {
@@ -176,6 +192,10 @@ export class OperationService {
    */
   async cancel(operationId: string): Promise<void> {
     try {
+      if (!this.supabase) {
+        throw new Error('Supabase client not initialized');
+      }
+
       await this.operations.updateOperationCancelled(this.supabase, operationId);
       console.log('[OperationService] Operation cancelled:', operationId);
     } catch (error) {
@@ -207,7 +227,7 @@ let operationServiceInstance: OperationService | null = null;
  * @param dependencies Optional dependencies (for testing)
  */
 export function getOperationService(
-  client?: ReturnType<typeof createServerClient>,
+  client?: SupabaseClient | null,
   operations?: Partial<OperationDatabaseOps>,
   dependencies?: OperationDependencies
 ): OperationService {

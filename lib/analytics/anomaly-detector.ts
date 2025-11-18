@@ -15,14 +15,10 @@ import {
   type AnomalySeverity,
   type Anomaly,
   type HistoricalDataPoint,
-  type DetectionConfig
+  type DetectionConfig,
+  CRITICAL_THRESHOLDS,
+  WARNING_THRESHOLDS
 } from './anomaly-types';
-
-import {
-  determineSeverity,
-  generateRecommendation,
-  createAnomalyMessage
-} from './anomaly-helpers';
 
 // Re-export types for backward compatibility
 export type {
@@ -32,6 +28,71 @@ export type {
   HistoricalDataPoint,
   DetectionConfig
 } from './anomaly-types';
+
+/**
+ * Determine severity based on deviation magnitude
+ */
+function determineSeverity(
+  percentChange: number,
+  metric: AnomalyMetric
+): AnomalySeverity {
+  const absChange = Math.abs(percentChange);
+
+  if (absChange >= CRITICAL_THRESHOLDS[metric]) {
+    return 'critical';
+  }
+  if (absChange >= WARNING_THRESHOLDS[metric]) {
+    return 'warning';
+  }
+  return 'info';
+}
+
+/**
+ * Generate recommendation based on anomaly type
+ */
+function generateRecommendation(
+  metric: AnomalyMetric,
+  severity: AnomalySeverity,
+  percentChange: number
+): string | undefined {
+  if (severity === 'info') return undefined;
+
+  const isIncrease = percentChange > 0;
+
+  const recommendations: Record<AnomalyMetric, { increase: string; decrease: string }> = {
+    responseTime: {
+      increase: 'Check server load and optimize database queries. Consider scaling resources.',
+      decrease: 'Performance improvement detected. Document what changed for future reference.'
+    },
+    errorRate: {
+      increase: 'Investigate error logs immediately. Check recent deployments and external dependencies.',
+      decrease: 'Error rate improvement detected. Verify fixes are working as expected.'
+    },
+    bounceRate: {
+      increase: 'Review landing page performance and user experience. Check page load times.',
+      decrease: 'Bounce rate improvement detected. Analyze what content/UX changes worked.'
+    },
+    conversionRate: {
+      increase: 'Positive trend! Analyze successful changes and consider A/B testing further improvements.',
+      decrease: 'Review checkout flow for issues. Check for technical problems or UX friction.'
+    },
+    satisfactionScore: {
+      increase: 'Great improvement! Document successful changes for best practices.',
+      decrease: 'Review recent customer feedback. Check for service quality issues.'
+    },
+    resolutionRate: {
+      increase: 'Support efficiency improving. Share successful practices with team.',
+      decrease: 'Review support processes. Check if complexity of issues has increased.'
+    },
+    trafficVolume: {
+      increase: 'Traffic spike detected. Ensure infrastructure can handle load. Check for campaigns or external events.',
+      decrease: 'Traffic drop detected. Check for technical issues, SEO changes, or marketing gaps.'
+    }
+  };
+
+  const recommendation = recommendations[metric];
+  return isIncrease ? recommendation.increase : recommendation.decrease;
+}
 
 /**
  * Detect anomalies in current metrics compared to historical data
@@ -113,207 +174,36 @@ export function detectAnomalies(
 }
 
 /**
- * Detect threshold-based anomalies using statistical analysis
+ * Create human-readable anomaly message
  */
-export function detectThresholdAnomaly(
-  currentValue: number,
-  historicalValues: number[],
+function createAnomalyMessage(
   metric: AnomalyMetric,
-  config: DetectionConfig = {}
-): Anomaly | null {
-  const {
-    stdDevThreshold = 2,
-    minDataPoints = 7
-  } = config;
-
-  // Check if we have enough data
-  if (historicalValues.length < minDataPoints) {
-    return null;
-  }
-
-  // Calculate statistics
-  const mean = calculateMean(historicalValues);
-  const stdDev = calculateStdDev(historicalValues, mean);
-  const median = calculateMedian(historicalValues);
-
-  // Use median as expected value (more robust to outliers)
-  const expectedValue = median || mean;
-
-  // Calculate percent change
-  const percentChange = expectedValue !== 0
-    ? ((currentValue - expectedValue) / expectedValue) * 100
-    : (currentValue > 0 ? 100 : 0);
-
-  // For zero standard deviation, use percent change only
-  if (stdDev === 0) {
-    if (currentValue === expectedValue) {
-      return null;
-    }
-    const severity = determineSeverity(percentChange, metric);
-    const recommendation = generateRecommendation(metric, severity, percentChange);
-
-    return {
-      metric,
-      severity,
-      message: createAnomalyMessage(metric, percentChange, severity),
-      currentValue,
-      expectedValue,
-      percentChange,
-      detectedAt: new Date().toISOString(),
-      recommendation
-    };
-  }
-
-  // Calculate standard deviation from mean
-  const stdDeviation = Math.abs(currentValue - mean) / stdDev;
-
-  // Check if anomaly
-  if (stdDeviation > stdDevThreshold) {
-    const severity = determineSeverity(percentChange, metric);
-    const recommendation = generateRecommendation(metric, severity, percentChange);
-
-    return {
-      metric,
-      severity,
-      message: createAnomalyMessage(metric, percentChange, severity),
-      currentValue,
-      expectedValue,
-      percentChange,
-      detectedAt: new Date().toISOString(),
-      recommendation
-    };
-  }
-
-  return null;
-}
-
-/**
- * Detect percentage-based anomalies
- */
-export function detectPercentageAnomaly(
-  currentValue: number,
-  baselineValue: number,
-  metric: AnomalyMetric,
-  config: DetectionConfig = {}
-): Anomaly | null {
-  const {
-    percentChangeThreshold = 50
-  } = config;
-
-  // Handle baseline of zero
-  const percentChange = baselineValue !== 0
-    ? ((currentValue - baselineValue) / baselineValue) * 100
-    : (currentValue > 0 ? 100 : 0);
-
-  // Check if change exceeds threshold
-  if (Math.abs(percentChange) < percentChangeThreshold) {
-    return null;
-  }
-
-  const severity = determineSeverity(percentChange, metric);
-  const recommendation = generateRecommendation(metric, severity, percentChange);
-
-  return {
-    metric,
-    severity,
-    message: createAnomalyMessage(metric, percentChange, severity),
-    currentValue,
-    expectedValue: baselineValue,
-    percentChange,
-    detectedAt: new Date().toISOString(),
-    recommendation
+  percentChange: number,
+  severity: AnomalySeverity
+): string {
+  const metricNames: Record<AnomalyMetric, string> = {
+    responseTime: 'Response time',
+    errorRate: 'Error rate',
+    bounceRate: 'Bounce rate',
+    conversionRate: 'Conversion rate',
+    satisfactionScore: 'Satisfaction score',
+    resolutionRate: 'Resolution rate',
+    trafficVolume: 'Traffic volume'
   };
+
+  const metricName = metricNames[metric];
+  const direction = percentChange > 0 ? 'increased' : 'decreased';
+  const absChange = Math.abs(percentChange).toFixed(1);
+
+  const severityText = severity === 'critical' ? 'significantly ' :
+                       severity === 'warning' ? 'notably ' : '';
+
+  return `${metricName} has ${severityText}${direction} by ${absChange}%`;
 }
 
 /**
- * Detect pattern-based anomalies (spikes and drops)
- */
-export function detectPatternAnomaly(
-  recentValues: number[],
-  metric: AnomalyMetric,
-  config: DetectionConfig = {}
-): Anomaly | null {
-  const {
-    minDataPoints = 5
-  } = config;
-
-  // Need at least 5 points to detect patterns
-  if (recentValues.length < minDataPoints) {
-    return null;
-  }
-
-  // Get last value and previous values
-  const lastValue = recentValues[recentValues.length - 1];
-  const previousValues = recentValues.slice(0, -1);
-
-  // Check if this is a gradual trend (not a spike/drop)
-  // Calculate differences between consecutive values
-  const differences: number[] = [];
-  for (let i = 1; i < recentValues.length; i++) {
-    differences.push(recentValues[i] - recentValues[i - 1]);
-  }
-
-  // If all differences have the same sign and similar magnitude, it's a trend
-  const allPositive = differences.every(d => d >= 0);
-  const allNegative = differences.every(d => d <= 0);
-  const isConsistentTrend = allPositive || allNegative;
-
-  if (isConsistentTrend) {
-    // Check if differences are similar (not a sudden spike at the end)
-    const avgDiff = calculateMean(differences.map(Math.abs));
-    const lastDiff = Math.abs(differences[differences.length - 1]);
-
-    // If last difference is within 2x the average, it's gradual
-    if (lastDiff <= avgDiff * 2) {
-      return null;
-    }
-  }
-
-  // Calculate mean of previous values
-  const previousMean = calculateMean(previousValues);
-  const previousStdDev = calculateStdDev(previousValues, previousMean);
-
-  // Calculate how many standard deviations away the last value is
-  if (previousStdDev === 0) {
-    // If no variation, check for any change
-    if (lastValue === previousMean) {
-      return null;
-    }
-  } else {
-    const stdDeviations = Math.abs(lastValue - previousMean) / previousStdDev;
-
-    // If less than 2 standard deviations, not a spike/drop
-    if (stdDeviations < 2) {
-      return null;
-    }
-  }
-
-  // Calculate percent change
-  const percentChange = previousMean !== 0
-    ? ((lastValue - previousMean) / previousMean) * 100
-    : (lastValue > 0 ? 100 : 0);
-
-  const severity = determineSeverity(percentChange, metric);
-  const isSpike = lastValue > previousMean;
-  const patternType = isSpike ? 'spike' : 'drop';
-
-  return {
-    metric,
-    severity,
-    message: createAnomalyMessage(metric, percentChange, severity).replace(
-      lastValue > previousMean ? 'increased' : 'decreased',
-      patternType
-    ),
-    currentValue: lastValue,
-    expectedValue: previousMean,
-    percentChange,
-    detectedAt: new Date().toISOString(),
-    recommendation: generateRecommendation(metric, severity, percentChange)
-  };
-}
-
-/**
- * Calculate baseline statistics for historical data
+ * Calculate statistical baselines for historical data
+ * Useful for understanding normal ranges before detecting anomalies
  */
 export function calculateBaselines(
   historicalData: Partial<Record<AnomalyMetric, HistoricalDataPoint[]>>
@@ -322,9 +212,7 @@ export function calculateBaselines(
 
   (Object.keys(historicalData) as AnomalyMetric[]).forEach(metric => {
     const points = historicalData[metric];
-    if (!points || points.length === 0) {
-      return;
-    }
+    if (!points || points.length === 0) return;
 
     const values = points.map(p => p.value);
     const mean = calculateMean(values);

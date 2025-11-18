@@ -187,6 +187,10 @@ export class CredentialVault {
     service: string,
     credentialType: CredentialType
   ): Promise<void> {
+    if (!this.supabase) {
+      throw new Error('Supabase client not initialized');
+    }
+
     const { rotateCredential } = await import('./credential-rotation');
     const current = await this.get(organizationId, service, credentialType);
 
@@ -208,6 +212,10 @@ export class CredentialVault {
    * Mark credentials requiring rotation (90+ days old)
    */
   async markStaleCredentialsForRotation(): Promise<number> {
+    if (!this.supabase) {
+      throw new Error('Supabase client not initialized');
+    }
+
     const { markStaleCredentialsForRotation } = await import('./credential-rotation');
     return markStaleCredentialsForRotation(this.supabase);
   }
@@ -216,6 +224,10 @@ export class CredentialVault {
    * Get credentials requiring rotation
    */
   async getCredentialsRequiringRotation(): Promise<StoredCredential[]> {
+    if (!this.supabase) {
+      throw new Error('Supabase client not initialized');
+    }
+
     const { getCredentialsRequiringRotation } = await import('./credential-rotation');
     const data = await getCredentialsRequiringRotation(this.supabase);
     return data.map(this.operations.mapToStoredCredential);

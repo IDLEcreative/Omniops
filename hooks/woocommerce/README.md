@@ -1,12 +1,20 @@
+**Last Updated:** 2025-11-18
+**Verified Accurate For:** v0.1.0
+**Status:** Active
+**Type:** Reference
+
 # WooCommerce Hooks
 
-**Purpose:** Custom React hooks for WooCommerce integration functionality.
-
+**Type:** Reference
+**Status:** Active
 **Last Updated:** 2025-11-08
-**Related:**
-- [WooCommerce Configure Page](/app/dashboard/integrations/woocommerce/configure/page.tsx)
-- [WooCommerce API Utilities](/lib/woocommerce-api/)
-- [All Hooks](/hooks/README.md)
+**Verified For:** v0.1.0
+**Dependencies:** [WooCommerce Configure Page](/home/user/Omniops/app/dashboard/integrations/woocommerce/configure/page.tsx), [WooCommerce API Utilities](/home/user/Omniops/lib/woocommerce-api/), [All Hooks](/home/user/Omniops/hooks/README.md)
+**Estimated Read Time:** 4 minutes
+
+## Purpose
+
+Custom React hooks for WooCommerce integration functionality, providing state management and business logic for configuration, credential management, and connection testing.
 
 ## Hooks
 

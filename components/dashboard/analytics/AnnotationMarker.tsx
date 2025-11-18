@@ -12,11 +12,10 @@ interface AnnotationMarkerProps {
 }
 
 // Category to icon mapping
-const categoryIcons = {
+const categoryIcons: Record<'campaign' | 'release' | 'incident' | 'other', string> = {
   campaign: '🚀',
   incident: '⚠️',
   release: '📦',
-  event: '📅',
   other: 'ℹ️',
 };
 
@@ -75,8 +74,6 @@ export function AnnotationTooltipContent({ annotation }: AnnotationTooltipConten
         return AlertTriangle;
       case 'release':
         return Package;
-      case 'other':
-        return Info;
       default:
         return Info;
     }

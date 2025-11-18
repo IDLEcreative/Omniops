@@ -1,8 +1,32 @@
+**Last Updated:** 2025-11-18
+**Verified Accurate For:** v0.1.0
+**Status:** Active
+**Type:** Reference
+
 # Organizations Directory
 
-**Purpose:** Multi-tenant organization management components
-**Last Updated:** 2025-10-30
-**Related:** [Contexts](/lib/contexts), [Team Dashboard](/app/dashboard/team)
+**Type:** Reference
+**Status:** Active
+**Last Updated:** 2025-11-18
+**Verified For:** v0.1.0
+**Dependencies:** [Contexts](/home/user/Omniops/lib/contexts), [Team Dashboard](/home/user/Omniops/app/dashboard/team), [Auth Components](/home/user/Omniops/components/auth/README.md)
+**Estimated Read Time:** 2 minutes
+
+## Purpose
+
+Multi-tenant organization management components for switching between organizations, managing team members, inviting members, tracking seat usage, and upgrading seat counts.
+
+## Quick Links
+
+- [Main Components Directory](/home/user/Omniops/components/README.md)
+- [Auth Components](/home/user/Omniops/components/auth/README.md)
+- [Billing Components](/home/user/Omniops/components/billing/README.md)
+
+---
+
+## Keywords
+
+multi-tenant, organizations, team management, seat allocation, invitations, role management
 
 ## Overview
 

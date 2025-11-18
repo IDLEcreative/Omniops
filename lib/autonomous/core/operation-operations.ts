@@ -7,7 +7,7 @@
  * @module lib/autonomous/core/operation-operations
  */
 
-import type { SupabaseClient } from '@supabase/supabase-js';
+import type { SupabaseClient } from '@/lib/supabase/server';
 import type { OperationRecord } from './operation-service';
 
 /**

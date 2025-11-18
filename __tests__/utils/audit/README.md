@@ -1,7 +1,15 @@
+**Last Updated:** 2025-11-18
+**Verified Accurate For:** v0.1.0
+**Status:** Active
+**Type:** Reference
+
 # Audit Test Utilities
 
+**Type:** Test Infrastructure
 **Status:** Active
-**Last Updated:** 2025-11-10
+**Last Updated:** 2025-11-18
+**Verified For:** v0.1.0
+**Estimated Read Time:** 2 minutes
 
 ## Purpose
 

@@ -1,6 +1,51 @@
+**Last Updated:** 2025-11-18
+**Verified Accurate For:** v0.1.0
+**Status:** Active
+**Type:** Reference
+
 # UI Components Directory
 
-Base design system components built on shadcn/ui and Radix UI primitives. These components form the foundation of the application's user interface.
+**Type:** Reference
+**Status:** Active
+**Last Updated:** 2025-11-18
+**Verified For:** v0.1.0
+**Dependencies:** [Radix UI](https://www.radix-ui.com/), [Tailwind CSS](https://tailwindcss.com/), [next-themes](https://github.com/pacocoursey/next-themes), [Class Variance Authority](https://cva.style/)
+**Estimated Read Time:** 12 minutes
+
+## Purpose
+
+Base design system components built on shadcn/ui and Radix UI primitives forming the foundation of the application's user interface with full accessibility compliance and themeable styling.
+
+## Quick Links
+
+- [Main Components Directory](/home/user/Omniops/components/README.md)
+- [shadcn/ui Documentation](https://ui.shadcn.com/)
+- [Radix UI Documentation](https://www.radix-ui.com/)
+- [Tailwind CSS Documentation](https://tailwindcss.com/)
+
+## Table of Contents
+
+- [Component Architecture](#component-architecture)
+- [Components](#components)
+  - [Form Components](#form-components)
+  - [Layout Components](#layout-components)
+  - [Navigation Components](#navigation-components)
+  - [Feedback Components](#feedback-components)
+  - [Interactive Components](#interactive-components)
+  - [Utility Components](#utility-components)
+- [Dependencies](#dependencies)
+- [Customization](#customization)
+- [Accessibility Features](#accessibility-features)
+- [Performance Considerations](#performance-considerations)
+- [Testing](#testing)
+- [Best Practices](#best-practices)
+- [Migration Guide](#migration-guide)
+
+---
+
+## Keywords
+
+UI components, shadcn/ui, Radix UI, design system, accessibility, Tailwind CSS, themeable, form components, navigation
 
 ## Overview
 

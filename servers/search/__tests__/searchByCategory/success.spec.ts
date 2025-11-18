@@ -14,12 +14,12 @@ describe('searchByCategory – Successful searches', () => {
     const result = await searchByCategory({ category: 'hydraulic-pumps', limit: 10 }, baseContext);
 
     expect(result.success).toBe(true);
-    expect(result.data.results).toEqual(mockResults);
-    expect(result.data.totalMatches).toBe(2);
-    expect(result.data.category).toBe('hydraulic-pumps');
-    expect(result.data.source).toBe('semantic');
-    expect(result.data.threshold).toBe(0.15);
-    expect(result.metadata.executionTime).toBeGreaterThan(0);
+    expect(result.data?.results).toEqual(mockResults);
+    expect(result.data?.totalMatches).toBe(2);
+    expect(result.data?.category).toBe('hydraulic-pumps');
+    expect(result.data?.source).toBe('semantic');
+    expect(result.data?.threshold).toBe(0.15);
+    expect(result.metadata?.executionTime).toBeGreaterThan(0);
   });
 
   it('supports categories with spaces', async () => {
@@ -28,7 +28,7 @@ describe('searchByCategory – Successful searches', () => {
     const result = await searchByCategory({ category: 'spare parts', limit: 20 }, baseContext);
 
     expect(result.success).toBe(true);
-    expect(result.data.category).toBe('spare parts');
+    expect(result.data?.category).toBe('spare parts');
     expect(mockSearchSimilarContent).toHaveBeenCalledWith('spare parts', 'thompsonseparts.co.uk', 20, 0.15);
   });
 
@@ -38,7 +38,7 @@ describe('searchByCategory – Successful searches', () => {
     const result = await searchByCategory({ category: 'parts-&-accessories', limit: 10 }, baseContext);
 
     expect(result.success).toBe(true);
-    expect(result.data.category).toBe('parts-&-accessories');
+    expect(result.data?.category).toBe('parts-&-accessories');
   });
 
   it('handles empty result sets', async () => {
@@ -47,7 +47,7 @@ describe('searchByCategory – Successful searches', () => {
     const result = await searchByCategory({ category: 'nonexistent', limit: 10 }, baseContext);
 
     expect(result.success).toBe(true);
-    expect(result.data.results).toEqual([]);
-    expect(result.data.totalMatches).toBe(0);
+    expect(result.data?.results).toEqual([]);
+    expect(result.data?.totalMatches).toBe(0);
   });
 });

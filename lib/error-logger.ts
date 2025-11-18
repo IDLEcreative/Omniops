@@ -267,10 +267,7 @@ class ErrorLogger {
   }
 
   public destroy(): void {
-    if (this.flushInterval) {
-      clearInterval(this.flushInterval);
-      this.flushInterval = null;
-    }
+    // Flush any remaining errors before destroying
     this.flushBuffer();
   }
 }

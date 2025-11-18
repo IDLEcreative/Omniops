@@ -1,4 +1,16 @@
+**Last Updated:** 2025-11-18
+**Verified Accurate For:** v0.1.0
+**Status:** Active
+**Type:** Reference
+
 # WooCommerce Tests Directory
+
+**Type:** Test Documentation
+**Status:** Active
+**Last Updated:** 2025-11-18
+**Verified For:** v0.1.0
+**Estimated Read Time:** 2 minutes
+
 
 **Purpose:** Integration tests for WooCommerce API integration, product operations, order management, and chat integration.
 

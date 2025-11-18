@@ -1,4 +1,15 @@
+**Last Updated:** 2025-11-18
+**Verified Accurate For:** v0.1.0
+**Status:** Active
+**Type:** Reference
+
 # Widget Config E2E Tests
+
+**Type:** Test Documentation
+**Status:** Active
+**Last Updated:** 2025-11-18
+**Verified For:** v0.1.0
+**Estimated Read Time:** 1 minute
 
 Modular organization of widget configuration end-to-end tests for the chat API.
 

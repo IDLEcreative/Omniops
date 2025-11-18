@@ -1,8 +1,29 @@
+**Last Updated:** 2025-11-18
+**Verified Accurate For:** v0.1.0
+**Status:** Active
+**Type:** Reference
+
 # Archived Scraping Documentation
 
-**Archive Date:** October 24, 2025
+**Type:** Archive
+**Status:** Archived
+**Last Updated:** 2025-11-18
+**Verified For:** v0.1.0
+**Dependencies:** [Current Scraping Guide](/home/user/Omniops/docs/08-FEATURES/scraping/README.md)
+**Estimated Read Time:** 3 minutes
 
 ## Purpose
+
+Legacy scraping documentation files consolidated into a single comprehensive guide, preserving 10+ historical documents for reference only.
+
+## Quick Links
+- [Current Scraping Documentation](/home/user/Omniops/docs/08-FEATURES/scraping/README.md)
+
+**Keywords:** scraping, archive, legacy, consolidated, October 2024
+
+---
+
+**Archive Date:** October 24, 2025
 
 This directory contains legacy scraping documentation files that have been consolidated into a single comprehensive guide.
 

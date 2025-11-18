@@ -1,8 +1,25 @@
+**Last Updated:** 2025-11-18
+**Verified Accurate For:** v0.1.0
+**Status:** Active
+**Type:** Reference
+
 # Examples Directory
 
-**Purpose:** Example implementations and usage patterns
-**Last Updated:** 2025-10-30
-**Related:** [Lib](/lib)
+**Type:** Utility
+**Status:** Active
+**Last Updated:** 2025-11-18
+**Verified For:** v0.1.0
+**Dependencies:** None (reference examples only)
+**Estimated Read Time:** 1 minute
+
+## Purpose
+
+Example implementations and usage patterns demonstrating proper usage of library features including rate limiting and web scraping.
+
+## Keywords
+- Examples, Rate Limiting, Scraping, Usage Patterns, Code Samples
+
+---
 
 ## Overview
 

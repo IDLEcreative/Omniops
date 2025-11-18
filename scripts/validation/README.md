@@ -1,8 +1,30 @@
+**Last Updated:** 2025-11-18
+**Verified Accurate For:** v0.1.0
+**Status:** Active
+**Type:** Reference
+
 # Validation Scripts
 
-**Purpose:** Data validation and system verification utilities
-**Last Updated:** 2025-10-30
-**Usage:** Run validation scripts from project root
+**Type:** Reference
+**Status:** Active
+**Last Updated:** 2025-11-18
+**Verified For:** v0.1.0
+**Dependencies:** [Testing Philosophy](/home/user/Omniops/CLAUDE.md#testing--code-quality-philosophy), [Supabase Configuration](/home/user/Omniops/supabase/README.md), [Main Scripts README](/home/user/Omniops/scripts/README.md)
+**Estimated Read Time:** 5 minutes
+
+## Purpose
+
+Data validation and system verification utilities for validating data integrity, verifying system functionality, and ensuring quality standards are met.
+
+## Quick Links
+
+- [Main Scripts README](/home/user/Omniops/scripts/README.md)
+- [Testing Philosophy](/home/user/Omniops/CLAUDE.md#testing--code-quality-philosophy)
+- [Supabase Configuration](/home/user/Omniops/supabase/README.md)
+
+## Keywords
+
+validation, verification, data integrity, price detection, Supabase, Playwright, quality assurance, smoke tests
 
 ## Overview
 
@@ -322,7 +344,7 @@ node scripts/validation/validate-price-detection.js
 
 ## Related Documentation
 
-- [Testing Philosophy](../../CLAUDE.md#testing--code-quality-philosophy)
-- [Price Detection](../../docs/price-detection.md)
-- [Supabase Configuration](../../supabase/README.md)
-- [Main Scripts README](../README.md)
+- [Testing Philosophy](/home/user/Omniops/CLAUDE.md#testing--code-quality-philosophy)
+- [Price Detection](/home/user/Omniops/docs/price-detection.md)
+- [Supabase Configuration](/home/user/Omniops/supabase/README.md)
+- [Main Scripts README](/home/user/Omniops/scripts/README.md)

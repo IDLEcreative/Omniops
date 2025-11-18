@@ -1,4 +1,36 @@
+**Last Updated:** 2025-11-18
+**Verified Accurate For:** v0.1.0
+**Status:** Active
+**Type:** Reference
+
 # Browser Automation
+
+**Type:** Reference
+**Status:** Archived
+**Last Updated:** 2025-11-18
+**Verified For:** v0.1.0
+**Dependencies:** None (experimental, not used in production)
+**Estimated Read Time:** 4 minutes
+
+## Purpose
+
+Experimental browser automation tools using Puppeteer for testing and development. These are separate from the main application's production Crawlee-based scraping system.
+
+## Quick Links
+
+- [Production Scraping System](/home/user/Omniops/lib/crawler-config.ts)
+- [Web Scraping Documentation](/home/user/Omniops/docs/WEB_SCRAPING.md)
+
+## Keywords
+
+**Search Terms:** browser automation, Puppeteer, experimental, web scraping, testing tools, Claude browser control
+
+**Aliases:**
+- "Browser control" (capability)
+- "AI browser automation" (concept)
+- "Experimental tools" (status)
+
+---
 
 Experimental browser automation tools and utilities for advanced web scraping and interaction.
 

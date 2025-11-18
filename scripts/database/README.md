@@ -1,8 +1,31 @@
+**Last Updated:** 2025-11-18
+**Verified Accurate For:** v0.1.0
+**Status:** Active
+**Type:** Reference
+
 # Database Utilities
 
-**Purpose:** Database maintenance, integrity checks, and credential management tools
-**Last Updated:** 2025-10-30
-**Usage:** Run database scripts using `npx tsx` from project root
+**Type:** Reference
+**Status:** Active
+**Last Updated:** 2025-11-18
+**Verified For:** v0.1.0
+**Dependencies:** [Database Schema](/home/user/Omniops/docs/09-REFERENCE/REFERENCE_DATABASE_SCHEMA.md), [RLS Security Policies](/home/user/Omniops/docs/01-ARCHITECTURE/ARCHITECTURE_SECURITY.md), [Main Scripts README](/home/user/Omniops/scripts/README.md)
+**Estimated Read Time:** 6 minutes
+
+## Purpose
+
+Database maintenance, integrity checks, and credential management tools for maintaining database health, verifying integrity, managing customer credentials, and performing database operations safely.
+
+## Quick Links
+
+- [Main Scripts README](/home/user/Omniops/scripts/README.md)
+- [Database Schema Reference](/home/user/Omniops/docs/09-REFERENCE/REFERENCE_DATABASE_SCHEMA.md)
+- [RLS Security Policies](/home/user/Omniops/docs/01-ARCHITECTURE/ARCHITECTURE_SECURITY.md)
+- [Supabase Configuration](/home/user/Omniops/supabase/README.md)
+
+## Keywords
+
+database, maintenance, integrity, RLS, security, credentials, WooCommerce, migrations, SQL, health checks
 
 ## Overview
 
@@ -375,7 +398,7 @@ npx tsx scripts/diagnostics/check-woocommerce-config.ts
 
 ## Related Documentation
 
-- [Database Schema Reference](../../docs/07-REFERENCE/REFERENCE_DATABASE_SCHEMA.md)
-- [RLS Security Policies](../../docs/01-ARCHITECTURE/ARCHITECTURE_SECURITY.md)
-- [Supabase Configuration](../../supabase/README.md)
-- [Main Scripts README](../README.md)
+- [Database Schema Reference](/home/user/Omniops/docs/09-REFERENCE/REFERENCE_DATABASE_SCHEMA.md)
+- [RLS Security Policies](/home/user/Omniops/docs/01-ARCHITECTURE/ARCHITECTURE_SECURITY.md)
+- [Supabase Configuration](/home/user/Omniops/supabase/README.md)
+- [Main Scripts README](/home/user/Omniops/scripts/README.md)

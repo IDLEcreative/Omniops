@@ -1,4 +1,16 @@
+**Last Updated:** 2025-11-18
+**Verified Accurate For:** v0.1.0
+**Status:** Active
+**Type:** Reference
+
 # Mocks Directory
+
+**Type:** Test Infrastructure
+**Status:** Active
+**Last Updated:** 2025-11-18
+**Verified For:** v0.1.0
+**Estimated Read Time:** 9 minutes
+
 
 **Purpose:** Mock Service Worker (MSW) handlers and server configuration for intercepting and mocking external API calls during tests.
 

@@ -1,6 +1,56 @@
+**Last Updated:** 2025-11-18
+**Verified Accurate For:** v0.1.0
+**Status:** Active
+**Type:** Reference
+
 # Integration Tests Directory
 
-End-to-end integration tests for the Customer Service Agent application, validating complete system workflows, cross-component interactions, and real-world scenarios.
+**Type:** Test Documentation
+**Status:** Active
+**Last Updated:** 2025-11-18
+**Verified For:** v0.1.0
+**Dependencies:** [Parent Tests README](/home/user/Omniops/__tests__/README.md), [CLAUDE.md](/home/user/Omniops/CLAUDE.md)
+**Estimated Read Time:** 12 minutes
+
+## Purpose
+
+End-to-end integration tests validating complete system workflows, cross-component interactions, and real-world scenarios including scraping, WooCommerce integration, and multi-tenant isolation.
+
+## Quick Links
+
+- [Parent Tests Directory](/home/user/Omniops/__tests__/README.md)
+- [Enhanced Scraper System Test](enhanced-scraper-system.test.ts)
+- [WooCommerce Schema Fix Test](woocommerce-schema-fix.test.ts)
+- [Testing Guide](/home/user/Omniops/docs/TESTING_GUIDE.md)
+
+## Table of Contents
+
+- [Overview](#overview)
+- [Directory Structure](#directory-structure)
+- [Test Categories](#test-categories)
+  - [Enhanced Scraper System](#enhanced-scraper-system-enhanced-scraper-systemtestts)
+  - [WooCommerce Integration](#woocommerce-integration-woocommerce-schema-fixtestts)
+- [Test Data Generation](#test-data-generation)
+  - [Realistic Data Factories](#realistic-data-factories)
+  - [Mock Service Factories](#mock-service-factories)
+- [Performance Monitoring](#performance-monitoring)
+  - [Built-in Performance Utilities](#built-in-performance-utilities)
+  - [Performance Benchmarks](#performance-benchmarks)
+- [Error Simulation & Recovery](#error-simulation--recovery)
+- [Test Configuration](#test-configuration)
+  - [Jest Configuration](#jest-configuration)
+  - [Environment Setup](#environment-setup)
+- [Running Integration Tests](#running-integration-tests)
+  - [Basic Commands](#basic-commands)
+  - [Advanced Options](#advanced-options)
+- [Debugging & Troubleshooting](#debugging--troubleshooting)
+  - [Common Issues](#common-issues)
+  - [Performance Analysis](#performance-analysis)
+- [Continuous Integration](#continuous-integration)
+- [Best Practices](#best-practices)
+- [Related Documentation](#related-documentation)
+
+---
 
 ## Overview
 

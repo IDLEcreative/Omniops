@@ -1,8 +1,60 @@
+**Last Updated:** 2025-11-18
+**Verified Accurate For:** v0.1.0
+**Status:** Active
+**Type:** Reference
+
 # API Routes - OmniOps AI Customer Service Platform
+
+**Type:** Reference
+**Status:** Active
+**Last Updated:** 2025-11-18
+**Verified For:** v0.1.0
+**Dependencies:** [Database Schema](/home/user/Omniops/docs/09-REFERENCE/REFERENCE_DATABASE_SCHEMA.md), [Embeddings System](/home/user/Omniops/lib/embeddings.ts), [WooCommerce Integration](/home/user/Omniops/lib/woocommerce-api)
+**Estimated Read Time:** 7 minutes
+
+## Purpose
+
+Comprehensive reference documentation for the OmniOps REST API, providing complete coverage of 60+ endpoints for AI chat, e-commerce integration, content management, privacy compliance, and system administration. This document serves as the authoritative guide for all API interactions.
+
+## Quick Links
+
+- [Chat API](#chat-api) - Main conversational AI endpoint
+- [Scraping API](#website-scraping-api) - Content indexing and extraction
+- [WooCommerce APIs](#woocommerce-apis) - E-commerce integration endpoints
+- [Privacy APIs](#privacy-apis) - GDPR/CCPA compliance endpoints
+- [Queue Management](/home/user/Omniops/app/api/queue/README.md) - Job queue operations
+- [Dashboard API](/home/user/Omniops/app/api/dashboard/README.md) - Analytics and configuration
+
+## Table of Contents
+
+- [Purpose](#purpose)
+- [Quick Links](#quick-links)
+- [Key Features](#key-features)
+- [Structure](#structure)
+- [Core Endpoints](#core-endpoints)
+  - [Chat API](#chat-api)
+  - [Website Scraping API](#website-scraping-api)
+  - [Search API](#search-api)
+  - [Admin APIs](#admin-apis)
+  - [Privacy APIs](#privacy-apis)
+  - [WooCommerce APIs](#woocommerce-apis)
+  - [Customer Verification APIs](#customer-verification-apis)
+  - [Training APIs](#training-apis)
+  - [Demo Generation API](#demo-generation-api)
+  - [System Health and Monitoring](#system-health-and-monitoring)
+  - [Debug and Testing APIs](#debug-and-testing-apis)
+- [Authentication](#authentication)
+- [Rate Limiting](#rate-limiting)
+- [Error Responses](#error-responses)
+- [Development Tips](#development-tips)
+- [Keywords](#keywords)
+
+---
+
+## Key Features
 
 Comprehensive REST API for the OmniOps AI Customer Service Platform, providing 60+ endpoints for intelligent customer service automation. Built with Next.js 15 App Router, featuring type-safe validation, enterprise-grade security, and performance optimization.
 
-**Key Features:**
 - **60+ Endpoints**: Complete coverage for AI chat, e-commerce, content management, and administration
 - **Type-Safe Validation**: Zod schema validation for all request/response data
 - **Rate Limiting**: Per-domain throttling with Redis backend for abuse prevention
@@ -293,3 +345,23 @@ Common status codes:
 3. Use proper error handling with try/catch
 4. Log errors for debugging
 5. Test with Postman or curl
+
+## Keywords
+
+**API Categories:** REST API, Next.js API Routes, App Router, endpoints, API reference
+
+**Core Features:** chat API, web scraping, content extraction, RAG system, embeddings, semantic search, WooCommerce integration, e-commerce API, customer verification, GDPR compliance, CCPA compliance, privacy API, data export, data deletion
+
+**Technologies:** Next.js 15, TypeScript, Zod validation, rate limiting, Redis, Supabase, PostgreSQL, OpenAI, vector search, pgvector
+
+**Operations:** authentication, session management, rate limiting, caching, error handling, health monitoring, debugging, admin operations, queue management
+
+**Integrations:** WooCommerce REST API, Shopify Admin API, OpenAI GPT-4, Supabase Auth, Redis job queue
+
+**Security:** CSRF protection, XSS prevention, injection prevention, encrypted credentials, Row Level Security (RLS), multi-tenant isolation
+
+**Aliases:**
+- "API routes" (also known as: endpoints, REST endpoints, API handlers)
+- "Chat endpoint" (also known as: /api/chat, conversational AI API, messaging API)
+- "Scraping API" (also known as: /api/scrape, web crawler, content indexer)
+- "WooCommerce endpoints" (also known as: /api/woocommerce, e-commerce API, product API)

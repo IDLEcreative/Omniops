@@ -22,7 +22,7 @@ export function ProgressIndicator({ progress, className }: ProgressIndicatorProp
       case 'behind':
         return 'text-red-600 bg-red-50';
       case 'at-risk':
-        return 'text-yellow-600 bg-yellow-50';
+        return 'text-orange-600 bg-orange-50';
       case 'on-track':
         return 'text-yellow-600 bg-yellow-50';
       case 'achieved':
@@ -50,15 +50,15 @@ export function ProgressIndicator({ progress, className }: ProgressIndicatorProp
   const getStatusLabel = () => {
     switch (status) {
       case 'behind':
-        return 'Behind';
+        return 'Behind Target';
       case 'at-risk':
         return 'At Risk';
       case 'on-track':
         return 'On Track';
       case 'achieved':
-        return 'Achieved';
+        return 'Goal Achieved';
       default:
-        return 'No Status';
+        return 'No Goal';
     }
   };
 

@@ -5,31 +5,30 @@ export function calculateMetricProgress(
   currentValue: number,
   goals: MetricGoal[]
 ): MetricProgress | null {
-  const goal = goals.find(g => g.metric_name === metricName);
+  const goal = goals.find(g => g.metric === metricName);
 
   if (!goal) {
     return null;
   }
 
-  const targetValue = goal.target_value;
+  const targetValue = goal.targetValue;
   const progressPercentage = (currentValue / targetValue) * 100;
 
   let status: MetricProgress['status'];
   if (progressPercentage < 50) {
-    status = 'below';
+    status = 'behind';
   } else if (progressPercentage < 90) {
     status = 'on-track';
   } else if (progressPercentage < 110) {
     status = 'achieved';
   } else {
-    status = 'exceeded';
+    status = 'achieved'; // Map 'exceeded' to 'achieved' for type compatibility
   }
 
   return {
-    metric_name: metricName,
-    current_value: currentValue,
-    target_value: targetValue,
-    progress_percentage: progressPercentage,
+    current: currentValue,
+    target: targetValue,
+    percentage: progressPercentage,
     status,
   };
 }

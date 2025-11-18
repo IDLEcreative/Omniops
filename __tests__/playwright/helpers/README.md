@@ -1,4 +1,16 @@
+**Last Updated:** 2025-11-18
+**Verified Accurate For:** v0.1.0
+**Status:** Active
+**Type:** Reference
+
 # Playwright E2E Test Helpers
+
+**Type:** Test Infrastructure
+**Status:** Active
+**Last Updated:** 2025-11-18
+**Verified For:** v0.1.0
+**Estimated Read Time:** 3 minutes
+
 
 **Purpose:** Reusable helper functions for Playwright E2E tests to reduce code duplication and maintain consistency.
 

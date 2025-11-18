@@ -60,7 +60,7 @@ export interface PaginationOptions {
  * ```
  */
 export async function paginatedQuery<T>(
-  query: PostgrestFilterBuilder<any, any, T[]>,
+  query: PostgrestFilterBuilder<any, any, any, any, any, any, any>,
   options: PaginationOptions = {}
 ): Promise<T[]> {
   const {
@@ -137,7 +137,7 @@ export async function paginatedQuery<T>(
  * ```
  */
 export async function paginatedQueryWithProcessor<T>(
-  query: PostgrestFilterBuilder<any, any, T[]>,
+  query: PostgrestFilterBuilder<any, any, any, any, any, any, any>,
   processor: (batch: T[]) => Promise<void>,
   options: PaginationOptions = {}
 ): Promise<{ totalProcessed: number; batchCount: number }> {
@@ -209,7 +209,7 @@ export async function paginatedQueryWithProcessor<T>(
  * ```
  */
 export async function countQuery(
-  query: PostgrestFilterBuilder<any, any, any[]>
+  query: PostgrestFilterBuilder<any, any, any, any, any, any, any>
 ): Promise<number> {
   const { count, error } = await query;
 

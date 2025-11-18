@@ -1,10 +1,19 @@
+**Last Updated:** 2025-11-18
+**Verified Accurate For:** v0.1.0
+**Status:** Structure Created - Implementation Pending
+**Type:** Reference
+
 # Scraper API Handlers Tests
+
+**Type:** Test Documentation
+**Status:** Active
+**Last Updated:** 2025-11-18
+**Verified For:** v0.1.0
+**Estimated Read Time:** 4 minutes
 
 **Purpose:** Test suite for the refactored scraper request handling modules.
 
-**Last Updated:** 2025-11-10
-**Status:** Structure Created - Implementation Pending
-**Related:** [lib/scraper-api-handlers/](../../../lib/scraper-api-handlers/)
+**Related:** [lib/scraper-api-handlers/](/home/user/Omniops/lib/scraper-api-handlers/)
 
 ## Overview
 

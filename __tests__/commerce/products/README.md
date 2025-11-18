@@ -1,9 +1,20 @@
+**Last Updated:** 2025-11-18
+**Verified Accurate For:** v0.1.0
+**Status:** Active
+**Status:** These failures are tracked separately and are not blockers for the refactoring.
+**Type:** Reference
+
 # Product Details Test Suite
+
+**Type:** Test Documentation
+**Status:** Active
+**Last Updated:** 2025-11-18
+**Verified For:** v0.1.0
+**Estimated Read Time:** 2 minutes
 
 **Purpose:** Comprehensive test coverage for the `getProductDetails` MCP tool with multi-strategy product retrieval
 **Total Tests:** 38 tests across 5 test files
 **Coverage:** 100% of critical paths including provider lookups, semantic search, validation, error handling, and response formatting
-**Last Updated:** 2025-11-10
 
 ## Overview
 

@@ -107,6 +107,11 @@ async function performFullTextSearch(
 ): Promise<ScoredResult[]> {
   const supabase = await createClient();
 
+  if (!supabase) {
+    console.error('FTS error: Supabase client unavailable');
+    return [];
+  }
+
   const { data, error } = await supabase.rpc('search_conversations', {
     p_query: query,
     p_domain_id: filters?.domainId || null,
@@ -148,6 +153,11 @@ async function performSemanticSearch(
     const embedding = await generateEmbedding(query);
 
     const supabase = await createClient();
+
+    if (!supabase) {
+      console.error('Semantic search error: Supabase client unavailable');
+      return [];
+    }
 
     // Build semantic search query
     let searchQuery = supabase

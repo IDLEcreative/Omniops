@@ -1,4 +1,15 @@
+**Last Updated:** 2025-11-18
+**Verified Accurate For:** v0.1.0
+**Status:** Active
+**Type:** Reference
+
 # Real Scenarios Test Suite
+
+**Type:** Test Documentation
+**Status:** Active
+**Last Updated:** 2025-11-18
+**Verified For:** v0.1.0
+**Estimated Read Time:** 1 minute
 
 **Purpose:** End-to-end testing of AI agent behavior in realistic user conversations.
 

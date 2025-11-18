@@ -1,8 +1,39 @@
+**Last Updated:** 2025-11-18
+**Verified Accurate For:** v0.1.0
+**Status:** Active
+**Type:** Reference
+
 # Chat Directory
 
-**Purpose:** Core chat engine with AI processing, tool execution, and conversation management
-**Last Updated:** 2025-10-30
-**Related:** [Agents](/lib/agents), [API Chat Route](/app/api/chat)
+**Type:** Service
+**Status:** Active
+**Last Updated:** 2025-11-18
+**Verified For:** v0.1.0
+**Dependencies:** [Agents](/home/user/Omniops/lib/agents), [API Chat Route](/home/user/Omniops/app/api/chat)
+**Estimated Read Time:** 2 minutes
+
+## Purpose
+
+Core chat engine with AI processing, tool execution, and conversation management for customer service interactions.
+
+## Quick Links
+- [AI Processor](ai-processor.ts) - Main orchestration
+- [Tool Definitions](tool-definitions.ts) - Available AI tools
+- [System Prompts](system-prompts.ts) - AI behavior configuration
+- [Agents Directory](/home/user/Omniops/lib/agents/README.md) - AI agent system
+
+## Table of Contents
+- [Overview](#overview)
+- [Directory Structure](#directory-structure)
+- [Core Components](#core-components)
+  - [AI Processing Pipeline](#ai-processing-pipeline)
+  - [Tool System](#tool-system)
+  - [Operations](#operations)
+- [Usage Examples](#usage-examples)
+- [System Prompts](#system-prompts)
+- [Dependencies](#dependencies)
+
+---
 
 ## Overview
 

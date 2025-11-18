@@ -1,21 +1,30 @@
+**Last Updated:** 2025-11-18
+**Verified Accurate For:** v0.1.0
+**Status:** Active
+**Type:** Reference
+
 # Content MCP Tools
 
-**Purpose**: Tools for retrieving, searching, and managing website content and page details.
-
-**Type**: MCP Server Category
-**Status**: Active
-**Last Updated**: 2025-11-05
-**Version**: 1.0.0
-**Dependencies**: [Search System Architecture](../../docs/01-ARCHITECTURE/ARCHITECTURE_SEARCH_SYSTEM.md), [Full Page Retrieval](../../lib/full-page-retrieval.ts)
+**Type:** Architecture
+**Status:** Active
+**Last Updated:** 2025-11-18
+**Verified For:** v0.1.0
+**Dependencies:** [MCP Servers](/home/user/Omniops/servers/README.md), [Search System Architecture](/home/user/Omniops/docs/01-ARCHITECTURE/ARCHITECTURE_SEARCH_SYSTEM.md)
+**Estimated Read Time:** 15 minutes
 
 ## Purpose
-This category provides tools for retrieving complete content from scraped websites, focusing on delivering comprehensive, focused information from specific pages rather than scattered chunks across multiple sources.
+
+Tools for retrieving complete content from scraped websites, focusing on delivering comprehensive, focused information from specific pages rather than scattered chunks across multiple sources.
 
 ## Quick Links
-- [MCP Server Architecture](../README.md)
-- [Search Tools](../search/README.md)
-- [Commerce Tools](../commerce/README.md)
-- [Full Page Retrieval Implementation](../../lib/full-page-retrieval.ts)
+- [Parent: MCP Servers](/home/user/Omniops/servers/README.md)
+- [Search Tools](/home/user/Omniops/servers/search/README.md)
+- [Commerce Tools](/home/user/Omniops/servers/commerce/README.md)
+- [Full Page Retrieval Implementation](/home/user/Omniops/lib/full-page-retrieval.ts)
+
+**Keywords:** content retrieval, web scraping, full page details, semantic search, page chunks
+
+---
 
 ## Table of Contents
 - [Available Tools](#available-tools)

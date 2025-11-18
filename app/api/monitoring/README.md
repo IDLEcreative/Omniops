@@ -1,4 +1,54 @@
+**Last Updated:** 2025-11-18
+**Verified Accurate For:** v0.1.0
+**Status:** Active
+**Type:** Reference
+
 # Monitoring API
+
+**Type:** Reference
+**Status:** Active
+**Last Updated:** 2025-11-18
+**Verified For:** v0.1.0
+**Dependencies:** [Chat API](/home/user/Omniops/app/api/chat/README.md), [Analytics System](/home/user/Omniops/lib/analytics/README.md)
+**Estimated Read Time:** 20 minutes
+
+## Purpose
+
+This document provides comprehensive technical reference for system monitoring, analytics, and performance tracking including chat telemetry, cost analytics, performance metrics, system health monitoring, and business intelligence with real-time data processing and alerting capabilities.
+
+## Quick Links
+
+- [Chat API](/home/user/Omniops/app/api/chat/README.md)
+- [Analytics Implementation](/home/user/Omniops/lib/analytics/README.md)
+- [API Routes Documentation](/home/user/Omniops/app/api/README.md)
+- [Dashboard Analytics](/home/user/Omniops/app/dashboard/README.md)
+
+## Keywords
+
+**Primary**: monitoring API, analytics, telemetry, performance tracking, cost analytics, system health, business intelligence
+**Aliases**: monitoring endpoints, analytics API, metrics API, telemetry API
+**Related**: chat analytics, token usage, cost tracking, performance metrics, real-time monitoring, alerting
+
+## Table of Contents
+
+- [Overview](#overview)
+- [Endpoints](#endpoints)
+  - [GET /api/monitoring/chat](#get-apimonitoringchat)
+  - [GET /api/monitoring/system](#get-apimonitoringsystem)
+  - [GET /api/monitoring/performance](#get-apimonitoringperformance)
+  - [GET /api/monitoring/costs](#get-apimonitoringcosts)
+- [Metrics](#metrics)
+- [Analytics](#analytics)
+- [Performance Tracking](#performance-tracking)
+- [Cost Management](#cost-management)
+- [System Health](#system-health)
+- [Real-time Monitoring](#real-time-monitoring)
+- [Alerting](#alerting)
+- [Examples](#examples)
+- [Integration](#integration)
+- [Best Practices](#best-practices)
+
+---
 
 System monitoring, analytics, and performance tracking endpoints for operational insights and business intelligence.
 

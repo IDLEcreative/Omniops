@@ -1,8 +1,20 @@
+**Last Updated:** 2025-11-18
+**Verified Accurate For:** v0.1.0
+**Status:** Active
+**Type:** Reference
+
 # Scraper API Handlers
 
-**Purpose:** API request handlers and utilities for web scraping system
-**Last Updated:** 2025-10-30
-**Related:** [Scraper API](/lib/scraper-api.ts), [Queue](/lib/queue)
+**Type:** Service
+**Status:** Active
+**Last Updated:** 2025-11-18
+**Verified For:** v0.1.0
+**Dependencies:** [Scraper API](/home/user/Omniops/lib/scraper-api.ts), [Queue](/home/user/Omniops/lib/queue)
+**Estimated Read Time:** 1 minute
+
+## Purpose
+
+API request handlers and utilities for web scraping system including error handling, AI optimization, and resource blocking.
 
 ## Overview
 

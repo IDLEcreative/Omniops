@@ -1,6 +1,25 @@
+**Last Updated:** 2025-11-18
+**Verified Accurate For:** v0.1.0
+**Status:** Active
+**Type:** Reference
+
 # Script Library Modules
 
-This directory contains extracted logic from scripts/ tools, organized by tool name.
+**Type:** Utility
+**Status:** Active
+**Last Updated:** 2025-11-18
+**Verified For:** v0.1.0
+**Dependencies:** Various (per script module)
+**Estimated Read Time:** 1 minute
+
+## Purpose
+
+Extracted business logic from scripts/ tools, organized by tool name following the CLI Separation Pattern (entrypoint <80 LOC, logic ≤200 LOC per module).
+
+## Keywords
+- Script Modules, CLI Separation, Business Logic, Testable, Reusable
+
+---
 
 ## Structure
 

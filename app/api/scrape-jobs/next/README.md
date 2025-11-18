@@ -1,6 +1,27 @@
+**Last Updated:** 2025-11-18
+**Verified Accurate For:** v0.1.0
+**Status:** Active
+**Type:** Reference
+
 # Job Queue API
 
-The Job Queue API provides endpoints for workers to retrieve and claim jobs from the scrape job queue. This API is designed for distributed scraping systems where multiple workers need to process jobs atomically.
+**Type:** Reference
+**Status:** Active
+**Last Updated:** 2025-11-18
+**Verified For:** v0.1.0
+**Dependencies:** [Scrape Jobs API](/home/user/Omniops/app/api/scrape-jobs/README.md), [Individual Scrape Job API](/home/user/Omniops/app/api/scrape-jobs/[id]/README.md)
+**Estimated Read Time:** 13 minutes
+
+## Purpose
+
+Complete API reference for workers to retrieve and claim jobs from the scrape job queue. Designed for distributed scraping systems where multiple workers need to process jobs atomically with race condition prevention.
+
+## Quick Links
+
+- [Scrape Jobs API](/home/user/Omniops/app/api/scrape-jobs/README.md)
+- [Individual Scrape Job API](/home/user/Omniops/app/api/scrape-jobs/[id]/README.md)
+- [Job Retry API](/home/user/Omniops/app/api/scrape-jobs/[id]/retry/README.md)
+- [Job Statistics API](/home/user/Omniops/app/api/scrape-jobs/stats/README.md)
 
 ## Endpoints
 

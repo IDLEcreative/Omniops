@@ -7,6 +7,8 @@
 
 import { NextRequest, NextResponse } from 'next/server';
 import { getOperationQueueManager } from '@/lib/autonomous/queue';
+import { requireAuth } from '@/lib/middleware/auth';
+import { getUserOrganization } from '@/lib/auth/api-helpers';
 import { z } from 'zod';
 
 const RetryRequestSchema = z.object({
@@ -18,7 +20,42 @@ export async function POST(request: NextRequest) {
     const body = await request.json();
     const { jobId } = RetryRequestSchema.parse(body);
 
-    // TODO: Add authentication and verify user owns this operation
+    // Authenticate user
+    const authResult = await requireAuth();
+    if (authResult instanceof NextResponse) {
+      return authResult; // Return auth error
+    }
+
+    const { user, supabase } = authResult;
+
+    // Get user's organization
+    const orgResult = await getUserOrganization(user.id, supabase);
+    if (orgResult instanceof NextResponse) {
+      return orgResult;
+    }
+
+    const { organizationId } = orgResult;
+
+    // Verify ownership: Find operation by job_id and check organization
+    const { data: operation, error: opError } = await supabase
+      .from('autonomous_operations')
+      .select('id, organization_id')
+      .eq('job_id', jobId)
+      .single();
+
+    if (opError || !operation) {
+      return NextResponse.json(
+        { error: 'Operation not found' },
+        { status: 404 }
+      );
+    }
+
+    if (operation.organization_id !== organizationId) {
+      return NextResponse.json(
+        { error: 'Operation not found' },
+        { status: 404 }
+      );
+    }
 
     // Get queue manager
     const queueManager = getOperationQueueManager();
