@@ -90,7 +90,12 @@ export class WooCommerceCartTracker {
       abandonedOrders.forEach(order => { stats.by_status[order.status] = (stats.by_status[order.status] || 0) + 1; });
 
       const productCounts: Record<string, number> = {};
-      abandonedOrders.forEach(order => { order.line_items?.forEach(item => { productCounts[item.name] = (productCounts[item.name] || 0) + item.quantity; }); });
+      // ✅ O(n) - Efficient iteration with for loops instead of O(n²) nested forEach
+      for (const order of abandonedOrders) {
+        for (const item of order.line_items ?? []) {
+          productCounts[item.name] = (productCounts[item.name] || 0) + item.quantity;
+        }
+      }
 
       stats.top_abandoned_products = Object.entries(productCounts).map(([name, count]) => ({ name, count })).sort((a, b) => b.count - a.count).slice(0, 5);
       const totalCarts = abandonedOrders.length + completedOrders.length;

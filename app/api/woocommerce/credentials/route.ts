@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { createServiceRoleClient } from '@/lib/supabase-server';
+import { createClient, createServiceRoleClient } from '@/lib/supabase-server';
 import { decrypt } from '@/lib/encryption';
 
 /**
@@ -20,6 +20,52 @@ export async function GET(request: NextRequest) {
       );
     }
 
+    // ✅ SECURITY FIX: Authenticate user before allowing access to credentials
+    const authClient = await createClient();
+
+    if (!authClient) {
+      return NextResponse.json(
+        { success: false, error: 'Authentication service unavailable' },
+        { status: 503 }
+      );
+    }
+
+    // Check if user is authenticated
+    const { data: { user }, error: authError } = await authClient.auth.getUser();
+
+    if (authError || !user) {
+      return NextResponse.json(
+        { success: false, error: 'Unauthorized - Authentication required' },
+        { status: 401 }
+      );
+    }
+
+    // Verify user has access to this domain via organization membership
+    const { data: membership, error: membershipError } = await authClient
+      .from('organization_members')
+      .select('organization_id, organizations(customer_configs(domain))')
+      .eq('user_id', user.id)
+      .single();
+
+    if (membershipError || !membership) {
+      return NextResponse.json(
+        { success: false, error: 'Forbidden - No organization access' },
+        { status: 403 }
+      );
+    }
+
+    // Check if the requested domain belongs to user's organization
+    const orgDomains = (membership.organizations as any)?.customer_configs || [];
+    const hasAccess = orgDomains.some((config: any) => config.domain === domain);
+
+    if (!hasAccess) {
+      return NextResponse.json(
+        { success: false, error: 'Forbidden - No access to this domain' },
+        { status: 403 }
+      );
+    }
+
+    // Now use service role to fetch credentials
     const supabase = await createServiceRoleClient();
 
     if (!supabase) {

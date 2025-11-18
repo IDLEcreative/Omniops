@@ -4,7 +4,7 @@ import { useState, useCallback, useRef, useEffect } from 'react';
 import { Search, X, Loader2 } from 'lucide-react';
 import { Input } from '@/components/ui/input';
 import { Button } from '@/components/ui/button';
-import { debounce } from 'lodash';
+import { debounce } from '@/lib/utils/debounce';
 
 interface SearchBarProps {
   onSearch: (query: string) => void;

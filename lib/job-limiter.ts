@@ -82,28 +82,38 @@ export class JobLimiter {
   
   async getActiveJobs(): Promise<any[]> {
     try {
-      // Get all job keys from Redis
+      // Get all job keys from Redis using SCAN instead of KEYS for better performance
       const redis = this.jobManager.getRedisClient();
-      const keys = await redis.keys('job:*');
       const activeJobs = [];
-      
-      for (const key of keys) {
-        // Skip result keys
-        if (key.includes(':results')) continue;
-        
-        const job = await redis.hgetall(key);
-        if (job && (job.status === 'queued' || job.status === 'processing')) {
-          activeJobs.push({
-            id: job.id,
-            status: job.status,
-            url: job.url,
-            maxPages: parseInt(job.maxPages || '0') || 0,
-            pagesCrawled: parseInt(job.pagesCrawled || '0') || 0,
-            startTime: job.startTime
-          });
+
+      // Use SCAN for non-blocking iteration
+      let cursor = '0';
+      do {
+        const [newCursor, keys] = await redis.scan(
+          cursor,
+          'MATCH', 'job:*',
+          'COUNT', 100
+        );
+        cursor = newCursor;
+
+        for (const key of keys) {
+          // Skip result keys
+          if (key.includes(':results')) continue;
+
+          const job = await redis.hgetall(key);
+          if (job && (job.status === 'queued' || job.status === 'processing')) {
+            activeJobs.push({
+              id: job.id,
+              status: job.status,
+              url: job.url,
+              maxPages: parseInt(job.maxPages || '0') || 0,
+              pagesCrawled: parseInt(job.pagesCrawled || '0') || 0,
+              startTime: job.startTime
+            });
+          }
         }
-      }
-      
+      } while (cursor !== '0');
+
       return activeJobs;
     } catch (error) {
       console.error('Error getting active jobs:', error);
