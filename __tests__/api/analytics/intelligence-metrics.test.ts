@@ -10,8 +10,15 @@ import {
   mockConversionFunnel,
   calculateDaysDiff
 } from './intelligence.test-utils';
+import * as authModule from '@/lib/middleware/auth';
+import { checkAnalyticsRateLimit, addRateLimitHeaders } from '@/lib/middleware/analytics-rate-limit';
+import { getSearchCacheManager } from '@/lib/search-cache';
 
 const mockCreateServiceRoleClient = jest.fn();
+const mockRequireAdmin = authModule.requireAdmin as jest.Mock;
+const mockCheckAnalyticsRateLimit = checkAnalyticsRateLimit as jest.Mock;
+const mockAddRateLimitHeaders = addRateLimitHeaders as jest.Mock;
+const mockGetSearchCacheManager = getSearchCacheManager as jest.Mock;
 
 jest.mock('@/lib/supabase-server', () => {
   const actual = jest.requireActual('@/lib/supabase-server');
@@ -26,14 +33,69 @@ jest.mock('@/lib/analytics/business-intelligence', () => ({
   },
 }));
 jest.mock('@/lib/logger');
+jest.mock('@/lib/middleware/auth');
+jest.mock('@/lib/middleware/analytics-rate-limit');
+jest.mock('@/lib/search-cache');
 
 describe('GET /api/analytics/intelligence - Metrics', () => {
   let mockSupabase: any;
+  let mockUserSupabase: any;
   let mockBI: any;
+  let mockCacheManager: any;
 
   beforeEach(() => {
+    // Setup Supabase mocks
     mockSupabase = {};
     mockCreateServiceRoleClient.mockResolvedValue(mockSupabase);
+
+    // Setup user supabase with customer_configs query
+    mockUserSupabase = {
+      from: jest.fn().mockReturnThis(),
+      select: jest.fn().mockReturnThis(),
+      eq: jest.fn().mockReturnThis(),
+      single: jest.fn().mockResolvedValue({
+        data: { organization_id: 'org-123', role: 'admin' },
+        error: null
+      })
+    };
+
+    // Mock customer_configs query to return allowed domains
+    mockUserSupabase.from.mockImplementation((table: string) => {
+      if (table === 'customer_configs') {
+        return {
+          select: jest.fn().mockReturnThis(),
+          eq: jest.fn().mockReturnValue({
+            data: [
+              { domain: 'example.com' },
+              { domain: 'test.com' }
+            ],
+            error: null
+          })
+        };
+      }
+      return mockUserSupabase;
+    });
+
+    // Setup auth mock
+    mockRequireAdmin.mockResolvedValue({
+      user: { id: 'user-123', email: 'test@example.com' },
+      supabase: mockUserSupabase,
+      organizationId: 'org-123',
+      role: 'admin'
+    });
+
+    // Setup rate limiting mock
+    mockCheckAnalyticsRateLimit.mockResolvedValue(null);
+    mockAddRateLimitHeaders.mockResolvedValue(undefined);
+
+    // Setup cache manager mock
+    mockCacheManager = {
+      getCachedResult: jest.fn().mockResolvedValue(null),
+      cacheResult: jest.fn().mockResolvedValue(undefined)
+    };
+    mockGetSearchCacheManager.mockReturnValue(mockCacheManager);
+
+    // Setup Business Intelligence mock
     mockBI = createMockBusinessIntelligence();
     (BusinessIntelligence.getInstance as jest.Mock).mockReturnValue(mockBI);
   });
