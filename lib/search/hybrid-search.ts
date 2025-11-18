@@ -1,24 +1,40 @@
-import { createClient } from '@/lib/supabase/server';
 import { SearchFilters, SearchResult } from './conversation-search';
 import {
-  generateEmbedding,
-  calculateCosineSimilarity,
   scoreAndMergeResults,
-  deduplicateResults,
-  highlightRelevantSection
+  deduplicateResults
 } from './search-algorithms';
-
-interface ScoredResult extends SearchResult {
-  ftsScore?: number;
-  semanticScore?: number;
-  combinedScore: number;
-}
+import {
+  performFullTextSearch,
+  performSemanticSearch,
+  type ScoredResult
+} from './search-executors';
 
 export interface HybridSearchConfig {
   ftsWeight: number; // Default 0.6
   semanticWeight: number; // Default 0.4
   minScore: number; // Minimum relevance score threshold
   maxResults: number; // Maximum results to return
+}
+
+export interface SearchPagination {
+  limit?: number; // Items per page (default 20)
+  cursor?: string; // Opaque pagination cursor (base64 encoded)
+}
+
+export interface PaginatedSearchResult {
+  results: SearchResult[];
+  pagination: {
+    hasMore: boolean;
+    nextCursor?: string;
+    totalCount?: number; // Total matches before pagination
+  };
+  searchMetrics: {
+    ftsCount: number;
+    semanticCount: number;
+    mergedCount: number;
+    deduplicatedCount: number;
+    returnedCount: number;
+  };
 }
 
 const DEFAULT_CONFIG: HybridSearchConfig = {
@@ -29,24 +45,50 @@ const DEFAULT_CONFIG: HybridSearchConfig = {
 };
 
 /**
- * Hybrid search combining full-text and semantic search
+ * Encode pagination cursor (score + ID for stable sorting)
  */
-export async function hybridSearch(
+function encodeCursor(score: number, id: string): string {
+  return Buffer.from(`${score}:${id}`).toString('base64');
+}
+
+/**
+ * Decode pagination cursor
+ */
+function decodeCursor(cursor: string): { score: number; id: string } {
+  const decoded = Buffer.from(cursor, 'base64').toString('utf-8');
+  const [scoreStr, id] = decoded.split(':');
+  return {
+    score: parseFloat(scoreStr || '0'),
+    id: id || ''
+  };
+}
+
+/**
+ * Hybrid search with cursor-based pagination
+ */
+export async function hybridSearchPaginated(
   query: string,
   filters?: Partial<SearchFilters>,
-  config: Partial<HybridSearchConfig> = {}
-): Promise<{
-  results: SearchResult[];
-  totalCount: number;
-  searchMetrics: {
-    ftsCount: number;
-    semanticCount: number;
-    mergedCount: number;
-    deduplicatedCount: number;
-  };
-}> {
+  config: Partial<HybridSearchConfig> = {},
+  pagination?: SearchPagination
+): Promise<PaginatedSearchResult> {
   const searchConfig = { ...DEFAULT_CONFIG, ...config };
-  const supabase = await createClient();
+  const limit = pagination?.limit ?? 20;
+
+  // Decode cursor if provided
+  let cursorScore = Infinity;
+  let cursorId = '';
+
+  if (pagination?.cursor) {
+    try {
+      const decoded = decodeCursor(pagination.cursor);
+      cursorScore = decoded.score;
+      cursorId = decoded.id;
+    } catch (error) {
+      console.error('Failed to decode cursor:', error);
+      // Continue with default values if cursor is invalid
+    }
+  }
 
   // Execute both searches in parallel
   const [ftsResults, semanticResults] = await Promise.all([
@@ -69,11 +111,29 @@ export async function hybridSearch(
     r => r.combinedScore >= searchConfig.minScore
   );
 
-  // Sort by combined score
+  // Sort by combined score (descending)
   filtered.sort((a, b) => b.combinedScore - a.combinedScore);
 
-  // Limit results
-  const finalResults = filtered.slice(0, searchConfig.maxResults);
+  // Apply keyset pagination filtering
+  const afterCursor = filtered.filter(r => {
+    // Results with lower scores come after cursor
+    // If same score, use ID for stable ordering
+    return r.combinedScore < cursorScore ||
+           (r.combinedScore === cursorScore && r.messageId > cursorId);
+  });
+
+  // Get one extra to check if there are more results
+  const paginatedResults = afterCursor.slice(0, limit + 1);
+  const hasMore = paginatedResults.length > limit;
+  const finalResults = paginatedResults.slice(0, limit);
+
+  // Generate cursor for next page
+  const nextCursor = hasMore && finalResults.length > 0
+    ? encodeCursor(
+        finalResults[finalResults.length - 1].combinedScore,
+        finalResults[finalResults.length - 1].messageId
+      )
+    : undefined;
 
   return {
     results: finalResults.map(r => ({
@@ -88,147 +148,57 @@ export async function hybridSearch(
       customerEmail: r.customerEmail,
       domainName: r.domainName
     })),
-    totalCount: finalResults.length,
+    pagination: {
+      hasMore,
+      nextCursor,
+      totalCount: filtered.length
+    },
     searchMetrics: {
       ftsCount: ftsResults.length,
       semanticCount: semanticResults.length,
       mergedCount: scoredResults.length,
-      deduplicatedCount: deduplicated.length
+      deduplicatedCount: deduplicated.length,
+      returnedCount: finalResults.length
     }
   };
 }
 
 /**
- * Perform full-text search using PostgreSQL
+ * Hybrid search combining full-text and semantic search
+ * @deprecated Use hybridSearchPaginated for better performance with pagination
  */
-async function performFullTextSearch(
+export async function hybridSearch(
   query: string,
-  filters?: Partial<SearchFilters>
-): Promise<ScoredResult[]> {
-  const supabase = await createClient();
+  filters?: Partial<SearchFilters>,
+  config: Partial<HybridSearchConfig> = {}
+): Promise<{
+  results: SearchResult[];
+  totalCount: number;
+  searchMetrics: {
+    ftsCount: number;
+    semanticCount: number;
+    mergedCount: number;
+    deduplicatedCount: number;
+  };
+}> {
+  const searchConfig = { ...DEFAULT_CONFIG, ...config };
 
-  if (!supabase) {
-    console.error('FTS error: Supabase client unavailable');
-    return [];
-  }
+  // Use paginated version without cursor (returns first page)
+  const result = await hybridSearchPaginated(
+    query,
+    filters,
+    config,
+    { limit: searchConfig.maxResults }
+  );
 
-  const { data, error } = await supabase.rpc('search_conversations', {
-    p_query: query,
-    p_domain_id: filters?.domainId || null,
-    p_date_from: filters?.dateFrom || null,
-    p_date_to: filters?.dateTo || null,
-    p_sentiment: filters?.sentiment || null,
-    p_limit: 100,
-    p_offset: 0
-  });
-
-  if (error) {
-    console.error('FTS error:', error);
-    return [];
-  }
-
-  return (data || []).map((row: any) => ({
-    conversationId: row.conversation_id,
-    messageId: row.message_id,
-    content: row.content,
-    role: row.role,
-    createdAt: row.created_at,
-    sentiment: row.sentiment,
-    relevanceScore: row.relevance_score,
-    highlight: row.highlight,
-    ftsScore: row.relevance_score,
-    combinedScore: 0
-  }));
+  return {
+    results: result.results,
+    totalCount: result.pagination.totalCount ?? result.results.length,
+    searchMetrics: {
+      ftsCount: result.searchMetrics.ftsCount,
+      semanticCount: result.searchMetrics.semanticCount,
+      mergedCount: result.searchMetrics.mergedCount,
+      deduplicatedCount: result.searchMetrics.deduplicatedCount
+    }
+  };
 }
-
-/**
- * Perform semantic search using vector embeddings
- */
-async function performSemanticSearch(
-  query: string,
-  filters?: Partial<SearchFilters>
-): Promise<ScoredResult[]> {
-  try {
-    // Generate query embedding
-    const embedding = await generateEmbedding(query);
-
-    const supabase = await createClient();
-
-    if (!supabase) {
-      console.error('Semantic search error: Supabase client unavailable');
-      return [];
-    }
-
-    // Build semantic search query
-    let searchQuery = supabase
-      .from('message_embeddings')
-      .select(`
-        message_id,
-        embedding,
-        messages!inner(
-          id,
-          content,
-          role,
-          created_at,
-          sentiment,
-          conversation_id
-        )
-      `);
-
-    // Apply filters via joins
-    if (filters?.domainId || filters?.dateFrom || filters?.dateTo) {
-      searchQuery = searchQuery.select(`
-        message_id,
-        embedding,
-        messages!inner(
-          id,
-          content,
-          role,
-          created_at,
-          sentiment,
-          conversation_id,
-          conversations!inner(
-            domain_id
-          )
-        )
-      `);
-    }
-
-    const { data, error } = await searchQuery.limit(100);
-
-    if (error) {
-      console.error('Semantic search error:', error);
-      return [];
-    }
-
-    // Calculate cosine similarity and map results
-    return (data || [])
-      .map((row: any) => {
-        const message = row.messages;
-        const similarity = calculateCosineSimilarity(
-          embedding,
-          row.embedding || []
-        );
-
-        return {
-          conversationId: message.conversation_id,
-          messageId: message.id,
-          content: message.content,
-          role: message.role,
-          createdAt: message.created_at,
-          sentiment: message.sentiment,
-          relevanceScore: similarity,
-          highlight: highlightRelevantSection(message.content, query),
-          semanticScore: similarity,
-          combinedScore: 0
-        };
-      })
-      .filter(r => r.semanticScore > 0.3) // Filter out low similarity
-      .sort((a, b) => b.semanticScore - a.semanticScore);
-  } catch (error) {
-    console.error('Semantic search error:', error);
-    return [];
-  }
-}
-
-// Algorithm functions extracted to search-algorithms.ts

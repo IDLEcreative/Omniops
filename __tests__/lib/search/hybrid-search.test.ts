@@ -9,6 +9,7 @@
 import './tests/result-merging.test';
 import './tests/scoring-filtering.test';
 import './tests/error-handling.test';
+import './tests/pagination.test';
 
 // Re-export for test discovery
 export {};

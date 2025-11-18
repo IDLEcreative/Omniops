@@ -47,22 +47,32 @@ interface ViewStats {
 }
 
 /**
- * Refresh all analytics materialized views using the helper function
+ * Refresh all analytics materialized views using the helper functions
  */
 async function refreshAllViews(): Promise<void> {
   console.log('🔄 Refreshing all analytics materialized views...\n');
 
   const startTime = Date.now();
 
-  // Call the PostgreSQL function that refreshes all views concurrently
-  const { data, error } = await supabase.rpc('refresh_analytics_views');
+  // Call the PostgreSQL functions that refresh all views concurrently
+  const [conversationViewsResult, telemetryViewsResult] = await Promise.all([
+    supabase.rpc('refresh_analytics_views'),
+    supabase.rpc('refresh_telemetry_summary_views')
+  ]);
 
-  if (error) {
-    console.error('❌ Error refreshing views:', error.message);
+  if (conversationViewsResult.error) {
+    console.error('❌ Error refreshing conversation views:', conversationViewsResult.error.message);
     process.exit(1);
   }
 
-  const results = data as RefreshResult[];
+  if (telemetryViewsResult.error) {
+    console.error('❌ Error refreshing telemetry views:', telemetryViewsResult.error.message);
+    process.exit(1);
+  }
+
+  const conversationResults = conversationViewsResult.data as RefreshResult[];
+  const telemetryResults = telemetryViewsResult.data as RefreshResult[];
+  const results = [...conversationResults, ...telemetryResults];
   const totalTime = Date.now() - startTime;
 
   console.log('📊 Refresh Results:\n');
@@ -98,9 +108,13 @@ async function refreshAllViews(): Promise<void> {
  */
 async function refreshSingleView(viewName: string): Promise<void> {
   const validViews = [
+    // Conversation analytics views
     'daily_analytics_summary',
     'hourly_usage_stats',
     'weekly_analytics_summary',
+    // Telemetry summary views
+    'chat_telemetry_domain_summary',
+    'chat_telemetry_model_summary',
   ];
 
   if (!validViews.includes(viewName)) {
@@ -139,6 +153,8 @@ async function checkRefreshStatus(): Promise<void> {
     'daily_analytics_summary',
     'hourly_usage_stats',
     'weekly_analytics_summary',
+    'chat_telemetry_domain_summary',
+    'chat_telemetry_model_summary',
   ];
 
   console.log('┌─────────────────────────────┬──────────┬──────────────┬────────────────────┐');
@@ -246,10 +262,14 @@ Options:
   --view=VIEW_NAME     Refresh a specific view only
   --help               Show this help message
 
-Views:
-  daily_analytics_summary   Daily aggregated statistics
-  hourly_usage_stats        Hourly usage patterns
-  weekly_analytics_summary  Weekly trend analysis
+Views (Conversations):
+  daily_analytics_summary           Daily conversation aggregates
+  hourly_usage_stats                Hourly usage patterns
+  weekly_analytics_summary          Weekly conversation trends
+
+Views (Telemetry):
+  chat_telemetry_domain_summary     Domain-level telemetry summary
+  chat_telemetry_model_summary      Model performance comparison
 
 Examples:
   # Refresh all views (recommended for cron job)

@@ -1,7 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { z } from 'zod';
 import { searchConversations, SearchFiltersSchema } from '@/lib/search/conversation-search';
-import { hybridSearch } from '@/lib/search/hybrid-search';
+import { hybridSearch, hybridSearchPaginated } from '@/lib/search/hybrid-search';
 import { createClient } from '@/lib/supabase/server';
 
 const SearchRequestSchema = z.object({
@@ -9,7 +9,8 @@ const SearchRequestSchema = z.object({
   filters: SearchFiltersSchema.partial().optional(),
   searchType: z.enum(['full_text', 'semantic', 'hybrid']).default('hybrid'),
   page: z.number().min(1).default(1),
-  limit: z.number().min(1).max(100).default(50)
+  limit: z.number().min(1).max(100).default(50),
+  cursor: z.string().optional() // Cursor for pagination
 });
 
 export async function POST(request: NextRequest) {
@@ -42,18 +43,46 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    const { query, filters, searchType, page, limit } = validation.data;
-
-    // Calculate pagination
-    const offset = (page - 1) * limit;
+    const { query, filters, searchType, page, limit, cursor } = validation.data;
 
     // Perform search based on type
     let results;
     let executionTime: number;
 
     if (searchType === 'hybrid') {
-      // Use optimized hybrid search
       const startTime = performance.now();
+
+      // Use cursor-based pagination if cursor is provided
+      if (cursor) {
+        const searchResults = await hybridSearchPaginated(
+          query,
+          filters,
+          {},
+          { limit, cursor }
+        );
+        executionTime = performance.now() - startTime;
+
+        return NextResponse.json({
+          success: true,
+          data: {
+            results: searchResults.results,
+            pagination: {
+              limit,
+              hasMore: searchResults.pagination.hasMore,
+              nextCursor: searchResults.pagination.nextCursor,
+              totalCount: searchResults.pagination.totalCount
+            },
+            performance: {
+              executionTime,
+              searchType,
+              searchMetrics: searchResults.searchMetrics
+            }
+          }
+        });
+      }
+
+      // Fallback to offset-based for backward compatibility
+      const offset = (page - 1) * limit;
       const searchResults = await hybridSearch(query, {
         ...filters,
         limit,
@@ -68,7 +97,8 @@ export async function POST(request: NextRequest) {
         searchMetrics: searchResults.searchMetrics
       };
     } else {
-      // Use standard search
+      // Use standard search (non-hybrid)
+      const offset = (page - 1) * limit;
       results = await searchConversations({
         query,
         ...filters,
@@ -78,7 +108,7 @@ export async function POST(request: NextRequest) {
       });
     }
 
-    // Calculate pagination metadata
+    // Calculate pagination metadata (offset-based)
     const totalPages = Math.ceil(results.totalCount / limit);
     const hasNextPage = page < totalPages;
     const hasPreviousPage = page > 1;
