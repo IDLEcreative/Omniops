@@ -77,8 +77,9 @@ describe('POST /api/stripe/portal', () => {
     });
   });
 
-  // TODO: Fix Supabase mock - Database error being thrown from from() call
-  // The createMockQueryBuilder() isn't preventing recursive calls properly
+  // TODO: Fix Supabase mock - Tests timing out after 5000ms
+  // The improved state management in supabase-mock.js didn't resolve the issue
+  // Need to investigate the actual cause of the hang in the route handler
   describe.skip('Successful Portal Session Creation', () => {
     it('should create portal session with valid customer ID', async () => {
       const organizationId = '123e4567-e89b-12d3-a456-426614174000';
@@ -217,7 +218,7 @@ describe('POST /api/stripe/portal', () => {
       expect(data.error).toBe('No active subscription');
     });
 
-    // TODO: Same mock issue as above - skip until fixed
+    // TODO: Same timeout issue as above tests
     it.skip('should handle Stripe API errors gracefully', async () => {
       const organizationId = '123e4567-e89b-12d3-a456-426614174000';
 
