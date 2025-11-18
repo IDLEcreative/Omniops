@@ -115,8 +115,10 @@ export async function getRecommendations(
 
     // Filter out excluded products
     if (request.excludeProductIds?.length) {
+      // O(1) lookup optimization: Convert array to Set
+      const excludeSet = new Set(request.excludeProductIds);
       recommendations = recommendations.filter(
-        (rec) => !request.excludeProductIds!.includes(rec.productId)
+        (rec) => !excludeSet.has(rec.productId)  // O(1) instead of O(n)
       );
     }
 

@@ -115,11 +115,15 @@ async function findSimilarProducts(
     }
 
     // Filter and format results
+    // O(1) lookup optimization: Convert arrays to Sets
+    const productIdSet = new Set(productIds);
+    const excludeSet = new Set(excludeIds || []);
+
     const recommendations = similar
       .filter(
         (item: any) =>
-          !productIds.includes(item.product_id) &&
-          (!excludeIds || !excludeIds.includes(item.product_id))
+          !productIdSet.has(item.product_id) &&  // O(1) instead of O(n)
+          !excludeSet.has(item.product_id)       // O(1) instead of O(n)
       )
       .slice(0, limit)
       .map((item: any) => ({
