@@ -2,17 +2,20 @@
  * Autonomous Operations Queue Stats API
  *
  * GET /api/autonomous/operations/queue/stats
- * Returns statistics about the operation queue
+ * Returns statistics about the operation queue (admin only)
  */
 
 import { NextRequest, NextResponse } from 'next/server';
 import { getOperationQueueManager } from '@/lib/autonomous/queue';
-import { createServerClient } from '@/lib/supabase/server';
+import { requireAdmin } from '@/lib/middleware/auth';
 
 export async function GET(request: NextRequest) {
   try {
-    // TODO: Add authentication/authorization
-    // For now, this is an internal API
+    // Require admin role
+    const authResult = await requireAdmin();
+    if (authResult instanceof NextResponse) {
+      return authResult; // Return auth error
+    }
 
     // Get queue manager
     const queueManager = getOperationQueueManager();
