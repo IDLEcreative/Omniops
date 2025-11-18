@@ -1,5 +1,53 @@
 # Customer API
 
+**Type:** Reference
+**Status:** Active
+**Last Updated:** 2025-11-18
+**Verified For:** v0.1.0
+**Dependencies:** [Authentication API](/home/user/Omniops/app/api/auth/README.md), [Scraping API](/home/user/Omniops/app/api/scrape/README.md), [Database Schema](/home/user/Omniops/docs/09-REFERENCE/REFERENCE_DATABASE_SCHEMA.md)
+**Estimated Read Time:** 18 minutes
+
+## Purpose
+
+This document provides comprehensive technical reference for customer management and configuration including domain setup with automatic validation, scraping automation triggers, multi-tenant customer settings, and domain-based isolation with comprehensive scraping status tracking.
+
+## Quick Links
+
+- [Authentication API](/home/user/Omniops/app/api/auth/README.md)
+- [Scraping API](/home/user/Omniops/app/api/scrape/README.md)
+- [API Routes Documentation](/home/user/Omniops/app/api/README.md)
+- [Monitoring Analytics](/home/user/Omniops/app/api/monitoring/README.md)
+
+## Keywords
+
+**Primary**: customer configuration, domain management, scraping automation, customer settings, domain validation
+**Aliases**: customer API, config endpoints, domain config, customer management
+**Related**: automatic scraping, domain normalization, customer isolation, multi-tenancy, scraping frequency
+
+## Table of Contents
+
+- [Overview](#overview)
+- [Endpoints](#endpoints)
+  - [GET /api/customer/config](#get-apicustomerconfig)
+  - [POST /api/customer/config](#post-apicustomerconfig)
+  - [PUT /api/customer/config](#put-apicustomerconfig)
+  - [DELETE /api/customer/config](#delete-apicustomerconfig)
+- [Features](#features)
+- [Configuration Schema](#configuration-schema)
+- [Domain Validation](#domain-validation)
+- [Scraping Integration](#scraping-integration)
+- [Performance](#performance)
+- [Examples](#examples)
+- [Error Handling](#error-handling)
+- [Security Features](#security-features)
+- [Integration](#integration)
+- [Best Practices](#best-practices)
+- [Monitoring and Analytics](#monitoring-and-analytics)
+- [Related Endpoints](#related-endpoints)
+- [Future Enhancements](#future-enhancements)
+
+---
+
 Customer management and configuration endpoints for domain setup, scraping automation, and business settings.
 
 ## Overview

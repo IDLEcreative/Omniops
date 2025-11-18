@@ -1,6 +1,41 @@
 # API Tests Directory
 
-Comprehensive test suite for API routes in the Customer Service Agent application, covering authentication, chat functionality, data scraping, and business logic endpoints.
+**Type:** Test Documentation
+**Status:** Active
+**Last Updated:** 2025-11-18
+**Verified For:** v0.1.0
+**Dependencies:** [Parent Tests README](/home/user/Omniops/__tests__/README.md), [App API Directory](/home/user/Omniops/app/api)
+**Estimated Read Time:** 10 minutes
+
+## Purpose
+
+Comprehensive test suite for API routes covering authentication, chat functionality, GDPR compliance, scraping, and business logic endpoints with 300+ tests ensuring reliability, security, and performance.
+
+## Quick Links
+
+- [Parent Tests Directory](/home/user/Omniops/__tests__/README.md)
+- [App API Directory](/home/user/Omniops/app/api)
+- [Chat API Tests](chat/)
+- [GDPR API Tests](gdpr/)
+- [Testing Guide](/home/user/Omniops/docs/TESTING_GUIDE.md)
+
+## Table of Contents
+
+- [Overview](#overview)
+- [Directory Structure](#directory-structure)
+- [Test Categories](#test-categories)
+  - [Authentication Tests](#authentication-tests)
+  - [Chat Endpoint Tests](#chat-endpoint-tests)
+  - [GDPR Compliance Tests](#gdpr-compliance-tests)
+  - [Scraping Tests](#scraping-tests)
+- [Testing Patterns](#testing-patterns)
+- [Mock Service Worker Setup](#mock-service-worker-setup)
+- [Running API Tests](#running-api-tests)
+- [Best Practices](#best-practices)
+- [Debugging](#debugging)
+- [Related Documentation](#related-documentation)
+
+---
 
 ## Overview
 

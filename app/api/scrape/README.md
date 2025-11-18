@@ -1,5 +1,54 @@
 # Scraping API
 
+**Type:** Reference
+**Status:** Active
+**Last Updated:** 2025-11-18
+**Verified For:** v0.1.0
+**Dependencies:** [Search Architecture](/home/user/Omniops/docs/01-ARCHITECTURE/ARCHITECTURE_SEARCH_SYSTEM.md), [Content Extractor](/home/user/Omniops/lib/content-extractor.ts), [Crawler Config](/home/user/Omniops/lib/crawler-config.ts)
+**Estimated Read Time:** 12 minutes
+
+## Purpose
+
+This document provides comprehensive technical reference for website content extraction and indexing capabilities including single-page scraping, full website crawling, vector embeddings generation, and intelligent content processing with Turbo mode optimization.
+
+## Quick Links
+
+- [API Routes Documentation](/home/user/Omniops/app/api/README.md)
+- [Chat API Integration](/home/user/Omniops/app/api/chat/README.md)
+- [Job Queue Management](/home/user/Omniops/app/api/jobs/README.md)
+- [Database Schema](/home/user/Omniops/docs/09-REFERENCE/REFERENCE_DATABASE_SCHEMA.md)
+
+## Keywords
+
+**Primary**: web scraping, content extraction, website crawling, vector embeddings, semantic search indexing, Turbo mode
+**Aliases**: scraping API, crawler endpoint, content indexing, website scraper
+**Related**: embeddings generation, job queue, crawlee, Mozilla Readability, OpenAI embeddings
+
+## Table of Contents
+
+- [Overview](#overview)
+- [Endpoints](#endpoints)
+  - [POST /api/scrape](#post-apiscrape)
+  - [GET /api/scrape](#get-apiscrape)
+- [Features](#features)
+  - [Intelligent Content Extraction](#intelligent-content-extraction)
+  - [Vector Embeddings](#vector-embeddings)
+  - [Turbo Mode](#turbo-mode)
+  - [Crawl Management](#crawl-management)
+- [Configuration](#configuration)
+- [Performance](#performance)
+- [Examples](#examples)
+- [Database Schema](#database-schema)
+- [Error Handling](#error-handling)
+- [Rate Limiting & Throttling](#rate-limiting--throttling)
+- [Monitoring & Analytics](#monitoring--analytics)
+- [Integration](#integration)
+- [Best Practices](#best-practices)
+- [Troubleshooting](#troubleshooting)
+- [Related Endpoints](#related-endpoints)
+
+---
+
 Website content extraction and indexing system with AI-powered embeddings and intelligent content processing.
 
 ## Overview

@@ -1,6 +1,39 @@
 # Supabase Integration
 
-Database clients and configuration for the Customer Service Agent application.
+**Type:** Service
+**Status:** Active
+**Last Updated:** 2025-11-18
+**Verified For:** v0.1.0
+**Dependencies:** [@supabase/supabase-js](https://www.npmjs.com/package/@supabase/supabase-js), [@supabase/ssr](https://www.npmjs.com/package/@supabase/ssr)
+**Estimated Read Time:** 4 minutes
+
+## Purpose
+
+Database clients and configuration for the Customer Service Agent application. Provides both browser-side and server-side Supabase client configurations for secure database access across different execution contexts.
+
+## Quick Links
+- [Authentication Utilities](/home/user/Omniops/lib/auth/README.md)
+- [Database Schema Reference](/home/user/Omniops/docs/09-REFERENCE/REFERENCE_DATABASE_SCHEMA.md)
+- [Database Migrations](/home/user/Omniops/supabase/README.md)
+- [Project Architecture](/home/user/Omniops/docs/ARCHITECTURE.md)
+
+## Table of Contents
+- [Files Structure](#files-structure)
+- [Client Configurations](#client-configurations)
+- [Environment Configuration](#environment-configuration)
+- [Authentication Patterns](#authentication-patterns)
+- [Database Operations](#database-operations)
+- [Row Level Security (RLS)](#row-level-security-rls)
+- [Error Handling](#error-handling)
+- [Performance Optimization](#performance-optimization)
+- [Testing](#testing)
+- [Security Best Practices](#security-best-practices)
+- [Database Schema Integration](#database-schema-integration)
+- [Migration Support](#migration-support)
+- [Troubleshooting](#troubleshooting)
+- [Related Documentation](#related-documentation)
+
+---
 
 ## Overview
 
@@ -449,6 +482,7 @@ export async function runMigration() {
 ## Related Documentation
 
 - [Supabase Official Documentation](https://supabase.com/docs)
-- [Authentication Utilities](../auth/README.md)
-- [Database Migrations](../../supabase/README.md)
-- [Project Architecture](../../docs/ARCHITECTURE.md)
+- [Authentication Utilities](/home/user/Omniops/lib/auth/README.md)
+- [Database Migrations](/home/user/Omniops/supabase/README.md)
+- [Database Schema Reference](/home/user/Omniops/docs/09-REFERENCE/REFERENCE_DATABASE_SCHEMA.md)
+- [Project Architecture](/home/user/Omniops/docs/ARCHITECTURE.md)

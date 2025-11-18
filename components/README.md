@@ -1,6 +1,39 @@
 # Components Directory
 
-Reusable React components for the Customer Service Agent application, built with React, TypeScript, and Tailwind CSS.
+**Type:** Reference
+**Status:** Active
+**Last Updated:** 2025-11-18
+**Verified For:** v0.1.0
+**Dependencies:** [Types](/home/user/Omniops/types), [Hooks](/home/user/Omniops/hooks), [Lib](/home/user/Omniops/lib)
+**Estimated Read Time:** 7 minutes
+
+## Purpose
+
+Reusable React component library built with React 19, TypeScript, and Tailwind CSS, featuring base UI components (shadcn/ui), feature components organized by domain, layout components, and cross-cutting utilities for error handling and theming.
+
+## Quick Links
+
+- [Component Tests](/home/user/Omniops/__tests__/components/README.md)
+- [Hooks Directory](/home/user/Omniops/hooks/README.md)
+- [Types Directory](/home/user/Omniops/types/README.md)
+- [UI Components Guide](/home/user/Omniops/docs/02-GUIDES/ui-components.md)
+
+## Table of Contents
+
+- [Architecture Overview](#architecture-overview)
+- [Directory Structure](#directory-structure)
+- [Component Categories](#component-categories)
+  - [UI Components (shadcn/ui)](#ui-components)
+  - [Feature Components](#feature-components)
+  - [Layout Components](#layout-components)
+  - [Utility Components](#utility-components)
+- [Component Patterns](#component-patterns)
+- [Styling Guidelines](#styling-guidelines)
+- [Testing Components](#testing-components)
+- [Best Practices](#best-practices)
+- [Related Documentation](#related-documentation)
+
+---
 
 ## Architecture Overview
 

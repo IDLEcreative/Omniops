@@ -1,5 +1,27 @@
 # Documentation Hub
 
+**Type:** Reference
+**Status:** Active
+**Last Updated:** 2025-11-18
+**Verified For:** v0.1.0
+**Dependencies:** [CLAUDE.md](/home/user/Omniops/CLAUDE.md), [Main README](/home/user/Omniops/README.md)
+**Estimated Read Time:** 9 minutes
+
+## Purpose
+
+Central navigation hub for all Omniops documentation, providing role-based quick starts, comprehensive category structure, and fast access to architecture, guides, API references, and troubleshooting resources.
+
+## Quick Links
+
+- [Main Project README](/home/user/Omniops/README.md)
+- [CLAUDE.md - AI Assistant Instructions](/home/user/Omniops/CLAUDE.md)
+- [Getting Started for Developers](00-GETTING-STARTED/getting-started-developers.md)
+- [Getting Started for DevOps](00-GETTING-STARTED/getting-started-devops.md)
+- [Architecture Overview](01-ARCHITECTURE/overview.md)
+- [Database Schema Reference](09-REFERENCE/REFERENCE_DATABASE_SCHEMA.md)
+
+---
+
 > **Central navigation for all Omniops documentation**
 
 Welcome to the Omniops documentation! This guide will help you find exactly what you need, whether you're a developer setting up the project for the first time, a DevOps engineer deploying to production, or a product manager understanding the system architecture.

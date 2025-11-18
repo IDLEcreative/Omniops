@@ -1,9 +1,13 @@
 # useChatState Hook Tests
 
+**Type:** Test Documentation
+**Status:** Active
+**Last Updated:** 2025-11-18
+**Verified For:** v0.1.0
+**Estimated Read Time:** 2 minutes
+
 **Purpose:** Modular test suite for the `useChatState` hook, split from a monolithic 672 LOC file into focused modules.
 
-**Last Updated:** 2025-11-08
-**Status:** Active
 **Related:** [useChatState hook](../../../../components/ChatWidget/hooks/useChatState.ts)
 
 ## Structure

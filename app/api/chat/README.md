@@ -1,5 +1,50 @@
 # Chat API - Intelligent Implementation
 
+**Type:** Reference
+**Status:** Active
+**Last Updated:** 2025-11-18
+**Verified For:** v0.1.0
+**Dependencies:** [Search Architecture](/home/user/Omniops/docs/01-ARCHITECTURE/ARCHITECTURE_SEARCH_SYSTEM.md), [Hallucination Prevention](/home/user/Omniops/docs/HALLUCINATION_PREVENTION.md)
+**Estimated Read Time:** 10 minutes
+
+## Purpose
+
+This document provides the complete technical reference for the unified intelligent chat endpoint that powers AI-driven customer service responses with GPT-4/GPT-5-mini, advanced tool calling, parallel execution, and comprehensive telemetry.
+
+## Quick Links
+
+- [API Routes Documentation](/home/user/Omniops/app/api/README.md)
+- [Scraping API](/home/user/Omniops/app/api/scrape/README.md)
+- [WooCommerce Integration](/home/user/Omniops/app/api/woocommerce/README.md)
+- [Performance Optimization](/home/user/Omniops/docs/09-REFERENCE/REFERENCE_PERFORMANCE_OPTIMIZATION.md)
+
+## Keywords
+
+**Primary**: chat API, intelligent chat, GPT-4, GPT-5-mini, tool calling, ReAct loop, conversation API
+**Aliases**: intelligent chat endpoint, AI chat route, chat service
+**Related**: semantic search, WooCommerce agent, product search, customer service automation
+
+## Table of Contents
+
+- [Current Implementation](#current-implementation-september-2025)
+- [Endpoints](#endpoints)
+  - [POST /api/chat](#post-apichat)
+- [Key Features](#key-features)
+  - [Intelligent Search & Response](#intelligent-search--response)
+  - [Model Selection](#model-selection)
+  - [Tool Functions](#tool-functions)
+  - [Anti-Hallucination](#anti-hallucination)
+- [Performance Metrics](#performance-metrics)
+- [Telemetry](#telemetry)
+- [Configuration](#configuration)
+- [Examples](#examples)
+- [Error Handling](#error-handling)
+- [Database Schema](#database-schema)
+- [Monitoring & Debugging](#monitoring--debugging)
+- [Related Endpoints](#related-endpoints)
+
+---
+
 The unified intelligent chat endpoint providing AI-powered customer service responses with advanced features.
 
 ## Current Implementation (September 2025)

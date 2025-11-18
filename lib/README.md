@@ -1,10 +1,37 @@
 # Lib Directory
 
-Core business logic, utilities, and service implementations for the Customer Service Agent application.
+**Type:** Service
+**Status:** Active
+**Last Updated:** 2025-11-18
+**Verified For:** v0.1.0
+**Dependencies:** [Supabase](./supabase/README.md), [WooCommerce API](./woocommerce-api/README.md), [Agents](./agents/README.md)
+**Estimated Read Time:** 3 minutes
 
-## Overview
+## Purpose
 
-The `/lib` directory contains the foundational modules that power our customer service automation platform, including database clients, AI integrations, web scraping systems, WooCommerce API integration, and various utilities.
+Core business logic, utilities, and service implementations for the Customer Service Agent application. This directory contains the foundational modules that power our customer service automation platform.
+
+## Quick Links
+- [Authentication Utilities](/home/user/Omniops/lib/auth/README.md)
+- [Supabase Integration](/home/user/Omniops/lib/supabase/README.md)
+- [WooCommerce API](/home/user/Omniops/lib/woocommerce-api/README.md)
+- [AI Agents](/home/user/Omniops/lib/agents/README.md)
+- [Job Queue System](/home/user/Omniops/lib/queue/README.md)
+
+## Table of Contents
+- [Directory Structure](#directory-structure)
+- [Core Modules](#core-modules)
+- [Installation & Dependencies](#installation--dependencies)
+- [Usage Examples](#usage-examples)
+- [Service Architecture Pattern](#service-architecture-pattern)
+- [Testing](#testing)
+- [Performance Considerations](#performance-considerations)
+- [Security Best Practices](#security-best-practices)
+- [Troubleshooting](#troubleshooting)
+- [Contributing](#contributing)
+- [Related Documentation](#related-documentation)
+
+---
 
 ## Directory Structure
 
@@ -356,5 +383,5 @@ When adding new utilities to this directory:
 - [WooCommerce API Reference](./woocommerce-api/README.md) - Complete WooCommerce REST API implementation
 
 ### Project Documentation
-- [Project Architecture](../docs/ARCHITECTURE.md)
-- [API Reference](../docs/API.md)
+- [Project Architecture](/home/user/Omniops/docs/ARCHITECTURE.md)
+- [API Reference](/home/user/Omniops/docs/API.md)

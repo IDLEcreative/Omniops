@@ -1,5 +1,11 @@
 # Real Scenarios Test Suite
 
+**Type:** Test Documentation
+**Status:** Active
+**Last Updated:** 2025-11-18
+**Verified For:** v0.1.0
+**Estimated Read Time:** 1 minute
+
 **Purpose:** End-to-end testing of AI agent behavior in realistic user conversations.
 
 **Structure:** Scenario-based testing framework (refactored from 322 LOC to 123 LOC orchestrator + 249 LOC scenarios).

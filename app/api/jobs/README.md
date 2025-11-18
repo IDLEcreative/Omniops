@@ -1,5 +1,47 @@
 # Jobs API
 
+**Type:** Reference
+**Status:** Active
+**Last Updated:** 2025-11-18
+**Verified For:** v0.1.0
+**Dependencies:** [Queue System](/home/user/Omniops/lib/queue/README.md), [Scraping API](/home/user/Omniops/app/api/scrape/README.md)
+**Estimated Read Time:** 12 minutes
+
+## Purpose
+
+This document provides comprehensive technical reference for the job queue management system powering web scraping operations, including job creation (single page, full crawl, refresh), job status tracking, queue statistics, and health monitoring with BullMQ integration.
+
+## Quick Links
+
+- [Scraping API](/home/user/Omniops/app/api/scrape/README.md)
+- [Queue Implementation](/home/user/Omniops/lib/queue/README.md)
+- [API Routes Documentation](/home/user/Omniops/app/api/README.md)
+- [Monitoring Analytics](/home/user/Omniops/app/api/monitoring/README.md)
+
+## Keywords
+
+**Primary**: job queue, BullMQ, job management, queue statistics, job status, scraping jobs
+**Aliases**: jobs API, queue API, job endpoints, task queue
+**Related**: web scraping, Redis queue, job scheduling, worker management, job monitoring
+
+## Table of Contents
+
+- [Endpoints](#endpoints)
+  - [GET /api/jobs](#get-apijobs)
+  - [POST /api/jobs](#post-apijobs)
+  - [GET /api/jobs/[jobId]](#get-apijobsjobid)
+- [Job Types](#job-types)
+- [Queue Statistics](#queue-statistics)
+- [Job Status](#job-status)
+- [Performance](#performance)
+- [Examples](#examples)
+- [Error Handling](#error-handling)
+- [Integration](#integration)
+- [Monitoring](#monitoring)
+- [Best Practices](#best-practices)
+
+---
+
 The Jobs API manages the job queue system for web scraping operations. It provides endpoints for creating various types of jobs (single page, full crawl, refresh) and retrieving job statistics.
 
 ## Endpoints
