@@ -169,7 +169,7 @@ export async function getProductDetails(
         return buildNotFoundResult(result, {
           customerId: context.customerId,
           executionTime: timer.elapsed()
-        });
+        }, query);
       }
     } catch (providerError) {
       console.log(`[MCP getProductDetails] Provider error, trying fallback strategies`);

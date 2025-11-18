@@ -1,4 +1,4 @@
-import { createServiceClient } from '@/lib/supabase/server';
+import { createServiceRoleClientSync } from '@/lib/supabase/server';
 import { EventEmitter } from 'events';
 
 export interface AnalyticsEvent {
@@ -30,7 +30,17 @@ class AnalyticsStreamManager extends EventEmitter {
   }
 
   private initializeSupabase() {
-    this.supabase = createServiceClient();
+    const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL;
+    const serviceRoleKey = process.env.SUPABASE_SERVICE_ROLE_KEY;
+
+    if (!supabaseUrl || !serviceRoleKey) {
+      throw new Error('Missing Supabase credentials');
+    }
+
+    this.supabase = createServiceRoleClientSync();
+    if (!this.supabase) {
+      throw new Error('Failed to create Supabase client');
+    }
     this.subscribeToEvents();
   }
 
@@ -160,8 +170,12 @@ class AnalyticsStreamManager extends EventEmitter {
   }
 
   public destroy() {
-    if (this.subscription) {
-      this.supabase.removeChannel(this.subscription);
+    if (this.subscription && this.supabase) {
+      try {
+        this.supabase.removeChannel(this.subscription);
+      } catch (error) {
+        // Ignore errors during cleanup
+      }
     }
 
     if (this.pingInterval) {
@@ -183,6 +197,14 @@ export function getAnalyticsStreamManager(): AnalyticsStreamManager {
     streamManager = new AnalyticsStreamManager();
   }
   return streamManager;
+}
+
+// Reset singleton for testing purposes only
+export function resetAnalyticsStreamManager(): void {
+  if (streamManager) {
+    streamManager.destroy();
+    streamManager = null;
+  }
 }
 
 export function createAnalyticsStream(clientId: string): ReadableStream {

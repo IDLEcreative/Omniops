@@ -1,10 +1,17 @@
 import { describe, it, expect, jest, beforeEach, afterEach } from '@jest/globals';
-import { getAnalyticsStreamManager, createAnalyticsStream } from '@/lib/realtime/analytics-stream';
-import { createClient } from '@supabase/supabase-js';
+import {
+  getAnalyticsStreamManager,
+  createAnalyticsStream,
+  resetAnalyticsStreamManager
+} from '@/lib/realtime/analytics-stream';
+import { createServiceRoleClientSync } from '@/lib/supabase/server';
 
-// Mock Supabase
-jest.mock('@supabase/supabase-js', () => ({
-  createClient: jest.fn()
+// Create mock function
+const mockCreateServiceRoleClientSync = jest.fn();
+
+// Mock Supabase server module (the actual module used by the implementation)
+jest.mock('@/lib/supabase/server', () => ({
+  createServiceRoleClientSync: (...args: any[]) => mockCreateServiceRoleClientSync(...args)
 }));
 
 describe('Analytics Stream Manager', () => {
@@ -12,10 +19,18 @@ describe('Analytics Stream Manager', () => {
   let mockChannel: any;
   let mockSubscription: any;
   let manager: any;
+  let mockFrom: jest.Mock;
+  let mockSelect: jest.Mock;
+  let mockGte: jest.Mock;
+  let mockOrder: jest.Mock;
+  let mockInsert: jest.Mock;
 
   beforeEach(() => {
-    // Clear any existing instances
-    jest.clearAllMocks();
+    // Use fake timers to control intervals and prevent real timers
+    jest.useFakeTimers();
+
+    // Reset singleton before setting up mocks
+    resetAnalyticsStreamManager();
 
     // Mock Supabase channel and subscription
     mockSubscription = {
@@ -27,27 +42,39 @@ describe('Analytics Stream Manager', () => {
       subscribe: jest.fn().mockReturnValue(mockSubscription)
     };
 
+    // Create chainable mock functions for query builder
+    mockOrder = jest.fn().mockResolvedValue({
+      data: [],
+      error: null
+    });
+
+    mockGte = jest.fn().mockReturnValue({
+      order: mockOrder
+    });
+
+    mockSelect = jest.fn().mockReturnValue({
+      gte: mockGte
+    });
+
+    mockInsert = jest.fn().mockResolvedValue({
+      data: null,
+      error: null
+    });
+
+    mockFrom = jest.fn().mockReturnValue({
+      select: mockSelect,
+      insert: mockInsert
+    });
+
     mockSupabaseClient = {
       channel: jest.fn().mockReturnValue(mockChannel),
       removeChannel: jest.fn(),
-      from: jest.fn().mockReturnValue({
-        select: jest.fn().mockReturnValue({
-          gte: jest.fn().mockReturnValue({
-            order: jest.fn().mockResolvedValue({
-              data: [],
-              error: null
-            })
-          })
-        }),
-        insert: jest.fn().mockResolvedValue({
-          data: null,
-          error: null
-        })
-      })
+      from: mockFrom
     };
 
-    (createClient as jest.MockedFunction<typeof createClient>)
-      .mockReturnValue(mockSupabaseClient as any);
+    // Reset and configure the mock for createServiceRoleClientSync
+    mockCreateServiceRoleClientSync.mockReset();
+    mockCreateServiceRoleClientSync.mockReturnValue(mockSupabaseClient as any);
 
     // Set required env vars
     process.env.NEXT_PUBLIC_SUPABASE_URL = 'https://test.supabase.co';
@@ -55,20 +82,19 @@ describe('Analytics Stream Manager', () => {
   });
 
   afterEach(() => {
-    // Clean up
-    if (manager) {
-      manager.destroy();
-    }
+    // Reset singleton instance to ensure test isolation
+    resetAnalyticsStreamManager();
+    manager = null;
+
+    // Restore real timers
+    jest.useRealTimers();
   });
 
   describe('Initialization', () => {
     it('should initialize Supabase client with correct credentials', () => {
       manager = getAnalyticsStreamManager();
 
-      expect(createClient).toHaveBeenCalledWith(
-        'https://test.supabase.co',
-        'test-key'
-      );
+      expect(mockCreateServiceRoleClientSync).toHaveBeenCalled();
     });
 
     it('should throw error if Supabase credentials are missing', () => {
@@ -77,6 +103,9 @@ describe('Analytics Stream Manager', () => {
       expect(() => {
         getAnalyticsStreamManager();
       }).toThrow('Missing Supabase credentials');
+
+      // Restore env var for other tests
+      process.env.NEXT_PUBLIC_SUPABASE_URL = 'https://test.supabase.co';
     });
 
     it('should subscribe to analytics_events table changes', () => {
@@ -148,8 +177,8 @@ describe('Analytics Stream Manager', () => {
         userId: 'user-456'
       });
 
-      expect(mockSupabaseClient.from).toHaveBeenCalledWith('analytics_events');
-      expect(mockSupabaseClient.from().insert).toHaveBeenCalledWith({
+      expect(mockFrom).toHaveBeenCalledWith('analytics_events');
+      expect(mockInsert).toHaveBeenCalledWith({
         event_type: 'session_started',
         session_id: 'session-123',
         data: { userId: 'user-456' }
@@ -160,11 +189,10 @@ describe('Analytics Stream Manager', () => {
       manager = getAnalyticsStreamManager();
       const consoleErrorSpy = jest.spyOn(console, 'error').mockImplementation();
 
-      mockSupabaseClient.from.mockReturnValue({
-        insert: jest.fn().mockResolvedValue({
-          data: null,
-          error: { message: 'Database error' }
-        })
+      // Override insert mock for this test
+      mockInsert.mockResolvedValueOnce({
+        data: null,
+        error: { message: 'Database error' }
       });
 
       await manager.recordEvent('test_event', 'session-123');
@@ -187,36 +215,26 @@ describe('Analytics Stream Manager', () => {
         { id: '2', event_type: 'message_sent', created_at: new Date() }
       ];
 
-      mockSupabaseClient.from.mockReturnValue({
-        select: jest.fn().mockReturnValue({
-          gte: jest.fn().mockReturnValue({
-            order: jest.fn().mockResolvedValue({
-              data: mockEvents,
-              error: null
-            })
-          })
-        })
+      // Override order mock for this test
+      mockOrder.mockResolvedValueOnce({
+        data: mockEvents,
+        error: null
       });
 
       const events = await manager.getRecentEvents(5);
 
       expect(events).toEqual(mockEvents);
-      expect(mockSupabaseClient.from).toHaveBeenCalledWith('analytics_events');
+      expect(mockFrom).toHaveBeenCalledWith('analytics_events');
     });
 
     it('should return empty array on error', async () => {
       manager = getAnalyticsStreamManager();
       const consoleErrorSpy = jest.spyOn(console, 'error').mockImplementation();
 
-      mockSupabaseClient.from.mockReturnValue({
-        select: jest.fn().mockReturnValue({
-          gte: jest.fn().mockReturnValue({
-            order: jest.fn().mockResolvedValue({
-              data: null,
-              error: { message: 'Query error' }
-            })
-          })
-        })
+      // Override order mock for this test
+      mockOrder.mockResolvedValueOnce({
+        data: null,
+        error: { message: 'Query error' }
       });
 
       const events = await manager.getRecentEvents();

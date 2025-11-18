@@ -6,7 +6,8 @@
 import { ToolResult } from '../../shared/types';
 import { GetProductDetailsOutput } from '../getProductDetails';
 import { logToolExecution } from '../../shared/utils/logger';
-import { StrategyResult } from './product-strategies';
+import { StrategyResult, getQueryType } from './product-strategies';
+import { trackLookupFailure } from '@/lib/telemetry/lookup-failures';
 
 export interface ResultContext {
   customerId?: string;
@@ -52,8 +53,21 @@ export async function buildSuccessResult(
  */
 export async function buildNotFoundResult(
   strategyResult: StrategyResult,
-  context: ResultContext
+  context: ResultContext,
+  query?: string
 ): Promise<ToolResult<GetProductDetailsOutput>> {
+  // Track lookup failure for analytics
+  if (query) {
+    await trackLookupFailure({
+      query,
+      queryType: getQueryType(query),
+      errorType: 'not_found',
+      platform: strategyResult.platform || 'unknown',
+      suggestions: strategyResult.suggestions,
+      timestamp: new Date(),
+    });
+  }
+
   return {
     success: false,
     data: {
