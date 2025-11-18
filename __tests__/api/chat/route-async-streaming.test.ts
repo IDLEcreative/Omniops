@@ -72,6 +72,9 @@ describe('Chat API Route - Streaming Performance', () => {
     jest.clearAllMocks();
     performanceMarkers = {};
 
+    // Set required environment variable for GPT-5 mini
+    process.env.USE_GPT5_MINI = 'true';
+
     // Get mock embeddings module
     mockEmbeddings = jest.requireMock('@/lib/embeddings');
 
