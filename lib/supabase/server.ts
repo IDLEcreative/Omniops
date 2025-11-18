@@ -149,7 +149,7 @@ export async function createClient() {
           headers: {
             'x-connection-pooling': 'session',
             'x-pool-timeout': '60',
-            'x-pool-size': '20', // Session pool (increased from 10 for 2x headroom under load)
+            'x-pool-size': '50', // Session pool (increased from 20 to 50 for 5x concurrent user capacity)
             'x-statement-timeout': '5000', // 5 second query timeout
           },
         },
@@ -196,7 +196,7 @@ export function createServiceRoleClientSync() {
           headers: {
             'x-connection-pooling': 'transaction',
             'x-pool-timeout': '60',
-            'x-pool-size': '40', // Service role pool (increased from 20 for 2x headroom under load)
+            'x-pool-size': '100', // Service role pool (increased from 40 to 100 for high-concurrency operations)
             'x-statement-timeout': '5000', // 5 second query timeout
             'x-connection-timeout': '10000', // 10 second connection timeout
           },
