@@ -87,8 +87,8 @@ describe('Conditional Tool Availability', () => {
     });
 
     it('should use environment variables ONLY for primary customer domain', async () => {
-      // Set environment variables
-      process.env.WOOCOMMERCE_URL = 'https://primary.com';
+      // Set environment variables for primary customer
+      process.env.WOOCOMMERCE_URL = 'https://thompsonseparts.co.uk';
       process.env.WOOCOMMERCE_CONSUMER_KEY = 'ck_test';
       process.env.WOOCOMMERCE_CONSUMER_SECRET = 'cs_test';
 

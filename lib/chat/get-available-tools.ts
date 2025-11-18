@@ -33,10 +33,26 @@ export async function checkToolAvailability(domain: string): Promise<ToolAvailab
 
     if (error || !data) {
       // No configuration found for this domain - NO tools available
-      // Environment variables are only used for the DEFAULT_DOMAIN
-      const isDefaultDomain = domain === process.env.TEST_DOMAIN ||
-                             domain === process.env.DEFAULT_DOMAIN ||
-                             domain === process.env.PRIMARY_CUSTOMER_DOMAIN; // Primary customer
+      // Environment variables are only used for the primary customer domain
+
+      // Extract domain from WOOCOMMERCE_URL if set
+      let envWooCommerceDomain = '';
+      if (process.env.WOOCOMMERCE_URL) {
+        try {
+          const url = new URL(process.env.WOOCOMMERCE_URL);
+          envWooCommerceDomain = url.hostname.replace(/^www\./, ''); // Remove www. prefix
+        } catch (e) {
+          // Invalid URL, ignore
+        }
+      }
+
+      // Check if this domain matches any of the primary/test domains
+      const normalizedDomain = domain.replace(/^www\./, ''); // Remove www. prefix
+      const isDefaultDomain = normalizedDomain === process.env.TEST_DOMAIN ||
+                             normalizedDomain === process.env.DEFAULT_DOMAIN ||
+                             normalizedDomain === process.env.PRIMARY_CUSTOMER_DOMAIN ||
+                             normalizedDomain === process.env.PRIMARY_DOMAIN ||
+                             normalizedDomain === envWooCommerceDomain; // Match WooCommerce URL domain
 
       if (isDefaultDomain) {
         // Only use environment variables for the primary/test domain

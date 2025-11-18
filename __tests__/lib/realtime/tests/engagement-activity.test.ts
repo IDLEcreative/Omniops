@@ -10,11 +10,11 @@ const mockSupabaseClient = {
 };
 
 // Create mock function BEFORE jest.mock call
-const mockCreateServiceRoleClientSync = jest.fn(() => mockSupabaseClient);
+const mockCreateServiceClient = jest.fn(() => mockSupabaseClient);
 
 // Mock MUST be before imports of the module being tested
 jest.mock('@/lib/supabase/server', () => ({
-  createServiceRoleClientSync: mockCreateServiceRoleClientSync
+  createServiceClient: mockCreateServiceClient
 }));
 
 import {
@@ -23,11 +23,20 @@ import {
   getAggregatedMetrics
 } from '@/lib/realtime/event-aggregator';
 
+// Mock Date.now to invalidate cache
+let originalDateNow: () => number;
+let currentTime = Date.now() + 100000;
+
 // Setup function to reset mocks between tests
 function setupMocks() {
   jest.clearAllMocks();
   mockSupabaseClient.from.mockReset();
-  mockCreateServiceRoleClientSync.mockReturnValue(mockSupabaseClient);
+  mockCreateServiceClient.mockReturnValue(mockSupabaseClient);
+
+  // Advance time to invalidate cache
+  currentTime += 60000;
+  Date.now = jest.fn(() => currentTime);
+
   process.env.NEXT_PUBLIC_SUPABASE_URL = 'https://test.supabase.co';
   process.env.SUPABASE_SERVICE_ROLE_KEY = 'test-key';
   return mockSupabaseClient;
@@ -35,7 +44,13 @@ function setupMocks() {
 
 describe('Event Aggregator - Engagement & Activity', () => {
   beforeEach(() => {
+    originalDateNow = Date.now;
     setupMocks();
+  });
+
+  afterEach(() => {
+    Date.now = originalDateNow;
+    mockSupabaseClient.from.mockReset();
   });
 
   describe('getUserEngagementMetrics', () => {
