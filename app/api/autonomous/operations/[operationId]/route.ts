@@ -6,7 +6,8 @@
  */
 
 import { NextRequest, NextResponse } from 'next/server';
-import { createServerClient } from '@/lib/supabase/server';
+import { requireAuth } from '@/lib/middleware/auth';
+import { getUserOrganization } from '@/lib/auth/api-helpers';
 import { getOperationQueueManager } from '@/lib/autonomous/queue';
 
 export async function GET(
@@ -16,15 +17,23 @@ export async function GET(
   try {
     const { operationId } = await params;
 
-    // TODO: Add authentication and verify user owns this operation
-
-    const supabase = await createServerClient();
-    if (!supabase) {
-      return NextResponse.json(
-        { error: 'Database unavailable' },
-        { status: 503 }
-      );
+    // Authenticate user
+    const authResult = await requireAuth();
+    if (authResult instanceof NextResponse) {
+      return authResult; // Return auth error
     }
+
+    const { user, supabase } = authResult;
+
+    // Get user's organization
+    const orgResult = await getUserOrganization(user.id, supabase);
+    if (orgResult instanceof NextResponse) {
+      return orgResult;
+    }
+
+    const { organizationId } = orgResult;
+
+    // Fetch operation and verify ownership
     const { data: operation, error } = await supabase
       .from('autonomous_operations')
       .select('*')
@@ -32,6 +41,14 @@ export async function GET(
       .single();
 
     if (error || !operation) {
+      return NextResponse.json(
+        { error: 'Operation not found' },
+        { status: 404 }
+      );
+    }
+
+    // Verify the operation belongs to user's organization
+    if (operation.organization_id !== organizationId) {
       return NextResponse.json(
         { error: 'Operation not found' },
         { status: 404 }

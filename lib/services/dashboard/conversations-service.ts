@@ -24,6 +24,7 @@ export interface ConversationFilters {
   days: number;
   limit: number;
   cursor?: string | null;
+  organizationId: string;
 }
 
 export interface ConversationStats {
@@ -47,7 +48,7 @@ export class ConversationsService {
   static async getConversationStats(
     filters: ConversationFilters
   ): Promise<ConversationStats> {
-    const { days, limit, cursor } = filters;
+    const { days, limit, cursor, organizationId } = filters;
     const supabase = await createServiceRoleClient();
 
     if (!supabase) {
@@ -60,29 +61,29 @@ export class ConversationsService {
     const previousStartDate = new Date();
     previousStartDate.setDate(previousStartDate.getDate() - days * 2);
 
-    // Fetch counts
+    // Fetch counts with organization filter
     const [currentCount, previousCount] = await Promise.all([
-      fetchCount(supabase, startDate),
-      fetchCount(supabase, previousStartDate, startDate),
+      fetchCount(supabase, startDate, undefined, organizationId),
+      fetchCount(supabase, previousStartDate, startDate, organizationId),
     ]);
 
     // Calculate change percentage
     const change = calculateChange(currentCount, previousCount);
 
-    // Fetch conversations with stats
+    // Fetch conversations with stats and organization filter
     const {
       conversations,
       statusCounts,
       languageCounts,
     } = await fetchConversations(
       supabase,
-      { startDate, limit, cursor },
+      { startDate, limit, cursor, organizationId },
       determineStatus,
       extractLanguage
     );
 
-    // Fetch peak hours
-    const peakHourCounts = await fetchPeakHours(supabase, startDate);
+    // Fetch peak hours with organization filter
+    const peakHourCounts = await fetchPeakHours(supabase, startDate, organizationId);
 
     // Transform data
     const languages = transformLanguages(languageCounts, currentCount);
