@@ -1,10 +1,11 @@
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
-import type { DashboardTelemetryData, DashboardTelemetryDomainBreakdown } from "@/hooks/use-dashboard-telemetry";
+import type { TelemetryResponse } from "@/app/api/dashboard/telemetry/types";
+import type { DashboardTelemetryDomainBreakdown } from "@/hooks/use-dashboard-telemetry";
 
 interface TenantStatsProps {
   domainBreakdown: DashboardTelemetryDomainBreakdown[];
-  tokens: DashboardTelemetryData["tokens"] | undefined;
-  performance: DashboardTelemetryData["performance"] | undefined;
+  tokens: TelemetryResponse["tokens"] | undefined;
+  performance: TelemetryResponse["performance"] | undefined;
   loading: boolean;
 }
 
@@ -28,10 +29,10 @@ export function TenantStats({ domainBreakdown, tokens, performance, loading }: T
                   <div>
                     <p className="text-sm font-medium">{entry.domain}</p>
                     <p className="text-xs text-muted-foreground">
-                      {formatNumber((entry as any).requests || entry.count)} requests
+                      {formatNumber(entry.requests)} requests
                     </p>
                   </div>
-                  <span className="text-sm font-semibold">{formatCurrency((entry as any).cost || 0)}</span>
+                  <span className="text-sm font-semibold">{formatCurrency(entry.cost)}</span>
                 </div>
               ))}
             </div>

@@ -26,7 +26,7 @@ export function detectChanges(
       const phaseKey = phase as 'phase1' | 'phase2' | 'phase3';
       if (newConfig.sessionPersistence?.[phaseKey]) {
         Object.entries(newConfig.sessionPersistence[phaseKey]!).forEach(([key, value]) => {
-          const oldValue = oldConfig.sessionPersistence[phaseKey][key as keyof typeof oldConfig.sessionPersistence.phase1];
+          const oldValue = (oldConfig.sessionPersistence[phaseKey] as any)[key];
           if (oldValue !== value) {
             changes.push({
               flagPath: `sessionPersistence.${phase}.${key}`,

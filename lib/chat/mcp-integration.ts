@@ -36,7 +36,7 @@ export function detectMCPCodeExecution(content: string): boolean {
  */
 export function extractMCPCode(content: string): string | null {
   const match = content.match(/```typescript\n([\s\S]+?)\n```/);
-  return match ? match[1] : null;
+  return match && match[1] ? match[1] : null;
 }
 
 /**

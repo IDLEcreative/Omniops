@@ -56,11 +56,15 @@ export class MetricTrackers {
    * Take memory snapshot
    */
   takeMemorySnapshot(sessionId?: string, messageCount?: number): void {
-    if (typeof window === 'undefined' || !performance.memory) return;
+    if (typeof window === 'undefined') return;
+
+    // Type assertion for Chrome's performance.memory extension
+    const perfMemory = (performance as any).memory;
+    if (!perfMemory) return;
 
     const snapshot: MemorySnapshot = {
-      heapUsed: (performance.memory as any).usedJSHeapSize,
-      heapTotal: (performance.memory as any).totalJSHeapSize,
+      heapUsed: perfMemory.usedJSHeapSize,
+      heapTotal: perfMemory.totalJSHeapSize,
       external: 0, // Not available in browser
       timestamp: new Date(),
       sessionId,

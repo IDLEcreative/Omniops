@@ -46,7 +46,7 @@ export async function runProjectManagementTests(
       ['list_organizations', 'List all organizations'],
       ['get_organization', 'Get organization details']
     ].forEach(([name, description]) =>
-      functions.push({ name, description, ok: null, notes: note })
+      functions.push({ name: name || '', description: description || '', ok: null, notes: note })
     );
 
     return {

@@ -79,6 +79,8 @@ export async function getInstagramCredentials(
 ): Promise<InstagramCredentials | null> {
   const supabase = await createClient();
 
+  if (!supabase) throw new Error('Supabase client not initialized');
+
   const { data, error } = await supabase
     .from('instagram_credentials')
     .select('*')

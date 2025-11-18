@@ -42,6 +42,15 @@ export function ConversationTabbedList({
     { value: 'resolved' as const, label: 'Resolved', emptyTitle: 'No resolved conversations', emptyDescription: 'Resolved conversations will appear here' },
   ];
 
+  // Map DashboardConversation to the expected format
+  const mappedConversations = conversations.map(conv => ({
+    id: conv.id,
+    message: conv.message || conv.lastMessage?.content || '',
+    timestamp: conv.timestamp || conv.lastMessage?.timestamp || new Date().toISOString(),
+    status: conv.status,
+    customerName: conv.customerName || null,
+  }));
+
   return (
     <Tabs value={activeTab} onValueChange={(val) => onTabChange(val as typeof activeTab)} defaultValue="all" className="flex h-full flex-col">
       <TabsList className="!w-full grid grid-cols-4" role="tablist" aria-label="Filter conversations by status">
@@ -52,7 +61,7 @@ export function ConversationTabbedList({
       {tabConfigs.map(({ value, emptyTitle, emptyDescription }) => (
         <TabsContent key={value} value={value} className="flex-1 mt-0">
           <ConversationListWithPagination
-            conversations={conversations}
+            conversations={mappedConversations}
             loading={loading}
             searchTerm={searchTerm}
             selectedId={selectedId}

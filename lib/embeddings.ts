@@ -68,7 +68,11 @@ export async function generateEmbedding(text: string): Promise<number[]> {
     model: 'text-embedding-ada-002',
     input: text,
   });
-  return response.data[0].embedding;
+  const embeddingData = response.data[0];
+  if (!embeddingData) {
+    throw new Error('No embedding data returned from OpenAI API');
+  }
+  return embeddingData.embedding;
 }
 
 /**

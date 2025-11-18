@@ -17,7 +17,7 @@ export type {
   GetCompletePageDetailsOutput
 } from './getCompletePageDetails';
 
-export const categoryMetadata = {
+export const contentCategoryMetadata = {
   name: 'content',
   description: 'Tools for retrieving and managing content from scraped websites',
   version: '1.0.0',

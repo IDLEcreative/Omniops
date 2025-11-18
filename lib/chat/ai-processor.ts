@@ -58,8 +58,8 @@ export async function processAIConversation(params: AIProcessorParams): Promise<
   }
 
   // Get available tools based on customer configuration
-  const availableTools = await getAvailableTools(domain);
-  const toolAvailability = await checkToolAvailability(domain);
+  const availableTools = await getAvailableTools(domain || '');
+  const toolAvailability = await checkToolAvailability(domain || '');
   const toolInstructions = getToolInstructions(toolAvailability);
 
   // Add tool availability instructions to system message
@@ -188,18 +188,18 @@ export async function processAIConversation(params: AIProcessorParams): Promise<
           else if (searchResult.url && searchResult.url.includes('/product/') && searchResult.content) {
             console.log('[Shopping Debug] ✅ Case 2 matched - Embeddings result with /product/ URL');
             // Parse product data from embeddings result
-            const priceMatch = searchResult.content.match(/Price:\s*([0-9,.]+)/i);
-            const skuMatch = searchResult.content.match(/SKU:\s*([^\s\n]+)/i);
+            const priceMatch = searchResult.content?.match(/Price:\s*([0-9,.]+)/i);
+            const skuMatch = searchResult.content?.match(/SKU:\s*([^\s\n]+)/i);
 
             const product = {
               id: searchResult.url, // Use URL as unique ID
               name: searchResult.title || 'Product',
-              price: priceMatch ? parseFloat(priceMatch[1].replace(/,/g, '')) : 0,
-              sku: skuMatch ? skuMatch[1] : '',
+              price: priceMatch && priceMatch[1] ? parseFloat(priceMatch[1].replace(/,/g, '')) : 0,
+              sku: skuMatch && skuMatch[1] ? skuMatch[1] : '',
               permalink: searchResult.url,
               images: [], // Embeddings don't have image data
               stockStatus: 'instock', // Assume in stock from embeddings
-              shortDescription: searchResult.content.split('\n')[0] || '',
+              shortDescription: searchResult.content?.split('\n')[0] || '',
             };
             console.log('[Shopping Debug] Parsed product:', product);
             allProducts.push(product);

@@ -91,6 +91,11 @@ export function validateImports(code: string): ValidationResult {
   for (const match of matches) {
     const importPath = match[1];
 
+    // Skip if import path is undefined
+    if (!importPath) {
+      continue;
+    }
+
     // Check if import is from allowed path
     const isAllowed = ALLOWED_IMPORT_PATTERNS.some(pattern =>
       pattern.test(importPath)

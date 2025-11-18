@@ -8,7 +8,7 @@ import * as fs from 'fs/promises';
 import * as path from 'path';
 import type { MigrationConfig, MigrationProgress, OptimizationResult } from './types';
 
-export { MigrationConfig, MigrationProgress, OptimizationResult } from './types';
+export type { MigrationConfig, MigrationProgress, OptimizationResult } from './types';
 
 export class DataOptimizer {
   private supabase: any;
@@ -29,10 +29,9 @@ export class DataOptimizer {
       process.env.SUPABASE_SERVICE_ROLE_KEY!,
       process.env.REDIS_URL
     );
-    const metadataGenerator = new AIMetadataGenerator({
-      openaiApiKey: process.env.OPENAI_API_KEY,
-      cacheEnabled: true
-    });
+    const metadataGenerator = new AIMetadataGenerator(
+      process.env.OPENAI_API_KEY || ''
+    );
 
     this.optimizer = new PageOptimizer(config, aiExtractor, deduplicator, metadataGenerator);
 

@@ -14,6 +14,7 @@
  * Path: /dashboard/domains/[domainId]/billing
  */
 
+import { use } from 'react';
 import { useBillingData } from '@/hooks/billing/use-billing-data';
 import { LoadingState } from './components/loading-state';
 import { ErrorState } from './components/error-state';
@@ -26,12 +27,13 @@ import { BillingActions } from './components/billing-actions';
 import { FeatureListCard } from './components/feature-list-card';
 
 interface BillingPageProps {
-  params: {
+  params: Promise<{
     domainId: string;
-  };
+  }>;
 }
 
-export default function BillingPage({ params }: BillingPageProps) {
+export default function BillingPage(props: BillingPageProps) {
+  const params = use(props.params);
   const { loading, billingData, error } = useBillingData(params.domainId);
 
   if (loading) {

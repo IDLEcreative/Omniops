@@ -69,7 +69,6 @@ export function initializeQueue(config: NormalizedQueueConfig): Queue {
       },
       removeOnComplete: false, // Keep for audit trail
       removeOnFail: false, // Keep for debugging
-      timeout: config.defaultJobOptions.timeout,
     },
   };
 
@@ -86,15 +85,14 @@ export function initializeQueue(config: NormalizedQueueConfig): Queue {
  * setupQueueEventListeners(queue);
  */
 export function setupQueueEventListeners(queue: Queue): void {
-  queue.on('added', (job) => {
-    console.log(`[OperationQueue] Job added to queue: ${job.id}`);
-  });
-
-  queue.on('waiting', (jobId) => {
+  // Note: BullMQ v5+ uses different event signatures
+  // 'waiting' event receives a Job object, not just an ID
+  queue.on('waiting' as any, (job: any) => {
+    const jobId = typeof job === 'string' ? job : job?.id;
     console.log(`[OperationQueue] Job waiting: ${jobId}`);
   });
 
-  queue.on('error', (error) => {
+  queue.on('error', (error: Error) => {
     console.error('[OperationQueue] Queue error:', error);
   });
 }

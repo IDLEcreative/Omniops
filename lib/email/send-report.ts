@@ -44,18 +44,25 @@ export async function sendAnalyticsReport(
   data: ReportData
 ) {
   // Generate CSV attachment
-  const csvContent = generateCSVContent({
-    dateRange: { start: data.startDate, end: data.endDate },
-    summary: {
-      totalConversations: data.totalConversations,
-      avgResponseTime: data.avgResponseTime,
-      sentimentScore: data.sentimentScore,
+  const csvContent = generateCSVContent(
+    {
+      responseTime: data.avgResponseTime,
+      satisfactionScore: data.sentimentScore,
+      resolutionRate: 0, // Not available in ReportData
+      metrics: {
+        totalMessages: data.summary.totalMessages,
+        userMessages: data.summary.totalMessages,
+        positiveMessages: data.summary.positiveSentiment,
+        negativeMessages: data.summary.negativeSentiment,
+        avgMessagesPerDay: 0,
+      },
+      topQueries: data.topQueries.map(q => ({ ...q, percentage: 0 })),
+      dailySentiment: [],
+      languageDistribution: [],
+      failedSearches: [],
     },
-    topQueries: data.topQueries || [],
-    dailySentiment: [], // Would be populated with actual data
-    languages: [],
-    failedSearches: [],
-  });
+    { start: data.startDate, end: data.endDate }
+  );
 
   // Send email with HTML template
   const info = await getTransporter().sendMail({

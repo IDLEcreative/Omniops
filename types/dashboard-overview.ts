@@ -36,6 +36,7 @@ export interface DashboardQuickStats {
   avgSearchesPerRequest: number;
 }
 
+// Simple telemetry snapshot for dashboard overview
 export interface DashboardTelemetrySnapshot {
   totalRequests: number;
   successfulRequests: number;
@@ -43,6 +44,71 @@ export interface DashboardTelemetrySnapshot {
   avgSearchesPerRequest: number;
   totalTokens: number;
   totalCostUSD: number;
+}
+
+// Full telemetry data structure (matches API response)
+export interface DashboardTelemetryFull {
+  overview: {
+    totalRequests: number;
+    successfulRequests: number;
+    failedRequests: number;
+    successRate: number;
+    errorRate: number;
+    activeSessions: number;
+    timeRange: string;
+  };
+  cost: {
+    total: string;
+    average: string;
+    projectedDaily: string;
+    projectedMonthly: string;
+    perHour: string;
+    trend: string;
+  };
+  tokens: {
+    totalInput: number;
+    totalOutput: number;
+    total: number;
+    avgPerRequest: number;
+  };
+  performance: {
+    avgResponseTime: number;
+    totalSearches: number;
+    avgSearchesPerRequest: string;
+    avgIterations: string;
+  };
+  modelUsage: Array<{
+    model: string;
+    count: number;
+    cost: string;
+    tokens: number;
+    percentage: number;
+  }>;
+  domainBreakdown: Array<{
+    domain: string;
+    requests: number;
+    cost: string;
+  }>;
+  hourlyTrend: Array<{
+    hour: string;
+    cost: number;
+    requests: number;
+  }>;
+  live: {
+    activeSessions: number;
+    currentCost: string;
+    sessionsData: Array<{
+      id: string;
+      uptime: number;
+      cost: string;
+      model: string;
+    }>;
+  };
+  health: {
+    rollupFreshnessMinutes: number | null;
+    rollupSource: 'rollup' | 'raw';
+    stale: boolean;
+  };
 }
 
 export interface DashboardBotStatus {

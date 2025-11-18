@@ -279,7 +279,7 @@ function avg(nums: number[]): number {
 function median(nums: number[]): number {
   if (nums.length === 0) return 0;
   const sorted = [...nums].sort((a, b) => a - b);
-  return sorted[Math.floor(sorted.length / 2)];
+  return sorted[Math.floor(sorted.length / 2)] ?? 0;
 }
 
 function calcPriorityMetrics(funnels: any[]): { count: number; value: number; conversionRate: number } {

@@ -152,11 +152,6 @@ export function ShoppingFeed({
     }
   }, []);
 
-  const handleExit = useCallback(() => {
-    hapticMedium();
-    onExit();
-  }, [onExit]);
-
   const handleTouchEnd = useCallback(() => {
     const swipeDistance = touchEndX.current - touchStartX.current;
     const SWIPE_THRESHOLD = 100;

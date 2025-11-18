@@ -75,14 +75,14 @@ export function mergeFeatures(base: WidgetFeatures, overrides?: WidgetFeatures |
 
 export function createConfig(userConfig: Partial<WidgetConfig> = {}): WidgetConfig {
   // Fix serverUrl to use www subdomain if needed (prevents CORS redirect issues)
-  const fixedUserConfig = {
-    ...userConfig,
-    serverUrl: userConfig.serverUrl ? ensureWwwUrl(userConfig.serverUrl) : undefined,
-  };
+  const serverUrl = userConfig.serverUrl
+    ? ensureWwwUrl(userConfig.serverUrl)
+    : DEFAULT_CONFIG.serverUrl;
 
   return {
     ...DEFAULT_CONFIG,
-    ...fixedUserConfig,
+    ...userConfig,
+    serverUrl,
     appearance: mergeAppearance(DEFAULT_CONFIG.appearance, userConfig.appearance),
     behavior: mergeBehavior(DEFAULT_CONFIG.behavior, userConfig.behavior),
     features: mergeFeatures(DEFAULT_CONFIG.features, userConfig.features),

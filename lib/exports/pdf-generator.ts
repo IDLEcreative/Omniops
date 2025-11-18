@@ -53,7 +53,7 @@ export function exportToPDF(
   addPageNumbers(doc);
 
   // Return as Uint8Array
-  return doc.output('arraybuffer') as Uint8Array;
+  return new Uint8Array(doc.output('arraybuffer') as ArrayBuffer);
 }
 
 // Re-export conversation report generator

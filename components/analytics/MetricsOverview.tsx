@@ -16,7 +16,8 @@ export function MetricsOverview({ data }: MetricsOverviewProps) {
     ? (data.metrics.negativeMessages / data.metrics.totalMessages) * 100
     : 0;
 
-  const { comparison } = data;
+  // Optional comparison data - may not be present
+  const comparison = (data as any).comparison as DashboardAnalyticsData['comparison'];
 
   return (
     <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">

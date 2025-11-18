@@ -23,10 +23,12 @@ export async function generateQueryEmbedding(
       input: query,
     });
 
-    const embedding = response.data[0]?.embedding;
-    if (!embedding) {
+    const embeddingData = response.data[0];
+    if (!embeddingData || !embeddingData.embedding) {
       throw new Error('No embedding returned from OpenAI API');
     }
+
+    const embedding = embeddingData.embedding;
 
     // Cache the query embedding
     embeddingCache.set(query, embedding);

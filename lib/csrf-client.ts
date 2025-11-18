@@ -30,7 +30,7 @@ export async function fetchCSRFToken(): Promise<string> {
     csrfToken = data.csrfToken;
     tokenExpiry = Date.now() + (data.expiresIn * 1000);
 
-    return csrfToken;
+    return data.csrfToken;
   } catch (error) {
     console.error('Error fetching CSRF token:', error);
     throw error;

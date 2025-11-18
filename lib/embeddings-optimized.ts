@@ -120,7 +120,7 @@ export async function searchSimilarContentOptimized(
   try {
     // OPTIMIZATION 1: Check domain ID cache first
     const searchDomain = domain.replace('www.', '');
-    let domainId = domainIdCache.get(searchDomain);
+    let domainId: string | null = domainIdCache.get(searchDomain);
 
     if (!domainId) {
       // Cache miss - fetch from database
@@ -139,13 +139,20 @@ export async function searchSimilarContentOptimized(
         return [];
       }
 
-      domainId = domainData.id;
+      const fetchedDomainId = domainData.id;
+      domainId = fetchedDomainId;
 
       // Cache the result for future requests
-      domainIdCache.set(searchDomain, domainId);
+      domainIdCache.set(searchDomain, fetchedDomainId);
       console.log(`[Performance] Domain ID cached for "${searchDomain}"`);
     } else {
       console.log(`[Performance] Domain ID from cache for "${searchDomain}"`);
+    }
+
+    // Final check - domainId must exist at this point
+    if (!domainId) {
+      console.log(`No domain ID found for "${domain}"`);
+      return [];
     }
     
     // SHORT QUERY OPTIMIZATION - for 1-2 word queries, use fast keyword search

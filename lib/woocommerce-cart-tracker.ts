@@ -126,15 +126,29 @@ export class WooCommerceCartTracker {
     return {
       orderId: order.id,
       status: order.status,
-      customer: { email: order.billing.email, name: `${order.billing.first_name} ${order.billing.last_name}`.trim() || 'Guest', phone: order.billing.phone },
+      customer: {
+        email: order.billing.email,
+        name: `${order.billing.first_name} ${order.billing.last_name}`.trim() || 'Guest',
+        phone: order.billing.phone || undefined
+      },
       cart: {
         total: order.total,
         currency: order.currency,
         itemCount: order.line_items?.reduce((sum, item) => sum + item.quantity, 0) || 0,
         items: order.line_items?.map(item => ({ name: item.name, quantity: item.quantity, price: String(item.price), total: item.total })) || []
       },
-      dates: { created: order.date_created, modified: order.date_modified, abandoned_duration: duration },
-      recovery: { priority, suggested_action, recovery_url: order.order_key ? `/checkout/order-pay/${order.id}/?pay_for_order=true&key=${order.order_key}` : undefined }
+      dates: {
+        created: order.date_created || '',
+        modified: order.date_modified || '',
+        abandoned_duration: duration
+      },
+      recovery: {
+        priority,
+        suggested_action,
+        recovery_url: order.order_key && order.order_key !== null
+          ? `/checkout/order-pay/${order.id}/?pay_for_order=true&key=${order.order_key}`
+          : undefined
+      }
     };
   }
 

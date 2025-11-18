@@ -25,9 +25,9 @@ export const serverRegistry = {
 };
 
 // Export all server categories
-export * from "./search";
 export * from "./commerce";
 export * from "./content";
+export * from "./search";
 export * from "./shared/types";
 export * from "./shared/validation";
 export * from "./shared/utils/logger";

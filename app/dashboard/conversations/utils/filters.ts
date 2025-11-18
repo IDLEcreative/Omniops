@@ -23,7 +23,8 @@ export function useFilteredConversations(
     if (searchTerm.trim()) {
       const term = searchTerm.toLowerCase();
       filtered = filtered.filter((conversation) => {
-        const messageMatch = conversation.message.toLowerCase().includes(term);
+        const messageText = conversation.message || conversation.lastMessage?.content || '';
+        const messageMatch = messageText.toLowerCase().includes(term);
         const customerMatch = (conversation.customerName?.toLowerCase() ?? "").includes(term);
         return messageMatch || customerMatch;
       });

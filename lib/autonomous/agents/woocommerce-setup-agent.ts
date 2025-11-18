@@ -59,8 +59,8 @@ export class WooCommerceSetupAgent extends AutonomousAgent {
   async getCredentials(organizationId: string): Promise<Record<string, string>> {
     try {
       // Get admin credentials from vault
-      const adminUser = await getCredential(organizationId, 'woocommerce', 'admin_username');
-      const adminPass = await getCredential(organizationId, 'woocommerce', 'admin_password');
+      const adminUser = await getCredential(organizationId, 'woocommerce', 'password');
+      const adminPass = await getCredential(organizationId, 'woocommerce', 'password');
 
       if (!adminUser || !adminPass) {
         throw new Error('WooCommerce admin credentials not found in vault');
@@ -113,7 +113,7 @@ export class WooCommerceSetupAgent extends AutonomousAgent {
       const productCountText = await page.locator('text=/\\d+ products?/i').first().textContent({ timeout: 3000 }).catch(() => null);
       if (productCountText) {
         const match = productCountText.match(/(\d+)/);
-        if (match) {
+        if (match && match[1]) {
           productCount = parseInt(match[1], 10);
         }
       }

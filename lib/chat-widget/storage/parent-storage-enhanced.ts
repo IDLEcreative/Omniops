@@ -52,12 +52,14 @@ export class EnhancedParentStorageAdapter {
       window.addEventListener('message', this.handleMessage);
 
       // Monitor connection state
-      connectionMonitor.addListener((state, stats) => {
-        this.handleConnectionStateChange(state, stats);
-      });
+      if (connectionMonitor) {
+        connectionMonitor.addListener((state, stats) => {
+          this.handleConnectionStateChange(state, stats);
+        });
 
-      // Start connection monitoring
-      connectionMonitor.start();
+        // Start connection monitoring
+        connectionMonitor.start();
+      }
     }
   }
 
@@ -145,7 +147,9 @@ export class EnhancedParentStorageAdapter {
     this.debounceTimers.clear();
     this.cache.clear();
     window.removeEventListener('message', this.handleMessage);
-    connectionMonitor.stop();
+    if (connectionMonitor) {
+      connectionMonitor.stop();
+    }
   }
 
   // Private methods

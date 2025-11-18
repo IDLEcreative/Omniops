@@ -55,7 +55,7 @@ export class PageOptimizer {
 
         case 'basic':
         default:
-          optimizedContent = await this.aiExtractor.extract(page.html || originalContent, page.url);
+          optimizedContent = await AIContentExtractor.extractOptimized(page.html || originalContent, page.url);
           break;
       }
 
@@ -75,25 +75,24 @@ export class PageOptimizer {
   }
 
   private async optimizeAdvanced(page: any, originalContent: string): Promise<any> {
-    const optimizedContent = await this.aiExtractor.extract(page.html || originalContent, page.url);
+    const optimizedContent = await AIContentExtractor.extractOptimized(page.html || originalContent, page.url);
     const dedupResult = await this.deduplicator.processContent(optimizedContent.content, page.url);
 
     const metadata = await this.metadataGenerator.generateMetadata(
       optimizedContent.content,
-      { includeEmbeddings: true, generateQuestions: true }
+      { includeEmbeddings: true, maxQuestions: 10 }
     );
 
     return { ...optimizedContent, deduplication: dedupResult, aiMetadata: metadata };
   }
 
   private async optimizeStandard(page: any, originalContent: string): Promise<any> {
-    const optimizedContent = await this.aiExtractor.extract(page.html || originalContent, page.url);
+    const optimizedContent = await AIContentExtractor.extractOptimized(page.html || originalContent, page.url);
     const basicMetadata = await this.metadataGenerator.generateMetadata(
       optimizedContent.content,
-      { includeEmbeddings: false, generateQuestions: false }
+      { includeEmbeddings: false, maxQuestions: 0 }
     );
-    optimizedContent.aiMetadata = basicMetadata;
-    return optimizedContent;
+    return { ...optimizedContent, aiMetadata: basicMetadata };
   }
 
   private estimateTokens(text: string): number {

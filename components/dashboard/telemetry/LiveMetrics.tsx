@@ -2,22 +2,22 @@ import { type ReactNode } from "react";
 import { Badge } from "@/components/ui/badge";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Clock, Server, TrendingUp, Zap } from "lucide-react";
-import type { DashboardTelemetryData } from "@/hooks/use-dashboard-telemetry";
+import type { TelemetryResponse } from "@/app/api/dashboard/telemetry/types";
 
 interface LiveMetricsProps {
-  overview: DashboardTelemetryData["overview"] | undefined;
-  cost: DashboardTelemetryData["cost"] | undefined;
-  performance: DashboardTelemetryData["performance"] | undefined;
+  overview: TelemetryResponse["overview"] | undefined;
+  cost: TelemetryResponse["cost"] | undefined;
+  performance: TelemetryResponse["performance"] | undefined;
   loading: boolean;
 }
 
-const TREND_LABELS: Record<DashboardTelemetryData["cost"]["trend"], string> = {
+const TREND_LABELS: Record<string, string> = {
   increasing: "Rising spend",
   decreasing: "Lower spend",
   stable: "Stable spend",
 };
 
-const TREND_BADGES: Record<DashboardTelemetryData["cost"]["trend"], "default" | "outline" | "secondary"> = {
+const TREND_BADGES: Record<string, "default" | "outline" | "secondary"> = {
   increasing: "default",
   decreasing: "secondary",
   stable: "outline",

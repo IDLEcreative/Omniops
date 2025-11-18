@@ -75,8 +75,9 @@ export async function getQueueHealth(
 
     // Get last processed job
     const completedJobs = await queue.getCompleted(0, 0);
-    const lastJobProcessedAt = completedJobs.length > 0
-      ? new Date(completedJobs[0].finishedOn!).toISOString()
+    const firstJob = completedJobs[0];
+    const lastJobProcessedAt = firstJob?.finishedOn
+      ? new Date(firstJob.finishedOn).toISOString()
       : undefined;
 
     return {

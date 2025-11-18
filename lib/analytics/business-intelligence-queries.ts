@@ -147,7 +147,7 @@ export async function fetchMessagesForUsageAnalysis(
         return viewData;
       }
     } catch (error) {
-      logger.warn('Materialized view unavailable, falling back to raw query', error);
+      logger.warn('Materialized view unavailable, falling back to raw query', error as Record<string, any>);
       // Fall through to raw query
     }
   }

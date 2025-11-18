@@ -142,10 +142,16 @@ export function detectBrowserLanguage(
   const languages = acceptLanguage
     .split(',')
     .map((lang) => {
-      const [code, qValue] = lang.trim().split(';');
-      const q = qValue ? parseFloat(qValue.split('=')[1]) : 1.0;
-      return { code: code.split('-')[0].toLowerCase(), q };
+      const [codeRaw, qValue] = lang.trim().split(';');
+      if (!codeRaw) return null;
+      const qValuePart = qValue?.split('=')[1];
+      const q = qValuePart ? parseFloat(qValuePart) : 1.0;
+      const codePart = codeRaw.split('-')[0];
+      if (!codePart) return null;
+      const code = codePart.toLowerCase();
+      return { code, q };
     })
+    .filter((item): item is { code: string; q: number } => item !== null)
     .sort((a, b) => b.q - a.q);
 
   // Find first supported language

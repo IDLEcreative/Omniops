@@ -13,7 +13,7 @@ export { searchByCategory, metadata as searchByCategoryMetadata } from "./search
 export type { SearchProductsInput, SearchProductsOutput } from "./searchProducts";
 export type { SearchByCategoryInput, SearchByCategoryOutput } from "./searchByCategory";
 
-export const categoryMetadata = {
+export const searchCategoryMetadata = {
   name: "search",
   description: "Search and discovery tools using semantic embeddings, exact matching, and commerce provider integration",
   version: "1.0.0",

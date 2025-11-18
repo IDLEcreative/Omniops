@@ -1,4 +1,4 @@
-import { ExecutionContext } from '../../../shared/types';
+import type { ExecutionContext } from '@/servers/shared/types';
 import { searchAndReturnFullPage } from '@/lib/full-page-retrieval';
 import { normalizeDomain } from '@/lib/chat/tool-handlers/domain-utils';
 

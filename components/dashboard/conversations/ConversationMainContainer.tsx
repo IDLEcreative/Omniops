@@ -141,7 +141,12 @@ export function ConversationMainContainer({
           {selectedConversation ? (
             <>
               <ConversationHeader
-                conversation={selectedConversation}
+                conversation={{
+                  id: selectedConversation.id,
+                  customerName: selectedConversation.customerName || null,
+                  status: selectedConversation.status,
+                  timestamp: selectedConversation.createdAt || selectedConversation.timestamp || new Date().toISOString(),
+                }}
                 onActionComplete={onActionComplete}
               />
 

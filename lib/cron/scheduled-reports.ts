@@ -63,8 +63,8 @@ async function fetchAnalyticsForReport(
   return {
     data,
     dateRange: {
-      start: startDate.toISOString().split('T')[0],
-      end: endDate.toISOString().split('T')[0],
+      start: startDate.toISOString().split('T')[0] || '',
+      end: endDate.toISOString().split('T')[0] || '',
     },
   };
 }
@@ -126,15 +126,25 @@ async function processReports(frequency: 'daily' | 'weekly' | 'monthly') {
         frequency
       );
 
-      await sendAnalyticsReport({
-        to: subscriber.user_email,
-        data,
-        dateRange,
-        period: frequency,
-        includeCSV: true,
-        includePDF: false,
-        organizationName: subscriber.organization_name,
-      });
+      await sendAnalyticsReport(
+        subscriber.user_email,
+        frequency,
+        {
+          organizationName: subscriber.organization_name || '',
+          startDate: dateRange.start,
+          endDate: dateRange.end,
+          totalConversations: data.metrics.totalMessages,
+          avgResponseTime: data.responseTime,
+          sentimentScore: data.satisfactionScore,
+          topQueries: data.topQueries,
+          summary: {
+            totalMessages: data.metrics.totalMessages,
+            positiveSentiment: data.metrics.positiveMessages,
+            negativeSentiment: data.metrics.negativeMessages,
+            neutralSentiment: data.metrics.totalMessages - data.metrics.positiveMessages - data.metrics.negativeMessages,
+          },
+        }
+      );
 
       successCount++;
       console.log(`[Scheduled Reports] Sent ${frequency} report to ${subscriber.user_email}`);

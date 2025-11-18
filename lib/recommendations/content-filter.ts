@@ -68,6 +68,7 @@ async function getProductMetadata(
   if (!productIds.length) return [];
 
   const supabase = await createClient();
+  if (!supabase) return [];
 
   try {
     const { data, error } = await supabase

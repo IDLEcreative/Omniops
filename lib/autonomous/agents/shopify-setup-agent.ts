@@ -82,8 +82,8 @@ export class ShopifySetupAgent extends AutonomousAgent {
   async getCredentials(organizationId: string): Promise<Record<string, string>> {
     try {
       // Get admin credentials from vault
-      const adminEmail = await getCredential(organizationId, 'shopify', 'admin_email');
-      const adminPass = await getCredential(organizationId, 'shopify', 'admin_password');
+      const adminEmail = await getCredential(organizationId, 'shopify', 'password');
+      const adminPass = await getCredential(organizationId, 'shopify', 'password');
 
       if (!adminEmail || !adminPass) {
         throw new Error('Shopify admin credentials not found in vault');

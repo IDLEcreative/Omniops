@@ -40,23 +40,26 @@ export interface DashboardConversationMetrics {
 
 export interface DashboardConversationItem {
   id: string;
-  customerEmail: string;
-  customerName?: string;
-  domain: string;
+  customerEmail?: string;
+  customerName?: string | null;
+  domain?: string;
   status: DashboardConversationStatus;
   sentiment?: 'positive' | 'negative' | 'neutral';
-  messageCount: number;
-  lastMessage: {
+  messageCount?: number;
+  message?: string;
+  timestamp?: string;
+  lastMessage?: {
     content: string;
     role: 'user' | 'assistant';
     timestamp: string;
   };
-  createdAt: string;
-  updatedAt: string;
+  createdAt?: string;
+  updatedAt?: string;
   metadata?: {
     productViewed?: boolean;
     cartCreated?: boolean;
     checkoutStarted?: boolean;
     orderCompleted?: boolean;
+    language?: string;
   };
 }

@@ -107,5 +107,5 @@ export function generateConversationReport(
   // Add page numbers
   addPageNumbers(doc);
 
-  return doc.output('arraybuffer') as Uint8Array;
+  return new Uint8Array(doc.output('arraybuffer') as ArrayBuffer);
 }

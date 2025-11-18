@@ -3,7 +3,7 @@ import { ScenarioRunner } from './scenarios';
 import { LoadTestFormatter } from './formatters';
 import type { LoadTestConfig, LoadTestMetrics } from './types';
 
-export { LoadTestConfig, LoadTestMetrics } from './types';
+export type { LoadTestConfig, LoadTestMetrics } from './types';
 export { VirtualUser } from './virtual-user';
 
 export class LoadTestOrchestrator {
@@ -141,7 +141,7 @@ export class LoadTestOrchestrator {
   private percentile(sorted: number[], p: number): number {
     if (sorted.length === 0) return 0;
     const index = Math.ceil((sorted.length * p) / 100) - 1;
-    return sorted[Math.max(0, index)];
+    return sorted[Math.max(0, index)] ?? 0;
   }
 
   private printProgressReport(): void {

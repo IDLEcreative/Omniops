@@ -270,6 +270,10 @@ async function tryEmailOnlyMatch(
     new Date(b.created_at).getTime() - new Date(a.created_at).getTime()
   )[0];
 
+  if (!mostRecent) {
+    return null;
+  }
+
   // Lower confidence due to time gap
   let confidence = 0.65;
 

@@ -176,8 +176,8 @@ export async function searchAndReturnFullPage(
       results: fullPageChunks,
       source: 'full_page',
       pageInfo: fullPageChunks.length > 0 ? {
-        url: fullPageChunks[0].url,
-        title: fullPageChunks[0].title,
+        url: fullPageChunks[0]?.url ?? '',
+        title: fullPageChunks[0]?.title ?? '',
         totalChunks: fullPageChunks.length
       } : {
         url: '',

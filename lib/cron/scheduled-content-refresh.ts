@@ -10,12 +10,13 @@
  */
 
 import cron from 'node-cron';
+import type { ScheduledTask } from 'node-cron';
 
 const REFRESH_INTERVAL_HOURS = 24;
 const MAX_PAGES_PER_DOMAIN = 50;
 const CRON_SCHEDULE = '0 2 * * *'; // 2 AM daily
 
-let refreshJob: cron.ScheduledTask | null = null;
+let refreshJob: ScheduledTask | null = null;
 
 /**
  * Initialize the scheduled content refresh system

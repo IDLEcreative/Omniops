@@ -12,7 +12,7 @@ export function getFileLastModified(filePath: string, rootDir: string): string {
     return gitDate;
   } catch (error) {
     const stats = fs.statSync(filePath);
-    return stats.mtime.toISOString().split('T')[0];
+    return stats.mtime.toISOString().split('T')[0] || '';
   }
 }
 
@@ -40,11 +40,11 @@ export function compareVersions(v1: string, v2: string): number {
   const parts1 = v1.split('.').map(Number);
   const parts2 = v2.split('.').map(Number);
 
-  if (parts1[0] !== parts2[0]) {
-    return Math.abs(parts1[0] - parts2[0]) * 100;
+  if ((parts1[0] ?? 0) !== (parts2[0] ?? 0)) {
+    return Math.abs((parts1[0] ?? 0) - (parts2[0] ?? 0)) * 100;
   }
 
-  return Math.abs(parts1[1] - parts2[1]);
+  return Math.abs((parts1[1] ?? 0) - (parts2[1] ?? 0));
 }
 
 export function autoFixDocument(

@@ -20,6 +20,7 @@ export type {
   DashboardSummaryMetrics,
   DashboardQuickStats,
   DashboardTelemetrySnapshot,
+  DashboardTelemetryFull,
   DashboardBotStatus,
   DashboardOverview
 } from './dashboard-overview';
@@ -52,7 +53,7 @@ export type { AnomalySeverity } from '@/lib/analytics/anomaly-types';
 // Import types needed for backward compatibility aliases
 import type { DashboardAnalytics } from './dashboard-analytics';
 import type { DashboardConversationItem, DashboardConversationMetrics, DashboardConversationStatus, DashboardLanguageDistribution } from './dashboard-conversations';
-import type { DashboardTelemetrySnapshot } from './dashboard-overview';
+import type { DashboardTelemetrySnapshot, DashboardTelemetryFull } from './dashboard-overview';
 
 // Backward compatibility aliases
 export type DashboardAnalyticsData = DashboardAnalytics;
@@ -64,7 +65,7 @@ export type DashboardConversationsData = {
   statusCounts: Record<DashboardConversationStatus, number>;
   languages: DashboardLanguageDistribution[];
 };
-export type DashboardTelemetryData = DashboardTelemetrySnapshot;
+export type DashboardTelemetryData = DashboardTelemetryFull;
 
 // Additional type exports
 export interface ConversationMessage {
@@ -119,17 +120,20 @@ export interface MetricProgress {
 
 export interface DashboardTelemetryDomainBreakdown {
   domain: string;
-  count: number;
-  percentage: number;
+  requests: number;
+  cost: string;
 }
 
 export interface DashboardTelemetryHourlyPoint {
   hour: string;
-  count: number;
+  cost: number;
+  requests: number;
 }
 
 export interface DashboardTelemetryModelUsage {
   model: string;
   count: number;
+  cost: string;
+  tokens: number;
   percentage: number;
 }

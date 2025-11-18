@@ -10,7 +10,7 @@ export interface Integration {
   name: string;
   description: string;
   icon: React.ReactNode;
-  status: 'connected' | 'disconnected' | 'coming_soon';
+  status: 'connected' | 'disconnected' | 'coming_soon' | 'loading';
   category: 'ecommerce' | 'crm' | 'communication' | 'productivity' | 'analytics';
   metrics?: {
     synced?: number;
@@ -32,6 +32,8 @@ export function IntegrationCard({ integration, onIntegrationClick }: Integration
         return <div className="h-2 w-2 rounded-full bg-gray-300" />;
       case 'coming_soon':
         return <AlertCircle className="h-5 w-5 text-amber-500" />;
+      case 'loading':
+        return <div className="h-2 w-2 rounded-full bg-blue-300 animate-pulse" />;
     }
   };
 
@@ -43,6 +45,8 @@ export function IntegrationCard({ integration, onIntegrationClick }: Integration
         return <Badge variant="outline">Not Connected</Badge>;
       case 'coming_soon':
         return <Badge className="bg-amber-500/10 text-amber-600 border-amber-200">Coming Soon</Badge>;
+      case 'loading':
+        return <Badge variant="outline" className="animate-pulse">Loading...</Badge>;
     }
   };
 

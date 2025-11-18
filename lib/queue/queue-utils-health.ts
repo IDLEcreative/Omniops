@@ -62,8 +62,8 @@ export class QueueMonitor {
       processor: { isRunning: this.jobProcessor.isRunning(), metrics: processingMetrics },
       redis: { connected: await this.checkRedisConnection() },
       deduplication: {
-        totalKeys: deduplicationStats.enabled ? deduplicationStats.stats?.totalKeys || 0 : 0,
-        keysByType: deduplicationStats.enabled ? deduplicationStats.stats?.keysByType || {} : {}
+        totalKeys: deduplicationStats.enabled ? (deduplicationStats.stats as any)?.totalKeys || 0 : 0,
+        keysByType: deduplicationStats.enabled ? (deduplicationStats.stats as any)?.keysByType || {} : {}
       },
     };
   }

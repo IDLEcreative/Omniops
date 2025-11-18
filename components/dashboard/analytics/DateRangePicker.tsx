@@ -62,7 +62,7 @@ export function DateRangePicker({
   maxDate = new Date(),
   maxRangeDays = 365,
 }: DateRangePickerProps) {
-  const [preset, setPreset] = useState<DateRangePreset>('7d');
+  const [preset, setPreset] = useState<DateRangePreset>('last-7-days');
   const [isOpen, setIsOpen] = useState(false);
 
   // Convert DateRange to react-day-picker DateRange format
@@ -79,13 +79,13 @@ export function DateRangePicker({
     const now = new Date();
 
     switch (presetValue) {
-      case '7d':
+      case 'last-7-days':
         return { from: subDays(now, 7), to: now };
 
-      case '30d':
+      case 'last-30-days':
         return { from: subDays(now, 30), to: now };
 
-      case '90d':
+      case 'last-90-days':
         return { from: subDays(now, 90), to: now };
 
       case 'custom':
@@ -158,9 +158,9 @@ export function DateRangePicker({
           <SelectValue />
         </SelectTrigger>
         <SelectContent>
-          <SelectItem value="7d">Last 7 days</SelectItem>
-          <SelectItem value="30d">Last 30 days</SelectItem>
-          <SelectItem value="90d">Last 90 days</SelectItem>
+          <SelectItem value="last-7-days">Last 7 days</SelectItem>
+          <SelectItem value="last-30-days">Last 30 days</SelectItem>
+          <SelectItem value="last-90-days">Last 90 days</SelectItem>
           <SelectItem value="custom">Custom Range</SelectItem>
         </SelectContent>
       </Select>

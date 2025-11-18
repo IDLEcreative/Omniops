@@ -197,7 +197,7 @@ export class DocumentationAuditor {
     }
 
     const date = new Date().toISOString().split('T')[0];
-    const time = new Date().toISOString().split('T')[1].split('.')[0];
+    const time = new Date().toISOString().split('T')[1]?.split('.')[0] || '00:00:00';
 
     let report = `# Documentation Version Audit Report\n\n`;
     report += `**Generated:** ${date} ${time}\n`;

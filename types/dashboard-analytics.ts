@@ -123,4 +123,13 @@ export interface DashboardAnalytics {
     positiveMessages: number;
     negativeMessages: number;
   };
+  comparison?: {
+    totalMessages?: MetricComparison;
+    responseTime?: MetricComparison;
+    satisfactionScore?: MetricComparison;
+    resolutionRate?: MetricComparison;
+    positiveMessages?: MetricComparison;
+    negativeMessages?: MetricComparison;
+  };
+  anomalies?: DashboardAnomaly[];
 }

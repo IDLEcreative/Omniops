@@ -93,7 +93,7 @@ export async function getAvailableTools(domain: string): Promise<any[]> {
   const availability = await checkToolAvailability(domain);
 
   // Base search tools that are always available
-  const tools = [
+  const tools: any[] = [
     {
       type: "function" as const,
       function: {

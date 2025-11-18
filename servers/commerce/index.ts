@@ -16,7 +16,7 @@ export type { GetProductDetailsInput, GetProductDetailsOutput } from "./getProdu
 export { woocommerceOperations, metadata as woocommerceOperationsMetadata } from "./woocommerceOperations";
 export type { WoocommerceOperationsInput, WoocommerceOperationsOutput } from "./woocommerceOperations";
 
-export const categoryMetadata = {
+export const commerceCategoryMetadata = {
   name: "commerce",
   description: "Order management, product operations, and e-commerce integrations for WooCommerce and Shopify",
   version: "1.0.0",

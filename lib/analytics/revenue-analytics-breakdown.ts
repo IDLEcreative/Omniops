@@ -130,7 +130,10 @@ export async function getAttributionBreakdown(
       const hours = (orderTime - convTime) / (1000 * 60 * 60);
       const rev = parseFloat(a.order_total || '0');
       const idx = hours <= 1 ? 0 : hours <= 6 ? 1 : hours <= 24 ? 2 : hours <= 168 ? 3 : 4;
-      dist[idx].count++; dist[idx].revenue += rev;
+      if (dist[idx]) {
+        dist[idx].count++;
+        dist[idx].revenue += rev;
+      }
     }
   });
 
@@ -139,7 +142,7 @@ export async function getAttributionBreakdown(
     byConfidence: byConfidenceFormatted as any,
     timeToConversion: {
       avgSeconds: Math.round(avgSeconds),
-      medianSeconds: Math.round(medianSeconds),
+      medianSeconds: Math.round(medianSeconds ?? 0),
       distribution: dist.map(d => ({ ...d, revenue: roundToTwoDecimals(d.revenue) })),
     },
   };
