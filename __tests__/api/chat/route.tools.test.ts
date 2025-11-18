@@ -132,7 +132,7 @@ describe('/api/chat - Tool Execution', () => {
                   id: 'call_123',
                   type: 'function',
                   function: {
-                    name: 'search_products',
+                    name: 'search_website_content',
                     arguments: JSON.stringify({ query: 'business hours' })
                   }
                 }]
@@ -185,7 +185,7 @@ describe('/api/chat - Tool Execution', () => {
                   id: 'call_1',
                   type: 'function',
                   function: {
-                    name: 'search_products',
+                    name: 'search_website_content',
                     arguments: '{"limit": 5}', // Missing required 'query' parameter
                   },
                 }],
