@@ -22,6 +22,6 @@ describe('searchByCategory – Category input validation', () => {
 
     const result = await searchByCategory({ category, limit: 10 }, baseContext);
     expect(result.success).toBe(true);
-    expect(result.data.category).toBe(category);
+    expect(result.data?.category).toBe(category);
   });
 });

@@ -12,11 +12,10 @@ interface AnnotationMarkerProps {
 }
 
 // Category to icon mapping
-const categoryIcons = {
+const categoryIcons: Record<'campaign' | 'release' | 'incident' | 'other', string> = {
   campaign: '🚀',
   incident: '⚠️',
   release: '📦',
-  event: '📅',
   other: 'ℹ️',
 };
 
@@ -27,11 +26,11 @@ export function AnnotationMarker({
 }: AnnotationMarkerProps) {
   // Format the date to match chart data format
   const formattedDate = useMemo(() => {
-    return new Date(annotation.annotation_date).toLocaleDateString('en-US', {
+    return new Date(annotation.date).toLocaleDateString('en-US', {
       month: 'short',
       day: 'numeric',
     });
-  }, [annotation.annotation_date]);
+  }, [annotation.date]);
 
   const icon = categoryIcons[annotation.category] || categoryIcons.other;
 
@@ -75,8 +74,6 @@ export function AnnotationTooltipContent({ annotation }: AnnotationTooltipConten
         return AlertTriangle;
       case 'release':
         return Package;
-      case 'event':
-        return Calendar;
       default:
         return Info;
     }
@@ -97,7 +94,7 @@ export function AnnotationTooltipContent({ annotation }: AnnotationTooltipConten
             </div>
           )}
           <div className="text-xs text-muted-foreground mt-2">
-            {new Date(annotation.annotation_date).toLocaleDateString('en-US', {
+            {new Date(annotation.date).toLocaleDateString('en-US', {
               month: 'long',
               day: 'numeric',
               year: 'numeric',

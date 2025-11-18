@@ -86,6 +86,10 @@ export function highlightQuery(text: string, query: string): string {
  */
 export async function logSearchAnalytics(analytics: SearchAnalytics): Promise<void> {
   const supabase = await createClient();
+  if (!supabase) {
+    console.error('Failed to create Supabase client for analytics logging');
+    return;
+  }
 
   try {
     await supabase.from('search_queries').insert({

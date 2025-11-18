@@ -72,7 +72,7 @@ export function highlightWithContext(
   for (const match of matches) {
     for (let i = 0; i < sentences.length; i++) {
       const sentence = sentences[i];
-      if (match.start >= sentence.start && match.start < sentence.end) {
+      if (sentence && match.start >= sentence.start && match.start < sentence.end) {
         matchedSentences.add(i);
 
         // Add context sentences
@@ -91,11 +91,14 @@ export function highlightWithContext(
   let lastIndex = -1;
 
   for (const index of selectedIndices) {
-    if (index > lastIndex + 1) {
-      excerpt += '... ';
+    const sentence = sentences[index];
+    if (sentence) {
+      if (index > lastIndex + 1) {
+        excerpt += '... ';
+      }
+      excerpt += text.substring(sentence.start, sentence.end) + ' ';
+      lastIndex = index;
     }
-    excerpt += text.substring(sentences[index].start, sentences[index].end) + ' ';
-    lastIndex = index;
   }
 
   // Apply highlights

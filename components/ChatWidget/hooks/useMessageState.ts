@@ -1,4 +1,4 @@
-import { useState, useRef, useCallback } from 'react';
+import { useState, useRef, useCallback, useEffect } from 'react';
 import { Message } from '@/types';
 import type { StorageAdapter } from './useSessionManagement';
 import type { ChatWidgetConfig } from './useChatState';
@@ -137,6 +137,11 @@ export function useMessageState({
                 const lastDbMsg = data.messages[data.messages.length - 1];
                 const lastStateMsg = prev[prev.length - 1];
 
+                if (!lastDbMsg || !lastStateMsg) {
+                  console.log('[useMessageState] ⚠️ Missing last message in comparison');
+                  return prev;
+                }
+
                 console.log('[useMessageState] 🔍 Comparing last messages:', {
                   sameId: lastDbMsg.id === lastStateMsg.id,
                   dbHasMetadata: !!lastDbMsg.metadata?.shoppingProducts,
@@ -161,7 +166,9 @@ export function useMessageState({
             if (process.env.NODE_ENV === 'development') {
               console.log('[useMessageState] No messages found, clearing conversation ID');
             }
-            await storage.removeItem('conversation_id');
+            if (storage?.removeItem) {
+              await storage.removeItem('conversation_id');
+            }
             hasLoadedMessages.current = false; // Reset to allow new conversation
           }
         } else {
@@ -172,7 +179,9 @@ export function useMessageState({
           console.warn('[useMessageState] API error:', error);
           setMessagesLoadError(error);
 
-          await storage.removeItem('conversation_id');
+          if (storage?.removeItem) {
+            await storage.removeItem('conversation_id');
+          }
           hasLoadedMessages.current = false; // Reset to allow new conversation
         }
       } catch (err) {
@@ -184,7 +193,9 @@ export function useMessageState({
 
         // On error, clear stored conversation to allow fresh start
         try {
-          await storage.removeItem('conversation_id');
+          if (storage?.removeItem) {
+            await storage.removeItem('conversation_id');
+          }
         } catch (storageErr) {
           console.warn('[useMessageState] Failed to clear conversation ID:', storageErr);
         }
@@ -214,8 +225,8 @@ export function useMessageState({
     );
   }, [loadPreviousMessages]);
 
-  // Cleanup on unmount
-  useCallback(() => {
+  // Cleanup on unmount - use useEffect instead of standalone useCallback
+  useEffect(() => {
     return () => {
       isMountedRef.current = false;
     };
@@ -230,7 +241,7 @@ export function useMessageState({
     setLoading,
     loadingMessages,
     messagesLoadError,
-    messagesContainerRef,
+    messagesContainerRef: messagesContainerRef as React.RefObject<HTMLDivElement>,
     loadPreviousMessages,
     retryLoadMessages,
   };

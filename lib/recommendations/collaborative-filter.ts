@@ -67,6 +67,7 @@ async function getUserViewedProducts(
   domainId?: string
 ): Promise<string[]> {
   const supabase = await createClient();
+  if (!supabase) return [];
 
   try {
     const query = supabase
@@ -105,6 +106,7 @@ async function findSimilarUsers(
   domainId: string
 ): Promise<Array<{ sessionId: string; similarity: number }>> {
   const supabase = await createClient();
+  if (!supabase) return [];
 
   try {
     // Get all sessions that interacted with these products
@@ -158,6 +160,7 @@ async function getProductsFromSimilarUsers(
   additionalExcludes?: string[]
 ): Promise<ProductRecommendation[]> {
   const supabase = await createClient();
+  if (!supabase) return [];
 
   try {
     const sessionIds = similarUsers.map((u) => u.sessionId);

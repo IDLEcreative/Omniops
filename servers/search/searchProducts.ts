@@ -153,7 +153,7 @@ export async function searchProducts(
     // Adaptive limit: reduce by 50% for long queries to optimize performance
     // Long queries (>5 words) are more specific, so fewer results are typically needed
     const queryWords = validatedInput.query.trim().split(/\s+/).length;
-    const adaptiveLimit = queryWords > 5 ? Math.floor(validatedInput.limit / 2) : validatedInput.limit;
+    const adaptiveLimit = queryWords > 5 ? Math.floor((validatedInput.limit ?? 100) / 2) : (validatedInput.limit ?? 100);
 
     console.log(
       `[MCP searchProducts] Query: "${validatedInput.query}" | ` +

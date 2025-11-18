@@ -138,6 +138,11 @@ export function validateEmbeddings(
   for (let i = 0; i < embeddings.length; i++) {
     const emb = embeddings[i];
 
+    if (!emb) {
+      console.error(`[Validation] Embedding ${i} is undefined`);
+      return false;
+    }
+
     if (!emb.embedding || !Array.isArray(emb.embedding)) {
       console.error(`[Validation] Embedding ${i} is not an array`);
       return false;

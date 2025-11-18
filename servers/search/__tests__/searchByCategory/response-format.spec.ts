@@ -36,7 +36,7 @@ describe('searchByCategory – Response format', () => {
   it('includes execution time in data and metadata', async () => {
     const result = await searchByCategory({ category: 'pumps', limit: 10 }, baseContext);
 
-    expect(result.data.executionTime).toBeGreaterThan(0);
-    expect(result.metadata.executionTime).toBeGreaterThan(0);
+    expect(result.data?.executionTime).toBeGreaterThan(0);
+    expect(result.metadata?.executionTime).toBeGreaterThan(0);
   });
 });

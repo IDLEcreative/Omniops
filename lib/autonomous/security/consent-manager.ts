@@ -5,7 +5,8 @@
  * Ensures all autonomous actions have explicit user permission.
  */
 
-import { createServerClient } from '@/lib/supabase/server';
+import { createServiceRoleClientSync } from '@/lib/supabase/server';
+import type { SupabaseClient } from '@supabase/supabase-js';
 import type { ConsentRequest, ConsentRecord, ConsentVerification } from './consent-types';
 import {
   insertConsent as defaultInsertConsent,
@@ -37,7 +38,7 @@ export interface ConsentOperations {
 }
 
 export class ConsentManager {
-  private supabase: ReturnType<typeof createServerClient>;
+  private supabase: SupabaseClient | null;
   private consentVersion: string;
   private operations: ConsentOperations;
 
@@ -47,10 +48,10 @@ export class ConsentManager {
    * @param operations Optional consent operations (for testing). If not provided, uses defaults.
    */
   constructor(
-    client?: ReturnType<typeof createServerClient>,
+    client?: SupabaseClient | null,
     operations?: Partial<ConsentOperations>
   ) {
-    this.supabase = client || createServerClient();
+    this.supabase = client || createServiceRoleClientSync();
     this.consentVersion = process.env.CONSENT_VERSION || '1.0';
 
     // Use provided operations or defaults
@@ -71,6 +72,10 @@ export class ConsentManager {
     request: ConsentRequest
   ): Promise<ConsentRecord> {
     try {
+      if (!this.supabase) {
+        throw new Error('Supabase client not initialized');
+      }
+
       if (!request.permissions || request.permissions.length === 0) {
         throw new Error('At least one permission required');
       }
@@ -103,6 +108,10 @@ export class ConsentManager {
     operation: string
   ): Promise<ConsentVerification> {
     try {
+      if (!this.supabase) {
+        throw new Error('Supabase client not initialized');
+      }
+
       const data = await this.operations.selectConsent(this.supabase, organizationId, service, operation);
 
       if (!data) {
@@ -135,6 +144,10 @@ export class ConsentManager {
     operation: string
   ): Promise<void> {
     try {
+      if (!this.supabase) {
+        throw new Error('Supabase client not initialized');
+      }
+
       await this.operations.updateConsentRevoked(this.supabase, organizationId, service, operation);
 
       console.log('[ConsentManager] Consent revoked:', {
@@ -150,6 +163,10 @@ export class ConsentManager {
 
   async revokeById(organizationId: string, consentId: string): Promise<void> {
     try {
+      if (!this.supabase) {
+        throw new Error('Supabase client not initialized');
+      }
+
       await this.operations.updateConsentRevokedById(this.supabase, organizationId, consentId);
 
       console.log('[ConsentManager] Consent revoked by ID:', {
@@ -170,6 +187,10 @@ export class ConsentManager {
     }
   ): Promise<ConsentRecord[]> {
     try {
+      if (!this.supabase) {
+        throw new Error('Supabase client not initialized');
+      }
+
       let query = this.supabase
         .from('autonomous_consent')
         .select('*')
@@ -190,7 +211,7 @@ export class ConsentManager {
         throw new Error(`Failed to list consents: ${error.message}`);
       }
 
-      return (data || []).map(d => this.operations.mapToConsentRecord(d));
+      return (data || []).map((d: any) => this.operations.mapToConsentRecord(d));
     } catch (error) {
       console.error('[ConsentManager] List error:', error);
       throw error;
@@ -199,6 +220,10 @@ export class ConsentManager {
 
   async getById(consentId: string): Promise<ConsentRecord | null> {
     try {
+      if (!this.supabase) {
+        throw new Error('Supabase client not initialized');
+      }
+
       const { data, error } = await this.supabase
         .from('autonomous_consent')
         .select('*')
@@ -241,6 +266,10 @@ export class ConsentManager {
     newExpiresAt: Date
   ): Promise<void> {
     try {
+      if (!this.supabase) {
+        throw new Error('Supabase client not initialized');
+      }
+
       await this.operations.updateConsentExpiry(this.supabase, organizationId, service, operation, newExpiresAt);
 
       console.log('[ConsentManager] Consent extended:', {
@@ -280,6 +309,10 @@ export class ConsentManager {
 
   async revokeAllForService(organizationId: string, service: string): Promise<number> {
     try {
+      if (!this.supabase) {
+        throw new Error('Supabase client not initialized');
+      }
+
       const count = await this.operations.bulkRevokeForService(this.supabase, organizationId, service);
       console.log(`[ConsentManager] Revoked ${count} consents for service ${service}`);
       return count;
@@ -296,7 +329,7 @@ let consentManagerInstance: ConsentManager | null = null;
  * Get or create ConsentManager singleton
  * @param client Optional Supabase client (for testing)
  */
-export function getConsentManager(client?: ReturnType<typeof createServerClient>): ConsentManager {
+export function getConsentManager(client?: SupabaseClient | null): ConsentManager {
   if (!consentManagerInstance) {
     consentManagerInstance = new ConsentManager(client);
   }

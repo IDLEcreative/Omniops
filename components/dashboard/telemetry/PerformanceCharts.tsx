@@ -1,10 +1,25 @@
 import { useMemo } from "react";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
-import type { DashboardTelemetryData, DashboardTelemetryHourlyPoint } from "@/hooks/use-dashboard-telemetry";
+
+// Define the actual hourly trend point structure from telemetry API
+interface HourlyTrendPoint {
+  hour: string;
+  cost: number;
+  requests: number;
+}
+
+interface CostMetrics {
+  total: string;
+  average: string;
+  projectedDaily: string;
+  projectedMonthly: string;
+  perHour: string;
+  trend: string;
+}
 
 interface PerformanceChartsProps {
-  hourlyTrend: DashboardTelemetryHourlyPoint[];
-  cost: DashboardTelemetryData["cost"] | undefined;
+  hourlyTrend: HourlyTrendPoint[];
+  cost: CostMetrics | undefined;
   loading: boolean;
 }
 
@@ -74,7 +89,7 @@ function TelemetrySparkline({
   maxRequests,
   maxCost,
 }: {
-  points: (DashboardTelemetryHourlyPoint & { hourLabel: string })[];
+  points: (HourlyTrendPoint & { hourLabel: string })[];
   maxRequests: number;
   maxCost: number;
 }) {

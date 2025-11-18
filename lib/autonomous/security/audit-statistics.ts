@@ -3,13 +3,14 @@
  * @module lib/autonomous/security/audit-statistics
  */
 
-import { createServerClient } from '@/lib/supabase/server';
+import { createServiceRoleClientSync } from '@/lib/supabase/server';
+import type { SupabaseClient } from '@supabase/supabase-js';
 
 export class AuditStatistics {
-  private supabase: ReturnType<typeof createServerClient>;
+  private supabase: SupabaseClient | null;
 
   constructor() {
-    this.supabase = createServerClient();
+    this.supabase = createServiceRoleClientSync();
   }
 
   async getStatistics(
@@ -23,6 +24,10 @@ export class AuditStatistics {
     failureReasons: Record<string, number>;
   }> {
     try {
+      if (!this.supabase) {
+        throw new Error('Supabase client not initialized');
+      }
+
       let query = this.supabase
         .from('autonomous_operations_audit')
         .select('success, error, duration_ms');
@@ -44,18 +49,18 @@ export class AuditStatistics {
       }
 
       const logs = data || [];
-      const successful = logs.filter(l => l.success).length;
+      const successful = logs.filter((l: any) => l.success).length;
       const total = logs.length;
 
       const durations = logs
-        .filter(l => l.duration_ms !== null)
-        .map(l => l.duration_ms!);
+        .filter((l: any) => l.duration_ms !== null)
+        .map((l: any) => l.duration_ms!);
       const avgDurationMs = durations.length > 0
-        ? Math.round(durations.reduce((sum, d) => sum + d, 0) / durations.length)
+        ? Math.round(durations.reduce((sum: number, d: number) => sum + d, 0) / durations.length)
         : 0;
 
       const failureReasons: Record<string, number> = {};
-      logs.filter(l => !l.success && l.error).forEach(l => {
+      logs.filter((l: any) => !l.success && l.error).forEach((l: any) => {
         const reason = l.error!;
         failureReasons[reason] = (failureReasons[reason] || 0) + 1;
       });
@@ -80,6 +85,10 @@ export class AuditStatistics {
     period?: { startDate: Date; endDate: Date }
   ): Promise<number> {
     try {
+      if (!this.supabase) {
+        throw new Error('Supabase client not initialized');
+      }
+
       let query = this.supabase
         .from('autonomous_operations_audit')
         .select('operation_id', { count: 'exact', head: false });
@@ -100,7 +109,7 @@ export class AuditStatistics {
         throw new Error(`Failed to count operations: ${error.message}`);
       }
 
-      const uniqueIds = new Set((data || []).map(d => d.operation_id));
+      const uniqueIds = new Set((data || []).map((d: any) => d.operation_id));
       return uniqueIds.size;
     } catch (error) {
       console.error('[AuditStatistics] GetUniqueOperationsCount error:', error);

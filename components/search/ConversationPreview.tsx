@@ -46,6 +46,11 @@ export function ConversationPreview({
                            sentiments.find(s => s === 'positive') ||
                            'neutral';
 
+  // Early return if no messages
+  if (!firstMessage) {
+    return null;
+  }
+
   return (
     <Card className="overflow-hidden">
       <CardContent className="p-4">

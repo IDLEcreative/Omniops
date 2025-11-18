@@ -10,7 +10,7 @@
  */
 
 import { encrypt } from '@/lib/encryption/crypto-core';
-import { createServerClient } from '@/lib/supabase/server';
+import type { SupabaseClient } from '@supabase/supabase-js';
 
 /**
  * Rotate encryption key for a credential
@@ -22,7 +22,7 @@ export async function rotateCredential(
   credentialType: 'oauth_token' | 'api_key' | 'password' | 'session',
   currentValue: string,
   encryptionKeyId: string,
-  supabase: ReturnType<typeof createServerClient>
+  supabase: SupabaseClient
 ): Promise<void> {
   // Re-encrypt with current key
   const encryptedValue = encrypt(currentValue);
@@ -57,7 +57,7 @@ export async function rotateCredential(
  * Should be run via cron job
  */
 export async function markStaleCredentialsForRotation(
-  supabase: ReturnType<typeof createServerClient>
+  supabase: SupabaseClient
 ): Promise<number> {
   const ninetyDaysAgo = new Date();
   ninetyDaysAgo.setDate(ninetyDaysAgo.getDate() - 90);
@@ -82,7 +82,7 @@ export async function markStaleCredentialsForRotation(
  * Get credentials requiring rotation
  */
 export async function getCredentialsRequiringRotation(
-  supabase: ReturnType<typeof createServerClient>
+  supabase: SupabaseClient
 ): Promise<any[]> {
   const { data, error } = await supabase
     .from('autonomous_credentials')

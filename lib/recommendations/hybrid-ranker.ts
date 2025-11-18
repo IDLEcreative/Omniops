@@ -45,33 +45,36 @@ export async function hybridRanker(
 ): Promise<ProductRecommendation[]> {
   try {
     // Run all algorithms in parallel
-    const [vectorResults, collaborativeResults, contentResults] =
-      await Promise.all([
-        vectorSimilarityRecommendations({
-          domainId: request.domainId,
-          productIds: request.productIds,
-          context: request.context,
-          limit: request.limit * 2, // Get more for better mixing
-          excludeProductIds: request.excludeProductIds,
-        }),
-        collaborativeFilterRecommendations({
-          sessionId: request.sessionId,
-          userId: request.userId,
-          domainId: request.domainId,
-          limit: request.limit * 2,
-          excludeProductIds: request.excludeProductIds,
-          context: request.context,
-        }),
-        contentBasedRecommendations({
-          domainId: request.domainId,
-          productIds: request.productIds,
-          categories: request.categories,
-          tags: request.tags,
-          limit: request.limit * 2,
-          excludeProductIds: request.excludeProductIds,
-          context: request.context,
-        }),
-      ]);
+    const results = await Promise.all([
+      vectorSimilarityRecommendations({
+        domainId: request.domainId,
+        productIds: request.productIds,
+        context: request.context,
+        limit: request.limit * 2, // Get more for better mixing
+        excludeProductIds: request.excludeProductIds,
+      }),
+      collaborativeFilterRecommendations({
+        sessionId: request.sessionId,
+        userId: request.userId,
+        domainId: request.domainId,
+        limit: request.limit * 2,
+        excludeProductIds: request.excludeProductIds,
+        context: request.context,
+      }),
+      contentBasedRecommendations({
+        domainId: request.domainId,
+        productIds: request.productIds,
+        categories: request.categories,
+        tags: request.tags,
+        limit: request.limit * 2,
+        excludeProductIds: request.excludeProductIds,
+        context: request.context,
+      }),
+    ]);
+
+    const vectorResults = results[0] ?? [];
+    const collaborativeResults = results[1] ?? [];
+    const contentResults = results[2] ?? [];
 
     // Combine and rank results
     const combined = combineResults(
@@ -105,7 +108,7 @@ function combineResults(
   const productScores = new Map<string, {
     totalScore: number;
     algorithms: string[];
-    details: Map<string, number>;
+    details: Record<string, number>;
   }>();
 
   // Add vector similarity scores
@@ -113,11 +116,11 @@ function combineResults(
     const entry = productScores.get(rec.productId) || {
       totalScore: 0,
       algorithms: [],
-      details: new Map(),
+      details: {},
     };
     entry.totalScore += rec.score * weights.vector;
     entry.algorithms.push('vector');
-    entry.details.set('vector', rec.score);
+    entry.details.vector = rec.score;
     productScores.set(rec.productId, entry);
   });
 
@@ -126,11 +129,11 @@ function combineResults(
     const entry = productScores.get(rec.productId) || {
       totalScore: 0,
       algorithms: [],
-      details: new Map(),
+      details: {},
     };
     entry.totalScore += rec.score * weights.collaborative;
     entry.algorithms.push('collaborative');
-    entry.details.set('collaborative', rec.score);
+    entry.details.collaborative = rec.score;
     productScores.set(rec.productId, entry);
   });
 
@@ -139,11 +142,11 @@ function combineResults(
     const entry = productScores.get(rec.productId) || {
       totalScore: 0,
       algorithms: [],
-      details: new Map(),
+      details: {},
     };
     entry.totalScore += rec.score * weights.content;
     entry.algorithms.push('content');
-    entry.details.set('content', rec.score);
+    entry.details.content = rec.score;
     productScores.set(rec.productId, entry);
   });
 
@@ -162,7 +165,7 @@ function combineResults(
       reason: buildHybridReason(data.algorithms),
       metadata: {
         algorithms: data.algorithms,
-        scores: Object.fromEntries(data.details),
+        scores: data.details,
         algorithmCount: data.algorithms.length,
       },
     });

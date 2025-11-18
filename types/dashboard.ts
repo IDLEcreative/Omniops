@@ -49,6 +49,11 @@ export type {
 // Re-export AnomalySeverity for backward compatibility
 export type { AnomalySeverity } from '@/lib/analytics/anomaly-types';
 
+// Import types needed for backward compatibility aliases
+import type { DashboardAnalytics } from './dashboard-analytics';
+import type { DashboardConversationItem, DashboardConversationMetrics, DashboardConversationStatus, DashboardLanguageDistribution } from './dashboard-conversations';
+import type { DashboardTelemetrySnapshot } from './dashboard-overview';
+
 // Backward compatibility aliases
 export type DashboardAnalyticsData = DashboardAnalytics;
 export type DashboardConversation = DashboardConversationItem;

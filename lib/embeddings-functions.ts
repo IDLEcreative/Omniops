@@ -94,7 +94,7 @@ export async function generateEmbeddingVectors(chunks: string[]): Promise<number
     }
 
     // Generate embeddings only for missing chunks
-    const missingChunks = missing.map(index => chunks[index]);
+    const missingChunks = missing.map(index => chunks[index]).filter((chunk): chunk is string => chunk !== undefined);
     console.log(`[Performance] Generating ${missingChunks.length}/${chunks.length} embeddings (${cached.size} from cache)`);
 
     const response = await getOpenAIClient().embeddings.create({
@@ -111,10 +111,14 @@ export async function generateEmbeddingVectors(chunks: string[]): Promise<number
     const results: number[][] = [];
     let newEmbeddingIndex = 0;
     for (let i = 0; i < chunks.length; i++) {
-      if (cached.has(i)) {
-        results.push(cached.get(i)!);
+      const cachedEmbedding = cached.get(i);
+      if (cachedEmbedding !== undefined) {
+        results.push(cachedEmbedding);
       } else {
-        results.push(newEmbeddings[newEmbeddingIndex++]);
+        const newEmbedding = newEmbeddings[newEmbeddingIndex++];
+        if (newEmbedding !== undefined) {
+          results.push(newEmbedding);
+        }
       }
     }
 

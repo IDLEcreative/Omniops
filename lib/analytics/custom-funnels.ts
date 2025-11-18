@@ -218,23 +218,28 @@ export function mapConversationToStage(
   const hasConversion = metadata.converted === true;
 
   if (hasConversion) {
-    return funnel.stages[funnel.stages.length - 1].id; // Last stage = conversion
+    const lastStage = funnel.stages[funnel.stages.length - 1];
+    return lastStage?.id || null; // Last stage = conversion
   }
 
   if (hasOrderLookup) {
-    return funnel.stages[Math.min(4, funnel.stages.length - 2)].id; // Near end
+    const stage = funnel.stages[Math.min(4, funnel.stages.length - 2)];
+    return stage?.id || null; // Near end
   }
 
   if (hasPriceCheck) {
-    return funnel.stages[Math.min(3, funnel.stages.length - 3)].id; // Mid-late
+    const stage = funnel.stages[Math.min(3, funnel.stages.length - 3)];
+    return stage?.id || null; // Mid-late
   }
 
   if (hasProductInquiry) {
-    return funnel.stages[Math.min(2, funnel.stages.length - 4)].id; // Mid
+    const stage = funnel.stages[Math.min(2, funnel.stages.length - 4)];
+    return stage?.id || null; // Mid
   }
 
   // Default to first stage (awareness/contact)
-  return funnel.stages[0].id;
+  const firstStage = funnel.stages[0];
+  return firstStage?.id || null;
 }
 
 /**

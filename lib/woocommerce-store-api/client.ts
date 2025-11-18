@@ -73,6 +73,10 @@ export class StoreAPIClient {
     this.headers['Nonce'] = nonce;
   }
 
+  getNonce(): string | undefined {
+    return this.nonce;
+  }
+
   async isAvailable(): Promise<boolean> {
     const result = await this.request('/cart', { method: 'GET' });
     return result.success || (result.error?.code !== 'network_error');

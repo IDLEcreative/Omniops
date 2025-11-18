@@ -20,6 +20,8 @@
 //     "retentionDays": 90
 //   }
 
+// @ts-nocheck
+// Deno Edge Runtime types - not available during local TypeScript check
 import { createClient } from 'https://esm.sh/@supabase/supabase-js@2';
 
 // CORS headers for manual invocations

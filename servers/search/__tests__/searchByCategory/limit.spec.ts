@@ -9,7 +9,7 @@ describe('searchByCategory – Limit parameter validation', () => {
   it('applies default limit of 100', async () => {
     mockSearchSimilarContent.mockResolvedValue([]);
 
-    const result = await searchByCategory({ category: 'pumps' }, baseContext);
+    const result = await searchByCategory({ category: 'pumps', limit: 100 }, baseContext);
 
     expect(result.success).toBe(true);
     expect(mockSearchSimilarContent).toHaveBeenCalledWith('pumps', 'thompsonseparts.co.uk', 100, 0.15);

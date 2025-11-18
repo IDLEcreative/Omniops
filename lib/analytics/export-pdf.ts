@@ -69,7 +69,7 @@ export async function exportAnalyticsToPDF(
     autoTable(pdf, {
       startY: yOffset,
       head: [['Rank', 'Query', 'Count', 'Percentage']],
-      body: data.topQueries.slice(0, 10).map((query, idx) => [
+      body: data.topQueries.slice(0, 10).map((query: any, idx: number) => [
         (idx + 1).toString(),
         query.query,
         query.count.toString(),
@@ -96,7 +96,7 @@ export async function exportAnalyticsToPDF(
     autoTable(pdf, {
       startY: yOffset,
       head: [['Language', 'Count', 'Percentage']],
-      body: data.languageDistribution.map(lang => [
+      body: data.languageDistribution.map((lang: any) => [
         lang.language,
         lang.count.toString(),
         `${lang.percentage.toFixed(1)}%`,
@@ -122,7 +122,7 @@ export async function exportAnalyticsToPDF(
     autoTable(pdf, {
       startY: yOffset,
       head: [['Query']],
-      body: data.failedSearches.slice(0, 10).map(search => [search]),
+      body: data.failedSearches.slice(0, 10).map((search: any) => [search]),
       theme: 'striped',
       headStyles: { fillColor: [66, 66, 66] },
     });

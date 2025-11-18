@@ -112,6 +112,9 @@ export async function fullTextSearch(
   filters: SearchFilters
 ): Promise<{ results: SearchResult[]; totalCount: number }> {
   const supabase = await createClient();
+  if (!supabase) {
+    throw new Error('Failed to create Supabase client');
+  }
 
   // Build the query
   const query = supabase
@@ -133,7 +136,7 @@ export async function fullTextSearch(
   }
 
   // Map to SearchResult format
-  const results: SearchResult[] = (data || []).map(row => ({
+  const results: SearchResult[] = (data || []).map((row: any) => ({
     conversationId: row.conversation_id,
     messageId: row.message_id,
     content: row.content,
@@ -145,7 +148,7 @@ export async function fullTextSearch(
   }));
 
   // Get customer info for results
-  if (results.length > 0) {
+  if (results.length > 0 && supabase) {
     const conversationIds = [...new Set(results.map(r => r.conversationId))];
 
     const { data: convData } = await supabase
@@ -154,9 +157,9 @@ export async function fullTextSearch(
       .in('id', conversationIds);
 
     if (convData) {
-      const convMap = new Map(convData.map(c => [
+      const convMap = new Map(convData.map((c: any) => [
         c.id,
-        { email: c.customer_email, domain: c.domains?.name }
+        { email: c.customer_email, domain: Array.isArray(c.domains) ? c.domains[0]?.name : c.domains?.name }
       ]));
 
       results.forEach(r => {
@@ -179,6 +182,9 @@ export async function semanticSearch(
   filters: SearchFilters
 ): Promise<{ results: SearchResult[]; totalCount: number }> {
   const supabase = await createClient();
+  if (!supabase) {
+    throw new Error('Failed to create Supabase client');
+  }
 
   try {
     // Generate embedding for the query

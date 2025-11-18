@@ -62,15 +62,22 @@ async function getCachedEmbedding(
       return null;
     }
 
-    // Update access tracking
-    await supabase
-      .from('product_embeddings')
-      .update({
-        last_accessed_at: new Date().toISOString(),
-        access_count: supabase.raw('access_count + 1')
-      })
-      .eq('domain', domain)
-      .eq('product_id', productId);
+    // Update access tracking (using SQL increment via RPC if available)
+    const { error: rpcError } = await supabase.rpc('increment_product_embedding_access', {
+      p_domain: domain,
+      p_product_id: productId
+    });
+
+    if (rpcError) {
+      // Fallback: simple update without increment if RPC doesn't exist
+      await supabase
+        .from('product_embeddings')
+        .update({
+          last_accessed_at: new Date().toISOString()
+        })
+        .eq('domain', domain)
+        .eq('product_id', productId);
+    }
 
     console.log(`[Product Embeddings] Cache hit: product ${productId}`);
     return data.embedding as number[];
@@ -136,15 +143,23 @@ export function calculateCosineSimilarity(vectorA: number[], vectorB: number[]):
   // Calculate dot product
   let dotProduct = 0;
   for (let i = 0; i < vectorA.length; i++) {
-    dotProduct += vectorA[i] * vectorB[i];
+    const a = vectorA[i];
+    const b = vectorB[i];
+    if (a !== undefined && b !== undefined) {
+      dotProduct += a * b;
+    }
   }
 
   // Calculate magnitudes
   let magnitudeA = 0;
   let magnitudeB = 0;
   for (let i = 0; i < vectorA.length; i++) {
-    magnitudeA += vectorA[i] * vectorA[i];
-    magnitudeB += vectorB[i] * vectorB[i];
+    const a = vectorA[i];
+    const b = vectorB[i];
+    if (a !== undefined && b !== undefined) {
+      magnitudeA += a * a;
+      magnitudeB += b * b;
+    }
   }
   magnitudeA = Math.sqrt(magnitudeA);
   magnitudeB = Math.sqrt(magnitudeB);

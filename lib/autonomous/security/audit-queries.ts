@@ -7,7 +7,7 @@
  * @module lib/autonomous/security/audit-queries
  */
 
-import { createServerClient } from '@/lib/supabase/server';
+import type { SupabaseClient } from '@supabase/supabase-js';
 import type { AuditRecord } from './audit-logger-types';
 
 /**
@@ -15,7 +15,7 @@ import type { AuditRecord } from './audit-logger-types';
  */
 export async function getFailedSteps(
   operationId: string,
-  supabase: ReturnType<typeof createServerClient>,
+  supabase: SupabaseClient,
   mapFn: (data: any) => AuditRecord
 ): Promise<AuditRecord[]> {
   const { data, error } = await supabase
@@ -37,7 +37,7 @@ export async function getFailedSteps(
  */
 export async function getRecentLogs(
   limit: number,
-  supabase: ReturnType<typeof createServerClient>,
+  supabase: SupabaseClient,
   mapFn: (data: any) => AuditRecord
 ): Promise<AuditRecord[]> {
   const { data, error } = await supabase
@@ -60,7 +60,7 @@ export async function exportAuditTrail(
   organizationId: string,
   startDate: Date | undefined,
   endDate: Date | undefined,
-  supabase: ReturnType<typeof createServerClient>,
+  supabase: SupabaseClient,
   mapFn: (data: any) => AuditRecord
 ): Promise<AuditRecord[]> {
   let query = supabase
@@ -94,7 +94,7 @@ export async function exportAuditTrail(
  */
 export async function deleteOldLogs(
   retentionDays: number,
-  supabase: ReturnType<typeof createServerClient>
+  supabase: SupabaseClient
 ): Promise<number> {
   const cutoffDate = new Date();
   cutoffDate.setDate(cutoffDate.getDate() - retentionDays);

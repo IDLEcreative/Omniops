@@ -16,6 +16,8 @@ export interface ExecutionContext {
   domain?: string;
   sessionId?: string;
   userId?: string;
+  platform?: string;
+  traceId?: string;
   metadata?: Record<string, unknown>;
 }
 
