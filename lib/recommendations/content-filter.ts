@@ -100,6 +100,7 @@ async function findSimilarByContent(
   excludeIds?: string[]
 ): Promise<ProductRecommendation[]> {
   const supabase = await createClient();
+  if (!supabase) return [];
 
   try {
     // Get all products with metadata

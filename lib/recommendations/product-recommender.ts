@@ -137,7 +137,7 @@ function getRecommendationReason(
 
   // Generate reason based on similarity and attributes
   if (similarity > 0.85) {
-    if (sharedCategories.length > 0) {
+    if (sharedCategories.length > 0 && sharedCategories[0]) {
       return `Very similar ${sharedCategories[0].toLowerCase()}`;
     }
     return 'Very similar product';
@@ -147,14 +147,14 @@ function getRecommendationReason(
     if (isPriceSimilar) {
       return 'Similar product at comparable price';
     }
-    if (sharedCategories.length > 0) {
+    if (sharedCategories.length > 0 && sharedCategories[0]) {
       return `Related ${sharedCategories[0].toLowerCase()}`;
     }
     return 'Related product';
   }
 
   // 0.7 - 0.75
-  if (sharedCategories.length > 0) {
+  if (sharedCategories.length > 0 && sharedCategories[0]) {
     return `In same category (${sharedCategories[0]})`;
   }
 

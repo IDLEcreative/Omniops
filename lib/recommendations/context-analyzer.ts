@@ -144,7 +144,7 @@ function extractPriceRange(text: string): { min?: number; max?: number } | undef
 
   for (const pattern of patterns) {
     const match = text.match(pattern);
-    if (match) {
+    if (match && match[1]) {
       const num1 = parseFloat(match[1].replace(/,/g, ''));
       const num2 = match[2] ? parseFloat(match[2].replace(/,/g, '')) : undefined;
 
