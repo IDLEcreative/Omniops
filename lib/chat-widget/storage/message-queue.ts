@@ -23,7 +23,6 @@ export class MessageQueue {
     this.queue.push(message);
 
     if (this.debug) {
-      console.log('[MessageQueue] Queued message:', message.type, message.key);
     }
 
     // Prevent queue from growing too large (keep last N messages)
@@ -41,7 +40,6 @@ export class MessageQueue {
     if (count === 0) return 0;
 
     if (this.debug) {
-      console.log('[MessageQueue] Replaying queued messages:', count);
     }
 
     // Replay all messages

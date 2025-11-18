@@ -142,7 +142,7 @@ describe('UserMenu Component - Avatar Display', () => {
   });
 
   describe('Menu Icons', () => {
-    it.skip('should display icons in menu items', async () => {
+    it('should display icons in menu items', async () => {
       mockGetUser.mockResolvedValue({
         data: {
           user: {

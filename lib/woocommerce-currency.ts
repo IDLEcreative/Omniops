@@ -84,12 +84,10 @@ export async function getCurrency(
     // Return cached data if available (even if expired)
     const cached = currencyCache.get(domain);
     if (cached) {
-      console.log(`[Currency] Using expired cache for ${domain}`);
       return cached.data;
     }
 
     // Final fallback to USD
-    console.log(`[Currency] Falling back to USD for ${domain}`);
     return DEFAULT_CURRENCY;
   }
 }
@@ -116,10 +114,8 @@ export function formatPrice(amount: number | string, currency: CurrencyData): st
 export function clearCurrencyCache(domain?: string): void {
   if (domain) {
     currencyCache.delete(domain);
-    console.log(`[Currency] Cleared cache for ${domain}`);
   } else {
     currencyCache.clear();
-    console.log(`[Currency] Cleared all currency cache`);
   }
 }
 

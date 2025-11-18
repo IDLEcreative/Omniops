@@ -72,24 +72,18 @@ export class PerformanceAnalyzer {
   }
 
   static logSummary(report: PerformanceReport): void {
-    console.log('\n=== Performance Summary ===');
     console.log(`Total Duration: ${report.totalDuration.toFixed(2)}ms`);
-    console.log(`Operations: ${report.metrics.length}`);
 
     if (report.slowestOperations.length > 0) {
-      console.log('\nSlowest Operations:');
       report.slowestOperations.forEach((op, i) => {
         console.log(`  ${i + 1}. ${op.name}: ${op.duration?.toFixed(2)}ms`);
       });
     }
 
     if (report.suggestions.length > 0) {
-      console.log('\nOptimization Suggestions:');
       report.suggestions.forEach((suggestion, i) => {
-        console.log(`  ${i + 1}. ${suggestion}`);
       });
     }
 
-    console.log('========================\n');
   }
 }

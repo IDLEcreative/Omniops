@@ -49,7 +49,6 @@ export async function GET(request: NextRequest) {
 
     // Return default config if no domain or app_id provided
     if (isEmptyQuery(validatedQuery)) {
-      console.log('[Widget Config API] No domain provided, returning default config');
       return buildDefaultConfigResponse();
     }
 

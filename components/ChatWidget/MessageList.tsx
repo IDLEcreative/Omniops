@@ -34,8 +34,6 @@ export function MessageList({
   storeDomain,
 }: MessageListProps) {
   // CRITICAL DEBUG: Log on EVERY render
-  console.log('[MessageList] ⚡ RENDER TRIGGERED - Message count:', messages.length);
-  console.log('[MessageList] ⚡ Last message:', messages[messages.length - 1]);
 
   // Log messages metadata for debugging
   console.log('[MessageList] 🎨 Rendering with messages:', {
@@ -83,10 +81,8 @@ export function MessageList({
           products={shoppingData.products}
           onExit={handleCloseShopping}
           onProductView={(productId) => {
-            console.log('[Shopping] Product viewed:', productId);
           }}
           onAddToCart={(productId) => {
-            console.log('[Shopping] Product added to cart:', productId);
           }}
           sessionId={sessionId}
           conversationId={conversationId}

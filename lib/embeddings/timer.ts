@@ -22,7 +22,6 @@ export class QueryTimer {
 
   end(): number {
     const elapsed = Date.now() - this.startTime;
-    console.log(`[Performance] ${this.name}: ${elapsed}ms`);
     return elapsed;
   }
 }

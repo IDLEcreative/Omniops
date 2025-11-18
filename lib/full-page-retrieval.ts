@@ -54,7 +54,6 @@ async function getAllChunksFromPage(
       return [];
     }
 
-    console.log(`[Full Page] Retrieved ${chunks.length} chunks from: ${pageData.title}`);
 
     // Convert to SearchResult format
     return chunks.map((chunk, index) => ({
@@ -99,11 +98,9 @@ export async function searchAndReturnFullPage(
     totalChunks: number;
   };
 }> {
-  console.log(`[Full Page Strategy] Query: "${query}"`);
 
   const supabase = await createServiceRoleClient();
   if (!supabase) {
-    console.log('[Full Page] Supabase unavailable, cannot execute');
     return {
       success: false,
       results: [],
@@ -121,7 +118,6 @@ export async function searchAndReturnFullPage(
       .single();
 
     if (!domainData) {
-      console.log('[Full Page] Domain not found:', normalizedDomain);
       return {
         success: false,
         results: [],
@@ -142,7 +138,6 @@ export async function searchAndReturnFullPage(
     });
 
     if (error || !searchResults || searchResults.length === 0) {
-      console.log('[Full Page] No search results found');
       return {
         success: false,
         results: [],
@@ -155,13 +150,11 @@ export async function searchAndReturnFullPage(
     const bestPageId = bestMatch.page_id;
 
     console.log(`[Full Page] Best match: ${bestMatch.title} (similarity: ${bestMatch.similarity.toFixed(3)})`);
-    console.log(`[Full Page] Retrieving all chunks from page: ${bestPageId}`);
 
     // Step 5: Retrieve ALL chunks from that page
     const fullPageChunks = await getAllChunksFromPage(bestPageId, domain);
 
     if (fullPageChunks.length === 0) {
-      console.log('[Full Page] No chunks retrieved from page');
       return {
         success: false,
         results: [],
@@ -170,7 +163,6 @@ export async function searchAndReturnFullPage(
     }
 
     // Success! Return full page context
-    console.log(`[Full Page] Success! Returning ${fullPageChunks.length} chunks from one page`);
     return {
       success: true,
       results: fullPageChunks,
@@ -210,7 +202,6 @@ export async function searchAndReturnFullPageOptimized(
   // TODO: Modify search_embeddings RPC function to include page_id in results
   // Then we can skip the intermediate lookup
 
-  console.log('[Full Page Optimized] Not yet implemented, using standard approach');
   const result = await searchAndReturnFullPage(query, domain, 15, similarityThreshold);
   return result.results;
 }

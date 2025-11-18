@@ -49,7 +49,6 @@ export default function TestWidgetPage() {
       debug: true,
     };
 
-    console.log('[Test Page] Widget configured with language:', language);
   }, []);
 
   const handleLanguageChange = (lang: string) => {

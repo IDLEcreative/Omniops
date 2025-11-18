@@ -73,7 +73,6 @@ export class ResponseCache {
     // Check static responses first
     const staticResponse = this.staticResponses[normalizedQuery];
     if (staticResponse) {
-      console.log(`[Cache] Static hit for: "${query}"`);
       return staticResponse;
     }
     
@@ -88,7 +87,6 @@ export class ResponseCache {
     // Check if expired
     if (Date.now() - entry.timestamp > this.maxAge) {
       this.cache.delete(cacheKey);
-      console.log(`[Cache] Expired entry for: "${query}"`);
       return null;
     }
     
@@ -117,7 +115,6 @@ export class ResponseCache {
       const oldestKey = this.findOldestEntry();
       if (oldestKey) {
         this.cache.delete(oldestKey);
-        console.log(`[Cache] Evicted oldest entry to make room`);
       }
     }
     
@@ -131,7 +128,6 @@ export class ResponseCache {
       domain
     });
     
-    console.log(`[Cache] Stored response for: "${query}"`);
   }
 
   /**
@@ -166,7 +162,6 @@ export class ResponseCache {
     }
     
     if (cleaned > 0) {
-      console.log(`[Cache] Cleaned ${cleaned} expired entries`);
     }
     
     return cleaned;
@@ -211,7 +206,6 @@ export class ResponseCache {
    */
   clear(): void {
     this.cache.clear();
-    console.log('[Cache] Cleared all entries');
   }
 }
 

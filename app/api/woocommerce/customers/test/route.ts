@@ -21,7 +21,6 @@ export async function GET(request: NextRequest) {
       consumerSecret,
     });
 
-    console.log('Fetching customers from WooCommerce...');
     
     // Fetch first 10 customers
     const customers = await wc.getCustomers({
@@ -30,7 +29,6 @@ export async function GET(request: NextRequest) {
       order: 'desc'
     });
 
-    console.log(`Found ${customers.length} customers`);
     
     // Get detailed info for first customer if available
     let firstCustomerDetails = null;

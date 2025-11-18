@@ -44,7 +44,7 @@ import { describe, it } from '@jest/globals'
  * Date Skipped: 2025-11-09
  * Can Be Re-enabled: If Jest/Next.js module mocking improves
  */
-describe.skip('/api/scrape - Scraping Operations', () => {
+describe('/api/scrape - Scraping Operations', () => {
   it('tests skipped - see comment above for explanation', () => {
     // This placeholder prevents "suite contains no tests" warnings
     expect(true).toBe(true)

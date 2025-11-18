@@ -25,7 +25,6 @@ export async function executeHybridSearch(
     return [];
   }
 
-  console.log(`[Context Enhancer] Trying hybrid search for maximum accuracy...`);
 
   const { data: hybridResults, error: hybridError } = await supabase.rpc(
     'hybrid_product_search',
@@ -39,7 +38,6 @@ export async function executeHybridSearch(
   );
 
   if (!hybridError && hybridResults && hybridResults.length > 0) {
-    console.log(`[Context Enhancer] Hybrid search found ${hybridResults.length} results`);
 
     return hybridResults.map((r: any) => ({
       content: r.content || '',
@@ -62,7 +60,6 @@ export async function executeEmbeddingSearch(
   domain: string,
   neededChunks: number
 ): Promise<ContextChunk[]> {
-  console.log(`[Context Enhancer] Need more chunks, adding embedding search...`);
 
   const embeddingResults = await searchSimilarContentEnhanced(
     searchQuery,
@@ -72,7 +69,6 @@ export async function executeEmbeddingSearch(
   );
 
   if (embeddingResults && embeddingResults.length > 0) {
-    console.log(`[Context Enhancer] Found ${embeddingResults.length} additional embedding chunks`);
     return embeddingResults.map(r => ({
       ...r,
       source: 'embedding' as const
@@ -90,7 +86,6 @@ export async function executeSmartSearch(
   domain: string,
   neededChunks: number
 ): Promise<ContextChunk[]> {
-  console.log(`[Context Enhancer] Need more chunks, trying smart search...`);
 
   const smartResults = await smartSearch(
     searchQuery,
@@ -101,7 +96,6 @@ export async function executeSmartSearch(
   );
 
   if (smartResults && smartResults.length > 0) {
-    console.log(`[Context Enhancer] Found ${smartResults.length} additional smart search chunks`);
     return smartResults.map(r => ({
       ...r,
       source: 'smart' as const

@@ -63,7 +63,6 @@ export class AuditExporter {
       }
 
       const count = data?.length || 0;
-      console.log(`[AuditExporter] Deleted ${count} audit logs older than ${retentionDays} days`);
       return count;
     } catch (error) {
       console.error('[AuditExporter] DeleteOldLogs error:', error);

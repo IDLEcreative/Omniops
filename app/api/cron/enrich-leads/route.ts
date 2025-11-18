@@ -22,7 +22,6 @@ export async function GET(req: NextRequest) {
       );
     }
 
-    console.log('[Cron] Starting lead enrichment job...');
 
     await enrichPendingLeads();
 

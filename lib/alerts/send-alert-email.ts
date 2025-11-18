@@ -62,7 +62,6 @@ export async function sendAlertEmail(
     console.warn(
       '[Alert Email] RESEND_API_KEY not configured. Logging alert instead of sending email.'
     );
-    console.log('[Alert Email] Would send to:', emails);
     console.log('[Alert Email] Alert:', {
       metric: metricName,
       condition,
@@ -101,7 +100,6 @@ export async function sendAlertEmail(
         const errorData = await response.text();
         console.error('[Alert Email] Failed to send email:', errorData);
       } else {
-        console.log('[Alert Email] Successfully sent alert to:', email);
       }
     } catch (error) {
       console.error('[Alert Email] Error sending email:', error);

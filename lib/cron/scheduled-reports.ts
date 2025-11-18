@@ -111,10 +111,8 @@ async function getReportSubscribers(
  * Process reports for a specific frequency
  */
 async function processReports(frequency: 'daily' | 'weekly' | 'monthly') {
-  console.log(`[Scheduled Reports] Processing ${frequency} reports...`);
 
   const subscribers = await getReportSubscribers(frequency);
-  console.log(`[Scheduled Reports] Found ${subscribers.length} subscribers for ${frequency} reports`);
 
   let successCount = 0;
   let errorCount = 0;
@@ -137,7 +135,6 @@ async function processReports(frequency: 'daily' | 'weekly' | 'monthly') {
       });
 
       successCount++;
-      console.log(`[Scheduled Reports] Sent ${frequency} report to ${subscriber.user_email}`);
     } catch (error) {
       errorCount++;
       console.error(
@@ -156,7 +153,6 @@ async function processReports(frequency: 'daily' | 'weekly' | 'monthly') {
  * Initialize scheduled report cron jobs
  */
 export function initializeScheduledReports() {
-  console.log('[Scheduled Reports] Initializing cron jobs...');
 
   // Daily reports at 8 AM
   const dailyJob = cron.schedule('0 8 * * *', async () => {
@@ -173,10 +169,6 @@ export function initializeScheduledReports() {
     await processReports('monthly');
   });
 
-  console.log('[Scheduled Reports] Cron jobs initialized:');
-  console.log('  - Daily reports: Every day at 8:00 AM');
-  console.log('  - Weekly reports: Every Monday at 9:00 AM');
-  console.log('  - Monthly reports: 1st of every month at 10:00 AM');
 
   return {
     dailyJob,
@@ -186,7 +178,6 @@ export function initializeScheduledReports() {
       dailyJob.stop();
       weeklyJob.stop();
       monthlyJob.stop();
-      console.log('[Scheduled Reports] All cron jobs stopped');
     },
   };
 }

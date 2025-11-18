@@ -116,13 +116,9 @@ export function logCostSummary(): void {
   const projectedMonthlyCalls = (stats.totalCalls / dayOfMonth) * daysInMonth;
   const projectedMonthlyCost = projectedMonthlyCalls * COST_PER_CALL;
 
-  console.log('=== AI Sentiment Analysis Cost Summary ===');
-  console.log(`Total API calls this month: ${stats.totalCalls}`);
   console.log(`Current monthly cost: $${stats.estimatedMonthlyCost.toFixed(4)}`);
   console.log(`Projected end-of-month cost: $${projectedMonthlyCost.toFixed(2)}`);
   console.log(`Cost per call: $${COST_PER_CALL.toFixed(6)}`);
-  console.log(`Monthly threshold: $${MONTHLY_COST_THRESHOLD}`);
-  console.log('==========================================');
 }
 
 /**

@@ -50,6 +50,5 @@ export async function persistMappings(
   if (error) {
     console.error('Error persisting mappings:', error);
   } else {
-    console.log(`Persisted ${mappings.size} category mappings`);
   }
 }

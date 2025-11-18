@@ -25,7 +25,7 @@ import type { TestDataContext } from '@/__tests__/utils/customer-config/test-set
  * TODO: Fix test environment setup/cleanup before re-enabling
  * Related: __tests__/api/customer-config/security/get.test.ts
  */
-describe.skip('DELETE /api/customer/config - Security', () => {
+describe('DELETE /api/customer/config - Security', () => {
   let context: TestDataContext;
   let tempConfigId: string;
 

@@ -27,7 +27,6 @@ export class PlaywrightTester {
   }
 
   async runAllTests(): Promise<TestResults> {
-    console.log('🚀 Starting Comprehensive Playwright Tests');
     console.log('='.repeat(50));
 
     try {
@@ -50,7 +49,6 @@ export class PlaywrightTester {
   }
 
   async testBrowserLaunching(): Promise<void> {
-    console.log('\n📱 Testing Browser Launching...');
     console.log('-'.repeat(30));
 
     const browsers = [
@@ -60,7 +58,6 @@ export class PlaywrightTester {
     ];
 
     for (const { name, launcher } of browsers) {
-      console.log(`Testing ${name}...`);
 
       const browserResult = {
         headless: false,
@@ -82,10 +79,8 @@ export class PlaywrightTester {
         browserResult.headless = true;
 
         await browser.close();
-        console.log(`  ✅ Headless: ${browserResult.launchTime}ms`);
       } catch (error: any) {
         browserResult.error = error.message;
-        console.log(`  ❌ Headless: ${error.message}`);
       }
 
       try {
@@ -95,7 +90,6 @@ export class PlaywrightTester {
         });
         browserResult.headed = true;
         await browser.close();
-        console.log(`  ✅ Headed: Working`);
       } catch (error) {
         console.log(`  ❌ Headed: ${(error as Error).message}`);
       }
@@ -105,7 +99,6 @@ export class PlaywrightTester {
   }
 
   async testBasicScraping(): Promise<void> {
-    console.log('\n🌐 Testing Basic Web Scraping...');
     console.log('-'.repeat(30));
 
     const browser = await chromium.launch({ headless: true });
@@ -119,7 +112,6 @@ export class PlaywrightTester {
     ];
 
     for (const testCase of testCases) {
-      console.log(`Testing ${testCase.name}...`);
 
       try {
         const page = await browser.newPage();
@@ -141,10 +133,8 @@ export class PlaywrightTester {
 
         await page.close();
         this.results.scraping[testCase.name] = testResult;
-        console.log(`  ✅ ${testResult.passed} passed, ${testResult.failed} failed`);
 
       } catch (error: any) {
-        console.log(`  ❌ ${testCase.name}: ${error.message}`);
         this.results.scraping[testCase.name] = { error: error.message };
       }
     }
@@ -153,7 +143,6 @@ export class PlaywrightTester {
   }
 
   async testAdvancedScraping(): Promise<void> {
-    console.log('\n⚙️  Testing Advanced Scraping Features...');
     console.log('-'.repeat(30));
 
     const browser = await chromium.launch({
@@ -164,11 +153,9 @@ export class PlaywrightTester {
     try {
       const page = await browser.newPage();
 
-      console.log('Testing JavaScript execution...');
       await page.goto('data:text/html,<html><body><div id="test"></div><script>document.getElementById("test").textContent = "JS Works";</script></body></html>');
       const jsResult = await page.textContent('#test');
 
-      console.log('Testing page evaluation...');
       const evalResult = await page.evaluate(() => ({
         url: window.location.href,
         timestamp: Date.now()
@@ -181,11 +168,8 @@ export class PlaywrightTester {
         pageEvaluation: evalResult && evalResult.timestamp
       };
 
-      console.log('  ✅ JavaScript execution:', jsResult === 'JS Works');
-      console.log('  ✅ Page evaluation:', !!evalResult.timestamp);
 
     } catch (error: any) {
-      console.log(`  ❌ Advanced scraping failed: ${error.message}`);
       this.results.scraping.advanced = { error: error.message };
     }
 
@@ -193,7 +177,6 @@ export class PlaywrightTester {
   }
 
   async testPerformanceOptimizations(): Promise<void> {
-    console.log('\n⚡ Testing Performance Optimizations...');
     console.log('-'.repeat(30));
 
     const testUrl = 'data:text/html,<html><head><title>Perf Test</title></head><body><h1>Performance Test</h1></body></html>';
@@ -224,13 +207,9 @@ export class PlaywrightTester {
       improvementPercent: ((standardTime - optimizedTime) / standardTime * 100).toFixed(2)
     };
 
-    console.log(`  ⏱️  Standard: ${standardTime}ms`);
-    console.log(`  ⚡ Optimized: ${optimizedTime}ms`);
-    console.log(`  📈 Improvement: ${this.results.performance.improvementPercent}%`);
   }
 
   async testStealthFeatures(): Promise<void> {
-    console.log('\n🥷 Testing Stealth Features...');
     console.log('-'.repeat(30));
 
     const browser = await chromium.launch({
@@ -252,12 +231,9 @@ export class PlaywrightTester {
         viewportSet: viewport && viewport.width > 0
       };
 
-      console.log(`  ✅ User agent configured:`, this.results.scraping.stealth.userAgentSet);
-      console.log(`  ✅ WebDriver hidden:`, this.results.scraping.stealth.webdriverHidden);
 
       await page.close();
     } catch (error: any) {
-      console.log(`  ❌ Stealth test failed: ${error.message}`);
       this.results.scraping.stealth = { error: error.message };
     }
 
@@ -265,7 +241,6 @@ export class PlaywrightTester {
   }
 
   async generateReport(): Promise<void> {
-    console.log('\n📊 Generating Test Report...');
     console.log('-'.repeat(30));
 
     const totalTime = Date.now() - this.startTime;
@@ -283,12 +258,7 @@ export class PlaywrightTester {
       JSON.stringify(this.results, null, 2)
     );
 
-    console.log(`  📄 Detailed results: ./test-results/playwright-comprehensive-test.json`);
-    console.log('\n🎯 Test Summary:');
     console.log(`  ⏱️  Duration: ${Math.round(totalTime / 1000)}s`);
-    console.log(`  🌐 Browsers: ${this.results.summary.browsersWorking}/3 working`);
-    console.log(`  ✅ Tests: ${this.results.summary.scrapingTests} completed`);
-    console.log(`  ❌ Errors: ${this.results.summary.errors}`);
   }
 
   getResults(): TestResults {

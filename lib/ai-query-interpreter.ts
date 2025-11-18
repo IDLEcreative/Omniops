@@ -85,8 +85,6 @@ For example:
       try {
         const result = JSON.parse(content);
         
-        console.log('[AI Interpreter] Input:', userMessage);
-        console.log('[AI Interpreter] Output:', result);
         
         return {
           searchTerms: result.searchTerms || [userMessage],

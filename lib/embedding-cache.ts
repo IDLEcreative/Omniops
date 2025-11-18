@@ -30,9 +30,7 @@ class EmbeddingCache {
     this.ttl = (ttlMinutes || parseInt(process.env.EMBEDDING_CACHE_TTL_MINUTES || '60')) * 60 * 1000;
 
     if (!this.enabled) {
-      console.log('[EmbeddingCache] Cache is disabled via environment variable');
     } else {
-      console.log(`[EmbeddingCache] Initialized with maxSize=${this.maxSize}, ttl=${this.ttl / 60000} minutes`);
     }
   }
 
@@ -167,7 +165,6 @@ class EmbeddingCache {
       this.setMultiple(batch, embeddings);
     }
     
-    console.log(`[EmbeddingCache] Preloaded ${commonTexts.length} embeddings`);
   }
 }
 

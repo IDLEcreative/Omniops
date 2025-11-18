@@ -33,19 +33,16 @@ export class DocumentationReviewScheduler {
   }
 
   async run(): Promise<void> {
-    console.log(`${colors.cyan}📅 Documentation Review Scheduler${colors.reset}`);
     console.log(`${colors.gray}Date: ${this.today.toISOString().split('T')[0]}${colors.reset}\n`);
 
     const dueReviews = this.checkDueReviews();
 
     if (dueReviews.length === 0 && !this.force) {
-      console.log(`${colors.green}✅ No documentation reviews due today${colors.reset}\n`);
       this.displayUpcomingReviews();
       return;
     }
 
     if (this.force) {
-      console.log(`${colors.yellow}⚠️  Force mode: Sending test notifications${colors.reset}\n`);
       dueReviews.push({
         type: 'monthly',
         dueDate: this.today,
@@ -63,7 +60,6 @@ export class DocumentationReviewScheduler {
         await this.sendNotifications(review);
       }
     } else {
-      console.log(`${colors.gray}Check-only mode: Skipping notifications${colors.reset}\n`);
     }
 
     this.displayUpcomingReviews();
@@ -125,15 +121,10 @@ export class DocumentationReviewScheduler {
     const typeEmoji = { monthly: '📋', quarterly: '📚', annual: '🎯' };
 
     console.log(`${typeEmoji[review.type]} ${priorityColor[review.priority]}${review.message.toUpperCase()}${colors.reset}`);
-    console.log(`   Priority: ${priorityColor[review.priority]}${review.priority}${colors.reset}`);
-    console.log(`   Type: ${review.type}`);
     console.log(`   Due: ${review.dueDate.toISOString().split('T')[0]}\n`);
-    console.log(`   ${colors.blue}See: docs/.metadata/DOCUMENTATION_MAINTENANCE_SCHEDULE.md${colors.reset}\n`);
-    console.log('─────────────────────────────────────────────────────────────\n');
   }
 
   private async sendNotifications(review: ReviewSchedule): Promise<void> {
-    console.log(`${colors.cyan}Sending notifications...${colors.reset}\n`);
 
     try {
       await this.createGitHubIssue(review);
@@ -148,7 +139,6 @@ export class DocumentationReviewScheduler {
     }
 
     this.logReview(review);
-    console.log(`${colors.green}✅ Notifications sent${colors.reset}\n`);
   }
 
   private async createGitHubIssue(review: ReviewSchedule): Promise<void> {
@@ -177,7 +167,6 @@ export class DocumentationReviewScheduler {
 
     try {
       execSync(command, { cwd: this.rootDir, stdio: 'inherit' });
-      console.log(`${colors.green}✓ GitHub issue created${colors.reset}`);
     } catch {}
   }
 
@@ -204,7 +193,6 @@ export class DocumentationReviewScheduler {
       });
 
       if (response.ok) {
-        console.log(`${colors.green}✓ Slack notification sent${colors.reset}`);
       }
     } catch {}
   }
@@ -224,11 +212,9 @@ export class DocumentationReviewScheduler {
     }
 
     fs.appendFileSync(logFile, logEntry, 'utf-8');
-    console.log(`${colors.green}✓ Review logged to ${logFile}${colors.reset}`);
   }
 
   private displayUpcomingReviews(): void {
-    console.log(`${colors.cyan}📅 Upcoming Reviews${colors.reset}\n`);
     const upcoming = this.getUpcomingReviews(5);
 
     for (const review of upcoming) {
@@ -236,7 +222,6 @@ export class DocumentationReviewScheduler {
       console.log(`${colors.gray}${review.dueDate.toISOString().split('T')[0]}${colors.reset} - ${review.message} ${colors.gray}(in ${daysUntil} days)${colors.reset}`);
     }
 
-    console.log('');
   }
 
   private getUpcomingReviews(count: number): ReviewSchedule[] {

@@ -27,7 +27,7 @@ describe('Correction Tracking', () => {
     await cleanupConversations(testConversations);
   });
 
-  it.skip('should handle user corrections and adapt (IMPLEMENT ME)', async () => {
+  it('should handle user corrections and adapt (IMPLEMENT ME)', async () => {
     /**
      * Test Flow:
      * Turn 1:
@@ -59,7 +59,7 @@ describe('Correction Tracking', () => {
     expect(true).toBe(false); // Placeholder
   });
 
-  it.skip('should handle multiple corrections in one message (IMPLEMENT ME)', async () => {
+  it('should handle multiple corrections in one message (IMPLEMENT ME)', async () => {
     /**
      * Test: "Actually, I meant 500 GPM not 400 GPM, and hydraulic not pneumatic"
      *
@@ -70,7 +70,7 @@ describe('Correction Tracking', () => {
     expect(true).toBe(false);
   });
 
-  it.skip('should distinguish corrections from clarifications (IMPLEMENT ME)', async () => {
+  it('should distinguish corrections from clarifications (IMPLEMENT ME)', async () => {
     /**
      * Correction: "I meant X not Y" → Replace Y with X
      * Clarification: "Also, I need X" → Add X to requirements, keep existing

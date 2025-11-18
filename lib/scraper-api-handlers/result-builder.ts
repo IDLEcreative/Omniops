@@ -56,7 +56,6 @@ export async function buildResult(
     ...aiOptimizedData
   } as ScrapedPage | AIOptimizedResult;
 
-  console.log(`[SCRAPER] Successfully created result object for: ${url}`);
   console.log(`[SCRAPER] Result summary:`, {
     url: result.url,
     title: result.title,

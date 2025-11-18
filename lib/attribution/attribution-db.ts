@@ -52,7 +52,6 @@ export async function savePurchaseAttribution(params: {
   if (error) {
     // Check if it's a duplicate
     if (error.code === '23505') { // Unique constraint violation
-      console.log(`[Attribution DB] Purchase already attributed: ${params.platform}:${params.orderId}`);
       return null;
     }
 

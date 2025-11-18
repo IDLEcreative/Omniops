@@ -114,7 +114,6 @@ export class ChatTelemetry {
     const summary = createSummary(this.session);
 
     // Log summary
-    console.log('\n📊 CHAT SESSION SUMMARY', summary);
 
     // Persist to database if enabled
     if (this.persistToDatabase) {
@@ -176,7 +175,6 @@ class TelemetryManager {
     this.sessions.set(sessionId, telemetry);
 
     // Log session creation with model info
-    console.log(`[TelemetryManager] Created session ${sessionId} with model ${model}`);
 
     return telemetry;
   }

@@ -23,7 +23,7 @@ import type { TestDataContext } from '@/__tests__/utils/customer-config/test-set
  * TODO: Fix test environment setup/cleanup before re-enabling
  * Related: __tests__/api/customer-config/security/get.test.ts
  */
-describe.skip('POST /api/customer/config - Security', () => {
+describe('POST /api/customer/config - Security', () => {
   let context: TestDataContext;
 
   beforeAll(async () => {

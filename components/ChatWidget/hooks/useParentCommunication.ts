@@ -118,7 +118,6 @@ export function useParentCommunication({
 
         // Debug logging (can be enabled via ChatWidgetDebug global)
         if (typeof window !== 'undefined' && (window as any).ChatWidgetDebug) {
-          console.log('[useParentCommunication] Received message:', event.data.type, 'from', event.origin);
         }
 
         // Process message by type
@@ -149,21 +148,18 @@ export function useParentCommunication({
 
               if (storedSessionId && typeof storedSessionId === 'string' && !sessionId) {
                 if (process.env.NODE_ENV === 'development') {
-                  console.log('[useParentCommunication] Restored session ID from parent:', storedSessionId);
                 }
                 setSessionId(storedSessionId);
               }
 
               if (storedConversationId && typeof storedConversationId === 'string' && !conversationId) {
                 if (process.env.NODE_ENV === 'development') {
-                  console.log('[useParentCommunication] Restored conversation ID from parent:', storedConversationId);
                 }
                 setConversationId(storedConversationId);
               }
 
               if (widgetOpen === true && !isOpen) {
                 if (process.env.NODE_ENV === 'development') {
-                  console.log('[useParentCommunication] Widget was open, restoring state');
                 }
                 setIsOpen(true);
               }
@@ -172,14 +168,12 @@ export function useParentCommunication({
 
           case 'open':
             if (typeof window !== 'undefined' && (window as any).ChatWidgetDebug) {
-              console.log('[useParentCommunication] Opening widget');
             }
             setIsOpen(true);
             break;
 
           case 'close':
             if (typeof window !== 'undefined' && (window as any).ChatWidgetDebug) {
-              console.log('[useParentCommunication] Closing widget');
             }
             setIsOpen(false);
             break;
@@ -258,11 +252,7 @@ export function useParentCommunication({
 
         // DEBUG: Log what we detected
         if (process.env.NODE_ENV === 'development' || (window as any).ChatWidgetDebug) {
-          console.log('[useParentCommunication] Sending ready message');
-          console.log('  document.referrer:', document.referrer);
           console.log('  ancestorOrigins:', window.location.ancestorOrigins ? Array.from(window.location.ancestorOrigins) : 'N/A');
-          console.log('  Calculated parentOrigin:', parentOrigin);
-          console.log('  window.location.origin:', window.location.origin);
         }
 
         window.parent.postMessage({ type: 'ready' }, parentOrigin);
@@ -298,9 +288,6 @@ export function useParentCommunication({
 
         // DEBUG: Log what we're doing
         if (process.env.NODE_ENV === 'development' || (window as any).ChatWidgetDebug) {
-          console.log(`[useParentCommunication] Widget ${isOpen ? 'opened' : 'closed'}`);
-          console.log('  document.referrer:', document.referrer);
-          console.log('  Calculated targetOrigin:', targetOrigin);
         }
 
         if (isOpen) {

@@ -216,7 +216,6 @@ export class WooCommerceMockData {
   };
 
   static async getOrders(params: any): Promise<any[]> {
-    console.log('[WooCommerceMock] Using mock data for orders');
     
     // Filter by search term if provided
     if (params.search) {
@@ -240,12 +239,10 @@ export class WooCommerceMockData {
   }
 
   static async getOrder(orderId: number): Promise<any | null> {
-    console.log('[WooCommerceMock] Using mock data for order', orderId);
     return this.mockOrders.find(order => order.id === orderId) || null;
   }
 
   static async getCustomerByEmail(email: string): Promise<any | null> {
-    console.log('[WooCommerceMock] Using mock data for customer', email);
     if (email.toLowerCase() === this.mockCustomer.email.toLowerCase()) {
       return this.mockCustomer;
     }
@@ -253,7 +250,6 @@ export class WooCommerceMockData {
   }
 
   static async searchCustomers(params: any): Promise<any[]> {
-    console.log('[WooCommerceMock] Using mock data for customer search');
     if (params.email && params.email.toLowerCase() === this.mockCustomer.email.toLowerCase()) {
       return [this.mockCustomer];
     }

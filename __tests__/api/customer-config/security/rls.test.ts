@@ -26,7 +26,7 @@ const SUPABASE_ANON_KEY = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!;
  * TODO: Fix test environment setup/cleanup before re-enabling
  * Related: __tests__/api/customer-config/security/get.test.ts
  */
-describe.skip('RLS Policy Verification', () => {
+describe('RLS Policy Verification', () => {
   let context: TestDataContext;
 
   beforeAll(async () => {

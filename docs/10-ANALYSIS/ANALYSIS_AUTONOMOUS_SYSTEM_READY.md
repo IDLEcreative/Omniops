@@ -194,8 +194,8 @@ The autonomous agents now use OpenAI's GPT-4 Vision to:
 
 ## 📚 Documentation
 
-- **[Deployment Summary](AUTONOMOUS_SYSTEM_DEPLOYED.md)** - Complete deployment details
-- **[Deployment Guide](AUTONOMOUS_DEPLOYMENT_GUIDE.md)** - Step-by-step instructions
+- **[Deployment Summary](ANALYSIS_AUTONOMOUS_SYSTEM_DEPLOYED.md)** - Complete deployment details
+- **[Deployment Guide](../05-DEPLOYMENT/GUIDE_AUTONOMOUS_DEPLOYMENT.md)** - Step-by-step instructions
 - **[Phase 2 Complete](AUTONOMOUS_AGENTS_PHASE2_COMPLETE.md)** - Implementation summary
 - **[Integration Tests](scripts/tests/test-autonomous-simple.ts)** - Test suite
 

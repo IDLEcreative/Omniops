@@ -25,7 +25,6 @@ export class CacheStorage {
     // Fallback to memory cache
     const memoryCached = this.memoryCache.get(key);
     if (memoryCached && memoryCached.expires > Date.now()) {
-      console.log('[WC API Cache] Using memory cache fallback');
       return memoryCached.data;
     }
 
@@ -104,7 +103,6 @@ export class CacheStorage {
       }
 
       if (cleaned > 0) {
-        console.log(`[WC API Cache] Cleaned ${cleaned} expired memory cache entries`);
       }
     }, 60000); // Clean every minute
   }

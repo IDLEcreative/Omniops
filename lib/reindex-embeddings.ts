@@ -288,7 +288,6 @@ export async function reindexEmbeddings(
     domainId,
     ...options,
     onProgress: (progress) => {
-      console.log(`[${progress.phase}] ${progress.percentage}% - ${progress.message}`);
     }
   });
 }

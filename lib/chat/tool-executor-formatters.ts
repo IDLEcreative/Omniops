@@ -20,7 +20,6 @@ export function formatToolResultsForAI(
     // This ensures AI explicitly communicates errors (e.g., "Product X not found") to users
     if (!result.success && result.errorMessage) {
       toolResponse = `⚠️ ERROR: ${result.errorMessage}\n\n`;
-      console.log(`[Tool Executor] Surfacing error to AI: ${result.errorMessage}`);
     }
 
     if (result.success && result.results.length > 0) {

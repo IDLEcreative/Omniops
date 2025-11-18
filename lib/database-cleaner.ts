@@ -49,7 +49,6 @@ export class DatabaseCleaner {
 
     try {
       // Start transaction-like behavior
-      console.log('🧹 Starting database cleanup...');
       
       // Get domain ID if specific domain provided
       let domainId: string | null = null;
@@ -76,7 +75,6 @@ export class DatabaseCleaner {
       const { data: embeddings, error: embError } = await embeddingsQuery.select('id');
       if (embError) throw embError;
       result.deletedCounts.embeddings = embeddings?.length || 0;
-      console.log(`✅ Deleted ${result.deletedCounts.embeddings} embeddings`);
 
       // Delete structured extractions
       const extractionsQuery = domainId
@@ -86,7 +84,6 @@ export class DatabaseCleaner {
       const { data: extractions, error: extError } = await extractionsQuery.select('id');
       if (extError) throw extError;
       result.deletedCounts.extractions = extractions?.length || 0;
-      console.log(`✅ Deleted ${result.deletedCounts.extractions} structured extractions`);
 
       // Delete website content
       const contentQuery = domainId
@@ -96,7 +93,6 @@ export class DatabaseCleaner {
       const { data: content, error: contError } = await contentQuery.select('id');
       if (contError) throw contError;
       result.deletedCounts.content = content?.length || 0;
-      console.log(`✅ Deleted ${result.deletedCounts.content} website content entries`);
 
       // Delete scraped pages
       const pagesQuery = domainId
@@ -106,7 +102,6 @@ export class DatabaseCleaner {
       const { data: pages, error: pageError } = await pagesQuery.select('id');
       if (pageError) throw pageError;
       result.deletedCounts.pages = pages?.length || 0;
-      console.log(`✅ Deleted ${result.deletedCounts.pages} scraped pages`);
 
       // Delete scrape jobs if requested
       if (includeJobs) {
@@ -118,7 +113,6 @@ export class DatabaseCleaner {
         if (jobError) console.warn('Warning: scrape_jobs table might not exist', jobError);
         else {
           result.deletedCounts.jobs = jobs?.length || 0;
-          console.log(`✅ Deleted ${result.deletedCounts.jobs} scrape jobs`);
         }
       }
 
@@ -132,7 +126,6 @@ export class DatabaseCleaner {
         if (cacheError) console.warn('Warning: query_cache table might not exist', cacheError);
         else {
           result.deletedCounts.cache = cache?.length || 0;
-          console.log(`✅ Deleted ${result.deletedCounts.cache} cached queries`);
         }
       }
 
@@ -146,7 +139,6 @@ export class DatabaseCleaner {
         
         if (!convError) {
           result.deletedCounts.conversations = conversations?.length || 0;
-          console.log(`✅ Deleted ${result.deletedCounts.conversations} conversations`);
         }
       }
 
@@ -159,11 +151,9 @@ export class DatabaseCleaner {
             last_content_refresh: null 
           })
           .eq('id', domainId);
-        console.log('✅ Reset domain scraping timestamps');
       }
 
       result.success = true;
-      console.log('🎉 Database cleanup completed successfully!');
       
       return result;
 
@@ -253,7 +243,6 @@ if (require.main === module) {
   
   if (stats) {
     cleaner.getScrapingStats(domain).then(result => {
-      console.log('📊 Scraping Statistics:');
       console.log(JSON.stringify(result, null, 2));
     });
   } else {

@@ -158,7 +158,6 @@ export class ApiLogger {
    */
   static startTimer(label: string): number {
     const startTime = Date.now();
-    console.log(`[Timer] ${label} started`);
     return startTime;
   }
 
@@ -170,7 +169,6 @@ export class ApiLogger {
    */
   static endTimer(label: string, startTime: number): number {
     const duration = Date.now() - startTime;
-    console.log(`[Timer] ${label} completed in ${duration}ms`);
     return duration;
   }
 

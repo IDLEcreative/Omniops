@@ -51,7 +51,6 @@ export class EnhancedParentStorageAdapter {
     this.messageQueue = new MessageQueue(100, this.debug);
 
     if (this.debug) {
-      console.log('[EnhancedParentStorageAdapter] Initialized', { isInIframe: this.isInIframe });
     }
 
     // Listen for storage responses from parent
@@ -169,7 +168,6 @@ export class EnhancedParentStorageAdapter {
     this.connectionState = state;
 
     if (this.debug) {
-      console.log(`[EnhancedParentStorageAdapter] Connection: ${oldState} → ${state}`, stats);
     }
 
     // If reconnected, replay queued messages

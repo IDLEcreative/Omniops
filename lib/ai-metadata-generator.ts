@@ -84,7 +84,6 @@ export class AIMetadataGenerator {
       if (cached) return cached;
     }
 
-    console.log('Generating new metadata for content...');
 
     // Generate all metadata components in parallel
     const [

@@ -47,7 +47,6 @@ export async function getIntelligentChatContext(
       0.15  // Low threshold for maximum recall
     );
     
-    console.log(`[Intelligent Context] Found ${chunks.length} chunks`);
     
     // Return everything to the AI - let it decide what's relevant
     return {

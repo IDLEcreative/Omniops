@@ -123,7 +123,7 @@ describe('Analytics Stream Manager', () => {
       process.env.NEXT_PUBLIC_SUPABASE_URL = 'https://test.supabase.co';
     });
 
-    it.skip('should subscribe to analytics_events table changes', () => {
+    it('should subscribe to analytics_events table changes', () => {
       // SKIP: Due to Jest ES module mocking issues with TypeScript path aliases,
       // the Supabase client mock isn't properly injected. This test is skipped.
       // Core functionality is tested in other passing tests.
@@ -188,7 +188,7 @@ describe('Analytics Stream Manager', () => {
   });
 
   describe('Event Recording', () => {
-    it.skip('should record event to database', async () => {
+    it('should record event to database', async () => {
       // SKIP: Supabase client mock not properly injected (Jest ES module mocking issue)
       manager = getAnalyticsStreamManager();
 
@@ -204,7 +204,7 @@ describe('Analytics Stream Manager', () => {
       });
     });
 
-    it.skip('should handle database errors gracefully', async () => {
+    it('should handle database errors gracefully', async () => {
       // SKIP: Supabase client mock not properly injected (Jest ES module mocking issue)
       manager = getAnalyticsStreamManager();
       const consoleErrorSpy = jest.spyOn(console, 'error').mockImplementation();
@@ -227,7 +227,7 @@ describe('Analytics Stream Manager', () => {
   });
 
   describe('Recent Events', () => {
-    it.skip('should fetch recent events from last 5 minutes', async () => {
+    it('should fetch recent events from last 5 minutes', async () => {
       // SKIP: Supabase client mock not properly injected (Jest ES module mocking issue)
       manager = getAnalyticsStreamManager();
 
@@ -248,7 +248,7 @@ describe('Analytics Stream Manager', () => {
       expect(mockFrom).toHaveBeenCalledWith('analytics_events');
     });
 
-    it.skip('should return empty array on error', async () => {
+    it('should return empty array on error', async () => {
       // SKIP: Supabase client mock not properly injected (Jest ES module mocking issue)
       manager = getAnalyticsStreamManager();
       const consoleErrorSpy = jest.spyOn(console, 'error').mockImplementation();
@@ -277,7 +277,7 @@ describe('Analytics Stream Manager', () => {
   });
 
   describe('Cleanup', () => {
-    it.skip('should clean up resources on destroy', () => {
+    it('should clean up resources on destroy', () => {
       // SKIP: Supabase client mock not properly injected (Jest ES module mocking issue)
       manager = getAnalyticsStreamManager();
       const mockController = {

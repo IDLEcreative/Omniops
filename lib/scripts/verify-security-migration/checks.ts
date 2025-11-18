@@ -18,9 +18,7 @@ export function addResult(
 ): void {
   results.push({ name, passed, details });
   const icon = passed ? '✅' : '❌';
-  console.log(`${icon} ${name}`);
   if (details) {
-    console.log(`   ${details}`);
   }
 }
 
@@ -28,7 +26,6 @@ export async function checkViewSecurity(
   client: SupabaseClient,
   results: CheckResult[]
 ): Promise<void> {
-  console.log('\n📋 Checking View Security...\n');
 
   const views = [
     'chat_telemetry_metrics',
@@ -74,7 +71,6 @@ export async function checkRLSEnabled(
   client: SupabaseClient,
   results: CheckResult[]
 ): Promise<void> {
-  console.log('\n📋 Checking RLS Enabled on Tables...\n');
 
   const tables = [
     'chat_telemetry_rollups',
@@ -123,7 +119,6 @@ export async function checkRLSPolicies(
   client: SupabaseClient,
   results: CheckResult[]
 ): Promise<void> {
-  console.log('\n📋 Checking RLS Policies...\n');
 
   const expectedPolicies = [
     {
@@ -188,7 +183,6 @@ export async function runSmokeTests(
   client: SupabaseClient,
   results: CheckResult[]
 ): Promise<void> {
-  console.log('\n📋 Running Smoke Tests...\n');
 
   const testQueries = [
     { name: 'Service role can query chat_telemetry_rollups', table: 'chat_telemetry_rollups' },

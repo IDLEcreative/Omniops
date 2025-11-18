@@ -34,7 +34,6 @@ export async function refreshPageContent(
     const contentHash = await generateContentHash(scrapedPage.content);
 
     if (existingPage?.content_hash === contentHash) {
-      console.log(`Content unchanged for ${url}`);
       return false;
     }
 
@@ -72,7 +71,6 @@ export async function refreshPageContent(
       title: scrapedPage.title || '',
     });
 
-    console.log(`Successfully refreshed content for ${url}`);
     return true;
   } catch (error) {
     console.error(`Error refreshing ${url}:`, error);

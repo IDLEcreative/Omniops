@@ -26,7 +26,6 @@ export class JobLimiter {
     this.MAX_CONCURRENT_JOBS = this.OWN_SITE_MAX_CONCURRENT_JOBS;
     this.MAX_PAGES_PER_JOB = this.OWN_SITE_MAX_PAGES_PER_JOB;
     this.MAX_TOTAL_PAGES = this.OWN_SITE_MAX_TOTAL_PAGES;
-    console.log('Job limiter: Own-site mode enabled with higher limits');
   }
   
   // Reset to normal limits
@@ -34,7 +33,6 @@ export class JobLimiter {
     this.MAX_CONCURRENT_JOBS = 5;
     this.MAX_PAGES_PER_JOB = 1000;
     this.MAX_TOTAL_PAGES = 3000;
-    console.log('Job limiter: Returned to normal limits');
   }
   
   async canStartNewJob(): Promise<{ allowed: boolean; reason?: string }> {

@@ -253,7 +253,6 @@ export async function POST(request: NextRequest) {
       ConversationCache.invalidateConversations(validConversationIds, domainId)
         .catch(err => console.error('[BulkActions] Failed to invalidate caches:', err));
 
-      console.log('[BulkActions] Invalidated caches for domain:', domainId, 'conversations:', validConversationIds.length);
     }
 
     return NextResponse.json({

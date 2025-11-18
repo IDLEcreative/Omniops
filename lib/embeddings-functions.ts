@@ -82,7 +82,6 @@ export async function generateEmbeddingVectors(chunks: string[]): Promise<number
 
     // If all chunks are cached, return immediately
     if (missing.length === 0) {
-      console.log(`[Performance] All ${chunks.length} embeddings from cache`);
       const results: number[][] = [];
       for (let i = 0; i < chunks.length; i++) {
         const embedding = cached.get(i);
@@ -194,7 +193,6 @@ export async function generateEmbeddings(params: {
       }
     }
 
-    console.log(`Successfully stored ${chunks.length} embeddings for ${url}`);
   } catch (error) {
     console.error('Error generating embeddings:', error);
     throw error;

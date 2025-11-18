@@ -59,7 +59,6 @@ export default function EmbedPage() {
         document.body.classList.remove('rtl');
       }
 
-      console.log(`[RTL] Language: ${storedLang}, RTL: ${isRTL}`);
     };
 
     // Apply RTL on mount

@@ -140,7 +140,6 @@ export function registerMessageHandlers(ctx: IframeContext): void {
           localStorage.setItem(`chat_widget_${data.key}`, data.value);
           setStorageCookie(data.key, data.value);
           if (config.debug || (window as any).ChatWidgetDebug) {
-            console.log('[Chat Widget] Saved to parent localStorage:', data.key, data.value);
           }
         } catch (error) {
           console.error('[Chat Widget] Failed to save to parent localStorage:', error);
@@ -163,7 +162,6 @@ export function registerMessageHandlers(ctx: IframeContext): void {
           }, config.serverUrl || '*');
 
           if (config.debug || (window as any).ChatWidgetDebug) {
-            console.log('[Chat Widget] Retrieved from parent localStorage:', data.key, value);
           }
         } catch (error) {
           console.error('[Chat Widget] Failed to read from parent localStorage:', error);
@@ -183,7 +181,6 @@ export function registerMessageHandlers(ctx: IframeContext): void {
           localStorage.removeItem(`chat_widget_${data.key}`);
           deleteStorageCookie(data.key);
           if (config.debug || (window as any).ChatWidgetDebug) {
-            console.log('[Chat Widget] Removed from parent localStorage:', data.key);
           }
         } catch (error) {
           console.error('[Chat Widget] Failed to remove from parent localStorage:', error);
@@ -207,7 +204,6 @@ export function registerMessageHandlers(ctx: IframeContext): void {
     },
     ready: () => {
       if (config.debug || (window as any).ChatWidgetDebug) {
-        console.log('[Chat Widget] Widget ready');
       }
     },
     error: data => {

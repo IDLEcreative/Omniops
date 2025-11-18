@@ -34,12 +34,10 @@ export class DomainSynonymLoader {
     // Check cache first
     const cached = this.cache.get(domainId);
     if (cached && Date.now() - cached.timestamp < this.cacheExpiry) {
-      console.log(`[SynonymLoader] Using cached synonyms for domain ${domainId}`);
       return cached.data;
     }
 
     // Load from database
-    console.log(`[SynonymLoader] Loading synonyms for domain ${domainId} from database...`);
 
     try {
       const { data, error } = await this.supabase
@@ -71,7 +69,6 @@ export class DomainSynonymLoader {
         timestamp: Date.now()
       });
 
-      console.log(`[SynonymLoader] Loaded ${allSynonyms.length} synonym mappings for domain ${domainId}`);
 
       return synonymMap;
     } catch (error) {
@@ -142,10 +139,8 @@ export class DomainSynonymLoader {
   clearCache(domainId?: string) {
     if (domainId) {
       this.cache.delete(domainId);
-      console.log(`[SynonymLoader] Cache cleared for domain ${domainId}`);
     } else {
       this.cache.clear();
-      console.log(`[SynonymLoader] All caches cleared`);
     }
   }
 

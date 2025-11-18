@@ -30,7 +30,6 @@ export function checkEnvVars() {
     throw new Error(`Missing environment variables: ${missing.join(', ')}`);
   }
   
-  console.log('✅ All required environment variables are set');
 }
 
 // Validate on import (server-side only)

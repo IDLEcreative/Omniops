@@ -233,7 +233,6 @@ export class DatabaseOptimizer {
       })
     );
 
-    console.log('[DatabaseOptimizer] Prefetched common queries');
   }
 
   /**

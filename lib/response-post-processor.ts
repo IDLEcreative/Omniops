@@ -251,7 +251,6 @@ export class ResponsePostProcessor {
         processed = aiResponse + appendix;
       }
       
-      console.log('[Post-Processor] Appended', relevantProducts.length, 'products to response');
       
       return {
         processed,

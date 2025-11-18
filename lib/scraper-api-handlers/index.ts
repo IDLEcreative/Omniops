@@ -36,16 +36,13 @@ export async function handlePageRequest(
   scrapeStartTime: number
 ): Promise<ScrapedPage | AIOptimizedResult> {
   const startTime = Date.now();
-  console.log(`[SCRAPER] Request handler started for: ${request.url}`);
 
   try {
     // Wait for content to load
     await waitForContent(page, finalConfig);
 
     // Get the full HTML
-    console.log(`[SCRAPER] Extracting page HTML content...`);
     const html = await page.content();
-    console.log(`[SCRAPER] Page HTML extracted, length: ${html.length} characters`);
 
     // Validate page size
     validatePageSize(html, finalConfig);
@@ -74,7 +71,6 @@ export async function handlePageRequest(
  */
 async function updateRateLimit(url: string, responseTime: number, finalConfig: any): Promise<void> {
   const domain = new URL(url).hostname;
-  console.log(`[SCRAPER] Page processed in ${responseTime}ms for domain: ${domain}`);
 
   if (finalConfig.rateLimit.adaptiveDelay) {
     await jobManager.updateRateLimitDelay(domain, responseTime);

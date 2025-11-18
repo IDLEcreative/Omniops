@@ -38,11 +38,9 @@ export async function crossReferenceResults(
 
   // Only consolidate if we have BOTH product data AND scraped pages
   if (!commerceResult || !scrapedResult) {
-    console.log('[Cross-Reference] Skipping: need both commerce products and scraped pages');
     return toolExecutionResults;
   }
 
-  console.log('[Cross-Reference] Starting consolidation...');
 
   // Extract products from commerce result metadata
   const products: CommerceProduct[] = commerceResult.result.results
@@ -57,26 +55,22 @@ export async function crossReferenceResults(
     scrapedPages
   );
 
-  console.log(`[Cross-Reference] Enriched ${enrichedProducts.length} products, ${uniqueScrapedPages.length} unique pages`);
 
   // Extract user query for budget-based ranking
   const userQuery = commerceResult.toolArgs.query || '';
   const userBudget = extractBudgetFromQuery(userQuery);
 
   if (userBudget) {
-    console.log(`[Cross-Reference] Extracted budget from query: £${userBudget}`);
   }
 
   // Apply multi-signal ranking to enriched products
   const rankedProducts = rankProducts(enrichedProducts, { userBudget });
 
-  console.log(`[Cross-Reference] Ranked ${rankedProducts.length} products using multi-signal algorithm`);
 
   // Add product recommendations (top 3 ranked products get recommendations)
   const topProducts = rankedProducts.slice(0, 3);
   const allProducts = products; // All available products for recommendations
 
-  console.log(`[Cross-Reference] Finding recommendations for top ${topProducts.length} products...`);
 
   for (const rankedProduct of topProducts) {
     try {
@@ -100,7 +94,6 @@ export async function crossReferenceResults(
 
       rankedProduct.recommendations = recommendations;
 
-      console.log(`[Cross-Reference] Found ${recommendations.length} recommendations for "${rankedProduct.name}"`);
     } catch (error) {
       console.error(`[Cross-Reference] Failed to find recommendations for product ${rankedProduct.id}:`, error);
       rankedProduct.recommendations = [];
@@ -144,7 +137,6 @@ export async function crossReferenceResults(
   // Update scraped result with only unique pages (no duplicates)
   scrapedResult.result.results = uniqueScrapedPages;
 
-  console.log(`[Cross-Reference] ✅ Complete: ${rankedProducts.length} ranked products, ${uniqueScrapedPages.length} unique pages`);
 
   return toolExecutionResults;
 }

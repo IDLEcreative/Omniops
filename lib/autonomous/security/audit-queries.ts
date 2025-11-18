@@ -110,6 +110,5 @@ export async function deleteOldLogs(
   }
 
   const count = data?.length || 0;
-  console.log(`[AuditQueries] Deleted ${count} audit logs older than ${retentionDays} days`);
   return count;
 }

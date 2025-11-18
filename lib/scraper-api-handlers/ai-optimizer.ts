@@ -28,7 +28,6 @@ export async function applyAIOptimization(
   let optimizedTokens = 0;
 
   try {
-    console.log(`[AI] Applying ${aiOptimization.level} optimization to ${url}`);
 
     // Run AI content optimization
     const aiResult = await AIContentExtractor.optimizeContent(
@@ -73,7 +72,6 @@ export async function applyAIOptimization(
       extracted.content = aiResult.optimizedContent;
     }
 
-    console.log(`[AI] Optimization complete: ${aiOptimizedData.optimization.reductionPercent}% reduction`);
 
     return aiOptimizedData;
 

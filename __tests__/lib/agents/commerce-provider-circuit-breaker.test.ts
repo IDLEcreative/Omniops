@@ -84,7 +84,7 @@ import {
 // TODO: These tests require complete isolation and are causing SIGKILL during parallel execution
 // Run separately with: npm test -- __tests__/lib/agents/commerce-provider-circuit-breaker.test.ts --runInBand --maxWorkers=1
 // Issue: Circuit breaker is a singleton shared across all test files, causing state pollution
-describe.skip('Commerce Provider Circuit Breaker Integration', () => {
+describe('Commerce Provider Circuit Breaker Integration', () => {
   const mockDomain = 'example.com';
 
   beforeEach(async () => {

@@ -212,7 +212,6 @@ export class CircuitBreaker {
    * Centralized logging with circuit breaker name prefix
    */
   private log(message: string): void {
-    console.log(`[CircuitBreaker:${this.name}] ${message}`);
   }
 }
 

@@ -131,7 +131,6 @@ export function usePrivacySettings({
       );
 
       if (process.env.NODE_ENV === 'development') {
-        console.log('[usePrivacySettings] Consent given, message posted to parent');
       }
     } catch (err) {
       if (process.env.NODE_ENV === 'development') {

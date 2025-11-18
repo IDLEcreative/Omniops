@@ -19,7 +19,6 @@ import { checkCrawlStatus } from '@/lib/scraper-api';
  */
 export async function processCrawlResults(jobId: string, supabase: any) {
   try {
-    console.log(`[CrawlMonitor] Starting monitoring for job ${jobId}`);
     console.log(`[CrawlMonitor] Worker is handling all data operations (pages + embeddings)`);
 
     let completed = false;
@@ -30,8 +29,6 @@ export async function processCrawlResults(jobId: string, supabase: any) {
       const crawlStatus = await checkCrawlStatus(jobId);
 
       if (crawlStatus.status === 'completed') {
-        console.log(`[CrawlMonitor] ✅ Job ${jobId} completed successfully`);
-        console.log(`[CrawlMonitor] Worker handled all page saving and embedding generation`);
         console.log(`[CrawlMonitor] No duplicate embeddings created (worker is single source of truth)`);
         completed = true;
       } else if (crawlStatus.status === 'failed') {

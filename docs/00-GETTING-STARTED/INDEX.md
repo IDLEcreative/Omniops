@@ -48,7 +48,7 @@ directory, documentation, files, index, navigation, order, quick, reading, recom
 - **[VERCEL_ENV_SETUP.md](VERCEL_ENV_SETUP.md)** - Vercel environment variable configuration
 - **[VERCEL_REDIS_SETUP.md](VERCEL_REDIS_SETUP.md)** - Redis configuration for Vercel deployment
 - **[SETUP_GUIDE.md](SETUP_GUIDE.md)** - General setup instructions
-- **[MIGRATION_INSTRUCTIONS.md](MIGRATION_INSTRUCTIONS.md)** - Migration guide for existing deployments
+- **[GUIDE_MIGRATION_INSTRUCTIONS.md](GUIDE_MIGRATION_INSTRUCTIONS.md)** - Migration guide for existing deployments
 
 ### Docker Configuration
 - **[SETUP_DOCKER_PRODUCTION.md](SETUP_DOCKER_PRODUCTION.md)** - Production Docker setup guide

@@ -24,7 +24,6 @@ export async function GET() {
       });
     }
 
-    console.log('v_index_usage view error:', indexUsageError);
 
     // Try direct access to pg_stat_user_indexes (might work with service role)
     const { data: indexStats, error: indexStatsError } = await supabase
@@ -49,7 +48,6 @@ export async function GET() {
       });
     }
 
-    console.log('pg_stat_user_indexes error:', indexStatsError);
 
     // Try getting table info instead
     const { data: tables, error: tablesError } = await supabase

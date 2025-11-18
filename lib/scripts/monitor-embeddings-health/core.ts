@@ -165,17 +165,14 @@ export class EmbeddingsHealthMonitor {
 
   async performMaintenance(domain: string, metrics: HealthMetrics): Promise<void> {
     if (metrics.missingEmbeddings > 0) {
-      console.log(`\n🔨 Generating ${metrics.missingEmbeddings} missing embeddings...`);
       console.log('   (This would trigger embedding generation job)');
     }
 
     if (metrics.staleEmbeddings > 0) {
-      console.log(`\n🔄 Refreshing ${metrics.staleEmbeddings} stale embeddings...`);
       console.log('   (This would trigger re-embedding job)');
     }
 
     if (metrics.coverage >= 90 && metrics.staleEmbeddings === 0) {
-      console.log('\n✅ No maintenance needed - embeddings are healthy!');
     }
   }
 

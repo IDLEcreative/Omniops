@@ -61,7 +61,6 @@ export async function getEnhancedChatContext(
 
   // If AI says no search needed (greeting, etc), return empty
   if (!queryInterpreter.needsProductSearch(interpreted.intent)) {
-    console.log(`[Context Enhancer] AI determined no product search needed for intent: ${interpreted.intent}`);
     return {
       chunks: [],
       totalChunks: 0,
@@ -74,10 +73,6 @@ export async function getEnhancedChatContext(
   const searchQuery = interpreted.searchTerms.join(' ') || message;
 
   if (searchQuery !== message) {
-    console.log(`[Context Enhancer] AI interpreted query:`);
-    console.log(`  Original: "${message}"`);
-    console.log(`  Search for: "${searchQuery}"`);
-    console.log(`  Intent: ${interpreted.intent}`);
     console.log(`  Confidence: ${(interpreted.confidence * 100).toFixed(0)}%`);
   }
 

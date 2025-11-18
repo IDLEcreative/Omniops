@@ -84,7 +84,6 @@ export async function loadWidgetConfig(
       .single();
 
     if (domainError || !domainData?.customer_config_id) {
-      console.log('[ConversationManager] No customer_config_id found for domain');
       return null;
     }
 
@@ -99,7 +98,6 @@ export async function loadWidgetConfig(
       .single();
 
     if (configError || !widgetConfig) {
-      console.log('[ConversationManager] No active widget config found');
       return null;
     }
 
@@ -129,7 +127,6 @@ export async function loadCustomerProfile(
       .single();
 
     if (domainError || !domainData) {
-      console.log('[ConversationManager] No domain metadata found for profile context');
       return null;
     }
 

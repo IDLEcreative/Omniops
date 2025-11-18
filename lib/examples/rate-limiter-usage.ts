@@ -57,8 +57,6 @@ function sleep(ms: number): Promise<void> {
 // ============================================================================
 
 async function runExamples() {
-  console.log('🚀 Enhanced Rate Limiter Usage Examples');
-  console.log('=======================================\n');
 
   try {
     // Run examples sequentially
@@ -82,7 +80,6 @@ async function runExamples() {
 
     // await example7_monitoring(); // Requires Redis
 
-    console.log('\n✅ All examples completed successfully!');
 
   } catch (error) {
     console.error('\n❌ Error running examples:', error);

@@ -38,7 +38,6 @@ export default function PrivacyPage() {
   };
 
   const handleSave = () => {
-    console.log("Saving privacy settings:", settings);
     setIsDirty(false);
   };
 

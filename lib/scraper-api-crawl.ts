@@ -133,7 +133,6 @@ export async function crawlWebsite(
     try {
       const { ownSiteConfig } = await import('./scraper-config-own-site');
       crawlerConfig = { ...crawlerConfig, ...ownSiteConfig };
-      console.log(`[${jobId}] Own-site mode enabled with optimized config`);
     } catch (error) {
       console.error(`[CRAWLER] Failed to apply own-site config:`, error);
     }
@@ -179,12 +178,10 @@ export async function crawlWebsite(
   // Try to discover URLs from sitemap first
   let sitemapUrls: string[] = [];
   try {
-    console.log(`[${jobId}] Checking for sitemap at ${startUrl.origin}/sitemap.xml`);
     const parser = new SitemapParser();
     const sitemapEntries = await parser.parseSitemapFromUrl(`${startUrl.origin}/sitemap.xml`);
 
     if (sitemapEntries && sitemapEntries.length > 0) {
-      console.log(`[${jobId}] Found ${sitemapEntries.length} URLs in sitemap!`);
       sitemapUrls = sitemapEntries.map(entry => entry.loc);
 
       // Update job with discovered URLs count
@@ -209,10 +206,8 @@ export async function crawlWebsite(
   // Prepare forceRescrape flag with logging
   const forceRescrapeFlag = options?.forceRescrape ? 'true' : 'false';
 
-  console.log(`[CrawlWebsite] Starting crawl for ${url}`);
   console.log(`[CrawlWebsite] forceRescrape option: ${options?.forceRescrape} (type: ${typeof options?.forceRescrape})`);
   console.log(`[CrawlWebsite] forceRescrape flag to worker: "${forceRescrapeFlag}" (string)`);
-  console.log(`[CrawlWebsite] Worker args[8]: ${forceRescrapeFlag}`);
 
   const workerArgs = [
     crawlerPath,
@@ -234,7 +229,6 @@ export async function crawlWebsite(
       stdio: 'inherit'
     });
 
-    console.log(`[${jobId}] Worker process spawned with PID: ${child.pid}`);
 
     child.on('error', (error) => {
       console.error(`[${jobId}] Failed to spawn worker:`, error);
@@ -267,7 +261,6 @@ export async function crawlWebsite(
     });
 
     child.on('close', (code, signal) => {
-      console.log(`[${jobId}] Worker process closed with code: ${code}, signal: ${signal}`);
     });
 
   } catch (spawnError) {

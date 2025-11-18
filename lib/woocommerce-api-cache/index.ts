@@ -64,7 +64,6 @@ export class WooCommerceAPICache {
       // Cache the result to avoid future slow API calls
       await this.storage.set(cacheKey, data, ttl);
 
-      console.log(`[WC API Cache] Fetched in ${apiTime}ms, cached for ${ttl}s`);
 
       return {
         data,
@@ -82,7 +81,6 @@ export class WooCommerceAPICache {
    */
   async invalidate(pattern: string): Promise<number> {
     const invalidated = await this.storage.invalidate(pattern);
-    console.log(`[WC API Cache] Invalidated ${invalidated} entries matching "${pattern}"`);
     return invalidated;
   }
 
@@ -91,7 +89,6 @@ export class WooCommerceAPICache {
    */
   async flush(): Promise<void> {
     await this.storage.flush();
-    console.log('[WC API Cache] Cache flushed');
   }
 
   /**
@@ -123,7 +120,6 @@ let cacheInstance: WooCommerceAPICache | null = null;
 export function getWooCommerceAPICache(): WooCommerceAPICache {
   if (!cacheInstance) {
     cacheInstance = new WooCommerceAPICache();
-    console.log('[WC API Cache] 🚀 Initialized - Ready to eliminate 20-60s API delays');
   }
   return cacheInstance;
 }

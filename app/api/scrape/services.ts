@@ -79,7 +79,6 @@ export function splitIntoChunks(text: string, maxChunkSize: number = 1000): stri
   }
 
   if (duplicatesSkipped > 0) {
-    console.log(`Skipped ${duplicatesSkipped} duplicate chunks during single page scrape`);
   }
 
   return chunks;

@@ -31,9 +31,10 @@ const supabase = SKIP_E2E ? null : createClient(
   process.env.SUPABASE_SERVICE_ROLE_KEY!
 );
 
-// TODO: Fix dev server availability check - these tests require localhost:3000
-// Skipping to unblock TypeScript error fixes (user priority)
-describe.skip('Agent Flow E2E - Error Handling [Requires External Services]', () => {
+// NOTE: These tests require localhost:3000 to be running
+// Skipped by default via SKIP_E2E env var (set to false to run: SKIP_E2E=false npm test)
+// CI environments automatically skip E2E tests
+describeE2E('Agent Flow E2E - Error Handling [Requires External Services]', () => {
   describe('Commerce Provider Integration', () => {
     it('TEST 11: should fall back to generic search when no provider configured', async () => {
       /**

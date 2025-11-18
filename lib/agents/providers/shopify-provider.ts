@@ -22,7 +22,6 @@ export class ShopifyProvider implements CommerceProvider {
         try {
           order = await shopify.getOrder(numericId);
         } catch (error) {
-          console.log(`[Shopify Provider] Order ID ${numericId} not found`);
         }
       }
 
@@ -108,7 +107,6 @@ export class ShopifyProvider implements CommerceProvider {
         try {
           product = await shopify.getProduct(numericId);
         } catch (error) {
-          console.log(`[Shopify Provider] Product ID ${numericId} not found`);
         }
       }
 

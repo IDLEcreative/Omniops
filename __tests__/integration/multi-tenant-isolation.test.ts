@@ -51,9 +51,9 @@ const shouldRun = supabaseUrl &&
 const SKIP_E2E = process.env.CI === 'true' || process.env.SKIP_E2E === 'true';
 const describeE2E = SKIP_E2E ? describe.skip : describe;
 
-// TODO: Fix multi-tenant isolation test - embeddings leaking between orgs
-// Skipping to unblock TypeScript error fixes (user priority)
-describe.skip('Multi-Tenant Data Isolation [Requires Real Supabase]', () => {
+// NOTE: This test requires real Supabase credentials and is skipped by default via SKIP_E2E
+// Skipped in CI and by default (set to false to run: SKIP_E2E=false npm test)
+describeE2E('Multi-Tenant Data Isolation [Requires Real Supabase]', () => {
   const rlsTest = setupRLSTest();
   let configId1: string;
   let configId2: string;

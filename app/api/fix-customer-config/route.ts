@@ -55,7 +55,6 @@ export async function POST(request: Request) {
       .select('*')
       .limit(1);
 
-    console.log('Sample existing config:', existing?.[0]);
 
     // Try to insert with minimal required fields
     const { data: newConfig, error: configError } = await supabase

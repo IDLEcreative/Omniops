@@ -40,7 +40,6 @@ export function initWidget(containerId: string, config: StandaloneWidgetConfig =
     </React.StrictMode>
   );
 
-  console.log('[Omniops Widget] Lazy loader initialized');
 }
 
 // Make it available globally for embed.js to call

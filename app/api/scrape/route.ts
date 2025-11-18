@@ -156,7 +156,6 @@ async function getOrganizationId(userSupabase: any): Promise<string | undefined>
     if (error instanceof Error && error.message.includes('Insufficient permissions')) {
       throw error;
     }
-    console.log('Could not get organization ID, proceeding without owned domains');
   }
 
   return undefined;

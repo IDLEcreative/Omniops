@@ -170,18 +170,14 @@ export async function getAvailableTools(domain: string): Promise<any[]> {
 
   // Only add WooCommerce tool if the customer has it configured
   if (availability.hasWooCommerce) {
-    console.log('[Tool Availability] WooCommerce is configured - adding cart operations');
     tools.push(WOOCOMMERCE_TOOL);
   } else {
-    console.log('[Tool Availability] WooCommerce not configured - cart operations disabled');
   }
 
   // Add Shopify tool if the customer has it configured
   if (availability.hasShopify) {
-    console.log('[Tool Availability] Shopify is configured - adding cart operations');
     tools.push(SHOPIFY_TOOL);
   } else {
-    console.log('[Tool Availability] Shopify not configured - cart operations disabled');
   }
 
   return tools;

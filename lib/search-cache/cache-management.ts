@@ -43,7 +43,6 @@ export class CacheManagement {
       // Delete domain-specific cache entries
       if (domainKeys.length > 0) {
         await this.redis.del(...domainKeys);
-        console.log(`[SearchCache] Invalidated ${domainKeys.length} cache entries for domain: ${domain}`);
       }
     } catch (error) {
       console.error('[SearchCache] Error invalidating domain cache:', error);
@@ -82,13 +81,11 @@ export class CacheManagement {
 
         if (versionKeys.length > 0) {
           await this.redis.del(...versionKeys);
-          console.log(`[SearchCache] Cleared ${versionKeys.length} cache entries for version ${version}`);
           totalDeleted += versionKeys.length;
         }
       }
 
       if (totalDeleted > 0) {
-        console.log(`[SearchCache] Total old version entries cleared: ${totalDeleted}`);
       }
     } catch (error) {
       console.error('[SearchCache] Error clearing old version caches:', error);
@@ -125,7 +122,6 @@ export class CacheManagement {
 
       if (allKeys.length > 0) {
         await this.redis.del(...allKeys);
-        console.log(`[SearchCache] Cleared ${allKeys.length} cache entries`);
       }
 
       // Clear LRU tracking
@@ -203,7 +199,6 @@ export class CacheManagement {
    * Warm up cache with common queries
    */
   async warmupCache(commonQueries: string[], generateResult: (query: string) => Promise<any>): Promise<void> {
-    console.log(`[SearchCache] Warming up cache with ${commonQueries.length} common queries...`);
 
     for (const query of commonQueries) {
       const cached = await this.cacheOps.getCachedResult(query);
@@ -217,7 +212,6 @@ export class CacheManagement {
       }
     }
 
-    console.log('[SearchCache] Cache warmup complete');
   }
 
   /**
@@ -257,7 +251,6 @@ export class CacheManagement {
           // Remove from LRU tracking
           await this.redis.zrem('search:cache:lru', ...oldestKeys);
 
-          console.log(`[SearchCache] Evicted ${oldestKeys.length} oldest cache entries`);
         }
       }
     } catch (error) {

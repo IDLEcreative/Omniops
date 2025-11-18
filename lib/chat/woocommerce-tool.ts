@@ -24,7 +24,6 @@ export async function executeWooCommerceOperation(
   domain: string
 ): Promise<WooCommerceOperationResult> {
   const start = Date.now();
-  console.log(`[WooCommerce Agent] Executing: ${operation}`, params);
 
   try {
     // Get customer config ID for analytics

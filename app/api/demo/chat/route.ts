@@ -38,17 +38,13 @@ async function checkMessageRateLimit(sessionId: string) {
 
 export async function POST(req: NextRequest) {
   try {
-    console.log('[DemoChat] Starting chat request');
 
     // Parse and validate request
     const body = await req.json();
-    console.log('[DemoChat] Request body parsed:', { session_id: body.session_id, messageLength: body.message?.length });
 
     const { session_id, message } = chatSchema.parse(body);
-    console.log('[DemoChat] Request validated');
 
     // Retrieve session data from storage
-    console.log('[DemoChat] Retrieving session:', session_id);
     const sessionData = await getDemoSession(session_id);
 
     console.log('[DemoChat] Session retrieval result:', {
@@ -65,7 +61,6 @@ export async function POST(req: NextRequest) {
       );
     }
 
-    console.log('[DemoChat] Session found, proceeding with chat');
 
     // Check message count
     if (sessionData.message_count >= sessionData.max_messages) {
@@ -79,7 +74,6 @@ export async function POST(req: NextRequest) {
     await checkMessageRateLimit(session_id);
 
     // Find relevant chunks using simple similarity
-    console.log('[DemoChat] Finding relevant chunks...');
     let relevantChunks: string[];
     try {
       relevantChunks = await findRelevantChunks(
@@ -87,7 +81,6 @@ export async function POST(req: NextRequest) {
         sessionData.chunks,
         sessionData.embeddings
       );
-      console.log('[DemoChat] Found relevant chunks:', relevantChunks.length);
     } catch (embeddingError) {
       console.error('[DemoChat] Embedding generation failed:', embeddingError);
       // Fallback: use first 3 chunks without similarity search
@@ -96,7 +89,6 @@ export async function POST(req: NextRequest) {
     }
 
     // Generate response using OpenAI
-    console.log('[DemoChat] Generating AI response...');
     let response: string;
     try {
       response = await generateDemoResponse(
@@ -104,7 +96,6 @@ export async function POST(req: NextRequest) {
         relevantChunks,
         sessionData.domain
       );
-      console.log('[DemoChat] AI response generated successfully');
     } catch (openaiError) {
       console.error('[DemoChat] OpenAI API call failed:', {
         error: openaiError,

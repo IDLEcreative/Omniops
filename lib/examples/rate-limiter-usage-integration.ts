@@ -16,8 +16,6 @@ import {
 // ============================================================================
 
 export async function example6_actualScraperIntegration() {
-  console.log('Example 6: Integration with Actual Scraper');
-  console.log('==========================================\n');
 
   // This shows how to modify scraper-api.ts to use the enhanced rate limiter
 
@@ -58,7 +56,6 @@ export async function scrapePage(url: string, config?: any): Promise<ScrapedPage
         throw new Error(\`Circuit breaker open for \${new URL(url).hostname}\`);
       }
 
-      console.log(\`Rate limited, waiting \${rateLimit.delay}ms...\`);
       await new Promise(resolve => setTimeout(resolve, rateLimit.delay));
       retryCount++;
       continue;
@@ -124,9 +121,6 @@ export async function scrapePage(url: string, config?: any): Promise<ScrapedPage
 }
 `;
 
-  console.log('Integration code for scraper-api.ts:');
-  console.log('=====================================');
-  console.log(integrationCode);
 }
 
 // ============================================================================
@@ -134,8 +128,6 @@ export async function scrapePage(url: string, config?: any): Promise<ScrapedPage
 // ============================================================================
 
 export async function example7_monitoring() {
-  console.log('Example 7: Monitoring and Metrics');
-  console.log('=================================\n');
 
   // Initialize rate limiter with Redis for distributed metrics
   const limiter = initializeRateLimiter({
@@ -147,9 +139,6 @@ export async function example7_monitoring() {
   // Set up monitoring listeners
   limiter.on('circuit-breaker-open', (data) => {
     // Send alert to monitoring service
-    console.log('🚨 ALERT: Circuit breaker opened!');
-    console.log(`   Domain: ${data.domain}`);
-    console.log(`   Failures: ${data.failures}`);
     console.log(`   Next retry: ${new Date(data.nextRetryTime).toISOString()}`);
 
     // In production:
@@ -159,10 +148,6 @@ export async function example7_monitoring() {
 
   limiter.on('throttle-adjusted', (data) => {
     // Log throttle adjustments
-    console.log('📊 Throttle adjusted:');
-    console.log(`   Domain: ${data.domain}`);
-    console.log(`   New rate: ${data.newRate} req/s`);
-    console.log(`   Reason: ${data.reason}`);
 
     // In production:
     // await logMetric('rate_limit.adjusted', data.newRate, { domain: data.domain });
@@ -187,11 +172,7 @@ export async function example7_monitoring() {
 
     // Get and display statistics
     const stats = getRateLimitStats(domain);
-    console.log(`\n📈 Statistics for ${domain}:`);
-    console.log(`   Requests/min: ${stats.requestsPerMinute}`);
     console.log(`   Avg response time: ${stats.averageResponseTime.toFixed(0)}ms`);
     console.log(`   Success rate: ${(stats.successRate * 100).toFixed(1)}%`);
-    console.log(`   Current rate: ${stats.currentRate} req/s`);
-    console.log(`   Circuit breaker: ${stats.circuitBreakerState}`);
   }
 }

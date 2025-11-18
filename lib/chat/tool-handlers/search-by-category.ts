@@ -24,7 +24,6 @@ export async function executeSearchByCategory(
 
     // Use semantic search for category-based queries
     const searchResults = await searchFn(category, browseDomain, limit, 0.15);
-    console.log(`[Function Call] Category search returned ${searchResults.length} results`);
 
     return {
       success: true,

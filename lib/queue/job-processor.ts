@@ -73,19 +73,16 @@ export class JobProcessor {
   private setupEventListeners(): void {
     this.worker.on('ready', () => {
       if (!isBuildTime) {
-        console.log('Job processor is ready');
       }
     });
 
     this.worker.on('active', (job: Job) => {
       if (!isBuildTime) {
-        console.log(`Processing job ${job.id} of type ${job.data.type}`);
       }
     });
 
     this.worker.on('completed', (job: Job, result: JobResult) => {
       if (!isBuildTime) {
-        console.log(`Job ${job.id} completed in ${result.duration}ms`);
       }
       if (this.config.enableMetrics) {
         updateMetrics(this.metrics, job, result, true);
@@ -197,7 +194,6 @@ export class JobProcessor {
    */
   async pause(): Promise<void> {
     await this.worker.pause();
-    console.log('Job processor paused');
   }
 
   /**
@@ -205,7 +201,6 @@ export class JobProcessor {
    */
   async resume(): Promise<void> {
     await this.worker.resume();
-    console.log('Job processor resumed');
   }
 
   /**
@@ -229,12 +224,10 @@ export class JobProcessor {
     if (this.isShuttingDown) return;
 
     this.isShuttingDown = true;
-    console.log('Initiating graceful shutdown of job processor...');
 
     try {
       // Close the worker gracefully
       await this.worker.close();
-      console.log('Job processor shut down gracefully');
     } catch (error) {
       console.error('Error during graceful shutdown:', error);
     }
@@ -286,7 +279,6 @@ export function startJobProcessing(
   config?: Partial<JobProcessorConfig>
 ): JobProcessor {
   const processor = new JobProcessor(queueName, config);
-  console.log('Job processor started and ready to process jobs');
   return processor;
 }
 

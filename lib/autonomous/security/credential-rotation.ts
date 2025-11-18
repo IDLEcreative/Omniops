@@ -74,7 +74,6 @@ export async function markStaleCredentialsForRotation(
   }
 
   const count = data?.length || 0;
-  console.log(`[CredentialRotation] Marked ${count} credentials for rotation`);
   return count;
 }
 

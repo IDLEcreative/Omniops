@@ -79,13 +79,11 @@ export function initializeProcessErrorHandlers() {
 
   // Handle SIGTERM for graceful shutdown
   process.on('SIGTERM', async () => {
-    console.log('📦 SIGTERM received, initiating graceful shutdown...');
     await gracefulShutdown('SIGTERM', 0);
   });
 
   // Handle SIGINT (Ctrl+C) for graceful shutdown
   process.on('SIGINT', async () => {
-    console.log('🛑 SIGINT received, initiating graceful shutdown...');
     await gracefulShutdown('SIGINT', 0);
   });
 
@@ -111,7 +109,6 @@ export function initializeProcessErrorHandlers() {
         
         // Force garbage collection if available
         if (global.gc) {
-          console.log('Running garbage collection...');
           global.gc();
         }
       }
@@ -122,7 +119,6 @@ export function initializeProcessErrorHandlers() {
     }
   }, 30000); // Check every 30 seconds
 
-  console.log('✅ Process error handlers initialized');
 }
 
 /**
@@ -130,12 +126,10 @@ export function initializeProcessErrorHandlers() {
  */
 async function gracefulShutdown(reason: string, exitCode: number) {
   if (isShuttingDown) {
-    console.log('Shutdown already in progress...');
     return;
   }
   
   isShuttingDown = true;
-  console.log(`Starting graceful shutdown due to: ${reason}`);
   
   // Give active requests time to complete
   const shutdownTimeout = setTimeout(() => {
@@ -146,7 +140,6 @@ async function gracefulShutdown(reason: string, exitCode: number) {
   // Wait for active requests to complete
   let waitTime = 0;
   while (activeRequests > 0 && waitTime < 9000) {
-    console.log(`Waiting for ${activeRequests} active requests to complete...`);
     await new Promise(resolve => setTimeout(resolve, 100));
     waitTime += 100;
   }
@@ -156,11 +149,9 @@ async function gracefulShutdown(reason: string, exitCode: number) {
   // Cleanup resources
   try {
     // Close database connections
-    console.log('Closing database connections...');
     // Add database cleanup here
     
     // Close Redis connections
-    console.log('Closing Redis connections...');
     try {
       const { getRedisClient } = await import('./redis');
       const redis = await getRedisClient();
@@ -169,15 +160,12 @@ async function gracefulShutdown(reason: string, exitCode: number) {
       }
     } catch (error) {
       // Redis might not be available
-      console.log('Redis not available for shutdown');
     }
     
     // Flush error logs
-    console.log('Flushing error logs...');
     const { errorLogger } = await import('./error-logger');
     errorLogger.destroy();
     
-    console.log('Graceful shutdown completed');
   } catch (error) {
     console.error('Error during shutdown:', error);
   }

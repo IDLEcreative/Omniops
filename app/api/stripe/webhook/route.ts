@@ -38,7 +38,6 @@ export async function POST(request: NextRequest) {
     .single();
 
   if (existingEvent) {
-    console.log('Event already processed:', event.id);
     return NextResponse.json({ received: true });
   }
 

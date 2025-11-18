@@ -27,12 +27,10 @@ export async function searchSimilarContentOptimized(
   const cachedResult = await cacheManager.getCachedResult(query, domain, limit);
 
   if (cachedResult && cachedResult.chunks) {
-    console.log('[Cache] HIT - Returning cached search results');
     await cacheManager.trackCacheAccess(true);
     return cachedResult.chunks;
   }
 
-  console.log('[Cache] MISS - Performing optimized search');
   await cacheManager.trackCacheAccess(false);
 
   const supabase = await createServiceRoleClient();
@@ -64,7 +62,6 @@ export async function searchSimilarContentOptimized(
     attemptsBeforeSuccess++;
 
     if (!domainId) {
-      console.log('[Search] Cache lookup failed for:', searchDomain);
 
       // Step 2: Try alternative domain formats
       const alternativeDomains = [
@@ -85,7 +82,6 @@ export async function searchSimilarContentOptimized(
         alternativesAttempted.push(altDomain);
         attemptsBeforeSuccess++;
 
-        console.log('[Search] Trying alternative:', altDomain, { attempt: `${i + 1}/${alternativeDomains.length}` });
         domainId = await domainCache.getDomainId(altDomain);
 
         if (domainId) {
@@ -100,7 +96,6 @@ export async function searchSimilarContentOptimized(
 
       // Step 3: Last resort - direct database query with ILIKE for fuzzy matching
       if (!domainId) {
-        console.log('[Search] Cache exhausted, trying direct database lookup with fuzzy matching');
         attemptsBeforeSuccess++;
 
         try {
@@ -128,7 +123,6 @@ export async function searchSimilarContentOptimized(
             // Update cache with successful direct lookup for future requests
             // Note: We're using internal cache structure access here
             // In production, consider adding a public method to DomainCacheService
-            console.log('[Search] Caching direct database lookup result for future requests');
           }
         } catch (dbError) {
           console.error('[Search] Direct database lookup failed:', dbError);
@@ -170,7 +164,6 @@ export async function searchSimilarContentOptimized(
     const keywordResults = await performKeywordSearch(supabase, domainId, query, limit);
 
     if (keywordResults) {
-      console.log(`[HYBRID] Returning ${keywordResults.length} keyword results`);
 
       await cacheManager.cacheResult(
         query,
@@ -195,7 +188,6 @@ export async function searchSimilarContentOptimized(
       domain
     );
 
-    console.log(`[OPTIMIZATION] Returning ${vectorResults.length} results without chunk enhancement`);
 
     // Cache successful results
     await cacheManager.cacheResult(
@@ -220,7 +212,6 @@ export async function searchSimilarContentOptimized(
 
     // Try fallback search
     try {
-      console.log('[Search] Main search failed, attempting fallback search');
       const supabase = await createServiceRoleClient();
       if (!supabase) {
         console.error('[Search] Fallback failed: No Supabase client');
@@ -228,11 +219,9 @@ export async function searchSimilarContentOptimized(
       }
 
       const searchDomain = domain.replace('www.', '');
-      console.log('[Search] Fallback domain lookup:', { searchDomain });
       const domainId = await domainCache.getDomainId(searchDomain);
 
       if (!domainId) {
-        console.log('[Search] Fallback failed: Domain not found in cache');
         // Try direct lookup in fallback as well
         try {
           const { data } = await supabase
@@ -244,7 +233,6 @@ export async function searchSimilarContentOptimized(
             .single();
 
           if (data?.id) {
-            console.log('[Search] Fallback domain found via direct database lookup:', data.id);
             const fallbackResults = await performFallbackSearch(supabase, data.id, query, limit);
 
             await cacheManager.cacheResult(

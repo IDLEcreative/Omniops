@@ -91,7 +91,6 @@ export class SupabasePool {
     });
 
     if (keysToDelete.length > 0) {
-      console.log(`[SupabasePool] Cleaned up ${keysToDelete.length} idle connections`);
     }
   }
 

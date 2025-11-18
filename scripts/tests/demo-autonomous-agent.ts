@@ -228,8 +228,8 @@ async function main() {
     }
 
     console.log('\n📚 Documentation:');
-    console.log('   - System Overview: AUTONOMOUS_DEPLOYMENT_SUCCESS.md');
-    console.log('   - Deployment Guide: AUTONOMOUS_DEPLOYMENT_GUIDE.md');
+    console.log('   - System Overview: docs/10-ANALYSIS/ANALYSIS_AUTONOMOUS_DEPLOYMENT_SUCCESS.md');
+    console.log('   - Deployment Guide: docs/05-DEPLOYMENT/GUIDE_AUTONOMOUS_DEPLOYMENT.md');
     console.log('   - Test Results: AUTONOMOUS_TESTS_CREATED.md');
 
   } catch (error) {

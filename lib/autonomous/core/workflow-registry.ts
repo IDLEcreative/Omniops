@@ -65,7 +65,6 @@ export class WorkflowRegistry {
     try {
       const fileContent = fs.readFileSync(this.knowledgeBasePath, 'utf-8');
       this.knowledgeBase = JSON.parse(fileContent);
-      console.log(`[WorkflowRegistry] Loaded ${this.knowledgeBase!.workflows.length} workflows`);
       return this.knowledgeBase!;
     } catch (error) {
       console.error('[WorkflowRegistry] Failed to load knowledge base:', error);
@@ -164,7 +163,6 @@ export class WorkflowRegistry {
   static reload(): void {
     this.knowledgeBase = null;
     this.loadKnowledgeBase();
-    console.log('[WorkflowRegistry] Knowledge base reloaded');
   }
 
   /**

@@ -87,11 +87,9 @@ export function initializeQueue(config: NormalizedQueueConfig): Queue {
  */
 export function setupQueueEventListeners(queue: Queue): void {
   queue.on('added', (job) => {
-    console.log(`[OperationQueue] Job added to queue: ${job.id}`);
   });
 
   queue.on('waiting', (jobId) => {
-    console.log(`[OperationQueue] Job waiting: ${jobId}`);
   });
 
   queue.on('error', (error) => {

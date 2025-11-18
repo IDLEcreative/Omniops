@@ -53,7 +53,6 @@ export async function smartSearch(
       const { searchEnhancedContent } = await import('./embeddings-enhanced').catch(() => ({ searchEnhancedContent: null }));
       
       if (searchEnhancedContent) {
-        console.log('[SmartSearch] Using enhanced search with metadata filtering');
         
         // Detect content type from enhanced query
         const detectedTypes = detectContentTypes(query);
@@ -91,14 +90,12 @@ export async function smartSearch(
         });
         
         if (results && results.length > 0) {
-          console.log(`[SmartSearch] Enhanced search returned ${results.length} results`);
           return results;
         }
       }
     }
     
     // Fall back to regular search with enhanced query
-    console.log('[SmartSearch] Using regular embedding search with enhanced query');
     // Use the enhanced normalized query for better matching
     const searchQuery = enhancedQuery?.normalized || query;
     return await searchSimilarContent(searchQuery, domain, limit, threshold);

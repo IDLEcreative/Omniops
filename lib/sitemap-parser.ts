@@ -41,7 +41,6 @@ export class SitemapParser {
    */
   async parseSitemapFromUrl(url: string): Promise<SitemapEntry[]> {
     try {
-      console.log(`Fetching sitemap from ${url}...`);
       
       const response = await axios.get(url, {
         headers: {
@@ -56,7 +55,6 @@ export class SitemapParser {
       
       // Check if it's a sitemap index and handle it automatically
       if (parsed.sitemapindex?.sitemap) {
-        console.log('Detected sitemap index, parsing all child sitemaps...');
         return this.parseSitemapIndex(url);
       }
       
@@ -114,7 +112,6 @@ export class SitemapParser {
    */
   async parseSitemapIndex(url: string): Promise<SitemapEntry[]> {
     try {
-      console.log(`Fetching sitemap index from ${url}...`);
       
       const response = await axios.get(url, {
         headers: {
@@ -191,13 +188,11 @@ export class SitemapParser {
         }
       }
     } catch (error) {
-      console.log('Could not fetch robots.txt, trying default sitemap locations...');
     }
 
     // Try each possible location
     for (const location of possibleLocations) {
       try {
-        console.log(`Trying sitemap at: ${location}`);
         
         // Check if it's a sitemap index or regular sitemap
         if (location.includes('index') || location.includes('_index')) {
@@ -211,7 +206,6 @@ export class SitemapParser {
       }
     }
 
-    console.log('No sitemap found at common locations');
     return [];
   }
 

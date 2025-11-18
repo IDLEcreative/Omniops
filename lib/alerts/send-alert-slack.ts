@@ -37,7 +37,6 @@ export async function sendAlertSlack(
   const webhookUrl = await getSlackWebhookUrl(organizationId);
 
   if (!webhookUrl) {
-    console.log('[Alert Slack] No Slack webhook URL configured for organization:', organizationId);
     return;
   }
 
@@ -133,7 +132,6 @@ export async function sendAlertSlack(
     if (!response.ok) {
       console.error('[Alert Slack] Failed to send Slack message:', response.status);
     } else {
-      console.log('[Alert Slack] Successfully sent alert to Slack');
     }
   } catch (error) {
     console.error('[Alert Slack] Error sending Slack message:', error);

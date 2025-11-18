@@ -13,7 +13,6 @@ import {
 } from './health-checks';
 
 export async function generateReport(): Promise<MonitoringReport> {
-  console.log('🔍 WooCommerce Integration Health Check');
   console.log('━'.repeat(70));
   console.log(`Started: ${new Date().toISOString()}\n`);
 
@@ -21,7 +20,6 @@ export async function generateReport(): Promise<MonitoringReport> {
   const recommendations: string[] = [];
 
   // Run all checks
-  console.log('Running health checks...\n');
 
   checks.push(await checkDatabaseConnection());
   checks.push(await checkWooCommerceCredentials());

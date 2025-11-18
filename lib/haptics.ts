@@ -197,16 +197,13 @@ export async function testAllHaptics(): Promise<void> {
     return;
   }
 
-  console.log('Testing all haptic patterns...');
 
   for (const [type, pattern] of Object.entries(HAPTIC_PATTERNS)) {
-    console.log(`Testing ${type}: ${pattern.description}`);
     triggerHaptic(type as HapticType);
     // Wait between patterns
     await new Promise((resolve) => setTimeout(resolve, 1000));
   }
 
-  console.log('Haptic test complete');
 }
 
 /**

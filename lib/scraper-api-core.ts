@@ -11,7 +11,6 @@ if (typeof window === 'undefined' && !process.env.NEXT_RUNTIME) {
   import('crawlee').then(module => {
     PlaywrightCrawler = module.PlaywrightCrawler;
   }).catch(e => {
-    console.log('PlaywrightCrawler not available in this environment');
   });
 }
 
@@ -34,7 +33,6 @@ export async function scrapePage(
   redisClient?: Redis
 ): Promise<ScrapedPage | AIOptimizedResult> {
   const scrapeStartTime = Date.now();
-  console.log(`[SCRAPER] Starting single page scrape for: ${url}`);
   console.log(`[SCRAPER] Config options:`, {
     turboMode: config?.turboMode !== false,
     ecommerceMode: config?.ecommerceMode,
@@ -45,7 +43,6 @@ export async function scrapePage(
 
   // In serverless/edge environments, use Redis queue instead of direct crawling
   if (!PlaywrightCrawler || process.env.VERCEL || process.env.NETLIFY) {
-    console.log(`[SCRAPER] Serverless environment detected - using Redis queue for scraping`);
 
     // Create a job ID
     const jobId = `crawl_${Date.now()}_${Math.random().toString(36).substring(7)}`;
@@ -82,7 +79,6 @@ export async function scrapePage(
 
     await redis.quit();
 
-    console.log(`[SCRAPER] Job ${jobId} queued successfully`);
 
     return {
       url,
@@ -98,17 +94,14 @@ export async function scrapePage(
   // Use new configuration system if requested or by default in production
   let finalConfig: any;
   if (config?.useNewConfig !== false && process.env.NODE_ENV === 'production') {
-    console.log(`[SCRAPER] Using new configuration system`);
 
     // Apply preset if specified
     if (config?.configPreset) {
-      console.log(`[SCRAPER] Applying config preset: ${config.configPreset}`);
       applyConfigPreset(config.configPreset);
     }
 
     // Get configuration from new system
     const scraperConfig = configManager.getEffectiveConfig(url);
-    console.log(`[SCRAPER] Loaded effective config for URL: ${url}`);
 
     // Map new config structure to old crawler config structure for compatibility
     finalConfig = {
@@ -152,22 +145,18 @@ export async function scrapePage(
       ...config, // Allow direct overrides
     };
   } else {
-    console.log(`[SCRAPER] Using legacy configuration system`);
 
     // Use old configuration system
     const crawlerConfig = getCrawlerConfig();
     finalConfig = { ...crawlerConfig, ...config };
   }
 
-  console.log(`[SCRAPER] Final config timeouts:`, finalConfig.timeouts);
   const turboMode = config?.turboMode !== false; // Default to true
   console.log(`[SCRAPER] Turbo mode: ${turboMode ? 'ENABLED' : 'DISABLED'}`)
 
   return new Promise(async (resolve, reject) => {
     let result: ScrapedPage | null = null;
 
-    console.log(`[SCRAPER] Creating PlaywrightCrawler instance`);
-    console.log(`[SCRAPER] Browser settings: headless=${finalConfig.browser.headless}, userAgent=${finalConfig.browser.userAgent}`);
 
     try {
       const crawler = new PlaywrightCrawler({
@@ -208,7 +197,6 @@ export async function scrapePage(
       },
     });
 
-    console.log(`[SCRAPER] Crawler instance created successfully`);
     console.log(`[SCRAPER] Starting crawler.run() for URL: ${url}`);
 
     await crawler.run([url]);
@@ -216,7 +204,6 @@ export async function scrapePage(
     console.log(`[SCRAPER] Crawler.run() completed`);
 
     if (result) {
-      console.log(`[SCRAPER] SUCCESS: Scraping completed for ${url}`);
       console.log(`[SCRAPER] Total scraping time: ${Date.now() - scrapeStartTime}ms`);
       resolve(result);
     } else {

@@ -94,7 +94,6 @@ async function handleSetup(request: Request) {
 
   try {
     // Step 1: Add or update customer config
-    console.log(`Setting up customer config for ${domain}...`);
 
     const { data: existingConfig } = await supabase
       .from('customer_configs')
@@ -158,7 +157,6 @@ async function handleSetup(request: Request) {
     }
     
     // Step 2: Test embedding search
-    console.log('Testing embeddings...');
     
     const { data: embeddings, count } = await supabase
       .from('page_embeddings')

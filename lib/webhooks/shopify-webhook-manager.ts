@@ -25,7 +25,6 @@ export async function registerShopifyWebhook(
   accessToken: string
 ): Promise<{ success: boolean; webhookId?: number; error?: string }> {
   try {
-    console.log(`[Shopify Webhook Manager] Registering webhook for ${domain}`);
 
     // Get app URL from environment
     const appUrl = process.env.NEXT_PUBLIC_APP_URL || 'https://omniops.co.uk';

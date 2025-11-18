@@ -33,13 +33,11 @@ export class RedisCircuitBreaker extends EventEmitter {
 
   closeCircuitBreaker() {
     this.circuitBreakerOpen = false;
-    console.log('Redis circuit breaker closed');
   }
 
   checkCircuitBreaker() {
     if (this.circuitBreakerOpen &&
       Date.now() - this.circuitBreakerOpenTime > this.circuitBreakerTimeout) {
-      console.log('Attempting to close circuit breaker...');
       this.connectionAttempts = 0;
       this.reconnectCallback();
     }

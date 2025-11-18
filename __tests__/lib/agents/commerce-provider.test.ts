@@ -89,7 +89,7 @@ describe('commerce provider registry', () => {
    * This is purely a test infrastructure issue, not a production code issue.
    */
 
-  it.skip('returns Shopify provider when Shopify config is present', async () => {
+  it('returns Shopify provider when Shopify config is present', async () => {
     process.env.SHOPIFY_SHOP = 'brand.myshopify.com';
     process.env.SHOPIFY_ACCESS_TOKEN = 'token';
 
@@ -122,7 +122,7 @@ describe('commerce provider registry', () => {
     expect(MockedWooCommerceProvider).not.toHaveBeenCalled();
   });
 
-  it.skip('returns WooCommerce provider when WooCommerce config is present', async () => {
+  it('returns WooCommerce provider when WooCommerce config is present', async () => {
     process.env.WOOCOMMERCE_URL = 'https://shop.example';
     process.env.WOOCOMMERCE_CONSUMER_KEY = 'key';
     process.env.WOOCOMMERCE_CONSUMER_SECRET = 'secret';
@@ -155,7 +155,7 @@ describe('commerce provider registry', () => {
     expect(MockedWooCommerceProvider).toHaveBeenCalledWith(mockWooCommerceClient);
   });
 
-  it.skip('returns null when no provider configuration is found', async () => {
+  it('returns null when no provider configuration is found', async () => {
     mockCreateServiceRoleClient.mockResolvedValue({
       from: () => ({
         select: () => ({

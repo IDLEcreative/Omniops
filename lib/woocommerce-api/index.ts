@@ -32,10 +32,8 @@ export class WooCommerceAPI {
       let client = factory(this.config);
       if (!client && factory && typeof factory.getMockImplementation === 'function') {
         const impl = factory.getMockImplementation();
-        console.log('impl type', typeof impl);
         if (typeof impl === 'function') {
           const attempted = impl(this.config);
-          console.log('attempted', attempted);
           if (attempted) {
             client = attempted;
             moduleRef.__forcedClient = attempted;

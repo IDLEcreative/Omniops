@@ -87,7 +87,6 @@ export async function searchWithEnhancedContext(
       embeddings = extendedData;
     } else if (extendedError.message?.includes('function') || extendedError.message?.includes('does not exist')) {
       // Function doesn't exist, try the standard search_embeddings function
-      console.log('[Enhanced Embeddings] Extended function not found, falling back to search_embeddings');
 
       const { data: standardData, error: standardError } = await supabase.rpc(
         'search_embeddings',
@@ -119,7 +118,6 @@ export async function searchWithEnhancedContext(
     }
 
     if (!embeddings || embeddings.length === 0) {
-      console.log('[Enhanced Embeddings] No matching embeddings found');
       return {
         chunks: [],
         groupedContext: new Map(),

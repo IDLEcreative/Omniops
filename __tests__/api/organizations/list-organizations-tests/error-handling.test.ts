@@ -7,7 +7,7 @@ import { createAuthenticatedMockClient } from '@/test-utils/supabase-test-helper
 import { createMockUser } from '@/test-utils/api-test-helpers';
 
 // TEMPORARY: Skipped due to complex Supabase mocking issues - needs refactoring
-describe.skip('GET /api/organizations - Error Handling', () => {
+describe('GET /api/organizations - Error Handling', () => {
   beforeEach(() => {
     jest.clearAllMocks();
     jest.resetModules(); // Reset module cache

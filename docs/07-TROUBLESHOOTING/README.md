@@ -1455,7 +1455,7 @@ psql $DATABASE_URL -c "\d page_embeddings"
 
 **Related Docs:**
 - [Database Schema](../09-REFERENCE/REFERENCE_DATABASE_SCHEMA.md)
-- [Migration Instructions](../setup/MIGRATION_INSTRUCTIONS.md)
+- [Migration Instructions](../00-GETTING-STARTED/GUIDE_MIGRATION_INSTRUCTIONS.md)
 
 ---
 

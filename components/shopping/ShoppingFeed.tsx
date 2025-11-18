@@ -308,7 +308,6 @@ export function ShoppingFeed({
           itemCount={totalItemCount}
           onClick={() => {
             // TODO: Implement cart view
-            console.log('Cart clicked', cart);
           }}
         />
 

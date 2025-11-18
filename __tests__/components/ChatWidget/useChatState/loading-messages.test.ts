@@ -50,7 +50,7 @@ import { useChatState } from '@/components/ChatWidget/hooks/useChatState';
  * Fix required: Refactor hook to use useRef for stable callback or restructure dependencies.
  * Tracked in: docs/ISSUES.md (to be added)
  */
-describe.skip('useChatState Hook - Loading Previous Messages', () => {
+describe('useChatState Hook - Loading Previous Messages', () => {
   let localStorage: MockStorage;
 
   beforeEach(() => {

@@ -6,33 +6,22 @@ export class LoadTestFormatter {
   }
 
   printFinalReport(metrics: LoadTestMetrics): void {
-    console.log('');
     console.log('='.repeat(70));
-    console.log('📊 LOAD TEST RESULTS');
     console.log('='.repeat(70));
-    console.log('');
 
-    console.log('📈 Request Statistics:');
-    console.log(`  Total Requests: ${metrics.totalRequests}`);
-    console.log(`  Successful: ${metrics.successfulRequests}`);
-    console.log(`  Failed: ${metrics.failedRequests}`);
     console.log(
       `  Success Rate: ${((metrics.successfulRequests / metrics.totalRequests) * 100).toFixed(2)}%`
     );
     console.log(`  Duration: ${(metrics.totalDuration / 1000).toFixed(2)}s`);
     console.log(`  Throughput: ${metrics.requestsPerSecond.toFixed(2)} req/s`);
-    console.log('');
 
-    console.log('⏱️  Response Time Statistics:');
     console.log(`  Average: ${metrics.avgResponseTime.toFixed(2)}ms`);
     console.log(`  Min: ${metrics.minResponseTime.toFixed(2)}ms`);
     console.log(`  Max: ${metrics.maxResponseTime.toFixed(2)}ms`);
     console.log(`  P50: ${metrics.p50ResponseTime.toFixed(2)}ms`);
     console.log(`  P95: ${metrics.p95ResponseTime.toFixed(2)}ms`);
     console.log(`  P99: ${metrics.p99ResponseTime.toFixed(2)}ms`);
-    console.log('');
 
-    console.log('💾 Memory Statistics:');
     console.log(`  Initial: ${this.formatMemory(metrics.memoryUsage.initial)}`);
     console.log(`  Peak: ${this.formatMemory(metrics.memoryUsage.peak)}`);
     console.log(`  Final: ${this.formatMemory(metrics.memoryUsage.final)}`);
@@ -41,17 +30,12 @@ export class LoadTestFormatter {
         metrics.memoryUsage.leaked > 10 * 1024 * 1024 ? '⚠️ WARNING' : '✅'
       }`
     );
-    console.log('');
 
     if (metrics.errors.length > 0) {
-      console.log('❌ Errors:');
       metrics.errors.forEach((error) => {
-        console.log(`  ${error.type}: ${error.count}`);
       });
-      console.log('');
     }
 
-    console.log('🎯 Performance Assessment:');
     const assessments = [
       {
         name: 'Response Time (P95)',
@@ -91,7 +75,6 @@ export class LoadTestFormatter {
       );
     });
 
-    console.log('');
     console.log('='.repeat(70));
   }
 }

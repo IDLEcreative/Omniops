@@ -10,7 +10,6 @@ import { generatePattern, calculateConfidence } from './utilities';
 export async function buildCategoryMappings(
   supabase: any
 ): Promise<Map<string, CategoryMapping>> {
-  console.log('Building intelligent category mappings...');
 
   // Fetch all scraped product pages with pagination
   // ✅ Optimized: Only fetches needed columns (url, title, content)
@@ -36,7 +35,6 @@ export async function buildCategoryMappings(
     if (batch && batch.length > 0) {
       pages.push(...batch);
       offset += batchSize;
-      console.log(`Fetched ${pages.length} pages for category mapping...`);
 
       if (batch.length < batchSize) {
         hasMore = false;
@@ -47,7 +45,6 @@ export async function buildCategoryMappings(
   }
 
   if (pages.length === 0) {
-    console.log('No pages found for category mapping');
     return new Map();
   }
 
@@ -94,6 +91,5 @@ export async function buildCategoryMappings(
     });
   }
 
-  console.log(`Created ${mappings.size} category mappings`);
   return mappings;
 }

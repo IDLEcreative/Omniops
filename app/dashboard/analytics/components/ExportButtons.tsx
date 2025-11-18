@@ -71,7 +71,6 @@ export function ExportButtons({ days, className }: ExportButtonsProps) {
       document.body.removeChild(link);
       window.URL.revokeObjectURL(downloadUrl);
 
-      console.log(`✅ Successfully exported as ${filename}`);
 
       toast({
         title: 'Export successful',

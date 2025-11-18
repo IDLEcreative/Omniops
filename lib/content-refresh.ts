@@ -56,7 +56,6 @@ export async function discoverNewPages(
     const urlObj = new URL(baseUrl);
     const domain = urlObj.hostname;
 
-    console.log(`Sitemap discovery for ${baseUrl}`);
 
     if (!supabase) {
       throw new Error('Database connection unavailable');
@@ -71,7 +70,6 @@ export async function discoverNewPages(
 
     try {
       const sitemapUrls = await findSitemaps(domain);
-      console.log(`Found ${sitemapUrls.length} sitemaps for ${domain}`);
 
       for (const sitemapUrl of sitemapUrls) {
         try {
@@ -81,7 +79,6 @@ export async function discoverNewPages(
             isRelevantUrl(page.url)
           );
 
-          console.log(`Found ${newSitemapPages.length} new pages from sitemap: ${sitemapUrl}`);
           newPages.push(...newSitemapPages.map(page => page.url));
 
         } catch (sitemapError) {
@@ -100,7 +97,6 @@ export async function discoverNewPages(
       );
 
       newPages.push(...newRobotsUrls);
-      console.log(`Added ${newRobotsUrls.length} new pages from robots.txt`);
 
     } catch (robotsError) {
       console.warn(`Error parsing robots.txt for ${domain}:`, robotsError);

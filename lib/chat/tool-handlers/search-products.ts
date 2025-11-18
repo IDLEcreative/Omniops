@@ -33,12 +33,10 @@ export async function executeSearchProducts(
 
     // NEW: If query looks like a SKU, try exact match first
     if (isSkuPattern(query)) {
-      console.log(`[Function Call] Detected SKU pattern "${query}", trying exact match first`);
 
       const exactResults = await exactMatchSearch(query, browseDomain, 10);
 
       if (exactResults.length > 0) {
-        console.log(`[Function Call] Exact match found ${exactResults.length} results for SKU "${query}"`);
         return {
           success: true,
           results: exactResults,
@@ -46,7 +44,6 @@ export async function executeSearchProducts(
         };
       }
 
-      console.log(`[Function Call] No exact match found for SKU "${query}", falling back to provider/semantic search`);
     }
 
     const provider = await getProviderFn(browseDomain);
@@ -55,8 +52,6 @@ export async function executeSearchProducts(
     let errorContext: { providerFailed: boolean; providerPlatform?: string; errorMessage?: string } | undefined;
 
     if (provider) {
-      console.log(`[Function Call] Resolved commerce provider "${provider.platform}" for ${browseDomain}`);
-      console.log(`[Function Call] Provider search started { provider: "${provider.platform}", domain: "${browseDomain}", query: "${query}" }`);
 
       const providerSearchStart = Date.now();
 
@@ -64,13 +59,11 @@ export async function executeSearchProducts(
         const providerResults = await provider.searchProducts(query, adaptiveLimit);
         const providerSearchDuration = Date.now() - providerSearchStart;
 
-        console.log(`[Function Call] Provider search completed { provider: "${provider.platform}", duration: ${providerSearchDuration}ms, resultsCount: ${providerResults?.length || 0} }`);
 
         if (providerResults && providerResults.length > 0) {
           const results = formatProviderProducts(provider.platform, providerResults, browseDomain);
 
           if (results.length > 0) {
-            console.log(`[Function Call] Provider search successful { provider: "${provider.platform}", formattedResults: ${results.length}, source: "${provider.platform}" }`);
             return { success: true, results, source: provider.platform };
           } else {
             console.warn(`[Function Call] Provider returned results but formatting yielded 0 products { provider: "${provider.platform}", rawResults: ${providerResults.length} }`);
@@ -92,10 +85,8 @@ export async function executeSearchProducts(
           errorMessage: errorMessage
         };
 
-        console.log(`[Function Call] Error context created for semantic fallback:`, errorContext);
       }
     } else {
-      console.log(`[Function Call] No commerce provider available for domain "${browseDomain}"`);
     }
 
     // Fallback to semantic search
@@ -105,11 +96,9 @@ export async function executeSearchProducts(
     const searchResults = await searchFn(query, browseDomain, adaptiveLimit, 0.2);
     const semanticSearchDuration = Date.now() - semanticSearchStart;
 
-    console.log(`[Function Call] Semantic search returned ${searchResults.length} results { source: "semantic", duration: ${semanticSearchDuration}ms, fallbackUsed: ${!!errorContext} }`);
 
     // ZERO-RESULTS RECOVERY: If semantic search returns nothing, try recovery strategies
     if (searchResults.length === 0) {
-      console.log('[Function Call] Zero results from semantic search, activating recovery system');
 
       const recoveryStart = Date.now();
       const { results: recoveryResults, strategy, suggestion } = await handleZeroResults(
@@ -120,7 +109,6 @@ export async function executeSearchProducts(
       const recoveryDuration = Date.now() - recoveryStart;
 
       if (recoveryResults.length > 0) {
-        console.log(`[Function Call] RECOVERY SUCCESS: Found ${recoveryResults.length} results using strategy "${strategy}" { duration: ${recoveryDuration}ms }`);
 
         return {
           success: true,
@@ -129,7 +117,6 @@ export async function executeSearchProducts(
           errorMessage: suggestion
         };
       } else {
-        console.log(`[Function Call] RECOVERY EXHAUSTED: No results found after all recovery attempts { duration: ${recoveryDuration}ms }`);
 
         return {
           success: false,

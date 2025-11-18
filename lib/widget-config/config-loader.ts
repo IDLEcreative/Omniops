@@ -63,7 +63,6 @@ export async function loadConfigByAppId(
     return null;
   }
 
-  console.log('[Config Loader] Lookup by app_id:', appId, data ? 'found' : 'not found');
   return data as CustomerConfig | null;
 }
 
@@ -105,7 +104,6 @@ export async function loadConfigByDomain(
     return { config: null, domainData: domainData as { customer_config_id: string } | null };
   }
 
-  console.log('[Config Loader] Lookup by domain:', domain, data ? 'found' : 'not found');
   return {
     config: data as CustomerConfig | null,
     domainData: domainData as { customer_config_id: string } | null,

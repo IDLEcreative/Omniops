@@ -58,7 +58,6 @@ async function getCachedEmbedding(
 
     // Validate cache: if product text changed, cache is invalid
     if (data.product_text_hash !== textHash) {
-      console.log(`[Product Embeddings] Cache miss: product ${productId} text changed`);
       return null;
     }
 
@@ -79,7 +78,6 @@ async function getCachedEmbedding(
         .eq('product_id', productId);
     }
 
-    console.log(`[Product Embeddings] Cache hit: product ${productId}`);
     return data.embedding as number[];
   } catch (error) {
     console.error('[Product Embeddings] Cache retrieval error:', error);
@@ -121,7 +119,6 @@ async function saveEmbeddingToCache(
         onConflict: 'domain,product_id'
       });
 
-    console.log(`[Product Embeddings] Cached: product ${productId}`);
   } catch (error) {
     console.error('[Product Embeddings] Cache save error:', error);
     // Don't throw - caching is optional optimization

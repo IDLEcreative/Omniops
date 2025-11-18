@@ -88,7 +88,7 @@ describe('useChatState Hook - Widget Open/Close State', () => {
     });
   });
 
-  it.skip('should restore widget open state from localStorage', async () => {
+  it('should restore widget open state from localStorage', async () => {
     localStorage.setItem('widget_open', 'true');
 
     const { result } = renderHook(() => useChatState({}));

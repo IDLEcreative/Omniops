@@ -114,7 +114,6 @@ class ErrorLogger {
       const { createClient: createSupabaseClient } = await import('@supabase/supabase-js');
 
       if (!process.env.NEXT_PUBLIC_SUPABASE_URL || !process.env.SUPABASE_SERVICE_ROLE_KEY) {
-        console.log('Supabase credentials not available for error logging');
         await this.logToFile(logs);
         return;
       }
@@ -136,7 +135,6 @@ class ErrorLogger {
         .limit(1);
 
       if (tableError?.code === 'PGRST116') {
-        console.log('Creating error_logs table...');
         await this.createErrorLogsTable();
       }
 
@@ -201,7 +199,6 @@ class ErrorLogger {
 
   private async logToFile(logs: ErrorLog[]): Promise<void> {
     if (typeof window !== 'undefined') {
-      console.log('File logging not available in browser environment');
       return;
     }
 

@@ -33,12 +33,10 @@ export async function POST(request: NextRequest) {
       throw new Error('Failed to create Supabase client');
     }
 
-    console.log('[Cron] Starting follow-up send job...');
 
     // Send up to 100 pending messages per run
     const result = await sendPendingFollowUps(supabase, 100);
 
-    console.log('[Cron] Follow-up send job complete:', result);
 
     return NextResponse.json({
       success: true,

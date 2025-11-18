@@ -24,9 +24,6 @@ export class LoadTestOrchestrator {
   }
 
   async run(): Promise<LoadTestMetrics> {
-    console.log('🚀 Starting Load Test');
-    console.log(`📊 Configuration:`, this.config);
-    console.log('');
 
     this.recordMemorySnapshot();
     this.startTime = Date.now();

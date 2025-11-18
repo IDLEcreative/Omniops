@@ -16,7 +16,6 @@ export async function performVectorSearch(
   similarityThreshold: number,
   domain?: string
 ): Promise<SearchResult[]> {
-  console.log(`[HYBRID] Using vector search for: "${query}"`);
 
   // Generate embedding with timeout
   const embeddingTimer = new QueryTimer('Generate Embedding', TIMEOUTS.EMBEDDING_GENERATION);

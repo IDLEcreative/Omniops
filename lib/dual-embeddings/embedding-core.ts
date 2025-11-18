@@ -63,5 +63,4 @@ export async function storeDualEmbeddings(
     throw error;
   }
 
-  console.log(`Stored ${records.length} dual embeddings for page ${pageId}`);
 }

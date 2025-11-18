@@ -35,7 +35,6 @@ export class ScenarioRunner {
     });
 
     await Promise.all(promises);
-    console.log('✅ Burst scenario complete');
     return this.users;
   }
 
@@ -66,7 +65,6 @@ export class ScenarioRunner {
       await new Promise((resolve) => setTimeout(resolve, 100));
     }
 
-    console.log('✅ Sustained scenario complete');
     return this.users;
   }
 
@@ -106,7 +104,6 @@ export class ScenarioRunner {
       await new Promise((resolve) => setTimeout(resolve, 5000));
     }
 
-    console.log('✅ Ramp-up scenario complete');
     return this.users;
   }
 
@@ -137,7 +134,6 @@ export class ScenarioRunner {
       await new Promise((resolve) => setTimeout(resolve, 1000));
     }
 
-    console.log('✅ Memory leak detection complete');
     return this.users;
   }
 }

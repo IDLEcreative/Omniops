@@ -36,7 +36,6 @@ export async function sendAlertWebhook(
   const webhookUrl = await getWebhookUrl(organizationId);
 
   if (!webhookUrl) {
-    console.log('[Alert Webhook] No webhook URL configured for organization:', organizationId);
     return;
   }
 
@@ -68,7 +67,6 @@ export async function sendAlertWebhook(
         response.statusText
       );
     } else {
-      console.log('[Alert Webhook] Successfully sent alert webhook');
     }
   } catch (error) {
     console.error('[Alert Webhook] Error sending webhook:', error);

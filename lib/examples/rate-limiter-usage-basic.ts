@@ -17,8 +17,6 @@ import {
 // ============================================================================
 
 export async function example1_basicSetup() {
-  console.log('Example 1: Basic Setup and Configuration');
-  console.log('=========================================\n');
 
   // Initialize with moderate preset
   const limiter = initializeRateLimiter(RateLimiterPresets.moderate);
@@ -47,7 +45,6 @@ export async function example1_basicSetup() {
     maxDelay: 8000,
   });
 
-  console.log('✅ Rate limiter configured with domain-specific limits\n');
 }
 
 // ============================================================================
@@ -55,8 +52,6 @@ export async function example1_basicSetup() {
 // ============================================================================
 
 export async function example2_simpleScraping() {
-  console.log('Example 2: Simple Scraping with Rate Limiting');
-  console.log('=============================================\n');
 
   const urls = [
     'https://example.com/page1',
@@ -73,8 +68,6 @@ export async function example2_simpleScraping() {
     });
 
     if (!rateLimit.proceed) {
-      console.log(`⏳ Rate limited for ${url}: ${rateLimit.message}`);
-      console.log(`   Waiting ${rateLimit.delay}ms before retry...\n`);
 
       // Wait and retry
       await sleep(rateLimit.delay);
@@ -83,14 +76,11 @@ export async function example2_simpleScraping() {
 
     // Apply suggested delay for anti-detection
     if (rateLimit.delay > 0) {
-      console.log(`🕐 Applying anti-detection delay: ${rateLimit.delay}ms`);
       await sleep(rateLimit.delay);
     }
 
     try {
       // Simulate scraping (replace with actual scraper call)
-      console.log(`🔍 Scraping ${url}...`);
-      console.log(`   User-Agent: ${rateLimit.userAgent}`);
       console.log(`   Headers: ${JSON.stringify(rateLimit.headers, null, 2)}`);
 
       // Simulate network request
@@ -101,7 +91,6 @@ export async function example2_simpleScraping() {
       // Report success
       await reportScrapingResult(url, true, responseTime, 200);
 
-      console.log(`✅ Successfully scraped ${url} in ${responseTime}ms\n`);
 
     } catch (error) {
       const responseTime = Date.now() - startTime;
@@ -115,7 +104,6 @@ export async function example2_simpleScraping() {
 
   // Show statistics
   const stats = getRateLimitStats('example.com');
-  console.log('📊 Statistics for example.com:', stats, '\n');
 }
 
 // ============================================================================
@@ -123,8 +111,6 @@ export async function example2_simpleScraping() {
 // ============================================================================
 
 export async function example3_errorHandling() {
-  console.log('Example 3: Handling Rate Limit Errors and Circuit Breakers');
-  console.log('==========================================================\n');
 
   // Initialize with conservative settings for demonstration
   initializeRateLimiter({
@@ -137,7 +123,6 @@ export async function example3_errorHandling() {
 
   // Simulate multiple failures to trigger circuit breaker
   for (let i = 0; i < 5; i++) {
-    console.log(`\nAttempt ${i + 1}:`);
 
     const rateLimit = await checkScraperRateLimit(url, {
       retryCount: i,
@@ -146,8 +131,6 @@ export async function example3_errorHandling() {
 
     if (!rateLimit.proceed) {
       if (rateLimit.message === 'Circuit breaker open') {
-        console.log('⚡ Circuit breaker is OPEN - too many failures detected');
-        console.log(`   Waiting ${rateLimit.delay}ms before circuit breaker resets`);
 
         // In production, you might want to:
         // 1. Alert administrators
@@ -156,7 +139,6 @@ export async function example3_errorHandling() {
 
         break;
       } else {
-        console.log(`⏳ Rate limited: ${rateLimit.message}`);
         await sleep(rateLimit.delay);
         continue;
       }
@@ -164,7 +146,6 @@ export async function example3_errorHandling() {
 
     // Simulate failure to trigger circuit breaker
     if (i < 3) {
-      console.log('❌ Simulating request failure...');
       await reportScrapingResult(url, false, 100, 503, i);
     } else {
       console.log('✅ Request would succeed (but circuit might be open)');

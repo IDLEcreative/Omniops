@@ -23,25 +23,17 @@ let refreshJob: cron.ScheduledTask | null = null;
  */
 export function initializeContentRefresh() {
   if (refreshJob) {
-    console.log('[Content Refresh] Already initialized');
     return refreshJob;
   }
 
-  console.log('[Content Refresh] Initializing daily refresh job...');
   console.log(`[Content Refresh] Schedule: ${CRON_SCHEDULE} (2 AM UTC daily)`);
-  console.log(`[Content Refresh] Interval: ${REFRESH_INTERVAL_HOURS} hours`);
-  console.log(`[Content Refresh] Max pages per domain: ${MAX_PAGES_PER_DOMAIN}`);
 
   refreshJob = cron.schedule(CRON_SCHEDULE, async () => {
-    console.log('[Content Refresh] Starting scheduled refresh...');
     
     try {
       const result = await triggerContentRefresh();
       
       if (result.success) {
-        console.log('[Content Refresh] ✅ Completed successfully');
-        console.log(`[Content Refresh] Domains processed: ${result.domainsProcessed}`);
-        console.log(`[Content Refresh] Pages refreshed: ${result.pagesRefreshed}`);
       } else {
         console.error('[Content Refresh] ❌ Failed:', result.error);
       }
@@ -52,7 +44,6 @@ export function initializeContentRefresh() {
     timezone: 'UTC'
   });
 
-  console.log('[Content Refresh] ✅ Scheduler initialized');
   
   return refreshJob;
 }
@@ -113,7 +104,6 @@ export function stopContentRefresh() {
   if (refreshJob) {
     refreshJob.stop();
     refreshJob = null;
-    console.log('[Content Refresh] ✅ Scheduler stopped');
   }
 }
 

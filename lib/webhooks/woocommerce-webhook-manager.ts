@@ -29,7 +29,6 @@ export async function registerWooCommerceWebhook(
   consumerSecret: string
 ): Promise<{ success: boolean; webhookId?: number; error?: string }> {
   try {
-    console.log(`[WooCommerce Webhook Manager] Registering webhook for ${domain}`);
 
     // Generate secure webhook secret
     const webhookSecret = crypto.randomBytes(32).toString('hex');

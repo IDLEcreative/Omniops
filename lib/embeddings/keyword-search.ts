@@ -41,12 +41,10 @@ export async function performKeywordSearch(
       });
 
     if (error) {
-      console.log(`[HYBRID] Keyword search error: ${error.message}`);
       return null;
     }
 
     keywordTimer.end();
-    console.log(`[HYBRID] Keyword search found ${keywordResults?.length || 0} results`);
 
     // Check if we have enough good results
     if (keywordResults && keywordResults.length >= MIN_KEYWORD_RESULTS) {
@@ -74,10 +72,8 @@ export async function performKeywordSearch(
       }));
     }
 
-    console.log(`[HYBRID] Only ${keywordResults?.length || 0} keyword results, falling back to vector search`);
     return null;
   } catch (error) {
-    console.log(`[HYBRID] Keyword search error, falling back to vector: ${error}`);
     return null;
   }
 }

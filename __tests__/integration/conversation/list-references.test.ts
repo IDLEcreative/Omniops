@@ -27,7 +27,7 @@ describe('List Reference Resolution', () => {
     await cleanupConversations(testConversations);
   });
 
-  it.skip('should resolve numerical references like "item 2" or "the second one" (IMPLEMENT ME)', async () => {
+  it('should resolve numerical references like "item 2" or "the second one" (IMPLEMENT ME)', async () => {
     /**
      * Test Flow:
      * Turn 1:

@@ -27,7 +27,7 @@ describe('Pronoun Resolution', () => {
     await cleanupConversations(testConversations);
   });
 
-  it.skip('should resolve "it" across multiple turns (IMPLEMENT ME)', async () => {
+  it('should resolve "it" across multiple turns (IMPLEMENT ME)', async () => {
     /**
      * Test Flow (3 turns):
      * Turn 1:
@@ -65,7 +65,7 @@ describe('Pronoun Resolution', () => {
     expect(true).toBe(false); // Placeholder - replace with actual test
   });
 
-  it.skip('should resolve "they" for plural references (IMPLEMENT ME)', async () => {
+  it('should resolve "they" for plural references (IMPLEMENT ME)', async () => {
     /**
      * Test Flow:
      * Turn 1: "Show me pumps under $500"
@@ -82,7 +82,7 @@ describe('Pronoun Resolution', () => {
     expect(true).toBe(false);
   });
 
-  it.skip('should handle ambiguous pronouns gracefully (IMPLEMENT ME)', async () => {
+  it('should handle ambiguous pronouns gracefully (IMPLEMENT ME)', async () => {
     /**
      * Test Flow:
      * Turn 1: User asks about Pump A and Pump B

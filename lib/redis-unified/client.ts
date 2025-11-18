@@ -27,7 +27,6 @@ export function getRedisClient(): ResilientRedisClient {
     // Set up monitoring (suppressed during build time)
     if (!isBuildTime) {
       unifiedRedisClient.on('connected', () => {
-        console.log('[Redis] Connected to Redis server');
       });
 
       unifiedRedisClient.on('disconnected', () => {

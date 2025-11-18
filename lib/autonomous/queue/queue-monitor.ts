@@ -113,7 +113,6 @@ export async function getQueueHealth(
  */
 export async function pauseQueue(queue: Queue): Promise<void> {
   await queue.pause();
-  console.log('[OperationQueue] Queue paused');
 }
 
 /**
@@ -123,7 +122,6 @@ export async function pauseQueue(queue: Queue): Promise<void> {
  */
 export async function resumeQueue(queue: Queue): Promise<void> {
   await queue.resume();
-  console.log('[OperationQueue] Queue resumed');
 }
 
 /**
@@ -150,7 +148,6 @@ export async function cleanOldJobs(
     // Clean failed jobs older than age
     await queue.clean(age, 100, 'failed');
 
-    console.log('[OperationQueue] Cleaned old jobs');
   } catch (error) {
     console.error('[OperationQueue] Failed to clean jobs:', error);
     throw error;
@@ -164,5 +161,4 @@ export async function cleanOldJobs(
  */
 export async function closeQueue(queue: Queue): Promise<void> {
   await queue.close();
-  console.log('[OperationQueue] Queue closed');
 }

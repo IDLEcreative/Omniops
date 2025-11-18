@@ -314,7 +314,6 @@ export class ConsentManager {
       }
 
       const count = await this.operations.bulkRevokeForService(this.supabase, organizationId, service);
-      console.log(`[ConsentManager] Revoked ${count} consents for service ${service}`);
       return count;
     } catch (error) {
       console.error('[ConsentManager] RevokeAllForService error:', error);

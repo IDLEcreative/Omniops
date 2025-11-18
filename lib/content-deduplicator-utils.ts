@@ -97,7 +97,6 @@ export class ContentDeduplicatorTester {
   }
 
   async runTests(): Promise<void> {
-    console.log('Running Content Deduplicator tests...');
 
     await this.testBasicDeduplication();
     await this.testSimilarityDetection();
@@ -106,11 +105,9 @@ export class ContentDeduplicatorTester {
     await this.testCompression();
     await this.testMetrics();
 
-    console.log('All tests completed!');
   }
 
   private async testBasicDeduplication(): Promise<void> {
-    console.log('Testing basic deduplication...');
 
     const content1 = "This is a sample navigation menu with Home, About, Contact links.";
     const content2 = "This is a sample navigation menu with Home, About, Contact links.";
@@ -126,11 +123,9 @@ export class ContentDeduplicatorTester {
     const retrievedContent = await this.deduplicator.getContent(hash1);
     console.assert(retrievedContent === content1, 'Retrieved content should match original');
 
-    console.log('✓ Basic deduplication test passed');
   }
 
   private async testSimilarityDetection(): Promise<void> {
-    console.log('Testing similarity detection...');
 
     const template1 = "Welcome to our website. We have 100 products available.";
     const template2 = "Welcome to our website. We have 250 products available.";
@@ -141,13 +136,10 @@ export class ContentDeduplicatorTester {
     await this.deduplicator.processContent(template3, 'https://example.com/category3');
 
     const stats = this.deduplicator.getStorageStats();
-    console.log('Storage stats after similarity test:', stats);
 
-    console.log('✓ Similarity detection test passed');
   }
 
   private async testBatchProcessing(): Promise<void> {
-    console.log('Testing batch processing...');
 
     const contents = [
       { content: "Header content with logo and main navigation", url: 'https://example.com/page1' },
@@ -160,13 +152,10 @@ export class ContentDeduplicatorTester {
     const result = await this.deduplicator.batchProcess(contents);
 
     console.assert(result.hashes.length === contents.length, 'Should return hash for each content');
-    console.log('Batch processing result:', result);
 
-    console.log('✓ Batch processing test passed');
   }
 
   private async testTemplateDetection(): Promise<void> {
-    console.log('Testing template detection...');
 
     const templates = [
       "Product: iPhone 12 - Price: $999",
@@ -187,12 +176,9 @@ export class ContentDeduplicatorTester {
       detectTemplates: true
     });
 
-    console.log('Template detection result:', result.patterns);
-    console.log('✓ Template detection test passed');
   }
 
   private async testCompression(): Promise<void> {
-    console.log('Testing compression...');
 
     const longContent = "This is a very long content that should be compressed. ".repeat(100);
 
@@ -211,20 +197,16 @@ export class ContentDeduplicatorTester {
     const retrievedContent = await this.deduplicator.getContent(hash);
     console.assert(retrievedContent === longContent, 'Compressed content should decompress correctly');
 
-    console.log('✓ Compression test passed');
   }
 
   private async testMetrics(): Promise<void> {
-    console.log('Testing metrics generation...');
 
     const metrics = await this.deduplicator.generateMetrics();
 
-    console.log('Deduplication metrics:', metrics);
 
     console.assert(metrics.totalPages >= 0, 'Total pages should be non-negative');
     console.assert(metrics.storageReduction >= 0, 'Storage reduction should be non-negative');
 
-    console.log('✓ Metrics test passed');
   }
 }
 
@@ -253,7 +235,6 @@ export const ContentDeduplicatorUtils = {
 
     await deduplicator.batchProcess(contents);
     const metrics = await deduplicator.generateMetrics();
-    console.log('Deduplication saved:', metrics.storageReduction + '%');
 
     await deduplicator.getContent(hash);
     await deduplicator.cleanup();

@@ -26,10 +26,8 @@ export function useWidgetConfig({ toast }: UseWidgetConfigProps) {
       const response = await fetch('/api/customer/config');
       const data = await response.json();
 
-      console.log('[useWidgetConfig] API response:', data);
 
       if (data.success && data.data) {
-        console.log('[useWidgetConfig] Loaded configs:', data.data);
         setAvailableConfigs(data.data);
 
         // Check if customerConfigId is in URL query params
@@ -39,7 +37,6 @@ export function useWidgetConfig({ toast }: UseWidgetConfigProps) {
         if (ccIdFromUrl) {
           setCustomerConfigId(ccIdFromUrl);
         } else if (data.data.length === 1) {
-          console.log('[useWidgetConfig] Auto-selecting single config:', data.data[0]);
           setCustomerConfigId(data.data[0].id);
         }
       } else {

@@ -21,12 +21,10 @@ const COMMON_QUERIES_BY_DOMAIN: Record<string, string[]> = {};
  * Run this after deployment or cache clear
  */
 export async function warmCache(domain: string): Promise<void> {
-  console.log(`[CacheWarmer] Starting cache warming for ${domain}`);
   
   const queries = COMMON_QUERIES_BY_DOMAIN[domain] || [];
   
   if (queries.length === 0) {
-    console.log(`[CacheWarmer] No queries defined for ${domain}`);
     return;
   }
   
@@ -42,7 +40,6 @@ export async function warmCache(domain: string): Promise<void> {
     await Promise.all(
       batch.map(async (query) => {
         try {
-          console.log(`[CacheWarmer] Warming: "${query}"`);
           const results = await searchSimilarContent(query, domain, 100, 0.15);
           console.log(`[CacheWarmer] ✓ Cached "${query}" (${results.length} results)`);
           successCount++;
@@ -55,8 +52,6 @@ export async function warmCache(domain: string): Promise<void> {
   }
   
   const duration = Date.now() - startTime;
-  console.log(`[CacheWarmer] Cache warming complete for ${domain}`);
-  console.log(`[CacheWarmer] Success: ${successCount}, Errors: ${errorCount}, Duration: ${duration}ms`);
 }
 
 /**

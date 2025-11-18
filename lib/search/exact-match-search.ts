@@ -129,7 +129,6 @@ export async function exactMatchSkuSearch(
     }
 
     if (!data || data.length === 0) {
-      console.log(`[Exact Match] No exact matches found for SKU "${sku}"`);
       return [];
     }
 
@@ -146,7 +145,6 @@ export async function exactMatchSkuSearch(
       }
     }));
 
-    console.log(`[Exact Match] Found ${results.length} exact matches for SKU "${sku}"`);
     return results;
 
   } catch (error) {
@@ -199,7 +197,6 @@ export async function exactMatchProductCatalog(
     }
 
     if (!data || data.length === 0) {
-      console.log(`[Exact Match] No products found in catalog`);
       return [];
     }
 
@@ -213,7 +210,6 @@ export async function exactMatchProductCatalog(
     });
 
     if (matchingProducts.length === 0) {
-      console.log(`[Exact Match] No products in catalog match SKU "${sku}"`);
       return [];
     }
 
@@ -242,7 +238,6 @@ export async function exactMatchProductCatalog(
       };
     });
 
-    console.log(`[Exact Match] Found ${results.length} products in catalog matching SKU "${sku}"`);
     return results;
 
   } catch (error) {

@@ -52,7 +52,6 @@ export function useWidgetConfig({ demoConfig }: UseWidgetConfigProps): WidgetCon
       // This prevents overwriting correct domain with empty string from API
       if (demoConfig?.domain && demoConfig.domain.trim() !== '') {
         if (process.env.NODE_ENV === 'development') {
-          console.log('[useWidgetConfig] Using domain from demoConfig:', demoConfig.domain);
         }
 
         if (!isMountedRef.current) return;
@@ -66,7 +65,6 @@ export function useWidgetConfig({ demoConfig }: UseWidgetConfigProps): WidgetCon
       }
 
       if (process.env.NODE_ENV === 'development') {
-        console.log('[useWidgetConfig] No domain in demoConfig, falling back to URL detection');
       }
 
       const urlParams = new URLSearchParams(window.location.search);
@@ -131,7 +129,6 @@ export function useWidgetConfig({ demoConfig }: UseWidgetConfigProps): WidgetCon
     }
 
     if (process.env.NODE_ENV === 'development') {
-      console.log('[useWidgetConfig] Retrying config load with:', lastLoadParams.current);
     }
 
     await checkWooCommerceConfig();

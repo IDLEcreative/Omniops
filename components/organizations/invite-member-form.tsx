@@ -67,7 +67,6 @@ export function InviteMemberForm({ organizationId, onInviteSent, onClose, onSucc
 
       // Show invitation link (temporary until email is implemented)
       if (data.invitation_link) {
-        console.log('Invitation link:', data.invitation_link);
         alert(`Invitation link: ${data.invitation_link}\n\nCopy this link and send it to the invitee.`);
       }
     } catch (err) {

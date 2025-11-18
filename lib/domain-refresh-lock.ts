@@ -29,7 +29,6 @@ export class DomainRefreshLock {
 
     // Acquire lock with expiry
     await this.redis.setex(key, DomainRefreshLock.LOCK_TTL, timestamp);
-    console.log(`[DomainLock] ✅ Acquired lock for domain ${domainId}`);
     return true;
   }
 
@@ -40,7 +39,6 @@ export class DomainRefreshLock {
   async release(domainId: string): Promise<void> {
     const key = `${DomainRefreshLock.KEY_PREFIX}${domainId}`;
     await this.redis.del(key);
-    console.log(`[DomainLock] 🔓 Released lock for domain ${domainId}`);
   }
 
   /**
@@ -84,7 +82,6 @@ export class DomainRefreshLock {
    * @param domainId Domain UUID
    */
   async forceRelease(domainId: string): Promise<void> {
-    console.log(`[DomainLock] ⚠️ Force releasing lock for domain ${domainId}`);
     await this.release(domainId);
   }
 }

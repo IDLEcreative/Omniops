@@ -26,7 +26,6 @@ class QueryTimer {
 
   end(): number {
     const elapsed = Date.now() - this.startTime;
-    console.log(`[Performance] ${this.name}: ${elapsed}ms`);
     return elapsed;
   }
 }
@@ -58,7 +57,6 @@ export async function generateQueryEmbedding(
   // Check cache first
   const cached = embeddingCache.get(query);
   if (cached) {
-    console.log('[Performance] Query embedding from cache');
     return cached;
   }
   
@@ -102,12 +100,10 @@ export async function searchSimilarContentOptimized(
   const cachedResult = await cacheManager.getCachedResult(query, domain, limit);
   
   if (cachedResult && cachedResult.chunks) {
-    console.log('[Cache] HIT - Returning cached search results');
     await cacheManager.trackCacheAccess(true);
     return cachedResult.chunks;
   }
   
-  console.log('[Cache] MISS - Performing optimized search');
   await cacheManager.trackCacheAccess(false);
   
   const supabase = await createServiceRoleClient();
@@ -135,7 +131,6 @@ export async function searchSimilarContentOptimized(
       domainTimer.end();
 
       if (!domainData?.id) {
-        console.log(`No domain found for "${domain}"`);
         return [];
       }
 
@@ -143,9 +138,7 @@ export async function searchSimilarContentOptimized(
 
       // Cache the result for future requests
       domainIdCache.set(searchDomain, domainId);
-      console.log(`[Performance] Domain ID cached for "${searchDomain}"`);
     } else {
-      console.log(`[Performance] Domain ID from cache for "${searchDomain}"`);
     }
     
     // SHORT QUERY OPTIMIZATION - for 1-2 word queries, use fast keyword search
@@ -153,7 +146,6 @@ export async function searchSimilarContentOptimized(
     const isShortQuery = queryWords.length <= 2;
     
     if (isShortQuery) {
-      console.log(`[OPTIMIZATION] Short query detected: "${query}" - using fast keyword search`);
       
       const keywordTimer = new QueryTimer('Keyword Search', 3000);
       
@@ -189,7 +181,6 @@ export async function searchSimilarContentOptimized(
     }
     
     // VECTOR SEARCH - for longer queries
-    console.log('[OPTIMIZATION] Using vector search for complex query');
     
     // Generate embedding with timeout
     const embeddingTimer = new QueryTimer('Generate Embedding', 2000);
@@ -217,7 +208,6 @@ export async function searchSimilarContentOptimized(
       console.error('Vector search error:', error);
       
       // FALLBACK to keyword search on error
-      console.log('[OPTIMIZATION] Falling back to keyword search');
       
       const fallbackTimer = new QueryTimer('Fallback Search', 3000);
       
@@ -260,7 +250,6 @@ export async function searchSimilarContentOptimized(
     
     // OPTIMIZATION: Don't fetch all chunks for products - too slow
     // Instead, return the matched chunks as-is
-    console.log(`[OPTIMIZATION] Returning ${results.length} results without chunk enhancement`);
     
     // Cache successful results
     await cacheManager.cacheResult(query, { 

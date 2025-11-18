@@ -58,7 +58,6 @@ export function getOptimizationMetrics(result: ScrapedPage | AIOptimizedResult):
 // Clear AI service caches
 export function clearAIOptimizationCache(): void {
   DeduplicationService.clearCache();
-  console.log('AI optimization caches cleared');
 }
 
 // Utility function to apply AI optimization preset to config
@@ -106,7 +105,6 @@ export function resetAIOptimizationMetrics(): void {
 
 // Clean up old jobs
 export async function cleanupOldJobs(olderThanHours: number = 24): Promise<number> {
-  console.log(`Cleanup not yet implemented for jobs older than ${olderThanHours} hours`);
   return 0;
 }
 
@@ -162,7 +160,6 @@ export async function* streamCrawlResults(jobId: string): AsyncGenerator<Scraped
   for await (const result of jobManager.streamJobResults(jobId)) {
     count++;
     if (count % 10 === 0) {
-      console.log(`[STREAM] Streamed ${count} results so far`);
     }
     yield result;
   }
@@ -188,8 +185,6 @@ export async function resumeCrawl(jobId: string): Promise<void> {
   const config = job.config || {};
   const stats = job.stats || { scraped: 0, errors: 0, total: 0 };
 
-  console.log(`Resuming crawl ${jobId} from pause point`);
-  console.log(`Previous progress: ${stats.scraped}/${stats.total} pages scraped`);
 
   try {
     throw new Error('Resume functionality not fully implemented');

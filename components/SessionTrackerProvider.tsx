@@ -34,7 +34,6 @@ export function SessionTrackerProvider() {
       // Track initial page view
       tracker.trackPageView(window.location.pathname, document.title);
 
-      console.log('[SessionTracker] Initialized for domain:', domain);
 
       // Track page views on navigation (for client-side routing)
       const handleRouteChange = () => {

@@ -105,7 +105,6 @@ export async function atomicSavePageWithEmbeddings(
       };
     }
 
-    console.log(`[AtomicSave] ✅ Success for page ${data.page_id}`);
     console.log(`[AtomicSave]   - Deleted ${data.deleted_embeddings} old embedding(s)`);
     console.log(`[AtomicSave]   - Inserted ${data.inserted_embeddings} new embedding(s)`);
 

@@ -2,21 +2,30 @@
 
 **Type:** Reference
 **Status:** Active
-**Last Updated:** 2025-11-10
+**Last Updated:** 2025-11-18
+**Last Audit:** 2025-11-18 (TODO/FIXME scan - 167 comments found, 20 new issues created)
 **Purpose:** Single source of truth for all bugs, technical debt, and problems discovered in the codebase
 
 ## Quick Reference
 
-**Total Issues:** 24
+**Total Issues:** 44
 - 🔴 Critical: 4
-- 🟠 High: 7
-- 🟡 Medium: 7
-- 🟢 Low: 6
+- 🟠 High: 9
+- 🟡 Medium: 11
+- 🟢 Low: 10
+- ✅ Resolved: 1
 
 **Status Breakdown:**
-- Open: 23
+- Open: 43
 - In Progress: 0
 - Resolved: 1
+
+**TODO Documentation Status (2025-11-18):**
+- Total TODO/FIXME comments found: 167
+- Total issues created: 20 new issues (#025-#044)
+- Test-related TODOs: 128 (grouped into 7 issues)
+- Feature request TODOs: 20 (grouped into 10 issues)
+- Infrastructure TODOs: 19 (grouped into 3 issues)
 
 ---
 
@@ -1142,6 +1151,679 @@ Implement notification system:
 
 ---
 
+### 🟠 [HIGH] Test Infrastructure - Content Extractor Tests Missing {#issue-025}
+
+**Status:** Open
+**Severity:** High
+**Category:** Testing
+**Location:** `__tests__/lib/content-extractor/extractors.test.ts`, `__tests__/lib/content-extractor/converters.test.ts`, `__tests__/lib/content-extractor/utilities.test.ts`, `__tests__/lib/content-extractor/index.test.ts`
+**Discovered:** 2025-11-18
+**Effort:** 3-5 days
+**TODO Count:** 46
+
+**Description:**
+46 TODO comments in content-extractor test files indicate placeholder tests that need implementation. Tests include mock Document setup and actual test implementations for extractors, converters, utilities, and main index.
+
+**Impact:**
+- Content extraction functionality untested
+- No validation of metadata extraction (title, description, author, etc.)
+- No tests for image/link extraction
+- No tests for HTML to markdown conversion
+- Missing test coverage for critical content processing
+
+**Failing Tests:**
+```
+extractors.test.ts:
+  - extractMetadata (7 tests)
+  - extractImages (5 tests)
+  - extractLinks (5 tests)
+  - fallbackExtraction (8 tests)
+
+converters.test.ts:
+  - htmlToMarkdown (8 tests)
+
+utilities.test.ts:
+  - cleanHtml (14 tests)
+  - normalizeUrls (8 tests)
+
+index.test.ts:
+  - extractContent (21 tests)
+```
+
+**Proposed Solution:**
+1. Create mock Document object with necessary DOM APIs
+2. Implement extractMetadata tests (title, description, author, dates, OG tags, Twitter cards)
+3. Implement extractImages/extractLinks tests
+4. Implement HTML to Markdown conversion tests
+5. Implement utility function tests
+6. Implement full integration tests in index.test.ts
+
+**Related Issues:** #issue-001 (Untestable architecture)
+
+---
+
+### 🟠 [HIGH] Test Infrastructure - Scraper API Handlers Tests Missing {#issue-026}
+
+**Status:** Open
+**Severity:** High
+**Category:** Testing
+**Location:** Multiple scraper test files in `__tests__/lib/scraper-api-handlers/`
+**Discovered:** 2025-11-18
+**Effort:** 4-6 days
+**TODO Count:** 47
+
+**Description:**
+47 TODO comments across 9 test files indicate placeholder tests for scraper API handlers. Tests need implementation for result building, validation, AI optimization, extraction, navigation, resource blocking, error handling, and main index.
+
+**Impact:**
+- Scraper functionality untested
+- No validation of result builder logic
+- No tests for validation rules
+- No tests for AI-based optimization
+- Missing error handling verification
+
+**Test Files Requiring Implementation:**
+- result-builder.test.ts (7 tests)
+- validation.test.ts (9 tests)
+- ai-optimizer.test.ts (8 tests)
+- extraction.test.ts (8 tests)
+- page-navigation.test.ts (10 tests)
+- resource-blocker.test.ts (7 tests)
+- index.test.ts (10 tests)
+- error-handler.test.ts (7 tests)
+
+**Proposed Solution:**
+1. Create test fixtures for scraper configurations and responses
+2. Implement result builder tests (formatting, validation, metadata)
+3. Implement validation rule tests (URL formats, content constraints)
+4. Implement AI optimization tests (prompt generation, response parsing)
+5. Implement extraction tests (JavaScript execution, form handling)
+6. Implement navigation tests (link following, pagination)
+7. Implement resource blocking tests (asset filtering)
+8. Implement error handling tests (retry logic, failure cases)
+
+**Related Issues:** #issue-001, #issue-007
+
+---
+
+### 🟠 [HIGH] Test Infrastructure - E2E Placeholder Tests {#issue-027}
+
+**Status:** Open
+**Severity:** High
+**Category:** Testing
+**Location:** Multiple E2E test files in `__tests__/playwright/`
+**Discovered:** 2025-11-18
+**Effort:** 5-8 days
+**TODO Count:** 28
+
+**Description:**
+28 E2E test placeholders with "TODO" comments indicate incomplete test coverage for advanced features. These tests are skipped or logged as placeholders but contain important user journeys that need complete implementation.
+
+**Incomplete Test Categories:**
+- Multi-turn conversations (3 tests) - Context reset, long conversations, pronoun resolution
+- Order lookup (3 tests) - Multiple lookups, modifications, tracking numbers
+- Team management (3 tests) - Member lists, revocation, expired invitations
+- Analytics (4 tests) - Trends, filtering, data export, high-frequency updates
+- Conversation management (3 tests) - Empty results, bulk ops, analytics
+- Cart abandonment (4 tests) - Email reminders, expired sessions, cart merge, stock handling
+- Shopify integration (4 tests) - Inventory sync, out of stock, fulfillment, webhooks
+- Session/domain config (4 tests) - Session limits, upgrade prompts, domain editing, deletion, access control
+
+**Impact:**
+- Missing validation of complex user workflows
+- No E2E coverage for team features
+- Analytics functionality untested end-to-end
+- Shopify workflows not validated
+- Integration boundaries not verified
+
+**Proposed Solution:**
+1. Implement multi-turn conversation tests with context validation
+2. Implement order lookup tests with WooCommerce data
+3. Implement team management workflows
+4. Implement analytics feature tests with data verification
+5. Implement cart abandonment tests
+6. Implement Shopify integration tests with API mocking
+7. Document expected behaviors in each test
+8. Add screenshot/video capture on failures
+
+**Related Issues:** #issue-006, #issue-005
+
+---
+
+### 🟠 [HIGH] Test Infrastructure - Integration Test Placeholders {#issue-028}
+
+**Status:** Open
+**Severity:** High
+**Category:** Testing
+**Location:** Multiple integration test files in `__tests__/integration/`
+**Discovered:** 2025-11-18
+**Effort:** 3-4 days
+**TODO Count:** 7
+
+**Description:**
+7 integration tests have TODO placeholders for critical conversation features: list references, correction tracking, and pronoun resolution. These tests define expected multi-turn conversation behavior but implementation is missing.
+
+**Incomplete Tests:**
+- list-references.test.ts (1 test) - List reference resolution
+- correction-tracking.test.ts (5 tests) - Corrections, multi-corrections, vs clarifications
+- pronoun-resolution.test.ts (6 tests) - Plural pronouns, ambiguity handling
+- woocommerce/product-search.test.ts (1 test) - WooCommerce mock configuration
+- agent-flow-error-handling.test.ts (1 test) - Dev server dependency
+- multi-tenant-isolation.test.ts (1 test) - Embeddings isolation issue
+
+**Impact:**
+- Conversation accuracy features untested
+- Metadata tracking not validated
+- Multi-tenant isolation not verified
+- WooCommerce integration missing tests
+
+**Proposed Solution:**
+1. Implement turn-by-turn metadata assertions
+2. Implement correction detection and tracking
+3. Implement pronoun resolution with context
+4. Fix WooCommerce mock configuration
+5. Remove dev server dependency (use API mocking)
+6. Fix embeddings isolation issue between organizations
+
+**Related Issues:** #issue-001, #issue-004
+
+---
+
+### 🟠 [HIGH] Test Infrastructure - Commerce Provider Mocking Limitations {#issue-029}
+
+**Status:** Open
+**Severity:** High
+**Category:** Testing | Tech Debt
+**Location:** `__tests__/lib/agents/commerce-provider.test.ts:76`, `__tests__/lib/agents/commerce-provider-circuit-breaker.test.ts:84`
+**Discovered:** 2025-11-18
+**Effort:** 2-3 days
+
+**Description:**
+2 test files have TODOs indicating limitations in mocking dynamic imports and isolation issues that cause Jest worker crashes (SIGKILL). Dynamic import patterns prevent proper test isolation.
+
+**Impact:**
+- Provider logic not properly unit testable
+- Circuit breaker functionality untestable in isolation
+- Jest workers crash during parallel execution
+- Can't verify retry and fallback logic
+
+**Current Issues:**
+```
+commerce-provider.test.ts:76
+  TODO: Fix dynamic import mocking limitation
+  - getCommerceProvider uses dynamic imports
+  - Jest can't intercept these with standard mocking
+  - Tests resort to integration testing approach
+
+commerce-provider-circuit-breaker.test.ts:84
+  TODO: These tests cause SIGKILL during parallel execution
+  - Complete isolation required
+  - Parallel execution causes memory issues
+  - Tests marked for skip during parallel runs
+```
+
+**Root Cause:**
+Dynamic imports bypass Jest's module mocking system, making it impossible to mock configuration providers.
+
+**Proposed Solution:**
+1. Refactor provider resolution to use dependency injection
+2. Create provider factory with mockable dependencies
+3. Use `jest.unstable_mockModule()` for dynamic imports
+4. Split tests to avoid parallel execution issues
+5. Add timeout handling for provider initialization
+
+**Example Fix:**
+```typescript
+// Before: Unmockable dynamic import
+async function getCommerceProvider(domain: string) {
+  const config = await import('./dynamic-config');
+  return config.createProvider(domain);
+}
+
+// After: Dependency injection
+class ProviderFactory {
+  constructor(private configProvider: ConfigProvider) {}
+  async create(domain: string) {
+    const config = await this.configProvider.get(domain);
+    return createProvider(config);
+  }
+}
+```
+
+**Related Issues:** #issue-001 (Untestable architecture), #issue-003 (Dynamic imports)
+
+---
+
+### 🟡 [MEDIUM] Shopify Integration - Cart Operations {#issue-030}
+
+**Status:** Open
+**Severity:** Medium
+**Category:** Feature Request | Integration
+**Location:** `lib/chat/shopify-cart-operations.ts` (5 TODOs)
+**Discovered:** 2025-11-18
+**Effort:** 3-5 days
+
+**Description:**
+5 TODO comments indicate incomplete implementation of Shopify cart operations. Currently returns stub responses instead of performing actual operations through Shopify Storefront API.
+
+**Unimplemented Operations:**
+1. **Direct cart manipulation** (line 68) - Add items via Storefront API
+2. **Cart retrieval** (line 109) - Fetch cart contents
+3. **Item removal** (line 143) - Remove items from cart
+4. **Quantity updates** (line 176) - Modify item quantities
+5. **Discount application** (line 210) - Apply coupon codes
+
+**Current Behavior:**
+All operations return success messages but don't actually modify cart (feature pending).
+
+**Impact:**
+- Shopify cart integration not functional
+- Users can't add items through chat
+- Can't retrieve cart contents
+- Can't apply discount codes
+- Incomplete Shopify feature parity
+
+**Proposed Solution:**
+1. Implement Shopify Storefront API client
+2. Implement cart creation/retrieval (CartCreate, CartQuery mutations)
+3. Implement add to cart (CartLinesAdd mutation)
+4. Implement line update (CartLinesUpdate mutation)
+5. Implement line removal (CartLinesRemove mutation)
+6. Implement discount code (CartDiscountCodesUpdate mutation)
+7. Add error handling and retry logic
+8. Create comprehensive tests
+
+**Related Issues:** #issue-006 (Shopify provider tests)
+
+---
+
+### 🟡 [MEDIUM] Conversation Metadata - Test Expectations Mismatch {#issue-031}
+
+**Status:** Open
+**Severity:** Medium
+**Category:** Testing | Bug
+**Location:** `__tests__/lib/chat/conversation-metadata-integration.test.ts:12`
+**Discovered:** 2025-11-18
+
+**Description:**
+Test expects "ZF5 Hydraulic Pump" product name but receives "Product B" from mock data. This indicates either mock data mismatch or test expectations need updating for multi-tenant brand-agnostic system.
+
+**Impact:**
+- Test failing or assertions unreliable
+- Mock data not aligned with test expectations
+- Can't verify metadata tracking for products
+
+**Proposed Solution:**
+1. Either update test expectations to match mock data
+2. Or update mock data to match expected test values
+3. Use generic product names (Product A, Product B, etc.)
+4. Verify metadata structure is being tracked correctly
+
+**Related Issues:** #issue-014 (Brand-agnostic violations in tests)
+
+---
+
+### 🟡 [MEDIUM] Test Environment Setup - Customer Config RLS Tests {#issue-032}
+
+**Status:** Open
+**Severity:** Medium
+**Category:** Testing
+**Location:** `__tests__/api/customer-config/security/` (4 test files)
+**Discovered:** 2025-11-18
+
+**Description:**
+4 test files in customer-config security tests have TODO comments indicating test environment setup/cleanup issues. Tests are currently skipped/disabled until environment can be properly initialized.
+
+**Affected Tests:**
+- rls.test.ts (database RLS policies)
+- delete.test.ts (DELETE operations)
+- post.test.ts (POST/create operations)
+- put.test.ts (PUT/update operations)
+
+**Impact:**
+- RLS policies not tested
+- Security boundaries not verified
+- Missing validation that only org members can access their configs
+- No tests for permission enforcement
+
+**Root Cause:**
+Need proper test database setup with isolated tenants and authenticated users.
+
+**Proposed Solution:**
+1. Create test database factory that resets between tests
+2. Implement test user with specific org/role
+3. Setup test RLS context (authenticated_user_id, org_id)
+4. Create cleanup hooks to reset database state
+5. Re-enable all 4 test files
+
+**Related Issues:** #issue-001
+
+---
+
+### 🟡 [MEDIUM] Test - useParentCommunication targetOrigin Fallback {#issue-033}
+
+**Status:** Open
+**Severity:** Medium
+**Category:** Testing
+**Location:** `__tests__/components/ChatWidget/hooks/useParentCommunication-setup.test.ts:219`
+**Discovered:** 2025-11-18
+
+**Description:**
+Test expectations for targetOrigin fallback behavior need clarification. Comment indicates test expectations need fixing to properly validate fallback behavior.
+
+**Impact:**
+- Widget communication security not fully tested
+- Fallback behavior undefined
+- Potential security issues with incorrect origin validation
+
+**Proposed Solution:**
+1. Define expected fallback behavior for targetOrigin
+2. Create test cases for:
+   - Valid origin provided
+   - Invalid/missing origin
+   - Fallback to window.location.origin
+   - Security implications
+3. Update test expectations and assertions
+
+**Related Issues:** #issue-001
+
+---
+
+### 🟡 [MEDIUM] API Route - Mock Configuration Issues {#issue-034}
+
+**Status:** Open
+**Severity:** Medium
+**Category:** Testing
+**Location:** `__tests__/api/chat/route-async-errors.test.ts:56`, `__tests__/api/csrf/tests/endpoint-protection.test.ts:6`
+**Discovered:** 2025-11-18
+
+**Description:**
+2 API route test files have TODO comments indicating mock configuration issues preventing proper test execution.
+
+**Issues:**
+1. route-async-errors.test.ts - searchSimilarContent mock not recognized as jest.Mock
+2. endpoint-protection.test.ts - Queue module circular dependency (JobPriority.HIGH undefined)
+
+**Impact:**
+- Async error handling not tested
+- CSRF protection not tested
+- Mock configuration patterns unclear
+
+**Proposed Solution:**
+1. Fix searchSimilarContent mock to use proper jest.Mock typing
+2. Break queue module circular dependency using dependency injection
+3. Create reusable test fixture patterns
+4. Document mock setup patterns for API routes
+
+**Related Issues:** #issue-001, #issue-003
+
+---
+
+### 🟡 [MEDIUM] WooCommerce - MCP Test Environment Setup {#issue-035}
+
+**Status:** Open
+**Severity:** Medium
+**Category:** Testing | Integration
+**Location:** `servers/commerce/__tests__/woocommerceOperations.orders.test.ts:19`
+**Discovered:** 2025-11-18
+
+**Description:**
+TODO indicates need to set up proper MCP (Model Context Protocol) test environment for WooCommerce operations testing.
+
+**Impact:**
+- WooCommerce order operations untested
+- No validation of order retrieval and processing
+- Missing test integration between chat and WooCommerce
+
+**Proposed Solution:**
+1. Setup MCP test environment with mock server
+2. Create WooCommerce operation fixtures
+3. Implement order operation tests
+4. Document MCP testing patterns
+
+**Related Issues:** #issue-005
+
+---
+
+### 🟡 [MEDIUM] Analytics - Missing Calculations {#issue-036}
+
+**Status:** Open
+**Severity:** Medium
+**Category:** Feature Request | Analytics
+**Location:** `lib/follow-ups/analytics.ts` (2 TODOs)
+**Discovered:** 2025-11-18
+
+**Description:**
+2 TODO comments indicate missing analytics calculations:
+1. Line 52: conversion_rate calculation not implemented (placeholder 0)
+2. Line 74: response_rate calculation not implemented (placeholder 0)
+
+Plus line 186: Need to check conversation responses for tracking.
+
+**Impact:**
+- Analytics dashboards show 0% metrics
+- No visibility into follow-up effectiveness
+- Can't measure conversion or engagement
+
+**Proposed Solution:**
+1. Implement conversion_rate calculation:
+   - Count follow-ups sent vs purchases made
+   - Calculate percentage: purchases / sent * 100
+2. Implement response_rate calculation:
+   - Count responses vs follow-ups sent
+   - Calculate percentage: responses / sent * 100
+3. Implement response tracking in conversation metadata
+4. Add database queries for metrics
+
+**Related Issues:** #issue-020 (Feedback notifications)
+
+---
+
+### 🟢 [LOW] Feature - Email Service Integration {#issue-037}
+
+**Status:** Open
+**Severity:** Low
+**Category:** Feature Request
+**Location:** Multiple files (3 TODOs)
+**Discovered:** 2025-11-18
+
+**Description:**
+3 TODO comments indicate need to integrate email service (SendGrid, Mailgun, etc.) for notifications:
+1. `lib/follow-ups/channel-handlers.ts:14` - Follow-up email notifications
+2. `app/api/feedback/route.ts:201` - Feedback notifications (already #issue-020)
+3. `lib/analytics/funnel-alerts.ts:175` - Funnel alert notifications
+
+**Impact:**
+- Follow-up messages can't be sent via email
+- Feedback submissions not notified
+- Alerts not sent to stakeholders
+
+**Proposed Solution:**
+1. Choose email provider (SendGrid recommended for scalability)
+2. Create email service abstraction layer
+3. Implement email templates for:
+   - Follow-up messages
+   - Feedback notifications
+   - Funnel alerts
+4. Add configuration for SMTP or API key
+5. Implement retry logic and delivery tracking
+
+**Related Issues:** #issue-020
+
+---
+
+### 🟢 [LOW] Feature - Web Scraping Recommendations {#issue-038}
+
+**Status:** Open
+**Severity:** Low
+**Category:** Feature Request
+**Location:** `lib/recommendations/engine.ts:154`
+**Discovered:** 2025-11-18
+
+**Description:**
+TODO comment indicates need to integrate with WooCommerce to validate recommendations. Currently checks hardcoded data instead of live inventory.
+
+**Impact:**
+- Recommendations may reference out-of-stock items
+- No real-time inventory validation
+- Potential user frustration with unavailable products
+
+**Proposed Solution:**
+1. Query WooCommerce inventory for recommended products
+2. Filter to only in-stock items
+3. Validate prices match current data
+4. Implement caching with TTL
+
+**Related Issues:** #issue-005, #issue-030
+
+---
+
+### 🟢 [LOW] Feature - OpenAI Embeddings Integration {#issue-039}
+
+**Status:** Open
+**Severity:** Low
+**Category:** Feature Request
+**Location:** `lib/search/search-algorithms.ts:25`
+**Discovered:** 2025-11-18
+
+**Description:**
+TODO comment indicates incomplete OpenAI embeddings integration in search algorithms.
+
+**Impact:**
+- Semantic search may be using fallback methods
+- Search quality potentially impacted
+- No real-time embeddings generation
+
+**Proposed Solution:**
+Complete OpenAI embeddings integration with proper error handling.
+
+**Related Issues:** None
+
+---
+
+### 🟢 [LOW] Feature - Cart View Implementation {#issue-040}
+
+**Status:** Open
+**Severity:** Low
+**Category:** Feature Request | UI
+**Location:** `components/shopping/ShoppingFeed.tsx:310`
+**Discovered:** 2025-11-18
+
+**Description:**
+TODO comment indicates cart view feature not yet implemented in shopping feed component.
+
+**Impact:**
+- Users can't view cart from shopping interface
+- Requires navigating elsewhere to see cart
+- Incomplete shopping experience
+
+**Proposed Solution:**
+1. Implement cart view modal/drawer
+2. Show cart items with quantities and prices
+3. Provide edit/remove functionality
+4. Show cart totals
+
+---
+
+### 🟢 [LOW] Feature - Job Queue Integration {#issue-041}
+
+**Status:** Open
+**Severity:** Low
+**Category:** Feature Request
+**Location:** Multiple files (2 TODOs)
+**Discovered:** 2025-11-18
+
+**Description:**
+2 TODO comments indicate incomplete job queue integration in autonomous operations:
+1. `app/api/autonomous/consent/route.ts:117` - Enqueue consent job in BullMQ
+2. `app/api/autonomous/initiate/route.ts:90` - Enqueue operation job in BullMQ
+
+**Impact:**
+- Autonomous operations processed synchronously
+- No background job processing
+- Potential timeout issues with long operations
+
+**Proposed Solution:**
+1. Implement BullMQ integration
+2. Create job processors for:
+   - Consent operations
+   - Autonomous operations
+3. Add job status tracking
+4. Implement retry logic
+
+**Related Issues:** None
+
+---
+
+### 🟢 [LOW] Feature - Dashboard Edit Dialog {#issue-042}
+
+**Status:** Open
+**Severity:** Low
+**Category:** Feature Request | UI
+**Location:** `app/dashboard/analytics/components/OverviewTab.tsx:61`
+**Discovered:** 2025-11-18
+
+**Description:**
+TODO comment indicates edit dialog for metrics not yet implemented.
+
+**Impact:**
+- Can't edit metric goals from dashboard
+- Requires navigating to settings
+- Incomplete analytics management UX
+
+**Proposed Solution:**
+Implement modal dialog for editing metric goals and thresholds.
+
+---
+
+### 🟢 [LOW] Feature - Credential Rotation {#issue-043}
+
+**Status:** Open
+**Severity:** Low
+**Category:** Feature Request | Security
+**Location:** `lib/autonomous/queue/operation-job-processor.ts:166`
+**Discovered:** 2025-11-18
+
+**Description:**
+TODO comment indicates need to implement credential rotation for autonomous operations.
+
+**Impact:**
+- Long-running operations use stale credentials
+- Potential security exposure
+- Reduced session stability
+
+**Proposed Solution:**
+1. Implement credential refresh mechanism
+2. Detect expired credentials
+3. Automatically rotate to fresh credentials
+4. Handle rotation failures gracefully
+
+---
+
+### 🟢 [LOW] Feature - Health Check Implementation {#issue-044}
+
+**Status:** Open
+**Severity:** Low
+**Category:** Feature Request | Operations
+**Location:** `lib/autonomous/queue/operation-job-processor.ts:170`
+**Discovered:** 2025-11-18
+
+**Description:**
+TODO comment indicates need to implement health check for autonomous operation jobs.
+
+**Impact:**
+- No visibility into job processor health
+- Can't detect stuck jobs
+- Missing operational monitoring
+
+**Proposed Solution:**
+1. Implement health check endpoint
+2. Track job processor uptime
+3. Monitor queue depth
+4. Alert on unhealthy processors
+
+---
+
 ### 🔴 [CRITICAL] Search Inconsistency - First Attempt Fails, Second Succeeds {#issue-021}
 
 **Status:** ✅ Resolved
@@ -1321,27 +2003,47 @@ console.log('[Search] Provider result', { resultCount, source, fallbackUsed });
 
 ## Statistics
 
+**Issue Distribution by Severity:**
+- Critical (🔴): 4 issues - 9% of total
+- High (🟠): 9 issues - 20% of total
+- Medium (🟡): 11 issues - 25% of total
+- Low (🟢): 10 issues - 23% of total
+- Resolved (✅): 1 issue - 2% of total
+
 **Most Common Categories:**
-- Tech Debt: 5 issues
-- Testing: 4 issues
-- Code Quality: 4 issues
-- Feature Request: 5 issues
-- Bug: 2 issues
-- Architecture: 1 issue
-- Performance: 2 issues
+- Testing: 17 issues (#001, #003, #004, #005, #007, #025, #026, #027, #028, #029, #031, #032, #033, #034, #035)
+- Feature Request: 10 issues (#016, #017, #018, #019, #020, #030, #036, #037, #038, #039, #040, #041, #042, #043, #044)
+- Tech Debt: 7 issues (#001, #002, #003, #004, #008, #009, #010, #011, #029)
+- Bug: 4 issues (#021, #031, #034, #035)
+- Architecture: 3 issues (#001, #002, #013, #029)
+- Code Quality: 4 issues (#009, #010, #011, #014)
+- Performance: 2 issues (#007, #008)
+- Integration: 3 issues (#005, #006, #030, #035)
+- Security: 2 issues (#001, #043)
+- Analytics: 2 issues (#036, #037)
+- Operations: 1 issue (#044)
 
 **Most Affected Areas:**
-- Testing infrastructure: 5 issues (#001, #003, #004, #005, #007)
-- Search system: 1 issue (#021)
-- Agent files: 3 issues (#009, #010, #011)
-- API routes: 3 issues (#001, #012, #013)
-- Missing features: 5 issues (#016, #017, #018, #019, #020)
+- Testing infrastructure: 17 issues (content extraction, scraper handlers, E2E, integration, mocking)
+- Commerce integration: 5 issues (WooCommerce, Shopify, providers)
+- Supabase/database: 5 issues (untestable architecture, import inconsistency, RLS, migrations)
+- Agent files: 3 issues (mixed methods, any types, massive prompts)
+- API routes: 4 issues (error handling, business logic separation, mock issues)
+- Analytics/follow-ups: 3 issues (calculations, email integration, job queue)
+- Autonomous operations: 2 issues (job queue, credential rotation, health check)
 
 **Average Effort:**
 - Critical: 2-3 weeks
-- High: 3-8 days
-- Medium: 1-5 days
-- Low: 1-3 days
+- High: 2-6 days (average 4 days)
+- Medium: 1-5 days (average 3 days)
+- Low: 1-3 days (average 2 days)
+- Total backlog: ~150-200 person-hours (estimated)
+
+**Test Coverage Impact:**
+- 128 TODO comments in test files
+- 7 issues created for test infrastructure
+- Estimated 15-20 days of work to complete all test implementations
+- Critical for achieving 90%+ code coverage goal
 
 ---
 

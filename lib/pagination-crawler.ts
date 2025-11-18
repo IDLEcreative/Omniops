@@ -51,19 +51,16 @@ export class PaginationCrawler {
     let platform: string | undefined;
     let totalProductCount = 0;
     
-    console.log(`🔄 Starting catalog crawl from: ${startUrl}`);
     
     while (currentUrl && pageNum <= (this.options.maxPages || 50)) {
       // Check if we've already visited this URL
       if (this.visitedUrls.has(currentUrl)) {
-        console.log(`⚠️  Already visited: ${currentUrl}`);
         break;
       }
       
       this.visitedUrls.add(currentUrl);
       
       try {
-        console.log(`📄 Scraping page ${pageNum}: ${currentUrl}`);
         
         // Navigate to the page
         await page.goto(currentUrl, { 
@@ -77,7 +74,6 @@ export class PaginationCrawler {
             timeout: 5000
           });
         } catch {
-          console.log('⚠️  No products found on page, might be end of catalog');
           break;
         }
         
@@ -130,7 +126,6 @@ export class PaginationCrawler {
             
             pageNum++;
           } else {
-            console.log('✅ No more pages found');
             break;
           }
         } else {
@@ -158,9 +153,6 @@ export class PaginationCrawler {
     }
     
     const elapsed = ((Date.now() - startTime) / 1000).toFixed(2);
-    console.log(`\n✅ Catalog crawl completed in ${elapsed}s`);
-    console.log(`📊 Total products collected: ${this.allProducts.length}`);
-    console.log(`📄 Pages scraped: ${pageNum}`);
     
     return this.buildResult(startUrl, totalPages, platform, totalProductCount);
   }

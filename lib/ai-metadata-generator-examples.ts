@@ -61,7 +61,6 @@ export class MetadataExamples {
       documents.map(content => generator.generateMetadata(content))
     );
 
-    console.log(`Processed ${results.length} documents`);
     return results;
   }
 
@@ -77,7 +76,6 @@ export class MetadataExamples {
       []
     );
 
-    console.log('Content similarity to query:', similarity);
     return { metadata, similarity };
   }
 }

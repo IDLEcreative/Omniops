@@ -28,7 +28,6 @@ export async function GET(request: NextRequest) {
 
   // Verify token matches environment variable
   if (mode === 'subscribe' && token === process.env.WHATSAPP_VERIFY_TOKEN) {
-    console.log('✅ WhatsApp webhook verified');
     return new NextResponse(challenge, { status: 200 });
   }
 
@@ -249,7 +248,6 @@ async function handleStatusUpdates(value: any): Promise<void> {
 async function handleTemplateStatus(value: any): Promise<void> {
   const templateStatus = value.template_status;
 
-  console.log('📝 WhatsApp template status:', templateStatus);
 
   const supabase = await createClient();
   if (!supabase) {

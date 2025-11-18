@@ -16,15 +16,12 @@ export function printHealthMetrics(metrics: HealthMetrics): void {
   }
 
   if (metrics.issues.length > 0) {
-    console.log('\n  ⚠️  Issues detected:');
     metrics.issues.forEach(issue => console.log(`    - ${issue}`));
   } else {
-    console.log('\n  ✅ No issues detected');
   }
 }
 
 export function printDomainHealth(domainHealth: DomainHealth): void {
-  console.log(`\n📦 ${domainHealth.domain}`);
   console.log('─'.repeat(50));
   printHealthMetrics(domainHealth.metrics);
 }
@@ -38,11 +35,9 @@ export function printOverallSummary(health: DomainHealth[]): void {
   if (issuesFound.length > 0) {
     console.log(`\n⚠️  Issues detected in ${issuesFound.length} domain(s):`);
     for (const domain of issuesFound) {
-      console.log(`\n  ${domain.domain}:`);
       domain.metrics.issues.forEach(issue => console.log(`    - ${issue}`));
     }
   } else {
-    console.log('\n✅ All domains healthy!');
   }
 
   const totalPages = health.reduce((sum, h) => sum + h.metrics.totalPages, 0);
@@ -56,22 +51,18 @@ export function printOverallSummary(health: DomainHealth[]): void {
 
 export function printWatchStatus(intervalSeconds: number): void {
   console.log(`👁️  Starting continuous monitoring (checking every ${intervalSeconds}s)...\n`);
-  console.log('Press Ctrl+C to stop\n');
 }
 
 export function printWatchUpdate(health: DomainHealth[]): void {
   console.log(`\n[${new Date().toISOString()}] Running health check...`);
-  console.log(`\n📊 Monitored Domains: ${health.length}`);
 
   const issuesFound = health.filter(h => h.metrics.issues.length > 0);
   if (issuesFound.length > 0) {
     console.log(`\n⚠️  Issues detected in ${issuesFound.length} domain(s):`);
     for (const domain of issuesFound) {
-      console.log(`\n  ${domain.domain}:`);
       domain.metrics.issues.forEach(issue => console.log(`    - ${issue}`));
     }
   } else {
-    console.log('\n✅ All domains healthy!');
   }
 
   const totalPages = health.reduce((sum, h) => sum + h.metrics.totalPages, 0);

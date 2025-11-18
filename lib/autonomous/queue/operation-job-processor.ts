@@ -59,7 +59,6 @@ export class OperationJobProcessor {
     // Set up event listeners
     setupWorkerEventListeners(this.worker);
 
-    console.log('[OperationProcessor] Worker started');
   }
 
   /**
@@ -180,7 +179,6 @@ export class OperationJobProcessor {
    */
   async stop(): Promise<void> {
     await this.worker.close();
-    console.log('[OperationProcessor] Worker stopped');
   }
 }
 
@@ -219,6 +217,5 @@ export function createOperationJobProcessor(config?: OperationQueueConfig): Oper
  * startOperationProcessing();
  */
 export function startOperationProcessing(config?: OperationQueueConfig): OperationJobProcessor {
-  console.log('[OperationProcessor] Starting operation processing');
   return getOperationJobProcessor(config);
 }

@@ -12,7 +12,6 @@ export async function executeLookupOrder(
   deps: Pick<ToolDependencies, 'getCommerceProvider'>
 ): Promise<ToolResult> {
   const { getCommerceProvider: getProviderFn } = deps;
-  console.log(`[Function Call] lookup_order: "${orderId}"`);
 
   try {
     const browseDomain = normalizeDomain(domain);
@@ -25,7 +24,6 @@ export async function executeLookupOrder(
     const provider = await getProviderFn(browseDomain);
 
     if (!provider) {
-      console.log('[Function Call] No commerce provider available for domain');
       return {
         success: false,
         results: [],
@@ -36,7 +34,6 @@ export async function executeLookupOrder(
     const order = await provider.lookupOrder(orderId);
 
     if (!order) {
-      console.log(`[Function Call] No order found for ID: ${orderId}`);
       return {
         success: false,
         results: [],
@@ -44,7 +41,6 @@ export async function executeLookupOrder(
       };
     }
 
-    console.log(`[Function Call] Order found via ${provider.platform}: ${order.id} - Status: ${order.status}`);
 
     // Format order information as a search result
     const itemsList = order.items.map((item: any) => `${item.name} (x${item.quantity})`).join(', ');

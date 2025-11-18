@@ -103,10 +103,6 @@ export class QueryReformulator {
         1.0
       );
 
-      console.log('[Query Reformulator] Continuation detected');
-      console.log(`  Original: "${currentMessage}"`);
-      console.log(`  Reformulated: "${reformulated}"`);
-      console.log(`  Extracted entities:`, allEntities);
 
       return {
         original: currentMessage,
@@ -138,9 +134,6 @@ export class QueryReformulator {
 
       const reformulated = parts.join(' ').trim();
 
-      console.log('[Query Reformulator] Reference detected');
-      console.log(`  Original: "${currentMessage}"`);
-      console.log(`  Reformulated: "${reformulated}"`);
 
       return {
         original: currentMessage,

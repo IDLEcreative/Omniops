@@ -17,14 +17,11 @@ export async function crawlWebsiteWithCleanup(
   
   try {
     // Clean up any stuck jobs BEFORE starting
-    console.log('🧹 Running pre-scrape cleanup...');
     const preCleanup = await cleanup.cleanupStaleJobs();
     if (preCleanup > 0) {
-      console.log(`✅ Cleaned ${preCleanup} stale jobs before starting`);
     }
     
     // Start the actual crawl
-    console.log('🚀 Starting crawl...');
     const jobId = await crawlWebsite(url, options);
     
     // For long-running crawls, optionally run periodic cleanup
@@ -33,7 +30,6 @@ export async function crawlWebsiteWithCleanup(
       // Set up periodic cleanup every 30 minutes for large crawls
       const cleanupInterval = setInterval(async () => {
         try {
-          console.log('🧹 Running mid-scrape cleanup check...');
           await cleanup.cleanupStaleJobs();
         } catch (error) {
           console.error('Mid-scrape cleanup failed:', error);
@@ -47,7 +43,6 @@ export async function crawlWebsiteWithCleanup(
     return jobId;
   } catch (error) {
     // If crawl fails, still try to clean up
-    console.log('🧹 Running error cleanup...');
     await cleanup.cleanupStaleJobs().catch(console.error);
     throw error;
   } finally {
@@ -68,10 +63,8 @@ export async function onCrawlComplete(jobId: string) {
   // Run final cleanup
   const cleanup = new ScraperCleanupService(process.env.REDIS_URL);
   try {
-    console.log('🧹 Running post-scrape cleanup...');
     const cleaned = await cleanup.cleanupStaleJobs();
     if (cleaned > 0) {
-      console.log(`✅ Cleaned ${cleaned} jobs after scrape`);
     }
   } finally {
     await cleanup.disconnect();

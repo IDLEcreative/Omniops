@@ -102,7 +102,6 @@ export async function searchTitleAndUrl(
 
     if (error || !data) return [];
 
-    console.log(`[Enhanced Search] Found ${data.length} title/URL matches`);
 
     return data.map((row: any) => {
       const urlLower = (row.url || '').toLowerCase();
@@ -123,7 +122,6 @@ export async function searchTitleAndUrl(
       if (urlLower.includes(queryLower.replace(/\s+/g, '-')) ||
           titleLower.includes(queryLower)) {
         score = Math.min(0.99, score + 0.3);
-        console.log(`[Enhanced Search] Found exact/near-exact match: ${row.title}`);
       }
 
       return {

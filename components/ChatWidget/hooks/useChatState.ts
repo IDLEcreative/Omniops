@@ -192,7 +192,6 @@ export function useChatState({
         document.documentElement.setAttribute('dir', isRTLLang ? 'rtl' : 'ltr');
       }
 
-      console.log(`[ChatWidget RTL] Language: ${storedLang}, RTL: ${isRTLLang}`);
     };
 
     detectRTL();

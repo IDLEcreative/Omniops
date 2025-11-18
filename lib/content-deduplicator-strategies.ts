@@ -110,7 +110,6 @@ export async function performMemoryCleanup(
   processedPages: number,
   MAX_COMMON_ELEMENTS: number
 ): Promise<void> {
-  console.log(`[ContentDeduplicator] Performing memory cleanup at ${processedPages} pages processed`);
 
   if (storage.commonElements.size > MAX_COMMON_ELEMENTS) {
     const elementsToKeep = new Map<string, ContentHash>();
@@ -123,7 +122,6 @@ export async function performMemoryCleanup(
     }
 
     storage.commonElements = elementsToKeep;
-    console.log(`[ContentDeduplicator] Trimmed commonElements from ${storage.commonElements.size} to ${elementsToKeep.size}`);
   }
 
   if (storage.uniqueContent.size > 1000) {
@@ -138,7 +136,6 @@ export async function performMemoryCleanup(
     for (const key of keysToDelete) {
       storage.uniqueContent.delete(key);
     }
-    console.log(`[ContentDeduplicator] Cleaned ${keysToDelete.length} items from uniqueContent`);
   }
 
   const validHashes = new Set(storage.commonElements.keys());
@@ -154,6 +151,5 @@ export async function performMemoryCleanup(
 
   if (global.gc) {
     global.gc();
-    console.log('[ContentDeduplicator] Requested garbage collection');
   }
 }

@@ -33,7 +33,6 @@ export async function loadFromFile(filepath?: string): Promise<Partial<ScraperCo
         }
 
         if (parsedConfig) {
-          console.log(`Loaded configuration from ${configPath}`);
           return parsedConfig;
         }
       } catch (error) {

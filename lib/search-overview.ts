@@ -23,12 +23,10 @@ export async function getProductOverview(
     if (redis) {
       const cached = await redis.get(cacheKey);
       if (cached) {
-        console.log(`[ProductOverview] Cache HIT for query: "${query}"`);
         return JSON.parse(cached);
       }
     }
   } catch (error) {
-    console.log('[ProductOverview] Cache check failed, continuing without cache');
   }
   const supabase = await createServiceRoleClient();
   
@@ -43,14 +41,12 @@ export async function getProductOverview(
     const domainId = await domainCache.getDomainId(searchDomain);
     
     if (!domainId) {
-      console.log(`[ProductOverview] No domain found for "${searchDomain}"`);
       return null;
     }
     
     const queryWords = query.trim().split(/\s+/).filter(word => word.length > 0);
     const searchKeyword = queryWords.length > 0 ? queryWords[0] : '';
     
-    console.log(`[ProductOverview] Gathering metadata for query: "${query}" in domain: ${domainId}, searchKeyword: "${searchKeyword}"`);
     
     // Handle empty search (return all products) vs specific search
     let titleQuery, urlQuery, titleDataQuery, urlDataQuery;
@@ -220,7 +216,6 @@ export async function getProductOverview(
         console.log(`[ProductOverview] Cached result for query: "${query}" (TTL: 5min)`);
       }
     } catch (error) {
-      console.log('[ProductOverview] Failed to cache result, continuing');
     }
     
     return overview;

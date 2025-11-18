@@ -41,7 +41,6 @@ function getPersistedState(key: string): string | null {
 }
 
 async function initialize() {
-  console.log('[Chat Widget] Initialize function called');
 
   // Prevent concurrent initialization attempts using DOM-based lock
   const existingInitFlag = document.querySelector('[data-widget-init-lock="true"]');
@@ -58,15 +57,12 @@ async function initialize() {
 
   try {
     const userConfig = window.ChatWidgetConfig || {};
-    console.log('[Chat Widget] User config:', userConfig);
     let config = createConfig(userConfig);
-    console.log('[Chat Widget] Created config:', config);
 
     if (!config.serverUrl) {
       console.error('[Chat Widget] serverUrl not configured. Please ensure window.ChatWidgetConfig includes a serverUrl.');
       return;
     }
-    console.log('[Chat Widget] serverUrl configured:', config.serverUrl);
 
     // Check if widget exists - allow re-initialization only if config changed
     const existingIframe = document.getElementById('chat-widget-iframe');
@@ -83,7 +79,6 @@ async function initialize() {
 
       // ALWAYS reinitialize if page was reloaded OR config changed
       if (pageReloaded || currentConfigStr !== lastConfigStr) {
-        console.log('[Widget] Reinitializing - page reload or config change detected');
         existingIframe.remove();
         delete (window as any)._lastWidgetConfig;
         delete (window as any)._widgetInitializing;
@@ -108,7 +103,6 @@ async function initialize() {
     if (!storedLanguage) {
       const browserLocale = navigator.language || navigator.languages?.[0] || 'en';
       const detectedLanguage = browserLocale.substring(0, 2).toLowerCase();
-      console.log(`[Chat Widget] Detected browser locale: ${browserLocale}, using language: ${detectedLanguage}`);
       localStorage.setItem('omniops_ui_language', detectedLanguage);
       storedLanguage = detectedLanguage; // Update variable after setting
     }
@@ -223,7 +217,6 @@ async function initialize() {
         }));
 
         if (config.debug || (window as any).ChatWidgetDebug) {
-          console.log('[Chat Widget] Initialization complete, widget ready for interaction');
         }
 
         // Mark initialization as complete - remove both DOM and JS locks

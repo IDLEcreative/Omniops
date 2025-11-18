@@ -5,7 +5,6 @@ export async function POST(request: Request) {
   // Use YOUR production database credentials
   const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL!;
   // This should be birugqyuqhiahxvxeyqg.supabase.co
-  console.log('Connecting to:', supabaseUrl);
 
   const supabase = await createServiceRoleClient();
   if (!supabase) {
@@ -32,7 +31,6 @@ export async function POST(request: Request) {
 
   try {
     // Step 1: Create customer config in YOUR database
-    console.log('Setting up customer config in production...');
 
     const { data: existingConfig } = await supabase
       .from('customer_configs')

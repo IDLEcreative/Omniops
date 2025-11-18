@@ -10,7 +10,6 @@ export function normalizeDomain(domain: string): string | null {
   const normalized = domain.replace(/^https?:\/\//, '').replace('www.', '');
 
   if (!normalized || /localhost|127\.0\.0\.1/i.test(normalized)) {
-    console.log('[Search] Invalid or localhost domain - cannot search without valid domain');
     return null;
   }
 

@@ -64,7 +64,6 @@ export class QueryBuilder {
         }
       });
 
-      console.log(`[QueryBuilder] Executed batch of ${queries.length} queries`);
     } catch (error) {
       queries.forEach(q => q.reject(error));
     }

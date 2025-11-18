@@ -61,14 +61,12 @@ export async function getDynamicWooCommerceClient(
     // Get config using factory (allows test injection)
     const config = await factory.getConfigForDomain(domain);
     if (!config) {
-      console.log(`No configuration found for domain: ${domain}`);
       return null;
     }
 
     // Decrypt credentials using factory (allows test injection)
     const credentials = await factory.decryptCredentials(config);
     if (!credentials) {
-      console.log(`No WooCommerce credentials found for domain: ${domain}`);
       return null;
     }
 

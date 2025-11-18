@@ -62,7 +62,6 @@ export async function generateEnhancedEmbeddings(params: {
     // Log metadata stats for monitoring
     const contentTypes = new Set(embeddingRecords.map(r => r.metadata.content_type));
     const avgKeywords = embeddingRecords.reduce((sum, r) => sum + r.metadata.keywords.length, 0) / embeddingRecords.length;
-    console.log(`[Enhanced Embeddings] Generated ${chunks.length} embeddings for ${params.url}`);
     console.log(`  Content types: ${Array.from(contentTypes).join(', ')}`);
     console.log(`  Avg keywords per chunk: ${avgKeywords.toFixed(1)}`);
 
@@ -84,7 +83,6 @@ export async function generateEnhancedEmbeddings(params: {
       if (fallbackError) throw fallbackError;
     }
 
-    console.log(`Successfully stored ${chunks.length} enhanced embeddings for ${params.url}`);
   } catch (error) {
     console.error('Error generating enhanced embeddings:', error);
     throw error;

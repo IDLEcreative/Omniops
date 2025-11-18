@@ -63,7 +63,6 @@ export async function searchSimilarContentEnhanced(
   title: string;
   similarity: number;
 }>> {
-  console.log(`[Enhanced Search] Starting search for: "${query}" on domain: ${domain}`);
   
   const result = await searchWithEnhancedContext(query, domain, {
     minChunks: Math.max(MIN_CHUNKS, limit),
@@ -83,7 +82,6 @@ export async function searchSimilarContentEnhanced(
   }));
   
   // PARALLEL SEARCH: Also run keyword and metadata searches for better coverage
-  console.log(`[Enhanced Search] Running parallel keyword/metadata search for query: "${query}"`);
   
   // Get domain_id for filtering
   const { createClient } = await import('@supabase/supabase-js');
@@ -107,19 +105,16 @@ export async function searchSimilarContentEnhanced(
       searchTitleAndUrl(domainData.id, query, limit, supabase)
     ]);
     
-    console.log(`[Enhanced Search] Parallel results - Keywords: ${keywordResults.length}, Title/URL: ${metadataResults.length}`);
 
     // Merge results, deduplicating by URL
     const allResults = new Map<string, any>();
     
     // Add semantic results first
-    console.log(`[Enhanced Search] Adding ${mapped.length} semantic results to merge...`);
     mapped.forEach((r: SearchResult) => {
       allResults.set(r.url, { ...r, source: 'semantic' });
     });
 
     // Add keyword matches
-    console.log(`[Enhanced Search] Adding ${keywordResults.length} keyword results to merge...`);
     keywordResults.forEach((r: SearchResult) => {
       if (!allResults.has(r.url)) {
         allResults.set(r.url, { ...r, source: 'keyword' });
@@ -134,7 +129,6 @@ export async function searchSimilarContentEnhanced(
     });
 
     // Add title/URL matches with boost
-    console.log(`[Enhanced Search] Adding ${metadataResults.length} title/URL results to merge...`);
     metadataResults.forEach((r: SearchResult) => {
       if (!allResults.has(r.url)) {
         allResults.set(r.url, { ...r, source: 'title/url' });
@@ -148,7 +142,6 @@ export async function searchSimilarContentEnhanced(
       }
     });
     
-    console.log(`[Enhanced Search] Total unique results before sorting: ${allResults.size}`);
     
     // Convert back to array and sort
     mapped = Array.from(allResults.values())
@@ -165,11 +158,9 @@ export async function searchSimilarContentEnhanced(
 
     mapped = mapped.slice(0, limit);
     
-    console.log(`[Enhanced Search] Final merged results: ${mapped.length} items`);
 
     // Log top results for debugging
     if (mapped.length > 0) {
-      console.log('[Enhanced Search] Top results:');
       mapped.slice(0, 5).forEach((r: SearchResult, i: number) => {
         const source = (r as any).source || 'semantic';
         console.log(`  ${i + 1}. [${source}] ${r.title} (${(r.similarity * 100).toFixed(0)}%)`);

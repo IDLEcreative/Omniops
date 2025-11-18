@@ -197,7 +197,6 @@ export async function findRecommendationsForProducts(
   // Pre-generate embeddings for all products (batch optimization)
   const embeddingCache = new Map<string | number, number[]>();
 
-  console.log(`[Recommender] Generating embeddings for ${allProducts.length} products...`);
 
   await Promise.all(
     allProducts.map(async (product) => {
@@ -211,7 +210,6 @@ export async function findRecommendationsForProducts(
     })
   );
 
-  console.log(`[Recommender] Generated ${embeddingCache.size} embeddings`);
 
   // Find recommendations for each product
   const recommendations = new Map<string | number, RecommendedProduct[]>();

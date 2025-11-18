@@ -20,7 +20,6 @@ export async function scheduleContentRefresh(
     lastRun: config.lastRefreshedAt,
   };
 
-  console.log('Scheduled content refresh:', refreshJob);
 }
 
 /**
@@ -131,7 +130,6 @@ export async function parseSitemap(sitemapUrl: string): Promise<Array<{
         const sitemapLocMatch = sitemapLocRegex.exec(sitemapBlock);
         if (sitemapLocMatch && sitemapLocMatch[1]) {
           const childSitemapUrl = sitemapLocMatch[1].trim();
-          console.log(`Parsing child sitemap: ${childSitemapUrl}`);
           try {
             const childUrls = await parseSitemap(childSitemapUrl);
             urls.push(...childUrls);

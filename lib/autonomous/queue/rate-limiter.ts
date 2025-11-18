@@ -103,7 +103,6 @@ export async function resetRateLimit(
     const client = await queue.client;
     const key = `ratelimit:operations:${organizationId}`;
     await client.del(key);
-    console.log(`[OperationQueue] Rate limit reset for org: ${organizationId}`);
   } catch (error) {
     console.warn('[OperationQueue] Failed to reset rate limit:', error);
   }

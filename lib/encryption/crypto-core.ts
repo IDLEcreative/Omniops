@@ -79,7 +79,6 @@ export function tryDecrypt(value: string): string {
   try {
     return decrypt(value);
   } catch (error) {
-    console.log('Falling back to unencrypted value for backward compatibility');
     return value;
   }
 }

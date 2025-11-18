@@ -8,7 +8,7 @@ import { WooCommerceAgent } from '@/lib/agents/woocommerce-agent';
 import { CustomerServiceAgent } from '@/lib/agents/customer-service-agent';
 
 // TEMPORARY: Skipped due to system prompt changes - needs updating
-describe.skip('WooCommerceAgent', () => {
+describe('WooCommerceAgent', () => {
   describe('inheritance and structure', () => {
     it('should extend CustomerServiceAgent', () => {
       const agent = new WooCommerceAgent();

@@ -164,7 +164,6 @@ export class ProductExtractor {
    * Batch extract products from multiple pages
    */
   async extractBatch(pageIds: string[]): Promise<void> {
-    console.log(`Starting batch extraction for ${pageIds.length} pages...`);
     
     let succeeded = 0;
     let failed = 0;
@@ -173,17 +172,14 @@ export class ProductExtractor {
       const result = await this.extractProductData(pageId);
       if (result) {
         succeeded++;
-        console.log(`✓ Extracted product from page ${pageId}`);
       } else {
         failed++;
-        console.log(`✗ Failed to extract from page ${pageId}`);
       }
       
       // Rate limiting - avoid hitting OpenAI too hard
       await new Promise(resolve => setTimeout(resolve, 1000));
     }
     
-    console.log(`Extraction complete: ${succeeded} succeeded, ${failed} failed`);
   }
 
   /**

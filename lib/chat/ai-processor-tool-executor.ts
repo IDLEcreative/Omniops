@@ -37,7 +37,6 @@ export async function executeToolCallsParallel(
 ): Promise<ToolExecutionResult[]> {
   const { getCommerceProvider: getProviderFn, searchSimilarContent: searchFn } = dependencies;
 
-  console.log(`[Tool Executor] Executing ${toolCalls.length} tools in parallel`);
   const parallelStartTime = Date.now();
 
   // Create promises for all tool executions
@@ -84,7 +83,6 @@ export async function executeToolCallsParallel(
       parsedArgs.includeSpecs = true;
     }
 
-    console.log(`[Tool Executor] Starting: ${toolName}`, parsedArgs);
 
     let result: { success: boolean; results: SearchResult[]; source: string };
 
@@ -164,7 +162,6 @@ export async function executeToolCallsParallel(
                     images: product.images
                   }
                 }));
-                console.log(`[Tool Executor] Converted ${searchResults.length} WooCommerce products to SearchResults`);
               } else {
                 // For other operations, wrap entire result
                 searchResults = [{
@@ -195,7 +192,6 @@ export async function executeToolCallsParallel(
     }
 
     const executionTime = Date.now() - startTime;
-    console.log(`[Tool Executor] Tool ${toolName} completed in ${executionTime}ms: ${result.results.length} results`);
 
     // Track search in telemetry
     telemetry?.trackSearch({

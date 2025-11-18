@@ -34,13 +34,10 @@ export async function sendChatMessage({
   onSuccess,
   onError,
 }: SendMessageParams): Promise<void> {
-  console.log('[sendMessage] 🚀 ENTRY - Starting sendChatMessage');
   try {
     // First check if domain is provided via demoConfig (for dashboard preview)
     let domain = (demoConfig as any)?.domain;
 
-    console.log('[ChatWidget] Domain from demoConfig:', domain);
-    console.log('[ChatWidget] Full demoConfig:', demoConfig);
 
     // If not provided, use URL params or hostname
     if (!domain) {
@@ -57,9 +54,6 @@ export async function sendChatMessage({
       }
     }
 
-    console.log('[ChatWidget] Final domain being used:', domain);
-    console.log('[ChatWidget] storeDomain value:', storeDomain);
-    console.log('[ChatWidget] About to send to API - domain:', storeDomain || domain);
 
     const chatConfig = {
       features: {
@@ -86,8 +80,6 @@ export async function sendChatMessage({
 
     // Detect mobile device on client side
     const isMobile = /Mobile|Android|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent);
-    console.log('[sendMessage] 📱 Mobile detected:', isMobile, 'User-Agent:', navigator.userAgent);
-    console.log('[sendMessage] 🌐 About to fetch API:', { apiUrl, conversationId, sessionId, isMobile });
 
     const response = await fetch(apiUrl, {
       method: 'POST',
@@ -106,15 +98,12 @@ export async function sendChatMessage({
       }),
     });
 
-    console.log('[sendMessage] ✅ Fetch completed, status:', response.status);
 
     let data;
     const contentType = response.headers.get('content-type');
 
     if (contentType && contentType.includes('application/json')) {
-      console.log('[sendMessage] 📦 Parsing JSON response');
       data = await response.json();
-      console.log('[sendMessage] 📦 JSON parsed successfully');
     } else {
       const text = await response.text();
       console.error('Received non-JSON response:', text.substring(0, 200));
@@ -131,7 +120,6 @@ export async function sendChatMessage({
       message: data.message?.substring(0, 50)
     });
 
-    console.log('[ChatWidget] 🔍 Full API response shopping metadata:', data.shoppingMetadata);
 
     const assistantMessage: Message = {
       id: data.id || `temp_${Date.now()}_assistant`,
@@ -152,9 +140,7 @@ export async function sendChatMessage({
       fullMetadata: assistantMessage.metadata
     });
 
-    console.log('[sendMessage] 🎯 Calling onSuccess with message');
     onSuccess(assistantMessage, data.conversation_id);
-    console.log('[sendMessage] ✅ onSuccess completed');
 
   } catch (error) {
     console.error('Error sending message:', error);

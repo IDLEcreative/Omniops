@@ -67,7 +67,6 @@ export function shouldTriggerShoppingMode(
   // MOBILE OPTIMIZATION: Always use shopping feed on mobile for better UX
   // Mobile users should see swipeable product carousel instead of text links
   if (isMobile && products.length > 0) {
-    console.log('[Shopping] Mobile detected - forcing shopping mode for', products.length, 'products');
     return true;
   }
 

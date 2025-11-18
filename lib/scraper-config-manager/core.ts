@@ -185,7 +185,6 @@ export class ScraperConfigManager extends EventEmitter {
       if (fs.existsSync(configPath)) {
         this.fileWatcher = fs.watch(configPath, async (eventType) => {
           if (eventType === 'change') {
-            console.log('Configuration file changed, reloading...');
             await this.reload();
           }
         });

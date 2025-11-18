@@ -54,7 +54,6 @@ export async function POST(request: Request) {
 
   try {
     // Step 1: Create the search_embeddings RPC function
-    console.log('Creating search_embeddings function...');
     
     const createFunctionSQL = `
       CREATE OR REPLACE FUNCTION public.search_embeddings(
@@ -99,7 +98,6 @@ export async function POST(request: Request) {
     
     if (functionError) {
       // Try alternative: Create a simpler version
-      console.log('Trying alternative function creation...');
       results.function_creation = { 
         status: 'alternative_needed',
         message: 'Need to create function manually or through migration'
@@ -109,7 +107,6 @@ export async function POST(request: Request) {
     }
     
     // Step 2: Add customer_configs entry for the domain
-    console.log(`Adding customer config for ${domain}...`);
 
     // First check if it already exists
     const { data: existingConfig } = await supabase
@@ -153,7 +150,6 @@ export async function POST(request: Request) {
     }
     
     // Step 3: Test the search with a simple query
-    console.log('Testing search...');
     
     // Since we might not have the RPC function, let's do a direct search
     const { data: testResults } = await supabase

@@ -208,7 +208,6 @@ export async function getConversationHistory(
   }
 
   const historyLength = data?.length || 0;
-  console.log(`[ConversationManager] Loaded ${historyLength}/${limit} messages for conversation ${conversationId}`);
 
   if (historyLength === 0) {
     console.warn(`[ConversationManager] Conversation ${conversationId} has ZERO history messages`);

@@ -40,7 +40,6 @@ export function initWidget(containerId: string, config: StandaloneWidgetConfig =
     </React.StrictMode>
   );
 
-  console.log('[Omniops Widget] Initialized successfully');
 }
 
 // Make it available globally for embed.js to call

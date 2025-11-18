@@ -47,7 +47,6 @@ export async function resolveProviderWithRetry(
 
       for (const detector of providerDetectors) {
         const detectorName = detector === detectShopify ? 'shopify' : 'woocommerce';
-        console.log(`[Provider] Trying detector: ${detectorName}`, { domain, attempt });
 
         try {
           // Wrap detector call in circuit breaker to prevent cascading failures

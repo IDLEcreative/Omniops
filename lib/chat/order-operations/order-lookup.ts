@@ -39,7 +39,6 @@ export async function checkOrder(
           order = await wc.getOrder(numericId);
         } catch (error) {
           // Order not found by ID, will try email search
-          console.log(`[WooCommerce Agent] Order ID ${numericId} not found`);
         }
       }
     }

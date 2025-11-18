@@ -70,15 +70,12 @@ export async function executeGetProductDetails(
           }
         } else {
           // Product not found in commerce platform - log explicitly
-          console.log(`[Function Call] ${provider.platform} product not found: "${productQuery}"`);
 
           // NEW: Before returning not-found, try exact match if it's a SKU pattern
           if (isSkuPattern(productQuery)) {
-            console.log(`[Function Call] Trying exact SKU match for "${productQuery}" after provider miss`);
 
             const exactResults = await exactMatchSearch(productQuery, browseDomain, 5);
             if (exactResults.length > 0) {
-              console.log(`[Function Call] Exact match found ${exactResults.length} results after provider miss`);
               return {
                 success: true,
                 results: exactResults,
@@ -109,11 +106,9 @@ export async function executeGetProductDetails(
 
         // NEW: Try exact match on provider error if it's a SKU pattern
         if (isSkuPattern(productQuery)) {
-          console.log(`[Function Call] Trying exact SKU match for "${productQuery}" after provider error`);
 
           const exactResults = await exactMatchSearch(productQuery, browseDomain, 5);
           if (exactResults.length > 0) {
-            console.log(`[Function Call] Exact match found ${exactResults.length} results after provider error`);
             return {
               success: true,
               results: exactResults,
@@ -142,7 +137,6 @@ export async function executeGetProductDetails(
 
     // NEW: If no provider, try exact match first for SKU patterns
     if (isSkuPattern(productQuery)) {
-      console.log(`[Function Call] No provider available, trying exact SKU match for "${productQuery}"`);
 
       const exactResults = await exactMatchSearch(productQuery, browseDomain, 5);
       if (exactResults.length > 0) {
@@ -154,7 +148,6 @@ export async function executeGetProductDetails(
         };
       }
 
-      console.log(`[Function Call] No exact match found, falling back to semantic search`);
     }
 
     // Enhanced query for detailed product information (semantic fallback)

@@ -48,7 +48,6 @@ export class WooCommerceProvider implements CommerceProvider {
         try {
           order = await this.client.getOrder(numericId);
         } catch (error) {
-          console.log(`[WooCommerce Provider] Order ID ${numericId} not found`);
         }
       }
 
@@ -183,7 +182,6 @@ export class WooCommerceProvider implements CommerceProvider {
         return skuResults[0];
       }
 
-      console.log(`[WooCommerce Provider] SKU "${productId}" not found in catalog, trying name search fallback`);
 
       // Fallback: Search by product name/description if SKU search fails
       // This handles cases where user asks about "10mtr extension cables" (name) not SKU
@@ -197,7 +195,6 @@ export class WooCommerceProvider implements CommerceProvider {
         return searchResults[0];
       }
 
-      console.log(`[WooCommerce Provider] Product "${productId}" not found via SKU or name search`);
 
       // Fuzzy matching: Suggest similar SKUs if exact match and name search both failed
       const availableSkus = await this.getAvailableSkus();

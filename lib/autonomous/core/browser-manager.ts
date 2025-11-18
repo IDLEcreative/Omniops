@@ -19,7 +19,6 @@ export class BrowserManager {
     const page = await browser.newPage();
     await page.setViewportSize({ width: 1280, height: 720 });
 
-    console.log('[BrowserManager] Browser initialized');
     return { browser, page };
   }
 
@@ -29,7 +28,6 @@ export class BrowserManager {
   static async cleanup(browser?: Browser): Promise<void> {
     if (browser) {
       await browser.close();
-      console.log('[BrowserManager] Browser closed');
     }
   }
 

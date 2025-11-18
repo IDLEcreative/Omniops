@@ -192,8 +192,6 @@ export abstract class AutonomousAgent {
       // Ask AI what to do
       const aiCommand = await this.aiCommander.getCommand(step, screenshotBase64, pageUrl);
 
-      console.log(`[AutonomousAgent] Step ${step.order}: ${step.intent}`);
-      console.log(`[AutonomousAgent] AI Command: ${aiCommand}`);
 
       // Execute the command
       await this.executeCommand(aiCommand, credentials);

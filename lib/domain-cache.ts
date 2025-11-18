@@ -43,7 +43,6 @@ class DomainCacheService {
       this.recordMetric(lookupTime);
       
       if (lookupTime > 10) {
-        console.log(`[DomainCache] Slow cache hit: ${lookupTime}ms`);
       }
       
       return cached.id;
@@ -52,7 +51,6 @@ class DomainCacheService {
     // Check if lookup is already in progress (deduplication)
     const pendingLookup = this.pendingLookups.get(normalizedDomain);
     if (pendingLookup) {
-      console.log('[DomainCache] Deduplicating in-flight lookup');
       return pendingLookup;
     }
     
@@ -67,7 +65,6 @@ class DomainCacheService {
       this.recordMetric(lookupTime);
       
       if (lookupTime > 100) {
-        console.log(`[DomainCache] Slow DB lookup: ${lookupTime}ms for ${normalizedDomain}`);
       }
       
       return result;
@@ -162,7 +159,6 @@ class DomainCacheService {
    * Preload common domains for instant access
    */
   async preloadDomains(domains: string[]): Promise<void> {
-    console.log(`[DomainCache] Preloading ${domains.length} domains`);
     
     const promises = domains.map(domain => 
       this.getDomainId(domain).catch(err => {
@@ -172,7 +168,6 @@ class DomainCacheService {
     );
     
     await Promise.all(promises);
-    console.log('[DomainCache] Preload complete');
   }
 
   /**

@@ -180,7 +180,6 @@ export class OperationService {
       }
 
       await this.operations.updateOperationConsent(this.supabase, operationId);
-      console.log('[OperationService] Consent granted for operation:', operationId);
     } catch (error) {
       console.error('[OperationService] GrantConsent error:', error);
       throw error;
@@ -197,7 +196,6 @@ export class OperationService {
       }
 
       await this.operations.updateOperationCancelled(this.supabase, operationId);
-      console.log('[OperationService] Operation cancelled:', operationId);
     } catch (error) {
       console.error('[OperationService] Cancel error:', error);
       throw error;

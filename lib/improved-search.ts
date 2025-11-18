@@ -45,11 +45,9 @@ export async function searchWithImprovements(
   try {
     // 1. Detect query type for optimization
     const queryType = options.forceQueryType || detectQueryType(query);
-    console.log(`[Improved Search] Query type detected: ${queryType}`);
     
     // 2. Get optimized parameters
     const params = getOptimizedSearchParams(queryType);
-    console.log(`[Improved Search] Using params:`, params);
     
     // 3. Get domain_id
     const searchDomain = domain.replace('www.', '');
@@ -91,7 +89,6 @@ export async function searchWithImprovements(
     }
     
     if (!embeddings || embeddings.length === 0) {
-      console.log('[Improved Search] No results found');
       return [];
     }
     
@@ -114,9 +111,7 @@ export async function searchWithImprovements(
         .map((r: any) => r.url);
 
       if (productUrls.length === 0) {
-        console.log('[Improved Search] No product URLs to enhance');
       } else {
-        console.log(`[Improved Search] Enhancing ${productUrls.length} product pages with batched queries...`);
 
         try {
           // BATCH QUERY 1: Fetch ALL product pages at once
@@ -128,7 +123,6 @@ export async function searchWithImprovements(
           if (pagesError) {
             console.error('[Improved Search] Error fetching pages:', pagesError);
           } else if (allPages && allPages.length > 0) {
-            console.log(`[Improved Search] Fetched ${allPages.length} pages in 1 batch query`);
 
             // Build URL -> page lookup map
             const pagesByUrl = new Map(allPages.map(p => [p.url, p]));
@@ -144,7 +138,6 @@ export async function searchWithImprovements(
             if (chunksError) {
               console.error('[Improved Search] Error fetching chunks:', chunksError);
             } else if (allChunks && allChunks.length > 0) {
-              console.log(`[Improved Search] Fetched ${allChunks.length} chunks in 1 batch query`);
 
               // Build page_id -> chunks[] lookup map for efficient grouping
               const chunksByPageId = new Map<string, any[]>();
@@ -165,7 +158,6 @@ export async function searchWithImprovements(
                     if (index >= 0) {
                       results[index].content = (pageData as any).content;
                       results[index].enhanced = true;
-                      console.log(`[Improved Search] Enhanced ${productUrl} with full page content`);
                     }
                   } else {
                     // Option 2: Combine all embedding chunks from lookup map
@@ -176,7 +168,6 @@ export async function searchWithImprovements(
                       if (index >= 0) {
                         results[index].content = combinedContent;
                         results[index].enhanced = true;
-                        console.log(`[Improved Search] Enhanced ${productUrl} with ${chunks.length} chunks`);
                       }
                     }
                   }

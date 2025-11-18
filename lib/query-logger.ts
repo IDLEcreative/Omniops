@@ -132,10 +132,6 @@ export class QueryLogger {
   printSummary() {
     const summary = this.getSummary();
 
-    console.log('\n=== Query Performance Summary ===');
-    console.log(`Total Queries: ${summary.totalQueries}`);
-    console.log(`Total Time: ${summary.totalTime}ms`);
-    console.log(`Average Time: ${summary.avgTime}ms`);
 
     if (summary.slowest) {
       console.log(`Slowest Query: ${summary.slowest.query} (${summary.slowest.duration})`);
@@ -146,11 +142,8 @@ export class QueryLogger {
       console.warn('   Consider batching or using JOINs to reduce query count');
     }
 
-    console.log('\nQuery Details:');
     summary.queries.forEach((q, i) => {
-      console.log(`  ${i + 1}. ${q.query}: ${q.duration}`);
     });
-    console.log('================================\n');
   }
 }
 

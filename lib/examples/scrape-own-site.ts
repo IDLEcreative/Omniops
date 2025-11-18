@@ -7,20 +7,13 @@ async function scrapeOwnWebsite() {
   const url = 'https://www.your-company.com';
   const estimatedPages = 5000; // Estimate of total pages
   
-  console.log('🚀 Starting own-site scraping with optimized configuration...\n');
   
   // Get optimal configuration based on site size
   const { config, parallel } = getOptimalConfig(estimatedPages);
   
-  console.log(`Configuration for ${estimatedPages} pages:`);
-  console.log(`- Total parallel jobs: ${parallel.totalJobs}`);
-  console.log(`- Pages per job: ${parallel.pagesPerJob}`);
-  console.log(`- Concurrent browsers per job: ${config.maxConcurrency}`);
   console.log(`- Total concurrent browsers: ${parallel.totalJobs * (config.maxConcurrency || 3)}`);
-  console.log('');
   
   // Option 1: Single high-performance job
-  console.log('Option 1: Single job with high concurrency');
   const singleJobId = await crawlWebsiteWithCleanup(url, {
     maxPages: estimatedPages,
     ownSite: true, // Enable own-site optimizations
@@ -30,7 +23,6 @@ async function scrapeOwnWebsite() {
     }
   });
   
-  console.log(`Started single job: ${singleJobId}`);
   
   // Option 2: Multiple parallel jobs (recommended for large sites)
   console.log('\nOption 2: Multiple parallel jobs (better for large sites)');
@@ -47,14 +39,12 @@ async function scrapeOwnWebsite() {
     });
     
     jobIds.push(jobId);
-    console.log(`Started job ${i + 1}/${parallel.totalJobs}: ${jobId}`);
     
     // Small delay between starting jobs to avoid resource spike
     await new Promise(resolve => setTimeout(resolve, 1000));
   }
   
   // Monitor progress
-  console.log('\n📊 Monitoring progress...');
   
   const startTime = Date.now();
   let allCompleted = false;
@@ -71,19 +61,13 @@ async function scrapeOwnWebsite() {
     const elapsedSeconds = Math.round((Date.now() - startTime) / 1000);
     const pagesPerSecond = (totalCompleted / elapsedSeconds).toFixed(2);
     
-    console.log(`\nProgress after ${elapsedSeconds}s:`);
-    console.log(`- Pages scraped: ${totalCompleted}`);
-    console.log(`- Failed: ${totalFailed}`);
-    console.log(`- Speed: ${pagesPerSecond} pages/second`);
     console.log(`- Estimated completion: ${Math.round(estimatedPages / parseFloat(pagesPerSecond) / 60)} minutes`);
     
     allCompleted = statuses.every(s => s.status === 'completed' || s.status === 'failed');
   }
   
-  console.log('\n✅ All jobs completed!');
   
   // Stream results for processing
-  console.log('\n📥 Streaming results...');
   let totalResults = 0;
   
   for (const jobId of jobIds) {
@@ -91,12 +75,10 @@ async function scrapeOwnWebsite() {
       totalResults++;
       // Process each page (e.g., save to database, index for search, etc.)
       if (totalResults % 100 === 0) {
-        console.log(`Processed ${totalResults} pages...`);
       }
     }
   }
   
-  console.log(`\n🎉 Successfully scraped ${totalResults} pages!`);
 }
 
 // Helper function to distribute paths across jobs
@@ -208,10 +190,6 @@ async function advancedOwnSiteScraping() {
     }
   });
   
-  console.log('Started specialized scraping jobs:');
-  console.log(`- Products: ${productJobId}`);
-  console.log(`- Documentation: ${docsJobId}`);
-  console.log(`- News: ${newsJobId}`);
 }
 
 // Run the examples

@@ -16,10 +16,8 @@ export function extractDomainFromReferer(request: NextRequest, domain: string): 
       try {
         const refererUrl = new URL(referer);
         const extractedDomain = refererUrl.hostname;
-        console.log(`[Widget Config API] Domain extracted from referer: ${extractedDomain}`);
         return extractedDomain;
       } catch (e) {
-        console.log('[Widget Config API] Unable to parse referer:', referer);
       }
     }
   }
@@ -49,8 +47,6 @@ export function applyDomainAlias(domain: string): string {
 
   const aliasedDomain = domain && DOMAIN_ALIASES[domain];
   if (aliasedDomain) {
-    console.log(`[Widget Config API] ⚠️ Using domain alias workaround: ${domain} → ${aliasedDomain}`);
-    console.log(`[Widget Config API] ℹ️ Proper fix: Add ${domain} to customer_configs table`);
     return aliasedDomain;
   }
 

@@ -72,18 +72,15 @@ export async function GET(request: NextRequest) {
       );
     }
 
-    console.log('📍 Step 1: Exchange authorization code for access token');
 
     // Exchange code for access token
     const oauth = new InstagramOAuth();
     const tokenData = await oauth.exchangeCodeForToken(code);
 
-    console.log('📍 Step 2: Get Instagram account info');
 
     // Get Instagram account details
     const accountInfo = await oauth.getInstagramAccount(tokenData.access_token);
 
-    console.log('📍 Step 3: Store encrypted credentials');
 
     // Store encrypted credentials
     const { error: updateError } = await supabase
@@ -107,7 +104,6 @@ export async function GET(request: NextRequest) {
       throw new Error('Failed to store Instagram credentials');
     }
 
-    console.log('📍 Step 4: Subscribe to Instagram webhooks');
 
     // Subscribe to webhooks
     try {
@@ -118,8 +114,6 @@ export async function GET(request: NextRequest) {
       // User can retry later or webhooks can be configured manually
     }
 
-    console.log('✅ Instagram OAuth complete for customer:', customerId);
-    console.log('   Instagram account:', accountInfo.username);
 
     // Redirect back to dashboard with success message
     return NextResponse.redirect(

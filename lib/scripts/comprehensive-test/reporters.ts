@@ -28,7 +28,6 @@ export function log(message: string, type: LogType = 'info'): void {
     test: `${colors.cyan}🧪`,
   }[type];
 
-  console.log(`${prefix} ${message}${colors.reset}`);
 }
 
 /**
@@ -36,7 +35,6 @@ export function log(message: string, type: LogType = 'info'): void {
  */
 export function section(title: string): void {
   console.log(`\n${colors.bright}${'═'.repeat(50)}${colors.reset}`);
-  console.log(`${colors.bright}${title}${colors.reset}`);
   console.log(`${colors.bright}${'═'.repeat(50)}${colors.reset}`);
 }
 
@@ -44,11 +42,6 @@ export function section(title: string): void {
  * Print test suite header
  */
 export function printHeader(): void {
-  console.log(`${colors.bright}${colors.cyan}`);
-  console.log('╔══════════════════════════════════════════════════╗');
-  console.log('║   COMPREHENSIVE CHAT SYSTEM VALIDATION SUITE    ║');
-  console.log('╚══════════════════════════════════════════════════╝');
-  console.log(colors.reset);
 }
 
 export interface TestResults {
@@ -87,10 +80,4 @@ export function printSummary(results: TestResults): void {
   }
 
   // Connection status
-  console.log(`\n${colors.cyan}System Status:${colors.reset}`);
-  console.log(`• Supabase Connection: ${colors.green}✓ Connected${colors.reset}`);
-  console.log(`• API Endpoint: ${colors.green}✓ Responding${colors.reset}`);
-  console.log(`• Database Tables: ${colors.green}✓ Accessible${colors.reset}`);
-  console.log(`• UUID Validation: ${colors.green}✓ Working${colors.reset}`);
-  console.log(`• Message Persistence: ${colors.green}✓ Functional${colors.reset}`);
 }

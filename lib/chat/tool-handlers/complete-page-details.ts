@@ -18,7 +18,6 @@ export async function executeGetCompletePageDetails(
   pageQuery: string,
   domain: string
 ): Promise<ToolResult> {
-  console.log(`[Function Call] get_complete_page_details: "${pageQuery}"`);
 
   try {
     const browseDomain = normalizeDomain(domain);
@@ -31,7 +30,6 @@ export async function executeGetCompletePageDetails(
     const fullPageResult = await searchAndReturnFullPage(pageQuery, browseDomain, 15, 0.3);
 
     if (fullPageResult.success && fullPageResult.source === 'full_page') {
-      console.log(`[Function Call] Complete page details - ${fullPageResult.results.length} chunks from: ${fullPageResult.pageInfo?.title}`);
       return {
         success: true,
         results: fullPageResult.results,
@@ -41,7 +39,6 @@ export async function executeGetCompletePageDetails(
     }
 
     // If full page retrieval fails, return error (don't fall back)
-    console.log('[Function Call] Could not retrieve complete page details');
     return {
       success: false,
       results: [],

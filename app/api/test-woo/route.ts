@@ -7,7 +7,6 @@ import { createServiceRoleClient } from '@/lib/supabase-server';
 export async function GET(request: NextRequest) {
   const domain = request.nextUrl.searchParams.get('domain') || process.env.TEST_DOMAIN || 'example.com';
 
-  console.log('🧪 Testing WooCommerce connection for domain:', domain);
   
   // First check if config exists
   const supabase = await createServiceRoleClient();
@@ -45,7 +44,6 @@ export async function GET(request: NextRequest) {
       });
     }
     
-    console.log('✅ WooCommerce client created successfully');
     
     // Try to fetch products
     const products = await client.getProducts({

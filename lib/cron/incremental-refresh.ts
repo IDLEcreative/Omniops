@@ -41,7 +41,6 @@ export async function getChangedPages(domainId: string): Promise<string[]> {
       }
     } catch (error) {
       // On error, include for refresh
-      console.log(`[Incremental] Error checking ${page.url}, will re-scrape:`, error);
       changedUrls.push(page.url);
     }
   }
@@ -57,11 +56,9 @@ export async function incrementalCrawl(
   const changedPages = await getChangedPages(domainId);
 
   if (changedPages.length === 0) {
-    console.log(`[Incremental] No changes detected for ${domain}`);
     return { pagesRefreshed: 0, skipped: true };
   }
 
-  console.log(`[Incremental] Found ${changedPages.length} changed pages for ${domain}`);
 
   // Crawl only changed pages
   const jobId = await crawlWebsite(`https://${domain}`, {

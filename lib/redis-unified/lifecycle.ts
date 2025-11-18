@@ -8,7 +8,6 @@ import { getInstances, resetInstances } from './client';
  * Graceful shutdown helper
  */
 export async function gracefulShutdown(): Promise<void> {
-  console.log('[Redis] Starting graceful shutdown...');
 
   const { client, jobManager } = getInstances();
 
@@ -22,7 +21,6 @@ export async function gracefulShutdown(): Promise<void> {
 
   resetInstances();
 
-  console.log('[Redis] Graceful shutdown complete');
 }
 
 // Handle process termination

@@ -188,7 +188,7 @@ describe('Chat API Route - Integration Tests', () => {
     commerceModule.getCommerceProvider.mockResolvedValue(provider);
   });
 
-  it.skip('should validate conversation and message saving happen in correct order [NEEDS FIX: Mock setup after refactor]', async () => {
+  it('should validate conversation and message saving happen in correct order [NEEDS FIX: Mock setup after refactor]', async () => {
     const operationOrder: string[] = [];
 
     // Track operation order

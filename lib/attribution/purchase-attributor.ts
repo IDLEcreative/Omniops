@@ -38,7 +38,6 @@ export async function attributePurchaseToConversation(
     orderMetadata,
   } = context;
 
-  console.log(`[Attribution] Processing ${platform} order ${orderId} for ${customerEmail}`);
 
   // Strategy 1: Session Match (High Confidence: 0.95)
   const sessionMatch = await trySessionMatch(customerEmail, domain, orderTimestamp);

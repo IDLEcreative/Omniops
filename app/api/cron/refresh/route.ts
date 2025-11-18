@@ -17,7 +17,6 @@ async function processDomainWithRetry(
 
   for (let attempt = 1; attempt <= maxRetries; attempt++) {
     try {
-      console.log(`[Cron] Attempt ${attempt}/${maxRetries} for ${domain.domain}`);
 
       const jobId = await crawlWebsite(`https://${domain.domain}`, {
         maxPages: parseInt(process.env.CRON_MAX_PAGES || '-1'),
@@ -27,7 +26,6 @@ async function processDomainWithRetry(
         turboMode: true,
       });
 
-      console.log(`[Cron] ✅ Success on attempt ${attempt}: ${domain.domain}`);
       return { success: true, jobId, attempts: attempt };
 
     } catch (error) {
@@ -36,7 +34,6 @@ async function processDomainWithRetry(
 
       if (attempt < maxRetries) {
         const delay = retryDelay * attempt; // Exponential: 60s, 120s, 180s
-        console.log(`[Cron] ⏳ Waiting ${delay/1000}s before retry...`);
         await new Promise(resolve => setTimeout(resolve, delay));
       } else {
         return { success: false, error: errorMsg, attempts: attempt };
@@ -105,7 +102,6 @@ export async function GET(request: NextRequest) {
         const lockAcquired = await domainLock.acquire(domain.id);
 
         if (!lockAcquired) {
-          console.log(`[Cron] ⏭️ Skipping ${domain.domain} - refresh already in progress`);
           results.push({
             domainId: domain.id,
             domain: domain.domain,
@@ -116,13 +112,8 @@ export async function GET(request: NextRequest) {
           continue;
         }
 
-        console.log(`[Cron] 🔄 Refreshing domain: ${domain.domain}`);
         console.log(`[Cron]   - forceRescrape: true (forcing full re-scrape)`);
-        console.log(`[Cron]   - maxPages: ${process.env.CRON_MAX_PAGES || '-1'}`);
-        console.log(`[Cron]   - turboMode: true`);
         console.log(`[Cron]   - Using Crawlee + Playwright (same as initial scraper)`);
-        console.log(`[Cron]   - Sitemap discovery ENABLED`);
-        console.log(`[Cron]   - Retry logic: ${process.env.CRON_MAX_RETRIES || '3'} attempts with exponential backoff`);
 
         // Process domain with automatic retry logic
         const result = await processDomainWithRetry(domain, domainLock);
@@ -167,12 +158,10 @@ export async function GET(request: NextRequest) {
     }
 
     // After all domains processed, run cleanup of old deleted pages
-    console.log('\n🧹 Running cleanup of old deleted pages...');
 
     try {
       const { default: cleanupDeletedPages } = await import('@/scripts/database/cleanup-deleted-pages');
       await cleanupDeletedPages();
-      console.log('✅ Deleted pages cleanup complete');
     } catch (cleanupError) {
       console.error('❌ Cleanup failed:', cleanupError);
       // Don't fail the entire cron job if cleanup fails
@@ -270,7 +259,6 @@ export async function POST(request: NextRequest) {
         const lockAcquired = await domainLock.acquire(domain.id);
 
         if (!lockAcquired) {
-          console.log(`[Manual] ⏭️ Skipping ${domain.domain} - refresh already in progress`);
           results.push({
             domainId: domain.id,
             domain: domain.domain,

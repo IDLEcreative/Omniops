@@ -35,9 +35,7 @@ class DomainIdCache {
     this.ttl = (ttlMinutes || parseInt(process.env.DOMAIN_CACHE_TTL_MINUTES || '240')) * 60 * 1000; // 4 hours default
 
     if (!this.enabled) {
-      console.log('[DomainIdCache] Cache is disabled via environment variable');
     } else {
-      console.log(`[DomainIdCache] Initialized with maxSize=${this.maxSize}, ttl=${this.ttl / 60000} minutes`);
     }
   }
 
@@ -146,7 +144,6 @@ class DomainIdCache {
       this.set(domain, domainId);
     });
 
-    console.log(`[DomainIdCache] Preloaded ${domainMappings.length} domain mappings`);
   }
 }
 

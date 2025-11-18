@@ -27,11 +27,9 @@ export class WooCommerceDashboardCache {
       const cached = await this.redis.get(key);
       
       if (cached) {
-        console.log(`[Cache HIT] Dashboard for tenant ${tenantId}`);
         return JSON.parse(cached);
       }
       
-      console.log(`[Cache MISS] Dashboard for tenant ${tenantId}`);
       return null;
     } catch (error) {
       console.error('Cache get error:', error);
@@ -123,7 +121,6 @@ export class WooCommerceDashboardCache {
         for (const key of keys) {
           await this.redis.del(key);
         }
-        console.log(`[Cache INVALIDATE] Cleared ${keys.length} cache keys for tenant ${tenantId}`);
       }
     } catch (error) {
       console.error('Cache invalidation error:', error);
@@ -137,7 +134,6 @@ export class WooCommerceDashboardCache {
     try {
       const key = `wc:${tenantId}:${component}`;
       await this.redis.del(key);
-      console.log(`[Cache INVALIDATE] Component ${component} for tenant ${tenantId}`);
     } catch (error) {
       console.error(`Cache invalidation error for ${component}:`, error);
     }
@@ -203,7 +199,6 @@ export class WooCommerceDashboardCache {
    */
   async warmCache(tenantId: string, fetchFunction: () => Promise<any>): Promise<any> {
     try {
-      console.log(`[Cache WARM] Starting cache warm-up for tenant ${tenantId}`);
       const data = await fetchFunction();
       await this.cacheDashboard(tenantId, data);
       return data;

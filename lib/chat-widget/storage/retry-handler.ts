@@ -104,7 +104,6 @@ export class RetryHandler {
       this.pendingRequests.delete(requestId);
 
       if (this.debug) {
-        console.log('[RetryHandler] Resolved request:', requestId);
       }
       return true;
     }

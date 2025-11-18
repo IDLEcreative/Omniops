@@ -26,7 +26,6 @@ export async function extractProductsFromScrapedPages(
   const productPages = await queryScrapedPages(searchQuery, domainId);
   if (productPages.length === 0) return [];
 
-  console.log(`[Context Enhancer] Checking ${productPages.length} scraped pages for product data...`);
 
   const searchTerms = searchQuery.toLowerCase().split(/\s+/).filter(term => term.length > 2);
 
@@ -37,7 +36,6 @@ export async function extractProductsFromScrapedPages(
       for (const product of page.metadata.ecommerceData.products) {
         if (productMatchesQuery(product, searchQuery, searchTerms)) {
           chunks.push(formatProductAsChunk(product, page.url, page.title));
-          console.log(`[Context Enhancer] Found product with price: ${product.name} - ${product.price?.formatted || product.price}`);
         }
       }
     }
@@ -56,7 +54,6 @@ export async function extractProductsFromStructuredData(
   const structuredProducts = await queryStructuredExtractions(searchQuery, domainId);
   if (structuredProducts.length === 0) return [];
 
-  console.log(`[Context Enhancer] Checking ${structuredProducts.length} structured product extractions...`);
 
   const chunks: ContextChunk[] = [];
 
@@ -92,7 +89,6 @@ export async function extractProductsFromStructuredData(
           metadata: product
         });
 
-        console.log(`[Context Enhancer] Found structured product: ${product.name} - ${product.price?.formatted}`);
       }
     }
   }
@@ -110,7 +106,6 @@ export async function extractProductsFromWebsiteContent(
   const websiteContent = await queryWebsiteContent(searchQuery, domainId);
   if (websiteContent.length === 0) return [];
 
-  console.log(`[Context Enhancer] Checking ${websiteContent.length} website_content entries...`);
 
   const chunks: ContextChunk[] = [];
 
@@ -122,7 +117,6 @@ export async function extractProductsFromWebsiteContent(
 
         if (matchesQuery) {
           chunks.push(formatProductAsChunk(product, page.url, page.title || ''));
-          console.log(`[Context Enhancer] Found product in website_content: ${product.name}`);
         }
       }
     }
@@ -148,7 +142,6 @@ export async function extractEntitiesFromCatalog(
     priceLabel: 'price'
   };
 
-  console.log(`[Context Enhancer] Found ${entities.length} direct ${terminology.plural} matches`);
 
   return entities.map(entity => formatEntityAsChunk(entity, classification));
 }

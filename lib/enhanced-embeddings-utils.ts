@@ -47,7 +47,6 @@ export async function enhanceProductPages(
 
   if (productUrls.length === 0) return mapped;
 
-  console.log(`[Enhanced Embeddings] Found ${productUrls.length} item URLs, fetching ALL chunks for complete item info...`);
 
   // For each product URL, get ALL its chunks
   for (const productUrl of productUrls) {
@@ -67,7 +66,6 @@ export async function enhanceProductPages(
           .eq('page_id', pageData.id);
 
         if (allChunks && allChunks.length > 0) {
-          console.log(`[Enhanced Embeddings] Found ${allChunks.length} chunks for ${productUrl}`);
 
           // Intelligently combine chunks - prioritize chunks with product details
           let combinedContent = '';
@@ -83,7 +81,6 @@ export async function enhanceProductPages(
             if (text.includes('SKU:') && text.includes('Product Description')) {
               // This chunk has the complete item info
               productDescChunk = text + '\n';
-              console.log(`[Enhanced Embeddings] Found COMPLETE item chunk with SKU and description`);
             } else if (text.includes('Product Description') || text.includes('SKU:') || text.includes('Item Number')) {
               productDescChunk += text + '\n';
             } else if (text.includes('Specification') || text.includes('Dimensions') || text.includes('Capacity')) {
@@ -106,14 +103,8 @@ export async function enhanceProductPages(
           const existingIndex = mapped.findIndex(r => r.url === productUrl);
           if (existingIndex >= 0 && mapped[existingIndex]) {
             mapped[existingIndex].content = combinedContent;
-            console.log(`[Enhanced Embeddings] Enhanced item content for ${productUrl}`);
-            console.log(`[Enhanced Embeddings] Combined content length: ${combinedContent.length} chars`);
 
             // Log summary of combined content
-            console.log(`[Enhanced Embeddings] Combined chunks summary:`);
-            console.log(`  - Item info: ${productDescChunk.length > 0 ? 'Yes' : 'No'}`);
-            console.log(`  - Specifications: ${specsChunk.length > 0 ? 'Yes' : 'No'}`);
-            console.log(`  - Pricing: ${priceChunk.length > 0 ? 'Yes' : 'No'}`);
           }
         }
       }

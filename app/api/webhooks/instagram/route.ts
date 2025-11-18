@@ -20,13 +20,9 @@ export async function GET(request: NextRequest) {
   const token = searchParams.get('hub.verify_token');
   const challenge = searchParams.get('hub.challenge');
 
-  console.log('📍 Instagram webhook verification request received');
-  console.log('   Mode:', mode);
-  console.log('   Token matches:', token === process.env.INSTAGRAM_WEBHOOK_VERIFY_TOKEN);
 
   // Verify that mode and token match expected values
   if (mode === 'subscribe' && token === process.env.INSTAGRAM_WEBHOOK_VERIFY_TOKEN) {
-    console.log('✅ Instagram webhook verified successfully');
     // Respond with challenge to confirm verification
     return new NextResponse(challenge, { status: 200 });
   }
@@ -115,7 +111,6 @@ async function handleIncomingMessage(messaging: any) {
   const messageText = messaging.message.text;
   const messageId = messaging.message.mid;
 
-  console.log(`📨 Instagram message from ${senderId}: ${messageText}`);
 
   const supabase = await createClient();
   if (!supabase) {
@@ -157,7 +152,6 @@ async function handleIncomingMessage(messaging: any) {
     return;
   }
 
-  console.log('✅ Found customer:', matchingCreds.customer_id);
 
   // Get or create conversation
   const { data: conversationData, error: convError } = await supabase
@@ -178,7 +172,6 @@ async function handleIncomingMessage(messaging: any) {
   let conversation = conversationData;
 
   if (!conversation) {
-    console.log('📍 Creating new Instagram conversation');
 
     // Get sender's Instagram profile
     const instagramCreds = await getInstagramCredentials(matchingCreds.customer_id);
@@ -220,7 +213,6 @@ async function handleIncomingMessage(messaging: any) {
     }
 
     conversation = newConv;
-    console.log('✅ Created conversation:', conversation.id);
   }
 
   // Save incoming message
@@ -237,7 +229,6 @@ async function handleIncomingMessage(messaging: any) {
     return;
   }
 
-  console.log('✅ Saved incoming message');
 
   // Get customer config for AI processing
   const { data: customerConfig, error: configError } = await supabase
@@ -263,7 +254,6 @@ async function handleIncomingMessage(messaging: any) {
     return;
   }
 
-  console.log('📍 Processing message with AI...');
 
   // Process with AI
   const openaiClient = getOpenAIClient();
@@ -317,7 +307,6 @@ async function handleIncomingMessage(messaging: any) {
     const api = new InstagramAPI(instagramCreds);
     const sentMessageId = await api.sendMessage(senderId, aiResponse);
 
-    console.log('✅ Instagram response sent, message ID:', sentMessageId);
 
     // Save AI response
     await supabase.from('messages').insert({
@@ -337,7 +326,6 @@ async function handleIncomingMessage(messaging: any) {
       })
       .eq('customer_id', matchingCreds.customer_id);
 
-    console.log('✅ Instagram message flow complete');
 
   } catch (error) {
     console.error('❌ AI processing error:', error);

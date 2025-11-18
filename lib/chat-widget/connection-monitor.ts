@@ -82,7 +82,6 @@ export class ConnectionMonitor {
     }
 
     if (this.debug) {
-      console.log('[ConnectionMonitor] Starting heartbeat monitoring');
     }
 
     // Listen for pong responses
@@ -109,7 +108,6 @@ export class ConnectionMonitor {
     window.removeEventListener('message', this.handleMessage);
 
     if (this.debug) {
-      console.log('[ConnectionMonitor] Stopped');
     }
   }
 
@@ -167,7 +165,6 @@ export class ConnectionMonitor {
     this.stats.totalPings++;
 
     if (this.debug) {
-      console.log('[ConnectionMonitor] Sending ping', pingTime);
     }
 
     // Send ping to parent
@@ -211,7 +208,6 @@ export class ConnectionMonitor {
       this.latencies.reduce((a, b) => a + b, 0) / this.latencies.length;
 
     if (this.debug) {
-      console.log('[ConnectionMonitor] Received pong, latency:', latency + 'ms');
     }
 
     // Update state to connected if not already
@@ -241,7 +237,6 @@ export class ConnectionMonitor {
     this.state = newState;
 
     if (this.debug) {
-      console.log(`[ConnectionMonitor] State changed: ${oldState} → ${newState}`);
     }
 
     // Notify listeners
@@ -256,7 +251,6 @@ export class ConnectionMonitor {
     // Auto-recover: if disconnected and auto-recover enabled, try reconnecting
     if (newState === 'disconnected' && this.autoRecover) {
       if (this.debug) {
-        console.log('[ConnectionMonitor] Auto-recovery enabled, attempting reconnection');
       }
       // Reset failed pings counter for new attempt
       this.stats.failedPings = 0;

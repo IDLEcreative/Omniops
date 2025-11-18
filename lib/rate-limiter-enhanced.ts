@@ -102,7 +102,6 @@ export class EnhancedRateLimiter extends EventEmitter {
       });
 
       this.redis.on('connect', () => {
-        console.log('Rate limiter connected to Redis');
         this.emit('redis-connected');
       });
 

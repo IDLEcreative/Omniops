@@ -127,7 +127,6 @@ export async function getPages(
       hasMore = false;
     }
 
-    console.log(`Fetched ${allPages.length} pages so far...`);
   }
 
   return allPages;

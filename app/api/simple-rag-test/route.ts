@@ -15,7 +15,6 @@ export async function GET(request: NextRequest) {
   }
   
   try {
-    console.log('Testing RAG with query:', query);
     
     // Step 1: Get sample content from page_embeddings
     const { data: sampleContent, error: sampleError } = await supabase
@@ -44,7 +43,6 @@ export async function GET(request: NextRequest) {
       });
       
       if (rpcError) {
-        console.log('RPC search error:', rpcError);
       } else if (relevantChunks && relevantChunks.length > 0) {
         fallbackSearchResults = relevantChunks.map((chunk: any) => ({
           content: chunk.content || chunk.chunk_text,
@@ -54,7 +52,6 @@ export async function GET(request: NextRequest) {
         }));
       }
     } catch (rpcError: any) {
-      console.log('RPC search failed:', rpcError.message);
     }
     
     // Step 4: Simple keyword matching as a baseline

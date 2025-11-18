@@ -28,7 +28,6 @@ export function validateExtractedContent(
   finalConfig: any
 ): void {
   const isProductPage = (extracted as EcommerceExtractedContent).pageType === 'product';
-  console.log(`[SCRAPER] Page type: ${isProductPage ? 'PRODUCT' : 'REGULAR'}`);
 
   if (!isProductPage && extracted.wordCount < finalConfig.content.minWordCount) {
     const error = `Insufficient content: ${extracted.wordCount} words < ${finalConfig.content.minWordCount} minimum`;

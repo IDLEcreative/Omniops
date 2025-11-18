@@ -134,7 +134,7 @@ describe('BusinessIntelligence - Queries', () => {
   });
 
   describe('Domain Filtering', () => {
-    it.skip('should filter by specific domain [NEEDS FIX: Mock chain setup after refactor]', async () => {
+    it('should filter by specific domain [NEEDS FIX: Mock chain setup after refactor]', async () => {
       const eqSpy = jest.fn().mockReturnThis();
       const queryBuilder = {
         gte: jest.fn().mockReturnThis(),

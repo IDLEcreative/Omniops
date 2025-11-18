@@ -27,7 +27,6 @@ export class ScraperCleanupService {
   }
 
   async cleanupStaleJobs(): Promise<number> {
-    console.log('[Cleanup] Starting stale job cleanup...');
     let cleanedCount = 0;
     
     try {
@@ -81,7 +80,6 @@ export class ScraperCleanupService {
         if (job['stats.memoryMB']) {
           const memoryMB = parseFloat(job['stats.memoryMB']);
           if (memoryMB > this.config.maxMemoryMB) {
-            console.log(`[Cleanup] Killing job ${key} due to excessive memory usage: ${memoryMB}MB`);
             
             if (job.workerPid) {
               await this.killWorkerProcess(parseInt(job.workerPid));
@@ -101,7 +99,6 @@ export class ScraperCleanupService {
 
       await this.cleanupOldCompletedJobs();
       
-      console.log(`[Cleanup] Cleaned ${cleanedCount} stale jobs`);
       return cleanedCount;
     } catch (error) {
       console.error('[Cleanup] Error during cleanup:', error);
@@ -128,7 +125,6 @@ export class ScraperCleanupService {
     }
 
     if (deletedCount > 0) {
-      console.log(`[Cleanup] Deleted ${deletedCount} old completed/failed jobs`);
     }
   }
 
@@ -145,14 +141,12 @@ export class ScraperCleanupService {
     try {
       const isAlive = await this.isProcessAlive(pid);
       if (isAlive) {
-        console.log(`[Cleanup] Killing worker process ${pid}`);
         await execAsync(`kill -TERM ${pid}`);
         
         await new Promise(resolve => setTimeout(resolve, 2000));
         
         const stillAlive = await this.isProcessAlive(pid);
         if (stillAlive) {
-          console.log(`[Cleanup] Force killing worker process ${pid}`);
           await execAsync(`kill -9 ${pid}`);
         }
       }
@@ -162,7 +156,6 @@ export class ScraperCleanupService {
   }
 
   async cleanupQueuedJobs(): Promise<number> {
-    console.log('[Cleanup] Checking scrape queue for stale jobs...');
     let cleanedCount = 0;
 
     try {
@@ -195,7 +188,6 @@ export class ScraperCleanupService {
         if (validJobs.length > 0) {
           await this.redis.rpush('scrape:queue', ...validJobs);
         }
-        console.log(`[Cleanup] Removed ${cleanedCount} stale jobs from queue`);
       }
 
       return cleanedCount;
@@ -207,7 +199,6 @@ export class ScraperCleanupService {
 
   startAutoCleanup(): void {
     if (this.cleanupInterval) {
-      console.log('[Cleanup] Auto-cleanup already running');
       return;
     }
 
@@ -226,7 +217,6 @@ export class ScraperCleanupService {
       console.log(`[Cleanup] Running cleanup cycle at ${new Date().toISOString()}`);
       const staleJobs = await this.cleanupStaleJobs();
       const queuedJobs = await this.cleanupQueuedJobs();
-      console.log(`[Cleanup] Cycle complete. Cleaned ${staleJobs} stale jobs, ${queuedJobs} queued jobs`);
     } catch (error) {
       console.error('[Cleanup] Cleanup cycle failed:', error);
     }
@@ -236,7 +226,6 @@ export class ScraperCleanupService {
     if (this.cleanupInterval) {
       clearInterval(this.cleanupInterval);
       this.cleanupInterval = undefined;
-      console.log('[Cleanup] Auto-cleanup stopped');
     }
   }
 

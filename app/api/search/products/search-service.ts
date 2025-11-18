@@ -112,7 +112,6 @@ export async function performFilteredVectorSearch(
   const { data: candidates, error: sqlError } = await sqlQuery.limit(limit * 3);
 
   if (sqlError || !candidates || candidates.length === 0) {
-    console.log('[Filtered Search] No SQL candidates found, falling back to vector search');
     return performDualVectorSearch(supabase, query, classification, domain, limit);
   }
 

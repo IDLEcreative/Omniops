@@ -24,7 +24,6 @@ export class SynonymAutoLearner {
    * Analyze scraped content and build synonym mappings for a domain
    */
   public async learnFromScrapedContent(domainId: string, domain: string): Promise<void> {
-    console.log(`[SynonymLearner] Starting automatic synonym learning for ${domain}`);
     
     // Check if supabase client is initialized
     if (!this.supabase) {
@@ -45,7 +44,6 @@ export class SynonymAutoLearner {
         return;
       }
       
-      console.log(`[SynonymLearner] Analyzing ${pages.length} pages for patterns...`);
       
       // Extract terms and patterns
       const extractedTerms = this.extractTermsFromContent(pages);
@@ -56,7 +54,6 @@ export class SynonymAutoLearner {
       // Store in database
       await this.storeSynonyms(domainId, synonymGroups);
       
-      console.log(`[SynonymLearner] Learned ${synonymGroups.length} synonym groups for ${domain}`);
       
     } catch (error) {
       console.error('[SynonymLearner] Error in learning process:', error);

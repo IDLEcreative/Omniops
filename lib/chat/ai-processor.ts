@@ -42,7 +42,6 @@ export async function processAIConversation(params: AIProcessorParams): Promise<
 
   const { getCommerceProvider: getProviderFn, searchSimilarContent: searchFn, sanitizeOutboundLinks: sanitizeFn } = dependencies;
 
-  console.log(`[Intelligent Chat] Starting conversation with ${conversationMessages.length} messages`);
 
   // Log widget configuration settings
   if (widgetConfig?.integration_settings) {
@@ -107,7 +106,6 @@ export async function processAIConversation(params: AIProcessorParams): Promise<
   // ReAct loop - iterate until AI stops calling tools or max iterations reached
   while (shouldContinue && iteration < maxIterations) {
     iteration++;
-    console.log(`[Intelligent Chat] Iteration ${iteration}/${maxIterations}`);
 
     const choice = completion.choices[0];
     if (!choice?.message) break;
@@ -122,7 +120,6 @@ export async function processAIConversation(params: AIProcessorParams): Promise<
       // No tool calls - AI is ready to respond
       finalResponse = choice.message.content || 'I apologize, but I was unable to generate a response.';
       shouldContinue = false;
-      console.log('[Intelligent Chat] AI finished without tool calls');
       break;
     }
 
@@ -141,7 +138,6 @@ export async function processAIConversation(params: AIProcessorParams): Promise<
     });
 
     // Execute tool calls in parallel
-    console.log(`[Intelligent Chat] Executing ${toolCalls.length} tools in parallel for comprehensive search`);
     const toolExecutionResults = await executeToolCallsParallel(
       toolCalls,
       domain,
@@ -165,7 +161,6 @@ export async function processAIConversation(params: AIProcessorParams): Promise<
 
       // Collect products from ALL tool results (API and semantic search)
       // Products can be in result.results[].metadata (API) or parsed from embeddings (content/url)
-      console.log(`[Shopping Debug] Checking ${result.results.length} results from ${result.source}`);
       console.log('[Shopping Debug] First result keys:', result.results[0] ? Object.keys(result.results[0]) : []);
       console.log('[Shopping Debug] First result sample:', result.results[0] ? JSON.stringify(result.results[0]).substring(0, 200) : 'no results');
 
@@ -181,12 +176,10 @@ export async function processAIConversation(params: AIProcessorParams): Promise<
 
           // Case 1: Direct API results with metadata.id
           if (searchResult.metadata && searchResult.metadata.id) {
-            console.log('[Shopping Debug] ✅ Case 1 matched - API result with metadata.id');
             allProducts.push(searchResult.metadata);
           }
           // Case 2: Embeddings results with product URL (e.g., /product/pump-name/)
           else if (searchResult.url && searchResult.url.includes('/product/') && searchResult.content) {
-            console.log('[Shopping Debug] ✅ Case 2 matched - Embeddings result with /product/ URL');
             // Parse product data from embeddings result
             const priceMatch = searchResult.content.match(/Price:\s*([0-9,.]+)/i);
             const skuMatch = searchResult.content.match(/SKU:\s*([^\s\n]+)/i);
@@ -201,13 +194,10 @@ export async function processAIConversation(params: AIProcessorParams): Promise<
               stockStatus: 'instock', // Assume in stock from embeddings
               shortDescription: searchResult.content.split('\n')[0] || '',
             };
-            console.log('[Shopping Debug] Parsed product:', product);
             allProducts.push(product);
           } else {
-            console.log('[Shopping Debug] ❌ No case matched for this result');
           }
       }
-      console.log('[Shopping Debug] Total products collected so far:', allProducts.length);
     }
 
     // Format results for AI
@@ -272,7 +262,6 @@ export async function processAIConversation(params: AIProcessorParams): Promise<
 
   // If we hit max iterations, use last completion's content (avoid redundant API call)
   if (iteration >= maxIterations && shouldContinue) {
-    console.log('[Intelligent Chat] Max iterations reached, using last response');
 
     // Extract search context from the conversation to make fallback message helpful
     let searchContext = '';
@@ -318,10 +307,8 @@ export async function processAIConversation(params: AIProcessorParams): Promise<
   let shoppingContext: string | undefined;
 
   if (allProducts.length > 0) {
-    console.log(`[Shopping Integration] Found ${allProducts.length} products from commerce providers`);
 
     // DEBUG: Check searchLog structure
-    console.log('[Shopping Debug] searchLog length:', searchLog.length);
     console.log('[Shopping Debug] searchLog full structure:', JSON.stringify(searchLog, null, 2));
     console.log('[Shopping Debug] searchLog sources:', searchLog.map(log => log.source));
     console.log('[Shopping Debug] searchLog tools:', searchLog.map(log => log.tool));
@@ -330,8 +317,6 @@ export async function processAIConversation(params: AIProcessorParams): Promise<
     const hasWooCommerce = searchLog.some(log => log.source.includes('woocommerce'));
     const hasShopify = searchLog.some(log => log.source.includes('shopify'));
 
-    console.log('[Shopping Debug] hasWooCommerce:', hasWooCommerce);
-    console.log('[Shopping Debug] hasShopify:', hasShopify);
 
     // Transform products based on platform
     if (hasWooCommerce) {
@@ -345,7 +330,6 @@ export async function processAIConversation(params: AIProcessorParams): Promise<
       shoppingContext = extractShoppingContext(finalResponse, lastUserQuery);
       console.log(`[Shopping Integration] Shopping mode triggered with ${shoppingProducts.length} products${isMobile ? ' (mobile)' : ''}`);
       if (shoppingContext) {
-        console.log(`[Shopping Integration] Context: ${shoppingContext}`);
       }
     } else {
       // Don't include shopping products if mode shouldn't be triggered

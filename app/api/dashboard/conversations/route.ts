@@ -52,7 +52,6 @@ export async function GET(request: NextRequest) {
     );
     if (cached) {
       const duration = Date.now() - performanceStart;
-      console.log(`[Dashboard] Cache hit - served in ${duration}ms`);
 
       return NextResponse.json({
         ...cached,
@@ -61,7 +60,6 @@ export async function GET(request: NextRequest) {
       });
     }
 
-    console.log('[Dashboard] Cache miss - fetching from database');
 
     // Fetch data using service with organization filter
     const responseData = await ConversationsService.getConversationStats({
@@ -77,7 +75,6 @@ export async function GET(request: NextRequest) {
     );
 
     const duration = Date.now() - performanceStart;
-    console.log(`[Dashboard] Database query completed in ${duration}ms`);
 
     return NextResponse.json({
       ...responseData,

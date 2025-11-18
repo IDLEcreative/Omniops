@@ -102,13 +102,11 @@ export async function migrateExistingEmbeddings(
       lastId = embedding.id;
     }
 
-    console.log(`Migration progress: ${processed} processed, ${failed} failed`);
 
     // Add delay to avoid overwhelming the system
     await new Promise(resolve => setTimeout(resolve, 1000));
   }
 
-  console.log(`Migration complete: ${processed} processed, ${failed} failed`);
   return { processed, failed };
 }
 

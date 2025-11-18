@@ -13,7 +13,6 @@ export async function generateQueryEmbedding(
   // Check cache first
   const cached = embeddingCache.get(query);
   if (cached) {
-    console.log('[Performance] Query embedding from cache');
     return cached;
   }
 

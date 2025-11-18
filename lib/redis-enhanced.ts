@@ -86,7 +86,6 @@ export class ResilientRedisClient extends EventEmitter implements IResilientRedi
 
       this.redis.on('connect', () => {
         if (!isBuildTime) {
-          console.log('Redis connected successfully');
         }
         this.isConnected = true;
         this.circuitBreaker.resetAttempts();
@@ -103,7 +102,6 @@ export class ResilientRedisClient extends EventEmitter implements IResilientRedi
 
       this.redis.on('close', () => {
         if (!isBuildTime) {
-          console.log('Redis connection closed');
         }
         this.isConnected = false;
         this.emit('disconnected');

@@ -61,15 +61,12 @@ export async function GET(request: NextRequest) {
     // Fetch from BOTH tables to get complete training data for this user
 
     // 1. Get training_data entries (text, qa, custom) for this user
-    console.log('[DEBUG GET /api/training] User ID:', user.id);
     const { data: trainingDataEntries, error: trainingError } = await adminSupabase
       .from('training_data')
       .select('id, type, content, status, created_at, metadata')
       .eq('user_id', user.id)
       .order('created_at', { ascending: false });
 
-    console.log('[DEBUG GET /api/training] Training data count:', trainingDataEntries?.length ?? 0);
-    console.log('[DEBUG GET /api/training] Training data error:', trainingError);
 
     if (trainingError) {
       logger.error('GET /api/training training_data query failed', trainingError);
@@ -95,7 +92,6 @@ export async function GET(request: NextRequest) {
         .select('organization_id')
         .eq('user_id', user.id);
 
-      console.log('[DEBUG GET /api/training] User orgs count:', userOrgs?.length ?? 0);
 
       if (userOrgs && userOrgs.length > 0) {
         const orgIds = userOrgs.map(org => org.organization_id);
@@ -108,7 +104,6 @@ export async function GET(request: NextRequest) {
         .select('id')
         .or(domainConditions.join(','));
 
-      console.log('[DEBUG GET /api/training] User domains count:', userDomains?.length ?? 0);
 
       if (!domainsError && userDomains && userDomains.length > 0) {
         const domainIds = userDomains.map(d => d.id);
@@ -129,7 +124,6 @@ export async function GET(request: NextRequest) {
       // Continue with empty scrapedData - don't fail the entire request
     }
 
-    console.log('[DEBUG GET /api/training] Scraped data count:', scrapedData?.length ?? 0);
 
     // 3. Transform and combine both data sources
     const trainingItems = trainingDataEntries?.map(item => ({
@@ -160,16 +154,11 @@ export async function GET(request: NextRequest) {
     const allItems = [...trainingItems, ...scrapedItems]
       .sort((a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime());
 
-    console.log('[DEBUG GET /api/training] Training items count:', trainingItems.length);
-    console.log('[DEBUG GET /api/training] Scraped items count:', scrapedItems.length);
-    console.log('[DEBUG GET /api/training] Combined count:', allItems.length);
 
     // 5. Apply pagination to combined results
     const paginatedItems = allItems.slice(offset, offset + limit);
     const totalCount = allItems.length;
 
-    console.log('[DEBUG GET /api/training] Paginated count:', paginatedItems.length);
-    console.log('[DEBUG GET /api/training] Total count:', totalCount);
 
     const response = NextResponse.json({
       items: paginatedItems,

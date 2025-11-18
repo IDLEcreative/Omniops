@@ -63,7 +63,6 @@ export function useTranslation(): UseTranslationReturn {
     setLanguage(newLanguage);
     if (typeof window !== 'undefined') {
       localStorage.setItem('omniops_ui_language', newLanguage);
-      console.log(`[i18n] Language changed: ${newLanguage}, translations loaded`);
 
       // Notify parent window of language change (for analytics)
       if (window.parent !== window) {

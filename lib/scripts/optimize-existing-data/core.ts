@@ -50,12 +50,7 @@ export class DataOptimizer {
   }
 
   async migrate(): Promise<void> {
-    console.log('🚀 Starting AI Optimization Migration');
     console.log('━'.repeat(60));
-    console.log(`Configuration:`);
-    console.log(`  - Batch Size: ${this.config.batchSize}`);
-    console.log(`  - Dry Run: ${this.config.dryRun}`);
-    console.log(`  - Optimization Level: ${this.config.optimizationLevel}`);
     console.log('━'.repeat(60));
 
     try {
@@ -64,7 +59,6 @@ export class DataOptimizer {
         .select('*', { count: 'exact', head: true });
 
       this.progress.totalPages = count || 0;
-      console.log(`\n📊 Found ${this.progress.totalPages} pages to process\n`);
 
       let offset = 0;
       let hasMore = true;
@@ -118,7 +112,6 @@ export class DataOptimizer {
   }
 
   private async processBatch(pages: any[]): Promise<void> {
-    console.log(`\n🔄 Processing batch of ${pages.length} pages...`);
 
     const results = await Promise.all(
       pages.map(page => this.optimizer.optimizePage(page))
@@ -167,9 +160,7 @@ export class DataOptimizer {
     const elapsed = (Date.now() - this.progress.startTime.getTime()) / 1000;
     const rate = this.progress.processedPages / elapsed;
 
-    console.log('\n📊 Progress Report');
     console.log('━'.repeat(40));
-    console.log(`Processed: ${this.progress.processedPages}/${this.progress.totalPages}`);
     console.log(`Average Reduction: ${this.progress.averageReduction.toFixed(1)}%`);
     console.log(`Processing Rate: ${rate.toFixed(1)} pages/sec`);
     console.log('━'.repeat(40));
@@ -192,8 +183,6 @@ export class DataOptimizer {
     await fs.writeFile(reportPath, JSON.stringify(report, null, 2));
 
     console.log('\n' + '='.repeat(60));
-    console.log('✨ AI OPTIMIZATION MIGRATION COMPLETE');
     console.log('='.repeat(60));
-    console.log(`\n📁 Report saved to: ${reportPath}`);
   }
 }

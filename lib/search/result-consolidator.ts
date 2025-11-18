@@ -84,7 +84,6 @@ function matchProductWithPage(
       scraped.url.toLowerCase().includes(product.slug!.toLowerCase())
     );
     if (slugMatch) {
-      console.log(`[Consolidator] Matched product "${product.name}" by slug: ${product.slug}`);
       return slugMatch;
     }
   }
@@ -96,7 +95,6 @@ function matchProductWithPage(
       (product.permalink && scraped.url.endsWith(product.permalink))
     );
     if (permalinkMatch) {
-      console.log(`[Consolidator] Matched product "${product.name}" by permalink`);
       return permalinkMatch;
     }
   }
@@ -115,7 +113,6 @@ function matchProductWithPage(
   });
 
   if (nameMatch) {
-    console.log(`[Consolidator] Matched product "${product.name}" by name similarity`);
     return nameMatch;
   }
 
@@ -154,7 +151,6 @@ export function consolidateResults(
   products: CommerceProduct[],
   scrapedResults: SearchResult[]
 ): EnrichedProduct[] {
-  console.log(`[Consolidator] Consolidating ${products.length} products with ${scrapedResults.length} scraped pages`);
 
   return products.map((product) => {
     // Match product with its scraped page
@@ -197,13 +193,10 @@ export function consolidateResults(
 
     // Log consolidation result
     if (matchedPage) {
-      console.log(`[Consolidator] ✅ Product "${product.name}" enriched with scraped page: ${matchedPage.url}`);
     } else {
-      console.log(`[Consolidator] ⚠️  Product "${product.name}" has no matching scraped page`);
     }
 
     if (relatedPages.length > 0) {
-      console.log(`[Consolidator]    → ${relatedPages.length} related pages found`);
     }
 
     return enriched;
@@ -241,7 +234,6 @@ export function mergeAndDeduplicateResults(
     page => !matchedPageUrls.has(page.url)
   );
 
-  console.log(`[Consolidator] Final results: ${enrichedProducts.length} products, ${uniqueScrapedPages.length} unique pages`);
 
   return {
     enrichedProducts,

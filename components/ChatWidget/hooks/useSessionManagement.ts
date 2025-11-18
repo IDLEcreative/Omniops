@@ -90,7 +90,6 @@ export function useSessionManagement({
           setSessionId(newSessionId);
 
           if (process.env.NODE_ENV === 'development') {
-            console.log('[useSessionManagement] Created new session:', newSessionId);
           }
         }
 
@@ -134,7 +133,6 @@ export function useSessionManagement({
           await storage.setItem('conversation_id', id);
 
           if (process.env.NODE_ENV === 'development') {
-            console.log('[useSessionManagement] Persisted conversation ID:', id);
           }
         } catch (err) {
           console.warn('[useSessionManagement] Failed to persist conversation ID:', err);

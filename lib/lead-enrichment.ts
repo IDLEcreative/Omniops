@@ -18,12 +18,10 @@ interface EnrichmentResult {
  */
 export async function enrichLead(domain: string, url: string): Promise<EnrichmentResult> {
   try {
-    console.log(`[Lead Enrichment] Starting for domain: ${domain}`);
 
     // Strategy 1: Check common contact pages
     const contactEmail = await findEmailFromContactPages(domain);
     if (contactEmail) {
-      console.log(`[Lead Enrichment] Found email on contact page: ${contactEmail}`);
       return {
         email: contactEmail.email,
         source: contactEmail.source,
@@ -34,7 +32,6 @@ export async function enrichLead(domain: string, url: string): Promise<Enrichmen
     // Strategy 2: Web search for email
     const searchEmail = await findEmailViaWebSearch(domain);
     if (searchEmail) {
-      console.log(`[Lead Enrichment] Found email via web search: ${searchEmail}`);
       return {
         email: searchEmail.email,
         source: searchEmail.source,
@@ -42,7 +39,6 @@ export async function enrichLead(domain: string, url: string): Promise<Enrichmen
       };
     }
 
-    console.log(`[Lead Enrichment] No email found for: ${domain}`);
     return {
       email: null,
       source: null,
@@ -164,7 +160,6 @@ function extractEmailFromHTML(html: string): string | null {
  */
 export async function enrichPendingLeads() {
   try {
-    console.log('[Lead Enrichment] Starting batch enrichment...');
 
     if (!supabase) {
       console.error('[Lead Enrichment] Database client not available');
@@ -185,11 +180,9 @@ export async function enrichPendingLeads() {
     }
 
     if (!pendingLeads || pendingLeads.length === 0) {
-      console.log('[Lead Enrichment] No pending leads to enrich');
       return;
     }
 
-    console.log(`[Lead Enrichment] Enriching ${pendingLeads.length} leads...`);
 
     // Enrich each lead
     for (const lead of pendingLeads) {
@@ -212,7 +205,6 @@ export async function enrichPendingLeads() {
       await new Promise(resolve => setTimeout(resolve, 2000));
     }
 
-    console.log('[Lead Enrichment] Batch enrichment completed');
 
   } catch (error) {
     console.error('[Lead Enrichment] Batch enrichment error:', error);

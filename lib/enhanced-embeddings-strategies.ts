@@ -121,7 +121,6 @@ export function trimToTokenLimit(chunks: ChunkResult[]): ChunkResult[] {
       selected.push(chunk);
       totalTokens += estimatedTokens;
     } else {
-      console.log(`[Enhanced Embeddings] Trimmed at ${selected.length} chunks due to token limit`);
       break;
     }
   }

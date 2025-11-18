@@ -53,7 +53,6 @@ export function createRedisClient(): Redis | RedisClientWithFallback {
 
     redis.on('connect', () => {
       if (!isBuildTime) {
-        console.log('[Redis] Connected successfully');
       }
     });
 

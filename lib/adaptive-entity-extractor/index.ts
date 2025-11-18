@@ -54,7 +54,6 @@ export class AdaptiveEntityExtractor {
         extractionStrategy: existingData.extraction_config?.strategy,
         terminology: existingData.entity_terminology
       };
-      console.log(`Using existing classification: ${existingData.business_type}`);
       return;
     }
 
@@ -166,7 +165,6 @@ export class AdaptiveEntityExtractor {
     if (error) {
       console.error('Failed to store entity:', error);
     } else {
-      console.log(`Stored ${classification.terminology.entityName}: ${entity.name}`);
     }
   }
 
@@ -182,7 +180,6 @@ export class AdaptiveEntityExtractor {
       return;
     }
 
-    console.log(`\nProcessing ${this.businessClassification.terminology.entityNamePlural} for ${this.businessClassification.primaryType} business`);
 
     // Find pages likely to contain entities
     const { data: pages } = await this.supabase
@@ -192,7 +189,6 @@ export class AdaptiveEntityExtractor {
       .limit(limit);
 
     if (!pages || pages.length === 0) {
-      console.log('No pages found');
       return;
     }
 
@@ -213,8 +209,5 @@ export class AdaptiveEntityExtractor {
       }
     }
 
-    console.log(`\n✅ Extraction complete:`);
-    console.log(`   Processed: ${processed} ${this.businessClassification.terminology.entityNamePlural}`);
-    console.log(`   Failed: ${failed}`);
   }
 }

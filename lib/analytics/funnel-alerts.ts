@@ -82,7 +82,6 @@ async function checkAlertRule(rule: AlertRule): Promise<boolean> {
     .gte('triggered_at', todayStart.toISOString());
 
   if (todayAlerts && todayAlerts.length >= rule.max_alerts_per_day) {
-    console.log(`[Funnel Alerts] Max alerts reached for rule ${rule.id}`);
     return false;
   }
 
@@ -171,7 +170,6 @@ async function sendEmailNotification(
   email: string,
   alertData: { alert_title: string; alert_message: string; alert_data: Record<string, any> }
 ): Promise<void> {
-  console.log(`[Funnel Alerts] Sending email to ${email}:`, alertData.alert_title);
   // TODO: Integrate with email service (SendGrid, Postmark, etc.)
 }
 

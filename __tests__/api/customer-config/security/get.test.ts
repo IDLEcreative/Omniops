@@ -126,7 +126,7 @@ const makeRequest = (url = 'http://localhost:3000/api/customer/config') =>
  *
  * Related issue: lib/redis-unified.ts export pattern, JobPriority enum initialization
  */
-describe.skip('GET /api/customer/config - Security', () => {
+describe('GET /api/customer/config - Security', () => {
   beforeEach(() => {
     jest.resetAllMocks();
   });

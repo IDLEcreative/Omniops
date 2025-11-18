@@ -10,7 +10,7 @@ import { mockSupabase } from './helpers/test-helpers';
 jest.mock('@/lib/supabase/server');
 
 // TEMPORARY: Skipped due to Supabase mocking issue - needs refactoring
-describe.skip('Conversation Search - Semantic Mode', () => {
+describe('Conversation Search - Semantic Mode', () => {
   beforeEach(() => {
     jest.clearAllMocks();
     (createClient as jest.Mock).mockResolvedValue(mockSupabase);

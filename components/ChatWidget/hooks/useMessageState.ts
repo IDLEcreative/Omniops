@@ -138,7 +138,6 @@ export function useMessageState({
                 const lastStateMsg = prev[prev.length - 1];
 
                 if (!lastDbMsg || !lastStateMsg) {
-                  console.log('[useMessageState] ⚠️ Missing last message in comparison');
                   return prev;
                 }
 
@@ -158,13 +157,11 @@ export function useMessageState({
                 }
               }
 
-              console.log('[useMessageState] ⚠️ Skipping load - current state is up to date');
               return prev;
             });
           } else {
             // Conversation not found or expired - clear stored ID
             if (process.env.NODE_ENV === 'development') {
-              console.log('[useMessageState] No messages found, clearing conversation ID');
             }
             if (storage?.removeItem) {
               await storage.removeItem('conversation_id');

@@ -25,7 +25,6 @@ export async function resolveProvider(domain: string): Promise<CommerceProvider 
 
   for (const detector of providerDetectors) {
     const detectorName = detector === detectShopify ? 'shopify' : 'woocommerce';
-    console.log(`[Provider] Trying detector: ${detectorName}`, { domain });
 
     try {
       const provider = await detector({ domain, config });
@@ -40,7 +39,6 @@ export async function resolveProvider(domain: string): Promise<CommerceProvider 
         });
         return provider;
       }
-      console.log(`[Provider] Detector returned null: ${detectorName}`, { domain });
     } catch (error) {
       console.error(`[Provider] Detector failed: ${detectorName}`, {
         domain,

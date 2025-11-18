@@ -9,7 +9,6 @@ export async function updateProgress(
   progressUpdate: ProgressUpdate
 ): Promise<void> {
   await job.updateProgress(progressUpdate);
-  console.log(`Job ${job.id} progress: ${progressUpdate.percentage}% - ${progressUpdate.message}`);
 }
 
 /**

@@ -89,7 +89,7 @@ describe('Exact Match Search Functions', () => {
     });
 
     // Additional integration tests would go here when test database is available
-    it.skip('should find SKU in scraped content', async () => {
+    it('should find SKU in scraped content', async () => {
       // Integration test - requires test database
       const results = await exactMatchSkuSearch('MU110667601', 'test-domain', 10);
       expect(results.length).toBeGreaterThan(0);
@@ -104,7 +104,7 @@ describe('Exact Match Search Functions', () => {
       expect(Array.isArray(results)).toBe(true);
     });
 
-    it.skip('should find SKU in product catalog', async () => {
+    it('should find SKU in product catalog', async () => {
       // Integration test - requires test database
       const results = await exactMatchProductCatalog('MU110667601', 'test-domain');
       expect(results.length).toBeGreaterThan(0);
@@ -120,7 +120,7 @@ describe('Exact Match Search Functions', () => {
       expect(Array.isArray(results)).toBe(true);
     });
 
-    it.skip('should limit results to maxResults parameter', async () => {
+    it('should limit results to maxResults parameter', async () => {
       // Integration test
       const results = await exactMatchSearch('MU110667601', 'test-domain', 3);
       expect(results.length).toBeLessThanOrEqual(3);
@@ -235,7 +235,7 @@ describe('Error Handling', () => {
 
 describe('Context Extraction', () => {
   describe('SKU Context in Results', () => {
-    it.skip('should extract context around SKU mentions', async () => {
+    it('should extract context around SKU mentions', async () => {
       // Integration test - would verify that content includes SKU context
       // Example: "...compatible with MU110667601 pump series..."
       // Not full page content

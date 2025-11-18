@@ -104,7 +104,6 @@ export async function cancelJob(queue: Queue, jobId: string): Promise<boolean> {
     }
 
     await job.remove();
-    console.log(`[OperationQueue] Job cancelled: ${jobId}`);
 
     return true;
   } catch (error) {
@@ -129,7 +128,6 @@ export async function retryJob(queue: Queue, jobId: string): Promise<boolean> {
     }
 
     await job.retry();
-    console.log(`[OperationQueue] Job retried: ${jobId}`);
 
     return true;
   } catch (error) {

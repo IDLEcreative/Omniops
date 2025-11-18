@@ -35,7 +35,6 @@ export async function GET(request: NextRequest) {
       consumerSecret,
     });
 
-    console.log('Testing cart-related endpoints...');
     
     const results = {
       cartEndpoints: {} as any,

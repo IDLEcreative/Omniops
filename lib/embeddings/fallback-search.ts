@@ -13,7 +13,6 @@ export async function performFallbackSearch(
   query: string,
   limit: number
 ): Promise<SearchResult[]> {
-  console.log('[OPTIMIZATION] Falling back to keyword search');
 
   const fallbackTimer = new QueryTimer('Fallback Search', TIMEOUTS.FALLBACK_SEARCH);
 

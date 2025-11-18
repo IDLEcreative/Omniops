@@ -107,7 +107,7 @@ All tests passing:
 
 3. **Test with Real WooCommerce Store**
    ```bash
-   # See AUTONOMOUS_DEPLOYMENT_GUIDE.md for full instructions
+   # See docs/05-DEPLOYMENT/GUIDE_AUTONOMOUS_DEPLOYMENT.md for full instructions
    npx tsx test-woocommerce-agent.ts
    ```
 
@@ -165,7 +165,7 @@ All tests passing:
 ## 📚 Documentation
 
 **Complete Guides:**
-- [Deployment Guide](AUTONOMOUS_DEPLOYMENT_GUIDE.md) - Full deployment instructions
+- [Deployment Guide](../05-DEPLOYMENT/GUIDE_AUTONOMOUS_DEPLOYMENT.md) - Full deployment instructions
 - [Phase 2 Summary](AUTONOMOUS_AGENTS_PHASE2_COMPLETE.md) - Implementation details
 - [Roadmap](docs/10-ANALYSIS/ROADMAP_AUTONOMOUS_AGENTS.md) - Future phases
 

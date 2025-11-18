@@ -146,7 +146,6 @@ export class InstagramOAuth {
       throw new Error(`Webhook subscription failed: ${error.error?.message || 'Unknown error'}`);
     }
 
-    console.log('✅ Subscribed to Instagram webhooks');
   }
 
   /**
