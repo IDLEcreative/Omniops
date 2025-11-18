@@ -1,5 +1,6 @@
 import { NextResponse, type NextRequest } from 'next/server'
 import { updateSession } from '@/lib/supabase/middleware'
+import { applyRateLimit, addRateLimitHeaders } from '@/lib/middleware/api-rate-limit'
 
 export async function middleware(request: NextRequest) {
   const { pathname } = request.nextUrl
@@ -32,12 +33,28 @@ export async function middleware(request: NextRequest) {
 
   if (isPublicApi) {
     console.log('[Middleware] Public API request for:', pathname);
-    // Skip ALL processing - return immediately with CORS headers
+
+    // Apply rate limiting to public API endpoints (IP-based, no user)
+    const rateLimitResponse = await applyRateLimit(request);
+    if (rateLimitResponse) {
+      // Add CORS headers to rate limit response
+      rateLimitResponse.headers.set('Access-Control-Allow-Origin', origin || '*');
+      rateLimitResponse.headers.set('Access-Control-Allow-Methods', 'GET, POST, PUT, DELETE, OPTIONS');
+      rateLimitResponse.headers.set('Access-Control-Allow-Headers', 'Content-Type, Authorization, X-Requested-With');
+      rateLimitResponse.headers.set('Access-Control-Allow-Credentials', 'true');
+      return rateLimitResponse;
+    }
+
+    // Skip auth processing but add rate limit headers and CORS headers
     const response = NextResponse.next();
     response.headers.set('Access-Control-Allow-Origin', origin || '*');
     response.headers.set('Access-Control-Allow-Methods', 'GET, POST, PUT, DELETE, OPTIONS');
     response.headers.set('Access-Control-Allow-Headers', 'Content-Type, Authorization, X-Requested-With');
     response.headers.set('Access-Control-Allow-Credentials', 'true');
+
+    // Add rate limit headers
+    await addRateLimitHeaders(response, request);
+
     return response;
   }
 
@@ -221,6 +238,20 @@ export async function middleware(request: NextRequest) {
     const origin = request.headers.get('origin');
     response.headers.set('Access-Control-Allow-Origin', origin || '*');
     response.headers.set('Access-Control-Allow-Credentials', 'true');
+
+    // Apply rate limiting to authenticated API endpoints (user-based)
+    if (user) {
+      const rateLimitResponse = await applyRateLimit(request, user);
+      if (rateLimitResponse) {
+        // Add CORS headers to rate limit response
+        rateLimitResponse.headers.set('Access-Control-Allow-Origin', origin || '*');
+        rateLimitResponse.headers.set('Access-Control-Allow-Credentials', 'true');
+        return rateLimitResponse;
+      }
+
+      // Add rate limit headers to successful response
+      await addRateLimitHeaders(response, request, user);
+    }
   }
 
   return response

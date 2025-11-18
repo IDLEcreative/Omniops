@@ -13,16 +13,10 @@ import { SearchResult } from '@/types';
 import { ChatTelemetry } from '@/lib/chat-telemetry';
 import { getAvailableTools, checkToolAvailability, getToolInstructions } from './get-available-tools';
 import type { AIProcessorDependencies, AIProcessorResult, AIProcessorParams } from './ai-processor-types';
-import { executeToolCallsParallel, formatToolResultsForAI } from './ai-processor-tool-executor';
 import { formatResponse, getModelConfig } from './ai-processor-formatter';
-import {
-  transformWooCommerceProducts,
-  transformShopifyProducts,
-  shouldTriggerShoppingMode,
-  createShoppingMetadata,
-  extractShoppingContext
-} from './shopping-message-transformer';
 import { ShoppingProduct } from '@/types/shopping';
+import { logger } from '@/lib/logger';
+import { executeAndCollectTools, prepareShoppingProducts, logSearchSummary } from './ai-processor-helpers';
 
 /**
  * Process AI conversation with ReAct loop and tool execution
@@ -42,14 +36,20 @@ export async function processAIConversation(params: AIProcessorParams): Promise<
 
   const { getCommerceProvider: getProviderFn, searchSimilarContent: searchFn, sanitizeOutboundLinks: sanitizeFn } = dependencies;
 
-  console.log(`[Intelligent Chat] Starting conversation with ${conversationMessages.length} messages`);
+  logger.info('Starting conversation', {
+    service: 'intelligent-chat',
+    messageCount: conversationMessages.length,
+    domain
+  });
 
   // Log widget configuration settings
   if (widgetConfig?.integration_settings) {
-    console.log('[Intelligent Chat] Widget integration settings:', {
+    logger.debug('Widget integration settings', {
+      service: 'intelligent-chat',
       enableWebSearch: widgetConfig.integration_settings.enableWebSearch,
       enableKnowledgeBase: widgetConfig.integration_settings.enableKnowledgeBase,
-      dataSourcePriority: widgetConfig.integration_settings.dataSourcePriority
+      dataSourcePriority: widgetConfig.integration_settings.dataSourcePriority,
+      domain
     });
 
     // TODO: Implement web search tool integration
@@ -107,7 +107,12 @@ export async function processAIConversation(params: AIProcessorParams): Promise<
   // ReAct loop - iterate until AI stops calling tools or max iterations reached
   while (shouldContinue && iteration < maxIterations) {
     iteration++;
-    console.log(`[Intelligent Chat] Iteration ${iteration}/${maxIterations}`);
+    logger.info('Processing iteration', {
+      service: 'intelligent-chat',
+      iteration,
+      maxIterations,
+      domain
+    });
 
     const choice = completion.choices[0];
     if (!choice?.message) break;
@@ -122,12 +127,23 @@ export async function processAIConversation(params: AIProcessorParams): Promise<
       // No tool calls - AI is ready to respond
       finalResponse = choice.message.content || 'I apologize, but I was unable to generate a response.';
       shouldContinue = false;
-      console.log('[Intelligent Chat] AI finished without tool calls');
+      logger.info('AI finished without tool calls', {
+        service: 'intelligent-chat',
+        iteration,
+        domain
+      });
       break;
     }
 
     // Log tool selection for debugging and monitoring
-    console.log(`[Tool Selection] AI selected ${toolCalls.length} tool(s):`);
+    logger.debug('AI selected tools', {
+      service: 'tool-selection',
+      toolCount: toolCalls.length,
+      tools: toolCalls.map(tc => tc.function.name),
+      iteration,
+      domain
+    });
+
     toolCalls.forEach((tc, idx) => {
       const toolName = tc.function.name;
       let args: any = {};
@@ -137,96 +153,36 @@ export async function processAIConversation(params: AIProcessorParams): Promise<
         // Ignore parse errors for logging
       }
       const userContext = conversationMessages[conversationMessages.length - 1]?.content?.substring(0, 100) || 'N/A';
-      console.log(`[Tool Selection] ${idx + 1}. ${toolName} (args: ${JSON.stringify(args)}) | User context: "${userContext}..."`);
+      logger.debug('Tool selected', {
+        service: 'tool-selection',
+        toolIndex: idx + 1,
+        toolName,
+        args,
+        userContextPreview: userContext,
+        domain
+      });
     });
 
     // Execute tool calls in parallel
-    console.log(`[Intelligent Chat] Executing ${toolCalls.length} tools in parallel for comprehensive search`);
-    const toolExecutionResults = await executeToolCallsParallel(
+    logger.info('Executing tools in parallel', {
+      service: 'intelligent-chat',
+      toolCount: toolCalls.length,
+      iteration,
+      domain
+    });
+
+    const { toolResults, allSearchResults: newResults, allProducts: newProducts, searchLog: newSearchLog } = await executeAndCollectTools(
       toolCalls,
       domain,
       searchTimeout,
       telemetry,
-      dependencies
+      dependencies,
+      conversationMessages
     );
 
-    // Collect search results and log
-    for (const execResult of toolExecutionResults) {
-      const { toolName, toolArgs, result } = execResult;
-
-      searchLog.push({
-        tool: toolName,
-        query: toolArgs.query || toolArgs.category || toolArgs.productQuery || '',
-        resultCount: result.results.length,
-        source: result.source
-      });
-
-      allSearchResults.push(...result.results);
-
-      // Collect products from ALL tool results (API and semantic search)
-      // Products can be in result.results[].metadata (API) or parsed from embeddings (content/url)
-      console.log(`[Shopping Debug] Checking ${result.results.length} results from ${result.source}`);
-      console.log('[Shopping Debug] First result keys:', result.results[0] ? Object.keys(result.results[0]) : []);
-      console.log('[Shopping Debug] First result sample:', result.results[0] ? JSON.stringify(result.results[0]).substring(0, 200) : 'no results');
-
-      for (const searchResult of result.results) {
-          console.log('[Shopping Debug] Processing result:', {
-            hasMetadata: !!searchResult.metadata,
-            hasMetadataId: !!(searchResult.metadata && searchResult.metadata.id),
-            hasUrl: !!searchResult.url,
-            urlIncludesProduct: searchResult.url ? searchResult.url.includes('/product/') : false,
-            hasContent: !!searchResult.content,
-            url: searchResult.url
-          });
-
-          // Case 1: Direct API results with metadata.id
-          if (searchResult.metadata && searchResult.metadata.id) {
-            console.log('[Shopping Debug] ✅ Case 1 matched - API result with metadata.id');
-            allProducts.push(searchResult.metadata);
-          }
-          // Case 2: Embeddings results with product URL (e.g., /product/pump-name/)
-          else if (searchResult.url && searchResult.url.includes('/product/') && searchResult.content) {
-            console.log('[Shopping Debug] ✅ Case 2 matched - Embeddings result with /product/ URL');
-            // Parse product data from embeddings result
-            const priceMatch = searchResult.content.match(/Price:\s*([0-9,.]+)/i);
-            const skuMatch = searchResult.content.match(/SKU:\s*([^\s\n]+)/i);
-
-            const product = {
-              id: searchResult.url, // Use URL as unique ID
-              name: searchResult.title || 'Product',
-              price: priceMatch ? parseFloat(priceMatch[1].replace(/,/g, '')) : 0,
-              sku: skuMatch ? skuMatch[1] : '',
-              permalink: searchResult.url,
-              images: [], // Embeddings don't have image data
-              stockStatus: 'instock', // Assume in stock from embeddings
-              shortDescription: searchResult.content.split('\n')[0] || '',
-            };
-            console.log('[Shopping Debug] Parsed product:', product);
-            allProducts.push(product);
-          } else {
-            console.log('[Shopping Debug] ❌ No case matched for this result');
-          }
-      }
-      console.log('[Shopping Debug] Total products collected so far:', allProducts.length);
-    }
-
-    // Format results for AI
-    const toolResults = formatToolResultsForAI(toolExecutionResults);
-
-    // Log error messages being sent to AI for telemetry and debugging
-    toolResults.forEach(result => {
-      if (result.content.includes('⚠️ ERROR:')) {
-        console.log('[Intelligent Chat] Error message sent to AI:', {
-          errorContent: result.content.substring(0, 200), // First 200 chars
-          iteration,
-          toolCallId: result.tool_call_id
-        });
-
-        telemetry?.log('warn', 'ai', 'Error message sent to AI', {
-          errorPreview: result.content.substring(0, 200)
-        });
-      }
-    });
+    allSearchResults.push(...newResults);
+    allProducts.push(...newProducts);
+    searchLog.push(...newSearchLog);
 
     // Add tool results to conversation
     conversationMessages.push({
@@ -314,62 +270,16 @@ export async function processAIConversation(params: AIProcessorParams): Promise<
   finalResponse = formatResponse(finalResponse, domain, sanitizeFn);
 
   // Transform products for shopping feed if available
-  let shoppingProducts: ShoppingProduct[] | undefined;
-  let shoppingContext: string | undefined;
-
-  if (allProducts.length > 0) {
-    console.log(`[Shopping Integration] Found ${allProducts.length} products from commerce providers`);
-
-    // DEBUG: Check searchLog structure
-    console.log('[Shopping Debug] searchLog length:', searchLog.length);
-    console.log('[Shopping Debug] searchLog full structure:', JSON.stringify(searchLog, null, 2));
-    console.log('[Shopping Debug] searchLog sources:', searchLog.map(log => log.source));
-    console.log('[Shopping Debug] searchLog tools:', searchLog.map(log => log.tool));
-
-    // Determine platform from search log
-    const hasWooCommerce = searchLog.some(log => log.source.includes('woocommerce'));
-    const hasShopify = searchLog.some(log => log.source.includes('shopify'));
-
-    console.log('[Shopping Debug] hasWooCommerce:', hasWooCommerce);
-    console.log('[Shopping Debug] hasShopify:', hasShopify);
-
-    // Transform products based on platform
-    if (hasWooCommerce) {
-      shoppingProducts = transformWooCommerceProducts(allProducts);
-    } else if (hasShopify) {
-      shoppingProducts = transformShopifyProducts(allProducts);
-    }
-
-    // Check if shopping mode should be triggered
-    if (shoppingProducts && shouldTriggerShoppingMode(finalResponse, shoppingProducts, isMobile)) {
-      shoppingContext = extractShoppingContext(finalResponse, lastUserQuery);
-      console.log(`[Shopping Integration] Shopping mode triggered with ${shoppingProducts.length} products${isMobile ? ' (mobile)' : ''}`);
-      if (shoppingContext) {
-        console.log(`[Shopping Integration] Context: ${shoppingContext}`);
-      }
-    } else {
-      // Don't include shopping products if mode shouldn't be triggered
-      shoppingProducts = undefined;
-    }
-  }
+  const { shoppingProducts, shoppingContext } = prepareShoppingProducts(
+    allProducts,
+    searchLog,
+    finalResponse,
+    lastUserQuery,
+    isMobile
+  );
 
   // Log search activity
-  console.log('[Intelligent Chat] Search Summary:', {
-    totalIterations: iteration,
-    maxIterations,
-    iterationUtilization: `${Math.round((iteration / maxIterations) * 100)}%`,
-    totalSearches: searchLog.length,
-    totalResults: allSearchResults.length,
-    searchBreakdown: searchLog,
-    uniqueUrlsFound: Array.from(new Set(allSearchResults.map(r => r.url))).length,
-    productsFound: allProducts.length,
-    shoppingModeTriggered: !!shoppingProducts
-  });
-
-  // Add warning if close to limit
-  if (iteration >= maxIterations - 1) {
-    console.warn(`[Intelligent Chat] Nearly hit iteration limit (${iteration}/${maxIterations}). Consider increasing maxIterations if queries frequently timeout.`);
-  }
+  logSearchSummary(iteration, maxIterations, searchLog, allSearchResults, allProducts, shoppingProducts);
 
   return {
     finalResponse,

@@ -4,6 +4,7 @@
  */
 
 import { Moon, Sun, Sparkles, LucideIcon } from 'lucide-react';
+import { sanitizeConfigHtml } from '@/lib/utils/sanitize-html';
 
 export interface ThemePreset {
   name: string;
@@ -152,12 +153,12 @@ export default function RootLayout({ children }) {
           strategy="afterInteractive"
           dangerouslySetInnerHTML={{
             __html: \`
-              window.ChatWidgetConfig = ${configString};
+              window.ChatWidgetConfig = ${sanitizeConfigHtml(configString)};
             \`,
           }}
         />
         <Script
-          src="${config.serverUrl}/embed.js"
+          src="${sanitizeConfigHtml(config.serverUrl)}/embed.js"
           strategy="afterInteractive"
         />
       </body>

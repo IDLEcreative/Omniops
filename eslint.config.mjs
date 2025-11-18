@@ -91,6 +91,10 @@ const eslintConfig = [
       "@typescript-eslint/no-explicit-any": "off",
       "@typescript-eslint/no-unused-vars": "off",
       "react/no-unescaped-entities": "off",
+      // Discourage console usage - use logger instead
+      "no-console": ["warn", {
+        "allow": ["warn", "error"]
+      }],
       "no-restricted-imports": [
         "error",
         {
@@ -139,12 +143,19 @@ const eslintConfig = [
     rules: {
       "no-restricted-imports": "off",
       "no-restricted-syntax": "off",
+      "no-console": "off",
       "@typescript-eslint/no-explicit-any": "off",
       "@typescript-eslint/no-unused-vars": "off"
     }
   },
   {
     files: ["types/supabase.ts"],
+    rules: {
+      "no-restricted-imports": "off"
+    }
+  },
+  {
+    files: ["lib/autonomous/**/*"],
     rules: {
       "no-restricted-imports": "off"
     }
