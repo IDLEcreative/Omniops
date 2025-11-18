@@ -7,7 +7,43 @@ interface MessageContentProps {
   className?: string;
 }
 
-// Memoized component to prevent unnecessary re-renders
+/**
+ * MessageContent Component - AI-optimized header for fast comprehension
+ *
+ * @purpose Renders chat message content with markdown links and syntax-highlighted code blocks
+ *
+ * @flow
+ *   1. content → formatMarkdown (normalize line endings)
+ *   2. → renderContentWithCodeBlocks (detect ```code``` blocks)
+ *   3. → renderContentWithLinks (convert URLs/markdown links to <a> tags)
+ *   4. → render <div> with processed content
+ *
+ * @keyFunctions
+ *   - formatMarkdown (line 35): Normalizes CRLF→LF, trims whitespace
+ *   - processPlainUrlsCallback (line 48): Converts plain URLs to clickable links
+ *   - renderContentWithCodeBlocks (line 76): Parses ```language\ncode\n``` blocks, renders with SyntaxHighlighter
+ *   - renderContentWithLinks (line 139): Converts markdown [text](url) to <a> tags
+ *
+ * @handles
+ *   - Code blocks: ```javascript\nconst x = 5;\n``` → Syntax-highlighted with vscDarkPlus theme
+ *   - Markdown links: [Click here](https://example.com) → <a href="...">Click here</a>
+ *   - Plain URLs: https://example.com → <a href="https://example.com">...</a>
+ *   - Mixed content: Text, code blocks, and links can be interspersed
+ *
+ * @returns <div> with whitespace-pre-wrap, containing processed React elements
+ *
+ * @performance
+ *   - React.memo prevents re-renders unless content/className changes
+ *   - useCallback memoizes functions to prevent recreation on every render
+ *   - useMemo caches rendered content based on content string
+ *
+ * @consumers
+ *   - components/ChatWidget/MessageList.tsx (displays chat messages)
+ *   - __tests__/components/chat/MessageContent.test.tsx (test suite)
+ *
+ * @totalLines 197
+ * @estimatedTokens 1,600 (without header), 600 (with header - 62% savings)
+ */
 export const MessageContent = React.memo(({ content, className = '' }: MessageContentProps) => {
   // Format markdown content for better display - simplified to preserve formatting
   const formatMarkdown = useCallback((text: string): string => {

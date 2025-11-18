@@ -33,14 +33,14 @@ describe('MessageContent - React.memo Optimization', () => {
       <MessageContent content="Test" className="class1" />
     );
 
-    let span = container.querySelector('span');
-    expect(span).toHaveClass('class1');
+    let div = container.querySelector('div');
+    expect(div).toHaveClass('class1');
 
     rerender(<MessageContent content="Test" className="class2" />);
 
-    span = container.querySelector('span');
-    expect(span).not.toHaveClass('class1');
-    expect(span).toHaveClass('class2');
+    div = container.querySelector('div');
+    expect(div).not.toHaveClass('class1');
+    expect(div).toHaveClass('class2');
   });
 });
 
