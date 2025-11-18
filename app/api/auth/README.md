@@ -1,3 +1,8 @@
+**Last Updated:** 2025-11-18
+**Verified Accurate For:** v0.1.0
+**Status:** Active
+**Type:** Reference
+
 # Authentication API
 
 User authentication and customer management endpoints for secure access control and user session management.

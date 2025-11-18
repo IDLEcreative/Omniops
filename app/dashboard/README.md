@@ -1,3 +1,8 @@
+**Last Updated:** 2025-11-18
+**Verified Accurate For:** v0.1.0
+**Status:** Active
+**Type:** Reference
+
 # Dashboard - OmniOps Customer Management Interface
 
 The customer dashboard provides a comprehensive management interface for OmniOps AI customer service platform. Built with Next.js 15 Server Components and featuring real-time analytics, conversation management, and integration controls.

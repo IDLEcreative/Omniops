@@ -1,3 +1,8 @@
+**Last Updated:** 2025-11-18
+**Verified Accurate For:** v0.1.0
+**Status:** Active
+**Type:** Reference
+
 # Job Statistics API
 
 The Job Statistics API provides comprehensive analytics and reporting for scrape jobs. This endpoint offers insights into job performance, success rates, domain-specific metrics, and system health indicators.

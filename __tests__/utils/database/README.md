@@ -1,3 +1,8 @@
+**Last Updated:** 2025-11-18
+**Verified Accurate For:** v0.1.0
+**Status:** Active
+**Type:** Reference
+
 # Database Utilities
 
 **Purpose:** Shared database utilities and helpers for CLI tools and tests

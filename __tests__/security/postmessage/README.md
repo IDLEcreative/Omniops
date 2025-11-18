@@ -1,3 +1,8 @@
+**Last Updated:** 2025-11-18
+**Verified Accurate For:** v0.1.0
+**Status:** Active
+**Type:** Reference
+
 # PostMessage Security Tests
 
 **Purpose:** Modular test suite for postMessage cross-frame communication security.

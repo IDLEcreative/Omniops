@@ -1,3 +1,8 @@
+**Last Updated:** 2025-11-18
+**Verified Accurate For:** v0.1.0
+**Status:** Structure Created - Implementation Pending
+**Type:** Reference
+
 # Content Extractor Tests
 
 **Purpose:** Test suite for the refactored content extraction modules.

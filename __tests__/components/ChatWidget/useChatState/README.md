@@ -1,3 +1,8 @@
+**Last Updated:** 2025-11-18
+**Verified Accurate For:** v0.1.0
+**Status:** Active
+**Type:** Reference
+
 # useChatState Hook Tests
 
 **Purpose:** Modular test suite for the `useChatState` hook, split from a monolithic 672 LOC file into focused modules.

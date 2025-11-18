@@ -1,3 +1,8 @@
+**Last Updated:** 2025-11-18
+**Verified Accurate For:** v0.1.0
+**Status:** Active
+**Type:** Reference
+
 # CSV Export Utilities
 
 **Purpose:** Modular utilities for CSV generation, extracted from `csv-generator.ts` to comply with the 300 LOC file limit.

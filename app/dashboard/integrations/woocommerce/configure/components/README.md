@@ -1,3 +1,8 @@
+**Last Updated:** 2025-11-18
+**Verified Accurate For:** v0.1.0
+**Status:** Active
+**Type:** Reference
+
 # WooCommerce Configure Page Components
 
 **Purpose:** React components for the WooCommerce integration configuration page, extracted from page.tsx to comply with 300 LOC limit.

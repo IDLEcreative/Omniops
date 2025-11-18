@@ -1,3 +1,8 @@
+**Last Updated:** 2025-11-18
+**Verified Accurate For:** v0.1.0
+**Status:** Active
+**Type:** Reference
+
 # Job Queue API
 
 The Job Queue API provides endpoints for workers to retrieve and claim jobs from the scrape job queue. This API is designed for distributed scraping systems where multiple workers need to process jobs atomically.

@@ -1,3 +1,8 @@
+**Last Updated:** 2025-11-18
+**Verified Accurate For:** v0.1.0
+**Status:** Active
+**Type:** Reference
+
 # Test Utils Directory
 
 **Purpose:** Shared testing utilities, helpers, setup/teardown scripts, and mock factories used across all test suites.

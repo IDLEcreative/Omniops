@@ -1,3 +1,8 @@
+**Last Updated:** 2025-11-18
+**Verified Accurate For:** v0.1.0
+**Status:** Active
+**Type:** Reference
+
 # Job Status API
 
 The Job Status API provides endpoints to manage individual jobs by their ID. This includes retrieving job status, updating job state (pause/resume/cancel), and deleting jobs.

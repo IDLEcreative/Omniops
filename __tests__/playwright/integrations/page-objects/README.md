@@ -1,3 +1,8 @@
+**Last Updated:** 2025-11-18
+**Verified Accurate For:** v0.1.0
+**Status:** Active
+**Type:** Reference
+
 # Playwright Page Objects
 
 **Purpose:** Reusable page object models for E2E test interactions.

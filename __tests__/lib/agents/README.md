@@ -1,3 +1,8 @@
+**Last Updated:** 2025-11-18
+**Verified Accurate For:** v0.1.0
+**Status:** Active
+**Type:** Reference
+
 # AI Agents Tests Directory
 
 **Purpose:** Comprehensive test suite for AI agent routing, commerce providers, customer service agents, and intelligent query processing.

@@ -1,3 +1,8 @@
+**Last Updated:** 2025-11-18
+**Verified Accurate For:** v0.1.0
+**Status:** Active
+**Type:** Reference
+
 # ConsentManager Test Suite
 
 **Purpose:** Modular test suite for the ConsentManager class with focused test files organized by functionality.

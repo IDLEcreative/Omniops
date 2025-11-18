@@ -1,3 +1,8 @@
+**Last Updated:** 2025-11-18
+**Verified Accurate For:** v0.1.0
+**Status:** Active
+**Type:** Reference
+
 # Job Retry API
 
 The Job Retry API provides endpoints to retry failed scrape jobs. This API handles intelligent retry logic, tracks retry attempts, and manages retry limits to prevent infinite retry loops.

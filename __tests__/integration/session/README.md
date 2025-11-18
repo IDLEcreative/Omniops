@@ -1,3 +1,8 @@
+**Last Updated:** 2025-11-18
+**Verified Accurate For:** v0.1.0
+**Status:** Active
+**Type:** Integration Tests
+
 # Session Persistence Integration Tests
 
 **Purpose:** Focused integration tests for chat widget session persistence functionality

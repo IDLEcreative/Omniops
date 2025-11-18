@@ -1,3 +1,8 @@
+**Last Updated:** 2025-11-18
+**Verified Accurate For:** v0.1.0
+**Status:** Active
+**Type:** Reference
+
 # Privacy API
 
 User privacy and data control endpoints for managing personal data and privacy preferences.

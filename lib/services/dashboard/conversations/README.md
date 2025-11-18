@@ -1,3 +1,8 @@
+**Last Updated:** 2025-11-18
+**Verified Accurate For:** v0.1.0
+**Status:** Active
+**Type:** Reference
+
 # Conversations Service Modules
 
 **Purpose:** Extracted modules from the main conversations service to comply with the 300 LOC limit while maintaining clean separation of concerns.

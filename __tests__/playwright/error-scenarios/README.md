@@ -1,3 +1,7 @@
+**Last Updated:** 2025-11-18
+**Verified Accurate For:** v0.1.0
+**Type:** Reference
+
 # Error Scenarios E2E Tests (Phase 4)
 
 **Status:** ✅ Complete

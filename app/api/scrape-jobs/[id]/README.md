@@ -1,3 +1,8 @@
+**Last Updated:** 2025-11-18
+**Verified Accurate For:** v0.1.0
+**Status:** Active
+**Type:** Reference
+
 # Individual Scrape Job API
 
 The Individual Scrape Job API provides endpoints to manage specific scrape jobs by their ID. This includes retrieving job details, updating job status, and cancelling jobs.

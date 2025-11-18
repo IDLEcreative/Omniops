@@ -1,3 +1,8 @@
+**Last Updated:** 2025-11-18
+**Verified Accurate For:** v0.1.0
+**Status:** Active
+**Type:** Reference
+
 # Integration Tests Directory
 
 End-to-end integration tests for the Customer Service Agent application, validating complete system workflows, cross-component interactions, and real-world scenarios.

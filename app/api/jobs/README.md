@@ -1,3 +1,8 @@
+**Last Updated:** 2025-11-18
+**Verified Accurate For:** v0.1.0
+**Status:** Active
+**Type:** Reference
+
 # Jobs API
 
 The Jobs API manages the job queue system for web scraping operations. It provides endpoints for creating various types of jobs (single page, full crawl, refresh) and retrieving job statistics.

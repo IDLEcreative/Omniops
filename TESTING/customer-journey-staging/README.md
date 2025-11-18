@@ -1,3 +1,8 @@
+**Last Updated:** 2025-11-18
+**Verified Accurate For:** v0.1.0
+**Status:** Active
+**Type:** Reference
+
 # Customer Journey Testing - Staging Domain
 
 **Purpose:** End-to-end testing documentation for staging domain onboarding and A/B comparison with production.

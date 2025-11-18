@@ -1,6 +1,9 @@
 **Last Updated:** 2025-10-24
 **Verified Accurate For:** v0.1.0
 
+**Status:** Active
+**Type:** Reference
+
 # WooCommerce Integration Guide
 
 **Last Updated: 2025-10-24**

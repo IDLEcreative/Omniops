@@ -1,3 +1,8 @@
+**Last Updated:** 2025-11-18
+**Verified Accurate For:** v0.1.0
+**Status:** Active
+**Type:** Reference
+
 # Follow-up Scheduler Tests
 
 **Purpose:** Unit tests for the follow-up scheduling system that validates message scheduling, sending, and cancellation operations.

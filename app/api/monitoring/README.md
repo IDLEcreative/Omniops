@@ -1,3 +1,8 @@
+**Last Updated:** 2025-11-18
+**Verified Accurate For:** v0.1.0
+**Status:** Active
+**Type:** Reference
+
 # Monitoring API
 
 System monitoring, analytics, and performance tracking endpoints for operational insights and business intelligence.
