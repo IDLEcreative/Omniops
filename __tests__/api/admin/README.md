@@ -1,3 +1,8 @@
+**Last Updated:** 2025-11-18
+**Verified Accurate For:** v0.1.0
+**Status:** Active
+**Type:** Reference
+
 # Admin API Testing Suite
 
 **Purpose:** Comprehensive testing tools for admin API endpoints, including telemetry and lookup failure analytics.

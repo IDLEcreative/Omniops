@@ -1,3 +1,8 @@
+**Last Updated:** 2025-11-18
+**Verified Accurate For:** v0.1.0
+**Status:** Active
+**Type:** Reference
+
 # UI Tests Directory
 
 **Purpose:** Tests for reusable UI components, design system elements, and visual components.

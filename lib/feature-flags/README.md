@@ -1,3 +1,8 @@
+**Last Updated:** 2025-11-18
+**Verified Accurate For:** v0.1.0
+**Status:** Active
+**Type:** Reference
+
 # Feature Flags Library
 
 **Purpose:** Centralized feature flag evaluation system with database overrides, environment-based defaults, and per-customer/organization customization.

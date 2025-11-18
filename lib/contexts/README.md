@@ -1,3 +1,8 @@
+**Last Updated:** 2025-11-18
+**Verified Accurate For:** v0.1.0
+**Status:** Active
+**Type:** Reference
+
 # Contexts Directory
 
 **Purpose:** React Context providers for organization and multi-tenant state management

@@ -1,3 +1,8 @@
+**Last Updated:** 2025-11-18
+**Verified Accurate For:** v0.1.0
+**Status:** Active
+**Type:** Reference
+
 # App Tests Directory
 
 **Purpose:** Tests for Next.js page components and app-level routing.

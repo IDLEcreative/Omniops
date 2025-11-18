@@ -1,16 +1,20 @@
 # Supabase Database Schema Documentation
 
 **Type:** Reference
-**Status:** Active
-**Last Updated:** 2025-01-08
-**Verified For:** v0.1.0 (Added RLS policies to widget_config_versions, domain_mappings, demo_sessions)
+**Status:** Partial - Needs Update
+**Last Updated:** 2025-11-18
+**Verified For:** v0.1.0
+**Last Full Audit:** 2025-10-24 (Pre-dates WhatsApp, Instagram, Chart Annotations, Metric Goals tables)
 **Dependencies:**
 - [Search Architecture](./docs/01-ARCHITECTURE/ARCHITECTURE_SEARCH_SYSTEM.md) - Uses page_embeddings and scraped_pages
 - [Performance Optimization](./docs/07-REFERENCE/REFERENCE_PERFORMANCE_OPTIMIZATION.md) - Index strategies
 **Estimated Read Time:** 30 minutes
 
+⚠️ **DOCUMENTATION STATUS WARNING:**
+This document currently documents 31 core tables. However, database audit on 2025-11-18 found **85 total tables** exist in the schema. This means **54 tables are undocumented**. Recent additions (Nov 2025) include WhatsApp integration (4 tables), Instagram integration (1 table), analytics enhancements (2 tables), and product embeddings cache (1 table). A comprehensive schema update is needed.
+
 ## Purpose
-Complete authoritative reference for the Omniops Supabase database schema documenting 29 active tables across 10 categories (core business, multi-tenant, content/scraping, AI/embeddings, chat, telemetry, privacy, widgets, synonyms, business intelligence, caching), including 214 indexes, 24 foreign key relationships, and Row Level Security policies for multi-tenant isolation.
+Authoritative reference for the Omniops Supabase database schema documenting 31 core tables across 10 categories (core business, multi-tenant, content/scraping, AI/embeddings, chat, telemetry, privacy, widgets, synonyms, business intelligence, caching), including 214+ indexes, 24+ foreign key relationships, and Row Level Security policies for multi-tenant isolation. **Note:** 54 additional tables exist but are not yet documented here.
 
 ## Quick Links
 - [Schema Summary](#schema-summary) - Table categories and counts
@@ -32,13 +36,16 @@ database, schema, PostgreSQL, Supabase, pgvector, multi-tenant, RLS, Row Level S
 
 ---
 
-> **Version**: 2.1
-> **Last Verified**: 2025-10-24
-> **Verification Method**: Direct query via Supabase MCP tools
-> **Total Tables**: 29 (public schema) - was 31, removed 2 duplicates
-> **Total Foreign Keys**: 24 relationships
-> **Total Indexes**: 214 indexes
-> **RLS Policies**: Active on 24 tables
+> **Version**: 2.2 (Partial Update)
+> **Last Verified**: 2025-11-18
+> **Verification Method**: Migration file audit
+> **Total Tables**: 85 (public schema) - 31 documented below, 54 undocumented
+> **Documented Tables**: 31 core tables (see categories below)
+> **Undocumented Tables**: 54 additional tables (including cart analytics, funnel tracking, autonomous operations, feature flags, etc.)
+> **Recent Additions (Nov 2025)**: 8 tables (WhatsApp integration, Instagram, chart annotations, metric goals, product embeddings)
+> **Total Foreign Keys**: 24+ relationships (documented)
+> **Total Indexes**: 214+ indexes (documented)
+> **RLS Policies**: Active on 24+ tables
 
 ## 📋 Table of Contents
 
@@ -101,7 +108,29 @@ database, schema, PostgreSQL, Supabase, pgvector, multi-tenant, RLS, Row Level S
 | **Business Intelligence** | 1 | Business type classification |
 | **Caching** | 2 | Query and search result caching |
 
-**Total Active Tables**: 29
+**Total Active Tables**: 85 (31 documented below + 54 undocumented)
+**Documented Below**: 31 core operational tables
+
+**Recent Additions (Nov 2025 - Not Yet Fully Documented)**:
+- `product_embeddings` - Product embedding cache for search performance
+- `instagram_credentials` - OAuth credentials for Instagram Business integration
+- `whatsapp_templates` - WhatsApp message templates
+- `whatsapp_sessions` - 24-hour messaging windows tracking
+- `whatsapp_webhooks` - Webhook payload storage for debugging
+- `whatsapp_oauth_tokens` - Encrypted OAuth tokens
+- `chart_annotations` - Business context annotations for analytics charts
+- `metric_goals` - Organization metric goals and targets
+
+**Notable Undocumented Tables** (54 total - examples):
+- Cart analytics: `cart_abandonments`, `cart_analytics_daily`, `cart_operations`, `cart_session_metrics`
+- Funnel tracking: `conversation_funnel`, `custom_funnels`, `funnel_alert_history`, `funnel_alert_rules`
+- Autonomous operations: `autonomous_consent`, `autonomous_credentials`, `autonomous_operations`, `autonomous_operations_audit`
+- Feature management: `customer_feature_flags`, `organization_feature_flags`, `feature_flag_changes`, `feature_rollouts`
+- Alerts & monitoring: `alert_history`, `alert_thresholds`, `circuit_breaker_telemetry`, `error_logs`
+- User management: `customer_sessions`, `notifications`, `feedback`
+- Advanced features: `ai_quotes`, `quote_rate_limits`, `recommendation_events`, `follow_up_messages`
+- Translation: `language_preferences`, `translation_cache`, `translation_statistics`, `supported_languages`
+- And 22+ more specialized tables
 
 **Note**: After Issue #11 cleanup (2025-10-29), removed 2 duplicate tables:
 - `chat_sessions` (replaced by `conversations`)
@@ -139,11 +168,20 @@ updated_at                 | timestamptz                 | YES      | now()
 organization_id            | uuid                        | YES      | [FK -> organizations.id]
 shopify_shop               | text                        | YES      |
 shopify_access_token       | text                        | YES      |
+whatsapp_phone_number      | text                        | YES      | NULL (Added 2025-11-16)
+whatsapp_phone_number_id   | text                        | YES      | NULL (Added 2025-11-16)
+whatsapp_business_account_id| text                       | YES      | NULL (Added 2025-11-16)
+whatsapp_provider          | text                        | YES      | 'meta' (Added 2025-11-16)
+whatsapp_enabled           | boolean                     | YES      | false (Added 2025-11-16)
+whatsapp_oauth_connected_at| timestamptz                 | YES      | NULL (Added 2025-11-16)
+whatsapp_oauth_scopes      | text[]                      | YES      | NULL (Added 2025-11-16)
 
 PRIMARY KEY: id
 UNIQUE: domain
 FOREIGN KEYS:
   - organization_id -> organizations(id) ON DELETE CASCADE
+
+**Recent Changes (2025-11-16)**: Added 7 WhatsApp integration columns for Meta Cloud API support
 ```
 
 **Indexes** (12):

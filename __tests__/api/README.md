@@ -1,3 +1,8 @@
+**Last Updated:** 2025-11-18
+**Verified Accurate For:** v0.1.0
+**Status:** Active
+**Type:** Reference
+
 # API Tests Directory
 
 Comprehensive test suite for API routes in the Customer Service Agent application, covering authentication, chat functionality, data scraping, and business logic endpoints.

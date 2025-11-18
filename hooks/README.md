@@ -1,3 +1,8 @@
+**Last Updated:** 2025-11-18
+**Verified Accurate For:** v0.1.0
+**Status:** Active
+**Type:** Reference
+
 # Hooks Directory
 
 **Purpose:** Custom React hooks for state management and API integration across the OmniOps application

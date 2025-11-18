@@ -1,3 +1,8 @@
+**Last Updated:** 2025-11-18
+**Verified Accurate For:** v0.1.0
+**Status:** Active
+**Type:** Reference
+
 # Workers System
 
 Advanced multi-worker system for processing scraping jobs with robust error handling, memory management, and health monitoring.

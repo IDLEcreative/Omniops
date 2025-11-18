@@ -1,3 +1,8 @@
+**Last Updated:** 2025-11-18
+**Verified Accurate For:** v0.1.0
+**Status:** Active
+**Type:** Reference
+
 # WooCommerce Tests Directory
 
 **Purpose:** Integration tests for WooCommerce API integration, product operations, order management, and chat integration.

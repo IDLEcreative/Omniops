@@ -1,3 +1,8 @@
+**Last Updated:** 2025-11-18
+**Verified Accurate For:** v0.1.0
+**Status:** Active
+**Type:** Reference
+
 # Embed Widget - OmniOps AI Chat Integration
 
 The OmniOps embed widget provides a production-ready, customizable AI chat interface that can be integrated into any website with a single line of code. Built with performance and accessibility in mind, featuring real-time AI responses and seamless user experience.

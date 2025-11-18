@@ -1,3 +1,8 @@
+**Last Updated:** 2025-11-18
+**Verified Accurate For:** v0.1.0
+**Status:** Active
+**Type:** Reference
+
 # Scrape Jobs API
 
 The Scrape Jobs API manages the database-backed scraping job system. This API handles job creation, listing, and management for web scraping operations with persistent storage in Supabase.

@@ -1,7 +1,11 @@
+**Last Updated:** 2025-11-18
+**Verified Accurate For:** v0.1.0
+**Status:** Active
+**Type:** Reference
+
 # Scripts Directory
 
 **Purpose:** Comprehensive collection of utility scripts for maintenance, testing, monitoring, and development tasks
-**Last Updated:** 2025-10-30
 **Usage:** Run scripts using `npx tsx <script-name>.ts` or directly with Node.js
 
 ## Overview

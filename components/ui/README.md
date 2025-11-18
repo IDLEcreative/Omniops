@@ -1,3 +1,8 @@
+**Last Updated:** 2025-11-18
+**Verified Accurate For:** v0.1.0
+**Status:** Active
+**Type:** Reference
+
 # UI Components Directory
 
 Base design system components built on shadcn/ui and Radix UI primitives. These components form the foundation of the application's user interface.

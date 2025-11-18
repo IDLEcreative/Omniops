@@ -1,3 +1,8 @@
+**Last Updated:** 2025-11-18
+**Verified Accurate For:** v0.1.0
+**Status:** Active
+**Type:** Reference
+
 # Stripe Integration Scripts
 
 This directory contains automation scripts for managing the Stripe billing integration.

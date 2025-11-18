@@ -1,3 +1,8 @@
+**Last Updated:** 2025-11-18
+**Verified Accurate For:** v0.1.0
+**Status:** Active
+**Type:** Reference
+
 # Database Migrations
 
 Database schema evolution for the Customer Service Agent. This directory contains all SQL migration files that define the database structure and changes over time.

@@ -1,3 +1,8 @@
+**Last Updated:** 2025-11-18
+**Verified Accurate For:** v0.1.0
+**Status:** Active
+**Type:** Reference
+
 # Real Scenarios Test Suite
 
 **Purpose:** End-to-end testing of AI agent behavior in realistic user conversations.

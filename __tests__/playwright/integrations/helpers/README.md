@@ -1,3 +1,8 @@
+**Last Updated:** 2025-11-18
+**Verified Accurate For:** v0.1.0
+**Status:** Active
+**Type:** Reference
+
 # Playwright Test Helpers
 
 **Purpose:** Shared utilities and setup functions for E2E integration tests.

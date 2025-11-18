@@ -1,3 +1,8 @@
+**Last Updated:** 2025-11-18
+**Verified Accurate For:** v0.1.0
+**Status:** Active
+**Type:** Reference
+
 # Queue Management API
 
 The Queue Management API provides comprehensive queue health monitoring, maintenance operations, and administrative controls for the job processing system.

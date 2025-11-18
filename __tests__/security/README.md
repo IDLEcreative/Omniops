@@ -1,3 +1,8 @@
+**Last Updated:** 2025-11-18
+**Verified Accurate For:** v0.1.0
+**Status:** Active
+**Type:** Reference
+
 # Security Tests
 
 **Purpose:** Tests security measures for cross-frame communication, authentication, data validation, and XSS prevention.

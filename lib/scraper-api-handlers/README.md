@@ -1,3 +1,8 @@
+**Last Updated:** 2025-11-18
+**Verified Accurate For:** v0.1.0
+**Status:** Active
+**Type:** Reference
+
 # Scraper API Handlers
 
 **Purpose:** API request handlers and utilities for web scraping system

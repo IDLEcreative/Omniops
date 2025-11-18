@@ -1,3 +1,8 @@
+**Last Updated:** 2025-11-18
+**Verified Accurate For:** v0.1.0
+**Status:** ✅ Complete
+**Type:** Reference
+
 # Shopify API Factory Pattern
 
 **Last Updated:** 2025-11-05

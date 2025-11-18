@@ -1,4 +1,4 @@
-**Last Updated:** 2025-11-17 (Added mandatory rule: all agents must read CLAUDE.md first)
+**Last Updated:** 2025-11-18 (Documentation audit: updated statistics and fixed references)
 **Verified Accurate For:** v0.1.0
 
 # CLAUDE.md
@@ -6,12 +6,12 @@
 **AI Assistant Instructions for Omniops Codebase**
 
 **📊 Metadata:**
-- **Last Updated:** 2025-11-17
+- **Last Updated:** 2025-11-18
 - **Version:** v0.1.0
 - **File Purpose:** Primary instruction set for Claude Code AI assistant
 - **Critical Sections:** Lines 6-165 (brand-agnostic, file placement), 1101-1171 (agents MUST read CLAUDE.md), 1142-1281 (fix issues, create tests)
 - **Total MUST/NEVER Rules:** 53 directives
-- **Line Count:** ~1,770 lines (exempt from 300 LOC rule - must be fully loaded into AI memory)
+- **Line Count:** ~2,600 lines (exempt from 300 LOC rule - must be fully loaded into AI memory)
 - **Estimated Parse Time:** 30 seconds
 
 **⚡ Quick Navigation:**
@@ -381,7 +381,7 @@ When creating ANY file, you MUST follow these placement rules:
 - `.dockerignore`
 
 **Environment/Git Files:**
-- `.env.example`, `.env.docker.example`, `.env.monitoring.example`
+- `.env.example` (covers all environments: development, Docker, monitoring)
 - `.gitignore`, `.eslintignore`, `.vercelignore`
 - `.mcp.json`
 
@@ -916,7 +916,7 @@ See [REFERENCE_DATABASE_SCHEMA.md](docs/09-REFERENCE/REFERENCE_DATABASE_SCHEMA.m
 
 ### Documentation Coverage
 
-**Total README Files:** 109 across all directories
+**Total README Files:** 205 across all directories
 
 | Category | READMEs | Status |
 |----------|---------|--------|
@@ -951,7 +951,7 @@ See [REFERENCE_DATABASE_SCHEMA.md](docs/09-REFERENCE/REFERENCE_DATABASE_SCHEMA.m
 - [types/README.md](types/README.md) - TypeScript type definitions
 
 **Testing Documentation:**
-- [__tests__/README.md](__tests__/README.md) - Complete test suite (1,210+ tests)
+- [__tests__/README.md](__tests__/README.md) - Complete test suite (1,048+ tests)
 - [__tests__/components/README.md](__tests__/components/README.md) - Component tests (138 tests)
 - [__tests__/lib/agents/README.md](__tests__/lib/agents/README.md) - AI agent tests (80+ tests)
 - [__tests__/mocks/README.md](__tests__/mocks/README.md) - MSW setup guide
@@ -2027,7 +2027,7 @@ docker exec -it omniops-app sh         # Shell into app container
 - `docker-compose.yml` - Production orchestration
 - `docker-compose.dev.yml` - Development orchestration
 - `.dockerignore` - Build exclusions
-- `.env.docker.example` - Environment template
+- `.env.example` - Environment template (use for all environments)
 
 ## Development Workflow
 

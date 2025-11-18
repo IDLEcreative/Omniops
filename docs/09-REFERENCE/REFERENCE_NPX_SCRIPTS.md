@@ -2,7 +2,7 @@
 
 **Type:** Reference
 **Status:** Active
-**Last Updated:** 2025-10-29
+**Last Updated:** 2025-11-18
 **Verified For:** v0.1.0
 **Dependencies:**
 - [Database Schema](./REFERENCE_DATABASE_SCHEMA.md) - Tables affected by cleanup scripts
@@ -36,26 +36,26 @@ Implemented the three highest-priority NPX scripts referenced throughout the doc
 
 ### 1. test-database-cleanup.ts (92+ references - HIGHEST PRIORITY)
 
-**Location:** `/Users/jamesguy/Omniops/test-database-cleanup.ts`
+**Location:** `__tests__/database/test-database-cleanup.ts`
 
 **Purpose:** Clean scraped data, embeddings, and related content for fresh re-scraping.
 
 **Commands:**
 ```bash
 # Show statistics for all domains
-npx tsx test-database-cleanup.ts stats
+npx tsx __tests__/database/test-database-cleanup.ts stats
 
 # Show statistics for specific domain
-npx tsx test-database-cleanup.ts stats --domain=example.com
+npx tsx __tests__/database/test-database-cleanup.ts stats --domain=example.com
 
 # Preview cleanup (dry run)
-npx tsx test-database-cleanup.ts clean --dry-run
+npx tsx __tests__/database/test-database-cleanup.ts clean --dry-run
 
 # Clean all domains (with 3-second safety countdown)
-npx tsx test-database-cleanup.ts clean
+npx tsx __tests__/database/test-database-cleanup.ts clean
 
 # Clean specific domain
-npx tsx test-database-cleanup.ts clean --domain=example.com
+npx tsx __tests__/database/test-database-cleanup.ts clean --domain=example.com
 ```
 
 **Features:**
@@ -101,20 +101,20 @@ Total records:            24,757
 
 ### 2. monitor-embeddings-health.ts (48+ references)
 
-**Location:** `/Users/jamesguy/Omniops/monitor-embeddings-health.ts`
+**Location:** `scripts/monitoring/monitor-embeddings-health.ts`
 
 **Purpose:** Monitor and maintain embedding quality for optimal search performance.
 
 **Commands:**
 ```bash
 # Check health of all domains
-npx tsx monitor-embeddings-health.ts check
+npx tsx scripts/monitoring/monitor-embeddings-health.ts check
 
 # Check specific domain
-npx tsx monitor-embeddings-health.ts check --domain=example.com
+npx tsx scripts/monitoring/monitor-embeddings-health.ts check --domain=example.com
 
 # Run auto-maintenance (fix issues)
-npx tsx monitor-embeddings-health.ts auto
+npx tsx scripts/monitoring/monitor-embeddings-health.ts auto
 
 # Start continuous monitoring (check every 5 minutes)
 npx tsx monitor-embeddings-health.ts watch
@@ -159,7 +159,7 @@ npx tsx monitor-embeddings-health.ts watch --interval=60
 
 ### 3. test-hallucination-prevention.ts (18+ references)
 
-**Location:** `/Users/jamesguy/Omniops/test-hallucination-prevention.ts`
+**Location:** `scripts/tests/test-hallucination-prevention.ts`
 
 **Purpose:** Test anti-hallucination safeguards in the chat system.
 

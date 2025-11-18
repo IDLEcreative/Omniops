@@ -1,3 +1,8 @@
+**Last Updated:** 2025-11-18
+**Verified Accurate For:** v0.1.0
+**Status:** Active
+**Type:** Reference
+
 # Script Library Modules
 
 This directory contains extracted logic from scripts/ tools, organized by tool name.

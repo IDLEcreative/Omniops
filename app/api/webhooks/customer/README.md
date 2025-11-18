@@ -1,3 +1,8 @@
+**Last Updated:** 2025-11-18
+**Verified Accurate For:** v0.1.0
+**Status:** Active
+**Type:** Reference
+
 # Customer Webhooks API
 
 The Customer Webhooks API handles incoming webhooks from Supabase database changes and external scraping job notifications. This endpoint processes events and triggers automated job creation and processing workflows.

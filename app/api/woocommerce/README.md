@@ -1,3 +1,8 @@
+**Last Updated:** 2025-11-18
+**Verified Accurate For:** v0.1.0
+**Status:** Active
+**Type:** Reference
+
 # WooCommerce API
 
 E-commerce integration endpoints for product management, order processing, and customer service automation.

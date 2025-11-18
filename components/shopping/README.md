@@ -1,3 +1,8 @@
+**Last Updated:** 2025-11-18
+**Verified Accurate For:** v0.1.0
+**Status:** Active
+**Type:** Reference
+
 # Shopping Components
 
 **Purpose:** Next-level mobile shopping experience with Instagram Stories-style product browsing.
