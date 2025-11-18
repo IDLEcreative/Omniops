@@ -1,5 +1,4 @@
 import { describe, it, expect, beforeEach } from '@jest/globals';
-import { exportToPDF } from '@/lib/analytics/export/pdf-exporter';
 import {
   mockAddPage,
   mockSetFontSize,
@@ -10,6 +9,7 @@ import {
   createMockMessageAnalytics,
   createMockUserAnalytics,
 } from './pdf-exporter-test-utils';
+import { exportToPDF } from '@/lib/analytics/export/pdf-exporter';
 
 describe('PDF Exporter — Section Rendering', () => {
   beforeEach(() => {
@@ -58,8 +58,10 @@ describe('PDF Exporter — Section Rendering', () => {
         percentage: 2,
       })),
     });
+    const userAnalytics = createMockUserAnalytics();
 
-    await exportToPDF(messageAnalytics, null);
+    // Include both analytics to fill the page and trigger page addition
+    await exportToPDF(messageAnalytics, userAnalytics);
 
     expect(mockAddPage).toHaveBeenCalled();
   });
