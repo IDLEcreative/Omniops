@@ -1,4 +1,7 @@
 /**
+ * @jest-environment jsdom
+ */
+/**
  * Orchestrator for useParentCommunication message tests.
  * Keeps the legacy entrypoint while delegating to focused spec files.
  */

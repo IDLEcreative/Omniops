@@ -43,7 +43,7 @@ export function AddAnnotation({ onAdd, defaultDate, minDate, maxDate }: AddAnnot
   const [open, setOpen] = useState(false);
   const [loading, setLoading] = useState(false);
   const [formData, setFormData] = useState<CreateAnnotationInput>({
-    annotation_date: defaultDate || new Date().toISOString().split('T')[0],
+    annotation_date: (defaultDate ?? new Date().toISOString().split('T')[0]) as string,
     title: '',
     description: '',
     category: 'other',
@@ -72,7 +72,7 @@ export function AddAnnotation({ onAdd, defaultDate, minDate, maxDate }: AddAnnot
 
       // Reset form and close dialog
       setFormData({
-        annotation_date: defaultDate || new Date().toISOString().split('T')[0],
+        annotation_date: (defaultDate ?? new Date().toISOString().split('T')[0]) as string,
         title: '',
         description: '',
         category: 'other',

@@ -71,8 +71,8 @@ export function ModelUsagePanel({ modelUsage, liveSessions, loading }: ModelUsag
 }
 
 function ModelUsageRow({ item }: { item: DashboardTelemetryModelUsage }) {
-  const cost = formatCurrency(item.cost);
-  const tokenLabel = `${formatNumber(item.tokens)} tokens`;
+  const cost = formatCurrency((item as any).cost || 0);
+  const tokenLabel = `${formatNumber((item as any).tokens || 0)} tokens`;
   const requestLabel = `${formatNumber(item.count)} requests`;
   return (
     <div className="flex items-start justify-between rounded-md border px-3 py-2">

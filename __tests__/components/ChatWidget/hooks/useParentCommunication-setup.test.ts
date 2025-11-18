@@ -1,4 +1,7 @@
 /**
+ * @jest-environment jsdom
+ */
+/**
  * useParentCommunication Hook - Setup & Lifecycle Tests
  *
  * Tests for:

@@ -96,7 +96,10 @@ export function FunnelEditor({ domainId }: FunnelEditorProps) {
 
   const handleUpdateStageName = (index: number, name: string) => {
     const newStages = [...funnel.stages];
-    newStages[index] = { ...newStages[index], name };
+    const stage = newStages[index];
+    if (stage) {
+      newStages[index] = { ...stage, name };
+    }
 
     setFunnel({
       ...funnel,
@@ -116,7 +119,12 @@ export function FunnelEditor({ domainId }: FunnelEditorProps) {
     const targetIndex = direction === 'up' ? index - 1 : index + 1;
 
     // Swap stages
-    [newStages[index], newStages[targetIndex]] = [newStages[targetIndex], newStages[index]];
+    const temp = newStages[index];
+    const target = newStages[targetIndex];
+    if (temp && target) {
+      newStages[index] = target;
+      newStages[targetIndex] = temp;
+    }
 
     // Update order
     newStages.forEach((stage, idx) => {

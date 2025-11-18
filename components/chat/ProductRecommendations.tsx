@@ -77,6 +77,10 @@ export function ProductRecommendations({
 
   const currentRec = recommendations[currentIndex];
 
+  if (!currentRec) {
+    return null;
+  }
+
   return (
     <div className="my-4">
       <div className="flex items-center gap-2 mb-3">

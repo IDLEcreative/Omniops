@@ -1,4 +1,7 @@
 /**
+ * @jest-environment jsdom
+ */
+/**
  * CartIndicator Component Tests
  * Tests cart badge rendering, animations, and haptic feedback
  */

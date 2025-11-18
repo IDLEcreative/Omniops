@@ -11,12 +11,12 @@ interface PerformanceChartsProps {
 export function PerformanceCharts({ hourlyTrend, cost, loading }: PerformanceChartsProps) {
   const maxRequests = useMemo(() => {
     if (hourlyTrend.length === 0) return 0;
-    return Math.max(...hourlyTrend.map((point) => point.requests));
+    return Math.max(...hourlyTrend.map((point) => (point as any).requests || 0));
   }, [hourlyTrend]);
 
   const maxCost = useMemo(() => {
     if (hourlyTrend.length === 0) return 0;
-    return Math.max(...hourlyTrend.map((point) => point.cost));
+    return Math.max(...hourlyTrend.map((point) => (point as any).cost || 0));
   }, [hourlyTrend]);
 
   const trendPoints = useMemo(() => {
@@ -81,8 +81,10 @@ function TelemetrySparkline({
   return (
     <div className="flex h-48 items-end gap-2">
       {points.map((point) => {
-        const requestHeight = maxRequests > 0 ? Math.round((point.requests / maxRequests) * 100) : 0;
-        const costRatio = maxCost > 0 ? point.cost / maxCost : 0;
+        const requests = (point as any).requests || 0;
+        const cost = (point as any).cost || 0;
+        const requestHeight = maxRequests > 0 ? Math.round((requests / maxRequests) * 100) : 0;
+        const costRatio = maxCost > 0 ? cost / maxCost : 0;
         const background = `rgba(59,130,246,${0.3 + costRatio * 0.4})`;
         return (
           <div key={point.hour} className="flex w-full flex-col items-center gap-2">
@@ -93,10 +95,10 @@ function TelemetrySparkline({
               />
             </div>
             <div className="text-[11px] font-semibold text-muted-foreground">
-              {formatNumber(point.requests)} req
+              {formatNumber(requests)} req
             </div>
             <div className="text-[11px] text-muted-foreground">{point.hourLabel}</div>
-            <div className="text-[11px] text-muted-foreground">{formatCurrency(point.cost)}</div>
+            <div className="text-[11px] text-muted-foreground">{formatCurrency(cost)}</div>
           </div>
         );
       })}

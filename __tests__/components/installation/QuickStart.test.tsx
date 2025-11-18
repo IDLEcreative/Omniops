@@ -1,3 +1,6 @@
+/**
+ * @jest-environment jsdom
+ */
 import { describe, it, expect, beforeEach, afterEach, jest } from '@jest/globals';
 import { render, screen, waitFor } from '@/__tests__/utils/test-utils';
 import { QuickStart } from '@/app/dashboard/installation/components/QuickStart';

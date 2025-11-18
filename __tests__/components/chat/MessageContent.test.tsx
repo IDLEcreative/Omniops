@@ -1,4 +1,7 @@
 /**
+ * @jest-environment jsdom
+ */
+/**
  * MessageContent Component - Test Orchestrator
  *
  * This file imports and organizes all MessageContent component tests.

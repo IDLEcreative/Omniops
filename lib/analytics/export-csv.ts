@@ -22,7 +22,7 @@ function transformAnalyticsToRows(data: DashboardAnalyticsData, dateRange: { sta
   });
 
   // Add daily sentiment data
-  data.dailySentiment.forEach(day => {
+  data.dailySentiment.forEach((day: any) => {
     rows.push({
       Type: 'Daily Sentiment',
       Date: day.date,
@@ -35,7 +35,7 @@ function transformAnalyticsToRows(data: DashboardAnalyticsData, dateRange: { sta
   });
 
   // Add top queries
-  data.topQueries.forEach((query, idx) => {
+  data.topQueries.forEach((query: any, idx: number) => {
     rows.push({
       Type: 'Top Query',
       Rank: idx + 1,
@@ -46,7 +46,7 @@ function transformAnalyticsToRows(data: DashboardAnalyticsData, dateRange: { sta
   });
 
   // Add language distribution
-  data.languageDistribution.forEach(lang => {
+  data.languageDistribution.forEach((lang: any) => {
     rows.push({
       Type: 'Language',
       Language: lang.language,
@@ -56,7 +56,7 @@ function transformAnalyticsToRows(data: DashboardAnalyticsData, dateRange: { sta
   });
 
   // Add failed searches
-  data.failedSearches.forEach((search, idx) => {
+  data.failedSearches.forEach((search: any, idx: number) => {
     rows.push({
       Type: 'Failed Search',
       Rank: idx + 1,

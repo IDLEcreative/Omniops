@@ -1,4 +1,7 @@
 /**
+ * @jest-environment jsdom
+ */
+/**
  * usePrivacySettings Hook - Demo Mode Tests
  *
  * Tests demo mode behavior with URL parsing suppression

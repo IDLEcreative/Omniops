@@ -100,7 +100,7 @@ export function AlertHistoryView() {
     }
   };
 
-  const getSeverityColor = (alert: AlertHistoryItem): string => {
+  const getSeverityColor = (alert: AlertHistoryItem): 'default' | 'destructive' | 'secondary' => {
     const difference =
       alert.condition === 'above'
         ? ((alert.value - alert.threshold) / alert.threshold) * 100

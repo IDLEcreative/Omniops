@@ -4,6 +4,7 @@
  */
 
 import type { CommerceProduct } from '@/types/supabase/commerce';
+import type { SearchResult } from '@/types/supabase/search';
 
 export interface RankingSignal {
   semanticSimilarity: number;    // 0-1 from embeddings
@@ -27,6 +28,12 @@ export interface RankedProduct extends CommerceProduct {
   finalScore: number;
   rankingSignals: RankingSignal;
   rankingExplanation: string;
+  // Optional enrichment properties (from EnrichedProduct)
+  scrapedPage?: SearchResult;
+  relatedPages?: SearchResult[];
+  recommendations?: Array<CommerceProduct & { similarity: number; recommendationReason: string }>;
+  enrichedDescription?: string;
+  sources?: string[];
 }
 
 const DEFAULT_WEIGHTS: RankingWeights = {

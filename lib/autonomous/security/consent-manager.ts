@@ -5,7 +5,8 @@
  * Ensures all autonomous actions have explicit user permission.
  */
 
-import { createServerClient } from '@/lib/supabase/server';
+import type { SupabaseClient } from '@supabase/supabase-js';
+import { createServiceRoleClientSync } from '@/lib/supabase/server';
 import type { ConsentRequest, ConsentRecord, ConsentVerification } from './consent-types';
 import {
   insertConsent as defaultInsertConsent,
@@ -37,7 +38,7 @@ export interface ConsentOperations {
 }
 
 export class ConsentManager {
-  private supabase: ReturnType<typeof createServerClient>;
+  private supabase: SupabaseClient;
   private consentVersion: string;
   private operations: ConsentOperations;
 

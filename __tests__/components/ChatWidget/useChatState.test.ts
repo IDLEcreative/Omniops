@@ -1,4 +1,7 @@
 /**
+ * @jest-environment jsdom
+ */
+/**
  * Tests for useChatState hook
  *
  * This file re-exports all modularized tests from the useChatState/ directory.

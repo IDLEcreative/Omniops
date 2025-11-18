@@ -80,8 +80,8 @@ export function useDashboardConversations(
       }
 
       // Update pagination state
-      setNextCursor(payload.pagination?.nextCursor || null);
-      setHasMore(payload.pagination?.hasMore || false);
+      setNextCursor((payload as any).pagination?.nextCursor || null);
+      setHasMore((payload as any).pagination?.hasMore || false);
 
     } catch (err) {
       if ((err as Error).name === 'AbortError') return;

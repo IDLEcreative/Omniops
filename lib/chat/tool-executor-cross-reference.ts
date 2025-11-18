@@ -118,13 +118,13 @@ export async function crossReferenceResults(
       // Include matched page URL for "Learn more" links
       matchedPageUrl: ranked.scrapedPage?.url,
       // Include related pages for recommendations
-      relatedPages: ranked.relatedPages.map(p => ({
+      relatedPages: ranked.relatedPages?.map((p: any) => ({
         title: p.title,
         url: p.url,
         similarity: p.similarity
-      })),
+      })) || [],
       // Include product recommendations
-      recommendations: ranked.recommendations?.map(rec => ({
+      recommendations: ranked.recommendations?.map((rec: any) => ({
         id: rec.id,
         name: rec.name,
         price: rec.price,

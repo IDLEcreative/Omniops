@@ -19,7 +19,7 @@ export interface MessageState {
   setLoading: React.Dispatch<React.SetStateAction<boolean>>;
   loadingMessages: boolean;
   messagesLoadError: Error | null;
-  messagesContainerRef: React.RefObject<HTMLDivElement>;
+  messagesContainerRef: React.RefObject<HTMLDivElement | null>;
   loadPreviousMessages: (convId: string, sessId: string) => Promise<void>;
   retryLoadMessages: () => Promise<void>;
 }
@@ -137,19 +137,21 @@ export function useMessageState({
                 const lastDbMsg = data.messages[data.messages.length - 1];
                 const lastStateMsg = prev[prev.length - 1];
 
-                console.log('[useMessageState] 🔍 Comparing last messages:', {
-                  sameId: lastDbMsg.id === lastStateMsg.id,
-                  dbHasMetadata: !!lastDbMsg.metadata?.shoppingProducts,
-                  stateHasMetadata: !!lastStateMsg.metadata?.shoppingProducts,
-                  dbProducts: lastDbMsg.metadata?.shoppingProducts?.length || 0,
-                  stateProducts: lastStateMsg.metadata?.shoppingProducts?.length || 0
-                });
+                if (lastDbMsg && lastStateMsg) {
+                  console.log('[useMessageState] 🔍 Comparing last messages:', {
+                    sameId: lastDbMsg.id === lastStateMsg.id,
+                    dbHasMetadata: !!lastDbMsg.metadata?.shoppingProducts,
+                    stateHasMetadata: !!lastStateMsg.metadata?.shoppingProducts,
+                    dbProducts: lastDbMsg.metadata?.shoppingProducts?.length || 0,
+                    stateProducts: lastStateMsg.metadata?.shoppingProducts?.length || 0
+                  });
 
-                if (lastDbMsg.id === lastStateMsg.id &&
-                    lastDbMsg.metadata?.shoppingProducts &&
-                    !lastStateMsg.metadata?.shoppingProducts) {
-                  console.log('[useMessageState] ✅ Loading messages (DB has metadata, state missing it)');
-                  return data.messages;
+                  if (lastDbMsg.id === lastStateMsg.id &&
+                      lastDbMsg.metadata?.shoppingProducts &&
+                      !lastStateMsg.metadata?.shoppingProducts) {
+                    console.log('[useMessageState] ✅ Loading messages (DB has metadata, state missing it)');
+                    return data.messages;
+                  }
                 }
               }
 
@@ -161,7 +163,9 @@ export function useMessageState({
             if (process.env.NODE_ENV === 'development') {
               console.log('[useMessageState] No messages found, clearing conversation ID');
             }
-            await storage.removeItem('conversation_id');
+            if (storage.removeItem) {
+              await storage.removeItem('conversation_id');
+            }
             hasLoadedMessages.current = false; // Reset to allow new conversation
           }
         } else {
@@ -172,7 +176,9 @@ export function useMessageState({
           console.warn('[useMessageState] API error:', error);
           setMessagesLoadError(error);
 
-          await storage.removeItem('conversation_id');
+          if (storage.removeItem) {
+            await storage.removeItem('conversation_id');
+          }
           hasLoadedMessages.current = false; // Reset to allow new conversation
         }
       } catch (err) {
@@ -184,7 +190,9 @@ export function useMessageState({
 
         // On error, clear stored conversation to allow fresh start
         try {
-          await storage.removeItem('conversation_id');
+          if (storage.removeItem) {
+            await storage.removeItem('conversation_id');
+          }
         } catch (storageErr) {
           console.warn('[useMessageState] Failed to clear conversation ID:', storageErr);
         }

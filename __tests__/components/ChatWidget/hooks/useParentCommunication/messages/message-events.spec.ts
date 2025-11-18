@@ -1,3 +1,6 @@
+/**
+ * @jest-environment jsdom
+ */
 import { describe, it, beforeEach, afterEach, expect } from '@jest/globals';
 import { createHookHarness } from './helpers/test-harness';
 

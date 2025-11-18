@@ -10,7 +10,7 @@ interface ResponseTimeChartProps {
 }
 
 export function ResponseTimeChart({ data, annotations = [], onAnnotationClick }: ResponseTimeChartProps) {
-  const chartData = data.dailySentiment.map(day => ({
+  const chartData = data.dailySentiment.map((day: any) => ({
     date: new Date(day.date).toLocaleDateString('en-US', { month: 'short', day: 'numeric' }),
     responseTime: data.responseTime,
     messages: day.total

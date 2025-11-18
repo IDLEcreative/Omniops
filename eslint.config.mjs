@@ -97,6 +97,7 @@ const eslintConfig = [
           "patterns": [
             {
               "group": ["@supabase/supabase-js"],
+              "allowTypeImports": true,
               "message": "Import from @/lib/supabase/server (for service role) or @/lib/supabase/client (for browser) instead. Only import types with 'import type { SupabaseClient } from @supabase/supabase-js'."
             },
             {

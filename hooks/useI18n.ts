@@ -6,30 +6,30 @@
  */
 
 import { useState, useEffect, useCallback } from 'react';
-import { t as translateFn, getAvailableLanguages } from '@/lib/i18n';
-import { type LanguageCode, isRTL as checkRTL } from '@/lib/translation/language-detector';
+import { t as translateFn, getAvailableLanguages, type LanguageCode as I18nLanguageCode, type Language } from '@/lib/i18n';
+import { isRTL as checkRTL } from '@/lib/translation/language-detector';
 
 export interface UseI18nOptions {
-  initialLanguage?: LanguageCode;
+  initialLanguage?: I18nLanguageCode;
   persist?: boolean; // Save to localStorage
 }
 
 export interface UseI18nResult {
-  language: LanguageCode;
-  setLanguage: (lang: LanguageCode) => void;
+  language: I18nLanguageCode;
+  setLanguage: (lang: I18nLanguageCode) => void;
   t: (key: string) => string;
   isRTL: boolean;
-  availableLanguages: LanguageCode[];
+  availableLanguages: Language[];
 }
 
 const STORAGE_KEY = 'omniops_ui_language';
 
 export function useI18n(options: UseI18nOptions = {}): UseI18nResult {
-  const [language, setLanguageState] = useState<LanguageCode>(() => {
+  const [language, setLanguageState] = useState<I18nLanguageCode>(() => {
     // Try to load from localStorage if persist is enabled
     if (options.persist && typeof window !== 'undefined') {
       const stored = localStorage.getItem(STORAGE_KEY);
-      if (stored) return stored as LanguageCode;
+      if (stored) return stored as I18nLanguageCode;
     }
     return options.initialLanguage || 'en';
   });
@@ -37,16 +37,16 @@ export function useI18n(options: UseI18nOptions = {}): UseI18nResult {
   const [isRTL, setIsRTL] = useState(false);
 
   useEffect(() => {
-    setIsRTL(checkRTL(language));
+    setIsRTL(checkRTL(language as any));
 
     // Update HTML dir attribute for RTL support
     if (typeof document !== 'undefined') {
-      document.documentElement.setAttribute('dir', checkRTL(language) ? 'rtl' : 'ltr');
+      document.documentElement.setAttribute('dir', checkRTL(language as any) ? 'rtl' : 'ltr');
     }
   }, [language]);
 
   const setLanguage = useCallback(
-    (lang: LanguageCode) => {
+    (lang: I18nLanguageCode) => {
       setLanguageState(lang);
 
       // Persist to localStorage if enabled

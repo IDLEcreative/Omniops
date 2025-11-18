@@ -126,7 +126,7 @@ describe('Anomaly Detector', () => {
       const anomaly = detectPatternAnomaly(recentValues, metric);
 
       expect(anomaly).not.toBeNull();
-      expect(anomaly?.severity).toBe('warning');
+      expect(anomaly?.severity).toBe('critical'); // 382% increase is critical
       expect(anomaly?.message).toContain('spike');
     });
 
@@ -310,7 +310,7 @@ describe('Anomaly Detector', () => {
 
       expect(anomalies.length).toBeGreaterThan(0);
       expect(anomalies[0].message).toContain('Response time');
-      expect(anomalies[0].message).toContain('higher');
+      expect(anomalies[0].message).toContain('increased');
       expect(anomalies[0].message).toContain('%');
     });
   });

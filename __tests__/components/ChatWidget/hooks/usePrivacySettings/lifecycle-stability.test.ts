@@ -1,4 +1,7 @@
 /**
+ * @jest-environment jsdom
+ */
+/**
  * usePrivacySettings Hook - Lifecycle & Stability Tests
  *
  * Tests unmount handling, hook stability, and state setters

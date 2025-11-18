@@ -1,3 +1,6 @@
+/**
+ * @jest-environment jsdom
+ */
 import { describe, it, expect, beforeEach, afterEach } from '@jest/globals';
 import { renderHook, waitFor } from '@testing-library/react';
 import { useChatState } from '@/components/ChatWidget/hooks/useChatState';

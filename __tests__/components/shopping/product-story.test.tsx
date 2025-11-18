@@ -1,4 +1,7 @@
 /**
+ * @jest-environment jsdom
+ */
+/**
  * ProductStory Component Tests
  * Tests haptic feedback, gestures, and animations for product cards
  */

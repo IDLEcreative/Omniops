@@ -1,4 +1,4 @@
-import { useEffect, useCallback, useState } from 'react';
+import { useEffect, useCallback, useState, useRef } from 'react';
 import type { PrivacySettings } from './usePrivacySettings';
 
 export interface UseParentCommunicationProps {
@@ -55,9 +55,14 @@ export function useParentCommunication({
   const [error, setError] = useState<Error | null>(null);
   const [messagesReceived, setMessagesReceived] = useState<number>(0);
   const [lastMessageType, setLastMessageType] = useState<string | null>(null);
-  // Create memoized message handler with security and validation
-  const handleMessage = useCallback(
-    (event: MessageEvent) => {
+
+  // FIXED: Use useRef to store callback and prevent infinite loop
+  // Store callback in ref to prevent recreation on every state change
+  const handleMessageRef = useRef<((event: MessageEvent) => void) | undefined>(undefined);
+
+  // Update ref whenever dependencies change, but don't trigger event listener re-registration
+  useEffect(() => {
+    handleMessageRef.current = (event: MessageEvent) => {
       try {
         // SECURITY: Validate origin to prevent XSS attacks
         // Special handling for srcdoc iframes where origin is 'null'
@@ -208,26 +213,28 @@ export function useParentCommunication({
         setError(error);
         console.error('[useParentCommunication] Error handling message:', error);
       }
-    },
-    [
-      conversationId,
-      isOpen,
-      sessionId,
-      setPrivacySettings,
-      setWoocommerceEnabled,
-      setStoreDomain,
-      setSessionId,
-      setConversationId,
-      setIsOpen,
-      setInput,
-      cleanupOldMessages,
-    ]
-  );
+    };
+  }, [
+    conversationId,
+    isOpen,
+    sessionId,
+    setPrivacySettings,
+    setWoocommerceEnabled,
+    setStoreDomain,
+    setSessionId,
+    setConversationId,
+    setIsOpen,
+    setInput,
+    cleanupOldMessages,
+  ]);
 
-  // Set up message listener (runs when handleMessage changes)
+  // Set up stable message listener that uses the ref (runs only once on mount)
   useEffect(() => {
+    // Wrapper function that calls the ref
+    const handler = (event: MessageEvent) => handleMessageRef.current?.(event);
+
     try {
-      window.addEventListener('message', handleMessage);
+      window.addEventListener('message', handler);
     } catch (err) {
       const error = err instanceof Error ? err : new Error('Failed to setup message listener');
       setError(error);
@@ -236,7 +243,7 @@ export function useParentCommunication({
 
     return () => {
       try {
-        window.removeEventListener('message', handleMessage);
+        window.removeEventListener('message', handler);
       } catch (err) {
         // Log but don't throw on cleanup
         if (process.env.NODE_ENV === 'development') {
@@ -244,7 +251,7 @@ export function useParentCommunication({
         }
       }
     };
-  }, [handleMessage]);
+  }, []); // Empty deps - stable event listener
 
   // Send ready message ONCE on mount (empty dependency array)
   useEffect(() => {

@@ -10,7 +10,7 @@ interface MessageVolumeChartProps {
 }
 
 export function MessageVolumeChart({ data, annotations = [], onAnnotationClick }: MessageVolumeChartProps) {
-  const chartData = data.dailySentiment.map(day => {
+  const chartData = data.dailySentiment.map((day: any) => {
     const userMessages = Math.round(day.total * 0.5);
     const assistantMessages = day.total - userMessages;
 

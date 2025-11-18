@@ -1,4 +1,7 @@
 /**
+ * @jest-environment jsdom
+ */
+/**
  * usePrivacySettings Hook - Edge Cases Tests
  *
  * Tests edge cases, SSR, special characters, and boundary conditions

@@ -123,7 +123,7 @@ export async function getResponseTimes(): Promise<ResponseTimeMetrics> {
   // Extract response times and sort
   const responseTimes = data
     .map(d => d.data?.response_time_ms)
-    .filter(t => typeof t === 'number')
+    .filter((t: any) => typeof t === 'number')
     .sort((a, b) => a - b);
 
   if (responseTimes.length === 0) {

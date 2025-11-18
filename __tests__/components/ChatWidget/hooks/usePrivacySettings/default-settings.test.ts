@@ -1,4 +1,7 @@
 /**
+ * @jest-environment jsdom
+ */
+/**
  * usePrivacySettings Hook - Default Settings Tests
  *
  * Tests default initialization and prop overrides

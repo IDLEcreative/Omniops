@@ -1,4 +1,7 @@
 /**
+ * @jest-environment jsdom
+ */
+/**
  * usePrivacySettings Hook - Production-Safe Logging Tests
  *
  * Tests environment-specific logging behavior

@@ -199,7 +199,7 @@ export function GoalSettings({ onGoalUpdate }: GoalSettingsProps) {
             <h3 className="text-sm font-semibold">Current Goals</h3>
             <div className="space-y-2 max-h-[200px] overflow-y-auto">
               {goals.map((goal) => {
-                const metric = METRIC_OPTIONS.find(m => m.value === goal.metric_name);
+                const metric = METRIC_OPTIONS.find(m => m.value === goal.metric);
                 return (
                   <div
                     key={goal.id}
@@ -207,10 +207,10 @@ export function GoalSettings({ onGoalUpdate }: GoalSettingsProps) {
                   >
                     <div className="flex-1">
                       <p className="text-sm font-medium">
-                        {metric?.label || goal.metric_name}
+                        {metric?.label || goal.metric}
                       </p>
                       <p className="text-xs text-muted-foreground">
-                        Target: {goal.target_value}{metric?.unit} ({goal.period})
+                        Target: {goal.targetValue}{metric?.unit} ({goal.period})
                       </p>
                     </div>
                     <Button

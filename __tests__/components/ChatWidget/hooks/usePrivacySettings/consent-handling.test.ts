@@ -1,4 +1,7 @@
 /**
+ * @jest-environment jsdom
+ */
+/**
  * usePrivacySettings Hook - Consent Handling Tests
  *
  * Tests consent state management and postMessage communication

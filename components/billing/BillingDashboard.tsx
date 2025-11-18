@@ -85,7 +85,7 @@ export default function BillingDashboard({ organizations }: BillingDashboardProp
         </div>
       ) : (
         <>
-          {subscription?.hasSubscription ? (
+          {subscription?.hasSubscription && selectedOrgId ? (
             <SubscriptionCard
               subscription={subscription.subscription!}
               organizationId={selectedOrgId}
@@ -96,7 +96,7 @@ export default function BillingDashboard({ organizations }: BillingDashboardProp
             <NewPlanSelector />
           )}
 
-          {subscription?.hasSubscription && (
+          {subscription?.hasSubscription && selectedOrgId && (
             <InvoiceHistory organizationId={selectedOrgId} />
           )}
         </>

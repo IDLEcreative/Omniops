@@ -7,14 +7,14 @@
  * @module lib/autonomous/core/operation-operations
  */
 
-import { createServerClient } from '@/lib/supabase/server';
+import type { SupabaseClient } from '@supabase/supabase-js';
 import type { OperationRecord } from './operation-service';
 
 /**
  * Insert a new operation record
  */
 export const insertOperation = async (
-  supabase: ReturnType<typeof createServerClient>,
+  supabase: SupabaseClient,
   data: {
     organization_id: string;
     user_id: string | null;
@@ -44,7 +44,7 @@ export const insertOperation = async (
  * Select operation by ID
  */
 export const selectOperationById = async (
-  supabase: ReturnType<typeof createServerClient>,
+  supabase: SupabaseClient,
   operationId: string
 ): Promise<any | null> => {
   const { data, error } = await supabase
@@ -67,7 +67,7 @@ export const selectOperationById = async (
  * Select operations for organization with filters
  */
 export const selectOperations = async (
-  supabase: ReturnType<typeof createServerClient>,
+  supabase: SupabaseClient,
   organizationId: string,
   options?: { status?: string; service?: string; limit?: number }
 ): Promise<any[]> => {
@@ -100,7 +100,7 @@ export const selectOperations = async (
  * Update operation consent
  */
 export const updateOperationConsent = async (
-  supabase: ReturnType<typeof createServerClient>,
+  supabase: SupabaseClient,
   operationId: string
 ): Promise<void> => {
   const { error } = await supabase
@@ -122,7 +122,7 @@ export const updateOperationConsent = async (
  * Update operation status to cancelled
  */
 export const updateOperationCancelled = async (
-  supabase: ReturnType<typeof createServerClient>,
+  supabase: SupabaseClient,
   operationId: string
 ): Promise<void> => {
   const { error } = await supabase
@@ -140,7 +140,7 @@ export const updateOperationCancelled = async (
  * Update operation with arbitrary fields
  */
 export const updateOperation = async (
-  supabase: ReturnType<typeof createServerClient>,
+  supabase: SupabaseClient,
   operationId: string,
   updates: Partial<{
     status: string;

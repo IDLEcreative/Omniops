@@ -1,3 +1,6 @@
+/**
+ * @jest-environment jsdom
+ */
 import { describe, it, expect, jest, beforeEach, afterEach } from '@jest/globals';
 import { render, screen } from '@/__tests__/utils/test-utils';
 import { ErrorBoundary } from '@/components/error-boundary';

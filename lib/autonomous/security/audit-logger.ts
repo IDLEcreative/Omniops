@@ -7,7 +7,8 @@
  * @module lib/autonomous/security/audit-logger
  */
 
-import { createServerClient } from '@/lib/supabase/server';
+import type { SupabaseClient } from '@supabase/supabase-js';
+import { createServiceRoleClientSync } from '@/lib/supabase/server';
 import type { AuditStepData, AuditRecord, OperationSummary } from './audit-logger-types';
 
 export type { AuditStepData, AuditRecord, OperationSummary } from './audit-logger-types';
@@ -17,14 +18,14 @@ export type { AuditStepData, AuditRecord, OperationSummary } from './audit-logge
 // ============================================================================
 
 export interface AuditOperations {
-  insertAuditStep: (supabase: ReturnType<typeof createServerClient>, data: any) => Promise<any>;
-  selectOperationLogs: (supabase: ReturnType<typeof createServerClient>, operationId: string) => Promise<any[]>;
+  insertAuditStep: (supabase: SupabaseClient, data: any) => Promise<any>;
+  selectOperationLogs: (supabase: SupabaseClient, operationId: string) => Promise<any[]>;
   mapToAuditRecord: (data: any) => AuditRecord;
 }
 
 // Default implementations
 const defaultInsertAuditStep = async (
-  supabase: ReturnType<typeof createServerClient>,
+  supabase: SupabaseClient,
   data: any
 ): Promise<any> => {
   const { data: record, error } = await supabase
@@ -41,7 +42,7 @@ const defaultInsertAuditStep = async (
 };
 
 const defaultSelectOperationLogs = async (
-  supabase: ReturnType<typeof createServerClient>,
+  supabase: SupabaseClient,
   operationId: string
 ): Promise<any[]> => {
   const { data, error } = await supabase
@@ -79,7 +80,7 @@ const defaultMapToAuditRecord = (data: any): AuditRecord => {
 // ============================================================================
 
 export class AuditLogger {
-  private supabase: ReturnType<typeof createServerClient>;
+  private supabase: SupabaseClient | null;
   private operations: AuditOperations;
 
   /**
@@ -88,10 +89,10 @@ export class AuditLogger {
    * @param operations Optional audit operations (for testing). If not provided, uses defaults.
    */
   constructor(
-    client?: ReturnType<typeof createServerClient>,
+    client?: SupabaseClient | null,
     operations?: Partial<AuditOperations>
   ) {
-    this.supabase = client || createServerClient();
+    this.supabase = client || createServiceRoleClientSync();
 
     // Use provided operations or defaults
     this.operations = {
@@ -117,6 +118,9 @@ export class AuditLogger {
    */
   async logStep(data: AuditStepData): Promise<AuditRecord> {
     try {
+      if (!this.supabase) {
+        throw new Error('Supabase client not initialized');
+      }
       const record = await this.operations.insertAuditStep(this.supabase, {
         operation_id: data.operationId,
         step_number: data.stepNumber,
@@ -154,6 +158,9 @@ export class AuditLogger {
    */
   async getOperationLogs(operationId: string): Promise<AuditRecord[]> {
     try {
+      if (!this.supabase) {
+        throw new Error('Supabase client not initialized');
+      }
       const data = await this.operations.selectOperationLogs(this.supabase, operationId);
       return data.map(d => this.operations.mapToAuditRecord(d));
     } catch (error) {
@@ -265,7 +272,7 @@ let auditLoggerInstance: AuditLogger | null = null;
  * const logger = getAuditLogger();
  * await logger.logStep(...);
  */
-export function getAuditLogger(client?: ReturnType<typeof createServerClient>): AuditLogger {
+export function getAuditLogger(client?: SupabaseClient | null): AuditLogger {
   if (!auditLoggerInstance) {
     auditLoggerInstance = new AuditLogger(client);
   }

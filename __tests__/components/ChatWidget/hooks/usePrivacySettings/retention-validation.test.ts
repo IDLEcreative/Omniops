@@ -1,4 +1,7 @@
 /**
+ * @jest-environment jsdom
+ */
+/**
  * usePrivacySettings Hook - Retention Days Validation Tests
  *
  * Tests retentionDays parameter validation and boundary conditions

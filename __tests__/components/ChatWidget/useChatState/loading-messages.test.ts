@@ -1,3 +1,6 @@
+/**
+ * @jest-environment jsdom
+ */
 import { describe, it, expect, beforeEach, afterEach, jest } from '@jest/globals';
 import { renderHook, act, waitFor } from '@testing-library/react';
 import {
@@ -41,16 +44,11 @@ import { useChatState } from '@/components/ChatWidget/hooks/useChatState';
  * - Preventing duplicate loads
  * - Custom server URL handling
  *
- * NOTE: Tests temporarily skipped due to Jest worker crashes (SIGKILL).
- * Root cause: Infinite loop in hook's useEffect caused by handleMessage dependency.
- * The hook's useEffect (line 399) depends on handleMessage, which is recreated
- * on every render due to conversationId/isOpen/sessionId dependencies.
- * This creates: render → storage update → state change → handleMessage recreated → useEffect runs → repeat
- *
- * Fix required: Refactor hook to use useRef for stable callback or restructure dependencies.
- * Tracked in: docs/ISSUES.md (to be added)
+ * FIXED: Infinite loop resolved by using useRef pattern in useParentCommunication hook.
+ * The handleMessage callback is now stored in a ref and updated independently of the
+ * event listener registration, preventing infinite useEffect loops.
  */
-describe.skip('useChatState Hook - Loading Previous Messages', () => {
+describe('useChatState Hook - Loading Previous Messages', () => {
   let localStorage: MockStorage;
 
   beforeEach(() => {

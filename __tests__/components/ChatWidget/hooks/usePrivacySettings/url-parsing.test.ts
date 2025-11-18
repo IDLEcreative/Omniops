@@ -1,4 +1,7 @@
 /**
+ * @jest-environment jsdom
+ */
+/**
  * usePrivacySettings Hook - URL Parameter Parsing Tests
  *
  * Tests URL parameter parsing and prop precedence

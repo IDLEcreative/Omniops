@@ -1,4 +1,7 @@
 /**
+ * @jest-environment jsdom
+ */
+/**
  * useParentCommunication Hook - Widget State Notifications Tests
  *
  * Tests for:

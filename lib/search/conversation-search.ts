@@ -133,7 +133,7 @@ export async function fullTextSearch(
   }
 
   // Map to SearchResult format
-  const results: SearchResult[] = (data || []).map(row => ({
+  const results: SearchResult[] = (data || []).map((row: any) => ({
     conversationId: row.conversation_id,
     messageId: row.message_id,
     content: row.content,

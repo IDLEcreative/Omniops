@@ -1,4 +1,7 @@
 /**
+ * @jest-environment jsdom
+ */
+/**
  * Haptic Feedback Utility Tests
  *
  * Tests haptic feedback functionality with graceful degradation

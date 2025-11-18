@@ -1,4 +1,7 @@
 /**
+ * @jest-environment jsdom
+ */
+/**
  * useSessionManagement Hook - Test Suite Index
  *
  * Tests have been split into focused modules for maintainability:

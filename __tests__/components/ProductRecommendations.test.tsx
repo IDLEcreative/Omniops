@@ -1,4 +1,7 @@
 /**
+ * @jest-environment jsdom
+ */
+/**
  * ProductRecommendations Component Tests
  *
  * Tests the recommendation carousel UI component

@@ -100,7 +100,7 @@ export function useAnnotations({
         headers: {
           'Content-Type': 'application/json',
         },
-        body: JSON.stringify({ id, ...input }),
+        body: JSON.stringify({ ...input, id }),
       });
 
       if (!response.ok) {

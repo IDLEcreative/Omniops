@@ -3,10 +3,10 @@
  * @module lib/autonomous/security/audit-statistics
  */
 
-import { createServerClient } from '@/lib/supabase/server';
+import type { SupabaseClient } from '@supabase/supabase-js';
 
 export class AuditStatistics {
-  private supabase: ReturnType<typeof createServerClient>;
+  private supabase: SupabaseClient;
 
   constructor() {
     this.supabase = createServerClient();

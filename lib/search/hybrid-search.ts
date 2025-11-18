@@ -122,7 +122,7 @@ async function performFullTextSearch(
     return [];
   }
 
-  return (data || []).map(row => ({
+  return (data || []).map((row: any) => ({
     conversationId: row.conversation_id,
     messageId: row.message_id,
     content: row.content,

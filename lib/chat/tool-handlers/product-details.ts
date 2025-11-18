@@ -37,7 +37,7 @@ export async function executeGetProductDetails(
           if ('suggestions' in details && Array.isArray(details.suggestions)) {
             let errorMessage = `Product "${productQuery}" not found in catalog`;
             if (details.suggestions.length > 0) {
-              errorMessage += `\n\nDid you mean one of these?\n${details.suggestions.map(s => `- ${s}`).join('\n')}`;
+              errorMessage += `\n\nDid you mean one of these?\n${details.suggestions.map((s: any) => `- ${s}`).join('\n')}`;
             }
 
             console.log(`[Function Call] ${provider.platform} product not found, but similar SKUs suggested: ${details.suggestions.join(', ')}`);

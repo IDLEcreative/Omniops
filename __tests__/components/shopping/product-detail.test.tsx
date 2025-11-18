@@ -1,4 +1,7 @@
 /**
+ * @jest-environment jsdom
+ */
+/**
  * ProductDetail Component Tests
  * Tests product detail view, variant selection, and accessibility
  */

@@ -85,6 +85,26 @@ jest.mock('next/headers', () => ({
   })),
 }))
 
+// Mock window.matchMedia for tests that use it (only in jsdom environment)
+if (typeof window !== 'undefined') {
+  Object.defineProperty(window, 'matchMedia', {
+    writable: true,
+    value: jest.fn().mockImplementation(query => ({
+      matches: false,
+      media: query,
+      onchange: null,
+      addListener: jest.fn(), // Deprecated
+      removeListener: jest.fn(), // Deprecated
+      addEventListener: jest.fn(),
+      removeEventListener: jest.fn(),
+      dispatchEvent: jest.fn(),
+    })),
+  });
+}
+
+// Note: MSW mocks removed - tests needing MSW should use integration test config
+// Unit tests are optimized for speed and don't include MSW dependencies
+
 // Clear mocks between tests
 afterEach(() => {
   jest.clearAllMocks()

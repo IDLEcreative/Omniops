@@ -71,21 +71,23 @@ export function ConversationPreview({
             </div>
 
             <div className="flex items-center gap-4 text-xs text-muted-foreground">
-              {firstMessage.customerEmail && (
+              {firstMessage?.customerEmail && (
                 <span className="flex items-center gap-1">
                   <Mail className="h-3 w-3" />
                   {firstMessage.customerEmail}
                 </span>
               )}
-              {firstMessage.domainName && (
+              {firstMessage?.domainName && (
                 <span className="flex items-center gap-1">
                   <Globe className="h-3 w-3" />
                   {firstMessage.domainName}
                 </span>
               )}
-              <span>
-                {format(new Date(firstMessage.createdAt), 'PPp')}
-              </span>
+              {firstMessage && (
+                <span>
+                  {format(new Date(firstMessage.createdAt), 'PPp')}
+                </span>
+              )}
             </div>
           </div>
 

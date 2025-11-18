@@ -66,8 +66,8 @@ export async function getFollowUpAnalytics(
     .gte('sent_at', new Date(Date.now() - days * 24 * 60 * 60 * 1000).toISOString());
 
   if (channelData) {
-    const emailSent = channelData.filter(m => m.channel === 'email').length;
-    const inAppSent = channelData.filter(m => m.channel === 'in_app').length;
+    const emailSent = channelData.filter((m: any) => m.channel === 'email').length;
+    const inAppSent = channelData.filter((m: any) => m.channel === 'in_app').length;
 
     byChannel.email = {
       total_sent: emailSent,

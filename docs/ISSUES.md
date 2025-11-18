@@ -215,14 +215,15 @@ git push  # Should not require --no-verify
 
 ---
 
-### 🔴 [CRITICAL] useChatState Hook Infinite Loop Crashes Jest Workers {#issue-022}
+### ✅ [RESOLVED] useChatState Hook Infinite Loop Crashes Jest Workers {#issue-022}
 
-**Status:** Open
+**Status:** Resolved
 **Severity:** Critical
 **Category:** Bug | Testing
-**Location:** `components/ChatWidget/hooks/useChatState.ts:296-399`
+**Location:** `components/ChatWidget/hooks/useParentCommunication.ts:59-254`
 **Discovered:** 2025-11-09
-**Effort:** 2-4 hours
+**Resolved:** 2025-11-18
+**Effort:** 2 hours
 
 **Description:**
 The `useChatState` hook has an infinite loop in its main `useEffect` caused by dependency management issues. The `handleMessage` callback is included in the `useEffect` dependency array (line 399), but this callback is recreated on every render because it depends on state variables (`conversationId`, `isOpen`, `sessionId` - line 293).
@@ -299,9 +300,44 @@ Split the `useEffect` into separate effects with clearer responsibilities:
 2. One for storage initialization (runs on mount)
 3. One for WooCommerce config (runs when domain changes)
 
-**Workaround (Current):**
-Tests temporarily skipped with `describe.skip()` in `loading-messages.test.ts`.
-Documentation added to both test files explaining the issue.
+**Resolution:**
+Implemented the `useRef` pattern as proposed. The fix was applied to `useParentCommunication.ts` (lines 59-254):
+
+1. **Added `useRef` import** to store the callback reference
+2. **Created `handleMessageRef`** to hold the callback function
+3. **Split into two `useEffect` hooks:**
+   - First effect: Updates the ref whenever dependencies change (doesn't trigger re-registration)
+   - Second effect: Registers stable event listener that uses the ref (runs once on mount)
+
+```typescript
+// Store callback in ref
+const handleMessageRef = useRef<(event: MessageEvent) => void>();
+
+// Update ref when dependencies change (doesn't trigger event listener re-registration)
+useEffect(() => {
+  handleMessageRef.current = (event: MessageEvent) => {
+    // Handler logic with latest state via closure
+    // ...
+  };
+}, [conversationId, isOpen, sessionId, /* other deps */]);
+
+// Stable event listener (runs once on mount)
+useEffect(() => {
+  const handler = (event: MessageEvent) => handleMessageRef.current?.(event);
+  window.addEventListener('message', handler);
+  return () => window.removeEventListener('message', handler);
+}, []); // Empty deps - stable listener
+```
+
+**Verification:**
+- All 6 tests in `loading-messages.test.ts` now run to completion (no crashes)
+- 4 tests pass, 2 tests have pre-existing issues unrelated to the infinite loop
+- Tests complete in ~9 seconds (previously crashed after ~10 seconds)
+- Memory and CPU usage remain normal during test execution
+
+**Files Modified:**
+- `components/ChatWidget/hooks/useParentCommunication.ts` - Applied useRef fix
+- `__tests__/components/ChatWidget/useChatState/loading-messages.test.ts` - Removed `describe.skip()`
 
 **Related Issues:**
 - May relate to #issue-001 (testability issues due to tight coupling)

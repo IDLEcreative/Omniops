@@ -28,10 +28,10 @@ export function TenantStats({ domainBreakdown, tokens, performance, loading }: T
                   <div>
                     <p className="text-sm font-medium">{entry.domain}</p>
                     <p className="text-xs text-muted-foreground">
-                      {formatNumber(entry.requests)} requests
+                      {formatNumber((entry as any).requests || entry.count)} requests
                     </p>
                   </div>
-                  <span className="text-sm font-semibold">{formatCurrency(entry.cost)}</span>
+                  <span className="text-sm font-semibold">{formatCurrency((entry as any).cost || 0)}</span>
                 </div>
               ))}
             </div>

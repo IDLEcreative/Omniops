@@ -62,7 +62,7 @@ export function DateRangePicker({
   maxDate = new Date(),
   maxRangeDays = 365,
 }: DateRangePickerProps) {
-  const [preset, setPreset] = useState<DateRangePreset>('last-7-days');
+  const [preset, setPreset] = useState<DateRangePreset>('7d');
   const [isOpen, setIsOpen] = useState(false);
 
   // Convert DateRange to react-day-picker DateRange format
@@ -79,25 +79,14 @@ export function DateRangePicker({
     const now = new Date();
 
     switch (presetValue) {
-      case 'last-7-days':
+      case '7d':
         return { from: subDays(now, 7), to: now };
 
-      case 'last-30-days':
+      case '30d':
         return { from: subDays(now, 30), to: now };
 
-      case 'last-90-days':
+      case '90d':
         return { from: subDays(now, 90), to: now };
-
-      case 'this-month':
-        return { from: startOfMonth(now), to: endOfMonth(now) };
-
-      case 'last-month': {
-        const lastMonth = subDays(startOfMonth(now), 1);
-        return { from: startOfMonth(lastMonth), to: endOfMonth(lastMonth) };
-      }
-
-      case 'this-quarter':
-        return { from: startOfQuarter(now), to: endOfQuarter(now) };
 
       case 'custom':
       default:
@@ -121,8 +110,8 @@ export function DateRangePicker({
 
   // Handle calendar date selection
   const handleCalendarSelect = (range: DateRangeType | undefined) => {
-    if (!range) {
-      onChange({ from: undefined, to: undefined });
+    if (!range || !range.from || !range.to) {
+      // Don't call onChange until we have a complete range
       return;
     }
 
@@ -169,12 +158,9 @@ export function DateRangePicker({
           <SelectValue />
         </SelectTrigger>
         <SelectContent>
-          <SelectItem value="last-7-days">Last 7 days</SelectItem>
-          <SelectItem value="last-30-days">Last 30 days</SelectItem>
-          <SelectItem value="last-90-days">Last 90 days</SelectItem>
-          <SelectItem value="this-month">This Month</SelectItem>
-          <SelectItem value="last-month">Last Month</SelectItem>
-          <SelectItem value="this-quarter">This Quarter</SelectItem>
+          <SelectItem value="7d">Last 7 days</SelectItem>
+          <SelectItem value="30d">Last 30 days</SelectItem>
+          <SelectItem value="90d">Last 90 days</SelectItem>
           <SelectItem value="custom">Custom Range</SelectItem>
         </SelectContent>
       </Select>

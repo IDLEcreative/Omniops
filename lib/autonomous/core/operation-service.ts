@@ -9,7 +9,8 @@
  * @module lib/autonomous/core/operation-service
  */
 
-import { createServerClient } from '@/lib/supabase/server';
+import type { SupabaseClient } from '@supabase/supabase-js';
+import { createServiceRoleClientSync } from '@/lib/supabase/server';
 import { verifyConsent as defaultVerifyConsent } from '../security/consent-manager';
 import {
   insertOperation as defaultInsertOperation,
@@ -75,7 +76,7 @@ export interface OperationDependencies {
 // ============================================================================
 
 export class OperationService {
-  private supabase: ReturnType<typeof createServerClient>;
+  private supabase: SupabaseClient;
   private operations: OperationDatabaseOps;
   private verifyConsent: typeof defaultVerifyConsent;
 

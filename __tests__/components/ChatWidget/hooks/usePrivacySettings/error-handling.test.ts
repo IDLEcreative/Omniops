@@ -1,4 +1,7 @@
 /**
+ * @jest-environment jsdom
+ */
+/**
  * usePrivacySettings Hook - Error Handling Tests
  *
  * Tests error recovery and environment-specific logging
