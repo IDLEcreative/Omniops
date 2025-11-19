@@ -17,36 +17,41 @@ jest.mock('@/lib/woocommerce-dynamic', () => ({
   getDynamicWooCommerceClient: jest.fn(),
 }));
 
-describe.skip('/api/woocommerce/health', () => {
+describe('/api/woocommerce/health', () => {
   let mockSupabase: any;
   let mockGetDynamicWooCommerceClient: jest.Mock;
 
   beforeEach(() => {
-    // Create a chainable query builder mock
-    const queryBuilder: any = {
-      then: jest.fn((resolve) => resolve({ data: [], error: null })),
-    };
+    // Create chainable and thenable query builder
+    const queryBuilder: any = {};
 
-    // Make methods chainable by returning queryBuilder itself
-    queryBuilder.select = jest.fn().mockReturnValue(queryBuilder);
-    queryBuilder.not = jest.fn().mockReturnValue(queryBuilder);
-    queryBuilder.eq = jest.fn().mockReturnValue(queryBuilder);
+    // Setup methods using mockImplementation to ensure proper chainability
+    queryBuilder.select = jest.fn(function() { return queryBuilder; });
+    queryBuilder.not = jest.fn(function() { return queryBuilder; });
+    queryBuilder.eq = jest.fn(function() { return queryBuilder; });
 
-    // Create mock Supabase client
+    // Setup then for awaiting
+    queryBuilder.then = jest.fn(function(onFulfilled: any, onRejected: any) {
+      return Promise.resolve({ data: [], error: null }).then(onFulfilled, onRejected);
+    });
+
+    // Create mock Supabase client with from method returning the queryBuilder
     mockSupabase = {
-      from: jest.fn().mockReturnValue(queryBuilder),
+      from: jest.fn(function() { return queryBuilder; }),
     };
 
-    // Store queryBuilder reference for test customization
+    // Store queryBuilder for tests to customize
     (mockSupabase as any).queryBuilder = queryBuilder;
 
-    // Mock createClient to return our mock Supabase instance
+    // Reset and setup mocks
     const supabaseServer = jest.requireMock('@/lib/supabase/server');
+    supabaseServer.createClient.mockClear();
     supabaseServer.createClient.mockReturnValue(mockSupabase);
 
-    // Mock WooCommerce client getter
+    // Setup WooCommerce mock
     const woocommerceDynamic = jest.requireMock('@/lib/woocommerce-dynamic');
     mockGetDynamicWooCommerceClient = woocommerceDynamic.getDynamicWooCommerceClient;
+    mockGetDynamicWooCommerceClient.mockClear();
   });
 
   describe('GET - Single domain health check', () => {
@@ -62,10 +67,10 @@ describe.skip('/api/woocommerce/health', () => {
         get: jest.fn().mockResolvedValue({ data: { environment: 'production' } }),
       };
 
-      // Mock the query result
-      mockSupabase.queryBuilder.then = jest.fn((resolve) =>
-        resolve({ data: [mockConfig], error: null })
-      );
+      // Mock the query result - override the then function for this test
+      mockSupabase.queryBuilder.then.mockImplementation((onFulfilled, onRejected) => {
+        return Promise.resolve({ data: [mockConfig], error: null }).then(onFulfilled, onRejected);
+      });
 
       mockGetDynamicWooCommerceClient.mockResolvedValue(mockWooClient);
 
@@ -93,9 +98,13 @@ describe.skip('/api/woocommerce/health', () => {
       };
 
       // Mock the query result
-      mockSupabase.queryBuilder.then = jest.fn((resolve) =>
-        resolve({ data: [mockConfig], error: null })
-      );
+      mockSupabase.queryBuilder.then = jest.fn((onFulfilled) => {
+        const result = { data: [mockConfig], error: null };
+        if (onFulfilled) {
+          return Promise.resolve(onFulfilled(result));
+        }
+        return Promise.resolve(result);
+      });
 
       mockGetDynamicWooCommerceClient.mockResolvedValue(null);
 
@@ -122,9 +131,13 @@ describe.skip('/api/woocommerce/health', () => {
       };
 
       // Mock the query result
-      mockSupabase.queryBuilder.then = jest.fn((resolve) =>
-        resolve({ data: [mockConfig], error: null })
-      );
+      mockSupabase.queryBuilder.then = jest.fn((onFulfilled) => {
+        const result = { data: [mockConfig], error: null };
+        if (onFulfilled) {
+          return Promise.resolve(onFulfilled(result));
+        }
+        return Promise.resolve(result);
+      });
 
       mockGetDynamicWooCommerceClient.mockResolvedValue(mockWooClient);
 
@@ -161,9 +174,9 @@ describe.skip('/api/woocommerce/health', () => {
       };
 
       // Mock the query result
-      mockSupabase.queryBuilder.then = jest.fn((resolve) =>
-        resolve({ data: mockConfigs, error: null })
-      );
+      mockSupabase.queryBuilder.then.mockImplementation((onFulfilled, onRejected) => {
+        return Promise.resolve({ data: mockConfigs, error: null }).then(onFulfilled, onRejected);
+      });
 
       mockGetDynamicWooCommerceClient.mockResolvedValue(mockWooClient);
 
@@ -185,9 +198,9 @@ describe.skip('/api/woocommerce/health', () => {
       ];
 
       // Mock the query result
-      mockSupabase.queryBuilder.then = jest.fn((resolve) =>
-        resolve({ data: mockConfigs, error: null })
-      );
+      mockSupabase.queryBuilder.then.mockImplementation((onFulfilled, onRejected) => {
+        return Promise.resolve({ data: mockConfigs, error: null }).then(onFulfilled, onRejected);
+      });
 
       mockGetDynamicWooCommerceClient.mockImplementation(async (domain) => {
         if (domain === 'healthy.com') {
@@ -210,9 +223,9 @@ describe.skip('/api/woocommerce/health', () => {
   describe('GET - No configurations found', () => {
     it('should return empty result when no configurations exist', async () => {
       // Mock the query result
-      mockSupabase.queryBuilder.then = jest.fn((resolve) =>
-        resolve({ data: [], error: null })
-      );
+      mockSupabase.queryBuilder.then.mockImplementation((onFulfilled, onRejected) => {
+        return Promise.resolve({ data: [], error: null }).then(onFulfilled, onRejected);
+      });
 
       const request = new Request('http://localhost:3000/api/woocommerce/health');
 
@@ -228,9 +241,9 @@ describe.skip('/api/woocommerce/health', () => {
 
     it('should return specific message when domain not configured', async () => {
       // Mock the query result
-      mockSupabase.queryBuilder.then = jest.fn((resolve) =>
-        resolve({ data: [], error: null })
-      );
+      mockSupabase.queryBuilder.then.mockImplementation((onFulfilled, onRejected) => {
+        return Promise.resolve({ data: [], error: null }).then(onFulfilled, onRejected);
+      });
 
       const request = new Request('http://localhost:3000/api/woocommerce/health?domain=nonexistent.com');
 
@@ -246,7 +259,7 @@ describe.skip('/api/woocommerce/health', () => {
   describe('GET - Database errors', () => {
     it('should return 500 when Supabase client creation fails', async () => {
       const supabaseServer = jest.requireMock('@/lib/supabase/server');
-      supabaseServer.createClient.mockReturnValue(null);
+      supabaseServer.createClient.mockResolvedValue(null);
 
       const request = new Request('http://localhost:3000/api/woocommerce/health');
 
@@ -259,9 +272,9 @@ describe.skip('/api/woocommerce/health', () => {
 
     it('should return 500 when config query fails', async () => {
       // Mock the query result with error
-      mockSupabase.queryBuilder.then = jest.fn((resolve) =>
-        resolve({ data: null, error: { message: 'Query error', code: 'PGRST116' } })
-      );
+      mockSupabase.queryBuilder.then.mockImplementation((onFulfilled, onRejected) => {
+        return Promise.resolve({ data: null, error: { message: 'Query error', code: 'PGRST116' } }).then(onFulfilled, onRejected);
+      });
 
       const request = new Request('http://localhost:3000/api/woocommerce/health');
 
@@ -291,9 +304,13 @@ describe.skip('/api/woocommerce/health', () => {
       };
 
       // Mock the query result
-      mockSupabase.queryBuilder.then = jest.fn((resolve) =>
-        resolve({ data: [mockConfig], error: null })
-      );
+      mockSupabase.queryBuilder.then = jest.fn((onFulfilled) => {
+        const result = { data: [mockConfig], error: null };
+        if (onFulfilled) {
+          return Promise.resolve(onFulfilled(result));
+        }
+        return Promise.resolve(result);
+      });
 
       mockGetDynamicWooCommerceClient.mockResolvedValue(mockWooClient);
 
@@ -319,9 +336,13 @@ describe.skip('/api/woocommerce/health', () => {
       };
 
       // Mock the query result
-      mockSupabase.queryBuilder.then = jest.fn((resolve) =>
-        resolve({ data: [mockConfig], error: null })
-      );
+      mockSupabase.queryBuilder.then = jest.fn((onFulfilled) => {
+        const result = { data: [mockConfig], error: null };
+        if (onFulfilled) {
+          return Promise.resolve(onFulfilled(result));
+        }
+        return Promise.resolve(result);
+      });
 
       mockGetDynamicWooCommerceClient.mockResolvedValue(mockWooClient);
 

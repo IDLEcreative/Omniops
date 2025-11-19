@@ -7,20 +7,18 @@
 
 import { describe, it, expect, jest, beforeEach } from '@jest/globals';
 import { NextRequest } from 'next/server';
-import { GET } from '@/app/api/shopify/products/route';
 
-// Mock dependencies
-jest.mock('@/lib/shopify-dynamic', () => ({
-  getDynamicShopifyClient: jest.fn(),
-}));
+// Import the mocked module first
+const shopifyDynamicMock = require('@/lib/shopify-dynamic');
+const getDynamicShopifyClient = shopifyDynamicMock.getDynamicShopifyClient;
 
-describe.skip('/api/shopify/products', () => {
+// Import the route (should use the mocked module)
+const { GET } = require('@/app/api/shopify/products/route');
+
+describe('/api/shopify/products', () => {
   let mockShopifyClient: any;
-  let mockGetDynamicShopifyClient: jest.Mock;
 
   beforeEach(() => {
-    jest.clearAllMocks();
-
     // Create mock Shopify client
     mockShopifyClient = {
       getProducts: jest.fn(),
@@ -28,9 +26,16 @@ describe.skip('/api/shopify/products', () => {
       getProduct: jest.fn(),
     };
 
-    const shopifyDynamic = jest.requireMock('@/lib/shopify-dynamic');
-    mockGetDynamicShopifyClient = shopifyDynamic.getDynamicShopifyClient;
-    mockGetDynamicShopifyClient.mockResolvedValue(mockShopifyClient);
+    // Reset all mock calls
+    getDynamicShopifyClient.mockClear();
+
+    // Set up the mock to return the Shopify client
+    const result = getDynamicShopifyClient.mockResolvedValue(mockShopifyClient);
+
+    // Verify the mock returned a Mock object
+    if (!result) {
+      throw new Error('mockResolvedValue returned falsy value!');
+    }
   });
 
   describe('GET - All products', () => {
@@ -156,7 +161,9 @@ describe.skip('/api/shopify/products', () => {
 
       expect(response.status).toBe(400);
       expect(data.error).toContain('Domain parameter is required');
-      expect(mockGetDynamicShopifyClient).not.toHaveBeenCalled();
+
+      const getDynamicShopifyClient = require('@/lib/shopify-dynamic').getDynamicShopifyClient;
+      expect(getDynamicShopifyClient).not.toHaveBeenCalled();
     });
 
     it('should return 400 when domain is empty string', async () => {
@@ -172,7 +179,8 @@ describe.skip('/api/shopify/products', () => {
 
   describe('GET - Shopify not configured', () => {
     it('should return 404 when Shopify is not configured for domain', async () => {
-      mockGetDynamicShopifyClient.mockResolvedValue(null);
+      const getDynamicShopifyClient = require('@/lib/shopify-dynamic').getDynamicShopifyClient;
+      getDynamicShopifyClient.mockResolvedValue(null);
 
       const request = new NextRequest('http://localhost:3000/api/shopify/products?domain=unconfigured.com');
 
