@@ -72,8 +72,7 @@ describe('Chat API Route - Streaming Performance', () => {
     jest.clearAllMocks();
     performanceMarkers = {};
 
-    // Set required environment variables
-    process.env.OPENAI_API_KEY = 'test-key';
+    // Set required environment variable for GPT-5 mini
     process.env.USE_GPT5_MINI = 'true';
 
     // Get mock embeddings module
@@ -257,6 +256,11 @@ describe('Chat API Route - Streaming Performance', () => {
       }),
     });
     commerceModule.getCommerceProvider.mockResolvedValue(provider);
+  });
+
+  afterEach(() => {
+    // Clean up environment variable
+    delete process.env.USE_GPT5_MINI;
   });
 
   it('should execute independent operations in parallel', async () => {
