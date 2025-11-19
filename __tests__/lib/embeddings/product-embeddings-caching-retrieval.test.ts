@@ -70,6 +70,7 @@ describe('Product Embeddings Caching - Retrieval and Integration', () => {
       update: jest.fn().mockReturnThis(),
       upsert: jest.fn(),
       raw: jest.fn((sql: string) => sql),
+      rpc: jest.fn().mockResolvedValue({ data: null, error: { message: 'RPC not available' } }),
     };
 
     mockCreateClient.mockReturnValue(mockSupabaseClient as any);
