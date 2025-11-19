@@ -16,10 +16,14 @@ describe('MessageContent - XSS Prevention', () => {
     const htmlContent = '<div>Hello</div><img src="x" onerror="alert(1)">';
     const { container } = render(<MessageContent content={htmlContent} />);
 
-    // Should render as text
+    // Should render as text (HTML tags escaped)
     expect(container).toHaveTextContent('<div>Hello</div>');
-    expect(container.querySelector('div div')).not.toBeInTheDocument();
+    expect(container).toHaveTextContent('<img');
+    // Should not have actual img tag (only the wrapper div and content div)
     expect(container.querySelector('img')).not.toBeInTheDocument();
+    // Should only have the wrapper div, not nested divs from content
+    const divs = container.querySelectorAll('div');
+    expect(divs.length).toBeLessThanOrEqual(2); // wrapper div + optional code block div
   });
 
   it('should handle javascript: protocol URLs safely', () => {

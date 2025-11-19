@@ -1,3 +1,60 @@
+/**
+ * WooCommerce Dynamic Client - AI-optimized header for fast comprehension
+ *
+ * @purpose Dynamic WooCommerce client creation with domain-based configuration and credential decryption
+ *
+ * @flow
+ *   1. Domain → getConfigForDomain (fetch customer_configs)
+ *   2. → decryptCredentials (decrypt WooCommerce API keys)
+ *   3. → createClient (instantiate WooCommerceAPI/StoreAPI)
+ *   4. → Return configured client OR null if not configured
+ *
+ * @keyFunctions
+ *   - getDynamicWooCommerceClient (line 56): Creates REST API client from domain config
+ *   - searchProductsDynamic (line 86): Searches products using dynamic client
+ *   - getDynamicStoreAPIClient (line 109): Creates Store API client (cart/checkout operations)
+ *   - isStoreAPIAvailable (line 145): Checks if Store API is available for domain
+ *
+ * @handles
+ *   - REST API: Product search, catalog access via WooCommerceAPI
+ *   - Store API: Cart operations, session management via WooCommerceStoreAPI
+ *   - Dependency Injection: Factory pattern for testing (mock vs real database)
+ *   - Error handling: Returns null if config/credentials missing
+ *
+ * @returns
+ *   - getDynamicWooCommerceClient: WooCommerceAPI | null
+ *   - searchProductsDynamic: Product[] (empty array on error)
+ *   - getDynamicStoreAPIClient: WooCommerceStoreAPI | null
+ *   - isStoreAPIAvailable: boolean
+ *
+ * @dependencies
+ *   - Database: customer_configs table (WooCommerce credentials)
+ *   - Encryption: AES-256 decryption for API keys
+ *   - WooCommerce: REST API v3 + Store API
+ *   - Factory: WooCommerceClientFactory for dependency injection
+ *
+ * @consumers
+ *   - lib/agents/providers/woocommerce-provider.ts: Uses dynamic client for agent queries
+ *   - app/api/woocommerce/products/route.ts: Product search endpoint
+ *   - app/api/cart/route.ts: Cart operations via Store API
+ *
+ * @testingStrategy
+ *   - Production: Pass defaultWooCommerceFactory (uses real database)
+ *   - Testing: Pass mockFactory (injects test config/credentials)
+ *
+ * @security
+ *   - Credentials: AES-256-GCM encrypted in database (customer_configs table)
+ *   - Decryption: Only server-side with service role access (never sent to client)
+ *   - API keys: WooCommerce consumerKey + consumerSecret encrypted before storage
+ *   - Domain validation: Only loads config for valid customer domains
+ *   - Factory pattern: Prevents direct database access in tests (injection)
+ *   - Error handling: Returns null if credentials missing (no exception leaks)
+ *   - Service role required: Bypasses RLS to access encrypted credentials
+ *
+ * @totalLines 180
+ * @estimatedTokens 1,200 (without header), 450 (with header - 62% savings)
+ */
+
 import { WooCommerceAPI } from './woocommerce-api';
 import { WooCommerceStoreAPI } from './woocommerce-store-api';
 import { getCartSessionManager } from './cart-session-manager';

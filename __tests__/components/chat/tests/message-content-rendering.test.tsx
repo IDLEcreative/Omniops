@@ -10,9 +10,9 @@ describe('MessageContent - Plain Text Rendering', () => {
 
   it('should handle empty content', () => {
     const { container } = render(<MessageContent content="" />);
-    const span = container.querySelector('span');
-    expect(span).toBeInTheDocument();
-    expect(span?.textContent).toBe('');
+    const div = container.querySelector('div');
+    expect(div).toBeInTheDocument();
+    expect(div?.textContent).toBe('');
   });
 
   it('should trim whitespace from content', () => {
@@ -23,8 +23,8 @@ describe('MessageContent - Plain Text Rendering', () => {
   it('should preserve line breaks with whitespace-pre-wrap', () => {
     const content = 'Line 1\nLine 2\nLine 3';
     const { container } = render(<MessageContent content={content} />);
-    const span = container.querySelector('span');
-    expect(span).toHaveClass('whitespace-pre-wrap');
+    const div = container.querySelector('div');
+    expect(div).toHaveClass('whitespace-pre-wrap');
   });
 
   it('should handle very long messages', () => {
@@ -42,20 +42,20 @@ describe('MessageContent - Plain Text Rendering', () => {
   it('should normalize line endings (CRLF to LF)', () => {
     const content = 'Line 1\r\nLine 2\rLine 3\nLine 4';
     const { container } = render(<MessageContent content={content} />);
-    const span = container.querySelector('span');
-    expect(span?.textContent).toContain('Line 1');
-    expect(span?.textContent).toContain('Line 2');
-    expect(span?.textContent).toContain('Line 3');
-    expect(span?.textContent).toContain('Line 4');
+    const div = container.querySelector('div');
+    expect(div?.textContent).toContain('Line 1');
+    expect(div?.textContent).toContain('Line 2');
+    expect(div?.textContent).toContain('Line 3');
+    expect(div?.textContent).toContain('Line 4');
   });
 });
 
 describe('MessageContent - Formatting Edge Cases', () => {
   it('should handle messages with only whitespace', () => {
     const { container } = render(<MessageContent content="   \n\t  " />);
-    const span = container.querySelector('span');
-    expect(span).toBeInTheDocument();
-    expect(span?.textContent).toBe('\\n\\t');
+    const div = container.querySelector('div');
+    expect(div).toBeInTheDocument();
+    expect(div?.textContent).toBe('\\n\\t');
   });
 
   it('should handle messages with bullet points', () => {
@@ -107,15 +107,15 @@ describe('MessageContent - Custom ClassName', () => {
       <MessageContent content="Test" className="custom-class" />
     );
 
-    const span = container.querySelector('span');
-    expect(span).toHaveClass('custom-class');
-    expect(span).toHaveClass('whitespace-pre-wrap');
+    const div = container.querySelector('div');
+    expect(div).toHaveClass('custom-class');
+    expect(div).toHaveClass('whitespace-pre-wrap');
   });
 
   it('should work without custom className', () => {
     const { container } = render(<MessageContent content="Test" />);
 
-    const span = container.querySelector('span');
-    expect(span).toHaveClass('whitespace-pre-wrap');
+    const div = container.querySelector('div');
+    expect(div).toHaveClass('whitespace-pre-wrap');
   });
 });

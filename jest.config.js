@@ -41,6 +41,9 @@ const customJestConfig = {
     '^@supabase/ssr$': '<rootDir>/__mocks__/@supabase/ssr.js',
     // Map cheerio to its CommonJS build to avoid ESM issues in Jest
     '^cheerio$': '<rootDir>/node_modules/cheerio/dist/commonjs/index.js',
+    // Mock react-syntax-highlighter to avoid ESM issues with refractor
+    '^react-syntax-highlighter$': '<rootDir>/__mocks__/react-syntax-highlighter.tsx',
+    '^react-syntax-highlighter/dist/esm/styles/prism$': '<rootDir>/__mocks__/react-syntax-highlighter.tsx',
     // Internal module mocks - MUST come before the catch-all '^@/(.*)$' pattern
     // NOTE: supabase-server and supabase/server are both mocked via jest.mock() in jest.setup.js, NOT via moduleNameMapper
     // NOTE: auth and analytics-rate-limit are mocked via jest.mock() in individual test files
@@ -113,7 +116,7 @@ const customJestConfig = {
   // Transform ESM packages in node_modules
   // Note: cheerio is mapped to CommonJS build above, but its dependencies may need transformation
   transformIgnorePatterns: [
-    '/node_modules/(?!(parse5|dom-serializer|domhandler|domutils|entities|htmlparser2|bullmq|uuid)/)',
+    '/node_modules/(?!(parse5|dom-serializer|domhandler|domutils|entities|htmlparser2|bullmq|uuid|react-syntax-highlighter|refractor|hastscript|hast-util-.*|unist-util-.*|property-information|space-separated-tokens|comma-separated-tokens|web-namespaces)/)',
   ],
   collectCoverageFrom: [
     'app/**/*.{js,jsx,ts,tsx}',

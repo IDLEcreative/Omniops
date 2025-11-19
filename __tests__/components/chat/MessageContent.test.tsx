@@ -9,6 +9,7 @@
  * - Links: URL detection, markdown links, styling
  * - Security: XSS prevention, sanitization
  * - Performance: React.memo optimization, large content handling
+ * - Syntax Highlighting: Code block detection and rendering
  */
 
 // Import all test suites
@@ -16,3 +17,4 @@ import './tests/message-content-rendering.test';
 import './tests/message-content-links.test';
 import './tests/message-content-security.test';
 import './tests/message-content-performance.test';
+import './tests/message-content-syntax-highlighting.test';

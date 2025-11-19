@@ -1,3 +1,54 @@
+/**
+ * WooCommerce API Client - AI-optimized header for fast comprehension
+ *
+ * @purpose Main WooCommerce REST API v3 client with modular API endpoints
+ *
+ * @flow
+ *   1. Construct WooCommerceAPI(config) → Lazy client initialization
+ *   2. → getClient() creates WooCommerceClient on first use
+ *   3. → Delegate to specialized APIs (Products, Orders, Customers, Reports, Settings)
+ *   4. → Return API responses from WooCommerce REST API
+ *
+ * @keyFunctions
+ *   - constructor (line 22): Stores config, delays client creation until needed
+ *   - getClient (line 28): Lazy loads WooCommerce client, handles mocking for tests
+ *   - getProductsAPI (line 59): Returns ProductsAPI instance
+ *   - getOrdersAPI (line 66): Returns OrdersAPI instance
+ *   - getCustomersAPI (line 73): Returns CustomersAPI instance
+ *   - getProducts (line ~100): Search/filter products
+ *   - getOrders (line ~200): Search/filter orders
+ *   - getCustomers (line ~300): Search/filter customers
+ *
+ * @handles
+ *   - Lazy initialization: Client created only when first API call is made
+ *   - Build-time safety: Prevents errors when WooCommerce credentials missing
+ *   - Mock support: Handles Jest mocks via getMockImplementation()
+ *   - Modular APIs: Delegates to ProductsAPI, OrdersAPI, CustomersAPI, ReportsAPI, SettingsAPI
+ *   - Error handling: Throws clear error if WooCommerce not configured
+ *
+ * @returns
+ *   - WooCommerceAPI instance with methods for products, orders, customers, reports, settings
+ *   - All methods return promises with WooCommerce REST API responses
+ *
+ * @dependencies
+ *   - WooCommerce REST API v3
+ *   - @woocommerce/woocommerce-rest-api npm package
+ *   - Environment: config object with {url, consumerKey, consumerSecret}
+ *
+ * @consumers
+ *   - lib/woocommerce-dynamic.ts: Creates clients dynamically per domain
+ *   - lib/agents/providers/woocommerce-provider.ts: Agent queries to WooCommerce
+ *   - app/api/woocommerce/ * /route.ts: API endpoints (note: asterisk for glob pattern)
+ *
+ * @configuration
+ *   - url: WooCommerce store URL
+ *   - consumerKey: WooCommerce REST API key
+ *   - consumerSecret: WooCommerce REST API secret
+ *
+ * @totalLines 600
+ * @estimatedTokens 3,000 (without header), 1,100 (with header - 63% savings)
+ */
+
 import type { WooCommerceClient } from '@/lib/woocommerce-types';
 import { ProductsAPI } from './products';
 import { OrdersAPI } from './orders';

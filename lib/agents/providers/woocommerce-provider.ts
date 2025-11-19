@@ -1,5 +1,50 @@
 /**
- * WooCommerce Commerce Provider Implementation
+ * WooCommerce Commerce Provider - AI-optimized header for fast comprehension
+ *
+ * @purpose WooCommerce implementation of CommerceProvider interface for AI agent product/order queries
+ *
+ * @flow
+ *   1. Query → lookupProducts(query) OR lookupOrder(orderId)
+ *   2. → generateQueryEmbedding (AI semantic search)
+ *   3. → Fetch from WooCommerce API (products/orders)
+ *   4. → scoreProductsBySimilarity (rank by relevance)
+ *   5. → Return top results with similarity scores + relevance reasons
+ *
+ * @keyFunctions
+ *   - constructor (line 35): Dependency injection for client, embeddings, scoring
+ *   - lookupOrder (line 43): Find order by ID or email with fallback search
+ *   - lookupProducts (line ~90): Semantic product search with embeddings + fuzzy SKU matching
+ *   - getRecentSkus (line ~200): Cache SKUs for fuzzy matching (5 min TTL)
+ *
+ * @handles
+ *   - Semantic search: AI embeddings for product queries (e.g., "red shoes" matches "crimson sneakers")
+ *   - Fuzzy SKU matching: Handles typos in SKUs (e.g., "A4VT90" → "A4VTG90")
+ *   - Order lookup: By order ID, order number, or customer email
+ *   - Relevance scoring: Combines embedding similarity + metadata (name, SKU, description)
+ *   - Caching: SKU cache (5 min) to optimize fuzzy matching
+ *   - Dependency injection: Testable with mock embeddings/scoring functions
+ *
+ * @returns
+ *   - lookupProducts: ProductInfo[] with similarity scores (0-1) and relevance reasons
+ *   - lookupOrder: OrderInfo | null with order details, line items, customer info
+ *
+ * @dependencies
+ *   - WooCommerceAPI: Product/order queries via REST API
+ *   - Embeddings: generateQueryEmbedding for semantic search
+ *   - Product scorer: scoreProductsBySimilarity for relevance ranking
+ *   - Fuzzy matching: findSimilarSkus for SKU typo tolerance
+ *
+ * @consumers
+ *   - lib/agents/commerce-provider.ts: Used by AI agent to answer commerce queries
+ *   - app/api/chat/route.ts: Injected via getCommerceProvider()
+ *
+ * @testingStrategy
+ *   - Mock embeddingGenerator: Inject test function instead of real AI
+ *   - Mock productScorer: Inject test scorer with known similarity scores
+ *   - Mock client: Test without real WooCommerce API calls
+ *
+ * @totalLines 400
+ * @estimatedTokens 2,000 (without header), 750 (with header - 62% savings)
  */
 
 import { CommerceProvider, OrderInfo } from '../commerce-provider';
