@@ -37,6 +37,15 @@
  *   - Production: Pass defaultShopifyFactory (uses real database)
  *   - Testing: Pass mockFactory (injects test config/credentials)
  *
+ * @security
+ *   - Credentials: AES-256-GCM encrypted in database (customer_configs table)
+ *   - Decryption: Only server-side with service role access (never sent to client)
+ *   - API token: Shopify Admin API access token encrypted before storage
+ *   - Domain validation: Only loads config for valid customer domains
+ *   - Factory pattern: Prevents direct database access in tests (injection)
+ *   - Error handling: Returns null/empty array if credentials missing (no leaks)
+ *   - Service role required: Bypasses RLS to access encrypted credentials
+ *
  * @totalLines 60
  * @estimatedTokens 600 (without header), 250 (with header - 58% savings)
  */

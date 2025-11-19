@@ -47,6 +47,22 @@
  *   - Persistent sessions: User context only (service role doesn't persist)
  *   - Auto refresh: User context only (service role is stateless)
  *
+ * @security
+ *   - Service role key: Admin access, bypasses RLS (use with caution)
+ *   - Anon key: Limited to RLS policies (safe for client-side)
+ *   - Key storage: ENV variables only (never in code or database)
+ *   - Connection pooling: Prevents connection exhaustion attacks
+ *   - RLS enforcement: User context client enforces row-level security
+ *   - Admin operations: Only use service role for system tasks, not user requests
+ *   - Build-time safety: Returns null when env vars missing (prevents crashes)
+ *
+ * @testingStrategy
+ *   - Test createClient: Verify SSR cookie handling works
+ *   - Test service role: Verify RLS bypass (can access all data)
+ *   - Test requireClient: Verify throws when env missing
+ *   - Mock cookies: Use Next.js test helpers for cookie management
+ *   - Tests: __tests__/lib/supabase/server.test.ts
+ *
  * @totalLines 191
  * @estimatedTokens 1,500 (without header), 550 (with header - 63% savings)
  */

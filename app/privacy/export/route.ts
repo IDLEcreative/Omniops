@@ -41,6 +41,23 @@
  *   - Service role: Bypasses RLS to access all user data
  *   - Data retention: Includes 30-day retention policy in metadata
  *
+ * @security
+ *   - Input validation: User ID required in query parameter
+ *   - Service role access: Bypasses RLS to access all user data (admin only)
+ *   - Data minimization: Only exports user's own data (no cross-user access)
+ *   - GDPR compliance: Right to data portability (Article 20)
+ *   - CCPA compliance: Right to know what data is collected
+ *   - Audit logging: Logs all export requests in privacy_requests table
+ *   - No PII exposure: User ID used as identifier (no names/emails in export)
+ *   - Structured export: JSON format with timestamps, counts, metadata
+ *
+ * @testingStrategy
+ *   - Mock createServiceRoleClient: Inject test database client
+ *   - Test data export: Verify conversations + messages returned
+ *   - Test metadata: Check total counts, date ranges correct
+ *   - Test audit log: Verify privacy_requests entry created
+ *   - Tests: __tests__/api/privacy/export/route.test.ts
+ *
  * @totalLines ~100
  * @estimatedTokens 800 (without header), 300 (with header - 62% savings)
  */

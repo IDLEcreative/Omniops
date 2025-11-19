@@ -45,6 +45,23 @@
  *   - Service role: Bypasses RLS to delete all user data
  *   - CSRF required: Prevents unauthorized deletions
  *
+ * @security
+ *   - CSRF protection: Requires valid X-CSRF-Token header (prevents unauthorized deletion)
+ *   - Input validation: User ID required in request body
+ *   - Service role access: Bypasses RLS to delete all user data (admin only)
+ *   - Audit logging: Logs all deletion requests in privacy_requests table
+ *   - GDPR compliance: Right to erasure (Article 17)
+ *   - CCPA compliance: Right to deletion
+ *   - Irreversible: No recovery after deletion (warn users)
+ *   - Cascading deletes: Removes messages → conversations (database foreign keys)
+ *
+ * @testingStrategy
+ *   - Test with mock CSRF middleware: Bypass token validation in tests
+ *   - Mock createServiceRoleClient: Inject test database client
+ *   - Verify deletion: Check messages + conversations tables empty
+ *   - Test audit log: Verify privacy_requests entry created
+ *   - Tests: __tests__/api/privacy/delete/route.test.ts
+ *
  * @totalLines ~90
  * @estimatedTokens 900 (without header), 350 (with header - 61% savings)
  */

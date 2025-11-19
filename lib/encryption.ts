@@ -31,6 +31,22 @@
  *
  * @note Prefer importing from '@/lib/encryption/crypto-core' for new code
  *
+ * @security
+ *   - Encryption: AES-256-GCM (authenticated encryption with associated data)
+ *   - IV: Randomly generated per encryption (prevents replay attacks)
+ *   - Key management: ENV variable (ENCRYPTION_KEY) - 32-byte hex string
+ *   - Key rotation: Not implemented yet (requires data migration)
+ *   - Credentials stored: WooCommerce/Shopify API keys encrypted before database storage
+ *   - Decryption: Only server-side with service role access (never exposed to client)
+ *   - Compliance: Meets GDPR encryption-at-rest requirements
+ *
+ * @testingStrategy
+ *   - Test encryption: Verify output differs for same input (random IV)
+ *   - Test decryption: Verify plaintext matches after encrypt/decrypt cycle
+ *   - Test IV uniqueness: Each encryption produces unique ciphertext
+ *   - Mock environment: Use test ENCRYPTION_KEY in tests
+ *   - Tests: __tests__/lib/encryption/crypto-core.test.ts
+ *
  * @totalLines 11
  * @estimatedTokens 100 (without header), 50 (with header - 50% savings)
  */

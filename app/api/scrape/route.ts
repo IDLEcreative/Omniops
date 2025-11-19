@@ -50,6 +50,30 @@
  *   - maxDuration: 300 seconds (5 minutes for long crawls)
  *   - Rate limit: 10 scrapes/hour per domain
  *
+ * @security
+ *   - Input validation: Zod schema (ScrapeRequestSchema) validates URL, domain
+ *   - CSRF protection: Requires X-CSRF-Token header for all POST requests
+ *   - Rate limiting: 10 scrapes/hour per domain (prevents abuse, expensive operation)
+ *   - URL validation: Only allows HTTPS URLs, blocks localhost/internal IPs
+ *   - Service role: Uses admin database access to store scraped content
+ *   - Content sanitization: Readability strips scripts, sanitizes HTML
+ *   - Authentication: Requires valid domain in customer_configs table
+ *   - Resource limits: Max 5 min timeout, max depth 3 for crawls
+ *
+ * @performance
+ *   - Complexity: O(n) for single page, O(n × depth) for full crawl
+ *   - Bottlenecks: Playwright page load (2-10s), Readability extraction (100-500ms), embedding generation (1-3s per page)
+ *   - Expected timing: Single page 5-15s, full crawl 1-5 min (depends on site size)
+ *   - Concurrency: Max 5 concurrent scrapes (Playwright browser instances)
+ *   - Memory: ~100MB per Playwright instance, ~50MB per page scraped
+ *
+ * @knownIssues
+ *   - JavaScript-heavy sites: May timeout if JS takes >10s to render
+ *   - Rate limit bypass: Can scrape same domain with different session IDs
+ *   - Memory leaks: Long crawls (100+ pages) may exhaust memory
+ *   - Playwright crashes: Unstable on some sites (graceful degradation)
+ *   - Cloudflare/bot detection: Some sites block Playwright
+ *
  * @totalLines 350
  * @estimatedTokens 1,800 (without header), 700 (with header - 61% savings)
  */

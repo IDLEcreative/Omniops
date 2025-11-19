@@ -42,6 +42,15 @@
  *   - Production: Pass defaultWooCommerceFactory (uses real database)
  *   - Testing: Pass mockFactory (injects test config/credentials)
  *
+ * @security
+ *   - Credentials: AES-256-GCM encrypted in database (customer_configs table)
+ *   - Decryption: Only server-side with service role access (never sent to client)
+ *   - API keys: WooCommerce consumerKey + consumerSecret encrypted before storage
+ *   - Domain validation: Only loads config for valid customer domains
+ *   - Factory pattern: Prevents direct database access in tests (injection)
+ *   - Error handling: Returns null if credentials missing (no exception leaks)
+ *   - Service role required: Bypasses RLS to access encrypted credentials
+ *
  * @totalLines 180
  * @estimatedTokens 1,200 (without header), 450 (with header - 62% savings)
  */
