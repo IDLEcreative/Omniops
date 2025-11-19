@@ -26,17 +26,17 @@ describe('ConsentManager - GDPR Compliance', () => {
       bulkRevokeForService: jest.fn(),
       mapToConsentRecord: jest.fn((data) => ({
         id: data.id,
-        organizationId: data.organization_id || data.organizationId,
-        userId: data.user_id || data.userId,
+        organizationId: data.organization_id ?? data.organizationId,
+        userId: data.user_id ?? data.userId,
         service: data.service,
         operation: data.operation,
         permissions: data.permissions,
-        grantedAt: data.granted_at || data.grantedAt,
-        expiresAt: data.expires_at || data.expiresAt,
-        revokedAt: data.revoked_at || data.revokedAt,
+        grantedAt: data.granted_at ?? data.grantedAt,
+        expiresAt: data.expires_at ?? data.expiresAt ?? null,
+        revokedAt: data.revoked_at ?? data.revokedAt ?? null,
         isActive: data.is_active ?? data.isActive,
-        consentVersion: data.consent_version || data.consentVersion,
-        createdAt: data.created_at || data.createdAt
+        consentVersion: data.consent_version ?? data.consentVersion,
+        createdAt: data.created_at ?? data.createdAt
       }))
     };
 

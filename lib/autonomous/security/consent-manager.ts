@@ -51,7 +51,8 @@ export class ConsentManager {
     client?: SupabaseClient | null,
     operations?: Partial<ConsentOperations>
   ) {
-    this.supabase = client || createServiceRoleClientSync();
+    // Preserve explicit null when passed, only create client when undefined
+    this.supabase = client !== undefined ? client : createServiceRoleClientSync();
     this.consentVersion = process.env.CONSENT_VERSION || '1.0';
 
     // Use provided operations or defaults
