@@ -36,9 +36,11 @@ export async function uploadUrl(page: Page, url: string) {
 
   // Wait for API response (network request to complete)
   // URL submission uses /api/scrape endpoint
+  // Accept any response status (200, 400, 500, etc.) to capture errors
+  // Increased timeout to 30s to handle slow scraping operations (e.g., invalid domains)
   const apiResponseReceived = await page.waitForResponse(
-    response => response.url().includes('/api/scrape') && response.status() === 200,
-    { timeout: 10000 }
+    response => response.url().includes('/api/scrape'),
+    { timeout: 30000 }
   ).then(() => true).catch(() => {
     console.log('⚠️ No /api/scrape response detected');
     return false;
