@@ -1,0 +1,152 @@
+version: 2
+updates:
+  # Npm dependencies
+  - package-ecosystem: "npm"
+    directory: "/"
+    schedule:
+      interval: "weekly"
+      day: "monday"
+      time: "09:00"
+      timezone: "Europe/London"
+    open-pull-requests-limit: 10
+    reviewers:
+      - "IDLEcreative"
+    assignees:
+      - "IDLEcreative"
+    labels:
+      - "dependencies"
+      - "automated"
+    commit-message:
+      prefix: "chore"
+      include: "scope"
+    # Group updates by type
+    groups:
+      # Production dependencies
+      production-dependencies:
+        patterns:
+          - "*"
+        exclude-patterns:
+          - "@types/*"
+          - "@testing-library/*"
+          - "jest*"
+          - "playwright*"
+          - "eslint*"
+          - "@playwright/*"
+        update-types:
+          - "minor"
+          - "patch"
+
+      # Development dependencies
+      development-dependencies:
+        patterns:
+          - "@types/*"
+          - "@testing-library/*"
+          - "jest*"
+          - "playwright*"
+          - "eslint*"
+          - "@playwright/*"
+        update-types:
+          - "minor"
+          - "patch"
+
+      # TypeScript ecosystem
+      typescript-ecosystem:
+        patterns:
+          - "typescript"
+          - "@types/*"
+          - "ts-*"
+          - "tsx"
+        update-types:
+          - "minor"
+          - "patch"
+
+      # React ecosystem
+      react-ecosystem:
+        patterns:
+          - "react"
+          - "react-dom"
+          - "@radix-ui/*"
+          - "next"
+          - "next-*"
+        update-types:
+          - "patch"
+
+      # Testing frameworks
+      testing-frameworks:
+        patterns:
+          - "jest*"
+          - "@jest/*"
+          - "@testing-library/*"
+          - "playwright*"
+          - "@playwright/*"
+          - "msw"
+        update-types:
+          - "minor"
+          - "patch"
+
+      # Database & infrastructure
+      infrastructure:
+        patterns:
+          - "@supabase/*"
+          - "redis*"
+          - "ioredis"
+          - "bullmq"
+          - "pg"
+        update-types:
+          - "patch"
+
+      # AI & ML
+      ai-dependencies:
+        patterns:
+          - "openai"
+        update-types:
+          - "minor"
+          - "patch"
+
+    # Version updates to ignore
+    ignore:
+      # Ignore major version updates (review manually)
+      - dependency-name: "*"
+        update-types: ["version-update:semver-major"]
+
+      # Ignore specific packages with known issues
+      # (Add here if needed)
+
+  # GitHub Actions
+  - package-ecosystem: "github-actions"
+    directory: "/"
+    schedule:
+      interval: "weekly"
+      day: "monday"
+      time: "09:00"
+      timezone: "Europe/London"
+    reviewers:
+      - "IDLEcreative"
+    assignees:
+      - "IDLEcreative"
+    labels:
+      - "dependencies"
+      - "github-actions"
+      - "automated"
+    commit-message:
+      prefix: "ci"
+
+  # Docker
+  - package-ecosystem: "docker"
+    directory: "/"
+    schedule:
+      interval: "weekly"
+      day: "monday"
+      time: "09:00"
+      timezone: "Europe/London"
+    reviewers:
+      - "IDLEcreative"
+    assignees:
+      - "IDLEcreative"
+    labels:
+      - "dependencies"
+      - "docker"
+      - "automated"
+    commit-message:
+      prefix: "chore"
+      include: "scope"

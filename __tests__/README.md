@@ -54,9 +54,9 @@ Comprehensive test suite for the OmniOps Customer Service Platform with 1,048+ t
 
 ## Test Suite Statistics
 
-- **Total Test Files:** 67
+- **Total Test Files:** 67+
 - **Total Tests:** 1,048+
-- **Total Test Code:** 23,677 LOC
+- **Total Test Code:** 23,677+ LOC
 - **Coverage Target:** 80%+
 
 ### Test Distribution
@@ -65,6 +65,10 @@ Comprehensive test suite for the OmniOps Customer Service Platform with 1,048+ t
 - **API Tests:** 300+ tests
 - **Integration Tests:** 100+ tests
 - **Business Logic Tests:** 400+ tests
+- **E2E Tests (Playwright):** 44+ tests
+- **Accessibility Tests:** Automated (axe-core)
+- **Visual Regression:** Automated (Playwright)
+- **Load Tests:** Automated (k6)
 
 ## Structure
 
@@ -159,14 +163,141 @@ __tests__/
 │   ├── handlers.ts        # MSW request handlers
 │   └── server.ts          # MSW server setup
 │
-└── utils/                 # Test utilities
-    ├── global-setup.js
-    ├── global-teardown.js
-    ├── integration-setup.js
-    ├── integration-test-helpers.ts
-    ├── supabase-mock.ts
-    └── test-utils.tsx
+├── utils/                 # Test utilities
+│   ├── global-setup.js
+│   ├── global-teardown.js
+│   ├── integration-setup.js
+│   ├── integration-test-helpers.ts
+│   ├── supabase-mock.ts
+│   └── test-utils.tsx
+│
+├── playwright/            # E2E tests
+│   ├── core-journeys/     # Critical user journeys
+│   ├── integrations/      # WooCommerce, Shopify, etc.
+│   └── visual-regression/ # Visual regression tests (NEW)
+│
+└── accessibility/         # Accessibility tests (NEW)
+    └── axe-tests.spec.ts  # WCAG 2.1 AA compliance tests
 ```
+
+## Advanced Testing Infrastructure
+
+### Visual Regression Testing
+
+**Purpose:** Catch unintended UI changes by comparing screenshots against baselines
+
+**Running:**
+```bash
+# Run visual regression tests
+npm run test:e2e:visual
+
+# Update baselines (after intentional changes)
+npm run test:e2e:visual -- --update-snapshots
+```
+
+**What it tests:**
+- Chat widget in all states (closed, open, with messages)
+- Dashboard layouts
+- Responsive designs (mobile, tablet, desktop)
+- Dark mode variants
+
+**Documentation:** [Visual Regression Guide](/home/user/Omniops/docs/04-TESTING/GUIDE_VISUAL_REGRESSION_TESTING.md)
+
+---
+
+### Accessibility Testing
+
+**Purpose:** Ensure WCAG 2.1 AA compliance for all users, including those with disabilities
+
+**Running:**
+```bash
+# Run automated accessibility tests
+npm run test:accessibility
+# or
+npm run test:a11y
+```
+
+**Coverage:**
+- Color contrast validation (≥4.5:1)
+- Keyboard navigation
+- Screen reader compatibility (NVDA, VoiceOver)
+- ARIA attributes
+- Form labels and error messages
+- Semantic HTML structure
+
+**Tools:**
+- @axe-core/playwright for automated testing
+- WAVE browser extension for manual review
+- NVDA/VoiceOver for screen reader validation
+
+**Documentation:**
+- [Accessibility Guide](/home/user/Omniops/docs/04-TESTING/GUIDE_ACCESSIBILITY_TESTING.md)
+- [Accessibility Audit Runbook](/home/user/Omniops/docs/04-TESTING/RUNBOOK_ACCESSIBILITY_AUDIT.md)
+
+---
+
+### Lighthouse CI
+
+**Purpose:** Automated performance, accessibility, SEO, and best practices auditing on every PR
+
+**Running:**
+```bash
+# Run Lighthouse CI locally
+npm run test:lighthouse
+```
+
+**Performance Budgets:**
+- Performance: 90+ (LCP <2.5s, CLS <0.1)
+- Accessibility: 100 (WCAG AA compliance)
+- Best Practices: 95+ (No console errors, HTTPS, secure deps)
+- SEO: 90+ (Meta tags, crawlable links)
+
+**What it measures:**
+- Core Web Vitals (LCP, FID, CLS)
+- Page load performance
+- Accessibility compliance
+- SEO optimization
+- Best practices adherence
+
+**Documentation:** [Lighthouse CI Guide](/home/user/Omniops/docs/04-TESTING/GUIDE_LIGHTHOUSE_CI.md)
+
+---
+
+### Load Testing
+
+**Purpose:** Validate system performance under realistic traffic loads using k6
+
+**Requirements:**
+- Dev server running: `npm run dev`
+- Redis running: `docker-compose up redis`
+- k6 installed: https://k6.io/docs/getting-started/installation/
+
+**Running:**
+```bash
+# Chat API load test (100 concurrent users, 6.5 min)
+npm run test:load:chat
+
+# Scraping API load test (20 concurrent scrapers, 5 min)
+npm run test:load:scraping
+
+# Run both tests
+npm run test:load
+```
+
+**Performance Targets:**
+
+| Test | Metric | Target |
+|------|--------|--------|
+| Chat API | Response time (p95) | <2s |
+| Chat API | Concurrent users | 100+ |
+| Chat API | Error rate | <5% |
+| Scraping API | Response time (p95) | <3s |
+| Scraping API | Queue acceptance | 85%+ |
+| Scraping API | Concurrent jobs | 20+ |
+
+**Documentation:** [Load Testing Guide](/home/user/Omniops/docs/04-TESTING/GUIDE_LOAD_TESTING.md)
+
+---
 
 ## Test Categories
 

@@ -1,0 +1,40 @@
+# Build outputs
+.next
+.vercel
+dist
+build
+out
+
+# Dependencies
+node_modules
+pnpm-lock.yaml
+yarn.lock
+package-lock.json
+
+# Test coverage
+coverage
+
+# Environment files
+.env.local
+.env.*.local
+
+# IDE files
+.vscode
+.idea
+*.swp
+*.swo
+
+# OS files
+.DS_Store
+Thumbs.db
+
+# Documentation
+CHANGELOG.md
+
+# Config files
+*.config.js
+*.config.ts
+*.config.mjs
+
+# Generated files
+next-env.d.ts

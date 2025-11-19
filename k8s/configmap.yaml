@@ -1,0 +1,53 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: omniops-config
+  namespace: omniops
+  labels:
+    app: omniops
+    app.kubernetes.io/name: omniops
+    app.kubernetes.io/component: configuration
+data:
+  # Application Configuration
+  NODE_ENV: "production"
+  PORT: "3000"
+
+  # Public URLs
+  NEXT_PUBLIC_APP_URL: "https://omniops.co.uk"
+  NEXT_PUBLIC_SUPABASE_URL: "https://birugqyuqhiahxvxeyqg.supabase.co"
+
+  # Redis Configuration (internal service)
+  REDIS_URL: "redis://redis-service.omniops.svc.cluster.local:6379"
+
+  # Feature Flags
+  ENABLE_CHAT: "true"
+  ENABLE_SCRAPING: "true"
+  ENABLE_WOOCOMMERCE: "true"
+  ENABLE_SHOPIFY: "true"
+
+  # Rate Limiting
+  RATE_LIMIT_WINDOW: "60000"
+  RATE_LIMIT_MAX_REQUESTS: "60"
+
+  # Scraping Configuration
+  MAX_SCRAPE_PAGES: "100"
+  SCRAPE_TIMEOUT: "30000"
+  CONCURRENT_SCRAPE_JOBS: "5"
+
+  # Chat Configuration
+  MAX_TOKENS: "2000"
+  TEMPERATURE: "0.7"
+  MODEL: "gpt-4-turbo-preview"
+
+  # Search Configuration
+  SEARCH_RESULT_LIMIT: "100"
+  EMBEDDING_DIMENSION: "1536"
+
+  # Monitoring
+  ENABLE_METRICS: "true"
+  METRICS_PORT: "9090"
+  LOG_LEVEL: "info"
+
+  # Cache Configuration
+  CACHE_TTL: "3600"
+  CACHE_MAX_SIZE: "1000"

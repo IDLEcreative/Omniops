@@ -1,0 +1,84 @@
+# Example Terraform Variables File
+# Copy this to terraform.tfvars and fill in your actual values
+# NEVER commit terraform.tfvars to version control!
+
+# Environment Configuration
+environment = "development"  # development, staging, or production
+aws_region  = "us-east-1"
+
+# Networking
+vpc_cidr             = "10.0.0.0/16"
+private_subnet_cidrs = ["10.0.1.0/24", "10.0.2.0/24", "10.0.3.0/24"]
+public_subnet_cidrs  = ["10.0.101.0/24", "10.0.102.0/24", "10.0.103.0/24"]
+
+# Domain Configuration
+domain_names = ["omniops.co.uk", "www.omniops.co.uk"]
+
+# Supabase Configuration
+supabase_url              = "https://your-project-ref.supabase.co"
+supabase_anon_key         = "your-anon-key-here"
+supabase_service_role_key = "your-service-role-key-here"
+supabase_jwt_secret       = "your-jwt-secret-here"
+
+# OpenAI Configuration
+openai_api_key = "sk-your-openai-api-key-here"
+
+# Vercel Configuration
+vercel_api_token = "your-vercel-api-token"
+github_repo      = "your-org/omniops"
+
+# Database Configuration (if using RDS)
+db_password = "your-secure-database-password"
+
+# Monitoring
+alert_email = "alerts@yourcompany.com"
+
+# Scaling Configuration
+min_capacity     = 1
+max_capacity     = 10
+desired_capacity = 2
+
+# Instance Configuration
+instance_type = "t3.medium"
+
+# Redis Configuration
+redis_node_type = "cache.t3.micro"
+redis_num_nodes = 1
+
+# Backup Configuration
+backup_retention_days = 30
+backup_window        = "03:00-04:00"
+maintenance_window   = "sun:04:00-sun:05:00"
+
+# Feature Flags
+enable_monitoring = true
+enable_backups   = true
+enable_encryption = true
+enable_cdn       = true
+
+# Cost Optimization
+use_spot_instances = false
+spot_max_price    = "0.05"
+
+# Security
+allowed_ips  = []  # Add your IP addresses for SSH access
+ssh_key_name = ""  # Your SSH key pair name
+
+# Application Configuration
+app_port              = 3000
+health_check_path     = "/api/health"
+health_check_interval = 30
+
+# Rate Limiting
+rate_limit_requests_per_minute = 60
+
+# Cache Configuration
+cache_ttl = 3600
+
+# Scraping Configuration
+max_scrape_pages = 100
+scrape_timeout   = 30000
+
+# Tagging
+owner       = "DevOps Team"
+cost_center = "Engineering"
