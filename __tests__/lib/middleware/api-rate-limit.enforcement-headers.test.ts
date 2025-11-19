@@ -23,13 +23,20 @@ jest.mock('@/lib/logger', () => ({
   }
 }));
 
-// Mock rate-limit module
+// Create mock functions before the jest.mock() call
+const mockCheckRateLimit = jest.fn();
+const mockResetRateLimit = jest.fn();
+const mockCheckDomainRateLimit = jest.fn();
+const mockCheckExpensiveOpRateLimit = jest.fn();
+const mockGetRateLimitStatus = jest.fn();
+
+// Mock rate-limit module with our jest.fn() instances
 jest.mock('@/lib/rate-limit', () => ({
-  checkRateLimit: jest.fn(),
-  resetRateLimit: jest.fn(),
-  checkDomainRateLimit: jest.fn(),
-  checkExpensiveOpRateLimit: jest.fn(),
-  getRateLimitStatus: jest.fn()
+  checkRateLimit: mockCheckRateLimit,
+  resetRateLimit: mockResetRateLimit,
+  checkDomainRateLimit: mockCheckDomainRateLimit,
+  checkExpensiveOpRateLimit: mockCheckExpensiveOpRateLimit,
+  getRateLimitStatus: mockGetRateLimitStatus,
 }));
 
 import {
@@ -38,16 +45,12 @@ import {
   withAPIRateLimit,
   RATE_LIMIT_TIERS
 } from '@/lib/middleware/api-rate-limit';
-import { checkRateLimit, resetRateLimit } from '@/lib/rate-limit';
 
-// Get references to mocked functions using jest.mocked
-const mockedCheckRateLimit = jest.mocked(checkRateLimit);
-const mockedResetRateLimit = jest.mocked(resetRateLimit);
+// Use the mock references directly
+const mockedCheckRateLimit = mockCheckRateLimit;
+const mockedResetRateLimit = mockResetRateLimit;
 
-// TODO: Fix Jest mocking issue - jest.mocked() not working correctly with ES module imports
-// The mock is set up correctly but jest.mocked() returns a non-function value
-// Need to investigate proper pattern for mocking async functions from ES modules
-describe.skip('API Rate Limiting - Enforcement & Headers', () => {
+describe('API Rate Limiting - Enforcement & Headers', () => {
   beforeEach(() => {
     jest.clearAllMocks();
     // Default: allow requests
