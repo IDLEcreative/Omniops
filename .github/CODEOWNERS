@@ -1,0 +1,84 @@
+# Code Owners for OmniOps
+#
+# This file defines code ownership for automatic PR review assignments.
+# When a PR touches these files/directories, the specified owners are
+# automatically requested for review.
+#
+# Format: <file-pattern> <owner1> <owner2> ...
+# Use @username for individuals or @org/team for teams
+
+# Default owner for everything
+* @IDLEcreative
+
+# Documentation
+/docs/ @IDLEcreative
+/CLAUDE.md @IDLEcreative
+/README.md @IDLEcreative
+/CONTRIBUTING.md @IDLEcreative
+/CODE_OF_CONDUCT.md @IDLEcreative
+
+# GitHub configuration
+/.github/ @IDLEcreative
+
+# Core application code
+/app/ @IDLEcreative
+/components/ @IDLEcreative
+/lib/ @IDLEcreative
+/hooks/ @IDLEcreative
+/types/ @IDLEcreative
+
+# API routes (critical - require extra scrutiny)
+/app/api/ @IDLEcreative
+
+# Database & migrations (critical)
+/supabase/ @IDLEcreative
+/migrations/ @IDLEcreative
+/scripts/database/ @IDLEcreative
+
+# Security-sensitive files (critical)
+/lib/encryption.ts @IDLEcreative
+/lib/rate-limit.ts @IDLEcreative
+/app/api/auth/ @IDLEcreative
+/app/api/privacy/ @IDLEcreative
+/app/api/gdpr/ @IDLEcreative
+
+# E-commerce integrations (business-critical)
+/lib/woocommerce-api/ @IDLEcreative
+/lib/shopify-api.ts @IDLEcreative
+/lib/agents/providers/ @IDLEcreative
+/app/api/woocommerce/ @IDLEcreative
+/app/api/shopify/ @IDLEcreative
+
+# Chat & AI system (core functionality)
+/app/api/chat/ @IDLEcreative
+/lib/agents/ @IDLEcreative
+/lib/embeddings.ts @IDLEcreative
+/lib/content-extractor.ts @IDLEcreative
+
+# Infrastructure & deployment
+/docker/ @IDLEcreative
+/scripts/ @IDLEcreative
+/.github/workflows/ @IDLEcreative
+/Dockerfile @IDLEcreative
+/docker-compose*.yml @IDLEcreative
+
+# Configuration files
+/package.json @IDLEcreative
+/tsconfig.json @IDLEcreative
+/next.config.js @IDLEcreative
+/jest.config.js @IDLEcreative
+/playwright.config.js @IDLEcreative
+/.env.example @IDLEcreative
+
+# Testing
+/__tests__/ @IDLEcreative
+/test-utils/ @IDLEcreative
+
+# Widget (customer-facing)
+/public/embed.js @IDLEcreative
+/app/embed/ @IDLEcreative
+
+# Analytics & monitoring
+/lib/analytics/ @IDLEcreative
+/lib/monitoring/ @IDLEcreative
+/scripts/monitoring/ @IDLEcreative

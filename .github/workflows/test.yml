@@ -76,6 +76,108 @@ jobs:
           files: ./coverage/coverage-final.json
           flags: unittests
           name: codecov-umbrella
+          fail_ci_if_error: true
+
+      - name: Check coverage thresholds
+        if: always()
+        run: |
+          echo "Checking coverage thresholds..."
+
+          # Extract coverage percentages from JSON
+          COVERAGE_FILE="./coverage/coverage-summary.json"
+
+          if [ -f "$COVERAGE_FILE" ]; then
+            LINES=$(jq '.total.lines.pct' $COVERAGE_FILE)
+            STATEMENTS=$(jq '.total.statements.pct' $COVERAGE_FILE)
+            FUNCTIONS=$(jq '.total.functions.pct' $COVERAGE_FILE)
+            BRANCHES=$(jq '.total.branches.pct' $COVERAGE_FILE)
+
+            echo "Coverage Summary:"
+            echo "  Lines: ${LINES}%"
+            echo "  Statements: ${STATEMENTS}%"
+            echo "  Functions: ${FUNCTIONS}%"
+            echo "  Branches: ${BRANCHES}%"
+
+            # Check thresholds (70% minimum)
+            THRESHOLD=70
+            FAILED=0
+
+            if (( $(echo "$LINES < $THRESHOLD" | bc -l) )); then
+              echo "❌ Lines coverage (${LINES}%) below threshold (${THRESHOLD}%)"
+              FAILED=1
+            fi
+
+            if (( $(echo "$STATEMENTS < $THRESHOLD" | bc -l) )); then
+              echo "❌ Statements coverage (${STATEMENTS}%) below threshold (${THRESHOLD}%)"
+              FAILED=1
+            fi
+
+            if (( $(echo "$FUNCTIONS < $THRESHOLD" | bc -l) )); then
+              echo "❌ Functions coverage (${FUNCTIONS}%) below threshold (${THRESHOLD}%)"
+              FAILED=1
+            fi
+
+            if (( $(echo "$BRANCHES < $THRESHOLD" | bc -l) )); then
+              echo "❌ Branches coverage (${BRANCHES}%) below threshold (${THRESHOLD}%)"
+              FAILED=1
+            fi
+
+            if [ $FAILED -eq 1 ]; then
+              echo "Coverage check failed. Please increase test coverage."
+              exit 1
+            else
+              echo "✅ All coverage thresholds met!"
+            fi
+          else
+            echo "⚠️  Coverage summary file not found"
+            exit 1
+          fi
+
+      - name: Comment PR with coverage
+        if: github.event_name == 'pull_request' && always()
+        uses: actions/github-script@v6
+        with:
+          script: |
+            const fs = require('fs');
+
+            if (!fs.existsSync('./coverage/coverage-summary.json')) {
+              console.log('No coverage summary found');
+              return;
+            }
+
+            const coverage = JSON.parse(fs.readFileSync('./coverage/coverage-summary.json', 'utf8'));
+            const total = coverage.total;
+
+            const lines = total.lines.pct.toFixed(2);
+            const statements = total.statements.pct.toFixed(2);
+            const functions = total.functions.pct.toFixed(2);
+            const branches = total.branches.pct.toFixed(2);
+
+            const threshold = 70;
+            const emoji = (pct) => pct >= threshold ? '✅' : '❌';
+
+            const comment = `## 📊 Test Coverage Report
+
+            | Metric | Coverage | Status |
+            |--------|----------|--------|
+            | Lines | ${lines}% | ${emoji(lines)} |
+            | Statements | ${statements}% | ${emoji(statements)} |
+            | Functions | ${functions}% | ${emoji(functions)} |
+            | Branches | ${branches}% | ${emoji(branches)} |
+
+            **Threshold:** ${threshold}%
+
+            ${lines >= threshold && statements >= threshold && functions >= threshold && branches >= threshold
+              ? '✅ **All coverage thresholds met!**'
+              : '❌ **Some coverage thresholds not met. Please add more tests.**'}
+            `;
+
+            github.rest.issues.createComment({
+              issue_number: context.issue.number,
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              body: comment
+            });
 
       - name: Test Summary
         if: always()

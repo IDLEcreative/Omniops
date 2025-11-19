@@ -1,0 +1,72 @@
+apiVersion: v1
+kind: Service
+metadata:
+  name: omniops-service
+  namespace: omniops
+  labels:
+    app: omniops
+    app.kubernetes.io/name: omniops
+    app.kubernetes.io/component: service
+  annotations:
+    service.beta.kubernetes.io/aws-load-balancer-type: "nlb"
+    service.beta.kubernetes.io/aws-load-balancer-backend-protocol: "tcp"
+spec:
+  type: ClusterIP
+  ports:
+  - name: http
+    port: 3000
+    targetPort: http
+    protocol: TCP
+  - name: metrics
+    port: 9090
+    targetPort: metrics
+    protocol: TCP
+  selector:
+    app: omniops-app
+  sessionAffinity: ClientIP
+  sessionAffinityConfig:
+    clientIP:
+      timeoutSeconds: 10800
+
+---
+# Headless service for internal pod-to-pod communication
+apiVersion: v1
+kind: Service
+metadata:
+  name: omniops-headless
+  namespace: omniops
+  labels:
+    app: omniops
+    app.kubernetes.io/name: omniops
+    app.kubernetes.io/component: headless-service
+spec:
+  type: ClusterIP
+  clusterIP: None
+  ports:
+  - name: http
+    port: 3000
+    targetPort: http
+    protocol: TCP
+  selector:
+    app: omniops-app
+
+---
+# Redis Service (if deploying Redis in cluster)
+apiVersion: v1
+kind: Service
+metadata:
+  name: redis-service
+  namespace: omniops
+  labels:
+    app: redis
+    app.kubernetes.io/name: redis
+    app.kubernetes.io/component: cache
+spec:
+  type: ClusterIP
+  ports:
+  - name: redis
+    port: 6379
+    targetPort: 6379
+    protocol: TCP
+  selector:
+    app: redis
