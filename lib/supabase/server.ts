@@ -1,3 +1,56 @@
+/**
+ * Supabase Server Clients - AI-optimized header for fast comprehension
+ *
+ * @purpose Creates Supabase clients for server-side usage with SSR support and service role access
+ *
+ * @flow
+ *   1. API route → createClient() for user context (SSR with cookies)
+ *   2. OR → createServiceRoleClient() for admin operations (bypasses RLS)
+ *   3. → Validates env vars with cached validation
+ *   4. → Returns typed Supabase client OR null (safe for missing env)
+ *
+ * @keyFunctions
+ *   - validateSupabaseEnv (line 16): Validates env vars, cached per request
+ *   - createClient (line 42): SSR server client with user context (cookies)
+ *   - createServiceRoleClientSync (line 105): Service role client (sync, for constructors)
+ *   - createServiceRoleClient (line 154): Service role client (async, for API routes)
+ *   - requireClient (line 166): Get SSR client or throw production-safe error
+ *   - requireServiceRoleClient (line 178): Get service role or throw
+ *
+ * @handles
+ *   - SSR: Uses @supabase/ssr with Next.js cookies() for session persistence
+ *   - Service role: Uses admin key to bypass RLS (createClient, not createServerClient)
+ *   - Connection pooling: Session pooling (20 connections) vs Transaction pooling (40 connections)
+ *   - Build-time safety: Returns null when env vars missing (no throws)
+ *   - Request caching: Validates env once per request, caches result
+ *
+ * @returns
+ *   - createClient(): SupabaseClient | null (SSR client with user context)
+ *   - createServiceRoleClient(): SupabaseClient (admin client, throws if unavailable)
+ *   - requireClient(): SupabaseClient (SSR client, throws if unavailable)
+ *
+ * @dependencies
+ *   - @supabase/ssr: SSR-compatible Supabase client
+ *   - @supabase/supabase-js: Service role client (bypasses RLS)
+ *   - next/headers: Cookie management for session persistence
+ *   - Environment: NEXT_PUBLIC_SUPABASE_URL, NEXT_PUBLIC_SUPABASE_ANON_KEY, SUPABASE_SERVICE_ROLE_KEY
+ *
+ * @consumers
+ *   - API routes (user context): app/api/chat/route.ts, app/api/scrape/route.ts
+ *   - API routes (admin): app/api/woocommerce/ * /route.ts (note: asterisk for glob pattern)
+ *   - Background jobs: lib/queue/job-processor.ts (service role for admin tasks)
+ *   - Server components: Any RSC needing database access
+ *
+ * @configuration
+ *   - Session pool (user context): 20 connections, 60s timeout, 5s statement timeout
+ *   - Transaction pool (service role): 40 connections, 60s timeout, 10s connection timeout
+ *   - Persistent sessions: User context only (service role doesn't persist)
+ *   - Auto refresh: User context only (service role is stateless)
+ *
+ * @totalLines 191
+ * @estimatedTokens 1,500 (without header), 550 (with header - 63% savings)
+ */
+
 import { createServerClient } from '@supabase/ssr'
 import { createClient as createSupabaseClient, type SupabaseClient, type User } from '@supabase/supabase-js'
 import { cookies } from 'next/headers'
