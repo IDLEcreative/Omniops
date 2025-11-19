@@ -103,16 +103,30 @@ export const maxDuration = 300; // 5 minutes for web scraping (long-running craw
  */
 async function handlePost(request: NextRequest) {
   try {
+    console.log('[DEBUG FLOW] 1. Received POST request to /api/scrape', {
+      method: request.method,
+      url: request.url,
+      headers: Object.fromEntries(request.headers.entries())
+    });
+
     let body;
     try {
       body = await request.json();
+      console.log('[DEBUG FLOW] 2. Parsed request body:', JSON.stringify(body, null, 2));
     } catch (jsonError) {
+      console.error('[DEBUG FLOW] ERROR: Failed to parse JSON body:', jsonError);
       return NextResponse.json(
         { error: 'Invalid JSON in request body' },
         { status: 400 }
       );
     }
     const scrapeRequest = ScrapeRequestSchema.parse(body);
+    console.log('[DEBUG FLOW] 3. Validated scrape request:', {
+      url: scrapeRequest.url,
+      crawl: scrapeRequest.crawl,
+      turbo: scrapeRequest.turbo,
+      max_pages: scrapeRequest.max_pages
+    });
 
     // Rate limit expensive scraping operations
     const domain = new URL(scrapeRequest.url).hostname;
@@ -152,12 +166,22 @@ async function handlePost(request: NextRequest) {
     // Get the authenticated user's ID and organization ID
     const { data: { user } } = await userSupabase.auth.getUser();
     const userId = user?.id;
+    console.log('[DEBUG FLOW] 4. Authenticated user:', {
+      userId: userId,
+      userEmail: user?.email
+    });
+
     const organizationId = await getOrganizationId(userSupabase);
+    console.log('[DEBUG FLOW] 5. Retrieved organization ID:', {
+      organizationId: organizationId
+    });
 
     // Route to appropriate handler
     if (!scrapeRequest.crawl) {
+      console.log('[DEBUG FLOW] 6. Routing to handleSinglePageScrape');
       return await handleSinglePageScrape(scrapeRequest, supabase, organizationId, userId);
     } else {
+      console.log('[DEBUG FLOW] 6. Routing to handleWebsiteCrawl');
       return await handleWebsiteCrawl(scrapeRequest, supabase, organizationId, userId);
     }
   } catch (error) {

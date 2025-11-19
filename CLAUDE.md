@@ -1050,6 +1050,7 @@ See [REFERENCE_DATABASE_SCHEMA.md](docs/09-REFERENCE/REFERENCE_DATABASE_SCHEMA.m
   - ✅ Proven: 72% time savings, 100% success rate (Wave 10: 29 files, 8 pods)
   - 🔧 Ready-to-use pod templates (test refactoring, scripts, production code)
   - 📊 Adaptive scaling (split pods when needed: S → S1, S2, S3)
+  - ⚠️ **Pod Orchestrators** (orchestrators WITHIN pods): See below for usage guidelines
 - **[Orchestration Archive](docs/10-ANALYSIS/ANALYSIS_PARALLEL_AGENT_ORCHESTRATION.md)** - Complete 4-week case study with week-by-week breakdown (reference/archive)
 - **[Agent Hierarchy Guide](.claude/AGENT_HIERARCHY.md)** - Three-tier agent system (Architect → Plan → Explore) and when to use each type
 
@@ -1186,6 +1187,133 @@ When you identify a task suitable for parallel agents:
 - **Large-Scale Refactoring** (20+ files, domain-based) → **Pod Orchestration** 🆕 - 5-8 pods, Sonnet, 65-75% savings
 - **Dependency Updates** (15+ packages) → Scenario 1 (line 494) - 4 agents, Haiku, 88-92% savings
 - **File Refactoring** (30+ files, uniform) → Scenario 2 (line 548) - 3 agents, Opus, 60-75% savings
+
+#### 🎯 Pod Orchestrators: When to Add Orchestration WITHIN Pods
+
+**Test Results:** [POD_ORCHESTRATOR_TEST_RESULTS.md](ARCHIVE/completion-reports-2025-11/POD_ORCHESTRATOR_TEST_RESULTS.md) (2025-11-19)
+
+**Concept:** A pod orchestrator is an agent WITHIN a pod that manages sub-agents, consolidates their reports, and returns a single summary to Main Claude.
+
+**Benefits:**
+- ✅ 90% context savings (tested: 7,950 tokens → 750 tokens)
+- ✅ Excellent for 50-100+ file campaigns
+- ✅ Main Claude gets concise summaries instead of detailed reports
+
+**Risks (CRITICAL):**
+- ❌ Information loss: 70-100% on critical details
+- ❌ Severity downgrading (Critical → Important)
+- ❌ Loss of file:line references
+- ❌ Code examples eliminated
+- ❌ Main Claude can't verify or implement specific fixes
+
+**Decision Matrix: When to Use Pod Orchestrators**
+
+| Pod Size | Approach | Rationale |
+|----------|----------|-----------|
+| **1-7 files** | Direct pod agent | Too small, overhead > benefit |
+| **8-15 files** | Direct pod agent | Manageable context load |
+| **15-25 files** | **Consider orchestrator** | If complexity is LOW (research/docs) |
+| **25+ files** | **Use orchestrator with safeguards** | Context protection needed |
+
+**Critical Safeguards (MANDATORY for Pod Orchestrators):**
+
+```markdown
+## Pod Orchestrator Mission Template (Information Fidelity Focus)
+
+**CRITICAL RULES - NEVER VIOLATE:**
+
+1. **Preserve Critical Issues Verbatim (100%)**
+   - ✅ COPY critical issues exactly as written by sub-agents
+   - ✅ PRESERVE file:line references
+   - ✅ PRESERVE severity (Critical/Warning/Info)
+   - ✅ PRESERVE code examples if provided
+   - ❌ DO NOT summarize or rephrase critical issues
+   - ❌ DO NOT downgrade severity
+
+2. **Severity-Tiered Consolidation**
+   ```
+   Critical issues: Copy verbatim (0% summarization)
+   Warnings: Preserve file refs, may group similar (25% summarization)
+   Info: May summarize patterns (75% summarization)
+   ```
+
+3. **Mandatory Verification Checklist**
+   Before submitting consolidated report:
+   - [ ] Counted critical issues in each sub-agent report
+   - [ ] Verified same count in my consolidated report
+   - [ ] All critical issues have file:line references
+   - [ ] No critical issues downgraded to "Important" or "Minor"
+   - [ ] Main Claude can make decisions from my report
+
+**Report Structure:**
+
+### Critical Issues (EXACT COPY FROM SUB-AGENTS)
+[Domain] [File:Line] [Exact issue description]
+[Code example if provided]
+
+### Important Findings (Can group similar issues)
+- [Domain] [Pattern] affecting files X, Y, Z (preserve file names)
+
+### Minor Issues (Summary only)
+- [Count] files have [general pattern]
+
+**Token Budget:**
+- Critical section: No limit (preserve everything)
+- Important section: ~400-600 tokens
+- Minor section: ~100-200 tokens
+```
+
+**When to Use Pod Orchestrators (Decision Tree):**
+
+```
+Task requires 20+ files in single pod?
+├─ NO → Use direct pod agent
+└─ YES → Continue...
+
+Is this security-critical or bug-fixing work?
+├─ YES → Use direct pod agent (need file:line precision)
+└─ NO → Continue...
+
+Is this research/analysis/documentation work?
+├─ YES → Use pod orchestrator with safeguards ✅
+└─ NO → Use direct pod agent (implementation needs specifics)
+```
+
+**Safe Use Cases for Pod Orchestrators:**
+- ✅ Documentation quality analysis (low stakes)
+- ✅ Pattern identification across many files
+- ✅ Code exploration / research tasks
+- ✅ Style guide validation (non-critical)
+
+**Unsafe Use Cases (NEVER use orchestrators):**
+- ❌ Security vulnerability detection
+- ❌ Critical bug fixing
+- ❌ Code changes requiring file:line precision
+- ❌ Compliance/audit work requiring detailed trail
+
+**Hybrid Approach (Recommended for 50-100 Files):**
+
+```typescript
+Main Claude
+  ├─> Pod L (Library) - DIRECT (4 files, critical code)
+  ├─> Pod A (API) - DIRECT (5 files, security critical)
+  │
+  ├─> Pod S Orchestrator (15 files, scripts - low stakes)
+  │   ├─> Sub-Pod S1 (5 largest scripts)
+  │   ├─> Sub-Pod S2 (5 medium scripts)
+  │   └─> Sub-Pod S3 (5 smaller scripts)
+  │
+  └─> Pod D Orchestrator (20 files, documentation)
+      ├─> Sub-Pod D1 (API docs)
+      ├─> Sub-Pod D2 (Guide docs)
+      └─> Sub-Pod D3 (Reference docs)
+```
+
+**Test Results Reference:**
+- Context savings: 90.6% (7,950 → 750 tokens)
+- Critical info preserved: 0% (ALL lost - failed without safeguards)
+- With safeguards (untested): Expected 80-90% critical preservation
+- Full report: [POD_ORCHESTRATOR_TEST_RESULTS.md](ARCHIVE/completion-reports-2025-11/POD_ORCHESTRATOR_TEST_RESULTS.md)
 
 **📝 AFTER Deploying Agents - Update the Archive:**
 

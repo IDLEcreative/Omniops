@@ -99,9 +99,9 @@ export const TrainingDataList = memo(function TrainingDataList({
 
         <div className="flex items-center gap-1 ml-2">
           {item.status === 'processing' ? (
-            <Loader2 className="h-3 w-3 animate-spin text-muted-foreground" />
+            <Loader2 className="h-3 w-3 animate-spin text-muted-foreground" data-testid="status" />
           ) : item.status === 'error' ? (
-            <Badge variant="destructive" className="text-xs py-0 px-1 h-5">
+            <Badge variant="destructive" className="text-xs py-0 px-1 h-5" data-testid="status">
               Error
             </Badge>
           ) : null}

@@ -91,7 +91,12 @@ export default function TrainingPage() {
       );
     } catch (error) {
       console.error('Error submitting URL:', error);
-      setTrainingData(prev => removeOptimisticItem(prev, optimisticItem.id));
+      // Mark item as error instead of removing it, so error badge shows up
+      setTrainingData(prev =>
+        updateOptimisticItem(prev, optimisticItem.id, {
+          status: 'error'
+        })
+      );
       alert(`Failed to scrape URL: ${error instanceof Error ? error.message : 'Unknown error'}`);
     }
     setIsLoading(false);

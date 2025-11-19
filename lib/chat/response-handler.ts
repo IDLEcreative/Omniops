@@ -125,6 +125,13 @@ export function buildChatResponse(
 
   console.log('[Response Handler] Final API response keys:', Object.keys(response));
   console.log('[Response Handler] Has shoppingMetadata?', !!response.shoppingMetadata);
+  console.log('[Response Handler] ⚡ FINAL JSON PAYLOAD:', JSON.stringify({
+    hasMessage: !!response.message,
+    hasConversationId: !!response.conversation_id,
+    hasShoppingMetadata: !!response.shoppingMetadata,
+    shoppingProductCount: response.shoppingMetadata?.products?.length || 0,
+    shoppingMetadataKeys: response.shoppingMetadata ? Object.keys(response.shoppingMetadata) : []
+  }));
 
   return NextResponse.json(response, { headers: corsHeaders });
 }

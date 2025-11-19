@@ -329,15 +329,20 @@ export async function processAIConversation(params: AIProcessorParams): Promise<
     // Determine platform from search log
     const hasWooCommerce = searchLog.some(log => log.source.includes('woocommerce'));
     const hasShopify = searchLog.some(log => log.source.includes('shopify'));
+    const hasSemantic = searchLog.some(log => log.source === 'semantic');
 
     console.log('[Shopping Debug] hasWooCommerce:', hasWooCommerce);
     console.log('[Shopping Debug] hasShopify:', hasShopify);
+    console.log('[Shopping Debug] hasSemantic:', hasSemantic);
 
     // Transform products based on platform
-    if (hasWooCommerce) {
+    if (hasWooCommerce || hasSemantic) {
+      // Semantic search results are treated as WooCommerce products (most common platform)
       shoppingProducts = transformWooCommerceProducts(allProducts);
+      console.log('[Shopping Debug] Transformed products using WooCommerce transformer');
     } else if (hasShopify) {
       shoppingProducts = transformShopifyProducts(allProducts);
+      console.log('[Shopping Debug] Transformed products using Shopify transformer');
     }
 
     // Check if shopping mode should be triggered

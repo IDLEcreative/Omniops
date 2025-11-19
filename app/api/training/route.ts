@@ -42,7 +42,7 @@ export async function GET(request: NextRequest) {
       );
     }
 
-    console.log('[DEBUG GET /api/training] Authenticated user:', {
+    console.log('[DEBUG FLOW] 25. GET /api/training - Authenticated user:', {
       id: user.id,
       email: user.email
     });
@@ -61,15 +61,18 @@ export async function GET(request: NextRequest) {
     // Fetch from BOTH tables to get complete training data for this user
 
     // 1. Get training_data entries (text, qa, custom) for this user
-    console.log('[DEBUG GET /api/training] User ID:', user.id);
+    console.log('[DEBUG FLOW] 26. Querying training_data table for user:', user.id);
     const { data: trainingDataEntries, error: trainingError } = await adminSupabase
       .from('training_data')
       .select('id, type, content, status, created_at, metadata')
       .eq('user_id', user.id)
       .order('created_at', { ascending: false });
 
-    console.log('[DEBUG GET /api/training] Training data count:', trainingDataEntries?.length ?? 0);
-    console.log('[DEBUG GET /api/training] Training data error:', trainingError);
+    console.log('[DEBUG FLOW] 27. Training data query result:', {
+      count: trainingDataEntries?.length ?? 0,
+      error: trainingError,
+      sampleEntry: trainingDataEntries?.[0]
+    });
 
     if (trainingError) {
       logger.error('GET /api/training training_data query failed', trainingError);
@@ -88,6 +91,10 @@ export async function GET(request: NextRequest) {
     try {
       // Build domain query conditions
       const domainConditions = [`user_id.eq.${user.id}`];
+      console.log('[DEBUG FLOW] 28. Building domain query conditions:', {
+        userId: user.id,
+        initialConditions: domainConditions
+      });
 
       // Also check user's organization(s) if they have any
       const { data: userOrgs } = await adminSupabase
@@ -95,12 +102,17 @@ export async function GET(request: NextRequest) {
         .select('organization_id')
         .eq('user_id', user.id);
 
-      console.log('[DEBUG GET /api/training] User orgs count:', userOrgs?.length ?? 0);
+      console.log('[DEBUG FLOW] 29. User organizations query result:', {
+        count: userOrgs?.length ?? 0,
+        orgIds: userOrgs?.map(org => org.organization_id)
+      });
 
       if (userOrgs && userOrgs.length > 0) {
         const orgIds = userOrgs.map(org => org.organization_id);
         domainConditions.push(`organization_id.in.(${orgIds.join(',')})`);
       }
+
+      console.log('[DEBUG FLOW] 30. Final domain query conditions:', domainConditions);
 
       // Get all domains accessible to this user (either by user_id or organization_id)
       const { data: userDomains, error: domainsError } = await adminSupabase
@@ -108,10 +120,16 @@ export async function GET(request: NextRequest) {
         .select('id')
         .or(domainConditions.join(','));
 
-      console.log('[DEBUG GET /api/training] User domains count:', userDomains?.length ?? 0);
+      console.log('[DEBUG FLOW] 31. Domains query result:', {
+        count: userDomains?.length ?? 0,
+        error: domainsError,
+        domainIds: userDomains?.map(d => d.id)
+      });
 
       if (!domainsError && userDomains && userDomains.length > 0) {
         const domainIds = userDomains.map(d => d.id);
+
+        console.log('[DEBUG FLOW] 32. Querying scraped_pages for domain IDs:', domainIds);
 
         // Get scraped pages for those domains
         const { data: scrapedPages, error: scrapedError } = await adminSupabase
@@ -120,18 +138,28 @@ export async function GET(request: NextRequest) {
           .in('domain_id', domainIds)
           .order('created_at', { ascending: false });
 
+        console.log('[DEBUG FLOW] 33. Scraped pages query result:', {
+          count: scrapedPages?.length ?? 0,
+          error: scrapedError,
+          samplePage: scrapedPages?.[0]
+        });
+
         if (!scrapedError && scrapedPages) {
           scrapedData = scrapedPages;
         }
+      } else {
+        console.log('[DEBUG FLOW] 32. No domains found or error occurred - skipping scraped_pages query');
       }
     } catch (error) {
+      console.error('[DEBUG FLOW] ERROR: scraped_pages query failed:', error);
       logger.error('GET /api/training scraped_pages query failed', error);
       // Continue with empty scrapedData - don't fail the entire request
     }
 
-    console.log('[DEBUG GET /api/training] Scraped data count:', scrapedData?.length ?? 0);
+    console.log('[DEBUG FLOW] 34. Final scraped data count:', scrapedData?.length ?? 0);
 
     // 3. Transform and combine both data sources
+    console.log('[DEBUG FLOW] 35. Transforming training_data entries...');
     const trainingItems = trainingDataEntries?.map(item => ({
       id: item.id,
       type: item.type as 'text' | 'qa' | 'url' | 'file',
@@ -141,10 +169,11 @@ export async function GET(request: NextRequest) {
       metadata: item.metadata,
     })) || [];
 
+    console.log('[DEBUG FLOW] 36. Transforming scraped_pages entries...');
     const scrapedItems = scrapedData?.map(item => ({
       id: item.id,
       type: 'url' as const,
-      content: item.title || item.url,
+      content: item.url,  // Fixed: Always show URL as primary content for searchability
       status: 'completed' as const,
       createdAt: item.created_at,
       metadata: {
@@ -156,20 +185,41 @@ export async function GET(request: NextRequest) {
       },
     })) || [];
 
+    console.log('[DEBUG FLOW] 37. Transformation complete:', {
+      trainingItemsCount: trainingItems.length,
+      scrapedItemsCount: scrapedItems.length,
+      sampleTrainingItem: trainingItems[0],
+      sampleScrapedItem: scrapedItems[0]
+    });
+
     // 4. Combine and sort by created_at (newest first)
     const allItems = [...trainingItems, ...scrapedItems]
       .sort((a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime());
 
-    console.log('[DEBUG GET /api/training] Training items count:', trainingItems.length);
-    console.log('[DEBUG GET /api/training] Scraped items count:', scrapedItems.length);
-    console.log('[DEBUG GET /api/training] Combined count:', allItems.length);
+    console.log('[DEBUG FLOW] 38. Combined and sorted items:', {
+      totalCount: allItems.length,
+      firstItem: allItems[0],
+      lastItem: allItems[allItems.length - 1]
+    });
 
     // 5. Apply pagination to combined results
     const paginatedItems = allItems.slice(offset, offset + limit);
     const totalCount = allItems.length;
 
-    console.log('[DEBUG GET /api/training] Paginated count:', paginatedItems.length);
-    console.log('[DEBUG GET /api/training] Total count:', totalCount);
+    console.log('[DEBUG FLOW] 39. Pagination applied:', {
+      offset,
+      limit,
+      paginatedCount: paginatedItems.length,
+      totalCount,
+      hasMore: totalCount > offset + limit
+    });
+
+    console.log('[DEBUG FLOW] 40. Returning response with items:', {
+      itemsCount: paginatedItems.length,
+      total: totalCount,
+      page,
+      limit
+    });
 
     const response = NextResponse.json({
       items: paginatedItems,
