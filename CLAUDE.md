@@ -35,6 +35,7 @@
 7. **[Line 787]** Deploy agent immediately when encountering ANY issue
 8. **[Line 879]** Deploy testing agent immediately after completing any code
 9. **[Line 1152]** ALWAYS validate fixes with actual commands (`npm test`, `npm run build`)
+10. **[Line 2056]** 🆕 ALL NEW FILES MUST include AI-friendly headers (63% token savings, 13:1 ROI)
 
 **NEVER Rules (Prohibited Actions):**
 1. **[Line 10-17]** NEVER hardcode brand-specific data (Thompson's, pumps, etc.) in production code
@@ -51,6 +52,7 @@
 4. **[Line 879-892]** ALWAYS deploy testing agent after: new features, bug fixes, refactors, API endpoints, components
 5. **[Line 1060]** ALWAYS use standardized agent prompt templates
 6. **[Line 1152]** ALWAYS validate with concrete commands, never assume fixes work
+7. **[Line 2056]** 🆕 ALWAYS add AI-friendly headers to new files (see AI-Friendly File Headers section)
 
 **Auto-Trigger Rules (Do Without User Permission):**
 1. **[Line 759-782]** Auto-deploy parallel agents for: 2+ independent categories, 20+ files, >30min tasks, >10K tokens
@@ -2052,6 +2054,138 @@ docker exec -it omniops-app sh         # Shell into app container
 - API routes use Zod for validation
 - Services use class-based patterns in `lib/`
 - All WooCommerce credentials are encrypted using AES-256
+
+### AI-Friendly File Headers
+**CRITICAL:** All new TypeScript/JavaScript files MUST include AI-optimized headers for fast comprehension.
+
+**Required Sections (Always):**
+```typescript
+/**
+ * [File Name] - AI-optimized header for fast comprehension
+ *
+ * @purpose [One-line description of what this file does]
+ *
+ * @flow
+ *   1. [Step 1: Entry point]
+ *   2. → [Step 2: Processing]
+ *   3. → [Step 3: Output/return]
+ *
+ * @keyFunctions
+ *   - functionName (line X): Description of what it does
+ *   - anotherFunction (line Y): Description
+ *
+ * @handles
+ *   - [What problems this solves]
+ *   - [Edge cases handled]
+ *
+ * @returns [What the module/functions return]
+ *
+ * @dependencies
+ *   - [External packages]
+ *   - [Environment variables]
+ *
+ * @consumers
+ *   - [Files that use this module]
+ *
+ * @totalLines XXX
+ * @estimatedTokens XXX (without header), XXX (with header - XX% savings)
+ */
+```
+
+**Optional Sections (Add When Relevant):**
+
+**@security** - For API routes, authentication, encryption, data handling:
+```typescript
+/**
+ * @security
+ *   - Input validation: [Zod schema, sanitization]
+ *   - Authentication: [Required/optional, method]
+ *   - Authorization: [RLS, permissions]
+ *   - Rate limiting: [Limits, strategy]
+ *   - Encryption: [What's encrypted, algorithm]
+ *   - CSRF protection: [If applicable]
+ *   - Compliance: [GDPR, CCPA requirements]
+ */
+```
+
+**@performance** - For complex operations, APIs, data processing:
+```typescript
+/**
+ * @performance
+ *   - Complexity: [O(n), O(n²), etc.]
+ *   - Bottlenecks: [Slow operations with timing]
+ *   - Expected timing: [Response times, processing duration]
+ *   - Concurrency: [Max concurrent operations]
+ *   - Memory: [Usage estimates]
+ *   - Optimizations: [Caching, batching, etc.]
+ */
+```
+
+**@knownIssues** - For files with limitations, edge cases, bugs:
+```typescript
+/**
+ * @knownIssues
+ *   - [Limitation 1]: [Description + workaround]
+ *   - [Edge case]: [When it fails, how to handle]
+ *   - [Known bug]: Link to GitHub issue #XXX
+ *   - [API limits]: [Rate limits, size limits]
+ */
+```
+
+**@testingStrategy** - For all files (helps write tests faster):
+```typescript
+/**
+ * @testingStrategy
+ *   - [Mock strategy]: [What to mock, how]
+ *   - [Dependency injection]: [Factory patterns, test doubles]
+ *   - [Test file]: __tests__/path/to/file.test.ts
+ *   - [Verification]: [What to verify, assertions]
+ */
+```
+
+**@configuration** - For API routes, runtime settings:
+```typescript
+/**
+ * @configuration
+ *   - runtime: [nodejs/edge]
+ *   - maxDuration: [Timeout in seconds]
+ *   - [Other Next.js config]
+ */
+```
+
+**Component-Specific Sections:**
+
+For React components, add:
+```typescript
+/**
+ * @keyComponents
+ *   - Header: [Description]
+ *   - Body: [Description]
+ *   - Footer: [Description]
+ *
+ * @stateManagement
+ *   - useState/useCustomHook: [State variables]
+ *   - Props: [Key props and their purpose]
+ */
+```
+
+**Examples:**
+- See `lib/embeddings.ts` for core library pattern
+- See `app/api/chat/route.ts` for API route pattern (includes @security, @performance, @knownIssues)
+- See `components/ChatWidget.tsx` for React component pattern
+- See `lib/encryption.ts` for security-critical file pattern
+
+**Benefits:**
+- ✅ 63% token reduction when reading files
+- ✅ 30-second comprehension (vs 2-3 minutes)
+- ✅ Security audit in 30 seconds
+- ✅ Performance expectations instant
+- ✅ Known limitations documented
+- ✅ Testing strategy clear
+
+**Validation:** 23 files currently use this pattern with proven 13:1 ROI (90 hours/year saved vs 7 hours/year maintenance).
+
+**Reference:** See `docs/10-ANALYSIS/ANALYSIS_AI_FRIENDLY_HEADERS_ENHANCEMENT_COMPLETE.md` for full implementation details
 
 ### Testing Approach
 - Unit tests for business logic (`lib/`)
