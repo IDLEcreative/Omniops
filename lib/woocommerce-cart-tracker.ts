@@ -89,8 +89,13 @@ export class WooCommerceCartTracker {
       stats.average_cart_value = stats.total_abandoned > 0 ? stats.total_value / stats.total_abandoned : 0;
       abandonedOrders.forEach(order => { stats.by_status[order.status] = (stats.by_status[order.status] || 0) + 1; });
 
-      const productCounts: Record<string, number> = {};
-      abandonedOrders.forEach(order => { order.line_items?.forEach(item => { productCounts[item.name] = (productCounts[item.name] || 0) + item.quantity; }); });
+      // Flatten and reduce for better performance (cleaner than nested forEach)
+      const productCounts = abandonedOrders
+        .flatMap(order => order.line_items || [])
+        .reduce((counts: Record<string, number>, item) => {
+          counts[item.name] = (counts[item.name] || 0) + item.quantity;
+          return counts;
+        }, {});
 
       stats.top_abandoned_products = Object.entries(productCounts).map(([name, count]) => ({ name, count })).sort((a, b) => b.count - a.count).slice(0, 5);
       const totalCarts = abandonedOrders.length + completedOrders.length;

@@ -47,21 +47,43 @@ export async function GET(request: NextRequest) {
       /show me (.+?)(?:\.|,|$)/gi,
       /where (?:is|are) (?:the )?(.+?)(?:\?|$)/gi,
     ];
-    
-    // For each "not found" message, look at the conversation to find what was requested
-    for (const msg of messages || []) {
-      // Get the user's original query from the same conversation
-      const { data: userMsg, error: userError } = await supabase!
+
+    // Batch fetch all user messages for efficiency (fix N+1 query issue)
+    // Step 1: Get all unique conversation IDs
+    const conversationIds = Array.from(new Set(messages?.map(m => m.conversation_id) || []));
+
+    // Step 2: Fetch ALL relevant user messages in a single query
+    let userMessagesByConversation = new Map<string, any[]>();
+
+    if (conversationIds.length > 0) {
+      const { data: allUserMessages, error: batchError } = await supabase!
         .from('messages')
-        .select('content')
-        .eq('conversation_id', msg.conversation_id)
+        .select('content, conversation_id, created_at')
+        .in('conversation_id', conversationIds)
         .eq('role', 'user')
-        .lt('created_at', msg.created_at)
-        .order('created_at', { ascending: false })
-        .limit(1);
-      
-      if (!userError && userMsg && userMsg[0]) {
-        const query = userMsg[0].content.toLowerCase();
+        .order('created_at', { ascending: false });
+
+      if (!batchError && allUserMessages) {
+        // Step 3: Build a Map indexed by conversation_id for O(1) lookup
+        allUserMessages.forEach(msg => {
+          if (!userMessagesByConversation.has(msg.conversation_id)) {
+            userMessagesByConversation.set(msg.conversation_id, []);
+          }
+          userMessagesByConversation.get(msg.conversation_id)!.push(msg);
+        });
+      }
+    }
+
+    // Step 4: Process messages with Map lookups instead of individual queries
+    for (const msg of messages || []) {
+      // Get user messages for this conversation from the Map (O(1) lookup)
+      const userMessages = userMessagesByConversation.get(msg.conversation_id) || [];
+
+      // Find the most recent user message before this assistant message
+      const userMsg = userMessages.find(m => m.created_at < msg.created_at);
+
+      if (userMsg) {
+        const query = userMsg.content.toLowerCase();
         
         // Extract product names from the query
         let productName = '';

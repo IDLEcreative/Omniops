@@ -71,37 +71,47 @@ export interface EnrichedProduct extends CommerceProduct {
  * Match a commerce product with its scraped page by URL/slug/name
  *
  * @param product - Commerce product to match
- * @param scrapedResults - Available scraped pages
+ * @param scrapedBySlug - Map of slug -> scraped page for O(1) lookups
+ * @param scrapedByUrl - Map of URL -> scraped page for O(1) lookups
+ * @param scrapedByPath - Map of URL path -> scraped page for O(1) lookups (handles relative permalinks)
+ * @param scrapedResults - Available scraped pages (for name matching fallback)
  * @returns Matched scraped page or undefined
  */
 function matchProductWithPage(
   product: CommerceProduct,
+  scrapedBySlug: Map<string, SearchResult>,
+  scrapedByUrl: Map<string, SearchResult>,
+  scrapedByPath: Map<string, SearchResult>,
   scrapedResults: SearchResult[]
 ): SearchResult | undefined {
-  // Try matching by URL/slug (most reliable)
+  // Try matching by URL/slug (most reliable) - O(1) lookup
   if (product.slug) {
-    const slugMatch = scrapedResults.find(scraped =>
-      scraped.url.toLowerCase().includes(product.slug!.toLowerCase())
-    );
+    const slugLower = product.slug.toLowerCase();
+    const slugMatch = scrapedBySlug.get(slugLower);
     if (slugMatch) {
       console.log(`[Consolidator] Matched product "${product.name}" by slug: ${product.slug}`);
       return slugMatch;
     }
   }
 
-  // Try matching by permalink
+  // Try matching by permalink - O(1) lookup
   if (product.permalink) {
-    const permalinkMatch = scrapedResults.find(scraped =>
-      scraped.url === product.permalink ||
-      (product.permalink && scraped.url.endsWith(product.permalink))
-    );
-    if (permalinkMatch) {
-      console.log(`[Consolidator] Matched product "${product.name}" by permalink`);
-      return permalinkMatch;
+    // Try exact URL match first
+    const exactMatch = scrapedByUrl.get(product.permalink);
+    if (exactMatch) {
+      console.log(`[Consolidator] Matched product "${product.name}" by exact permalink`);
+      return exactMatch;
+    }
+
+    // Try path-based match (for relative permalinks like "/products/motor-c")
+    const pathMatch = scrapedByPath.get(product.permalink);
+    if (pathMatch) {
+      console.log(`[Consolidator] Matched product "${product.name}" by permalink path`);
+      return pathMatch;
     }
   }
 
-  // Try matching by name similarity (fuzzy match)
+  // Try matching by name similarity (fuzzy match) - still O(n) but last resort
   const normalizedProductName = product.name.toLowerCase().replace(/[^a-z0-9]/g, '');
 
   const nameMatch = scrapedResults.find(scraped => {
@@ -156,9 +166,39 @@ export function consolidateResults(
 ): EnrichedProduct[] {
   console.log(`[Consolidator] Consolidating ${products.length} products with ${scrapedResults.length} scraped pages`);
 
+  // Pre-index scraped results for O(1) lookups instead of O(n) .find() calls
+  const scrapedBySlug = new Map<string, SearchResult>();
+  const scrapedByUrl = new Map<string, SearchResult>();
+  const scrapedByPath = new Map<string, SearchResult>();
+
+  scrapedResults.forEach(result => {
+    // Index by URL segments (slug-like parts)
+    const urlParts = result.url.toLowerCase().split('/');
+    urlParts.forEach(part => {
+      if (part && part.length > 2) { // Skip empty and very short parts
+        scrapedBySlug.set(part, result);
+      }
+    });
+
+    // Index by full URL
+    scrapedByUrl.set(result.url, result);
+
+    // Index by URL path (for relative permalink matching)
+    try {
+      const urlObj = new URL(result.url);
+      scrapedByPath.set(urlObj.pathname, result);
+    } catch {
+      // If URL parsing fails, try to extract path manually
+      const pathMatch = result.url.match(/https?:\/\/[^\/]+(.+)/);
+      if (pathMatch) {
+        scrapedByPath.set(pathMatch[1], result);
+      }
+    }
+  });
+
   return products.map((product) => {
-    // Match product with its scraped page
-    const matchedPage = matchProductWithPage(product, scrapedResults);
+    // Match product with its scraped page using indexed lookups
+    const matchedPage = matchProductWithPage(product, scrapedBySlug, scrapedByUrl, scrapedByPath, scrapedResults);
 
     // Find related pages (excluding the matched page)
     const relatedPages = findRelatedPages(

@@ -213,6 +213,11 @@ export async function findRecommendationsForProducts(
 
   console.log(`[Recommender] Generated ${embeddingCache.size} embeddings`);
 
+  // Pre-index products by text for O(1) lookup instead of O(n) Array.find
+  const productByText = new Map<string, CommerceProduct>(
+    allProducts.map(p => [buildProductText(p), p])
+  );
+
   // Find recommendations for each product
   const recommendations = new Map<string | number, RecommendedProduct[]>();
   const processedIds = new Set<string | number>();
@@ -237,10 +242,8 @@ export async function findRecommendationsForProducts(
         ...options,
         excludeIds,
         embeddingProvider: async (text) => {
-          // Use cached embeddings when available
-          const matchingProduct = allProducts.find(
-            p => buildProductText(p) === text
-          );
+          // Use cached embeddings when available (O(1) Map lookup instead of O(n) Array.find)
+          const matchingProduct = productByText.get(text);
           if (matchingProduct && embeddingCache.has(matchingProduct.id)) {
             return embeddingCache.get(matchingProduct.id)!;
           }

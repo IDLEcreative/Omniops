@@ -160,12 +160,18 @@ export function highlightRelevantSection(content: string, query: string): string
   const contentLower = content.toLowerCase();
 
   // Find the position of the first matching word
-  let firstMatch = -1;
+  let firstMatch = contentLower.length; // Default to end
+
   for (const word of words) {
     const pos = contentLower.indexOf(word);
-    if (pos !== -1 && (firstMatch === -1 || pos < firstMatch)) {
+    if (pos !== -1 && pos < firstMatch) {
       firstMatch = pos;
+      if (firstMatch === 0) break; // Early exit if match at start
     }
+  }
+
+  if (firstMatch === contentLower.length) {
+    firstMatch = -1; // No match found
   }
 
   // Extract a window around the first match
@@ -176,11 +182,15 @@ export function highlightRelevantSection(content: string, query: string): string
   if (start > 0) excerpt = '...' + excerpt;
   if (end < content.length) excerpt = excerpt + '...';
 
-  // Highlight matching words
-  words.forEach(word => {
-    const regex = new RegExp(`\\b(${word})\\b`, 'gi');
-    excerpt = excerpt.replace(regex, '<mark>$1</mark>');
-  });
+  // Highlight matching words - combine into single regex for performance
+  const escapedWords = words
+    .map(w => w.replace(/[.*+?^${}()|[\]\\]/g, '\\$&'))
+    .join('|');
+
+  if (escapedWords) {
+    const combinedRegex = new RegExp(`\\b(${escapedWords})\\b`, 'gi');
+    excerpt = excerpt.replace(combinedRegex, '<mark>$1</mark>');
+  }
 
   return excerpt;
 }

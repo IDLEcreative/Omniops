@@ -131,9 +131,15 @@ async function findSimilarUsers(
     const similarities: Array<{ sessionId: string; similarity: number }> = [];
 
     sessionProducts.forEach((products, sessionId) => {
-      const intersection = new Set(
-        [...products].filter((p) => userProductSet.has(p))
-      );
+      // Efficient Set intersection: iterate once instead of spread + filter
+      const intersection = new Set<string>();
+      for (const p of products) {
+        if (userProductSet.has(p)) {
+          intersection.add(p);
+        }
+      }
+
+      // Efficient union: combine both sets
       const union = new Set([...userProductSet, ...products]);
       const similarity = intersection.size / union.size;
 
@@ -176,8 +182,11 @@ async function getProductsFromSimilarUsers(
     // Score products based on user similarity and engagement
     const productScores = new Map<string, number>();
 
+    // O(1) lookup optimization: Create Map of users indexed by sessionId
+    const userMap = new Map(similarUsers.map(u => [u.sessionId, u]));
+
     events.forEach((event) => {
-      const user = similarUsers.find((u) => u.sessionId === event.session_id);
+      const user = userMap.get(event.session_id);  // O(1) instead of O(n)
       if (!user) return;
 
       const engagementScore = event.purchased ? 3 : event.clicked ? 2 : 1;

@@ -209,8 +209,10 @@ function diversifyRecommendations(
   }
 
   // Fill remaining slots with highest scores
+  // O(1) lookup optimization: Convert array to Set
+  const diversifiedSet = new Set(diversified);
   const remaining = recommendations.filter(
-    (rec) => !diversified.includes(rec)
+    (rec) => !diversifiedSet.has(rec)  // O(1) instead of O(n)
   );
   diversified.push(...remaining);
 
@@ -221,17 +223,19 @@ function diversifyRecommendations(
  * Build human-readable reason from algorithms
  */
 function buildHybridReason(algorithms: string[]): string {
-  const unique = Array.from(new Set(algorithms));
+  // O(1) lookup optimization: Convert to Set for fast has() checks
+  const algorithmSet = new Set(algorithms);
+  const unique = Array.from(algorithmSet);
 
   if (unique.length === 3) {
     return 'Highly recommended based on multiple factors';
   } else if (unique.length === 2) {
     return `Recommended based on ${unique.join(' and ')} analysis`;
-  } else if (unique.includes('vector')) {
+  } else if (algorithmSet.has('vector')) {  // O(1) instead of O(n)
     return 'Semantically similar to your interests';
-  } else if (unique.includes('collaborative')) {
+  } else if (algorithmSet.has('collaborative')) {  // O(1) instead of O(n)
     return 'Popular among similar users';
-  } else if (unique.includes('content')) {
+  } else if (algorithmSet.has('content')) {  // O(1) instead of O(n)
     return 'Similar product attributes';
   }
 
