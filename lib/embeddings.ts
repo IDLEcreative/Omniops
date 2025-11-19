@@ -35,6 +35,27 @@
  *   - Production: Use modern functions from ./embeddings/index
  *   - app/api/chat/route.ts: searchSimilarContent for AI queries
  *
+ * @testingStrategy
+ *   - Mock OpenAI client: Use jest.fn() for embeddings API calls
+ *   - Test batch processing: Verify BATCH_SIZE=20 chunks per request
+ *   - Test search: Mock match_embeddings RPC, verify similarity scores
+ *   - Integration tests: Use real OpenAI API with small dataset
+ *   - Tests: __tests__/lib/embeddings/embeddings.test.ts
+ *
+ * @performance
+ *   - Complexity: O(n) for embedding generation, O(log n) for vector search (pgvector index)
+ *   - Bottlenecks: OpenAI API (1-3s per batch of 20), database writes (50-100ms), vector search (100-500ms)
+ *   - Batch size: 20 chunks per OpenAI request (rate limit optimization)
+ *   - Expected timing: 1-3s per 20 chunks, search 100-500ms for 1,000-10,000 vectors
+ *   - Memory: ~5MB per 1,000 embeddings (1536 dimensions × 4 bytes)
+ *
+ * @knownIssues
+ *   - OpenAI rate limits: 3,000 requests/min (shared across all customers)
+ *   - Token limits: Max 8,191 tokens per chunk (auto-truncation needed)
+ *   - Embedding model: text-embedding-ada-002 (may upgrade to ada-003 later)
+ *   - Vector search: Returns max 100-200 results (database RPC limit)
+ *   - Cold start: First search after deploy takes 2-5s (pgvector index loading)
+ *
  * @totalLines 133
  * @estimatedTokens 800 (without header), 350 (with header - 56% savings)
  */
