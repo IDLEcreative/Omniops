@@ -1,0 +1,978 @@
+
+> customer-service-agent@0.1.0 pretest
+> npm run cleanup:processes || true
+
+
+> customer-service-agent@0.1.0 cleanup:processes
+> bash scripts/cleanup-processes.sh
+
+🧹 Cleaning up processes...
+
+Checking for runaway Jest workers...
+✅ No runaway Jest workers found
+
+Checking for duplicate MCP servers...
+✅ MCP server count is normal (0)
+
+Checking for orphaned Next.js processes...
+⚠️  Found 2 orphaned Next.js processes
+✅ Cleaned orphaned processes
+
+======================================
+Process Status:
+======================================
+Jest workers:    0
+MCP servers:     0
+Next.js servers: 0
+======================================
+
+✅ Cleanup complete!
+
+> customer-service-agent@0.1.0 test
+> NODE_OPTIONS='--max-old-space-size=4096 --expose-gc' jest --bail --passWithNoTests __tests__/performance/ --verbose --maxWorkers=1
+
+  console.log
+    [Fetch API] ensureFetch called, E2E_TEST=undefined, typeof fetch=undefined
+
+      at log (test-utils/jest-msw/fetch-api.js:309:11)
+
+  console.log
+    [Fetch API] Setting up mock fetch (returns empty {})
+
+      at log (test-utils/jest-msw/fetch-api.js:337:11)
+
+  console.error
+    [Dashboard] Error fetching organizations: { message: 'Database error', code: '500' }
+
+      71 |
+      72 |   if (orgsError) {
+    > 73 |     console.error('[Dashboard] Error fetching organizations:', orgsError);
+         |             ^
+      74 |     throw orgsError;
+      75 |   }
+      76 |
+
+      at error (lib/queries/dashboard-stats.ts:73:13)
+      at Object.<anonymous> (__tests__/performance/dashboard-queries.test.ts:303:7)
+
+  console.error
+    [Dashboard] User not member of organization
+
+      181 |
+      182 |   if (membershipError || !membership) {
+    > 183 |     console.error('[Dashboard] User not member of organization');
+          |             ^
+      184 |     return null;
+      185 |   }
+      186 |
+
+      at error (lib/queries/dashboard-stats.ts:183:13)
+      at Object.<anonymous> (__tests__/performance/dashboard-queries.test.ts:338:21)
+
+PASS __tests__/performance/dashboard-queries.test.ts
+  Dashboard Query Performance
+    Query Count Optimization
+      ✓ should execute maximum 4 queries for multiple organizations (13 ms)
+      ✓ should NOT scale query count with organization count (2 ms)
+    Performance Benchmarks
+      ✓ should complete in under 500ms for 10 organizations (1 ms)
+      ✓ should handle single organization efficiently (1 ms)
+    Data Aggregation
+      ✓ should correctly aggregate stats across organizations (3 ms)
+    Error Handling
+      ✓ should handle organization query errors gracefully (10 ms)
+      ✓ should return empty array when user has no organizations
+      ✓ should return null for unauthorized organization access (1 ms)
+
+  console.log
+    [Fetch API] ensureFetch called, E2E_TEST=undefined, typeof fetch=undefined
+
+      at log (test-utils/jest-msw/fetch-api.js:309:11)
+
+  console.log
+    [Fetch API] Setting up mock fetch (returns empty {})
+
+      at log (test-utils/jest-msw/fetch-api.js:337:11)
+
+  console.log
+    
+    🏢 Multi-Tenant Performance:
+
+      at Object.log (__tests__/performance/integration/concurrent-customers.test.ts:56:15)
+
+  console.log
+    
+    customer1.example.com:
+
+      at log (__tests__/performance/integration/concurrent-customers.test.ts:58:17)
+          at Array.forEach (<anonymous>)
+
+  console.log
+    
+    Performance Metrics:
+
+      at log (__tests__/performance/utils/metrics-collector.ts:159:11)
+          at Array.forEach (<anonymous>)
+
+  console.log
+      Response Times:
+
+      at log (__tests__/performance/utils/metrics-collector.ts:160:11)
+          at Array.forEach (<anonymous>)
+
+  console.log
+        Min:    50ms
+
+      at log (__tests__/performance/utils/metrics-collector.ts:161:11)
+          at Array.forEach (<anonymous>)
+
+  console.log
+        Mean:   68ms
+
+      at log (__tests__/performance/utils/metrics-collector.ts:162:11)
+          at Array.forEach (<anonymous>)
+
+  console.log
+        Median: 65ms
+
+      at log (__tests__/performance/utils/metrics-collector.ts:163:11)
+          at Array.forEach (<anonymous>)
+
+  console.log
+        p90:    99ms
+
+      at log (__tests__/performance/utils/metrics-collector.ts:164:11)
+          at Array.forEach (<anonymous>)
+
+  console.log
+        p95:    102ms
+
+      at log (__tests__/performance/utils/metrics-collector.ts:165:11)
+          at Array.forEach (<anonymous>)
+
+  console.log
+        p99:    115ms
+
+      at log (__tests__/performance/utils/metrics-collector.ts:166:11)
+          at Array.forEach (<anonymous>)
+
+  console.log
+        Max:    115ms
+
+      at log (__tests__/performance/utils/metrics-collector.ts:167:11)
+          at Array.forEach (<anonymous>)
+
+  console.log
+      Throughput: 69.25 req/s
+
+      at log (__tests__/performance/utils/metrics-collector.ts:168:11)
+          at Array.forEach (<anonymous>)
+
+  console.log
+      Success Rate: 100.00%
+
+      at log (__tests__/performance/utils/metrics-collector.ts:169:11)
+          at Array.forEach (<anonymous>)
+
+  console.log
+      Total Requests: 25
+
+      at log (__tests__/performance/utils/metrics-collector.ts:170:11)
+          at Array.forEach (<anonymous>)
+
+  console.log
+      Duration: 361ms
+
+      at log (__tests__/performance/utils/metrics-collector.ts:171:11)
+          at Array.forEach (<anonymous>)
+
+  console.log
+    
+    customer2.example.com:
+
+      at log (__tests__/performance/integration/concurrent-customers.test.ts:58:17)
+          at Array.forEach (<anonymous>)
+
+  console.log
+    
+    Performance Metrics:
+
+      at log (__tests__/performance/utils/metrics-collector.ts:159:11)
+          at Array.forEach (<anonymous>)
+
+  console.log
+      Response Times:
+
+      at log (__tests__/performance/utils/metrics-collector.ts:160:11)
+          at Array.forEach (<anonymous>)
+
+  console.log
+        Min:    47ms
+
+      at log (__tests__/performance/utils/metrics-collector.ts:161:11)
+          at Array.forEach (<anonymous>)
+
+  console.log
+        Mean:   67ms
+
+      at log (__tests__/performance/utils/metrics-collector.ts:162:11)
+          at Array.forEach (<anonymous>)
+
+  console.log
+        Median: 66ms
+
+      at log (__tests__/performance/utils/metrics-collector.ts:163:11)
+          at Array.forEach (<anonymous>)
+
+  console.log
+        p90:    97ms
+
+      at log (__tests__/performance/utils/metrics-collector.ts:164:11)
+          at Array.forEach (<anonymous>)
+
+  console.log
+        p95:    97ms
+
+      at log (__tests__/performance/utils/metrics-collector.ts:165:11)
+          at Array.forEach (<anonymous>)
+
+  console.log
+        p99:    97ms
+
+      at log (__tests__/performance/utils/metrics-collector.ts:166:11)
+          at Array.forEach (<anonymous>)
+
+  console.log
+        Max:    97ms
+
+      at log (__tests__/performance/utils/metrics-collector.ts:167:11)
+          at Array.forEach (<anonymous>)
+
+  console.log
+      Throughput: 72.46 req/s
+
+      at log (__tests__/performance/utils/metrics-collector.ts:168:11)
+          at Array.forEach (<anonymous>)
+
+  console.log
+      Success Rate: 100.00%
+
+      at log (__tests__/performance/utils/metrics-collector.ts:169:11)
+          at Array.forEach (<anonymous>)
+
+  console.log
+      Total Requests: 25
+
+      at log (__tests__/performance/utils/metrics-collector.ts:170:11)
+          at Array.forEach (<anonymous>)
+
+  console.log
+      Duration: 345ms
+
+      at log (__tests__/performance/utils/metrics-collector.ts:171:11)
+          at Array.forEach (<anonymous>)
+
+  console.log
+    
+    customer3.example.com:
+
+      at log (__tests__/performance/integration/concurrent-customers.test.ts:58:17)
+          at Array.forEach (<anonymous>)
+
+  console.log
+    
+    Performance Metrics:
+
+      at log (__tests__/performance/utils/metrics-collector.ts:159:11)
+          at Array.forEach (<anonymous>)
+
+  console.log
+      Response Times:
+
+      at log (__tests__/performance/utils/metrics-collector.ts:160:11)
+          at Array.forEach (<anonymous>)
+
+  console.log
+        Min:    42ms
+
+      at log (__tests__/performance/utils/metrics-collector.ts:161:11)
+          at Array.forEach (<anonymous>)
+
+  console.log
+        Mean:   65ms
+
+      at log (__tests__/performance/utils/metrics-collector.ts:162:11)
+          at Array.forEach (<anonymous>)
+
+  console.log
+        Median: 64ms
+
+      at log (__tests__/performance/utils/metrics-collector.ts:163:11)
+          at Array.forEach (<anonymous>)
+
+  console.log
+        p90:    97ms
+
+      at log (__tests__/performance/utils/metrics-collector.ts:164:11)
+          at Array.forEach (<anonymous>)
+
+  console.log
+        p95:    97ms
+
+      at log (__tests__/performance/utils/metrics-collector.ts:165:11)
+          at Array.forEach (<anonymous>)
+
+  console.log
+        p99:    98ms
+
+      at log (__tests__/performance/utils/metrics-collector.ts:166:11)
+          at Array.forEach (<anonymous>)
+
+  console.log
+        Max:    98ms
+
+      at log (__tests__/performance/utils/metrics-collector.ts:167:11)
+          at Array.forEach (<anonymous>)
+
+  console.log
+      Throughput: 72.89 req/s
+
+      at log (__tests__/performance/utils/metrics-collector.ts:168:11)
+          at Array.forEach (<anonymous>)
+
+  console.log
+      Success Rate: 100.00%
+
+      at log (__tests__/performance/utils/metrics-collector.ts:169:11)
+          at Array.forEach (<anonymous>)
+
+  console.log
+      Total Requests: 25
+
+      at log (__tests__/performance/utils/metrics-collector.ts:170:11)
+          at Array.forEach (<anonymous>)
+
+  console.log
+      Duration: 343ms
+
+      at log (__tests__/performance/utils/metrics-collector.ts:171:11)
+          at Array.forEach (<anonymous>)
+
+  console.log
+    
+    customer4.example.com:
+
+      at log (__tests__/performance/integration/concurrent-customers.test.ts:58:17)
+          at Array.forEach (<anonymous>)
+
+  console.log
+    
+    Performance Metrics:
+
+      at log (__tests__/performance/utils/metrics-collector.ts:159:11)
+          at Array.forEach (<anonymous>)
+
+  console.log
+      Response Times:
+
+      at log (__tests__/performance/utils/metrics-collector.ts:160:11)
+          at Array.forEach (<anonymous>)
+
+  console.log
+        Min:    31ms
+
+      at log (__tests__/performance/utils/metrics-collector.ts:161:11)
+          at Array.forEach (<anonymous>)
+
+  console.log
+        Mean:   64ms
+
+      at log (__tests__/performance/utils/metrics-collector.ts:162:11)
+          at Array.forEach (<anonymous>)
+
+  console.log
+        Median: 65ms
+
+      at log (__tests__/performance/utils/metrics-collector.ts:163:11)
+          at Array.forEach (<anonymous>)
+
+  console.log
+        p90:    99ms
+
+      at log (__tests__/performance/utils/metrics-collector.ts:164:11)
+          at Array.forEach (<anonymous>)
+
+  console.log
+        p95:    100ms
+
+      at log (__tests__/performance/utils/metrics-collector.ts:165:11)
+          at Array.forEach (<anonymous>)
+
+  console.log
+        p99:    100ms
+
+      at log (__tests__/performance/utils/metrics-collector.ts:166:11)
+          at Array.forEach (<anonymous>)
+
+  console.log
+        Max:    100ms
+
+      at log (__tests__/performance/utils/metrics-collector.ts:167:11)
+          at Array.forEach (<anonymous>)
+
+  console.log
+      Throughput: 73.31 req/s
+
+      at log (__tests__/performance/utils/metrics-collector.ts:168:11)
+          at Array.forEach (<anonymous>)
+
+  console.log
+      Success Rate: 100.00%
+
+      at log (__tests__/performance/utils/metrics-collector.ts:169:11)
+          at Array.forEach (<anonymous>)
+
+  console.log
+      Total Requests: 25
+
+      at log (__tests__/performance/utils/metrics-collector.ts:170:11)
+          at Array.forEach (<anonymous>)
+
+  console.log
+      Duration: 341ms
+
+      at log (__tests__/performance/utils/metrics-collector.ts:171:11)
+          at Array.forEach (<anonymous>)
+
+  console.log
+    
+    customer5.example.com:
+
+      at log (__tests__/performance/integration/concurrent-customers.test.ts:58:17)
+          at Array.forEach (<anonymous>)
+
+  console.log
+    
+    Performance Metrics:
+
+      at log (__tests__/performance/utils/metrics-collector.ts:159:11)
+          at Array.forEach (<anonymous>)
+
+  console.log
+      Response Times:
+
+      at log (__tests__/performance/utils/metrics-collector.ts:160:11)
+          at Array.forEach (<anonymous>)
+
+  console.log
+        Min:    18ms
+
+      at log (__tests__/performance/utils/metrics-collector.ts:161:11)
+          at Array.forEach (<anonymous>)
+
+  console.log
+        Mean:   64ms
+
+      at log (__tests__/performance/utils/metrics-collector.ts:162:11)
+          at Array.forEach (<anonymous>)
+
+  console.log
+        Median: 68ms
+
+      at log (__tests__/performance/utils/metrics-collector.ts:163:11)
+          at Array.forEach (<anonymous>)
+
+  console.log
+        p90:    102ms
+
+      at log (__tests__/performance/utils/metrics-collector.ts:164:11)
+          at Array.forEach (<anonymous>)
+
+  console.log
+        p95:    102ms
+
+      at log (__tests__/performance/utils/metrics-collector.ts:165:11)
+          at Array.forEach (<anonymous>)
+
+  console.log
+        p99:    103ms
+
+      at log (__tests__/performance/utils/metrics-collector.ts:166:11)
+          at Array.forEach (<anonymous>)
+
+  console.log
+        Max:    103ms
+
+      at log (__tests__/performance/utils/metrics-collector.ts:167:11)
+          at Array.forEach (<anonymous>)
+
+  console.log
+      Throughput: 73.53 req/s
+
+      at log (__tests__/performance/utils/metrics-collector.ts:168:11)
+          at Array.forEach (<anonymous>)
+
+  console.log
+      Success Rate: 100.00%
+
+      at log (__tests__/performance/utils/metrics-collector.ts:169:11)
+          at Array.forEach (<anonymous>)
+
+  console.log
+      Total Requests: 25
+
+      at log (__tests__/performance/utils/metrics-collector.ts:170:11)
+          at Array.forEach (<anonymous>)
+
+  console.log
+      Duration: 340ms
+
+      at log (__tests__/performance/utils/metrics-collector.ts:171:11)
+          at Array.forEach (<anonymous>)
+
+  console.log
+    
+    Performance Consistency:
+
+      at Object.log (__tests__/performance/integration/concurrent-customers.test.ts:74:15)
+
+  console.log
+      Average p95: 100ms
+
+      at Object.log (__tests__/performance/integration/concurrent-customers.test.ts:75:15)
+
+  console.log
+      Max deviation: 3ms
+
+      at Object.log (__tests__/performance/integration/concurrent-customers.test.ts:76:15)
+
+  console.log
+    
+    Normal Customer (during high load) - Performance Metrics:
+
+      at log (__tests__/performance/utils/metrics-collector.ts:159:11)
+
+  console.log
+      Response Times:
+
+      at log (__tests__/performance/utils/metrics-collector.ts:160:11)
+
+  console.log
+        Min:    7ms
+
+      at log (__tests__/performance/utils/metrics-collector.ts:161:11)
+
+  console.log
+        Mean:   8ms
+
+      at log (__tests__/performance/utils/metrics-collector.ts:162:11)
+
+  console.log
+        Median: 8ms
+
+      at log (__tests__/performance/utils/metrics-collector.ts:163:11)
+
+  console.log
+        p90:    9ms
+
+      at log (__tests__/performance/utils/metrics-collector.ts:164:11)
+
+  console.log
+        p95:    9ms
+
+      at log (__tests__/performance/utils/metrics-collector.ts:165:11)
+
+  console.log
+        p99:    10ms
+
+      at log (__tests__/performance/utils/metrics-collector.ts:166:11)
+
+  console.log
+        Max:    10ms
+
+      at log (__tests__/performance/utils/metrics-collector.ts:167:11)
+
+  console.log
+      Throughput: 581.40 req/s
+
+      at log (__tests__/performance/utils/metrics-collector.ts:168:11)
+
+  console.log
+      Success Rate: 100.00%
+
+      at log (__tests__/performance/utils/metrics-collector.ts:169:11)
+
+  console.log
+      Total Requests: 25
+
+      at log (__tests__/performance/utils/metrics-collector.ts:170:11)
+
+  console.log
+      Duration: 43ms
+
+      at log (__tests__/performance/utils/metrics-collector.ts:171:11)
+
+  console.log
+    
+    High Load Customer - Performance Metrics:
+
+      at log (__tests__/performance/utils/metrics-collector.ts:159:11)
+
+  console.log
+      Response Times:
+
+      at log (__tests__/performance/utils/metrics-collector.ts:160:11)
+
+  console.log
+        Min:    29ms
+
+      at log (__tests__/performance/utils/metrics-collector.ts:161:11)
+
+  console.log
+        Mean:   36ms
+
+      at log (__tests__/performance/utils/metrics-collector.ts:162:11)
+
+  console.log
+        Median: 33ms
+
+      at log (__tests__/performance/utils/metrics-collector.ts:163:11)
+
+  console.log
+        p90:    44ms
+
+      at log (__tests__/performance/utils/metrics-collector.ts:164:11)
+
+  console.log
+        p95:    46ms
+
+      at log (__tests__/performance/utils/metrics-collector.ts:165:11)
+
+  console.log
+        p99:    48ms
+
+      at log (__tests__/performance/utils/metrics-collector.ts:166:11)
+
+  console.log
+        Max:    49ms
+
+      at log (__tests__/performance/utils/metrics-collector.ts:167:11)
+
+  console.log
+      Throughput: 519.48 req/s
+
+      at log (__tests__/performance/utils/metrics-collector.ts:168:11)
+
+  console.log
+      Success Rate: 100.00%
+
+      at log (__tests__/performance/utils/metrics-collector.ts:169:11)
+
+  console.log
+      Total Requests: 200
+
+      at log (__tests__/performance/utils/metrics-collector.ts:170:11)
+
+  console.log
+      Duration: 385ms
+
+      at log (__tests__/performance/utils/metrics-collector.ts:171:11)
+
+  console.log
+    
+    💾 Database Connection Pooling:
+
+      at Object.log (__tests__/performance/integration/concurrent-customers.test.ts:158:15)
+
+  console.log
+      Concurrent queries: 10
+
+      at Object.log (__tests__/performance/integration/concurrent-customers.test.ts:159:15)
+
+  console.log
+      Success rate: 100.0%
+
+      at Object.log (__tests__/performance/integration/concurrent-customers.test.ts:160:15)
+
+  console.log
+      Total duration: 20ms
+
+      at Object.log (__tests__/performance/integration/concurrent-customers.test.ts:161:15)
+
+  console.log
+      Avg per query: 2ms
+
+      at Object.log (__tests__/performance/integration/concurrent-customers.test.ts:162:15)
+
+  console.log
+    
+    🔒 Cache Isolation Test:
+
+      at Object.log (__tests__/performance/integration/concurrent-customers.test.ts:201:15)
+
+  console.log
+      Customer 1 results: 0
+
+      at Object.log (__tests__/performance/integration/concurrent-customers.test.ts:202:15)
+
+  console.log
+      Customer 2 results: 0
+
+      at Object.log (__tests__/performance/integration/concurrent-customers.test.ts:203:15)
+
+PASS __tests__/performance/integration/concurrent-customers.test.ts
+  Concurrent Customers Performance
+    Multi-Tenant Isolation
+      ✓ should handle 5 customers with concurrent activity (421 ms)
+    Resource Contention
+      ✓ should not degrade when one customer has high load (1063 ms)
+    Database Connection Pooling
+      ✓ should efficiently share database connections (27 ms)
+    Cache Isolation
+      ✓ should not leak cache data between customers (6 ms)
+
+  console.log
+    [Fetch API] ensureFetch called, E2E_TEST=undefined, typeof fetch=undefined
+
+      at log (test-utils/jest-msw/fetch-api.js:309:11)
+
+  console.log
+    [Fetch API] Setting up mock fetch (returns empty {})
+
+      at log (test-utils/jest-msw/fetch-api.js:337:11)
+
+  console.log
+    
+    🛒 Purchase Flow Performance Breakdown:
+
+      at Object.log (__tests__/performance/integration/end-to-end-purchase.test.ts:94:15)
+
+  console.log
+      Chat - Product Discovery: 4ms
+
+      at log (__tests__/performance/integration/end-to-end-purchase.test.ts:96:17)
+          at Array.forEach (<anonymous>)
+
+  console.log
+      Product Search: 3ms
+
+      at log (__tests__/performance/integration/end-to-end-purchase.test.ts:96:17)
+          at Array.forEach (<anonymous>)
+
+  console.log
+      Add to Cart: 3ms
+
+      at log (__tests__/performance/integration/end-to-end-purchase.test.ts:96:17)
+          at Array.forEach (<anonymous>)
+
+  console.log
+      Get Cart: 7ms
+
+      at log (__tests__/performance/integration/end-to-end-purchase.test.ts:96:17)
+          at Array.forEach (<anonymous>)
+
+  console.log
+      Checkout Initiation: 6ms
+
+      at log (__tests__/performance/integration/end-to-end-purchase.test.ts:96:17)
+          at Array.forEach (<anonymous>)
+
+  console.log
+      Total: 23ms
+
+      at Object.log (__tests__/performance/integration/end-to-end-purchase.test.ts:98:15)
+
+  console.log
+    
+    ⚡ Parallel Operations: 13ms
+
+      at Object.log (__tests__/performance/integration/end-to-end-purchase.test.ts:135:15)
+
+  console.log
+    
+    💾 Cache Performance:
+
+      at Object.log (__tests__/performance/integration/end-to-end-purchase.test.ts:176:15)
+
+  console.log
+      First request (uncached): 3ms
+
+      at Object.log (__tests__/performance/integration/end-to-end-purchase.test.ts:177:15)
+
+  console.log
+      Second request (cached): 2ms
+
+      at Object.log (__tests__/performance/integration/end-to-end-purchase.test.ts:178:15)
+
+  console.log
+      Speedup: 1.17x
+
+      at Object.log (__tests__/performance/integration/end-to-end-purchase.test.ts:179:15)
+
+FAIL __tests__/performance/integration/end-to-end-purchase.test.ts
+  End-to-End Purchase Flow Performance
+    Complete Purchase Journey
+      ✓ should complete entire flow in < 5 seconds (30 ms)
+    Parallel Operations
+      ✓ should efficiently handle parallel data fetching (15 ms)
+    Cache Performance
+      ✕ should benefit from caching on repeated requests (9 ms)
+
+  ● End-to-End Purchase Flow Performance › Cache Performance › should benefit from caching on repeated requests
+
+    expect(received).toBeLessThan(expected)
+
+    Expected: < 1.4529900000002272
+    Received:   2.494231000000582
+
+      180 |
+      181 |       // Cached request should be significantly faster (at least 2x)
+    > 182 |       expect(secondDuration).toBeLessThan(firstDuration * 0.5);
+          |                              ^
+      183 |     }, 15000);
+      184 |   });
+      185 | });
+
+      at Object.toBeLessThan (__tests__/performance/integration/end-to-end-purchase.test.ts:182:30)
+
+Test Suites: 1 failed, 2 passed, 3 of 9 total
+Tests:       1 failed, 14 passed, 15 total
+Snapshots:   0 total
+Time:        7.959 s
+Ran all test suites matching /__tests__\/performance\//i.
+/bin/bash: line 1: export: `--': not a valid identifier
+/bin/bash: line 1: export: `__tests__/performance/api/chat-endpoint-load.test.ts': not a valid identifier
+/bin/bash: line 1: export: `--verbose': not a valid identifier
+/bin/bash: line 1: export: `--maxWorkers=1': not a valid identifier
+
+> customer-service-agent@0.1.0 pretest
+> npm run cleanup:processes || true
+
+
+> customer-service-agent@0.1.0 cleanup:processes
+> bash scripts/cleanup-processes.sh
+
+🧹 Cleaning up processes...
+
+Checking for runaway Jest workers...
+✅ No runaway Jest workers found
+
+Checking for duplicate MCP servers...
+✅ MCP server count is normal (0)
+
+Checking for orphaned Next.js processes...
+✅ No orphaned processes found
+
+======================================
+Process Status:
+======================================
+Jest workers:    0
+MCP servers:     0
+Next.js servers: 0
+======================================
+
+✅ Cleanup complete!
+
+> customer-service-agent@0.1.0 test
+> NODE_OPTIONS='--max-old-space-size=4096 --expose-gc' jest --bail --passWithNoTests __tests__/performance/api/ --verbose --maxWorkers=1
+
+FAIL __tests__/performance/api/chat-endpoint-load.test.ts
+  ● Test suite failed to run
+
+    A jest worker process (pid=10546) was terminated by another process: signal=SIGKILL, exitCode=null. Operating system logs may contain more information on why this occurred.
+
+      at ChildProcessWorker._onExit (node_modules/jest-worker/build/workers/ChildProcessWorker.js:370:23)
+
+PASS __tests__/performance/api/scrape-endpoint-load.test.ts
+  Scrape API Load Tests
+    Scrape Job Creation
+      ✓ should handle 5 concurrent scrape job requests (136 ms)
+    Scrape Status Checks
+      ✓ should handle high-frequency status polling (348 ms)
+    Memory Leak Detection
+      ✓ should not leak memory during sustained scraping (62 ms)
+    Concurrent Domain Scraping
+      ✓ should handle multiple domains simultaneously (91 ms)
+
+PASS __tests__/performance/api/search-endpoint-load.test.ts
+  Search API Load Tests
+    Simple Product Search
+      ✓ should handle 20 concurrent searches with p95 < 500ms (231 ms)
+    Complex Vector Search
+      ✓ should maintain performance with semantic search (113 ms)
+    Hybrid Search Performance
+      ✓ should efficiently combine keyword and vector search (157 ms)
+    Filter Performance
+      ✓ should handle filtered searches efficiently (103 ms)
+
+Test Suites: 1 failed, 2 passed, 3 total
+Tests:       8 passed, 8 total
+Snapshots:   0 total
+Time:        10.5 s
+Ran all test suites matching /__tests__\/performance\/api\//i.
+
+> customer-service-agent@0.1.0 pretest
+> npm run cleanup:processes || true
+
+
+> customer-service-agent@0.1.0 cleanup:processes
+> bash scripts/cleanup-processes.sh
+
+🧹 Cleaning up processes...
+
+Checking for runaway Jest workers...
+⚠️  Found high-CPU Jest workers: 12170
+✅ Killed runaway Jest workers
+
+Checking for duplicate MCP servers...
+✅ MCP server count is normal (0)
+
+Checking for orphaned Next.js processes...
+✅ No orphaned processes found
+
+======================================
+Process Status:
+======================================
+Jest workers:    0
+MCP servers:     0
+Next.js servers: 0
+======================================
+
+✅ Cleanup complete!
+
+> customer-service-agent@0.1.0 test
+> NODE_OPTIONS='--max-old-space-size=4096 --expose-gc' jest --bail --passWithNoTests __tests__/performance/queue/ --verbose --maxWorkers=1
+
+  console.log
+    [Fetch API] ensureFetch called, E2E_TEST=undefined, typeof fetch=undefined
+
+      at log (test-utils/jest-msw/fetch-api.js:309:11)
+
+  console.log
+    [Fetch API] Setting up mock fetch (returns empty {})
+
+      at log (test-utils/jest-msw/fetch-api.js:337:11)
+
+FAIL __tests__/performance/queue/concurrent-workers.test.ts
+  ● Test suite failed to run
+
+    A jest worker process (pid=12554) was terminated by another process: signal=SIGKILL, exitCode=null. Operating system logs may contain more information on why this occurred.
+
+      at ChildProcessWorker._onExit (node_modules/jest-worker/build/workers/ChildProcessWorker.js:370:23)
+
+PASS __tests__/performance/queue/job-processing-throughput.test.ts (45.433 s)
+  Queue Job Processing Throughput
+    Single Worker Performance
+      ✓ should process >50 jobs/second with single worker (10531 ms)
+    Concurrent Worker Performance
+      ✓ should scale throughput with worker count (19675 ms)
+    Large Queue Performance
+      ✓ should maintain throughput with 5000+ jobs (12884 ms)
+    Job Priority Handling
+      ✓ should process high-priority jobs faster (262 ms)
+
+Test Suites: 1 failed, 1 passed, 2 total
+Tests:       4 passed, 4 total
+Snapshots:   0 total
+Time:        59.928 s
+Ran all test suites matching /__tests__\/performance\/queue\//i.

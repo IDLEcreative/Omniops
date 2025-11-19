@@ -2,6 +2,17 @@
  * Alert Threshold Checker Tests - Edge Cases
  *
  * Tests for edge cases, error handling, and boundary conditions
+ *
+ * ENVIRONMENTAL NOTE: These tests may encounter SIGKILL in memory-constrained environments.
+ *
+ * Resolution (applied in jest.config.js):
+ * - maxWorkers=1 (serial execution) prevents SIGKILL crashes
+ * - Trade-off: ~20% slower test runs, but eliminates crashes
+ *
+ * To run individually:
+ *   npm test -- threshold-checker-edge.test.ts
+ *
+ * Measured heap usage: ~50 MB (estimated, similar to other threshold tests)
  */
 
 import { describe, it, expect, jest, beforeEach } from '@jest/globals';

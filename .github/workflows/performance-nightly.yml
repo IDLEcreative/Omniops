@@ -1,0 +1,171 @@
+name: Nightly Performance Testing
+
+on:
+  schedule:
+    # Run every night at 2 AM UTC
+    - cron: '0 2 * * *'
+  workflow_dispatch: # Allow manual triggers
+  push:
+    branches:
+      - main
+    paths:
+      - '__tests__/performance/**'
+      - 'lib/**'
+      - 'app/api/**'
+      - '.github/performance-budgets.json'
+
+jobs:
+  performance-tests:
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+
+    env:
+      RUN_PERFORMANCE_TESTS: 'true'
+      NEXT_PUBLIC_APP_URL: http://localhost:3000
+      NODE_OPTIONS: '--max-old-space-size=4096'
+      TEST_API_URL: http://localhost:3000
+
+    services:
+      redis:
+        image: redis:7-alpine
+        ports:
+          - 6379:6379
+        options: >-
+          --health-cmd "redis-cli ping"
+          --health-interval 10s
+          --health-timeout 5s
+          --health-retries 5
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+          cache: 'npm'
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Build application
+        run: npm run build
+        env:
+          NODE_OPTIONS: '--max-old-space-size=4096'
+
+      - name: Start dev server (background)
+        run: |
+          npm run dev &
+          echo "DEV_SERVER_PID=$!" >> $GITHUB_ENV
+
+          # Wait for server to be ready
+          echo "Waiting for dev server to start..."
+          timeout 60 bash -c 'until curl -s http://localhost:3000 > /dev/null; do sleep 2; done'
+          echo "✅ Server ready"
+
+      - name: Verify server is running
+        run: |
+          curl -f http://localhost:3000 || (echo "❌ Server not responding" && exit 1)
+          echo "✅ Server is responding"
+
+      - name: Run performance tests
+        run: |
+          npm test -- __tests__/performance/ \
+            --verbose \
+            --testTimeout=120000 \
+            --maxWorkers=2 \
+            --json \
+            --outputFile=performance-results.json
+        continue-on-error: true
+
+      - name: Extract performance metrics
+        if: always()
+        run: npx tsx scripts/extract-performance-metrics.ts
+
+      - name: Check performance budgets
+        id: budget-check
+        if: always()
+        run: |
+          npx tsx scripts/validate-performance-budgets.ts
+        continue-on-error: true
+
+      - name: Generate performance report
+        if: always()
+        run: |
+          # Create summary for GitHub Actions
+          if [ -f "PERFORMANCE_BASELINE.md" ]; then
+            echo "## 📊 Performance Test Results" >> $GITHUB_STEP_SUMMARY
+            echo "" >> $GITHUB_STEP_SUMMARY
+            cat PERFORMANCE_BASELINE.md >> $GITHUB_STEP_SUMMARY
+          fi
+
+          if [ -f "budget-violations.json" ]; then
+            echo "" >> $GITHUB_STEP_SUMMARY
+            echo "## ⚠️ Performance Budget Violations" >> $GITHUB_STEP_SUMMARY
+            echo "" >> $GITHUB_STEP_SUMMARY
+            echo '```json' >> $GITHUB_STEP_SUMMARY
+            cat budget-violations.json >> $GITHUB_STEP_SUMMARY
+            echo '```' >> $GITHUB_STEP_SUMMARY
+          fi
+
+      - name: Upload performance results
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: performance-results-${{ github.run_number }}
+          path: |
+            performance-results.json
+            PERFORMANCE_BASELINE.md
+            performance-baseline-report.txt
+            budget-violations.json
+            performance-metrics-*.json
+          retention-days: 30
+
+      - name: Comment on PR (if applicable)
+        if: github.event_name == 'pull_request' && always()
+        uses: actions/github-script@v7
+        with:
+          script: |
+            const fs = require('fs');
+
+            let body = '## 📊 Performance Test Results\n\n';
+
+            if (fs.existsSync('PERFORMANCE_BASELINE.md')) {
+              const baseline = fs.readFileSync('PERFORMANCE_BASELINE.md', 'utf-8');
+              body += baseline + '\n\n';
+            }
+
+            if (fs.existsSync('budget-violations.json')) {
+              const violations = fs.readFileSync('budget-violations.json', 'utf-8');
+              body += '## ⚠️ Performance Budget Violations\n\n';
+              body += '```json\n' + violations + '\n```\n\n';
+            }
+
+            body += `\n📁 Full results available in [workflow artifacts](https://github.com/${context.repo.owner}/${context.repo.repo}/actions/runs/${context.runId})`;
+
+            github.rest.issues.createComment({
+              issue_number: context.issue.number,
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              body: body
+            });
+
+      - name: Fail if budget violations
+        if: steps.budget-check.outcome == 'failure'
+        run: |
+          echo "❌ Performance budget violations detected"
+          if [ -f "budget-violations.json" ]; then
+            cat budget-violations.json
+          fi
+          exit 1
+
+      - name: Cleanup
+        if: always()
+        run: |
+          # Stop dev server
+          if [ ! -z "$DEV_SERVER_PID" ]; then
+            kill $DEV_SERVER_PID || true
+          fi
+          # Kill any remaining node processes
+          pkill -f "next dev" || true

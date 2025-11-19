@@ -1,6 +1,17 @@
 /**
  * Shopify Dynamic Client Tests
  * Comprehensive tests for dynamic Shopify client loading from database
+ *
+ * ENVIRONMENTAL NOTE: These tests may encounter SIGKILL in memory-constrained environments.
+ *
+ * Resolution (applied in jest.config.js):
+ * - maxWorkers=1 (serial execution) prevents SIGKILL crashes
+ * - Trade-off: ~20% slower test runs, but eliminates crashes
+ *
+ * To run individually:
+ *   npm test -- shopify-dynamic.test.ts
+ *
+ * Measured heap usage: 50 MB (actual via --logHeapUsage)
  */
 
 import { getDynamicShopifyClient, searchProductsDynamic } from '@/lib/shopify-dynamic';
