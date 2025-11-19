@@ -1,6 +1,10 @@
 // Jest setup for integration tests
 // THIS FILE DOES NOT START MSW - we need real API calls for RLS testing
 
+// Polyfill Fetch API (Response, Request, Headers, etc.) for MSW compatibility
+import { polyfillFetchApi } from './jest-msw/fetch-api.js'
+polyfillFetchApi()
+
 // Polyfill TextEncoder/TextDecoder for jsdom environment
 import { TextEncoder, TextDecoder } from 'util'
 if (typeof global.TextEncoder === 'undefined') {
@@ -54,6 +58,29 @@ if (typeof global.MessagePort === 'undefined') {
       this.port2 = new global.MessagePort()
       this.port1._otherPort = this.port2
       this.port2._otherPort = this.port1
+    }
+  }
+}
+
+// Polyfill BroadcastChannel (required by MSW)
+if (typeof global.BroadcastChannel === 'undefined') {
+  global.BroadcastChannel = class BroadcastChannel {
+    constructor(name) {
+      this.name = name
+      this.onmessage = null
+      this.onmessageerror = null
+    }
+
+    postMessage(message) {
+      if (this.onmessage) {
+        setTimeout(() => {
+          this.onmessage({ data: message })
+        }, 0)
+      }
+    }
+
+    close() {
+      // No-op for test environment
     }
   }
 }
