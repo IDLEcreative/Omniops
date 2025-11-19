@@ -9,9 +9,11 @@ import { processAIConversation } from '@/lib/chat/ai-processor';
 import type { AIProcessorParams } from '@/lib/chat/ai-processor-types';
 import { ChatTelemetry } from '@/lib/chat-telemetry';
 
+// Mock the modules (will use manual mocks from __mocks__/lib/chat/)
 jest.mock('@/lib/chat/get-available-tools');
 jest.mock('@/lib/chat/ai-processor-tool-executor');
 
+// Import the mocked functions - they are already jest.fn() from the mock above
 import { getAvailableTools, checkToolAvailability, getToolInstructions } from '@/lib/chat/get-available-tools';
 import { executeToolCallsParallel, formatToolResultsForAI } from '@/lib/chat/ai-processor-tool-executor';
 
@@ -74,7 +76,7 @@ describe('AI Processor - Edge Cases: Tools & API', () => {
 
   describe('Tool Execution', () => {
     it('should handle all tools returning no results', async () => {
-      (getAvailableTools as jest.Mock).mockResolvedValue([
+(getAvailableTools as jest.Mock).mockResolvedValue([
         { type: 'function', function: { name: 'search_website_content', description: '', parameters: {} } }
       ]);
 
@@ -105,7 +107,7 @@ describe('AI Processor - Edge Cases: Tools & API', () => {
           }]
         });
 
-      (executeToolCallsParallel as jest.Mock).mockResolvedValue([
+(executeToolCallsParallel as jest.Mock).mockResolvedValue([
         {
           toolCall: { id: 'call_1' },
           toolName: 'search_website_content',
@@ -119,7 +121,7 @@ describe('AI Processor - Edge Cases: Tools & API', () => {
         }
       ]);
 
-      (formatToolResultsForAI as jest.Mock).mockReturnValue([
+(formatToolResultsForAI as jest.Mock).mockReturnValue([
         { tool_call_id: 'call_1', content: 'No results found' }
       ]);
 
@@ -130,7 +132,7 @@ describe('AI Processor - Edge Cases: Tools & API', () => {
     });
 
     it('should handle all tools failing simultaneously', async () => {
-      (getAvailableTools as jest.Mock).mockResolvedValue([
+(getAvailableTools as jest.Mock).mockResolvedValue([
         { type: 'function', function: { name: 'search_website_content', description: '', parameters: {} } },
         { type: 'function', function: { name: 'search_by_category', description: '', parameters: {} } }
       ]);
@@ -172,7 +174,7 @@ describe('AI Processor - Edge Cases: Tools & API', () => {
           }]
         });
 
-      (executeToolCallsParallel as jest.Mock).mockResolvedValue([
+(executeToolCallsParallel as jest.Mock).mockResolvedValue([
         {
           toolCall: { id: 'call_1' },
           toolName: 'search_website_content',
@@ -189,7 +191,7 @@ describe('AI Processor - Edge Cases: Tools & API', () => {
         }
       ]);
 
-      (formatToolResultsForAI as jest.Mock).mockReturnValue([
+(formatToolResultsForAI as jest.Mock).mockReturnValue([
         { tool_call_id: 'call_1', content: '⚠️ ERROR: Search failed' },
         { tool_call_id: 'call_2', content: '⚠️ ERROR: Search failed' }
       ]);
@@ -201,7 +203,7 @@ describe('AI Processor - Edge Cases: Tools & API', () => {
     });
 
     it('should handle malformed tool results', async () => {
-      (getAvailableTools as jest.Mock).mockResolvedValue([
+(getAvailableTools as jest.Mock).mockResolvedValue([
         { type: 'function', function: { name: 'search_website_content', description: '', parameters: {} } }
       ]);
 
@@ -233,7 +235,7 @@ describe('AI Processor - Edge Cases: Tools & API', () => {
         });
 
       // Mock tool returning result without required fields
-      (executeToolCallsParallel as jest.Mock).mockResolvedValue([
+(executeToolCallsParallel as jest.Mock).mockResolvedValue([
         {
           toolCall: { id: 'call_1' },
           toolName: 'search_website_content',
@@ -250,7 +252,7 @@ describe('AI Processor - Edge Cases: Tools & API', () => {
         }
       ]);
 
-      (formatToolResultsForAI as jest.Mock).mockReturnValue([
+(formatToolResultsForAI as jest.Mock).mockReturnValue([
         { tool_call_id: 'call_1', content: 'Partial results' }
       ]);
 
