@@ -5,8 +5,7 @@
 
 import { describe, it, expect, jest, beforeEach, afterEach } from '@jest/globals';
 import { Queue, Job } from 'bullmq';
-import { QueueManager } from '@/lib/queue/queue-manager/core';
-import type { JobData, JobStatus } from '@/lib/queue/types';
+import Redis from 'ioredis';
 
 // Mock logger
 jest.mock('@/lib/logger', () => ({
@@ -18,49 +17,46 @@ jest.mock('@/lib/logger', () => ({
   },
 }));
 
-// Create mock queue and events instances
-const mockQueueInstance = {
-  add: jest.fn().mockResolvedValue({ id: 'job-123' }),
-  addBulk: jest.fn().mockResolvedValue([{ id: 'job-1' }, { id: 'job-2' }]),
-  getJob: jest.fn(),
-  getJobs: jest.fn(),
-  pause: jest.fn().mockResolvedValue(undefined),
-  resume: jest.fn().mockResolvedValue(undefined),
-  clean: jest.fn().mockResolvedValue(['job-1', 'job-2']),
-  drain: jest.fn().mockResolvedValue(undefined),
-  close: jest.fn().mockResolvedValue(undefined),
-  waitUntilReady: jest.fn().mockResolvedValue(undefined),
-  getJobCounts: jest.fn().mockResolvedValue({
-    waiting: 5,
-    active: 2,
-    completed: 10,
-    failed: 1,
-  }),
-};
-
-const mockQueueEventsInstance = {
-  on: jest.fn(),
-  close: jest.fn().mockResolvedValue(undefined),
-};
-
-const mockRedisInstance = {
-  status: 'ready',
-  on: jest.fn(),
-  connect: jest.fn(),
-  disconnect: jest.fn(),
-  quit: jest.fn().mockResolvedValue('OK'),
-};
-
 // Mock Redis
 jest.mock('ioredis', () => {
-  return jest.fn().mockImplementation(() => mockRedisInstance);
+  return jest.fn().mockImplementation(() => ({
+    status: 'ready',
+    on: jest.fn(),
+    connect: jest.fn(),
+    disconnect: jest.fn(),
+    quit: jest.fn().mockResolvedValue('OK'),
+  }));
 });
 
 // Mock BullMQ
 jest.mock('bullmq', () => ({
-  Queue: jest.fn().mockImplementation(() => mockQueueInstance),
-  QueueEvents: jest.fn().mockImplementation(() => mockQueueEventsInstance),
+  Queue: jest.fn().mockImplementation(() => ({
+    add: jest.fn().mockResolvedValue({ id: 'job-123' }),
+    addBulk: jest.fn().mockResolvedValue([{ id: 'job-1' }, { id: 'job-2' }]),
+    getJob: jest.fn(),
+    getJobs: jest.fn(),
+    pause: jest.fn().mockResolvedValue(undefined),
+    resume: jest.fn().mockResolvedValue(undefined),
+    clean: jest.fn().mockResolvedValue(['job-1', 'job-2']),
+    drain: jest.fn().mockResolvedValue(undefined),
+    close: jest.fn().mockResolvedValue(undefined),
+    waitUntilReady: jest.fn().mockResolvedValue(undefined),
+    getJobCounts: jest.fn().mockResolvedValue({
+      waiting: 5,
+      active: 2,
+      completed: 10,
+      failed: 1,
+    }),
+  })),
+  QueueEvents: jest.fn().mockImplementation(() => ({
+    on: jest.fn(),
+    close: jest.fn().mockResolvedValue(undefined),
+  })),
 }));
+
+// Import after mocks are defined
+import { QueueManager } from '@/lib/queue/queue-manager/core';
+import type { JobData, JobStatus } from '@/lib/queue/types';
 
 describe('QueueManager Core', () => {
   let queueManager: QueueManager;
@@ -271,12 +267,12 @@ describe('QueueManager Core', () => {
       ];
 
       const mockQueue = (Queue as jest.Mock).mock.results[0].value;
-      mockQueue.getJobs.mockResolvedValue(mockJobs);
+      mockQueue.getWaiting.mockResolvedValue(mockJobs);
 
       const jobs = await queueManager.getJobsByStatus('waiting', 10);
 
       expect(jobs).toEqual(mockJobs);
-      expect(mockQueue.getJobs).toHaveBeenCalledWith(['waiting'], 0, 9);
+      expect(mockQueue.getWaiting).toHaveBeenCalledWith(0, 9);
     });
 
     it('should limit number of returned jobs', async () => {
@@ -284,12 +280,20 @@ describe('QueueManager Core', () => {
 
       await queueManager.getJobsByStatus('completed', 5);
 
-      expect(mockQueue.getJobs).toHaveBeenCalledWith(['completed'], 0, 4);
+      expect(mockQueue.getCompleted).toHaveBeenCalledWith(0, 4);
     });
   });
 
   describe('Queue Statistics', () => {
     it('should return queue stats', async () => {
+      const mockQueue = (Queue as jest.Mock).mock.results[0].value;
+      mockQueue.getWaitingCount.mockResolvedValue(5);
+      mockQueue.getActiveCount.mockResolvedValue(2);
+      mockQueue.getCompletedCount.mockResolvedValue(10);
+      mockQueue.getFailedCount.mockResolvedValue(1);
+      mockQueue.getDelayedCount.mockResolvedValue(0);
+      mockQueue.isPaused.mockResolvedValue(false);
+
       const stats = await queueManager.getQueueStats();
 
       expect(stats).toEqual({
@@ -297,6 +301,8 @@ describe('QueueManager Core', () => {
         active: 2,
         completed: 10,
         failed: 1,
+        delayed: 0,
+        paused: false,
       });
     });
   });
