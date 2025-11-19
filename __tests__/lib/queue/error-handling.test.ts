@@ -64,8 +64,8 @@ import type { JobData } from '@/lib/queue/types';
 import { Worker } from 'bullmq';
 import * as handlers from '@/lib/queue/job-processor-handlers';
 
-// TODO: Fix circular dependency with job-processor-handlers - temporarily skipped to allow push
-describe.skip('Queue Error Handling', () => {
+// Circular dependency fixed: job-processor-handlers now uses @/ alias imports
+describe('Queue Error Handling', () => {
   let processor: JobProcessor;
   let processJobFn: any;
 

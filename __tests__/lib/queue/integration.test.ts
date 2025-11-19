@@ -100,8 +100,8 @@ import { QueueManager } from '@/lib/queue/queue-manager/core';
 import { JobProcessor } from '@/lib/queue/job-processor';
 import type { JobData, JobPriority } from '@/lib/queue/types';
 
-// TODO: Fix circular dependency with job-processor-handlers - temporarily skipped to allow push
-describe.skip('Queue Integration Tests', () => {
+// Circular dependency fixed: job-processor-handlers now uses @/ alias imports
+describe('Queue Integration Tests', () => {
   let queueManager: QueueManager;
   let jobProcessor: JobProcessor;
 

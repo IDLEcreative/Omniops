@@ -2,27 +2,21 @@
  * Job Handler Tests
  * Tests individual job type processors (single-page, full-crawl, refresh)
  *
- * IMPORTANT: All tests skipped due to Jest + ESM mocking limitation
- *
- * Root Cause:
- * - Jest cannot reliably mock ES6 modules with relative imports
- * - handlers use relative imports: `import { scrapePage } from '../scraper-api'`
- * - moduleNameMapper only works with @/ alias imports
- * - jest.mock() with factories doesn't work reliably with ESM
- * - See route-errors.test.ts (lines 4-29) for detailed explanation
- *
- * Solution Options:
- * 1. Refactor handlers to use @/ imports (requires production code change)
- * 2. Refactor handlers to use dependency injection (preferred, but larger change)
- * 3. Wait for Jest ESM support to improve
- *
- * Testing Alternatives:
- * - Integration tests with real queue
- * - Manual testing via queue endpoints
- * - E2E tests with Playwright
+ * FIXED: Handlers now use @/ imports which allows proper mocking
  */
 
-import { describe, it, expect, beforeEach } from '@jest/globals';
+import { describe, it, expect, beforeEach, jest } from '@jest/globals';
+
+// Mock scraper dependencies BEFORE importing handlers
+jest.mock('@/lib/scraper-api', () => ({
+  scrapePage: jest.fn().mockResolvedValue({ success: true, content: 'mocked content' }),
+  checkCrawlStatus: jest.fn().mockResolvedValue({ status: 'completed', completed: 10, total: 10, progress: 100 }),
+}));
+
+jest.mock('@/lib/scraper-with-cleanup', () => ({
+  crawlWebsiteWithCleanup: jest.fn().mockResolvedValue({ success: true, completed: 10, total: 10 }),
+}));
+
 import { Job } from 'bullmq';
 import type { JobData } from '@/lib/queue/types';
 
@@ -31,15 +25,26 @@ import {
   processFullCrawlJob,
   processRefreshJob,
 } from '@/lib/queue/job-processor-handlers';
+import * as scraperApi from '@/lib/scraper-api';
+import * as scraperWithCleanup from '@/lib/scraper-with-cleanup';
 
-// TODO: Fix Jest ESM mocking issues with relative imports - temporarily skipped to allow push
-describe.skip('Job Processor Handlers', () => {
+// Get properly typed mocks
+const mockScrapePage = scraperApi.scrapePage as jest.MockedFunction<typeof scraperApi.scrapePage>;
+const mockCheckCrawlStatus = scraperApi.checkCrawlStatus as jest.MockedFunction<typeof scraperApi.checkCrawlStatus>;
+const mockCrawlWebsiteWithCleanup = scraperWithCleanup.crawlWebsiteWithCleanup as jest.MockedFunction<typeof scraperWithCleanup.crawlWebsiteWithCleanup>;
+
+// ESM mocking issues fixed: job-processor-handlers now uses @/ alias imports
+describe('Job Processor Handlers', () => {
   beforeEach(() => {
     jest.clearAllMocks();
+    // Reset mock implementations to default
+    mockScrapePage.mockResolvedValue({ success: true, content: 'mocked content' } as any);
+    mockCheckCrawlStatus.mockResolvedValue({ status: 'completed', completed: 10, total: 10, progress: 100 } as any);
+    mockCrawlWebsiteWithCleanup.mockResolvedValue({ success: true, completed: 10, total: 10 } as any);
   });
 
   describe('processSinglePageJob', () => {
-    it.skip('should scrape single page successfully', async () => {
+    it('should scrape single page successfully', async () => {
       const mockJob = createMockJob({
         type: 'single-page',
         customerId: 'customer-1',
@@ -64,7 +69,7 @@ describe.skip('Job Processor Handlers', () => {
       expect(mockJob.updateProgress).toHaveBeenCalled();
     });
 
-    it.skip('should handle scraping errors', async () => {
+    it('should handle scraping errors', async () => {
       const mockJob = createMockJob({
         type: 'single-page',
         customerId: 'customer-1',
@@ -81,7 +86,7 @@ describe.skip('Job Processor Handlers', () => {
       expect(result.totalPages).toBe(1);
     });
 
-    it.skip('should update progress during scraping', async () => {
+    it('should update progress during scraping', async () => {
       const mockJob = createMockJob({
         type: 'single-page',
         customerId: 'customer-1',
@@ -107,7 +112,7 @@ describe.skip('Job Processor Handlers', () => {
   });
 
   describe('processFullCrawlJob', () => {
-    it.skip('should crawl website successfully', async () => {
+    it('should crawl website successfully', async () => {
       const mockJob = createMockJob({
         type: 'full-crawl',
         customerId: 'customer-1',
@@ -132,7 +137,7 @@ describe.skip('Job Processor Handlers', () => {
       expect(result.totalPages).toBe(10);
     });
 
-    it.skip('should handle crawl errors', async () => {
+    it('should handle crawl errors', async () => {
       const mockJob = createMockJob({
         type: 'full-crawl',
         customerId: 'customer-1',
@@ -149,7 +154,7 @@ describe.skip('Job Processor Handlers', () => {
       expect(result.error).toBe('Crawler failed');
     });
 
-    it.skip('should report progress during crawl', async () => {
+    it('should report progress during crawl', async () => {
       const mockJob = createMockJob({
         type: 'full-crawl',
         customerId: 'customer-1',
@@ -184,7 +189,7 @@ describe.skip('Job Processor Handlers', () => {
       );
     });
 
-    it.skip('should respect shutdown signal', async () => {
+    it('should respect shutdown signal', async () => {
       const mockJob = createMockJob({
         type: 'full-crawl',
         customerId: 'customer-1',
@@ -214,7 +219,7 @@ describe.skip('Job Processor Handlers', () => {
   });
 
   describe('processRefreshJob', () => {
-    it.skip('should refresh single page', async () => {
+    it('should refresh single page', async () => {
       const mockJob = createMockJob({
         type: 'refresh',
         customerId: 'customer-1',
@@ -238,7 +243,7 @@ describe.skip('Job Processor Handlers', () => {
       );
     });
 
-    it.skip('should perform full refresh when configured', async () => {
+    it('should perform full refresh when configured', async () => {
       const mockJob = createMockJob({
         type: 'refresh',
         customerId: 'customer-1',
@@ -262,7 +267,7 @@ describe.skip('Job Processor Handlers', () => {
       );
     });
 
-    it.skip('should handle refresh errors', async () => {
+    it('should handle refresh errors', async () => {
       const mockJob = createMockJob({
         type: 'refresh',
         customerId: 'customer-1',
@@ -277,7 +282,7 @@ describe.skip('Job Processor Handlers', () => {
       expect(result.error).toBe('Refresh failed');
     });
 
-    it.skip('should update progress during refresh', async () => {
+    it('should update progress during refresh', async () => {
       const mockJob = createMockJob({
         type: 'refresh',
         customerId: 'customer-1',
