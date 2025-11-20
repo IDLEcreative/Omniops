@@ -1,0 +1,146 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>PostMessage Fix Test</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            max-width: 800px;
+            margin: 50px auto;
+            padding: 20px;
+        }
+        h1 { color: #333; }
+        .status {
+            padding: 15px;
+            margin: 20px 0;
+            border-radius: 5px;
+            border: 1px solid #ddd;
+        }
+        .success { background-color: #d4edda; border-color: #c3e6cb; color: #155724; }
+        .error { background-color: #f8d7da; border-color: #f5c6cb; color: #721c24; }
+        .info { background-color: #d1ecf1; border-color: #bee5eb; color: #0c5460; }
+        #console-output {
+            background-color: #f8f9fa;
+            border: 1px solid #ddd;
+            padding: 15px;
+            height: 400px;
+            overflow-y: auto;
+            font-family: 'Courier New', monospace;
+            font-size: 12px;
+            white-space: pre-wrap;
+        }
+        .log-entry {
+            margin: 5px 0;
+            padding: 3px 0;
+            border-bottom: 1px solid #eee;
+        }
+        .log-error { color: #d9534f; }
+        .log-success { color: #5cb85c; }
+        .log-info { color: #5bc0de; }
+    </style>
+</head>
+<body>
+    <h1>🔧 PostMessage Origin Fix Test</h1>
+
+    <div class="status info">
+        <strong>Testing:</strong> Widget cross-origin communication with dynamic parent origin detection
+    </div>
+
+    <div id="test-status" class="status">
+        <strong>Status:</strong> <span id="status-text">Initializing...</span>
+    </div>
+
+    <h2>Console Output:</h2>
+    <div id="console-output"></div>
+
+    <script>
+        const consoleOutput = document.getElementById('console-output');
+        const statusText = document.getElementById('status-text');
+        const testStatus = document.getElementById('test-status');
+
+        let errorCount = 0;
+        let successCount = 0;
+
+        function log(message, type = 'info') {
+            const entry = document.createElement('div');
+            entry.className = `log-entry log-${type}`;
+            entry.textContent = `[${new Date().toLocaleTimeString()}] ${message}`;
+            consoleOutput.appendChild(entry);
+            consoleOutput.scrollTop = consoleOutput.scrollHeight;
+        }
+
+        // Intercept console errors
+        const originalError = console.error;
+        console.error = function(...args) {
+            const message = args.join(' ');
+
+            // Check for postMessage origin errors
+            if (message.includes('postMessage') && message.includes('origin')) {
+                errorCount++;
+                log(`❌ POSTMESSAGE ERROR DETECTED: ${message}`, 'error');
+                statusText.textContent = `FAILED - ${errorCount} postMessage error(s) detected`;
+                testStatus.className = 'status error';
+            } else {
+                log(`⚠️ Console error: ${message}`, 'error');
+            }
+
+            originalError.apply(console, args);
+        };
+
+        // Listen for postMessage events
+        window.addEventListener('message', (event) => {
+            successCount++;
+            log(`✅ Received postMessage from: ${event.origin}`, 'success');
+            log(`   Data: ${JSON.stringify(event.data)}`, 'info');
+
+            if (errorCount === 0 && successCount > 0) {
+                statusText.textContent = `PASSING - ${successCount} message(s) received, 0 errors`;
+                testStatus.className = 'status success';
+            }
+        });
+
+        // Load the widget
+        log('Loading Omniops widget...', 'info');
+
+        window.ChatWidgetConfig = {
+            serverUrl: "http://localhost:3000",
+            demoConfig: {
+                domain: "www.thompsonseparts.co.uk"
+            }
+        };
+
+        const script = document.createElement('script');
+        script.src = 'http://localhost:3000/embed.js';
+        script.async = true;
+        script.onload = () => {
+            log('Widget script loaded successfully', 'success');
+            statusText.textContent = 'Widget loaded, waiting for postMessage events...';
+        };
+        script.onerror = () => {
+            log('Failed to load widget script', 'error');
+            statusText.textContent = 'FAILED - Could not load widget';
+            testStatus.className = 'status error';
+        };
+        document.body.appendChild(script);
+
+        // Test summary after 10 seconds
+        setTimeout(() => {
+            log('='.repeat(50), 'info');
+            log('TEST SUMMARY', 'info');
+            log(`Total postMessage errors: ${errorCount}`, errorCount > 0 ? 'error' : 'success');
+            log(`Total messages received: ${successCount}`, successCount > 0 ? 'success' : 'info');
+
+            if (errorCount === 0 && successCount > 0) {
+                log('✅ TEST PASSED - No postMessage origin errors detected', 'success');
+            } else if (errorCount > 0) {
+                log('❌ TEST FAILED - PostMessage origin errors detected', 'error');
+            } else {
+                log('⚠️ TEST INCONCLUSIVE - No messages received yet', 'info');
+            }
+            log('='.repeat(50), 'info');
+        }, 10000);
+    </script>
+</body>
+</html>
