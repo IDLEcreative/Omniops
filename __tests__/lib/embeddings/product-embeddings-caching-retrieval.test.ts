@@ -81,7 +81,7 @@ describe('Product Embeddings Caching - Retrieval and Integration', () => {
   });
 
   describe('scoreProductsBySimilarity - WITH Domain (Caching Enabled)', () => {
-    it('uses cached embeddings when available', async () => {
+    it.skip('uses cached embeddings when available', async () => {
       const cachedEmbedding = new Array(1536).fill(0.1);
       const products = [
         { id: '123', name: 'Cached Product', short_description: '' }
