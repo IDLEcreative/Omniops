@@ -27,6 +27,7 @@ describe('Revenue Analytics', () => {
     } as any;
 
     // Mock createServiceRoleClient to return our mock
+    // eslint-disable-next-line @typescript-eslint/no-require-imports
     const { createServiceRoleClient } = require('@/lib/supabase-server');
     (createServiceRoleClient as jest.Mock).mockResolvedValue(mockSupabase);
   });

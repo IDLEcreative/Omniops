@@ -40,7 +40,17 @@ export async function processAIConversation(params: AIProcessorParams): Promise<
     isMobile
   } = params;
 
-  const { getCommerceProvider: getProviderFn, searchSimilarContent: searchFn, sanitizeOutboundLinks: sanitizeFn } = dependencies;
+  // Extract dependencies with defaults for production use
+  const {
+    getCommerceProvider: getProviderFn,
+    searchSimilarContent: searchFn,
+    sanitizeOutboundLinks: sanitizeFn,
+    getAvailableTools: getAvailableToolsFn = getAvailableTools,
+    checkToolAvailability: checkToolAvailabilityFn = checkToolAvailability,
+    getToolInstructions: getToolInstructionsFn = getToolInstructions,
+    executeToolCallsParallel: executeToolCallsParallelFn = executeToolCallsParallel,
+    formatToolResultsForAI: formatToolResultsForAIFn = formatToolResultsForAI
+  } = dependencies;
 
   console.log(`[Intelligent Chat] Starting conversation with ${conversationMessages.length} messages`);
 
@@ -58,9 +68,9 @@ export async function processAIConversation(params: AIProcessorParams): Promise<
   }
 
   // Get available tools based on customer configuration
-  const availableTools = await getAvailableTools(domain);
-  const toolAvailability = await checkToolAvailability(domain);
-  const toolInstructions = getToolInstructions(toolAvailability);
+  const availableTools = await getAvailableToolsFn(domain);
+  const toolAvailability = await checkToolAvailabilityFn(domain);
+  const toolInstructions = getToolInstructionsFn(toolAvailability);
 
   // Add tool availability instructions to system message
   if (toolInstructions) {
@@ -142,7 +152,7 @@ export async function processAIConversation(params: AIProcessorParams): Promise<
 
     // Execute tool calls in parallel
     console.log(`[Intelligent Chat] Executing ${toolCalls.length} tools in parallel for comprehensive search`);
-    const toolExecutionResults = await executeToolCallsParallel(
+    const toolExecutionResults = await executeToolCallsParallelFn(
       toolCalls,
       domain,
       searchTimeout,
@@ -211,7 +221,7 @@ export async function processAIConversation(params: AIProcessorParams): Promise<
     }
 
     // Format results for AI
-    const toolResults = formatToolResultsForAI(toolExecutionResults);
+    const toolResults = formatToolResultsForAIFn(toolExecutionResults);
 
     // Log error messages being sent to AI for telemetry and debugging
     toolResults.forEach(result => {

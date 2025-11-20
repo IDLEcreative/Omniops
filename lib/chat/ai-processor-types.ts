@@ -15,6 +15,19 @@ export interface AIProcessorDependencies {
   getCommerceProvider: any;
   searchSimilarContent: any;
   sanitizeOutboundLinks: any;
+  // Tool management functions (for testing)
+  getAvailableTools?: (domain: string) => Promise<any[]>;
+  checkToolAvailability?: (domain: string) => Promise<any>;
+  getToolInstructions?: (availability: any) => string;
+  // Tool execution functions (for testing)
+  executeToolCallsParallel?: (
+    toolCalls: any[],
+    domain: string,
+    searchTimeout: number,
+    telemetry: any,
+    dependencies: AIProcessorDependencies
+  ) => Promise<any[]>;
+  formatToolResultsForAI?: (toolExecutionResults: any[]) => any[];
 }
 
 export interface AIProcessorResult {

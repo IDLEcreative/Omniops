@@ -1,100 +1,35 @@
 /**
  * Edge Cases: AI Processor - Tools & API
  * Tests tool execution failures and OpenAI API edge cases
- *
- * NOTE: These tests are blocked by Jest ESM mocking limitations.
- * See JEST_MOCKING_INVESTIGATION.md for full analysis.
- *
- * RECOMMENDED SOLUTION: Refactor ai-processor.ts to use dependency injection
- * instead of direct imports. See investigation doc for details.
  */
 
 import { describe, it, expect, jest, beforeEach } from '@jest/globals';
-
-import OpenAI from 'openai';
 import { processAIConversation } from '@/lib/chat/ai-processor';
-import type { AIProcessorParams } from '@/lib/chat/ai-processor-types';
-import { ChatTelemetry } from '@/lib/chat-telemetry';
+import {
+  createMockOpenAIClient,
+  createMockTelemetry,
+  createMockDependencies,
+  createBaseParams
+} from './ai-processor-setup';
 
-// Import the modules to spy on
-import * as getAvailableToolsModule from '@/lib/chat/get-available-tools';
-import * as toolExecutorModule from '@/lib/chat/ai-processor-tool-executor';
-
-// Jest ESM mocking issue - tests skipped pending refactor to dependency injection
-describe.skip('AI Processor - Edge Cases: Tools & API', () => {
-  let mockOpenAIClient: jest.Mocked<OpenAI>;
-  let mockTelemetry: jest.Mocked<ChatTelemetry>;
-  let mockDependencies: any;
-  let baseParams: AIProcessorParams;
-
-  // Spies - created in beforeEach
-  let mockedGetAvailableTools: jest.SpyInstance;
-  let mockedCheckToolAvailability: jest.SpyInstance;
-  let mockedGetToolInstructions: jest.SpyInstance;
-  let mockedExecuteToolCallsParallel: jest.SpyInstance;
-  let mockedFormatToolResultsForAI: jest.SpyInstance;
+describe('AI Processor - Edge Cases: Tools & API', () => {
+  let mockOpenAIClient: ReturnType<typeof createMockOpenAIClient>;
+  let mockTelemetry: ReturnType<typeof createMockTelemetry>;
+  let mockDependencies: ReturnType<typeof createMockDependencies>;
+  let baseParams: ReturnType<typeof createBaseParams>;
 
   beforeEach(() => {
     jest.clearAllMocks();
 
-    // Create fresh spies for each test
-    mockedGetAvailableTools = jest.spyOn(getAvailableToolsModule, 'getAvailableTools').mockResolvedValue([]);
-    mockedCheckToolAvailability = jest.spyOn(getAvailableToolsModule, 'checkToolAvailability').mockResolvedValue({ hasWooCommerce: false, hasShopify: false });
-    mockedGetToolInstructions = jest.spyOn(getAvailableToolsModule, 'getToolInstructions').mockReturnValue('');
-    mockedExecuteToolCallsParallel = jest.spyOn(toolExecutorModule, 'executeToolCallsParallel').mockResolvedValue([]);
-    mockedFormatToolResultsForAI = jest.spyOn(toolExecutorModule, 'formatToolResultsForAI').mockReturnValue([]);
-
-    mockOpenAIClient = {
-      chat: {
-        completions: {
-          create: jest.fn()
-        }
-      }
-    } as any;
-
-    mockTelemetry = {
-      log: jest.fn(),
-      trackIteration: jest.fn(),
-      trackSearch: jest.fn()
-    } as any;
-
-    mockDependencies = {
-      getCommerceProvider: jest.fn(),
-      searchSimilarContent: jest.fn(),
-      sanitizeOutboundLinks: jest.fn((text: string) => text)
-    };
-
-    baseParams = {
-      conversationMessages: [
-        { role: 'system', content: 'You are a helpful assistant.' },
-        { role: 'user', content: 'Test' }
-      ],
-      domain: 'example.com',
-      config: {
-        ai: {
-          maxSearchIterations: 3,
-          searchTimeout: 10000
-        }
-      },
-      widgetConfig: null,
-      telemetry: mockTelemetry,
-      openaiClient: mockOpenAIClient,
-      useGPT5Mini: true,
-      dependencies: mockDependencies,
-      isMobile: false
-    };
-
-    mockedGetAvailableTools.mockResolvedValue([]);
-    mockedCheckToolAvailability.mockResolvedValue({
-      hasWooCommerce: false,
-      hasShopify: false
-    });
-    mockedGetToolInstructions.mockReturnValue('');
+    mockOpenAIClient = createMockOpenAIClient();
+    mockTelemetry = createMockTelemetry();
+    mockDependencies = createMockDependencies();
+    baseParams = createBaseParams(mockOpenAIClient, mockTelemetry, mockDependencies);
   });
 
   describe('Tool Execution', () => {
     it('should handle all tools returning no results', async () => {
-      mockedGetAvailableTools.mockResolvedValue([
+      (mockDependencies.getAvailableTools as jest.Mock).mockResolvedValue([
         { type: 'function', function: { name: 'search_website_content', description: '', parameters: {} } }
       ]);
 
@@ -125,7 +60,7 @@ describe.skip('AI Processor - Edge Cases: Tools & API', () => {
           }]
         });
 
-      mockedExecuteToolCallsParallel.mockResolvedValue([
+      (mockDependencies.executeToolCallsParallel as jest.Mock).mockResolvedValue([
         {
           toolCall: { id: 'call_1' },
           toolName: 'search_website_content',
@@ -139,7 +74,7 @@ describe.skip('AI Processor - Edge Cases: Tools & API', () => {
         }
       ]);
 
-      mockedFormatToolResultsForAI.mockReturnValue([
+      (mockDependencies.formatToolResultsForAI as jest.Mock).mockReturnValue([
         { tool_call_id: 'call_1', content: 'No results found' }
       ]);
 
@@ -150,7 +85,7 @@ describe.skip('AI Processor - Edge Cases: Tools & API', () => {
     });
 
     it('should handle all tools failing simultaneously', async () => {
-      mockedGetAvailableTools.mockResolvedValue([
+      (mockDependencies.getAvailableTools as jest.Mock).mockResolvedValue([
         { type: 'function', function: { name: 'search_website_content', description: '', parameters: {} } },
         { type: 'function', function: { name: 'search_by_category', description: '', parameters: {} } }
       ]);
@@ -192,7 +127,7 @@ describe.skip('AI Processor - Edge Cases: Tools & API', () => {
           }]
         });
 
-      mockedExecuteToolCallsParallel.mockResolvedValue([
+      (mockDependencies.executeToolCallsParallel as jest.Mock).mockResolvedValue([
         {
           toolCall: { id: 'call_1' },
           toolName: 'search_website_content',
@@ -209,7 +144,7 @@ describe.skip('AI Processor - Edge Cases: Tools & API', () => {
         }
       ]);
 
-      mockedFormatToolResultsForAI.mockReturnValue([
+      (mockDependencies.formatToolResultsForAI as jest.Mock).mockReturnValue([
         { tool_call_id: 'call_1', content: '⚠️ ERROR: Search failed' },
         { tool_call_id: 'call_2', content: '⚠️ ERROR: Search failed' }
       ]);
@@ -221,7 +156,7 @@ describe.skip('AI Processor - Edge Cases: Tools & API', () => {
     });
 
     it('should handle malformed tool results', async () => {
-      mockedGetAvailableTools.mockResolvedValue([
+      (mockDependencies.getAvailableTools as jest.Mock).mockResolvedValue([
         { type: 'function', function: { name: 'search_website_content', description: '', parameters: {} } }
       ]);
 
@@ -253,7 +188,7 @@ describe.skip('AI Processor - Edge Cases: Tools & API', () => {
         });
 
       // Mock tool returning result without required fields
-      mockedExecuteToolCallsParallel.mockResolvedValue([
+      (mockDependencies.executeToolCallsParallel as jest.Mock).mockResolvedValue([
         {
           toolCall: { id: 'call_1' },
           toolName: 'search_website_content',
@@ -270,7 +205,7 @@ describe.skip('AI Processor - Edge Cases: Tools & API', () => {
         }
       ]);
 
-      mockedFormatToolResultsForAI.mockReturnValue([
+      (mockDependencies.formatToolResultsForAI as jest.Mock).mockReturnValue([
         { tool_call_id: 'call_1', content: 'Partial results' }
       ]);
 

@@ -14,11 +14,7 @@ import { processAIConversation } from '@/lib/chat/ai-processor';
 import type { AIProcessorParams } from '@/lib/chat/ai-processor-types';
 import { ChatTelemetry } from '@/lib/chat-telemetry';
 
-jest.mock('@/lib/chat/get-available-tools');
-jest.mock('@/lib/chat/ai-processor-tool-executor');
 
-import { getAvailableTools, checkToolAvailability, getToolInstructions } from '@/lib/chat/get-available-tools';
-import { executeToolCallsParallel, formatToolResultsForAI } from '@/lib/chat/ai-processor-tool-executor';
 
 describe('AI Processor - Hallucination Prevention - Recommendations', () => {
   let mockOpenAIClient: jest.Mocked<OpenAI>;

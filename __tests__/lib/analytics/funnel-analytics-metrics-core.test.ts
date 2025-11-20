@@ -1,7 +1,7 @@
 /**
- * Funnel Analytics - Metrics & Trends Tests
+ * Funnel Analytics - Metrics & Trends Tests - Core Functionality
  *
- * Tests for getFunnelMetrics and getFunnelTrends functions
+ * Tests for getFunnelMetrics and getFunnelTrends main functionality
  */
 
 import { describe, it, expect, jest, beforeEach } from '@jest/globals';
@@ -14,7 +14,7 @@ import {
 // Mock dependencies
 jest.mock('@/lib/supabase-server');
 
-describe('Funnel Analytics - Metrics & Trends', () => {
+describe('Funnel Analytics - Metrics & Trends - Core', () => {
   let mockSupabase: jest.Mocked<SupabaseClient>;
 
   beforeEach(() => {
@@ -26,11 +26,12 @@ describe('Funnel Analytics - Metrics & Trends', () => {
     } as any;
 
     // Mock createServiceRoleClient to return our mock
+    // eslint-disable-next-line @typescript-eslint/no-require-imports
     const { createServiceRoleClient } = require('@/lib/supabase-server');
     (createServiceRoleClient as jest.Mock).mockResolvedValue(mockSupabase);
   });
 
-  describe('getFunnelMetrics', () => {
+  describe('getFunnelMetrics - Core Functionality', () => {
     const domain = 'example.com';
     const timeRange = {
       start: new Date('2024-01-01'),
@@ -205,46 +206,9 @@ describe('Funnel Analytics - Metrics & Trends', () => {
       expect(metrics.cartPriorityBreakdown.low.count).toBe(1);
       expect(metrics.cartPriorityBreakdown.low.conversionRate).toBe(0); // 0/1 * 100
     });
-
-    it('returns empty metrics when no funnels exist', async () => {
-      mockSupabase.from = jest.fn().mockReturnValue({
-        select: jest.fn().mockReturnThis(),
-        eq: jest.fn().mockReturnThis(),
-        gte: jest.fn().mockReturnThis(),
-        lte: jest.fn().mockReturnThis(),
-        then: (resolve: any) => resolve({ data: [], error: null }),
-      }) as any;
-
-      const metrics = await getFunnelMetrics(domain, timeRange);
-
-      expect(metrics.overview.totalChats).toBe(0);
-      expect(metrics.overview.totalCarts).toBe(0);
-      expect(metrics.overview.totalPurchases).toBe(0);
-      expect(metrics.conversionRates.chatToCart).toBe(0);
-      expect(metrics.conversionRates.cartToPurchase).toBe(0);
-      expect(metrics.conversionRates.overallConversion).toBe(0);
-    });
-
-    it('handles edge case: division by zero for conversion rates', async () => {
-      mockSupabase.from = jest.fn().mockReturnValue({
-        select: jest.fn().mockReturnThis(),
-        eq: jest.fn().mockReturnThis(),
-        gte: jest.fn().mockReturnThis(),
-        lte: jest.fn().mockReturnThis(),
-        then: (resolve: any) => resolve({ data: [], error: null }),
-      }) as any;
-
-      const metrics = await getFunnelMetrics(domain, timeRange);
-
-      // Should not throw division by zero errors
-      expect(metrics.conversionRates.chatToCart).toBe(0);
-      expect(metrics.conversionRates.cartToPurchase).toBe(0);
-      expect(metrics.conversionRates.overallConversion).toBe(0);
-      expect(metrics.revenueMetrics.avgPurchaseValue).toBe(0);
-    });
   });
 
-  describe('getFunnelTrends', () => {
+  describe('getFunnelTrends - Core Functionality', () => {
     const domain = 'example.com';
 
     it('retrieves funnel trend data over time', async () => {
@@ -301,44 +265,6 @@ describe('Funnel Analytics - Metrics & Trends', () => {
 
       // Check that gte was called with date 30 days ago
       expect(mockSupabase.from).toHaveBeenCalledWith('conversation_funnel_stats');
-    });
-
-    it('returns empty array when no data exists', async () => {
-      mockSupabase.from = jest.fn().mockReturnValue({
-        select: jest.fn().mockReturnThis(),
-        eq: jest.fn().mockReturnThis(),
-        gte: jest.fn().mockReturnThis(),
-        order: jest.fn().mockReturnThis(),
-        then: (resolve: any) => resolve({ data: null, error: null }),
-      }) as any;
-
-      const trends = await getFunnelTrends(domain, 7);
-
-      expect(trends).toEqual([]);
-    });
-
-    it('handles missing optional fields with default values', async () => {
-      const mockTrends = [
-        {
-          date: '2024-01-01',
-          // All optional fields missing
-        },
-      ];
-
-      mockSupabase.from = jest.fn().mockReturnValue({
-        select: jest.fn().mockReturnThis(),
-        eq: jest.fn().mockReturnThis(),
-        gte: jest.fn().mockReturnThis(),
-        order: jest.fn().mockReturnThis(),
-        then: (resolve: any) => resolve({ data: mockTrends, error: null }),
-      }) as any;
-
-      const trends = await getFunnelTrends(domain, 7);
-
-      expect(trends[0].totalChats).toBe(0);
-      expect(trends[0].totalCarts).toBe(0);
-      expect(trends[0].totalPurchases).toBe(0);
-      expect(trends[0].revenue).toBe(0);
     });
   });
 });

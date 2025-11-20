@@ -1,23 +1,16 @@
 /**
- * Alert Threshold Checker Tests
+ * Alert Threshold Checker Tests - Core Functionality
  *
- * Comprehensive test coverage for alert monitoring and threshold violation detection
- * Tests all functions in lib/alerts/threshold-checker.ts
+ * Tests for basic threshold checking and alert triggering
  */
 
 import { describe, it, expect, jest, beforeEach } from '@jest/globals';
 import type { SupabaseClient } from '@supabase/supabase-js';
 import {
   checkThresholds,
-  getAlertHistory,
-  acknowledgeAlert,
-  getAlertThresholds,
-  saveAlertThreshold,
-  deleteAlertThreshold,
   formatMetricName,
   type AlertThreshold,
   type MetricValues,
-  type TriggeredAlert,
 } from '@/lib/alerts/threshold-checker';
 import { sendAlertNotifications } from '@/lib/alerts/notification-handlers';
 
@@ -29,7 +22,7 @@ const mockSendAlertNotifications = sendAlertNotifications as jest.MockedFunction
   typeof sendAlertNotifications
 >;
 
-describe('Alert Threshold Checker', () => {
+describe('Alert Threshold Checker - Core', () => {
   let mockSupabase: jest.Mocked<SupabaseClient>;
 
   beforeEach(() => {
@@ -41,6 +34,7 @@ describe('Alert Threshold Checker', () => {
     } as any;
 
     // Mock createServiceRoleClient to return our mock
+    // eslint-disable-next-line @typescript-eslint/no-require-imports
     const { createServiceRoleClient } = require('@/lib/supabase-server');
     (createServiceRoleClient as jest.Mock).mockResolvedValue(mockSupabase);
   });
@@ -69,7 +63,7 @@ describe('Alert Threshold Checker', () => {
     });
   });
 
-  describe('checkThresholds', () => {
+  describe('checkThresholds - Basic Functionality', () => {
     const organizationId = 'org-123';
 
     it('triggers alert when metric exceeds "above" threshold', async () => {
@@ -187,72 +181,6 @@ describe('Alert Threshold Checker', () => {
       expect(mockSendAlertNotifications).not.toHaveBeenCalled();
     });
 
-    it('skips disabled thresholds', async () => {
-      const thresholds: AlertThreshold[] = [
-        {
-          id: 'threshold-4',
-          organization_id: organizationId,
-          metric: 'error_rate',
-          condition: 'above',
-          threshold: 1,
-          enabled: false, // Disabled
-          notification_channels: ['email'],
-        },
-      ];
-
-      const metrics: MetricValues = {
-        error_rate: 10, // Would violate if enabled
-      };
-
-      mockSupabase.from = jest.fn().mockImplementation((table) => {
-        if (table === 'alert_thresholds') {
-          return {
-            select: jest.fn().mockReturnThis(),
-            eq: jest.fn().mockReturnThis(),
-            then: (resolve: any) => resolve({ data: [], error: null }), // No enabled thresholds
-          };
-        }
-        return {};
-      }) as any;
-
-      const triggeredAlerts = await checkThresholds(organizationId, metrics);
-
-      expect(triggeredAlerts).toHaveLength(0);
-    });
-
-    it('skips metrics that are not provided', async () => {
-      const thresholds: AlertThreshold[] = [
-        {
-          id: 'threshold-5',
-          organization_id: organizationId,
-          metric: 'conversion_rate',
-          condition: 'below',
-          threshold: 10,
-          enabled: true,
-          notification_channels: ['email'],
-        },
-      ];
-
-      const metrics: MetricValues = {
-        error_rate: 5, // Different metric
-      };
-
-      mockSupabase.from = jest.fn().mockImplementation((table) => {
-        if (table === 'alert_thresholds') {
-          return {
-            select: jest.fn().mockReturnThis(),
-            eq: jest.fn().mockReturnThis(),
-            then: (resolve: any) => resolve({ data: thresholds, error: null }),
-          };
-        }
-        return {};
-      }) as any;
-
-      const triggeredAlerts = await checkThresholds(organizationId, metrics);
-
-      expect(triggeredAlerts).toHaveLength(0);
-    });
-
     it('handles multiple threshold violations', async () => {
       const thresholds: AlertThreshold[] = [
         {
@@ -344,51 +272,5 @@ describe('Alert Threshold Checker', () => {
         notification_sent: false,
       });
     });
-
-    it('handles edge case: metric value exactly equals threshold', async () => {
-      const thresholds: AlertThreshold[] = [
-        {
-          id: 'threshold-9',
-          organization_id: organizationId,
-          metric: 'error_rate',
-          condition: 'above',
-          threshold: 5,
-          enabled: true,
-          notification_channels: ['email'],
-        },
-      ];
-
-      mockSupabase.from = jest.fn().mockImplementation((table) => {
-        if (table === 'alert_thresholds') {
-          return {
-            select: jest.fn().mockReturnThis(),
-            eq: jest.fn().mockReturnThis(),
-            then: (resolve: any) => resolve({ data: thresholds, error: null }),
-          };
-        }
-        return {};
-      }) as any;
-
-      const triggeredAlerts = await checkThresholds(organizationId, { error_rate: 5 });
-
-      // Exactly equal should NOT trigger for "above" condition
-      expect(triggeredAlerts).toHaveLength(0);
-    });
-
-    it('handles database errors gracefully', async () => {
-      mockSupabase.from = jest.fn().mockImplementation(() => ({
-        select: jest.fn().mockReturnThis(),
-        eq: jest.fn().mockReturnThis(),
-        then: (resolve: any) => resolve({ data: null, error: { message: 'DB error' } }),
-      })) as any;
-
-      const triggeredAlerts = await checkThresholds(organizationId, { error_rate: 10 });
-
-      expect(triggeredAlerts).toEqual([]);
-    });
   });
-
-  // See threshold-checker-read.test.ts for getAlertHistory and getAlertThresholds tests
-  // See threshold-checker-write.test.ts for saveAlertThreshold and deleteAlertThreshold tests
-  // See threshold-checker-acknowledge.test.ts for acknowledgeAlert tests
 });

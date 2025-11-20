@@ -1,78 +1,26 @@
-/**
- * Edge Cases: AI Processor - Input Handling
- * Tests empty/malformed input, very long messages, and special characters
- */
-
 import { describe, it, expect, jest, beforeEach } from '@jest/globals';
-import OpenAI from 'openai';
 import { processAIConversation } from '@/lib/chat/ai-processor';
-import type { AIProcessorParams } from '@/lib/chat/ai-processor-types';
-import { ChatTelemetry } from '@/lib/chat-telemetry';
+import {
+  createMockOpenAIClient,
+  createMockTelemetry,
+  createMockDependencies,
+  createBaseParams
+} from './ai-processor-setup';
 
-jest.mock('@/lib/chat/get-available-tools');
-jest.mock('@/lib/chat/ai-processor-tool-executor');
-
-import { getAvailableTools, checkToolAvailability, getToolInstructions } from '@/lib/chat/get-available-tools';
-import { executeToolCallsParallel, formatToolResultsForAI } from '@/lib/chat/ai-processor-tool-executor';
-
-// TODO: Fix mock setup issue with getAvailableTools - temporarily skipped to allow push
-describe.skip('AI Processor - Edge Cases: Input', () => {
-  let mockOpenAIClient: jest.Mocked<OpenAI>;
-  let mockTelemetry: jest.Mocked<ChatTelemetry>;
-  let mockDependencies: any;
-  let baseParams: AIProcessorParams;
+describe('AI Processor - Edge Cases: Input', () => {
+  let mockOpenAIClient: ReturnType<typeof createMockOpenAIClient>;
+  let mockTelemetry: ReturnType<typeof createMockTelemetry>;
+  let mockDependencies: ReturnType<typeof createMockDependencies>;
+  let baseParams: ReturnType<typeof createBaseParams>;
 
   beforeEach(() => {
     jest.clearAllMocks();
 
-    mockOpenAIClient = {
-      chat: {
-        completions: {
-          create: jest.fn()
-        }
-      }
-    } as any;
-
-    mockTelemetry = {
-      log: jest.fn(),
-      trackIteration: jest.fn(),
-      trackSearch: jest.fn()
-    } as any;
-
-    mockDependencies = {
-      getCommerceProvider: jest.fn(),
-      searchSimilarContent: jest.fn(),
-      sanitizeOutboundLinks: jest.fn((text: string) => text)
-    };
-
-    baseParams = {
-      conversationMessages: [
-        { role: 'system', content: 'You are a helpful assistant.' },
-        { role: 'user', content: 'Test' }
-      ],
-      domain: 'example.com',
-      config: {
-        ai: {
-          maxSearchIterations: 3,
-          searchTimeout: 10000
-        }
-      },
-      widgetConfig: null,
-      telemetry: mockTelemetry,
-      openaiClient: mockOpenAIClient,
-      useGPT5Mini: true,
-      dependencies: mockDependencies,
-      isMobile: false
-    };
-
-    (getAvailableTools as jest.Mock).mockResolvedValue([]);
-    (checkToolAvailability as jest.Mock).mockResolvedValue({
-      hasWooCommerce: false,
-      hasShopify: false
-    });
-    (getToolInstructions as jest.Mock).mockReturnValue('');
+    mockOpenAIClient = createMockOpenAIClient();
+    mockTelemetry = createMockTelemetry();
+    mockDependencies = createMockDependencies();
+    baseParams = createBaseParams(mockOpenAIClient, mockTelemetry, mockDependencies);
   });
-
   describe('Empty & Malformed Input', () => {
     it('should handle empty message content', async () => {
       baseParams.conversationMessages = [

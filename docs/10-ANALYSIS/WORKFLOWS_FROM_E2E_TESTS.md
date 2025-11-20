@@ -1,14 +1,14 @@
 # Application Workflows (Auto-Generated from E2E Tests)
 
-**Generated:** 2025-11-16T19:38:24.809Z
+**Generated:** 2025-11-19T15:59:00.489Z
 **Source:** Playwright E2E test files in `__tests__/playwright/`
 
 ## Summary
 
-- **Total Tests:** 192
-- **Total Steps:** 839
+- **Total Tests:** 239
+- **Total Steps:** 1060
 - **API Endpoints Documented:** 5
-- **UI Elements Documented:** 115
+- **UI Elements Documented:** 124
 
 ---
 
@@ -35,177 +35,224 @@
 19. [should handle empty analytics data gracefully](#should-handle-empty-analytics-data-gracefully)
 20. [should handle API errors gracefully](#should-handle-api-errors-gracefully)
 21. [should switch between tabs correctly](#should-switch-between-tabs-correctly)
-22. [user discovers products and adds to cart via mobile shopping feed](#user-discovers-products-and-adds-to-cart-via-mobile-shopping-feed)
-23. [swipe navigation and gestures work smoothly](#swipe-navigation-and-gestures-work-smoothly)
-24. [product detail expansion and interaction](#product-detail-expansion-and-interaction)
-25. [cart operations and state management](#cart-operations-and-state-management)
-26. [accessibility and performance standards](#accessibility-and-performance-standards)
-27. [should complete scraping and make content searchable in chat](#should-complete-scraping-and-make-content-searchable-in-chat)
-28. [should handle scraping errors gracefully](#should-handle-scraping-errors-gracefully)
-29. [should show progress during long scraping jobs](#should-show-progress-during-long-scraping-jobs)
-30. [complete recommendation workflow: chat → recommendations → click → purchase tracking](#complete-recommendation-workflow-chat-recommendations-click-purchase-tracking)
-31. [recommendation algorithms display correctly](#recommendation-algorithms-display-correctly)
-32. [empty state when no recommendations available](#empty-state-when-no-recommendations-available)
-33. [click tracking without navigation](#click-tracking-without-navigation)
-34. [purchase tracking without navigation](#purchase-tracking-without-navigation)
-35. [recommendation API returns valid data](#recommendation-api-returns-valid-data)
-36. [invalid API requests return proper errors](#invalid-api-requests-return-proper-errors)
-37. [should complete WooCommerce setup and enable product search](#should-complete-woocommerce-setup-and-enable-product-search)
-38. [should handle WooCommerce connection errors gracefully](#should-handle-woocommerce-connection-errors-gracefully)
-39. [should maintain cart session across messages](#should-maintain-cart-session-across-messages)
-40. [should handle Store API failures gracefully](#should-handle-store-api-failures-gracefully)
-41. [should enforce rate limits and allow retry after cooldown](#should-enforce-rate-limits-and-allow-retry-after-cooldown)
-42. [should handle payment failure and allow retry with cart preserved](#should-handle-payment-failure-and-allow-retry-with-cart-preserved)
-43. [should handle network timeout and allow successful retry](#should-handle-network-timeout-and-allow-successful-retry)
-44. [should handle invalid WooCommerce credentials and allow correction](#should-handle-invalid-woocommerce-credentials-and-allow-correction)
-45. [should detect concurrent edits and provide conflict resolution](#should-detect-concurrent-edits-and-provide-conflict-resolution)
-46. [should prevent concurrent scraping and allow retry after completion](#should-prevent-concurrent-scraping-and-allow-retry-after-completion)
-47. [should install and customize widget successfully](#should-install-and-customize-widget-successfully)
-48. [should generate correct embed code for different environments](#should-generate-correct-embed-code-for-different-environments)
-49. [should handle widget customization with invalid values](#should-handle-widget-customization-with-invalid-values)
-50. [should add and configure domain successfully](#should-add-and-configure-domain-successfully)
-51. [should handle domain editing](#should-handle-domain-editing)
-52. [should handle domain deletion/disabling](#should-handle-domain-deletion-disabling)
-53. [should enforce domain access control](#should-enforce-domain-access-control)
-54. [complete search workflow: search → results → view conversation with highlight](#complete-search-workflow-search-results-view-conversation-with-highlight)
-55. [search with advanced filters: date range and status filtering](#search-with-advanced-filters-date-range-and-status-filtering)
-56. [handles empty search results gracefully](#handles-empty-search-results-gracefully)
-57. [search with special characters and edge cases](#search-with-special-characters-and-edge-cases)
-58. [keyboard navigation and shortcuts in search](#keyboard-navigation-and-shortcuts-in-search)
-59. [search result persistence and back navigation](#search-result-persistence-and-back-navigation)
-60. [CSV export endpoint: verify availability and response](#csv-export-endpoint-verify-availability-and-response)
-61. [JSON analytics endpoint: verify data structure](#json-analytics-endpoint-verify-data-structure)
-62. [Export formats: test all supported formats](#export-formats-test-all-supported-formats)
-63. [Date range parameters: test different time periods](#date-range-parameters-test-different-time-periods)
-64. [Error handling: test invalid parameters](#error-handling-test-invalid-parameters)
-65. [Export workflow documentation for AI agents](#export-workflow-documentation-for-ai-agents)
-66. [should complete demo flow from URL entry to AI chat response](#should-complete-demo-flow-from-url-entry-to-ai-chat-response)
-67. [should handle invalid URLs gracefully](#should-handle-invalid-urls-gracefully)
-68. [should enforce demo session limits](#should-enforce-demo-session-limits)
-69. [should show upgrade prompt after demo limits reached](#should-show-upgrade-prompt-after-demo-limits-reached)
-70. [should complete full purchase flow from chat to order confirmation](#should-complete-full-purchase-flow-from-chat-to-order-confirmation)
-71. [should handle purchase flow with guest checkout](#should-handle-purchase-flow-with-guest-checkout)
-72. [should handle purchase flow with registered user](#should-handle-purchase-flow-with-registered-user)
-73. [should maintain context across multiple conversation turns](#should-maintain-context-across-multiple-conversation-turns)
-74. [should handle conversation with context reset](#should-handle-conversation-with-context-reset)
-75. [should handle very long conversations](#should-handle-very-long-conversations)
-76. [should handle ambiguous pronouns](#should-handle-ambiguous-pronouns)
-77. [should complete full team invitation flow for viewer role](#should-complete-full-team-invitation-flow-for-viewer-role)
-78. [should handle editor role with correct permissions](#should-handle-editor-role-with-correct-permissions)
-79. [should show team members list with correct roles](#should-show-team-members-list-with-correct-roles)
-80. [should allow admin to revoke member access](#should-allow-admin-to-revoke-member-access)
-81. [should handle expired invitation tokens](#should-handle-expired-invitation-tokens)
-82. [should complete Shopify setup and track purchases](#should-complete-shopify-setup-and-track-purchases)
-83. [should handle Shopify connection errors](#should-handle-shopify-connection-errors)
-84. [should sync product inventory updates](#should-sync-product-inventory-updates)
-85. [should handle product out of stock scenarios](#should-handle-product-out-of-stock-scenarios)
-86. [should track Shopify order fulfillment](#should-track-shopify-order-fulfillment)
-87. [should handle Shopify webhooks](#should-handle-shopify-webhooks)
-88. [should display real-time metrics and update without refresh](#should-display-real-time-metrics-and-update-without-refresh)
-89. [should handle connection interruptions gracefully](#should-handle-connection-interruptions-gracefully)
-90. [should show historical trend alongside real-time data](#should-show-historical-trend-alongside-real-time-data)
-91. [should filter real-time events by type](#should-filter-real-time-events-by-type)
-92. [should export real-time data snapshot](#should-export-real-time-data-snapshot)
-93. [should handle high-frequency updates efficiently](#should-handle-high-frequency-updates-efficiently)
-94. [should lookup order status via chat and return accurate information](#should-lookup-order-status-via-chat-and-return-accurate-information)
-95. [should handle order lookup for processing orders](#should-handle-order-lookup-for-processing-orders)
-96. [should handle invalid order numbers gracefully](#should-handle-invalid-order-numbers-gracefully)
-97. [should handle multiple order lookups in same conversation](#should-handle-multiple-order-lookups-in-same-conversation)
-98. [should provide order modification options](#should-provide-order-modification-options)
-99. [should handle orders without tracking numbers](#should-handle-orders-without-tracking-numbers)
-100. [should monitor live chat and complete agent takeover](#should-monitor-live-chat-and-complete-agent-takeover)
-101. [should show waiting chats requiring agent attention](#should-show-waiting-chats-requiring-agent-attention)
-102. [should complete full conversations management flow with export](#should-complete-full-conversations-management-flow-with-export)
-103. [should filter conversations by date range](#should-filter-conversations-by-date-range)
-104. [should handle empty search results gracefully](#should-handle-empty-search-results-gracefully)
-105. [should allow bulk operations on conversations](#should-allow-bulk-operations-on-conversations)
-106. [should show conversation analytics](#should-show-conversation-analytics)
-107. [should track complete cart journey with analytics](#should-track-complete-cart-journey-with-analytics)
-108. [should track session metrics accurately](#should-track-session-metrics-accurately)
-109. [should retrieve domain-level analytics](#should-retrieve-domain-level-analytics)
-110. [should identify abandoned carts](#should-identify-abandoned-carts)
-111. [should filter analytics by date range](#should-filter-analytics-by-date-range)
-112. [should handle API errors gracefully](#should-handle-api-errors-gracefully)
-113. [should support platform filtering (WooCommerce vs Shopify)](#should-support-platform-filtering-woocommerce-vs-shopify)
-114. [should track both successful and failed operations](#should-track-both-successful-and-failed-operations)
-115. [should retrieve analytics quickly (< 1 second)](#should-retrieve-analytics-quickly-1-second)
-116. [should restore abandoned cart when customer returns](#should-restore-abandoned-cart-when-customer-returns)
-117. [should track cart abandonment analytics](#should-track-cart-abandonment-analytics)
-118. [should send abandonment email reminder](#should-send-abandonment-email-reminder)
-119. [should handle expired cart sessions](#should-handle-expired-cart-sessions)
-120. [should merge guest and authenticated user carts](#should-merge-guest-and-authenticated-user-carts)
-121. [should handle out-of-stock items in restored cart](#should-handle-out-of-stock-items-in-restored-cart)
-122. [delete items with persistence verification](#delete-items-with-persistence-verification)
-123. [delete multiple items sequentially](#delete-multiple-items-sequentially)
-124. [delete items while processing](#delete-items-while-processing)
-125. [list integrity after deletion](#list-integrity-after-deletion)
-126. [empty state when all items deleted](#empty-state-when-all-items-deleted)
-127. [delete confirmation dialog](#delete-confirmation-dialog)
-128. [user uploads Q&A pairs for FAQ training](#user-uploads-q-a-pairs-for-faq-training)
-129. [Q&A with long answers](#q-a-with-long-answers)
-130. [incomplete Q&A validation](#incomplete-q-a-validation)
-131. [multiple Q&A pairs](#multiple-q-a-pairs)
-132. [Q&A with special characters](#q-a-with-special-characters)
-133. [user uploads text and generates embeddings](#user-uploads-text-and-generates-embeddings)
-134. [short text (< 200 chars)](#short-text-200-chars)
-135. [long text (> 200 chars, truncated preview)](#long-text-200-chars-truncated-preview)
-136. [empty text validation](#empty-text-validation)
-137. [multiple text submissions](#multiple-text-submissions)
-138. [user uploads URL and processes to completion](#user-uploads-url-and-processes-to-completion)
-139. [URL normalization (auto-adds https://)](#url-normalization-auto-adds-https)
-140. [scraping failure handling](#scraping-failure-handling)
-141. [multiple URL submissions](#multiple-url-submissions)
-142. [live preview updates in real-time](#live-preview-updates-in-real-time)
-143. [reset button restores default settings](#reset-button-restores-default-settings)
-144. [tab navigation works correctly](#tab-navigation-works-correctly)
-145. [advanced color customization works](#advanced-color-customization-works)
-146. [handles save errors gracefully](#handles-save-errors-gracefully)
-147. [supports keyboard navigation](#supports-keyboard-navigation)
-148. [appearance → behavior → save → persist](#appearance-behavior-save-persist)
-149. [verify file naming convention for all formats](#verify-file-naming-convention-for-all-formats)
-150. [PDF export with 90-day range](#pdf-export-with-90-day-range)
-151. [Excel export validation](#excel-export-validation)
-152. [export with empty data: handle gracefully](#export-with-empty-data-handle-gracefully)
-153. [export with user authentication and permissions](#export-with-user-authentication-and-permissions)
-154. [handle invalid export format gracefully](#handle-invalid-export-format-gracefully)
-155. [handle missing query parameters](#handle-missing-query-parameters)
-156. [handle request timeout gracefully](#handle-request-timeout-gracefully)
-157. [complete export workflow: UI suggestion for missing buttons](#complete-export-workflow-ui-suggestion-for-missing-buttons)
-158. [export performance: large dataset handling](#export-performance-large-dataset-handling)
-159. [sequential export downloads: verify file independence](#sequential-export-downloads-verify-file-independence)
-160. [export with custom time ranges](#export-with-custom-time-ranges)
-161. [verify JSON analytics data structure](#verify-json-analytics-data-structure)
-162. [export with date range filter applied](#export-with-date-range-filter-applied)
-163. [validate CSV data accuracy and formatting](#validate-csv-data-accuracy-and-formatting)
-164. [verify API endpoint responses](#verify-api-endpoint-responses)
-165. [export analytics as CSV: click → download → verify](#export-analytics-as-csv-click-download-verify)
-166. [verify CSV file structure and headers](#verify-csv-file-structure-and-headers)
-167. [CSV export with 30-day range](#csv-export-with-30-day-range)
-168. [English to Spanish translation](#english-to-spanish-translation)
-169. [UI updates immediately on language change](#ui-updates-immediately-on-language-change)
-170. [RTL languages display correctly (Arabic)](#rtl-languages-display-correctly-arabic)
-171. [Hebrew (RTL) text rendering](#hebrew-rtl-text-rendering)
-172. [RTL layout persists across language changes](#rtl-layout-persists-across-language-changes)
-173. [locale preference persists in localStorage](#locale-preference-persists-in-localstorage)
-174. [multiple locales can be switched](#multiple-locales-can-be-switched)
-175. [invalid locale handled gracefully](#invalid-locale-handled-gracefully)
-176. [language switching preserves conversation history](#language-switching-preserves-conversation-history)
-177. [language persists after page reload](#language-persists-after-page-reload)
-178. [rapid language switches handled correctly](#rapid-language-switches-handled-correctly)
-179. [browser locale auto-detection](#browser-locale-auto-detection)
-180. [complete language workflow: English → Spanish → Arabic (RTL)](#complete-language-workflow-english-spanish-arabic-rtl)
-181. [abandoned conversation → detection → schedule → send](#abandoned-conversation-detection-schedule-send)
-182. [sends high-priority low-satisfaction follow-up](#sends-high-priority-low-satisfaction-follow-up)
-183. [respects follow-up attempt limits](#respects-follow-up-attempt-limits)
-184. [supports multiple scheduling windows](#supports-multiple-scheduling-windows)
-185. [handles email vs in-app channel routing](#handles-email-vs-in-app-channel-routing)
-186. [should track add-to-cart operation with full analytics](#should-track-add-to-cart-operation-with-full-analytics)
-187. [should track multi-step cart journey with session continuity](#should-track-multi-step-cart-journey-with-session-continuity)
-188. [should calculate accurate session duration](#should-calculate-accurate-session-duration)
-189. [should track operation failures with error messages](#should-track-operation-failures-with-error-messages)
-190. [should support analytics aggregation by platform](#should-support-analytics-aggregation-by-platform)
-191. [pending follow-up cancelled when user returns](#pending-follow-up-cancelled-when-user-returns)
-192. [tracks response metrics across channels](#tracks-response-metrics-across-channels)
+22. [product detail expansion and interaction](#product-detail-expansion-and-interaction)
+23. [cart operations and state management](#cart-operations-and-state-management)
+24. [accessibility and performance standards](#accessibility-and-performance-standards)
+25. [user discovers products and adds to cart via mobile shopping feed](#user-discovers-products-and-adds-to-cart-via-mobile-shopping-feed)
+26. [swipe navigation and gestures work smoothly](#swipe-navigation-and-gestures-work-smoothly)
+27. [should filter products by multiple criteria](#should-filter-products-by-multiple-criteria)
+28. [should sort search results by different criteria](#should-sort-search-results-by-different-criteria)
+29. [should handle "no results" with helpful suggestions](#should-handle-no-results-with-helpful-suggestions)
+30. [should paginate large result sets](#should-paginate-large-result-sets)
+31. [should measure search performance](#should-measure-search-performance)
+32. [should complete scraping and make content searchable in chat](#should-complete-scraping-and-make-content-searchable-in-chat)
+33. [should handle scraping errors gracefully](#should-handle-scraping-errors-gracefully)
+34. [should show progress during long scraping jobs](#should-show-progress-during-long-scraping-jobs)
+35. [complete recommendation workflow: chat → recommendations → click → purchase tracking](#complete-recommendation-workflow-chat-recommendations-click-purchase-tracking)
+36. [recommendation algorithms display correctly](#recommendation-algorithms-display-correctly)
+37. [empty state when no recommendations available](#empty-state-when-no-recommendations-available)
+38. [click tracking without navigation](#click-tracking-without-navigation)
+39. [purchase tracking without navigation](#purchase-tracking-without-navigation)
+40. [recommendation API returns valid data](#recommendation-api-returns-valid-data)
+41. [invalid API requests return proper errors](#invalid-api-requests-return-proper-errors)
+42. [should load widget in under 2 seconds](#should-load-widget-in-under-2-seconds)
+43. [should respond to chat messages within 3 seconds (p95)](#should-respond-to-chat-messages-within-3-seconds-p95)
+44. [should handle large conversations without degradation (50+ messages)](#should-handle-large-conversations-without-degradation-50-messages)
+45. [should handle concurrent message burst without errors](#should-handle-concurrent-message-burst-without-errors)
+46. [should not leak memory over extended usage](#should-not-leak-memory-over-extended-usage)
+47. [should measure API endpoint response times](#should-measure-api-endpoint-response-times)
+48. [should complete WooCommerce setup and enable product search](#should-complete-woocommerce-setup-and-enable-product-search)
+49. [should handle WooCommerce connection errors gracefully](#should-handle-woocommerce-connection-errors-gracefully)
+50. [should maintain cart session across messages](#should-maintain-cart-session-across-messages)
+51. [should handle Store API failures gracefully](#should-handle-store-api-failures-gracefully)
+52. [should enforce rate limits and allow retry after cooldown](#should-enforce-rate-limits-and-allow-retry-after-cooldown)
+53. [should handle payment failure and allow retry with cart preserved](#should-handle-payment-failure-and-allow-retry-with-cart-preserved)
+54. [should handle network timeout and allow successful retry](#should-handle-network-timeout-and-allow-successful-retry)
+55. [should handle invalid WooCommerce credentials and allow correction](#should-handle-invalid-woocommerce-credentials-and-allow-correction)
+56. [should detect concurrent edits and provide conflict resolution](#should-detect-concurrent-edits-and-provide-conflict-resolution)
+57. [should prevent concurrent scraping and allow retry after completion](#should-prevent-concurrent-scraping-and-allow-retry-after-completion)
+58. [should install and customize widget successfully](#should-install-and-customize-widget-successfully)
+59. [should generate correct embed code for different environments](#should-generate-correct-embed-code-for-different-environments)
+60. [should handle widget customization with invalid values](#should-handle-widget-customization-with-invalid-values)
+61. [should add and configure domain successfully](#should-add-and-configure-domain-successfully)
+62. [should handle domain editing](#should-handle-domain-editing)
+63. [should handle domain deletion/disabling](#should-handle-domain-deletion-disabling)
+64. [should enforce domain access control](#should-enforce-domain-access-control)
+65. [should filter conversations by sentiment](#should-filter-conversations-by-sentiment)
+66. [should filter conversations by domain](#should-filter-conversations-by-domain)
+67. [should filter conversations by customer email](#should-filter-conversations-by-customer-email)
+68. [should combine multiple filters](#should-combine-multiple-filters)
+69. [should clear all filters and reset results](#should-clear-all-filters-and-reset-results)
+70. [should complete full filtering user journey](#should-complete-full-filtering-user-journey)
+71. [should handle filter panel interactions smoothly](#should-handle-filter-panel-interactions-smoothly)
+72. [complete search workflow: search → results → view conversation with highlight](#complete-search-workflow-search-results-view-conversation-with-highlight)
+73. [search with advanced filters: date range and status filtering](#search-with-advanced-filters-date-range-and-status-filtering)
+74. [handles empty search results gracefully](#handles-empty-search-results-gracefully)
+75. [search with special characters and edge cases](#search-with-special-characters-and-edge-cases)
+76. [keyboard navigation and shortcuts in search](#keyboard-navigation-and-shortcuts-in-search)
+77. [search result persistence and back navigation](#search-result-persistence-and-back-navigation)
+78. [should support custom date range selection with presets](#should-support-custom-date-range-selection-with-presets)
+79. [should enable comparison mode and display change indicators](#should-enable-comparison-mode-and-display-change-indicators)
+80. [should display anomaly alerts with severity badges](#should-display-anomaly-alerts-with-severity-badges)
+81. [should create, display, and manage metric goals](#should-create-display-and-manage-metric-goals)
+82. [should create, display, and interact with chart annotations](#should-create-display-and-interact-with-chart-annotations)
+83. [should use all features together in realistic workflow](#should-use-all-features-together-in-realistic-workflow)
+84. [CSV export endpoint: verify availability and response](#csv-export-endpoint-verify-availability-and-response)
+85. [JSON analytics endpoint: verify data structure](#json-analytics-endpoint-verify-data-structure)
+86. [Export formats: test all supported formats](#export-formats-test-all-supported-formats)
+87. [Date range parameters: test different time periods](#date-range-parameters-test-different-time-periods)
+88. [Error handling: test invalid parameters](#error-handling-test-invalid-parameters)
+89. [Export workflow documentation for AI agents](#export-workflow-documentation-for-ai-agents)
+90. [should display complete page header with all controls](#should-display-complete-page-header-with-all-controls)
+91. [should switch time ranges and reload data](#should-switch-time-ranges-and-reload-data)
+92. [should toggle auto-refresh on and off](#should-toggle-auto-refresh-on-and-off)
+93. [should manually refresh analytics data](#should-manually-refresh-analytics-data)
+94. [should display all Overview Tab components](#should-display-all-overview-tab-components)
+95. [should display Business Intelligence Tab components](#should-display-business-intelligence-tab-components)
+96. [should open export dropdown and show all options](#should-open-export-dropdown-and-show-all-options)
+97. [should handle empty data gracefully on Overview tab](#should-handle-empty-data-gracefully-on-overview-tab)
+98. [should handle API errors with error alert](#should-handle-api-errors-with-error-alert)
+99. [should complete full user journey through all features](#should-complete-full-user-journey-through-all-features)
+100. [should work on mobile viewports (responsive)](#should-work-on-mobile-viewports-responsive)
+101. [should handle browser feature detection gracefully](#should-handle-browser-feature-detection-gracefully)
+102. [should maintain context across multiple conversation turns](#should-maintain-context-across-multiple-conversation-turns)
+103. [should handle conversation with context reset](#should-handle-conversation-with-context-reset)
+104. [should handle very long conversations](#should-handle-very-long-conversations)
+105. [should handle ambiguous pronouns](#should-handle-ambiguous-pronouns)
+106. [should complete demo flow from URL entry to AI chat response](#should-complete-demo-flow-from-url-entry-to-ai-chat-response)
+107. [should handle invalid URLs gracefully](#should-handle-invalid-urls-gracefully)
+108. [should enforce demo session limits](#should-enforce-demo-session-limits)
+109. [should show upgrade prompt after demo limits reached](#should-show-upgrade-prompt-after-demo-limits-reached)
+110. [should complete full purchase flow from chat to order confirmation](#should-complete-full-purchase-flow-from-chat-to-order-confirmation)
+111. [should handle purchase flow with guest checkout](#should-handle-purchase-flow-with-guest-checkout)
+112. [should handle purchase flow with registered user](#should-handle-purchase-flow-with-registered-user)
+113. [should complete full team invitation flow for viewer role](#should-complete-full-team-invitation-flow-for-viewer-role)
+114. [should handle editor role with correct permissions](#should-handle-editor-role-with-correct-permissions)
+115. [should show team members list with correct roles](#should-show-team-members-list-with-correct-roles)
+116. [should allow admin to revoke member access](#should-allow-admin-to-revoke-member-access)
+117. [should handle expired invitation tokens](#should-handle-expired-invitation-tokens)
+118. [should complete Shopify setup and track purchases](#should-complete-shopify-setup-and-track-purchases)
+119. [should handle Shopify connection errors](#should-handle-shopify-connection-errors)
+120. [should sync product inventory updates](#should-sync-product-inventory-updates)
+121. [should handle product out of stock scenarios](#should-handle-product-out-of-stock-scenarios)
+122. [should track Shopify order fulfillment](#should-track-shopify-order-fulfillment)
+123. [should handle Shopify webhooks](#should-handle-shopify-webhooks)
+124. [should display real-time metrics and update without refresh](#should-display-real-time-metrics-and-update-without-refresh)
+125. [should handle connection interruptions gracefully](#should-handle-connection-interruptions-gracefully)
+126. [should show historical trend alongside real-time data](#should-show-historical-trend-alongside-real-time-data)
+127. [should filter real-time events by type](#should-filter-real-time-events-by-type)
+128. [should export real-time data snapshot](#should-export-real-time-data-snapshot)
+129. [should handle high-frequency updates efficiently](#should-handle-high-frequency-updates-efficiently)
+130. [should lookup order status via chat and return accurate information](#should-lookup-order-status-via-chat-and-return-accurate-information)
+131. [should handle order lookup for processing orders](#should-handle-order-lookup-for-processing-orders)
+132. [should handle invalid order numbers gracefully](#should-handle-invalid-order-numbers-gracefully)
+133. [should handle multiple order lookups in same conversation](#should-handle-multiple-order-lookups-in-same-conversation)
+134. [should provide order modification options](#should-provide-order-modification-options)
+135. [should handle orders without tracking numbers](#should-handle-orders-without-tracking-numbers)
+136. [should monitor live chat and complete agent takeover](#should-monitor-live-chat-and-complete-agent-takeover)
+137. [should show waiting chats requiring agent attention](#should-show-waiting-chats-requiring-agent-attention)
+138. [should complete full conversations management flow with export](#should-complete-full-conversations-management-flow-with-export)
+139. [should filter conversations by date range](#should-filter-conversations-by-date-range)
+140. [should handle empty search results gracefully](#should-handle-empty-search-results-gracefully)
+141. [should allow bulk operations on conversations](#should-allow-bulk-operations-on-conversations)
+142. [should show conversation analytics](#should-show-conversation-analytics)
+143. [should track complete cart journey with analytics](#should-track-complete-cart-journey-with-analytics)
+144. [should track session metrics accurately](#should-track-session-metrics-accurately)
+145. [should retrieve domain-level analytics](#should-retrieve-domain-level-analytics)
+146. [should identify abandoned carts](#should-identify-abandoned-carts)
+147. [should filter analytics by date range](#should-filter-analytics-by-date-range)
+148. [should handle API errors gracefully](#should-handle-api-errors-gracefully)
+149. [should support platform filtering (WooCommerce vs Shopify)](#should-support-platform-filtering-woocommerce-vs-shopify)
+150. [should track both successful and failed operations](#should-track-both-successful-and-failed-operations)
+151. [should retrieve analytics quickly (< 1 second)](#should-retrieve-analytics-quickly-1-second)
+152. [should restore abandoned cart when customer returns](#should-restore-abandoned-cart-when-customer-returns)
+153. [should track cart abandonment analytics](#should-track-cart-abandonment-analytics)
+154. [should send abandonment email reminder](#should-send-abandonment-email-reminder)
+155. [should handle expired cart sessions](#should-handle-expired-cart-sessions)
+156. [should merge guest and authenticated user carts](#should-merge-guest-and-authenticated-user-carts)
+157. [should handle out-of-stock items in restored cart](#should-handle-out-of-stock-items-in-restored-cart)
+158. [should support complete keyboard navigation workflow](#should-support-complete-keyboard-navigation-workflow)
+159. [should meet color contrast requirements (WCAG AA)](#should-meet-color-contrast-requirements-wcag-aa)
+160. [should have proper ARIA labels and roles](#should-have-proper-aria-labels-and-roles)
+161. [should have semantic HTML structure](#should-have-semantic-html-structure)
+162. [should handle form validation with screen reader announcements](#should-handle-form-validation-with-screen-reader-announcements)
+163. [should run full axe accessibility audit](#should-run-full-axe-accessibility-audit)
+164. [live preview updates in real-time](#live-preview-updates-in-real-time)
+165. [reset button restores default settings](#reset-button-restores-default-settings)
+166. [tab navigation works correctly](#tab-navigation-works-correctly)
+167. [advanced color customization works](#advanced-color-customization-works)
+168. [handles save errors gracefully](#handles-save-errors-gracefully)
+169. [supports keyboard navigation](#supports-keyboard-navigation)
+170. [appearance → behavior → save → persist](#appearance-behavior-save-persist)
+171. [verify file naming convention for all formats](#verify-file-naming-convention-for-all-formats)
+172. [PDF export with 90-day range](#pdf-export-with-90-day-range)
+173. [Excel export validation](#excel-export-validation)
+174. [export with empty data: handle gracefully](#export-with-empty-data-handle-gracefully)
+175. [export with user authentication and permissions](#export-with-user-authentication-and-permissions)
+176. [handle invalid export format gracefully](#handle-invalid-export-format-gracefully)
+177. [handle missing query parameters](#handle-missing-query-parameters)
+178. [handle request timeout gracefully](#handle-request-timeout-gracefully)
+179. [complete export workflow: UI suggestion for missing buttons](#complete-export-workflow-ui-suggestion-for-missing-buttons)
+180. [export performance: large dataset handling](#export-performance-large-dataset-handling)
+181. [sequential export downloads: verify file independence](#sequential-export-downloads-verify-file-independence)
+182. [export with custom time ranges](#export-with-custom-time-ranges)
+183. [verify JSON analytics data structure](#verify-json-analytics-data-structure)
+184. [export with date range filter applied](#export-with-date-range-filter-applied)
+185. [validate CSV data accuracy and formatting](#validate-csv-data-accuracy-and-formatting)
+186. [verify API endpoint responses](#verify-api-endpoint-responses)
+187. [export analytics as CSV: click → download → verify](#export-analytics-as-csv-click-download-verify)
+188. [verify CSV file structure and headers](#verify-csv-file-structure-and-headers)
+189. [CSV export with 30-day range](#csv-export-with-30-day-range)
+190. [delete items with persistence verification](#delete-items-with-persistence-verification)
+191. [delete multiple items sequentially](#delete-multiple-items-sequentially)
+192. [delete items while processing](#delete-items-while-processing)
+193. [list integrity after deletion](#list-integrity-after-deletion)
+194. [empty state when all items deleted](#empty-state-when-all-items-deleted)
+195. [delete confirmation dialog](#delete-confirmation-dialog)
+196. [URL uploads generate embeddings](#url-uploads-generate-embeddings)
+197. [text uploads generate embeddings](#text-uploads-generate-embeddings)
+198. [Q&A uploads generate embeddings](#q-a-uploads-generate-embeddings)
+199. [embeddings are searchable via RAG](#embeddings-are-searchable-via-rag)
+200. [verify embedding pipeline for all upload types](#verify-embedding-pipeline-for-all-upload-types)
+201. [user uploads Q&A pairs for FAQ training](#user-uploads-q-a-pairs-for-faq-training)
+202. [Q&A with long answers](#q-a-with-long-answers)
+203. [incomplete Q&A validation](#incomplete-q-a-validation)
+204. [multiple Q&A pairs](#multiple-q-a-pairs)
+205. [Q&A with special characters](#q-a-with-special-characters)
+206. [user uploads text and generates embeddings](#user-uploads-text-and-generates-embeddings)
+207. [short text (< 200 chars)](#short-text-200-chars)
+208. [long text (> 200 chars, truncated preview)](#long-text-200-chars-truncated-preview)
+209. [empty text validation](#empty-text-validation)
+210. [multiple text submissions](#multiple-text-submissions)
+211. [user uploads URL and processes to completion](#user-uploads-url-and-processes-to-completion)
+212. [URL normalization (auto-adds https://)](#url-normalization-auto-adds-https)
+213. [scraping failure handling](#scraping-failure-handling)
+214. [multiple URL submissions](#multiple-url-submissions)
+215. [English to Spanish translation](#english-to-spanish-translation)
+216. [UI updates immediately on language change](#ui-updates-immediately-on-language-change)
+217. [RTL languages display correctly (Arabic)](#rtl-languages-display-correctly-arabic)
+218. [Hebrew (RTL) text rendering](#hebrew-rtl-text-rendering)
+219. [RTL layout persists across language changes](#rtl-layout-persists-across-language-changes)
+220. [locale preference persists in localStorage](#locale-preference-persists-in-localstorage)
+221. [multiple locales can be switched](#multiple-locales-can-be-switched)
+222. [invalid locale handled gracefully](#invalid-locale-handled-gracefully)
+223. [language switching preserves conversation history](#language-switching-preserves-conversation-history)
+224. [language persists after page reload](#language-persists-after-page-reload)
+225. [rapid language switches handled correctly](#rapid-language-switches-handled-correctly)
+226. [browser locale auto-detection](#browser-locale-auto-detection)
+227. [complete language workflow: English → Spanish → Arabic (RTL)](#complete-language-workflow-english-spanish-arabic-rtl)
+228. [abandoned conversation → detection → schedule → send](#abandoned-conversation-detection-schedule-send)
+229. [sends high-priority low-satisfaction follow-up](#sends-high-priority-low-satisfaction-follow-up)
+230. [respects follow-up attempt limits](#respects-follow-up-attempt-limits)
+231. [supports multiple scheduling windows](#supports-multiple-scheduling-windows)
+232. [handles email vs in-app channel routing](#handles-email-vs-in-app-channel-routing)
+233. [should track add-to-cart operation with full analytics](#should-track-add-to-cart-operation-with-full-analytics)
+234. [should track multi-step cart journey with session continuity](#should-track-multi-step-cart-journey-with-session-continuity)
+235. [should calculate accurate session duration](#should-calculate-accurate-session-duration)
+236. [should track operation failures with error messages](#should-track-operation-failures-with-error-messages)
+237. [should support analytics aggregation by platform](#should-support-analytics-aggregation-by-platform)
+238. [pending follow-up cancelled when user returns](#pending-follow-up-cancelled-when-user-returns)
+239. [tracks response metrics across channels](#tracks-response-metrics-across-channels)
 
 ---
 
@@ -898,207 +945,9 @@ await overviewTab.click();
 
 ---
 
-## 22. user discovers products and adds to cart via mobile shopping feed
+## 22. product detail expansion and interaction
 
-**Source:** [`__tests__/playwright/shopping/mobile-shopping-experience.spec.ts`](/__tests__/playwright/shopping/mobile-shopping-experience.spec.ts)
-
-**Description:**
-E2E Test: Product Discovery to Add-to-Cart
-Tests the COMPLETE journey from chat query to adding product to cart.
-This validates the core mobile shopping workflow end-to-end.
-User Journey:
-1. Open chat widget on mobile viewport
-2. Send product search query
-3. Chat transforms to shopping feed
-4. Swipe through product cards
-5. Tap product to expand details
-6. Select variants (size, color)
-7. Double-tap to add to cart
-8. Verify cart indicator appears
-9. Verify analytics tracked
-Success Indicators:
-- ✅ Shopping feed displays with products
-- ✅ Swipe navigation works smoothly
-- ✅ Product details expand on tap
-- ✅ Double-tap adds item to cart
-- ✅ Cart badge shows correct count
-- ✅ Analytics event fired
-This test teaches AI agents:
-- How to trigger shopping mode
-- Product card interaction patterns
-- Variant selection flow
-- Cart operations
-/
-
-**Total Steps:** 19
-
-**Workflow Steps:**
-
-| Step | Action | Target | Value | Expected Outcome |
-|------|--------|--------|-------|------------------|
-| 1 | log |  |  | 📍 Step 1: Set mobile viewport and enable touch features |
-| 2 | log |  |  | 📍 Step 2: Navigate to widget test page |
-| 3 | navigate | ``${BASE_URL}/widget-test`` |  |  |
-| 4 | log |  |  | 📍 Step 3: Wait for chat widget iframe |
-| 5 | log |  |  | 📍 Step 4: Setup shopping API mock with product data |
-| 6 | log |  |  | 📍 Step 5: Send product search query |
-| 7 | log |  |  | 📍 Step 6: Wait for chat → shopping feed transition |
-| 8 | log |  |  | 📍 Step 7: Verify product cards loaded |
-| 9 | log |  |  | 📍 Step 8: Swipe down to view next product |
-| 10 | wait | `1000` |  |  |
-| 11 | log |  |  | 📍 Step 9: Tap product card to expand details |
-| 12 | log |  |  | 📍 Step 10: Select product variant (Color: White) |
-| 13 | log |  |  | 📍 Step 11: Double-tap product to add to cart |
-| 14 | wait | `1000` |  |  |
-| 15 | log |  |  | 📍 Step 12: Verify cart indicator shows item count |
-| 16 | log |  |  | 📍 Step 13: Verify analytics event for add-to-cart |
-| 17 | wait | `500` |  |  |
-| 18 | log |  |  | 📍 Step 14: Capture success screenshot |
-| 19 | screenshot |  |  |  |
-
-**Code Reference:**
-
-```typescript
-// Line 92
-console.log('📍 Step 1: Set mobile viewport and enable touch features');
-
-// Line 100
-console.log('📍 Step 2: Navigate to widget test page');
-
-// Line 101
-await page.goto(`${BASE_URL}/widget-test`, { waitUntil: 'networkidle' });
-
-// Line 107
-console.log('📍 Step 3: Wait for chat widget iframe');
-
-// Line 114
-console.log('📍 Step 4: Setup shopping API mock with product data');
-
-// Line 121
-console.log('📍 Step 5: Send product search query');
-
-// Line 128
-console.log('📍 Step 6: Wait for chat → shopping feed transition');
-
-// Line 136
-console.log('📍 Step 7: Verify product cards loaded');
-
-// Line 144
-console.log('📍 Step 8: Swipe down to view next product');
-
-// Line 148
-await page.waitForTimeout(1000);
-
-// ... 9 more steps ...
-```
-
----
-
-## 23. swipe navigation and gestures work smoothly
-
-**Source:** [`__tests__/playwright/shopping/mobile-shopping-experience.spec.ts`](/__tests__/playwright/shopping/mobile-shopping-experience.spec.ts)
-
-**Description:**
-E2E Test: Swipe Navigation & Gestures
-Tests all swipe gestures in the shopping feed:
-- Vertical swipe: Navigate between products
-- Horizontal swipe: Exit shopping mode
-- Double-tap: Quick add to cart
-- Smooth animations: 60fps performance
-User Journey:
-1. Enter shopping mode
-2. Swipe down through 3 products
-3. Swipe up to go back
-4. Swipe right to exit
-5. Verify smooth animations
-Success Indicators:
-- ✅ Vertical swipes navigate products
-- ✅ Horizontal swipe exits shopping
-- ✅ Animations run at 60fps
-- ✅ Gestures feel natural
-/
-
-**Total Steps:** 13
-
-**Workflow Steps:**
-
-| Step | Action | Target | Value | Expected Outcome |
-|------|--------|--------|-------|------------------|
-| 1 | log |  |  | 📍 Step 1: Setup mobile environment |
-| 2 | log |  |  | 📍 Step 2: Load widget and trigger shopping mode |
-| 3 | navigate | ``${BASE_URL}/widget-test`` |  |  |
-| 4 | log |  |  | 📍 Step 3: Wait for shopping feed |
-| 5 | log |  |  | 📍 Step 4: Test vertical swipe down |
-| 6 | wait | `1000` |  |  |
-| 7 | log |  |  | 📍 Step 5: Swipe down again (product 3) |
-| 8 | wait | `1000` |  |  |
-| 9 | log |  |  | 📍 Step 6: Test vertical swipe up |
-| 10 | wait | `1000` |  |  |
-| 11 | log |  |  | 📍 Step 7: Measure animation performance |
-| 12 | log |  |  | 📍 Step 8: Test horizontal swipe to exit shopping |
-| 13 | wait | `1000` |  |  |
-
-**Code Reference:**
-
-```typescript
-// Line 261
-console.log('📍 Step 1: Setup mobile environment');
-
-// Line 265
-console.log('📍 Step 2: Load widget and trigger shopping mode');
-
-// Line 266
-await page.goto(`${BASE_URL}/widget-test`, { waitUntil: 'networkidle' });
-
-// Line 271
-console.log('📍 Step 3: Wait for shopping feed');
-
-// Line 278
-console.log('📍 Step 4: Test vertical swipe down');
-
-// Line 280
-await page.waitForTimeout(1000);
-
-// Line 286
-console.log('📍 Step 5: Swipe down again (product 3)');
-
-// Line 288
-await page.waitForTimeout(1000);
-
-// Line 294
-console.log('📍 Step 6: Test vertical swipe up');
-
-// Line 296
-await page.waitForTimeout(1000);
-
-// ... 3 more steps ...
-```
-
----
-
-## 24. product detail expansion and interaction
-
-**Source:** [`__tests__/playwright/shopping/mobile-shopping-experience.spec.ts`](/__tests__/playwright/shopping/mobile-shopping-experience.spec.ts)
-
-**Description:**
-E2E Test: Product Detail Expansion
-Tests product detail view functionality:
-- Tap to expand product details
-- Image gallery horizontal scroll
-- Variant selection
-- Collapse on tap outside
-User Journey:
-1. Enter shopping mode
-2. Tap product to expand
-3. Scroll image gallery
-4. Select variants
-5. Tap outside to collapse
-Success Indicators:
-- ✅ Details expand smoothly
-- ✅ Image gallery scrollable
-- ✅ Variants selectable
-- ✅ Collapse on outside tap
-/
+**Source:** [`__tests__/playwright/shopping/mobile-shopping-details.spec.ts`](/__tests__/playwright/shopping/mobile-shopping-details.spec.ts)
 
 **Total Steps:** 10
 
@@ -1120,63 +969,43 @@ Success Indicators:
 **Code Reference:**
 
 ```typescript
-// Line 351
+// Line 44
 console.log('📍 Step 1: Setup mobile environment');
 
-// Line 355
+// Line 48
 console.log('📍 Step 2: Load widget and trigger shopping mode');
 
-// Line 356
+// Line 49
 await page.goto(`${BASE_URL}/widget-test`, { waitUntil: 'networkidle' });
 
-// Line 361
+// Line 54
 console.log('📍 Step 3: Wait for shopping feed');
 
-// Line 367
+// Line 57
 console.log('📍 Step 4: Tap product card to expand details');
 
-// Line 376
+// Line 63
 console.log('📍 Step 5: Test image gallery horizontal scroll');
 
-// Line 384
+// Line 69
 await page.waitForTimeout(500);
 
-// Line 394
+// Line 76
 console.log('📍 Step 6: Test variant selection');
 
-// Line 410
+// Line 88
 console.log('📍 Step 7: Tap outside to collapse details');
 
-// Line 412
+// Line 90
 await page.waitForTimeout(1000);
 
 ```
 
 ---
 
-## 25. cart operations and state management
+## 23. cart operations and state management
 
-**Source:** [`__tests__/playwright/shopping/mobile-shopping-experience.spec.ts`](/__tests__/playwright/shopping/mobile-shopping-experience.spec.ts)
-
-**Description:**
-E2E Test: Cart Operations
-Tests cart functionality:
-- Add multiple items
-- Cart badge updates
-- Cart badge animations
-- View cart action
-User Journey:
-1. Add first product to cart
-2. Add second product to cart
-3. Verify cart shows count: 2
-4. Tap cart to view
-5. Verify cart contents
-Success Indicators:
-- ✅ Cart badge appears after first add
-- ✅ Cart count increments correctly
-- ✅ Badge animates on update
-- ✅ Cart view accessible
-/
+**Source:** [`__tests__/playwright/shopping/mobile-shopping-details.spec.ts`](/__tests__/playwright/shopping/mobile-shopping-details.spec.ts)
 
 **Total Steps:** 15
 
@@ -1203,34 +1032,34 @@ Success Indicators:
 **Code Reference:**
 
 ```typescript
-// Line 452
+// Line 107
 console.log('📍 Step 1: Setup mobile environment');
 
-// Line 456
+// Line 111
 console.log('📍 Step 2: Load widget and trigger shopping mode');
 
-// Line 457
+// Line 112
 await page.goto(`${BASE_URL}/widget-test`, { waitUntil: 'networkidle' });
 
-// Line 462
+// Line 117
 console.log('📍 Step 3: Wait for shopping feed');
 
-// Line 468
+// Line 120
 console.log('📍 Step 4: Add first product to cart (double-tap)');
 
-// Line 475
+// Line 126
 await page.waitForTimeout(1000);
 
-// Line 482
+// Line 130
 console.log('📍 Step 5: Verify cart badge shows count: 1');
 
-// Line 490
+// Line 135
 console.log('📍 Step 6: Swipe to next product');
 
-// Line 492
+// Line 137
 await page.waitForTimeout(1000);
 
-// Line 494
+// Line 139
 console.log('📍 Step 7: Add second product to cart (double-tap)');
 
 // ... 5 more steps ...
@@ -1238,29 +1067,9 @@ console.log('📍 Step 7: Add second product to cart (double-tap)');
 
 ---
 
-## 26. accessibility and performance standards
+## 24. accessibility and performance standards
 
-**Source:** [`__tests__/playwright/shopping/mobile-shopping-experience.spec.ts`](/__tests__/playwright/shopping/mobile-shopping-experience.spec.ts)
-
-**Description:**
-E2E Test: Accessibility & Performance
-Tests accessibility and performance standards:
-- Touch target sizes (iOS: 44x44px minimum)
-- Animation performance (60fps)
-- Screen reader compatibility
-- High contrast mode
-User Journey:
-1. Enter shopping mode
-2. Verify touch targets meet iOS standards
-3. Measure animation FPS
-4. Test with high contrast mode
-5. Verify ARIA labels
-Success Indicators:
-- ✅ All touch targets ≥44x44px
-- ✅ Animations run at ≥55fps
-- ✅ ARIA labels present
-- ✅ High contrast readable
-/
+**Source:** [`__tests__/playwright/shopping/mobile-shopping-details.spec.ts`](/__tests__/playwright/shopping/mobile-shopping-details.spec.ts)
 
 **Total Steps:** 8
 
@@ -1280,35 +1089,440 @@ Success Indicators:
 **Code Reference:**
 
 ```typescript
-// Line 565
+// Line 180
 console.log('📍 Step 1: Setup mobile environment');
 
-// Line 569
+// Line 184
 console.log('📍 Step 2: Load widget and trigger shopping mode');
 
-// Line 570
+// Line 185
 await page.goto(`${BASE_URL}/widget-test`, { waitUntil: 'networkidle' });
 
-// Line 575
+// Line 190
 console.log('📍 Step 3: Wait for shopping feed');
 
-// Line 581
+// Line 193
 console.log('📍 Step 4: Verify touch target sizes');
 
-// Line 611
+// Line 216
 console.log('📍 Step 5: Test animation performance during swipe');
 
-// Line 623
+// Line 223
 console.log('📍 Step 6: Verify ARIA labels for accessibility');
 
-// Line 636
+// Line 231
 console.log('📍 Step 7: Verify viewport is mobile');
 
 ```
 
 ---
 
-## 27. should complete scraping and make content searchable in chat
+## 25. user discovers products and adds to cart via mobile shopping feed
+
+**Source:** [`__tests__/playwright/shopping/mobile-shopping-core.spec.ts`](/__tests__/playwright/shopping/mobile-shopping-core.spec.ts)
+
+**Total Steps:** 28
+
+**Workflow Steps:**
+
+| Step | Action | Target | Value | Expected Outcome |
+|------|--------|--------|-------|------------------|
+| 1 | log |  |  | 📍 Step 1: Set mobile viewport and enable touch features |
+| 2 | log |  |  | 📍 Step 2: Navigate to widget test page |
+| 3 | navigate | ``${BASE_URL}/widget-test`` |  |  |
+| 4 | log |  |  | 📍 Step 3: Wait for chat widget iframe |
+| 5 | log |  |  | 📍 Step 4: Click open button to open widget |
+| 6 | wait | `{ state: 'visible', timeout: 10000 }` |  |  |
+| 7 | wait | `1000` |  |  |
+| 8 | log |  |  | 📍 Step 4a: Verify widget opened (check for input field) |
+| 9 | wait | `{ state: 'visible', timeout: 5000 }` |  |  |
+| 10 | log |  |  | 📍 Step 5: Using real Thompson's Parts API (www.thompsonseparts.co.uk) |
+| 11 | log |  |  | 📍 Step 6: Send product search query that triggers shopping feed |
+| 12 | log |  |  | 📍 Step 7: Wait for Browse Products button (real API response) |
+| 13 | wait | `{ state: 'visible', timeout: 60000 }` |  |  |
+| 14 | log |  |  | 📍 Step 8: Click Browse Products to open shopping feed |
+| 15 | click |  |  |  |
+| 16 | log |  |  | 📍 Step 9: Wait for shopping feed transition |
+| 17 | log |  |  | 📍 Step 10: Verify product cards loaded |
+| 18 | log |  |  | 📍 Step 11: Swipe down to view next product |
+| 19 | wait | `1000` |  |  |
+| 20 | log |  |  | 📍 Step 11: Tap product card to expand details |
+| 21 | log |  |  | 📍 Step 12: Select product variant (Color: White) |
+| 22 | log |  |  | 📍 Step 13: Double-tap product to add to cart |
+| 23 | wait | `1000` |  |  |
+| 24 | log |  |  | 📍 Step 12: Verify cart indicator shows item count |
+| 25 | log |  |  | 📍 Step 13: Verify analytics event for add-to-cart |
+| 26 | wait | `500` |  |  |
+| 27 | log |  |  | 📍 Step 14: Capture success screenshot |
+| 28 | screenshot |  |  |  |
+
+**Code Reference:**
+
+```typescript
+// Line 56
+console.log('📍 Step 1: Set mobile viewport and enable touch features');
+
+// Line 61
+console.log('📍 Step 2: Navigate to widget test page');
+
+// Line 62
+await page.goto(`${BASE_URL}/widget-test`, { waitUntil: 'networkidle' });
+
+// Line 65
+console.log('📍 Step 3: Wait for chat widget iframe');
+
+// Line 79
+console.log('📍 Step 4: Click open button to open widget');
+
+// Line 81
+await openButton.waitFor({ state: 'visible', timeout: 10000 });
+
+// Line 90
+await page.waitForTimeout(1000);
+
+// Line 93
+console.log('📍 Step 4a: Verify widget opened (check for input field)');
+
+// Line 95
+await inputField.waitFor({ state: 'visible', timeout: 5000 });
+
+// Line 98
+console.log('📍 Step 5: Using real Thompson\'s Parts API (www.thompsonseparts.co.uk)');
+
+// ... 18 more steps ...
+```
+
+---
+
+## 26. swipe navigation and gestures work smoothly
+
+**Source:** [`__tests__/playwright/shopping/mobile-shopping-core.spec.ts`](/__tests__/playwright/shopping/mobile-shopping-core.spec.ts)
+
+**Total Steps:** 13
+
+**Workflow Steps:**
+
+| Step | Action | Target | Value | Expected Outcome |
+|------|--------|--------|-------|------------------|
+| 1 | log |  |  | 📍 Step 1: Setup mobile environment |
+| 2 | log |  |  | 📍 Step 2: Load widget and trigger shopping mode |
+| 3 | navigate | ``${BASE_URL}/widget-test`` |  |  |
+| 4 | log |  |  | 📍 Step 3: Wait for shopping feed |
+| 5 | log |  |  | 📍 Step 4: Test vertical swipe down |
+| 6 | wait | `1000` |  |  |
+| 7 | log |  |  | 📍 Step 5: Swipe down again (product 3) |
+| 8 | wait | `1000` |  |  |
+| 9 | log |  |  | 📍 Step 6: Test vertical swipe up |
+| 10 | wait | `1000` |  |  |
+| 11 | log |  |  | 📍 Step 7: Measure animation performance |
+| 12 | log |  |  | 📍 Step 8: Test horizontal swipe to exit shopping |
+| 13 | wait | `1000` |  |  |
+
+**Code Reference:**
+
+```typescript
+// Line 191
+console.log('📍 Step 1: Setup mobile environment');
+
+// Line 195
+console.log('📍 Step 2: Load widget and trigger shopping mode');
+
+// Line 196
+await page.goto(`${BASE_URL}/widget-test`, { waitUntil: 'networkidle' });
+
+// Line 202
+console.log('📍 Step 3: Wait for shopping feed');
+
+// Line 206
+console.log('📍 Step 4: Test vertical swipe down');
+
+// Line 208
+await page.waitForTimeout(1000);
+
+// Line 211
+console.log('📍 Step 5: Swipe down again (product 3)');
+
+// Line 213
+await page.waitForTimeout(1000);
+
+// Line 216
+console.log('📍 Step 6: Test vertical swipe up');
+
+// Line 218
+await page.waitForTimeout(1000);
+
+// ... 3 more steps ...
+```
+
+---
+
+## 27. should filter products by multiple criteria
+
+**Source:** [`__tests__/playwright/search/advanced-search.spec.ts`](/__tests__/playwright/search/advanced-search.spec.ts)
+
+**Total Steps:** 13
+
+**Workflow Steps:**
+
+| Step | Action | Target | Value | Expected Outcome |
+|------|--------|--------|-------|------------------|
+| 1 | log |  |  | 📍 Step 1: Loading chat widget |
+| 2 | navigate | ``${BASE_URL}/widget-test`` |  |  |
+| 3 | log |  |  | 📍 Step 2: Setting up search filter mock |
+| 4 | log |  |  | 📍 Step 3: Searching with single filter (price < $500) |
+| 5 | wait | `2000` |  |  |
+| 6 | log |  |  | 📍 Step 4: Adding category filter (hydraulic) |
+| 7 | wait | `2000` |  |  |
+| 8 | log |  |  | 📍 Step 5: Adding availability filter (in stock) |
+| 9 | wait | `2000` |  |  |
+| 10 | log |  |  | 📍 Step 6: Adding specification filter (high pressure) |
+| 11 | wait | `2000` |  |  |
+| 12 | log |  |  | 📍 Step 7: Verifying filtered results are accurate |
+| 13 | screenshot |  |  |  |
+
+**Code Reference:**
+
+```typescript
+// Line 44
+console.log('📍 Step 1: Loading chat widget');
+
+// Line 46
+await page.goto(`${BASE_URL}/widget-test`, { waitUntil: 'networkidle' });
+
+// Line 54
+console.log('📍 Step 2: Setting up search filter mock');
+
+// Line 126
+console.log('📍 Step 3: Searching with single filter (price < $500)');
+
+// Line 129
+await page.waitForTimeout(2000);
+
+// Line 137
+console.log('📍 Step 4: Adding category filter (hydraulic)');
+
+// Line 140
+await page.waitForTimeout(2000);
+
+// Line 149
+console.log('📍 Step 5: Adding availability filter (in stock)');
+
+// Line 152
+await page.waitForTimeout(2000);
+
+// Line 162
+console.log('📍 Step 6: Adding specification filter (high pressure)');
+
+// ... 3 more steps ...
+```
+
+---
+
+## 28. should sort search results by different criteria
+
+**Source:** [`__tests__/playwright/search/advanced-search.spec.ts`](/__tests__/playwright/search/advanced-search.spec.ts)
+
+**Total Steps:** 11
+
+**Workflow Steps:**
+
+| Step | Action | Target | Value | Expected Outcome |
+|------|--------|--------|-------|------------------|
+| 1 | log |  |  | 📍 Step 1: Loading chat widget |
+| 2 | navigate | ``${BASE_URL}/widget-test`` |  |  |
+| 3 | log |  |  | 📍 Step 2: Setting up sort mock |
+| 4 | log |  |  | 📍 Step 3: Sort by price (ascending) |
+| 5 | wait | `2000` |  |  |
+| 6 | log |  |  | 📍 Step 4: Sort by price (descending) |
+| 7 | wait | `2000` |  |  |
+| 8 | log |  |  | 📍 Step 5: Sort by popularity |
+| 9 | wait | `2000` |  |  |
+| 10 | log |  |  | 📍 Step 6: Sort by newest |
+| 11 | wait | `2000` |  |  |
+
+**Code Reference:**
+
+```typescript
+// Line 204
+console.log('📍 Step 1: Loading chat widget');
+
+// Line 205
+await page.goto(`${BASE_URL}/widget-test`, { waitUntil: 'networkidle' });
+
+// Line 208
+console.log('📍 Step 2: Setting up sort mock');
+
+// Line 266
+console.log('📍 Step 3: Sort by price (ascending)');
+
+// Line 268
+await page.waitForTimeout(2000);
+
+// Line 272
+console.log('📍 Step 4: Sort by price (descending)');
+
+// Line 274
+await page.waitForTimeout(2000);
+
+// Line 278
+console.log('📍 Step 5: Sort by popularity');
+
+// Line 280
+await page.waitForTimeout(2000);
+
+// Line 284
+console.log('📍 Step 6: Sort by newest');
+
+// ... 1 more steps ...
+```
+
+---
+
+## 29. should handle "no results" with helpful suggestions
+
+**Source:** [`__tests__/playwright/search/advanced-search.spec.ts`](/__tests__/playwright/search/advanced-search.spec.ts)
+
+**Total Steps:** 6
+
+**Workflow Steps:**
+
+| Step | Action | Target | Value | Expected Outcome |
+|------|--------|--------|-------|------------------|
+| 1 | log |  |  | 📍 Step 1: Loading chat widget |
+| 2 | navigate | ``${BASE_URL}/widget-test`` |  |  |
+| 3 | log |  |  | 📍 Step 2: Setting up no results mock |
+| 4 | log |  |  | 📍 Step 3: Searching for impossible query |
+| 5 | wait | `2000` |  |  |
+| 6 | log |  |  | 📍 Step 4: Verifying no results message |
+
+**Code Reference:**
+
+```typescript
+// Line 296
+console.log('📍 Step 1: Loading chat widget');
+
+// Line 297
+await page.goto(`${BASE_URL}/widget-test`, { waitUntil: 'networkidle' });
+
+// Line 300
+console.log('📍 Step 2: Setting up no results mock');
+
+// Line 341
+console.log('📍 Step 3: Searching for impossible query');
+
+// Line 343
+await page.waitForTimeout(2000);
+
+// Line 345
+console.log('📍 Step 4: Verifying no results message');
+
+```
+
+---
+
+## 30. should paginate large result sets
+
+**Source:** [`__tests__/playwright/search/advanced-search.spec.ts`](/__tests__/playwright/search/advanced-search.spec.ts)
+
+**Total Steps:** 11
+
+**Workflow Steps:**
+
+| Step | Action | Target | Value | Expected Outcome |
+|------|--------|--------|-------|------------------|
+| 1 | log |  |  | 📍 Step 1: Loading chat widget |
+| 2 | navigate | ``${BASE_URL}/widget-test`` |  |  |
+| 3 | log |  |  | 📍 Step 2: Setting up pagination mock |
+| 4 | log |  |  | 📍 Step 3: Initial search (page 1) |
+| 5 | wait | `2000` |  |  |
+| 6 | log |  |  | 📍 Step 4: Navigate to next page |
+| 7 | wait | `2000` |  |  |
+| 8 | log |  |  | 📍 Step 5: Jump to specific page |
+| 9 | wait | `2000` |  |  |
+| 10 | log |  |  | 📍 Step 6: Navigate back |
+| 11 | wait | `2000` |  |  |
+
+**Code Reference:**
+
+```typescript
+// Line 366
+console.log('📍 Step 1: Loading chat widget');
+
+// Line 367
+await page.goto(`${BASE_URL}/widget-test`, { waitUntil: 'networkidle' });
+
+// Line 370
+console.log('📍 Step 2: Setting up pagination mock');
+
+// Line 423
+console.log('📍 Step 3: Initial search (page 1)');
+
+// Line 425
+await page.waitForTimeout(2000);
+
+// Line 429
+console.log('📍 Step 4: Navigate to next page');
+
+// Line 431
+await page.waitForTimeout(2000);
+
+// Line 435
+console.log('📍 Step 5: Jump to specific page');
+
+// Line 437
+await page.waitForTimeout(2000);
+
+// Line 441
+console.log('📍 Step 6: Navigate back');
+
+// ... 1 more steps ...
+```
+
+---
+
+## 31. should measure search performance
+
+**Source:** [`__tests__/playwright/search/advanced-search.spec.ts`](/__tests__/playwright/search/advanced-search.spec.ts)
+
+**Total Steps:** 6
+
+**Workflow Steps:**
+
+| Step | Action | Target | Value | Expected Outcome |
+|------|--------|--------|-------|------------------|
+| 1 | log |  |  | 📍 Step 1: Loading chat widget |
+| 2 | navigate | ``${BASE_URL}/widget-test`` |  |  |
+| 3 | log |  |  | 📍 Step 2: Setting up performance tracking |
+| 4 | log |  |  | 📍 Step 3: Running search performance tests |
+| 5 | wait | `1000` |  |  |
+| 6 | log |  |  | 📍 Step 4: Analyzing performance metrics |
+
+**Code Reference:**
+
+```typescript
+// Line 453
+console.log('📍 Step 1: Loading chat widget');
+
+// Line 454
+await page.goto(`${BASE_URL}/widget-test`, { waitUntil: 'networkidle' });
+
+// Line 457
+console.log('📍 Step 2: Setting up performance tracking');
+
+// Line 493
+console.log('📍 Step 3: Running search performance tests');
+
+// Line 506
+await page.waitForTimeout(1000);
+
+// Line 509
+console.log('📍 Step 4: Analyzing performance metrics');
+
+```
+
+---
+
+## 32. should complete scraping and make content searchable in chat
 
 **Source:** [`__tests__/playwright/scraping/scraping-flow.spec.ts`](/__tests__/playwright/scraping/scraping-flow.spec.ts)
 
@@ -1353,7 +1567,7 @@ await page.screenshot({
 
 ---
 
-## 28. should handle scraping errors gracefully
+## 33. should handle scraping errors gracefully
 
 **Source:** [`__tests__/playwright/scraping/scraping-flow.spec.ts`](/__tests__/playwright/scraping/scraping-flow.spec.ts)
 
@@ -1391,7 +1605,7 @@ await page.waitForTimeout(2000);
 
 ---
 
-## 29. should show progress during long scraping jobs
+## 34. should show progress during long scraping jobs
 
 **Source:** [`__tests__/playwright/scraping/scraping-flow.spec.ts`](/__tests__/playwright/scraping/scraping-flow.spec.ts)
 
@@ -1409,7 +1623,7 @@ await page.waitForTimeout(2000);
 
 ---
 
-## 30. complete recommendation workflow: chat → recommendations → click → purchase tracking
+## 35. complete recommendation workflow: chat → recommendations → click → purchase tracking
 
 **Source:** [`__tests__/playwright/recommendations/product-recommendations-e2e.spec.ts`](/__tests__/playwright/recommendations/product-recommendations-e2e.spec.ts)
 
@@ -1489,7 +1703,7 @@ console.log('✅ Step 7: Recommendations appeared');
 
 ---
 
-## 31. recommendation algorithms display correctly
+## 36. recommendation algorithms display correctly
 
 **Source:** [`__tests__/playwright/recommendations/product-recommendations-e2e.spec.ts`](/__tests__/playwright/recommendations/product-recommendations-e2e.spec.ts)
 
@@ -1519,7 +1733,7 @@ await iframe.locator('text=Recommended for you').waitFor({ timeout: 15000 });
 
 ---
 
-## 32. empty state when no recommendations available
+## 37. empty state when no recommendations available
 
 **Source:** [`__tests__/playwright/recommendations/product-recommendations-e2e.spec.ts`](/__tests__/playwright/recommendations/product-recommendations-e2e.spec.ts)
 
@@ -1549,7 +1763,7 @@ await page.waitForTimeout(5000);
 
 ---
 
-## 33. click tracking without navigation
+## 38. click tracking without navigation
 
 **Source:** [`__tests__/playwright/recommendations/product-recommendations-e2e.spec.ts`](/__tests__/playwright/recommendations/product-recommendations-e2e.spec.ts)
 
@@ -1567,7 +1781,7 @@ await page.waitForTimeout(5000);
 
 ---
 
-## 34. purchase tracking without navigation
+## 39. purchase tracking without navigation
 
 **Source:** [`__tests__/playwright/recommendations/product-recommendations-e2e.spec.ts`](/__tests__/playwright/recommendations/product-recommendations-e2e.spec.ts)
 
@@ -1585,7 +1799,7 @@ await page.waitForTimeout(5000);
 
 ---
 
-## 35. recommendation API returns valid data
+## 40. recommendation API returns valid data
 
 **Source:** [`__tests__/playwright/recommendations/product-recommendations-e2e.spec.ts`](/__tests__/playwright/recommendations/product-recommendations-e2e.spec.ts)
 
@@ -1603,7 +1817,7 @@ await page.waitForTimeout(5000);
 
 ---
 
-## 36. invalid API requests return proper errors
+## 41. invalid API requests return proper errors
 
 **Source:** [`__tests__/playwright/recommendations/product-recommendations-e2e.spec.ts`](/__tests__/playwright/recommendations/product-recommendations-e2e.spec.ts)
 
@@ -1621,7 +1835,258 @@ await page.waitForTimeout(5000);
 
 ---
 
-## 37. should complete WooCommerce setup and enable product search
+## 42. should load widget in under 2 seconds
+
+**Source:** [`__tests__/playwright/performance/load-testing.spec.ts`](/__tests__/playwright/performance/load-testing.spec.ts)
+
+**Total Steps:** 7
+
+**Workflow Steps:**
+
+| Step | Action | Target | Value | Expected Outcome |
+|------|--------|--------|-------|------------------|
+| 1 | log |  |  | 📍 Step 1: Starting widget load timer |
+| 2 | navigate | ``${BASE_URL}/widget-test`` |  |  |
+| 3 | wait | `{ state: 'attached', timeout: 10000 }` |  |  |
+| 4 | wait | `{ state: 'visible', timeout: 10000 }` |  |  |
+| 5 | log |  |  | 📍 Step 2: Validating load time against SLA |
+| 6 | log |  |  | 📍 Step 3: Measuring resource loading metrics |
+| 7 | screenshot |  |  |  |
+
+**Code Reference:**
+
+```typescript
+// Line 41
+console.log('📍 Step 1: Starting widget load timer');
+
+// Line 45
+await page.goto(`${BASE_URL}/widget-test`, { waitUntil: 'domcontentloaded' });
+
+// Line 49
+await widgetIframe.waitFor({ state: 'attached', timeout: 10000 });
+
+// Line 54
+await inputField.waitFor({ state: 'visible', timeout: 10000 });
+
+// Line 63
+console.log('📍 Step 2: Validating load time against SLA');
+
+// Line 71
+console.log('📍 Step 3: Measuring resource loading metrics');
+
+// Line 89
+await page.screenshot({
+      path: `test-results/widget-load-performance-${Date.now()}.png`,
+      fullPage: true
+    });
+
+```
+
+---
+
+## 43. should respond to chat messages within 3 seconds (p95)
+
+**Source:** [`__tests__/playwright/performance/load-testing.spec.ts`](/__tests__/playwright/performance/load-testing.spec.ts)
+
+**Total Steps:** 7
+
+**Workflow Steps:**
+
+| Step | Action | Target | Value | Expected Outcome |
+|------|--------|--------|-------|------------------|
+| 1 | log |  |  | 📍 Step 1: Loading chat widget |
+| 2 | navigate | ``${BASE_URL}/widget-test`` |  |  |
+| 3 | log |  |  | 📍 Step 2: Setting up response time tracking |
+| 4 | log |  |  | 📍 Step 3: Sending 20 test messages |
+| 5 | wait | `500` |  |  |
+| 6 | log |  |  | 📍 Step 4: Calculating performance statistics |
+| 7 | log |  |  | 📍 Step 5: Validating against SLA |
+
+**Code Reference:**
+
+```typescript
+// Line 98
+console.log('📍 Step 1: Loading chat widget');
+
+// Line 99
+await page.goto(`${BASE_URL}/widget-test`, { waitUntil: 'networkidle' });
+
+// Line 102
+console.log('📍 Step 2: Setting up response time tracking');
+
+// Line 133
+console.log('📍 Step 3: Sending 20 test messages');
+
+// Line 161
+await page.waitForTimeout(500);
+
+// Line 169
+console.log('📍 Step 4: Calculating performance statistics');
+
+// Line 195
+console.log('📍 Step 5: Validating against SLA');
+
+```
+
+---
+
+## 44. should handle large conversations without degradation (50+ messages)
+
+**Source:** [`__tests__/playwright/performance/load-testing.spec.ts`](/__tests__/playwright/performance/load-testing.spec.ts)
+
+**Total Steps:** 7
+
+**Workflow Steps:**
+
+| Step | Action | Target | Value | Expected Outcome |
+|------|--------|--------|-------|------------------|
+| 1 | log |  |  | 📍 Step 1: Loading chat widget |
+| 2 | navigate | ``${BASE_URL}/widget-test`` |  |  |
+| 3 | log |  |  | 📍 Step 2: Setting up large conversation simulation |
+| 4 | log |  |  | 📍 Step 3: Sending 50 messages to simulate long conversation |
+| 5 | wait | `200` |  |  |
+| 6 | log |  |  | 📍 Step 4: Analyzing performance degradation |
+| 7 | log |  |  | 📍 Step 5: Validating acceptable degradation |
+
+**Code Reference:**
+
+```typescript
+// Line 209
+console.log('📍 Step 1: Loading chat widget');
+
+// Line 210
+await page.goto(`${BASE_URL}/widget-test`, { waitUntil: 'networkidle' });
+
+// Line 213
+console.log('📍 Step 2: Setting up large conversation simulation');
+
+// Line 254
+console.log('📍 Step 3: Sending 50 messages to simulate long conversation');
+
+// Line 262
+await page.waitForTimeout(200);
+
+// Line 271
+console.log('📍 Step 4: Analyzing performance degradation');
+
+// Line 290
+console.log('📍 Step 5: Validating acceptable degradation');
+
+```
+
+---
+
+## 45. should handle concurrent message burst without errors
+
+**Source:** [`__tests__/playwright/performance/load-testing.spec.ts`](/__tests__/playwright/performance/load-testing.spec.ts)
+
+**Total Steps:** 6
+
+**Workflow Steps:**
+
+| Step | Action | Target | Value | Expected Outcome |
+|------|--------|--------|-------|------------------|
+| 1 | log |  |  | 📍 Step 1: Loading chat widget |
+| 2 | navigate | ``${BASE_URL}/widget-test`` |  |  |
+| 3 | log |  |  | 📍 Step 2: Setting up burst handling mock |
+| 4 | log |  |  | 📍 Step 3: Sending burst of 10 rapid messages (no delay) |
+| 5 | wait | `2000` |  |  |
+| 6 | log |  |  | 📍 Step 4: Analyzing concurrent request handling |
+
+**Code Reference:**
+
+```typescript
+// Line 304
+console.log('📍 Step 1: Loading chat widget');
+
+// Line 305
+await page.goto(`${BASE_URL}/widget-test`, { waitUntil: 'networkidle' });
+
+// Line 308
+console.log('📍 Step 2: Setting up burst handling mock');
+
+// Line 349
+console.log('📍 Step 3: Sending burst of 10 rapid messages (no delay)');
+
+// Line 363
+await page.waitForTimeout(2000);
+
+// Line 370
+console.log('📍 Step 4: Analyzing concurrent request handling');
+
+```
+
+---
+
+## 46. should not leak memory over extended usage
+
+**Source:** [`__tests__/playwright/performance/load-testing.spec.ts`](/__tests__/playwright/performance/load-testing.spec.ts)
+
+**Total Steps:** 8
+
+**Workflow Steps:**
+
+| Step | Action | Target | Value | Expected Outcome |
+|------|--------|--------|-------|------------------|
+| 1 | log |  |  | 📍 Step 1: Loading chat widget |
+| 2 | navigate | ``${BASE_URL}/widget-test`` |  |  |
+| 3 | log |  |  | 📍 Step 2: Taking initial memory snapshot |
+| 4 | log |  |  | 📍 Step 3: Simulating extended usage (100 messages) |
+| 5 | log |  |  | 📍 Step 4: Taking final memory snapshot |
+| 6 | wait | `2000` |  |  |
+| 7 | log |  |  | 📍 Step 5: Analyzing memory growth |
+| 8 | log |  |  | 📍 Step 6: Validating acceptable memory growth |
+
+**Code Reference:**
+
+```typescript
+// Line 389
+console.log('📍 Step 1: Loading chat widget');
+
+// Line 390
+await page.goto(`${BASE_URL}/widget-test`, { waitUntil: 'networkidle' });
+
+// Line 393
+console.log('📍 Step 2: Taking initial memory snapshot');
+
+// Line 418
+console.log('📍 Step 3: Simulating extended usage (100 messages)');
+
+// Line 444
+console.log('📍 Step 4: Taking final memory snapshot');
+
+// Line 446
+await page.waitForTimeout(2000);
+
+// Line 467
+console.log('📍 Step 5: Analyzing memory growth');
+
+// Line 479
+console.log('📍 Step 6: Validating acceptable memory growth');
+
+```
+
+---
+
+## 47. should measure API endpoint response times
+
+**Source:** [`__tests__/playwright/performance/load-testing.spec.ts`](/__tests__/playwright/performance/load-testing.spec.ts)
+
+**Total Steps:** 0
+
+**Workflow Steps:**
+
+| Step | Action | Target | Value | Expected Outcome |
+|------|--------|--------|-------|------------------|
+
+**Code Reference:**
+
+```typescript
+```
+
+---
+
+## 48. should complete WooCommerce setup and enable product search
 
 **Source:** [`__tests__/playwright/integrations/woocommerce-integration-e2e.spec.ts`](/__tests__/playwright/integrations/woocommerce-integration-e2e.spec.ts)
 
@@ -1663,7 +2128,7 @@ await page.reload({ waitUntil: 'networkidle' });
 
 ---
 
-## 38. should handle WooCommerce connection errors gracefully
+## 49. should handle WooCommerce connection errors gracefully
 
 **Source:** [`__tests__/playwright/integrations/woocommerce-integration-e2e.spec.ts`](/__tests__/playwright/integrations/woocommerce-integration-e2e.spec.ts)
 
@@ -1693,7 +2158,7 @@ await page.waitForTimeout(2000);
 
 ---
 
-## 39. should maintain cart session across messages
+## 50. should maintain cart session across messages
 
 **Source:** [`__tests__/playwright/integrations/woocommerce-cart-operations-e2e.spec.ts`](/__tests__/playwright/integrations/woocommerce-cart-operations-e2e.spec.ts)
 
@@ -1715,7 +2180,7 @@ await page.goto(`${BASE_URL}/widget-test`, { waitUntil: 'networkidle' });
 
 ---
 
-## 40. should handle Store API failures gracefully
+## 51. should handle Store API failures gracefully
 
 **Source:** [`__tests__/playwright/integrations/woocommerce-cart-operations-e2e.spec.ts`](/__tests__/playwright/integrations/woocommerce-cart-operations-e2e.spec.ts)
 
@@ -1733,7 +2198,7 @@ await page.goto(`${BASE_URL}/widget-test`, { waitUntil: 'networkidle' });
 
 ---
 
-## 41. should enforce rate limits and allow retry after cooldown
+## 52. should enforce rate limits and allow retry after cooldown
 
 **Source:** [`__tests__/playwright/error-scenarios/rate-limiting.spec.ts`](/__tests__/playwright/error-scenarios/rate-limiting.spec.ts)
 
@@ -1804,7 +2269,7 @@ console.log('📍 Step 6: Verifying rate limit was triggered');
 
 ---
 
-## 42. should handle payment failure and allow retry with cart preserved
+## 53. should handle payment failure and allow retry with cart preserved
 
 **Source:** [`__tests__/playwright/error-scenarios/payment-failure.spec.ts`](/__tests__/playwright/error-scenarios/payment-failure.spec.ts)
 
@@ -1886,7 +2351,7 @@ console.log('📍 Step 5: Navigating to cart');
 
 ---
 
-## 43. should handle network timeout and allow successful retry
+## 54. should handle network timeout and allow successful retry
 
 **Source:** [`__tests__/playwright/error-scenarios/network-timeout.spec.ts`](/__tests__/playwright/error-scenarios/network-timeout.spec.ts)
 
@@ -1958,7 +2423,7 @@ console.log('📍 Step 6: Accessing chat widget iframe');
 
 ---
 
-## 44. should handle invalid WooCommerce credentials and allow correction
+## 55. should handle invalid WooCommerce credentials and allow correction
 
 **Source:** [`__tests__/playwright/error-scenarios/invalid-credentials.spec.ts`](/__tests__/playwright/error-scenarios/invalid-credentials.spec.ts)
 
@@ -2041,7 +2506,7 @@ console.log('📍 Step 5: Setting up credential validation mock');
 
 ---
 
-## 45. should detect concurrent edits and provide conflict resolution
+## 56. should detect concurrent edits and provide conflict resolution
 
 **Source:** [`__tests__/playwright/error-scenarios/database-conflict.spec.ts`](/__tests__/playwright/error-scenarios/database-conflict.spec.ts)
 
@@ -2118,7 +2583,7 @@ console.log('📍 Step 5: Editing domain settings (User A)');
 
 ---
 
-## 46. should prevent concurrent scraping and allow retry after completion
+## 57. should prevent concurrent scraping and allow retry after completion
 
 **Source:** [`__tests__/playwright/error-scenarios/concurrent-operations.spec.ts`](/__tests__/playwright/error-scenarios/concurrent-operations.spec.ts)
 
@@ -2193,7 +2658,7 @@ await page.waitForTimeout(1000);
 
 ---
 
-## 47. should install and customize widget successfully
+## 58. should install and customize widget successfully
 
 **Source:** [`__tests__/playwright/dashboard/widget-installation.spec.ts`](/__tests__/playwright/dashboard/widget-installation.spec.ts)
 
@@ -2260,7 +2725,7 @@ await saveButton.click();
 
 ---
 
-## 48. should generate correct embed code for different environments
+## 59. should generate correct embed code for different environments
 
 **Source:** [`__tests__/playwright/dashboard/widget-installation.spec.ts`](/__tests__/playwright/dashboard/widget-installation.spec.ts)
 
@@ -2282,7 +2747,7 @@ await page.goto(`${BASE_URL}/dashboard/installation`, { waitUntil: 'networkidle'
 
 ---
 
-## 49. should handle widget customization with invalid values
+## 60. should handle widget customization with invalid values
 
 **Source:** [`__tests__/playwright/dashboard/widget-installation.spec.ts`](/__tests__/playwright/dashboard/widget-installation.spec.ts)
 
@@ -2300,7 +2765,7 @@ await page.goto(`${BASE_URL}/dashboard/installation`, { waitUntil: 'networkidle'
 
 ---
 
-## 50. should add and configure domain successfully
+## 61. should add and configure domain successfully
 
 **Source:** [`__tests__/playwright/dashboard/domain-configuration.spec.ts`](/__tests__/playwright/dashboard/domain-configuration.spec.ts)
 
@@ -2385,7 +2850,7 @@ console.log('📍 Step 3: Setting up domain API mock');
 
 ---
 
-## 51. should handle domain editing
+## 62. should handle domain editing
 
 **Source:** [`__tests__/playwright/dashboard/domain-configuration.spec.ts`](/__tests__/playwright/dashboard/domain-configuration.spec.ts)
 
@@ -2403,7 +2868,7 @@ console.log('📍 Step 3: Setting up domain API mock');
 
 ---
 
-## 52. should handle domain deletion/disabling
+## 63. should handle domain deletion/disabling
 
 **Source:** [`__tests__/playwright/dashboard/domain-configuration.spec.ts`](/__tests__/playwright/dashboard/domain-configuration.spec.ts)
 
@@ -2421,7 +2886,7 @@ console.log('📍 Step 3: Setting up domain API mock');
 
 ---
 
-## 53. should enforce domain access control
+## 64. should enforce domain access control
 
 **Source:** [`__tests__/playwright/dashboard/domain-configuration.spec.ts`](/__tests__/playwright/dashboard/domain-configuration.spec.ts)
 
@@ -2439,7 +2904,162 @@ console.log('📍 Step 3: Setting up domain API mock');
 
 ---
 
-## 54. complete search workflow: search → results → view conversation with highlight
+## 65. should filter conversations by sentiment
+
+**Source:** [`__tests__/playwright/dashboard/conversations-advanced-filters.spec.ts`](/__tests__/playwright/dashboard/conversations-advanced-filters.spec.ts)
+
+**Total Steps:** 0
+
+**Workflow Steps:**
+
+| Step | Action | Target | Value | Expected Outcome |
+|------|--------|--------|-------|------------------|
+
+**Code Reference:**
+
+```typescript
+```
+
+---
+
+## 66. should filter conversations by domain
+
+**Source:** [`__tests__/playwright/dashboard/conversations-advanced-filters.spec.ts`](/__tests__/playwright/dashboard/conversations-advanced-filters.spec.ts)
+
+**Total Steps:** 0
+
+**Workflow Steps:**
+
+| Step | Action | Target | Value | Expected Outcome |
+|------|--------|--------|-------|------------------|
+
+**Code Reference:**
+
+```typescript
+```
+
+---
+
+## 67. should filter conversations by customer email
+
+**Source:** [`__tests__/playwright/dashboard/conversations-advanced-filters.spec.ts`](/__tests__/playwright/dashboard/conversations-advanced-filters.spec.ts)
+
+**Total Steps:** 0
+
+**Workflow Steps:**
+
+| Step | Action | Target | Value | Expected Outcome |
+|------|--------|--------|-------|------------------|
+
+**Code Reference:**
+
+```typescript
+```
+
+---
+
+## 68. should combine multiple filters
+
+**Source:** [`__tests__/playwright/dashboard/conversations-advanced-filters.spec.ts`](/__tests__/playwright/dashboard/conversations-advanced-filters.spec.ts)
+
+**Total Steps:** 0
+
+**Workflow Steps:**
+
+| Step | Action | Target | Value | Expected Outcome |
+|------|--------|--------|-------|------------------|
+
+**Code Reference:**
+
+```typescript
+```
+
+---
+
+## 69. should clear all filters and reset results
+
+**Source:** [`__tests__/playwright/dashboard/conversations-advanced-filters.spec.ts`](/__tests__/playwright/dashboard/conversations-advanced-filters.spec.ts)
+
+**Total Steps:** 0
+
+**Workflow Steps:**
+
+| Step | Action | Target | Value | Expected Outcome |
+|------|--------|--------|-------|------------------|
+
+**Code Reference:**
+
+```typescript
+```
+
+---
+
+## 70. should complete full filtering user journey
+
+**Source:** [`__tests__/playwright/dashboard/conversations-advanced-filters.spec.ts`](/__tests__/playwright/dashboard/conversations-advanced-filters.spec.ts)
+
+**Total Steps:** 5
+
+**Workflow Steps:**
+
+| Step | Action | Target | Value | Expected Outcome |
+|------|--------|--------|-------|------------------|
+| 1 | log |  |  | 
+📍 Step 1: Viewing all conversations |
+| 2 | log |  |  | 
+📍 Step 2: Filter by negative sentiment |
+| 3 | log |  |  | 
+📍 Step 3: Add domain filter |
+| 4 | log |  |  | 
+📍 Step 4: Clear all filters |
+| 5 | log |  |  | 
+📍 Step 5: Filter by email |
+
+**Code Reference:**
+
+```typescript
+// Line 199
+console.log('\n📍 Step 1: Viewing all conversations');
+
+// Line 204
+console.log('\n📍 Step 2: Filter by negative sentiment');
+
+// Line 219
+console.log('\n📍 Step 3: Add domain filter');
+
+// Line 231
+console.log('\n📍 Step 4: Clear all filters');
+
+// Line 238
+console.log('\n📍 Step 5: Filter by email');
+
+```
+
+---
+
+## 71. should handle filter panel interactions smoothly
+
+**Source:** [`__tests__/playwright/dashboard/conversations-advanced-filters.spec.ts`](/__tests__/playwright/dashboard/conversations-advanced-filters.spec.ts)
+
+**Total Steps:** 1
+
+**Workflow Steps:**
+
+| Step | Action | Target | Value | Expected Outcome |
+|------|--------|--------|-------|------------------|
+| 1 | wait | `500` |  |  |
+
+**Code Reference:**
+
+```typescript
+// Line 266
+await page.waitForTimeout(500);
+
+```
+
+---
+
+## 72. complete search workflow: search → results → view conversation with highlight
 
 **Source:** [`__tests__/playwright/dashboard/chat-history-search.spec.ts`](/__tests__/playwright/dashboard/chat-history-search.spec.ts)
 
@@ -2488,7 +3108,7 @@ await page.screenshot({
 
 ---
 
-## 55. search with advanced filters: date range and status filtering
+## 73. search with advanced filters: date range and status filtering
 
 **Source:** [`__tests__/playwright/dashboard/chat-history-search.spec.ts`](/__tests__/playwright/dashboard/chat-history-search.spec.ts)
 
@@ -2534,7 +3154,7 @@ console.log('📍 Step 5: Submitting filters');
 
 ---
 
-## 56. handles empty search results gracefully
+## 74. handles empty search results gracefully
 
 **Source:** [`__tests__/playwright/dashboard/chat-history-search.spec.ts`](/__tests__/playwright/dashboard/chat-history-search.spec.ts)
 
@@ -2576,7 +3196,7 @@ await page.waitForTimeout(2000);
 
 ---
 
-## 57. search with special characters and edge cases
+## 75. search with special characters and edge cases
 
 **Source:** [`__tests__/playwright/dashboard/chat-history-search.spec.ts`](/__tests__/playwright/dashboard/chat-history-search.spec.ts)
 
@@ -2594,7 +3214,7 @@ await page.waitForTimeout(2000);
 
 ---
 
-## 58. keyboard navigation and shortcuts in search
+## 76. keyboard navigation and shortcuts in search
 
 **Source:** [`__tests__/playwright/dashboard/chat-history-search.spec.ts`](/__tests__/playwright/dashboard/chat-history-search.spec.ts)
 
@@ -2620,7 +3240,7 @@ await page.waitForTimeout(1500);
 
 ---
 
-## 59. search result persistence and back navigation
+## 77. search result persistence and back navigation
 
 **Source:** [`__tests__/playwright/dashboard/chat-history-search.spec.ts`](/__tests__/playwright/dashboard/chat-history-search.spec.ts)
 
@@ -2658,7 +3278,163 @@ await page.waitForTimeout(2000);
 
 ---
 
-## 60. CSV export endpoint: verify availability and response
+## 78. should support custom date range selection with presets
+
+**Source:** [`__tests__/playwright/dashboard/analytics-new-features.spec.ts`](/__tests__/playwright/dashboard/analytics-new-features.spec.ts)
+
+**Total Steps:** 2
+
+**Workflow Steps:**
+
+| Step | Action | Target | Value | Expected Outcome |
+|------|--------|--------|-------|------------------|
+| 1 | wait | `500` |  |  |
+| 2 | wait | `300` |  |  |
+
+**Code Reference:**
+
+```typescript
+// Line 65
+await page.waitForTimeout(500);
+
+// Line 72
+await page.waitForTimeout(300);
+
+```
+
+---
+
+## 79. should enable comparison mode and display change indicators
+
+**Source:** [`__tests__/playwright/dashboard/analytics-new-features.spec.ts`](/__tests__/playwright/dashboard/analytics-new-features.spec.ts)
+
+**Total Steps:** 0
+
+**Workflow Steps:**
+
+| Step | Action | Target | Value | Expected Outcome |
+|------|--------|--------|-------|------------------|
+
+**Code Reference:**
+
+```typescript
+```
+
+---
+
+## 80. should display anomaly alerts with severity badges
+
+**Source:** [`__tests__/playwright/dashboard/analytics-new-features.spec.ts`](/__tests__/playwright/dashboard/analytics-new-features.spec.ts)
+
+**Total Steps:** 3
+
+**Workflow Steps:**
+
+| Step | Action | Target | Value | Expected Outcome |
+|------|--------|--------|-------|------------------|
+| 1 | reload |  |  |  |
+| 2 | click |  |  |  |
+| 3 | wait | `500` |  |  |
+
+**Code Reference:**
+
+```typescript
+// Line 120
+await page.reload({ waitUntil: 'networkidle' });
+
+// Line 150
+await dismissButton.click();
+
+// Line 151
+await page.waitForTimeout(500);
+
+```
+
+---
+
+## 81. should create, display, and manage metric goals
+
+**Source:** [`__tests__/playwright/dashboard/analytics-new-features.spec.ts`](/__tests__/playwright/dashboard/analytics-new-features.spec.ts)
+
+**Total Steps:** 1
+
+**Workflow Steps:**
+
+| Step | Action | Target | Value | Expected Outcome |
+|------|--------|--------|-------|------------------|
+| 1 | wait | `1000` |  |  |
+
+**Code Reference:**
+
+```typescript
+// Line 170
+await page.waitForTimeout(1000);
+
+```
+
+---
+
+## 82. should create, display, and interact with chart annotations
+
+**Source:** [`__tests__/playwright/dashboard/analytics-new-features.spec.ts`](/__tests__/playwright/dashboard/analytics-new-features.spec.ts)
+
+**Total Steps:** 3
+
+**Workflow Steps:**
+
+| Step | Action | Target | Value | Expected Outcome |
+|------|--------|--------|-------|------------------|
+| 1 | wait | `2000` |  |  |
+| 2 | click |  |  |  |
+| 3 | wait | `500` |  |  |
+
+**Code Reference:**
+
+```typescript
+// Line 203
+await page.waitForTimeout(2000);
+
+// Line 213
+await annotationMarkers.click();
+
+// Line 214
+await page.waitForTimeout(500);
+
+```
+
+---
+
+## 83. should use all features together in realistic workflow
+
+**Source:** [`__tests__/playwright/dashboard/analytics-new-features.spec.ts`](/__tests__/playwright/dashboard/analytics-new-features.spec.ts)
+
+**Total Steps:** 3
+
+**Workflow Steps:**
+
+| Step | Action | Target | Value | Expected Outcome |
+|------|--------|--------|-------|------------------|
+| 1 | wait | `500` |  |  |
+| 2 | wait | `500` |  |  |
+| 3 | wait | `1500` |  |  |
+
+**Code Reference:**
+
+```typescript
+// Line 248
+await page.waitForTimeout(500);
+
+// Line 269
+await page.waitForTimeout(500);
+
+// Line 278
+await page.waitForTimeout(1500);
+
+```
+
+---
+
+## 84. CSV export endpoint: verify availability and response
 
 **Source:** [`__tests__/playwright/dashboard/analytics-exports-simple.spec.ts`](/__tests__/playwright/dashboard/analytics-exports-simple.spec.ts)
 
@@ -2680,7 +3456,7 @@ console.log('📍 Step 1: Test CSV export with 7 days');
 
 ---
 
-## 61. JSON analytics endpoint: verify data structure
+## 85. JSON analytics endpoint: verify data structure
 
 **Source:** [`__tests__/playwright/dashboard/analytics-exports-simple.spec.ts`](/__tests__/playwright/dashboard/analytics-exports-simple.spec.ts)
 
@@ -2702,7 +3478,7 @@ console.log('📍 Step 1: Test analytics API');
 
 ---
 
-## 62. Export formats: test all supported formats
+## 86. Export formats: test all supported formats
 
 **Source:** [`__tests__/playwright/dashboard/analytics-exports-simple.spec.ts`](/__tests__/playwright/dashboard/analytics-exports-simple.spec.ts)
 
@@ -2720,7 +3496,7 @@ console.log('📍 Step 1: Test analytics API');
 
 ---
 
-## 63. Date range parameters: test different time periods
+## 87. Date range parameters: test different time periods
 
 **Source:** [`__tests__/playwright/dashboard/analytics-exports-simple.spec.ts`](/__tests__/playwright/dashboard/analytics-exports-simple.spec.ts)
 
@@ -2738,7 +3514,7 @@ console.log('📍 Step 1: Test analytics API');
 
 ---
 
-## 64. Error handling: test invalid parameters
+## 88. Error handling: test invalid parameters
 
 **Source:** [`__tests__/playwright/dashboard/analytics-exports-simple.spec.ts`](/__tests__/playwright/dashboard/analytics-exports-simple.spec.ts)
 
@@ -2764,7 +3540,7 @@ console.log('📍 Step 2: Test missing format');
 
 ---
 
-## 65. Export workflow documentation for AI agents
+## 89. Export workflow documentation for AI agents
 
 **Source:** [`__tests__/playwright/dashboard/analytics-exports-simple.spec.ts`](/__tests__/playwright/dashboard/analytics-exports-simple.spec.ts)
 
@@ -2782,220 +3558,254 @@ console.log('📍 Step 2: Test missing format');
 
 ---
 
-## 66. should complete demo flow from URL entry to AI chat response
+## 90. should display complete page header with all controls
 
-**Source:** [`__tests__/playwright/core-journeys/landing-page-demo-flow.spec.ts`](/__tests__/playwright/core-journeys/landing-page-demo-flow.spec.ts)
+**Source:** [`__tests__/playwright/dashboard/analytics-dashboard-complete.spec.ts`](/__tests__/playwright/dashboard/analytics-dashboard-complete.spec.ts)
 
-**Total Steps:** 13
+**Total Steps:** 0
 
 **Workflow Steps:**
 
 | Step | Action | Target | Value | Expected Outcome |
 |------|--------|--------|-------|------------------|
-| 1 | navigate | `BASE_URL` |  |  |
-| 2 | wait | `{ state: 'visible', timeout: 10000 }` |  |  |
-| 3 | fill | `TEST_DEMO_SITE` |  |  |
-| 4 | click |  |  |  |
-| 5 | wait | `3000` |  |  |
-| 6 | wait | `{ state: 'visible', timeout: 10000 }` |  |  |
-| 7 | fill | `What can you tell me about this website?` |  |  |
-| 8 | click |  |  |  |
-| 9 | wait | `3000` |  |  |
-| 10 | fill | `Tell me more about that` |  |  |
-| 11 | click |  |  |  |
-| 12 | wait | `3000` |  |  |
-| 13 | screenshot |  |  |  |
 
 **Code Reference:**
 
 ```typescript
-// Line 22
-await page.goto(BASE_URL, { waitUntil: 'networkidle' });
-
-// Line 29
-await demoUrlInput.waitFor({ state: 'visible', timeout: 10000 });
-
-// Line 30
-await demoUrlInput.fill(TEST_DEMO_SITE);
-
-// Line 57
-await startDemoButton.click();
-
-// Line 58
-await page.waitForTimeout(3000);
-
-// Line 67
-await chatInterface.waitFor({ state: 'visible', timeout: 10000 });
-
-// Line 73
-await chatInterface.fill('What can you tell me about this website?');
-
-// Line 79
-await sendButton.click();
-
-// Line 80
-await page.waitForTimeout(3000);
-
-// Line 99
-await chatInterface.fill('Tell me more about that');
-
-// ... 3 more steps ...
 ```
 
 ---
 
-## 67. should handle invalid URLs gracefully
+## 91. should switch time ranges and reload data
 
-**Source:** [`__tests__/playwright/core-journeys/landing-page-demo-flow.spec.ts`](/__tests__/playwright/core-journeys/landing-page-demo-flow.spec.ts)
+**Source:** [`__tests__/playwright/dashboard/analytics-dashboard-complete.spec.ts`](/__tests__/playwright/dashboard/analytics-dashboard-complete.spec.ts)
 
-**Total Steps:** 5
+**Total Steps:** 0
 
 **Workflow Steps:**
 
 | Step | Action | Target | Value | Expected Outcome |
 |------|--------|--------|-------|------------------|
-| 1 | navigate | `BASE_URL` |  |  |
-| 2 | wait | `{ state: 'visible', timeout: 5000 }` |  |  |
-| 3 | fill | `invalidUrl` |  |  |
-| 4 | click |  |  |  |
-| 5 | wait | `500` |  |  |
 
 **Code Reference:**
 
 ```typescript
-// Line 114
-await page.goto(BASE_URL, { waitUntil: 'networkidle' });
+```
 
-// Line 117
-await demoUrlInput.waitFor({ state: 'visible', timeout: 5000 });
+---
 
-// Line 122
-await demoUrlInput.fill(invalidUrl);
+## 92. should toggle auto-refresh on and off
 
-// Line 124
-await startButton.click();
+**Source:** [`__tests__/playwright/dashboard/analytics-dashboard-complete.spec.ts`](/__tests__/playwright/dashboard/analytics-dashboard-complete.spec.ts)
 
-// Line 125
+**Total Steps:** 0
+
+**Workflow Steps:**
+
+| Step | Action | Target | Value | Expected Outcome |
+|------|--------|--------|-------|------------------|
+
+**Code Reference:**
+
+```typescript
+```
+
+---
+
+## 93. should manually refresh analytics data
+
+**Source:** [`__tests__/playwright/dashboard/analytics-dashboard-complete.spec.ts`](/__tests__/playwright/dashboard/analytics-dashboard-complete.spec.ts)
+
+**Total Steps:** 0
+
+**Workflow Steps:**
+
+| Step | Action | Target | Value | Expected Outcome |
+|------|--------|--------|-------|------------------|
+
+**Code Reference:**
+
+```typescript
+```
+
+---
+
+## 94. should display all Overview Tab components
+
+**Source:** [`__tests__/playwright/dashboard/analytics-dashboard-complete.spec.ts`](/__tests__/playwright/dashboard/analytics-dashboard-complete.spec.ts)
+
+**Total Steps:** 0
+
+**Workflow Steps:**
+
+| Step | Action | Target | Value | Expected Outcome |
+|------|--------|--------|-------|------------------|
+
+**Code Reference:**
+
+```typescript
+```
+
+---
+
+## 95. should display Business Intelligence Tab components
+
+**Source:** [`__tests__/playwright/dashboard/analytics-dashboard-complete.spec.ts`](/__tests__/playwright/dashboard/analytics-dashboard-complete.spec.ts)
+
+**Total Steps:** 0
+
+**Workflow Steps:**
+
+| Step | Action | Target | Value | Expected Outcome |
+|------|--------|--------|-------|------------------|
+
+**Code Reference:**
+
+```typescript
+```
+
+---
+
+## 96. should open export dropdown and show all options
+
+**Source:** [`__tests__/playwright/dashboard/analytics-dashboard-complete.spec.ts`](/__tests__/playwright/dashboard/analytics-dashboard-complete.spec.ts)
+
+**Total Steps:** 0
+
+**Workflow Steps:**
+
+| Step | Action | Target | Value | Expected Outcome |
+|------|--------|--------|-------|------------------|
+
+**Code Reference:**
+
+```typescript
+```
+
+---
+
+## 97. should handle empty data gracefully on Overview tab
+
+**Source:** [`__tests__/playwright/dashboard/analytics-dashboard-complete.spec.ts`](/__tests__/playwright/dashboard/analytics-dashboard-complete.spec.ts)
+
+**Total Steps:** 1
+
+**Workflow Steps:**
+
+| Step | Action | Target | Value | Expected Outcome |
+|------|--------|--------|-------|------------------|
+| 1 | reload |  |  |  |
+
+**Code Reference:**
+
+```typescript
+// Line 198
+await page.reload({ waitUntil: 'networkidle' });
+
+```
+
+---
+
+## 98. should handle API errors with error alert
+
+**Source:** [`__tests__/playwright/dashboard/analytics-dashboard-complete.spec.ts`](/__tests__/playwright/dashboard/analytics-dashboard-complete.spec.ts)
+
+**Total Steps:** 1
+
+**Workflow Steps:**
+
+| Step | Action | Target | Value | Expected Outcome |
+|------|--------|--------|-------|------------------|
+| 1 | reload |  |  |  |
+
+**Code Reference:**
+
+```typescript
+// Line 238
+await page.reload({ waitUntil: 'networkidle' });
+
+```
+
+---
+
+## 99. should complete full user journey through all features
+
+**Source:** [`__tests__/playwright/dashboard/analytics-dashboard-complete.spec.ts`](/__tests__/playwright/dashboard/analytics-dashboard-complete.spec.ts)
+
+**Total Steps:** 1
+
+**Workflow Steps:**
+
+| Step | Action | Target | Value | Expected Outcome |
+|------|--------|--------|-------|------------------|
+| 1 | wait | `500` |  |  |
+
+**Code Reference:**
+
+```typescript
+// Line 275
 await page.waitForTimeout(500);
 
 ```
 
 ---
 
-## 68. should enforce demo session limits
+## 100. should work on mobile viewports (responsive)
 
-**Source:** [`__tests__/playwright/core-journeys/landing-page-demo-flow.spec.ts`](/__tests__/playwright/core-journeys/landing-page-demo-flow.spec.ts)
+**Source:** [`__tests__/playwright/cross-browser/browser-compatibility.spec.ts`](/__tests__/playwright/cross-browser/browser-compatibility.spec.ts)
 
-**Total Steps:** 0
-
-**Workflow Steps:**
-
-| Step | Action | Target | Value | Expected Outcome |
-|------|--------|--------|-------|------------------|
-
-**Code Reference:**
-
-```typescript
-```
-
----
-
-## 69. should show upgrade prompt after demo limits reached
-
-**Source:** [`__tests__/playwright/core-journeys/landing-page-demo-flow.spec.ts`](/__tests__/playwright/core-journeys/landing-page-demo-flow.spec.ts)
-
-**Total Steps:** 0
-
-**Workflow Steps:**
-
-| Step | Action | Target | Value | Expected Outcome |
-|------|--------|--------|-------|------------------|
-
-**Code Reference:**
-
-```typescript
-```
-
----
-
-## 70. should complete full purchase flow from chat to order confirmation
-
-**Source:** [`__tests__/playwright/core-journeys/complete-purchase-flow.spec.ts`](/__tests__/playwright/core-journeys/complete-purchase-flow.spec.ts)
-
-**Total Steps:** 5
+**Total Steps:** 3
 
 **Workflow Steps:**
 
 | Step | Action | Target | Value | Expected Outcome |
 |------|--------|--------|-------|------------------|
 | 1 | navigate | ``${BASE_URL}/widget-test`` |  |  |
-| 2 | wait | `5000` |  |  |
-| 3 | wait | `{ state: 'visible', timeout: 5000 }` |  |  |
-| 4 | click |  |  |  |
-| 5 | screenshot |  |  |  |
+| 2 | wait | `2000` |  |  |
+| 3 | screenshot |  |  |  |
 
 **Code Reference:**
 
 ```typescript
-// Line 28
+// Line 316
 await page.goto(`${BASE_URL}/widget-test`, { waitUntil: 'networkidle' });
 
-// Line 37
-await page.waitForTimeout(5000);
+// Line 317
+await page.waitForTimeout(2000);
 
-// Line 71
-await checkoutButton.waitFor({ state: 'visible', timeout: 5000 });
-
-// Line 72
-await checkoutButton.click();
-
-// Line 82
-await productPage.screenshot({
-      path: `test-results/purchase-flow-success-${Date.now()}.png`,
-      fullPage: true
-    });
+// Line 342
+await page.screenshot({
+        path: `test-results/responsive-${viewport.name.toLowerCase().replace(/\s+/g, '-')}-${Date.now()}.png`,
+        fullPage: false
+      });
 
 ```
 
 ---
 
-## 71. should handle purchase flow with guest checkout
+## 101. should handle browser feature detection gracefully
 
-**Source:** [`__tests__/playwright/core-journeys/complete-purchase-flow.spec.ts`](/__tests__/playwright/core-journeys/complete-purchase-flow.spec.ts)
+**Source:** [`__tests__/playwright/cross-browser/browser-compatibility.spec.ts`](/__tests__/playwright/cross-browser/browser-compatibility.spec.ts)
 
-**Total Steps:** 0
+**Total Steps:** 1
 
 **Workflow Steps:**
 
 | Step | Action | Target | Value | Expected Outcome |
 |------|--------|--------|-------|------------------|
+| 1 | navigate | ``${BASE_URL}/widget-test`` |  |  |
 
 **Code Reference:**
 
 ```typescript
+// Line 354
+await page.goto(`${BASE_URL}/widget-test`, { waitUntil: 'networkidle' });
+
 ```
 
 ---
 
-## 72. should handle purchase flow with registered user
-
-**Source:** [`__tests__/playwright/core-journeys/complete-purchase-flow.spec.ts`](/__tests__/playwright/core-journeys/complete-purchase-flow.spec.ts)
-
-**Total Steps:** 0
-
-**Workflow Steps:**
-
-| Step | Action | Target | Value | Expected Outcome |
-|------|--------|--------|-------|------------------|
-
-**Code Reference:**
-
-```typescript
-```
-
----
-
-## 73. should maintain context across multiple conversation turns
+## 102. should maintain context across multiple conversation turns
 
 **Source:** [`__tests__/playwright/chat/multi-turn-chat.spec.ts`](/__tests__/playwright/chat/multi-turn-chat.spec.ts)
 
@@ -3077,7 +3887,7 @@ await page.waitForTimeout(3000);
 
 ---
 
-## 74. should handle conversation with context reset
+## 103. should handle conversation with context reset
 
 **Source:** [`__tests__/playwright/chat/multi-turn-chat.spec.ts`](/__tests__/playwright/chat/multi-turn-chat.spec.ts)
 
@@ -3095,7 +3905,7 @@ await page.waitForTimeout(3000);
 
 ---
 
-## 75. should handle very long conversations
+## 104. should handle very long conversations
 
 **Source:** [`__tests__/playwright/chat/multi-turn-chat.spec.ts`](/__tests__/playwright/chat/multi-turn-chat.spec.ts)
 
@@ -3113,7 +3923,7 @@ await page.waitForTimeout(3000);
 
 ---
 
-## 76. should handle ambiguous pronouns
+## 105. should handle ambiguous pronouns
 
 **Source:** [`__tests__/playwright/chat/multi-turn-chat.spec.ts`](/__tests__/playwright/chat/multi-turn-chat.spec.ts)
 
@@ -3131,7 +3941,220 @@ await page.waitForTimeout(3000);
 
 ---
 
-## 77. should complete full team invitation flow for viewer role
+## 106. should complete demo flow from URL entry to AI chat response
+
+**Source:** [`__tests__/playwright/core-journeys/landing-page-demo-flow.spec.ts`](/__tests__/playwright/core-journeys/landing-page-demo-flow.spec.ts)
+
+**Total Steps:** 13
+
+**Workflow Steps:**
+
+| Step | Action | Target | Value | Expected Outcome |
+|------|--------|--------|-------|------------------|
+| 1 | navigate | `BASE_URL` |  |  |
+| 2 | wait | `{ state: 'visible', timeout: 10000 }` |  |  |
+| 3 | fill | `TEST_DEMO_SITE` |  |  |
+| 4 | click |  |  |  |
+| 5 | wait | `3000` |  |  |
+| 6 | wait | `{ state: 'visible', timeout: 10000 }` |  |  |
+| 7 | fill | `What can you tell me about this website?` |  |  |
+| 8 | click |  |  |  |
+| 9 | wait | `3000` |  |  |
+| 10 | fill | `Tell me more about that` |  |  |
+| 11 | click |  |  |  |
+| 12 | wait | `3000` |  |  |
+| 13 | screenshot |  |  |  |
+
+**Code Reference:**
+
+```typescript
+// Line 22
+await page.goto(BASE_URL, { waitUntil: 'networkidle' });
+
+// Line 29
+await demoUrlInput.waitFor({ state: 'visible', timeout: 10000 });
+
+// Line 30
+await demoUrlInput.fill(TEST_DEMO_SITE);
+
+// Line 57
+await startDemoButton.click();
+
+// Line 58
+await page.waitForTimeout(3000);
+
+// Line 67
+await chatInterface.waitFor({ state: 'visible', timeout: 10000 });
+
+// Line 73
+await chatInterface.fill('What can you tell me about this website?');
+
+// Line 79
+await sendButton.click();
+
+// Line 80
+await page.waitForTimeout(3000);
+
+// Line 99
+await chatInterface.fill('Tell me more about that');
+
+// ... 3 more steps ...
+```
+
+---
+
+## 107. should handle invalid URLs gracefully
+
+**Source:** [`__tests__/playwright/core-journeys/landing-page-demo-flow.spec.ts`](/__tests__/playwright/core-journeys/landing-page-demo-flow.spec.ts)
+
+**Total Steps:** 5
+
+**Workflow Steps:**
+
+| Step | Action | Target | Value | Expected Outcome |
+|------|--------|--------|-------|------------------|
+| 1 | navigate | `BASE_URL` |  |  |
+| 2 | wait | `{ state: 'visible', timeout: 5000 }` |  |  |
+| 3 | fill | `invalidUrl` |  |  |
+| 4 | click |  |  |  |
+| 5 | wait | `500` |  |  |
+
+**Code Reference:**
+
+```typescript
+// Line 114
+await page.goto(BASE_URL, { waitUntil: 'networkidle' });
+
+// Line 117
+await demoUrlInput.waitFor({ state: 'visible', timeout: 5000 });
+
+// Line 122
+await demoUrlInput.fill(invalidUrl);
+
+// Line 124
+await startButton.click();
+
+// Line 125
+await page.waitForTimeout(500);
+
+```
+
+---
+
+## 108. should enforce demo session limits
+
+**Source:** [`__tests__/playwright/core-journeys/landing-page-demo-flow.spec.ts`](/__tests__/playwright/core-journeys/landing-page-demo-flow.spec.ts)
+
+**Total Steps:** 0
+
+**Workflow Steps:**
+
+| Step | Action | Target | Value | Expected Outcome |
+|------|--------|--------|-------|------------------|
+
+**Code Reference:**
+
+```typescript
+```
+
+---
+
+## 109. should show upgrade prompt after demo limits reached
+
+**Source:** [`__tests__/playwright/core-journeys/landing-page-demo-flow.spec.ts`](/__tests__/playwright/core-journeys/landing-page-demo-flow.spec.ts)
+
+**Total Steps:** 0
+
+**Workflow Steps:**
+
+| Step | Action | Target | Value | Expected Outcome |
+|------|--------|--------|-------|------------------|
+
+**Code Reference:**
+
+```typescript
+```
+
+---
+
+## 110. should complete full purchase flow from chat to order confirmation
+
+**Source:** [`__tests__/playwright/core-journeys/complete-purchase-flow.spec.ts`](/__tests__/playwright/core-journeys/complete-purchase-flow.spec.ts)
+
+**Total Steps:** 5
+
+**Workflow Steps:**
+
+| Step | Action | Target | Value | Expected Outcome |
+|------|--------|--------|-------|------------------|
+| 1 | navigate | ``${BASE_URL}/widget-test`` |  |  |
+| 2 | wait | `5000` |  |  |
+| 3 | wait | `{ state: 'visible', timeout: 5000 }` |  |  |
+| 4 | click |  |  |  |
+| 5 | screenshot |  |  |  |
+
+**Code Reference:**
+
+```typescript
+// Line 28
+await page.goto(`${BASE_URL}/widget-test`, { waitUntil: 'networkidle' });
+
+// Line 37
+await page.waitForTimeout(5000);
+
+// Line 71
+await checkoutButton.waitFor({ state: 'visible', timeout: 5000 });
+
+// Line 72
+await checkoutButton.click();
+
+// Line 82
+await productPage.screenshot({
+      path: `test-results/purchase-flow-success-${Date.now()}.png`,
+      fullPage: true
+    });
+
+```
+
+---
+
+## 111. should handle purchase flow with guest checkout
+
+**Source:** [`__tests__/playwright/core-journeys/complete-purchase-flow.spec.ts`](/__tests__/playwright/core-journeys/complete-purchase-flow.spec.ts)
+
+**Total Steps:** 0
+
+**Workflow Steps:**
+
+| Step | Action | Target | Value | Expected Outcome |
+|------|--------|--------|-------|------------------|
+
+**Code Reference:**
+
+```typescript
+```
+
+---
+
+## 112. should handle purchase flow with registered user
+
+**Source:** [`__tests__/playwright/core-journeys/complete-purchase-flow.spec.ts`](/__tests__/playwright/core-journeys/complete-purchase-flow.spec.ts)
+
+**Total Steps:** 0
+
+**Workflow Steps:**
+
+| Step | Action | Target | Value | Expected Outcome |
+|------|--------|--------|-------|------------------|
+
+**Code Reference:**
+
+```typescript
+```
+
+---
+
+## 113. should complete full team invitation flow for viewer role
 
 **Source:** [`__tests__/playwright/advanced-features/team-management.spec.ts`](/__tests__/playwright/advanced-features/team-management.spec.ts)
 
@@ -3160,7 +4183,7 @@ await page.screenshot({
 
 ---
 
-## 78. should handle editor role with correct permissions
+## 114. should handle editor role with correct permissions
 
 **Source:** [`__tests__/playwright/advanced-features/team-management.spec.ts`](/__tests__/playwright/advanced-features/team-management.spec.ts)
 
@@ -3178,7 +4201,7 @@ await page.screenshot({
 
 ---
 
-## 79. should show team members list with correct roles
+## 115. should show team members list with correct roles
 
 **Source:** [`__tests__/playwright/advanced-features/team-management.spec.ts`](/__tests__/playwright/advanced-features/team-management.spec.ts)
 
@@ -3196,7 +4219,7 @@ await page.screenshot({
 
 ---
 
-## 80. should allow admin to revoke member access
+## 116. should allow admin to revoke member access
 
 **Source:** [`__tests__/playwright/advanced-features/team-management.spec.ts`](/__tests__/playwright/advanced-features/team-management.spec.ts)
 
@@ -3214,7 +4237,7 @@ await page.screenshot({
 
 ---
 
-## 81. should handle expired invitation tokens
+## 117. should handle expired invitation tokens
 
 **Source:** [`__tests__/playwright/advanced-features/team-management.spec.ts`](/__tests__/playwright/advanced-features/team-management.spec.ts)
 
@@ -3232,7 +4255,7 @@ await page.screenshot({
 
 ---
 
-## 82. should complete Shopify setup and track purchases
+## 118. should complete Shopify setup and track purchases
 
 **Source:** [`__tests__/playwright/advanced-features/shopify-integration.spec.ts`](/__tests__/playwright/advanced-features/shopify-integration.spec.ts)
 
@@ -3265,7 +4288,7 @@ await page.screenshot({
 
 ---
 
-## 83. should handle Shopify connection errors
+## 119. should handle Shopify connection errors
 
 **Source:** [`__tests__/playwright/advanced-features/shopify-integration.spec.ts`](/__tests__/playwright/advanced-features/shopify-integration.spec.ts)
 
@@ -3291,7 +4314,7 @@ await page.waitForTimeout(2000);
 
 ---
 
-## 84. should sync product inventory updates
+## 120. should sync product inventory updates
 
 **Source:** [`__tests__/playwright/advanced-features/shopify-integration.spec.ts`](/__tests__/playwright/advanced-features/shopify-integration.spec.ts)
 
@@ -3309,7 +4332,7 @@ await page.waitForTimeout(2000);
 
 ---
 
-## 85. should handle product out of stock scenarios
+## 121. should handle product out of stock scenarios
 
 **Source:** [`__tests__/playwright/advanced-features/shopify-integration.spec.ts`](/__tests__/playwright/advanced-features/shopify-integration.spec.ts)
 
@@ -3327,7 +4350,7 @@ await page.waitForTimeout(2000);
 
 ---
 
-## 86. should track Shopify order fulfillment
+## 122. should track Shopify order fulfillment
 
 **Source:** [`__tests__/playwright/advanced-features/shopify-integration.spec.ts`](/__tests__/playwright/advanced-features/shopify-integration.spec.ts)
 
@@ -3345,7 +4368,7 @@ await page.waitForTimeout(2000);
 
 ---
 
-## 87. should handle Shopify webhooks
+## 123. should handle Shopify webhooks
 
 **Source:** [`__tests__/playwright/advanced-features/shopify-integration.spec.ts`](/__tests__/playwright/advanced-features/shopify-integration.spec.ts)
 
@@ -3363,7 +4386,7 @@ await page.waitForTimeout(2000);
 
 ---
 
-## 88. should display real-time metrics and update without refresh
+## 124. should display real-time metrics and update without refresh
 
 **Source:** [`__tests__/playwright/advanced-features/realtime-analytics.spec.ts`](/__tests__/playwright/advanced-features/realtime-analytics.spec.ts)
 
@@ -3404,7 +4427,7 @@ await page.screenshot({
 
 ---
 
-## 89. should handle connection interruptions gracefully
+## 125. should handle connection interruptions gracefully
 
 **Source:** [`__tests__/playwright/advanced-features/realtime-analytics.spec.ts`](/__tests__/playwright/advanced-features/realtime-analytics.spec.ts)
 
@@ -3426,7 +4449,7 @@ await page.waitForTimeout(5000);
 
 ---
 
-## 90. should show historical trend alongside real-time data
+## 126. should show historical trend alongside real-time data
 
 **Source:** [`__tests__/playwright/advanced-features/realtime-analytics.spec.ts`](/__tests__/playwright/advanced-features/realtime-analytics.spec.ts)
 
@@ -3444,7 +4467,7 @@ await page.waitForTimeout(5000);
 
 ---
 
-## 91. should filter real-time events by type
+## 127. should filter real-time events by type
 
 **Source:** [`__tests__/playwright/advanced-features/realtime-analytics.spec.ts`](/__tests__/playwright/advanced-features/realtime-analytics.spec.ts)
 
@@ -3462,7 +4485,7 @@ await page.waitForTimeout(5000);
 
 ---
 
-## 92. should export real-time data snapshot
+## 128. should export real-time data snapshot
 
 **Source:** [`__tests__/playwright/advanced-features/realtime-analytics.spec.ts`](/__tests__/playwright/advanced-features/realtime-analytics.spec.ts)
 
@@ -3480,7 +4503,7 @@ await page.waitForTimeout(5000);
 
 ---
 
-## 93. should handle high-frequency updates efficiently
+## 129. should handle high-frequency updates efficiently
 
 **Source:** [`__tests__/playwright/advanced-features/realtime-analytics.spec.ts`](/__tests__/playwright/advanced-features/realtime-analytics.spec.ts)
 
@@ -3498,7 +4521,7 @@ await page.waitForTimeout(5000);
 
 ---
 
-## 94. should lookup order status via chat and return accurate information
+## 130. should lookup order status via chat and return accurate information
 
 **Source:** [`__tests__/playwright/advanced-features/order-lookup-via-chat.spec.ts`](/__tests__/playwright/advanced-features/order-lookup-via-chat.spec.ts)
 
@@ -3527,7 +4550,7 @@ await page.screenshot({
 
 ---
 
-## 95. should handle order lookup for processing orders
+## 131. should handle order lookup for processing orders
 
 **Source:** [`__tests__/playwright/advanced-features/order-lookup-via-chat.spec.ts`](/__tests__/playwright/advanced-features/order-lookup-via-chat.spec.ts)
 
@@ -3549,7 +4572,7 @@ await page.goto(`${BASE_URL}/widget-test`, { waitUntil: 'networkidle' });
 
 ---
 
-## 96. should handle invalid order numbers gracefully
+## 132. should handle invalid order numbers gracefully
 
 **Source:** [`__tests__/playwright/advanced-features/order-lookup-via-chat.spec.ts`](/__tests__/playwright/advanced-features/order-lookup-via-chat.spec.ts)
 
@@ -3571,7 +4594,7 @@ await page.goto(`${BASE_URL}/widget-test`, { waitUntil: 'networkidle' });
 
 ---
 
-## 97. should handle multiple order lookups in same conversation
+## 133. should handle multiple order lookups in same conversation
 
 **Source:** [`__tests__/playwright/advanced-features/order-lookup-via-chat.spec.ts`](/__tests__/playwright/advanced-features/order-lookup-via-chat.spec.ts)
 
@@ -3589,7 +4612,7 @@ await page.goto(`${BASE_URL}/widget-test`, { waitUntil: 'networkidle' });
 
 ---
 
-## 98. should provide order modification options
+## 134. should provide order modification options
 
 **Source:** [`__tests__/playwright/advanced-features/order-lookup-via-chat.spec.ts`](/__tests__/playwright/advanced-features/order-lookup-via-chat.spec.ts)
 
@@ -3607,7 +4630,7 @@ await page.goto(`${BASE_URL}/widget-test`, { waitUntil: 'networkidle' });
 
 ---
 
-## 99. should handle orders without tracking numbers
+## 135. should handle orders without tracking numbers
 
 **Source:** [`__tests__/playwright/advanced-features/order-lookup-via-chat.spec.ts`](/__tests__/playwright/advanced-features/order-lookup-via-chat.spec.ts)
 
@@ -3625,7 +4648,7 @@ await page.goto(`${BASE_URL}/widget-test`, { waitUntil: 'networkidle' });
 
 ---
 
-## 100. should monitor live chat and complete agent takeover
+## 136. should monitor live chat and complete agent takeover
 
 **Source:** [`__tests__/playwright/advanced-features/live-chat-monitoring.spec.ts`](/__tests__/playwright/advanced-features/live-chat-monitoring.spec.ts)
 
@@ -3658,7 +4681,7 @@ await page.screenshot({
 
 ---
 
-## 101. should show waiting chats requiring agent attention
+## 137. should show waiting chats requiring agent attention
 
 **Source:** [`__tests__/playwright/advanced-features/live-chat-monitoring.spec.ts`](/__tests__/playwright/advanced-features/live-chat-monitoring.spec.ts)
 
@@ -3680,7 +4703,7 @@ await page.waitForTimeout(1000);
 
 ---
 
-## 102. should complete full conversations management flow with export
+## 138. should complete full conversations management flow with export
 
 **Source:** [`__tests__/playwright/advanced-features/conversations-management.spec.ts`](/__tests__/playwright/advanced-features/conversations-management.spec.ts)
 
@@ -3721,7 +4744,7 @@ await page.screenshot({
 
 ---
 
-## 103. should filter conversations by date range
+## 139. should filter conversations by date range
 
 **Source:** [`__tests__/playwright/advanced-features/conversations-management.spec.ts`](/__tests__/playwright/advanced-features/conversations-management.spec.ts)
 
@@ -3743,7 +4766,7 @@ await page.waitForTimeout(1500);
 
 ---
 
-## 104. should handle empty search results gracefully
+## 140. should handle empty search results gracefully
 
 **Source:** [`__tests__/playwright/advanced-features/conversations-management.spec.ts`](/__tests__/playwright/advanced-features/conversations-management.spec.ts)
 
@@ -3761,7 +4784,7 @@ await page.waitForTimeout(1500);
 
 ---
 
-## 105. should allow bulk operations on conversations
+## 141. should allow bulk operations on conversations
 
 **Source:** [`__tests__/playwright/advanced-features/conversations-management.spec.ts`](/__tests__/playwright/advanced-features/conversations-management.spec.ts)
 
@@ -3779,7 +4802,7 @@ await page.waitForTimeout(1500);
 
 ---
 
-## 106. should show conversation analytics
+## 142. should show conversation analytics
 
 **Source:** [`__tests__/playwright/advanced-features/conversations-management.spec.ts`](/__tests__/playwright/advanced-features/conversations-management.spec.ts)
 
@@ -3797,7 +4820,7 @@ await page.waitForTimeout(1500);
 
 ---
 
-## 107. should track complete cart journey with analytics
+## 143. should track complete cart journey with analytics
 
 **Source:** [`__tests__/playwright/advanced-features/cart-analytics-tracking.spec.ts`](/__tests__/playwright/advanced-features/cart-analytics-tracking.spec.ts)
 
@@ -3859,7 +4882,7 @@ console.log('📍 Step 4: Add product to cart');
 
 ---
 
-## 108. should track session metrics accurately
+## 144. should track session metrics accurately
 
 **Source:** [`__tests__/playwright/advanced-features/cart-analytics-tracking.spec.ts`](/__tests__/playwright/advanced-features/cart-analytics-tracking.spec.ts)
 
@@ -3885,7 +4908,7 @@ console.log('📍 Step 3: Retrieve session metrics');
 
 ---
 
-## 109. should retrieve domain-level analytics
+## 145. should retrieve domain-level analytics
 
 **Source:** [`__tests__/playwright/advanced-features/cart-analytics-tracking.spec.ts`](/__tests__/playwright/advanced-features/cart-analytics-tracking.spec.ts)
 
@@ -3907,7 +4930,7 @@ console.log('📍 Step 1: Fetch daily analytics for domain');
 
 ---
 
-## 110. should identify abandoned carts
+## 146. should identify abandoned carts
 
 **Source:** [`__tests__/playwright/advanced-features/cart-analytics-tracking.spec.ts`](/__tests__/playwright/advanced-features/cart-analytics-tracking.spec.ts)
 
@@ -3929,7 +4952,7 @@ console.log('📍 Step 1: Fetch abandoned carts for domain');
 
 ---
 
-## 111. should filter analytics by date range
+## 147. should filter analytics by date range
 
 **Source:** [`__tests__/playwright/advanced-features/cart-analytics-tracking.spec.ts`](/__tests__/playwright/advanced-features/cart-analytics-tracking.spec.ts)
 
@@ -3951,7 +4974,7 @@ console.log('📍 Step 1: Test date range filtering');
 
 ---
 
-## 112. should handle API errors gracefully
+## 148. should handle API errors gracefully
 
 **Source:** [`__tests__/playwright/advanced-features/cart-analytics-tracking.spec.ts`](/__tests__/playwright/advanced-features/cart-analytics-tracking.spec.ts)
 
@@ -3981,7 +5004,7 @@ console.log('📍 Step 3: Test non-existent session');
 
 ---
 
-## 113. should support platform filtering (WooCommerce vs Shopify)
+## 149. should support platform filtering (WooCommerce vs Shopify)
 
 **Source:** [`__tests__/playwright/advanced-features/cart-analytics-tracking.spec.ts`](/__tests__/playwright/advanced-features/cart-analytics-tracking.spec.ts)
 
@@ -4003,7 +5026,7 @@ console.log('📍 Step 1: Fetch analytics for domain');
 
 ---
 
-## 114. should track both successful and failed operations
+## 150. should track both successful and failed operations
 
 **Source:** [`__tests__/playwright/advanced-features/cart-analytics-tracking.spec.ts`](/__tests__/playwright/advanced-features/cart-analytics-tracking.spec.ts)
 
@@ -4025,7 +5048,7 @@ console.log('📍 Step 1: Retrieve recent operations');
 
 ---
 
-## 115. should retrieve analytics quickly (< 1 second)
+## 151. should retrieve analytics quickly (< 1 second)
 
 **Source:** [`__tests__/playwright/advanced-features/cart-analytics-tracking.spec.ts`](/__tests__/playwright/advanced-features/cart-analytics-tracking.spec.ts)
 
@@ -4043,7 +5066,7 @@ console.log('📍 Step 1: Retrieve recent operations');
 
 ---
 
-## 116. should restore abandoned cart when customer returns
+## 152. should restore abandoned cart when customer returns
 
 **Source:** [`__tests__/playwright/advanced-features/cart-abandonment.spec.ts`](/__tests__/playwright/advanced-features/cart-abandonment.spec.ts)
 
@@ -4072,7 +5095,7 @@ await page.screenshot({
 
 ---
 
-## 117. should track cart abandonment analytics
+## 153. should track cart abandonment analytics
 
 **Source:** [`__tests__/playwright/advanced-features/cart-abandonment.spec.ts`](/__tests__/playwright/advanced-features/cart-abandonment.spec.ts)
 
@@ -4090,7 +5113,7 @@ await page.screenshot({
 
 ---
 
-## 118. should send abandonment email reminder
+## 154. should send abandonment email reminder
 
 **Source:** [`__tests__/playwright/advanced-features/cart-abandonment.spec.ts`](/__tests__/playwright/advanced-features/cart-abandonment.spec.ts)
 
@@ -4108,7 +5131,7 @@ await page.screenshot({
 
 ---
 
-## 119. should handle expired cart sessions
+## 155. should handle expired cart sessions
 
 **Source:** [`__tests__/playwright/advanced-features/cart-abandonment.spec.ts`](/__tests__/playwright/advanced-features/cart-abandonment.spec.ts)
 
@@ -4126,7 +5149,7 @@ await page.screenshot({
 
 ---
 
-## 120. should merge guest and authenticated user carts
+## 156. should merge guest and authenticated user carts
 
 **Source:** [`__tests__/playwright/advanced-features/cart-abandonment.spec.ts`](/__tests__/playwright/advanced-features/cart-abandonment.spec.ts)
 
@@ -4144,7 +5167,7 @@ await page.screenshot({
 
 ---
 
-## 121. should handle out-of-stock items in restored cart
+## 157. should handle out-of-stock items in restored cart
 
 **Source:** [`__tests__/playwright/advanced-features/cart-abandonment.spec.ts`](/__tests__/playwright/advanced-features/cart-abandonment.spec.ts)
 
@@ -4162,47 +5185,81 @@ await page.screenshot({
 
 ---
 
-## 122. delete items with persistence verification
+## 158. should support complete keyboard navigation workflow
 
-**Source:** [`__tests__/playwright/dashboard/training/05-delete-data.spec.ts`](/__tests__/playwright/dashboard/training/05-delete-data.spec.ts)
+**Source:** [`__tests__/playwright/accessibility/wcag-compliance.spec.ts`](/__tests__/playwright/accessibility/wcag-compliance.spec.ts)
 
-**Total Steps:** 5
+**Total Steps:** 23
 
 **Workflow Steps:**
 
 | Step | Action | Target | Value | Expected Outcome |
 |------|--------|--------|-------|------------------|
-| 1 | log |  |  | 📍 Step 1: Create test item |
-| 2 | log |  |  | 📍 Step 2: Delete the item |
-| 3 | log |  |  | 📍 Step 3: Verify item is removed from list |
-| 4 | log |  |  | 📍 Step 4: Reload page to verify deletion persists |
-| 5 | log |  |  | 📍 Step 5: Confirm item is still not in list after reload |
+| 1 | log |  |  | 📍 Step 1: Loading chat widget page |
+| 2 | navigate | ``${BASE_URL}/widget-test`` |  |  |
+| 3 | wait | `2000` |  |  |
+| 4 | log |  |  | 📍 Step 2: Locating chat widget trigger |
+| 5 | log |  |  | 📍 Step 3: Tab to widget trigger |
+| 6 | log |  |  | 📍 Step 4: Pressing Enter to open widget |
+| 7 | wait | `1000` |  |  |
+| 8 | log |  |  | 📍 Step 5: Accessing widget iframe |
+| 9 | wait | `{ state: 'attached', timeout: 10000 }` |  |  |
+| 10 | log |  |  | 📍 Step 6: Verifying input field auto-focus |
+| 11 | wait | `{ state: 'visible', timeout: 10000 }` |  |  |
+| 12 | log |  |  | 📍 Step 7: Typing message with keyboard |
+| 13 | fill | `Show me your products` | `{ delay: 50 }` |  |
+| 14 | log |  |  | 📍 Step 8: Pressing Enter to send message |
+| 15 | wait | `2000` |  |  |
+| 16 | log |  |  | 📍 Step 9: Verifying screen reader announcements |
+| 17 | log |  |  | 📍 Step 10: Tab to action button |
+| 18 | wait | `100` |  |  |
+| 19 | log |  |  | 📍 Step 11: Pressing Enter to activate button |
+| 20 | wait | `1000` |  |  |
+| 21 | log |  |  | 📍 Step 12: Pressing Esc to close widget |
+| 22 | wait | `1000` |  |  |
+| 23 | screenshot |  |  |  |
 
 **Code Reference:**
 
 ```typescript
 // Line 48
-console.log('📍 Step 1: Create test item');
+console.log('📍 Step 1: Loading chat widget page');
 
-// Line 52
-console.log('📍 Step 2: Delete the item');
+// Line 50
+await page.goto(`${BASE_URL}/widget-test`, { waitUntil: 'networkidle' });
 
-// Line 55
-console.log('📍 Step 3: Verify item is removed from list');
+// Line 51
+await page.waitForTimeout(2000);
 
 // Line 58
-console.log('📍 Step 4: Reload page to verify deletion persists');
+console.log('📍 Step 2: Locating chat widget trigger');
 
-// Line 61
-console.log('📍 Step 5: Confirm item is still not in list after reload');
+// Line 64
+console.log('📍 Step 3: Tab to widget trigger');
 
+// Line 91
+console.log('📍 Step 4: Pressing Enter to open widget');
+
+// Line 94
+await page.waitForTimeout(1000);
+
+// Line 102
+console.log('📍 Step 5: Accessing widget iframe');
+
+// Line 105
+await widgetIframe.waitFor({ state: 'attached', timeout: 10000 });
+
+// Line 113
+console.log('📍 Step 6: Verifying input field auto-focus');
+
+// ... 13 more steps ...
 ```
 
 ---
 
-## 123. delete multiple items sequentially
+## 159. should meet color contrast requirements (WCAG AA)
 
-**Source:** [`__tests__/playwright/dashboard/training/05-delete-data.spec.ts`](/__tests__/playwright/dashboard/training/05-delete-data.spec.ts)
+**Source:** [`__tests__/playwright/accessibility/wcag-compliance.spec.ts`](/__tests__/playwright/accessibility/wcag-compliance.spec.ts)
 
 **Total Steps:** 6
 
@@ -4210,125 +5267,41 @@ console.log('📍 Step 5: Confirm item is still not in list after reload');
 
 | Step | Action | Target | Value | Expected Outcome |
 |------|--------|--------|-------|------------------|
-| 1 | log |  |  | 📍 Step 1: Create multiple test items |
-| 2 | wait | `500` |  |  |
-| 3 | log |  |  | 📍 Step 2: Verify all items appear |
-| 4 | log |  |  | 📍 Step 3: Delete items one by one |
-| 5 | wait | `500` |  |  |
-| 6 | log |  |  | 📍 Step 4: Verify all items are deleted |
+| 1 | log |  |  | 📍 Step 1: Loading chat widget |
+| 2 | navigate | ``${BASE_URL}/widget-test`` |  |  |
+| 3 | wait | `2000` |  |  |
+| 4 | log |  |  | 📍 Step 2: Injecting axe-core for accessibility testing |
+| 5 | log |  |  | 📍 Step 3: Running color contrast audit |
+| 6 | log |  |  | 📍 Step 4: Testing widget-specific contrast |
 
 **Code Reference:**
 
 ```typescript
-// Line 77
-console.log('📍 Step 1: Create multiple test items');
+// Line 237
+console.log('📍 Step 1: Loading chat widget');
 
-// Line 80
-await page.waitForTimeout(500);
+// Line 238
+await page.goto(`${BASE_URL}/widget-test`, { waitUntil: 'networkidle' });
 
-// Line 83
-console.log('📍 Step 2: Verify all items appear');
+// Line 239
+await page.waitForTimeout(2000);
 
-// Line 91
-console.log('📍 Step 3: Delete items one by one');
+// Line 241
+console.log('📍 Step 2: Injecting axe-core for accessibility testing');
 
-// Line 94
-await page.waitForTimeout(500);
+// Line 248
+console.log('📍 Step 3: Running color contrast audit');
 
-// Line 97
-console.log('📍 Step 4: Verify all items are deleted');
+// Line 287
+console.log('📍 Step 4: Testing widget-specific contrast');
 
 ```
 
 ---
 
-## 124. delete items while processing
+## 160. should have proper ARIA labels and roles
 
-**Source:** [`__tests__/playwright/dashboard/training/05-delete-data.spec.ts`](/__tests__/playwright/dashboard/training/05-delete-data.spec.ts)
-
-**Total Steps:** 5
-
-**Workflow Steps:**
-
-| Step | Action | Target | Value | Expected Outcome |
-|------|--------|--------|-------|------------------|
-| 1 | log |  |  | 📍 Step 1: Create item that will be processing |
-| 2 | log |  |  | 📍 Step 2: Delete item immediately (may still be processing) |
-| 3 | wait | `1000` |  |  |
-| 4 | log |  |  | 📍 Step 3: Verify item is removed from list |
-| 5 | log |  |  | 📍 Step 4: Verify no orphaned data after reload |
-
-**Code Reference:**
-
-```typescript
-// Line 115
-console.log('📍 Step 1: Create item that will be processing');
-
-// Line 119
-console.log('📍 Step 2: Delete item immediately (may still be processing)');
-
-// Line 121
-await page.waitForTimeout(1000);
-
-// Line 124
-console.log('📍 Step 3: Verify item is removed from list');
-
-// Line 127
-console.log('📍 Step 4: Verify no orphaned data after reload');
-
-```
-
----
-
-## 125. list integrity after deletion
-
-**Source:** [`__tests__/playwright/dashboard/training/05-delete-data.spec.ts`](/__tests__/playwright/dashboard/training/05-delete-data.spec.ts)
-
-**Total Steps:** 7
-
-**Workflow Steps:**
-
-| Step | Action | Target | Value | Expected Outcome |
-|------|--------|--------|-------|------------------|
-| 1 | log |  |  | 📍 Step 1: Create items to keep and one to delete |
-| 2 | wait | `500` |  |  |
-| 3 | wait | `500` |  |  |
-| 4 | log |  |  | 📍 Step 2: Verify all items appear |
-| 5 | log |  |  | 📍 Step 3: Delete one item |
-| 6 | log |  |  | 📍 Step 4: Verify deleted item is gone |
-| 7 | log |  |  | 📍 Step 5: Verify other items remain intact |
-
-**Code Reference:**
-
-```typescript
-// Line 144
-console.log('📍 Step 1: Create items to keep and one to delete');
-
-// Line 147
-await page.waitForTimeout(500);
-
-// Line 150
-await page.waitForTimeout(500);
-
-// Line 152
-console.log('📍 Step 2: Verify all items appear');
-
-// Line 161
-console.log('📍 Step 3: Delete one item');
-
-// Line 164
-console.log('📍 Step 4: Verify deleted item is gone');
-
-// Line 167
-console.log('📍 Step 5: Verify other items remain intact');
-
-```
-
----
-
-## 126. empty state when all items deleted
-
-**Source:** [`__tests__/playwright/dashboard/training/05-delete-data.spec.ts`](/__tests__/playwright/dashboard/training/05-delete-data.spec.ts)
+**Source:** [`__tests__/playwright/accessibility/wcag-compliance.spec.ts`](/__tests__/playwright/accessibility/wcag-compliance.spec.ts)
 
 **Total Steps:** 9
 
@@ -4336,375 +5309,53 @@ console.log('📍 Step 5: Verify other items remain intact');
 
 | Step | Action | Target | Value | Expected Outcome |
 |------|--------|--------|-------|------------------|
-| 1 | log |  |  | 📍 Step 1: Check if any items exist |
-| 2 | log |  |  | 📍 Step 2: Create some test items to delete |
-| 3 | wait | `500` |  |  |
-| 4 | log |  |  | 📍 Step 3: Delete all items |
-| 5 | click |  |  |  |
-| 6 | click |  |  |  |
-| 7 | wait | `1000` |  |  |
-| 8 | log |  |  | 📍 Step 4: Verify empty state is displayed |
-| 9 | log |  |  | 📍 Step 5: Verify item count is 0 |
+| 1 | log |  |  | 📍 Step 1: Loading chat widget |
+| 2 | navigate | ``${BASE_URL}/widget-test`` |  |  |
+| 3 | wait | `2000` |  |  |
+| 4 | log |  |  | 📍 Step 2: Checking widget ARIA attributes |
+| 5 | wait | `{ state: 'attached', timeout: 10000 }` |  |  |
+| 6 | log |  |  | 📍 Step 3: Checking input field ARIA |
+| 7 | wait | `{ state: 'visible' }` |  |  |
+| 8 | log |  |  | 📍 Step 4: Checking button ARIA |
+| 9 | log |  |  | 📍 Step 5: Checking for ARIA live regions |
 
 **Code Reference:**
 
 ```typescript
-// Line 184
-console.log('📍 Step 1: Check if any items exist');
+// Line 313
+console.log('📍 Step 1: Loading chat widget');
 
-// Line 189
-console.log('📍 Step 2: Create some test items to delete');
+// Line 314
+await page.goto(`${BASE_URL}/widget-test`, { waitUntil: 'networkidle' });
 
-// Line 197
-await page.waitForTimeout(500);
+// Line 315
+await page.waitForTimeout(2000);
 
-// Line 204
-console.log('📍 Step 3: Delete all items');
+// Line 317
+console.log('📍 Step 2: Checking widget ARIA attributes');
 
-// Line 217
-await deleteButton.click();
+// Line 320
+await widgetIframe.waitFor({ state: 'attached', timeout: 10000 });
 
-// Line 221
-await confirmButton.click();
+// Line 329
+console.log('📍 Step 3: Checking input field ARIA');
 
-// Line 224
-await page.waitForTimeout(1000);
+// Line 332
+await inputField.waitFor({ state: 'visible' });
 
-// Line 227
-console.log('📍 Step 4: Verify empty state is displayed');
+// Line 345
+console.log('📍 Step 4: Checking button ARIA');
 
-// Line 230
-console.log('📍 Step 5: Verify item count is 0');
+// Line 360
+console.log('📍 Step 5: Checking for ARIA live regions');
 
 ```
 
 ---
 
-## 127. delete confirmation dialog
+## 161. should have semantic HTML structure
 
-**Source:** [`__tests__/playwright/dashboard/training/05-delete-data.spec.ts`](/__tests__/playwright/dashboard/training/05-delete-data.spec.ts)
-
-**Total Steps:** 13
-
-**Workflow Steps:**
-
-| Step | Action | Target | Value | Expected Outcome |
-|------|--------|--------|-------|------------------|
-| 1 | log |  |  | 📍 Step 1: Create test item |
-| 2 | log |  |  | 📍 Step 2: Click delete button |
-| 3 | click |  |  |  |
-| 4 | log |  |  | 📍 Step 3: Check if confirmation dialog appears |
-| 5 | log |  |  | 📍 Step 4: Click cancel |
-| 6 | click |  |  |  |
-| 7 | wait | `1000` |  |  |
-| 8 | log |  |  | 📍 Step 5: Verify item is still in list |
-| 9 | log |  |  | 📍 Step 6: Delete again and confirm |
-| 10 | click |  |  |  |
-| 11 | click |  |  |  |
-| 12 | click |  |  |  |
-| 13 | log |  |  | 📍 Step 7: Verify item is deleted |
-
-**Code Reference:**
-
-```typescript
-// Line 243
-console.log('📍 Step 1: Create test item');
-
-// Line 247
-console.log('📍 Step 2: Click delete button');
-
-// Line 250
-await deleteButton.click();
-
-// Line 252
-console.log('📍 Step 3: Check if confirmation dialog appears');
-
-// Line 261
-console.log('📍 Step 4: Click cancel');
-
-// Line 263
-await cancelButton.click();
-
-// Line 264
-await page.waitForTimeout(1000);
-
-// Line 266
-console.log('📍 Step 5: Verify item is still in list');
-
-// Line 270
-console.log('📍 Step 6: Delete again and confirm');
-
-// Line 271
-await deleteButton.click();
-
-// ... 3 more steps ...
-```
-
----
-
-## 128. user uploads Q&A pairs for FAQ training
-
-**Source:** [`__tests__/playwright/dashboard/training/03-upload-qa.spec.ts`](/__tests__/playwright/dashboard/training/03-upload-qa.spec.ts)
-
-**Total Steps:** 3
-
-**Workflow Steps:**
-
-| Step | Action | Target | Value | Expected Outcome |
-|------|--------|--------|-------|------------------|
-| 1 | log |  |  | 📍 Step 1: Upload Q&A pair |
-| 2 | log |  |  | 📍 Step 2: Verify Q&A appears in list |
-| 3 | log |  |  | 📍 Step 3: Wait for embedding generation to complete |
-
-**Code Reference:**
-
-```typescript
-// Line 46
-console.log('📍 Step 1: Upload Q&A pair');
-
-// Line 49
-console.log('📍 Step 2: Verify Q&A appears in list');
-
-// Line 53
-console.log('📍 Step 3: Wait for embedding generation to complete');
-
-```
-
----
-
-## 129. Q&A with long answers
-
-**Source:** [`__tests__/playwright/dashboard/training/03-upload-qa.spec.ts`](/__tests__/playwright/dashboard/training/03-upload-qa.spec.ts)
-
-**Total Steps:** 2
-
-**Workflow Steps:**
-
-| Step | Action | Target | Value | Expected Outcome |
-|------|--------|--------|-------|------------------|
-| 1 | log |  |  | 📍 Step 2: Verify Q&A appears in list |
-| 2 | log |  |  | 📍 Step 3: Verify answer is stored (not truncated in backend) |
-
-**Code Reference:**
-
-```typescript
-// Line 69
-console.log('📍 Step 2: Verify Q&A appears in list');
-
-// Line 72
-console.log('📍 Step 3: Verify answer is stored (not truncated in backend)');
-
-```
-
----
-
-## 130. incomplete Q&A validation
-
-**Source:** [`__tests__/playwright/dashboard/training/03-upload-qa.spec.ts`](/__tests__/playwright/dashboard/training/03-upload-qa.spec.ts)
-
-**Total Steps:** 10
-
-**Workflow Steps:**
-
-| Step | Action | Target | Value | Expected Outcome |
-|------|--------|--------|-------|------------------|
-| 1 | log |  |  | 📍 Step 1: Switch to Q&A tab |
-| 2 | log |  |  | 📍 Step 2: Try to submit with only question (no answer) |
-| 3 | fill | `Test question without answer?` |  |  |
-| 4 | log |  |  | 📍 Step 3: Verify validation prevents submission |
-| 5 | click |  |  |  |
-| 6 | wait | `1000` |  |  |
-| 7 | log |  |  | 📍 Step 4: Try to submit with only answer (no question) |
-| 8 | fill | `Test answer without question.` |  |  |
-| 9 | click |  |  |  |
-| 10 | wait | `1000` |  |  |
-
-**Code Reference:**
-
-```typescript
-// Line 84
-console.log('📍 Step 1: Switch to Q&A tab');
-
-// Line 87
-console.log('📍 Step 2: Try to submit with only question (no answer)');
-
-// Line 91
-await questionInput.fill('Test question without answer?');
-
-// Line 99
-console.log('📍 Step 3: Verify validation prevents submission');
-
-// Line 106
-await submitButton.click();
-
-// Line 107
-await page.waitForTimeout(1000);
-
-// Line 119
-console.log('📍 Step 4: Try to submit with only answer (no question)');
-
-// Line 121
-await answerInput.fill('Test answer without question.');
-
-// Line 128
-await submitButton.click();
-
-// Line 129
-await page.waitForTimeout(1000);
-
-```
-
----
-
-## 131. multiple Q&A pairs
-
-**Source:** [`__tests__/playwright/dashboard/training/03-upload-qa.spec.ts`](/__tests__/playwright/dashboard/training/03-upload-qa.spec.ts)
-
-**Total Steps:** 4
-
-**Workflow Steps:**
-
-| Step | Action | Target | Value | Expected Outcome |
-|------|--------|--------|-------|------------------|
-| 1 | log |  |  | 📍 Step 1: Submit multiple Q&A pairs |
-| 2 | wait | `1000` |  |  |
-| 3 | log |  |  | 📍 Step 2: Verify all Q&A pairs appear in list |
-| 4 | log |  |  | 📍 Step 3: Verify list contains at least 3 items |
-
-**Code Reference:**
-
-```typescript
-// Line 162
-console.log('📍 Step 1: Submit multiple Q&A pairs');
-
-// Line 165
-await page.waitForTimeout(1000);
-
-// Line 168
-console.log('📍 Step 2: Verify all Q&A pairs appear in list');
-
-// Line 174
-console.log('📍 Step 3: Verify list contains at least 3 items');
-
-```
-
----
-
-## 132. Q&A with special characters
-
-**Source:** [`__tests__/playwright/dashboard/training/03-upload-qa.spec.ts`](/__tests__/playwright/dashboard/training/03-upload-qa.spec.ts)
-
-**Total Steps:** 3
-
-**Workflow Steps:**
-
-| Step | Action | Target | Value | Expected Outcome |
-|------|--------|--------|-------|------------------|
-| 1 | log |  |  | 📍 Step 1: Upload Q&A with special characters |
-| 2 | log |  |  | 📍 Step 2: Verify Q&A appears in list with special chars intact |
-| 3 | log |  |  | 📍 Step 3: Verify special characters are properly encoded |
-
-**Code Reference:**
-
-```typescript
-// Line 189
-console.log('📍 Step 1: Upload Q&A with special characters');
-
-// Line 192
-console.log('📍 Step 2: Verify Q&A appears in list with special chars intact');
-
-// Line 195
-console.log('📍 Step 3: Verify special characters are properly encoded');
-
-```
-
----
-
-## 133. user uploads text and generates embeddings
-
-**Source:** [`__tests__/playwright/dashboard/training/02-upload-text.spec.ts`](/__tests__/playwright/dashboard/training/02-upload-text.spec.ts)
-
-**Total Steps:** 3
-
-**Workflow Steps:**
-
-| Step | Action | Target | Value | Expected Outcome |
-|------|--------|--------|-------|------------------|
-| 1 | log |  |  | 📍 Step 1: Upload text content |
-| 2 | log |  |  | 📍 Step 2: Verify text appears in list |
-| 3 | log |  |  | 📍 Step 3: Wait for embedding generation to complete |
-
-**Code Reference:**
-
-```typescript
-// Line 45
-console.log('📍 Step 1: Upload text content');
-
-// Line 48
-console.log('📍 Step 2: Verify text appears in list');
-
-// Line 51
-console.log('📍 Step 3: Wait for embedding generation to complete');
-
-```
-
----
-
-## 134. short text (< 200 chars)
-
-**Source:** [`__tests__/playwright/dashboard/training/02-upload-text.spec.ts`](/__tests__/playwright/dashboard/training/02-upload-text.spec.ts)
-
-**Total Steps:** 2
-
-**Workflow Steps:**
-
-| Step | Action | Target | Value | Expected Outcome |
-|------|--------|--------|-------|------------------|
-| 1 | log |  |  | 📍 Step 1: Upload short text |
-| 2 | log |  |  | 📍 Step 2: Verify text appears in full (not truncated) |
-
-**Code Reference:**
-
-```typescript
-// Line 62
-console.log('📍 Step 1: Upload short text');
-
-// Line 65
-console.log('📍 Step 2: Verify text appears in full (not truncated)');
-
-```
-
----
-
-## 135. long text (> 200 chars, truncated preview)
-
-**Source:** [`__tests__/playwright/dashboard/training/02-upload-text.spec.ts`](/__tests__/playwright/dashboard/training/02-upload-text.spec.ts)
-
-**Total Steps:** 2
-
-**Workflow Steps:**
-
-| Step | Action | Target | Value | Expected Outcome |
-|------|--------|--------|-------|------------------|
-| 1 | log |  |  | 📍 Step 2: Verify text appears with preview |
-| 2 | log |  |  | 📍 Step 3: Verify truncation indicator |
-
-**Code Reference:**
-
-```typescript
-// Line 84
-console.log('📍 Step 2: Verify text appears with preview');
-
-// Line 89
-console.log('📍 Step 3: Verify truncation indicator');
-
-```
-
----
-
-## 136. empty text validation
-
-**Source:** [`__tests__/playwright/dashboard/training/02-upload-text.spec.ts`](/__tests__/playwright/dashboard/training/02-upload-text.spec.ts)
+**Source:** [`__tests__/playwright/accessibility/wcag-compliance.spec.ts`](/__tests__/playwright/accessibility/wcag-compliance.spec.ts)
 
 **Total Steps:** 5
 
@@ -4712,193 +5363,146 @@ console.log('📍 Step 3: Verify truncation indicator');
 
 | Step | Action | Target | Value | Expected Outcome |
 |------|--------|--------|-------|------------------|
-| 1 | log |  |  | 📍 Step 1: Switch to Text tab |
-| 2 | log |  |  | 📍 Step 2: Try to submit empty text |
-| 3 | log |  |  | 📍 Step 3: Verify submit button is disabled or shows validation error |
-| 4 | click |  |  |  |
-| 5 | wait | `1000` |  |  |
+| 1 | log |  |  | 📍 Step 1: Loading dashboard page |
+| 2 | navigate | ``${BASE_URL}/dashboard`` |  |  |
+| 3 | log |  |  | 📍 Step 2: Checking heading hierarchy |
+| 4 | log |  |  | 📍 Step 3: Checking landmark regions |
+| 5 | log |  |  | 📍 Step 4: Checking for lists |
 
 **Code Reference:**
 
 ```typescript
-// Line 103
-console.log('📍 Step 1: Switch to Text tab');
+// Line 388
+console.log('📍 Step 1: Loading dashboard page');
 
-// Line 106
-console.log('📍 Step 2: Try to submit empty text');
+// Line 389
+await page.goto(`${BASE_URL}/dashboard`, { waitUntil: 'networkidle' });
 
-// Line 113
-console.log('📍 Step 3: Verify submit button is disabled or shows validation error');
+// Line 391
+console.log('📍 Step 2: Checking heading hierarchy');
 
-// Line 121
-await submitButton.click();
+// Line 427
+console.log('📍 Step 3: Checking landmark regions');
 
-// Line 122
+// Line 446
+console.log('📍 Step 4: Checking for lists');
+
+```
+
+---
+
+## 162. should handle form validation with screen reader announcements
+
+**Source:** [`__tests__/playwright/accessibility/wcag-compliance.spec.ts`](/__tests__/playwright/accessibility/wcag-compliance.spec.ts)
+
+**Total Steps:** 10
+
+**Workflow Steps:**
+
+| Step | Action | Target | Value | Expected Outcome |
+|------|--------|--------|-------|------------------|
+| 1 | log |  |  | 📍 Step 1: Loading chat widget |
+| 2 | navigate | ``${BASE_URL}/widget-test`` |  |  |
+| 3 | wait | `2000` |  |  |
+| 4 | log |  |  | 📍 Step 2: Attempting to send empty message |
+| 5 | wait | `{ state: 'visible' }` |  |  |
+| 6 | fill |  |  |  |
+| 7 | click |  |  |  |
+| 8 | wait | `1000` |  |  |
+| 9 | log |  |  | 📍 Step 3: Checking for validation error |
+| 10 | log |  |  | 📍 Step 4: Checking input aria-invalid state |
+
+**Code Reference:**
+
+```typescript
+// Line 466
+console.log('📍 Step 1: Loading chat widget');
+
+// Line 467
+await page.goto(`${BASE_URL}/widget-test`, { waitUntil: 'networkidle' });
+
+// Line 468
+await page.waitForTimeout(2000);
+
+// Line 472
+console.log('📍 Step 2: Attempting to send empty message');
+
+// Line 475
+await inputField.waitFor({ state: 'visible' });
+
+// Line 478
+await inputField.fill('');
+
+// Line 481
+await sendButton.click();
+
+// Line 482
 await page.waitForTimeout(1000);
 
+// Line 484
+console.log('📍 Step 3: Checking for validation error');
+
+// Line 505
+console.log('📍 Step 4: Checking input aria-invalid state');
+
 ```
 
 ---
 
-## 137. multiple text submissions
+## 163. should run full axe accessibility audit
 
-**Source:** [`__tests__/playwright/dashboard/training/02-upload-text.spec.ts`](/__tests__/playwright/dashboard/training/02-upload-text.spec.ts)
+**Source:** [`__tests__/playwright/accessibility/wcag-compliance.spec.ts`](/__tests__/playwright/accessibility/wcag-compliance.spec.ts)
 
-**Total Steps:** 4
+**Total Steps:** 8
 
 **Workflow Steps:**
 
 | Step | Action | Target | Value | Expected Outcome |
 |------|--------|--------|-------|------------------|
-| 1 | log |  |  | 📍 Step 1: Submit multiple text entries |
-| 2 | wait | `1000` |  |  |
-| 3 | log |  |  | 📍 Step 2: Verify all texts appear in list |
-| 4 | log |  |  | 📍 Step 3: Verify list contains at least 3 items |
+| 1 | log |  |  | 📍 Step 1: Loading widget test page |
+| 2 | navigate | ``${BASE_URL}/widget-test`` |  |  |
+| 3 | wait | `2000` |  |  |
+| 4 | log |  |  | 📍 Step 2: Injecting axe-core |
+| 5 | log |  |  | 📍 Step 3: Running comprehensive accessibility audit |
+| 6 | log |  |  | 📍 Step 4: Auditing dashboard page |
+| 7 | navigate | ``${BASE_URL}/dashboard`` |  |  |
+| 8 | screenshot |  |  |  |
 
 **Code Reference:**
 
 ```typescript
-// Line 148
-console.log('📍 Step 1: Submit multiple text entries');
+// Line 516
+console.log('📍 Step 1: Loading widget test page');
 
-// Line 151
-await page.waitForTimeout(1000);
+// Line 517
+await page.goto(`${BASE_URL}/widget-test`, { waitUntil: 'networkidle' });
 
-// Line 154
-console.log('📍 Step 2: Verify all texts appear in list');
+// Line 518
+await page.waitForTimeout(2000);
 
-// Line 160
-console.log('📍 Step 3: Verify list contains at least 3 items');
+// Line 520
+console.log('📍 Step 2: Injecting axe-core');
+
+// Line 523
+console.log('📍 Step 3: Running comprehensive accessibility audit');
+
+// Line 538
+console.log('📍 Step 4: Auditing dashboard page');
+
+// Line 539
+await page.goto(`${BASE_URL}/dashboard`, { waitUntil: 'networkidle' });
+
+// Line 554
+await page.screenshot({
+      path: `test-results/accessibility-audit-${Date.now()}.png`,
+      fullPage: true
+    });
 
 ```
 
 ---
 
-## 138. user uploads URL and processes to completion
-
-**Source:** [`__tests__/playwright/dashboard/training/01-upload-url.spec.ts`](/__tests__/playwright/dashboard/training/01-upload-url.spec.ts)
-
-**Total Steps:** 3
-
-**Workflow Steps:**
-
-| Step | Action | Target | Value | Expected Outcome |
-|------|--------|--------|-------|------------------|
-| 1 | log |  |  | 📍 Step 1: Upload URL without https:// |
-| 2 | log |  |  | 📍 Step 2: Verify URL appears in list (normalized with https://) |
-| 3 | log |  |  | 📍 Step 3: Wait for scraping to complete |
-
-**Code Reference:**
-
-```typescript
-// Line 43
-console.log('📍 Step 1: Upload URL without https://');
-
-// Line 46
-console.log('📍 Step 2: Verify URL appears in list (normalized with https://)');
-
-// Line 49
-console.log('📍 Step 3: Wait for scraping to complete');
-
-```
-
----
-
-## 139. URL normalization (auto-adds https://)
-
-**Source:** [`__tests__/playwright/dashboard/training/01-upload-url.spec.ts`](/__tests__/playwright/dashboard/training/01-upload-url.spec.ts)
-
-**Total Steps:** 2
-
-**Workflow Steps:**
-
-| Step | Action | Target | Value | Expected Outcome |
-|------|--------|--------|-------|------------------|
-| 1 | log |  |  | 📍 Step 1: Submit URL without protocol |
-| 2 | log |  |  | 📍 Step 2: Verify URL is normalized to https:// |
-
-**Code Reference:**
-
-```typescript
-// Line 59
-console.log('📍 Step 1: Submit URL without protocol');
-
-// Line 62
-console.log('📍 Step 2: Verify URL is normalized to https://');
-
-```
-
----
-
-## 140. scraping failure handling
-
-**Source:** [`__tests__/playwright/dashboard/training/01-upload-url.spec.ts`](/__tests__/playwright/dashboard/training/01-upload-url.spec.ts)
-
-**Total Steps:** 4
-
-**Workflow Steps:**
-
-| Step | Action | Target | Value | Expected Outcome |
-|------|--------|--------|-------|------------------|
-| 1 | log |  |  | 📍 Step 1: Submit invalid URL |
-| 2 | log |  |  | 📍 Step 2: Wait for item to appear |
-| 3 | log |  |  | 📍 Step 3: Check for error state or removal |
-| 4 | wait | `5000` |  |  |
-
-**Code Reference:**
-
-```typescript
-// Line 78
-console.log('📍 Step 1: Submit invalid URL');
-
-// Line 81
-console.log('📍 Step 2: Wait for item to appear');
-
-// Line 84
-console.log('📍 Step 3: Check for error state or removal');
-
-// Line 86
-await page.waitForTimeout(5000);
-
-```
-
----
-
-## 141. multiple URL submissions
-
-**Source:** [`__tests__/playwright/dashboard/training/01-upload-url.spec.ts`](/__tests__/playwright/dashboard/training/01-upload-url.spec.ts)
-
-**Total Steps:** 4
-
-**Workflow Steps:**
-
-| Step | Action | Target | Value | Expected Outcome |
-|------|--------|--------|-------|------------------|
-| 1 | log |  |  | 📍 Step 1: Submit multiple URLs |
-| 2 | wait | `1000` |  |  |
-| 3 | log |  |  | 📍 Step 2: Verify all URLs appear in list |
-| 4 | log |  |  | 📍 Step 3: Verify list contains at least 3 items |
-
-**Code Reference:**
-
-```typescript
-// Line 114
-console.log('📍 Step 1: Submit multiple URLs');
-
-// Line 117
-await page.waitForTimeout(1000);
-
-// Line 120
-console.log('📍 Step 2: Verify all URLs appear in list');
-
-// Line 127
-console.log('📍 Step 3: Verify list contains at least 3 items');
-
-```
-
----
-
-## 142. live preview updates in real-time
+## 164. live preview updates in real-time
 
 **Source:** [`__tests__/playwright/dashboard/widget-customization/preview-and-reset.spec.ts`](/__tests__/playwright/dashboard/widget-customization/preview-and-reset.spec.ts)
 
@@ -4932,7 +5536,7 @@ await page.waitForTimeout(1000);
 
 ---
 
-## 143. reset button restores default settings
+## 165. reset button restores default settings
 
 **Source:** [`__tests__/playwright/dashboard/widget-customization/preview-and-reset.spec.ts`](/__tests__/playwright/dashboard/widget-customization/preview-and-reset.spec.ts)
 
@@ -4974,7 +5578,7 @@ console.log('📍 Step 3: Verify settings restored to defaults');
 
 ---
 
-## 144. tab navigation works correctly
+## 166. tab navigation works correctly
 
 **Source:** [`__tests__/playwright/dashboard/widget-customization/navigation.spec.ts`](/__tests__/playwright/dashboard/widget-customization/navigation.spec.ts)
 
@@ -5024,7 +5628,7 @@ await page.waitForTimeout(500);
 
 ---
 
-## 145. advanced color customization works
+## 167. advanced color customization works
 
 **Source:** [`__tests__/playwright/dashboard/widget-customization/navigation.spec.ts`](/__tests__/playwright/dashboard/widget-customization/navigation.spec.ts)
 
@@ -5062,7 +5666,7 @@ await buttonColorInput.fill('#f59e0b');
 
 ---
 
-## 146. handles save errors gracefully
+## 168. handles save errors gracefully
 
 **Source:** [`__tests__/playwright/dashboard/widget-customization/error-handling.spec.ts`](/__tests__/playwright/dashboard/widget-customization/error-handling.spec.ts)
 
@@ -5104,7 +5708,7 @@ console.log('📍 Step 4: Verify error is handled gracefully');
 
 ---
 
-## 147. supports keyboard navigation
+## 169. supports keyboard navigation
 
 **Source:** [`__tests__/playwright/dashboard/widget-customization/error-handling.spec.ts`](/__tests__/playwright/dashboard/widget-customization/error-handling.spec.ts)
 
@@ -5138,7 +5742,7 @@ await page.keyboard.type('Test Input');
 
 ---
 
-## 148. appearance → behavior → save → persist
+## 170. appearance → behavior → save → persist
 
 **Source:** [`__tests__/playwright/dashboard/widget-customization/complete-workflow.spec.ts`](/__tests__/playwright/dashboard/widget-customization/complete-workflow.spec.ts)
 
@@ -5207,7 +5811,7 @@ console.log('📍 Step 9: Change AI personality');
 
 ---
 
-## 149. verify file naming convention for all formats
+## 171. verify file naming convention for all formats
 
 **Source:** [`__tests__/playwright/dashboard/analytics-exports/pdf-export.spec.ts`](/__tests__/playwright/dashboard/analytics-exports/pdf-export.spec.ts)
 
@@ -5237,7 +5841,7 @@ await page.waitForTimeout(1000);
 
 ---
 
-## 150. PDF export with 90-day range
+## 172. PDF export with 90-day range
 
 **Source:** [`__tests__/playwright/dashboard/analytics-exports/pdf-export.spec.ts`](/__tests__/playwright/dashboard/analytics-exports/pdf-export.spec.ts)
 
@@ -5255,7 +5859,7 @@ await page.waitForTimeout(1000);
 
 ---
 
-## 151. Excel export validation
+## 173. Excel export validation
 
 **Source:** [`__tests__/playwright/dashboard/analytics-exports/pdf-export.spec.ts`](/__tests__/playwright/dashboard/analytics-exports/pdf-export.spec.ts)
 
@@ -5273,7 +5877,7 @@ await page.waitForTimeout(1000);
 
 ---
 
-## 152. export with empty data: handle gracefully
+## 174. export with empty data: handle gracefully
 
 **Source:** [`__tests__/playwright/dashboard/analytics-exports/error-handling.spec.ts`](/__tests__/playwright/dashboard/analytics-exports/error-handling.spec.ts)
 
@@ -5299,7 +5903,7 @@ await page.goto(exportUrl);
 
 ---
 
-## 153. export with user authentication and permissions
+## 175. export with user authentication and permissions
 
 **Source:** [`__tests__/playwright/dashboard/analytics-exports/error-handling.spec.ts`](/__tests__/playwright/dashboard/analytics-exports/error-handling.spec.ts)
 
@@ -5317,7 +5921,7 @@ await page.goto(exportUrl);
 
 ---
 
-## 154. handle invalid export format gracefully
+## 176. handle invalid export format gracefully
 
 **Source:** [`__tests__/playwright/dashboard/analytics-exports/error-handling.spec.ts`](/__tests__/playwright/dashboard/analytics-exports/error-handling.spec.ts)
 
@@ -5335,7 +5939,7 @@ await page.goto(exportUrl);
 
 ---
 
-## 155. handle missing query parameters
+## 177. handle missing query parameters
 
 **Source:** [`__tests__/playwright/dashboard/analytics-exports/error-handling.spec.ts`](/__tests__/playwright/dashboard/analytics-exports/error-handling.spec.ts)
 
@@ -5353,7 +5957,7 @@ await page.goto(exportUrl);
 
 ---
 
-## 156. handle request timeout gracefully
+## 178. handle request timeout gracefully
 
 **Source:** [`__tests__/playwright/dashboard/analytics-exports/error-handling.spec.ts`](/__tests__/playwright/dashboard/analytics-exports/error-handling.spec.ts)
 
@@ -5371,7 +5975,7 @@ await page.goto(exportUrl);
 
 ---
 
-## 157. complete export workflow: UI suggestion for missing buttons
+## 179. complete export workflow: UI suggestion for missing buttons
 
 **Source:** [`__tests__/playwright/dashboard/analytics-exports/download-flows.spec.ts`](/__tests__/playwright/dashboard/analytics-exports/download-flows.spec.ts)
 
@@ -5400,7 +6004,7 @@ await page.goto('/dashboard/analytics');
 
 ---
 
-## 158. export performance: large dataset handling
+## 180. export performance: large dataset handling
 
 **Source:** [`__tests__/playwright/dashboard/analytics-exports/download-flows.spec.ts`](/__tests__/playwright/dashboard/analytics-exports/download-flows.spec.ts)
 
@@ -5422,7 +6026,7 @@ await page.goto(exportUrl);
 
 ---
 
-## 159. sequential export downloads: verify file independence
+## 181. sequential export downloads: verify file independence
 
 **Source:** [`__tests__/playwright/dashboard/analytics-exports/download-flows.spec.ts`](/__tests__/playwright/dashboard/analytics-exports/download-flows.spec.ts)
 
@@ -5452,7 +6056,7 @@ await page.waitForTimeout(500);
 
 ---
 
-## 160. export with custom time ranges
+## 182. export with custom time ranges
 
 **Source:** [`__tests__/playwright/dashboard/analytics-exports/download-flows.spec.ts`](/__tests__/playwright/dashboard/analytics-exports/download-flows.spec.ts)
 
@@ -5486,7 +6090,7 @@ await page.waitForTimeout(500);
 
 ---
 
-## 161. verify JSON analytics data structure
+## 183. verify JSON analytics data structure
 
 **Source:** [`__tests__/playwright/dashboard/analytics-exports/data-validation.spec.ts`](/__tests__/playwright/dashboard/analytics-exports/data-validation.spec.ts)
 
@@ -5504,7 +6108,7 @@ await page.waitForTimeout(500);
 
 ---
 
-## 162. export with date range filter applied
+## 184. export with date range filter applied
 
 **Source:** [`__tests__/playwright/dashboard/analytics-exports/data-validation.spec.ts`](/__tests__/playwright/dashboard/analytics-exports/data-validation.spec.ts)
 
@@ -5534,7 +6138,7 @@ await page.waitForTimeout(2000);
 
 ---
 
-## 163. validate CSV data accuracy and formatting
+## 185. validate CSV data accuracy and formatting
 
 **Source:** [`__tests__/playwright/dashboard/analytics-exports/data-validation.spec.ts`](/__tests__/playwright/dashboard/analytics-exports/data-validation.spec.ts)
 
@@ -5552,7 +6156,7 @@ await page.waitForTimeout(2000);
 
 ---
 
-## 164. verify API endpoint responses
+## 186. verify API endpoint responses
 
 **Source:** [`__tests__/playwright/dashboard/analytics-exports/data-validation.spec.ts`](/__tests__/playwright/dashboard/analytics-exports/data-validation.spec.ts)
 
@@ -5570,7 +6174,7 @@ await page.waitForTimeout(2000);
 
 ---
 
-## 165. export analytics as CSV: click → download → verify
+## 187. export analytics as CSV: click → download → verify
 
 **Source:** [`__tests__/playwright/dashboard/analytics-exports/csv-export.spec.ts`](/__tests__/playwright/dashboard/analytics-exports/csv-export.spec.ts)
 
@@ -5596,7 +6200,7 @@ await page.goto('/dashboard/analytics');
 
 ---
 
-## 166. verify CSV file structure and headers
+## 188. verify CSV file structure and headers
 
 **Source:** [`__tests__/playwright/dashboard/analytics-exports/csv-export.spec.ts`](/__tests__/playwright/dashboard/analytics-exports/csv-export.spec.ts)
 
@@ -5614,7 +6218,7 @@ await page.goto('/dashboard/analytics');
 
 ---
 
-## 167. CSV export with 30-day range
+## 189. CSV export with 30-day range
 
 **Source:** [`__tests__/playwright/dashboard/analytics-exports/csv-export.spec.ts`](/__tests__/playwright/dashboard/analytics-exports/csv-export.spec.ts)
 
@@ -5632,7 +6236,996 @@ await page.goto('/dashboard/analytics');
 
 ---
 
-## 168. English to Spanish translation
+## 190. delete items with persistence verification
+
+**Source:** [`__tests__/playwright/dashboard/training/05-delete-data.spec.ts`](/__tests__/playwright/dashboard/training/05-delete-data.spec.ts)
+
+**Total Steps:** 5
+
+**Workflow Steps:**
+
+| Step | Action | Target | Value | Expected Outcome |
+|------|--------|--------|-------|------------------|
+| 1 | log |  |  | 📍 Step 1: Create test item |
+| 2 | log |  |  | 📍 Step 2: Delete the item |
+| 3 | log |  |  | 📍 Step 3: Verify item is removed from list |
+| 4 | log |  |  | 📍 Step 4: Reload page to verify deletion persists |
+| 5 | log |  |  | 📍 Step 5: Confirm item is still not in list after reload |
+
+**Code Reference:**
+
+```typescript
+// Line 48
+console.log('📍 Step 1: Create test item');
+
+// Line 52
+console.log('📍 Step 2: Delete the item');
+
+// Line 55
+console.log('📍 Step 3: Verify item is removed from list');
+
+// Line 58
+console.log('📍 Step 4: Reload page to verify deletion persists');
+
+// Line 61
+console.log('📍 Step 5: Confirm item is still not in list after reload');
+
+```
+
+---
+
+## 191. delete multiple items sequentially
+
+**Source:** [`__tests__/playwright/dashboard/training/05-delete-data.spec.ts`](/__tests__/playwright/dashboard/training/05-delete-data.spec.ts)
+
+**Total Steps:** 7
+
+**Workflow Steps:**
+
+| Step | Action | Target | Value | Expected Outcome |
+|------|--------|--------|-------|------------------|
+| 1 | log |  |  | 📍 Step 1: Create multiple test items |
+| 2 | wait | `1000` |  |  |
+| 3 | log |  |  | 📍 Step 2: Verify all items appear |
+| 4 | wait | `2000` |  |  |
+| 5 | log |  |  | 📍 Step 3: Delete items one by one |
+| 6 | wait | `500` |  |  |
+| 7 | log |  |  | 📍 Step 4: Verify all items are deleted |
+
+**Code Reference:**
+
+```typescript
+// Line 77
+console.log('📍 Step 1: Create multiple test items');
+
+// Line 80
+await page.waitForTimeout(1000);
+
+// Line 83
+console.log('📍 Step 2: Verify all items appear');
+
+// Line 89
+await page.waitForTimeout(2000);
+
+// Line 97
+console.log('📍 Step 3: Delete items one by one');
+
+// Line 100
+await page.waitForTimeout(500);
+
+// Line 103
+console.log('📍 Step 4: Verify all items are deleted');
+
+```
+
+---
+
+## 192. delete items while processing
+
+**Source:** [`__tests__/playwright/dashboard/training/05-delete-data.spec.ts`](/__tests__/playwright/dashboard/training/05-delete-data.spec.ts)
+
+**Total Steps:** 5
+
+**Workflow Steps:**
+
+| Step | Action | Target | Value | Expected Outcome |
+|------|--------|--------|-------|------------------|
+| 1 | log |  |  | 📍 Step 1: Create item that will be processing |
+| 2 | log |  |  | 📍 Step 2: Delete item immediately (may still be processing) |
+| 3 | wait | `1000` |  |  |
+| 4 | log |  |  | 📍 Step 3: Verify item is removed from list |
+| 5 | log |  |  | 📍 Step 4: Verify no orphaned data after reload |
+
+**Code Reference:**
+
+```typescript
+// Line 121
+console.log('📍 Step 1: Create item that will be processing');
+
+// Line 125
+console.log('📍 Step 2: Delete item immediately (may still be processing)');
+
+// Line 127
+await page.waitForTimeout(1000);
+
+// Line 130
+console.log('📍 Step 3: Verify item is removed from list');
+
+// Line 133
+console.log('📍 Step 4: Verify no orphaned data after reload');
+
+```
+
+---
+
+## 193. list integrity after deletion
+
+**Source:** [`__tests__/playwright/dashboard/training/05-delete-data.spec.ts`](/__tests__/playwright/dashboard/training/05-delete-data.spec.ts)
+
+**Total Steps:** 7
+
+**Workflow Steps:**
+
+| Step | Action | Target | Value | Expected Outcome |
+|------|--------|--------|-------|------------------|
+| 1 | log |  |  | 📍 Step 1: Create items to keep and one to delete |
+| 2 | wait | `500` |  |  |
+| 3 | wait | `500` |  |  |
+| 4 | log |  |  | 📍 Step 2: Verify all items appear |
+| 5 | log |  |  | 📍 Step 3: Delete one item |
+| 6 | log |  |  | 📍 Step 4: Verify deleted item is gone |
+| 7 | log |  |  | 📍 Step 5: Verify other items remain intact |
+
+**Code Reference:**
+
+```typescript
+// Line 150
+console.log('📍 Step 1: Create items to keep and one to delete');
+
+// Line 153
+await page.waitForTimeout(500);
+
+// Line 156
+await page.waitForTimeout(500);
+
+// Line 158
+console.log('📍 Step 2: Verify all items appear');
+
+// Line 167
+console.log('📍 Step 3: Delete one item');
+
+// Line 170
+console.log('📍 Step 4: Verify deleted item is gone');
+
+// Line 173
+console.log('📍 Step 5: Verify other items remain intact');
+
+```
+
+---
+
+## 194. empty state when all items deleted
+
+**Source:** [`__tests__/playwright/dashboard/training/05-delete-data.spec.ts`](/__tests__/playwright/dashboard/training/05-delete-data.spec.ts)
+
+**Total Steps:** 9
+
+**Workflow Steps:**
+
+| Step | Action | Target | Value | Expected Outcome |
+|------|--------|--------|-------|------------------|
+| 1 | log |  |  | 📍 Step 1: Check if any items exist |
+| 2 | log |  |  | 📍 Step 2: Create some test items to delete |
+| 3 | wait | `500` |  |  |
+| 4 | log |  |  | 📍 Step 3: Delete all items |
+| 5 | click |  |  |  |
+| 6 | click |  |  |  |
+| 7 | wait | `1000` |  |  |
+| 8 | log |  |  | 📍 Step 4: Verify empty state is displayed |
+| 9 | log |  |  | 📍 Step 5: Verify item count is 0 |
+
+**Code Reference:**
+
+```typescript
+// Line 190
+console.log('📍 Step 1: Check if any items exist');
+
+// Line 195
+console.log('📍 Step 2: Create some test items to delete');
+
+// Line 203
+await page.waitForTimeout(500);
+
+// Line 210
+console.log('📍 Step 3: Delete all items');
+
+// Line 223
+await deleteButton.click();
+
+// Line 227
+await confirmButton.click();
+
+// Line 230
+await page.waitForTimeout(1000);
+
+// Line 233
+console.log('📍 Step 4: Verify empty state is displayed');
+
+// Line 236
+console.log('📍 Step 5: Verify item count is 0');
+
+```
+
+---
+
+## 195. delete confirmation dialog
+
+**Source:** [`__tests__/playwright/dashboard/training/05-delete-data.spec.ts`](/__tests__/playwright/dashboard/training/05-delete-data.spec.ts)
+
+**Total Steps:** 13
+
+**Workflow Steps:**
+
+| Step | Action | Target | Value | Expected Outcome |
+|------|--------|--------|-------|------------------|
+| 1 | log |  |  | 📍 Step 1: Create test item |
+| 2 | log |  |  | 📍 Step 2: Click delete button |
+| 3 | click |  |  |  |
+| 4 | log |  |  | 📍 Step 3: Check if confirmation dialog appears |
+| 5 | log |  |  | 📍 Step 4: Click cancel |
+| 6 | click |  |  |  |
+| 7 | wait | `1000` |  |  |
+| 8 | log |  |  | 📍 Step 5: Verify item is still in list |
+| 9 | log |  |  | 📍 Step 6: Delete again and confirm |
+| 10 | click |  |  |  |
+| 11 | click |  |  |  |
+| 12 | click |  |  |  |
+| 13 | log |  |  | 📍 Step 7: Verify item is deleted |
+
+**Code Reference:**
+
+```typescript
+// Line 249
+console.log('📍 Step 1: Create test item');
+
+// Line 253
+console.log('📍 Step 2: Click delete button');
+
+// Line 256
+await deleteButton.click();
+
+// Line 258
+console.log('📍 Step 3: Check if confirmation dialog appears');
+
+// Line 267
+console.log('📍 Step 4: Click cancel');
+
+// Line 269
+await cancelButton.click();
+
+// Line 270
+await page.waitForTimeout(1000);
+
+// Line 272
+console.log('📍 Step 5: Verify item is still in list');
+
+// Line 276
+console.log('📍 Step 6: Delete again and confirm');
+
+// Line 277
+await deleteButton.click();
+
+// ... 3 more steps ...
+```
+
+---
+
+## 196. URL uploads generate embeddings
+
+**Source:** [`__tests__/playwright/dashboard/training/04-verify-embeddings.spec.ts`](/__tests__/playwright/dashboard/training/04-verify-embeddings.spec.ts)
+
+**Total Steps:** 6
+
+**Workflow Steps:**
+
+| Step | Action | Target | Value | Expected Outcome |
+|------|--------|--------|-------|------------------|
+| 1 | log |  |  | 📍 Step 1: Upload URL |
+| 2 | log |  |  | 📍 Step 2: Wait for URL to appear in list |
+| 3 | log |  |  | 📍 Step 3: Wait for processing to complete |
+| 4 | log |  |  | 📍 Step 4: Wait for embeddings to be generated (5s) |
+| 5 | wait | `5000` |  |  |
+| 6 | log |  |  | 📍 Step 5: Query database for embeddings |
+
+**Code Reference:**
+
+```typescript
+// Line 54
+console.log('📍 Step 1: Upload URL');
+
+// Line 57
+console.log('📍 Step 2: Wait for URL to appear in list');
+
+// Line 60
+console.log('📍 Step 3: Wait for processing to complete');
+
+// Line 63
+console.log('📍 Step 4: Wait for embeddings to be generated (5s)');
+
+// Line 64
+await page.waitForTimeout(5000);
+
+// Line 66
+console.log('📍 Step 5: Query database for embeddings');
+
+```
+
+---
+
+## 197. text uploads generate embeddings
+
+**Source:** [`__tests__/playwright/dashboard/training/04-verify-embeddings.spec.ts`](/__tests__/playwright/dashboard/training/04-verify-embeddings.spec.ts)
+
+**Total Steps:** 6
+
+**Workflow Steps:**
+
+| Step | Action | Target | Value | Expected Outcome |
+|------|--------|--------|-------|------------------|
+| 1 | log |  |  | 📍 Step 1: Upload text content |
+| 2 | log |  |  | 📍 Step 2: Wait for text to appear in list |
+| 3 | log |  |  | 📍 Step 3: Wait for processing to complete |
+| 4 | log |  |  | 📍 Step 4: Wait for embeddings to be generated (5s) |
+| 5 | wait | `5000` |  |  |
+| 6 | log |  |  | 📍 Step 5: Query database for text embeddings |
+
+**Code Reference:**
+
+```typescript
+// Line 106
+console.log('📍 Step 1: Upload text content');
+
+// Line 109
+console.log('📍 Step 2: Wait for text to appear in list');
+
+// Line 112
+console.log('📍 Step 3: Wait for processing to complete');
+
+// Line 115
+console.log('📍 Step 4: Wait for embeddings to be generated (5s)');
+
+// Line 116
+await page.waitForTimeout(5000);
+
+// Line 118
+console.log('📍 Step 5: Query database for text embeddings');
+
+```
+
+---
+
+## 198. Q&A uploads generate embeddings
+
+**Source:** [`__tests__/playwright/dashboard/training/04-verify-embeddings.spec.ts`](/__tests__/playwright/dashboard/training/04-verify-embeddings.spec.ts)
+
+**Total Steps:** 6
+
+**Workflow Steps:**
+
+| Step | Action | Target | Value | Expected Outcome |
+|------|--------|--------|-------|------------------|
+| 1 | log |  |  | 📍 Step 1: Upload Q&A pair |
+| 2 | log |  |  | 📍 Step 2: Wait for Q&A to appear in list |
+| 3 | log |  |  | 📍 Step 3: Wait for processing to complete |
+| 4 | log |  |  | 📍 Step 4: Wait for embeddings to be generated (5s) |
+| 5 | wait | `5000` |  |  |
+| 6 | log |  |  | 📍 Step 5: Query database for Q&A embeddings |
+
+**Code Reference:**
+
+```typescript
+// Line 152
+console.log('📍 Step 1: Upload Q&A pair');
+
+// Line 155
+console.log('📍 Step 2: Wait for Q&A to appear in list');
+
+// Line 158
+console.log('📍 Step 3: Wait for processing to complete');
+
+// Line 161
+console.log('📍 Step 4: Wait for embeddings to be generated (5s)');
+
+// Line 162
+await page.waitForTimeout(5000);
+
+// Line 164
+console.log('📍 Step 5: Query database for Q&A embeddings');
+
+```
+
+---
+
+## 199. embeddings are searchable via RAG
+
+**Source:** [`__tests__/playwright/dashboard/training/04-verify-embeddings.spec.ts`](/__tests__/playwright/dashboard/training/04-verify-embeddings.spec.ts)
+
+**Total Steps:** 14
+
+**Workflow Steps:**
+
+| Step | Action | Target | Value | Expected Outcome |
+|------|--------|--------|-------|------------------|
+| 1 | log |  |  | 📍 Step 1: Upload text with unique searchable content |
+| 2 | log |  |  | 📍 Step 2: Wait for text to appear and process |
+| 3 | log |  |  | 📍 Step 3: Wait for embeddings to be generated and indexed (10s) |
+| 4 | wait | `10000` |  |  |
+| 5 | log |  |  | 📍 Step 4: Verify embeddings exist in database |
+| 6 | log |  |  | 📍 Step 5: Navigate to widget test page |
+| 7 | navigate | `/widget-test` |  |  |
+| 8 | log |  |  | 📍 Step 6: Open chat widget |
+| 9 | wait | `{ state: 'visible', timeout: 10000 }` |  |  |
+| 10 | log |  |  | 📍 Step 7: Send query asking about our unique content |
+| 11 | fill | `searchQuery` |  |  |
+| 12 | log |  |  | 📍 Step 8: Wait for AI response |
+| 13 | wait | `8000` |  |  |
+| 14 | log |  |  | 📍 Step 9: Verify AI response mentions our content |
+
+**Code Reference:**
+
+```typescript
+// Line 202
+console.log('📍 Step 1: Upload text with unique searchable content');
+
+// Line 205
+console.log('📍 Step 2: Wait for text to appear and process');
+
+// Line 209
+console.log('📍 Step 3: Wait for embeddings to be generated and indexed (10s)');
+
+// Line 210
+await page.waitForTimeout(10000);
+
+// Line 212
+console.log('📍 Step 4: Verify embeddings exist in database');
+
+// Line 223
+console.log('📍 Step 5: Navigate to widget test page');
+
+// Line 224
+await page.goto('/widget-test');
+
+// Line 227
+console.log('📍 Step 6: Open chat widget');
+
+// Line 229
+await iframe.locator('body').waitFor({ state: 'visible', timeout: 10000 });
+
+// Line 231
+console.log('📍 Step 7: Send query asking about our unique content');
+
+// ... 4 more steps ...
+```
+
+---
+
+## 200. verify embedding pipeline for all upload types
+
+**Source:** [`__tests__/playwright/dashboard/training/04-verify-embeddings.spec.ts`](/__tests__/playwright/dashboard/training/04-verify-embeddings.spec.ts)
+
+**Total Steps:** 10
+
+**Workflow Steps:**
+
+| Step | Action | Target | Value | Expected Outcome |
+|------|--------|--------|-------|------------------|
+| 1 | log |  |  | 📍 Step 1: Upload URL |
+| 2 | wait | `3000` |  |  |
+| 3 | log |  |  | 📍 Step 2: Upload text |
+| 4 | wait | `3000` |  |  |
+| 5 | log |  |  | 📍 Step 3: Upload Q&A |
+| 6 | log |  |  | 📍 Step 4: Wait for all embeddings to be generated (15s) |
+| 7 | wait | `15000` |  |  |
+| 8 | log |  |  | 📍 Step 5: Verify embeddings exist for URL upload |
+| 9 | log |  |  | 📍 Step 6: Verify embeddings exist for text upload |
+| 10 | log |  |  | 📍 Step 7: Verify embeddings exist for Q&A upload |
+
+**Code Reference:**
+
+```typescript
+// Line 278
+console.log('📍 Step 1: Upload URL');
+
+// Line 281
+await page.waitForTimeout(3000);
+
+// Line 283
+console.log('📍 Step 2: Upload text');
+
+// Line 286
+await page.waitForTimeout(3000);
+
+// Line 288
+console.log('📍 Step 3: Upload Q&A');
+
+// Line 292
+console.log('📍 Step 4: Wait for all embeddings to be generated (15s)');
+
+// Line 293
+await page.waitForTimeout(15000);
+
+// Line 295
+console.log('📍 Step 5: Verify embeddings exist for URL upload');
+
+// Line 304
+console.log('📍 Step 6: Verify embeddings exist for text upload');
+
+// Line 313
+console.log('📍 Step 7: Verify embeddings exist for Q&A upload');
+
+```
+
+---
+
+## 201. user uploads Q&A pairs for FAQ training
+
+**Source:** [`__tests__/playwright/dashboard/training/03-upload-qa.spec.ts`](/__tests__/playwright/dashboard/training/03-upload-qa.spec.ts)
+
+**Total Steps:** 3
+
+**Workflow Steps:**
+
+| Step | Action | Target | Value | Expected Outcome |
+|------|--------|--------|-------|------------------|
+| 1 | log |  |  | 📍 Step 1: Upload Q&A pair |
+| 2 | log |  |  | 📍 Step 2: Verify Q&A appears in list |
+| 3 | log |  |  | 📍 Step 3: Wait for embedding generation to complete |
+
+**Code Reference:**
+
+```typescript
+// Line 46
+console.log('📍 Step 1: Upload Q&A pair');
+
+// Line 49
+console.log('📍 Step 2: Verify Q&A appears in list');
+
+// Line 53
+console.log('📍 Step 3: Wait for embedding generation to complete');
+
+```
+
+---
+
+## 202. Q&A with long answers
+
+**Source:** [`__tests__/playwright/dashboard/training/03-upload-qa.spec.ts`](/__tests__/playwright/dashboard/training/03-upload-qa.spec.ts)
+
+**Total Steps:** 2
+
+**Workflow Steps:**
+
+| Step | Action | Target | Value | Expected Outcome |
+|------|--------|--------|-------|------------------|
+| 1 | log |  |  | 📍 Step 2: Verify Q&A appears in list |
+| 2 | log |  |  | 📍 Step 3: Verify answer is stored (not truncated in backend) |
+
+**Code Reference:**
+
+```typescript
+// Line 69
+console.log('📍 Step 2: Verify Q&A appears in list');
+
+// Line 72
+console.log('📍 Step 3: Verify answer is stored (not truncated in backend)');
+
+```
+
+---
+
+## 203. incomplete Q&A validation
+
+**Source:** [`__tests__/playwright/dashboard/training/03-upload-qa.spec.ts`](/__tests__/playwright/dashboard/training/03-upload-qa.spec.ts)
+
+**Total Steps:** 11
+
+**Workflow Steps:**
+
+| Step | Action | Target | Value | Expected Outcome |
+|------|--------|--------|-------|------------------|
+| 1 | log |  |  | 📍 Step 1: Switch to Q&A tab |
+| 2 | wait | `500` |  |  |
+| 3 | log |  |  | 📍 Step 2: Try to submit with only question (no answer) |
+| 4 | fill | `Test question without answer?` |  |  |
+| 5 | log |  |  | 📍 Step 3: Verify validation prevents submission |
+| 6 | click |  |  |  |
+| 7 | wait | `1000` |  |  |
+| 8 | log |  |  | 📍 Step 4: Try to submit with only answer (no question) |
+| 9 | fill | `Test answer without question.` |  |  |
+| 10 | click |  |  |  |
+| 11 | wait | `1000` |  |  |
+
+**Code Reference:**
+
+```typescript
+// Line 84
+console.log('📍 Step 1: Switch to Q&A tab');
+
+// Line 86
+await page.waitForTimeout(500);
+
+// Line 88
+console.log('📍 Step 2: Try to submit with only question (no answer)');
+
+// Line 93
+await questionInput.fill('Test question without answer?');
+
+// Line 101
+console.log('📍 Step 3: Verify validation prevents submission');
+
+// Line 108
+await submitButton.click();
+
+// Line 109
+await page.waitForTimeout(1000);
+
+// Line 121
+console.log('📍 Step 4: Try to submit with only answer (no question)');
+
+// Line 123
+await answerInput.fill('Test answer without question.');
+
+// Line 130
+await submitButton.click();
+
+// ... 1 more steps ...
+```
+
+---
+
+## 204. multiple Q&A pairs
+
+**Source:** [`__tests__/playwright/dashboard/training/03-upload-qa.spec.ts`](/__tests__/playwright/dashboard/training/03-upload-qa.spec.ts)
+
+**Total Steps:** 4
+
+**Workflow Steps:**
+
+| Step | Action | Target | Value | Expected Outcome |
+|------|--------|--------|-------|------------------|
+| 1 | log |  |  | 📍 Step 1: Submit multiple Q&A pairs |
+| 2 | wait | `1000` |  |  |
+| 3 | log |  |  | 📍 Step 2: Verify all Q&A pairs appear in list |
+| 4 | log |  |  | 📍 Step 3: Verify list contains at least 3 items |
+
+**Code Reference:**
+
+```typescript
+// Line 164
+console.log('📍 Step 1: Submit multiple Q&A pairs');
+
+// Line 167
+await page.waitForTimeout(1000);
+
+// Line 170
+console.log('📍 Step 2: Verify all Q&A pairs appear in list');
+
+// Line 176
+console.log('📍 Step 3: Verify list contains at least 3 items');
+
+```
+
+---
+
+## 205. Q&A with special characters
+
+**Source:** [`__tests__/playwright/dashboard/training/03-upload-qa.spec.ts`](/__tests__/playwright/dashboard/training/03-upload-qa.spec.ts)
+
+**Total Steps:** 3
+
+**Workflow Steps:**
+
+| Step | Action | Target | Value | Expected Outcome |
+|------|--------|--------|-------|------------------|
+| 1 | log |  |  | 📍 Step 1: Upload Q&A with special characters |
+| 2 | log |  |  | 📍 Step 2: Verify Q&A appears in list with special chars intact |
+| 3 | log |  |  | 📍 Step 3: Verify special characters are properly encoded |
+
+**Code Reference:**
+
+```typescript
+// Line 191
+console.log('📍 Step 1: Upload Q&A with special characters');
+
+// Line 194
+console.log('📍 Step 2: Verify Q&A appears in list with special chars intact');
+
+// Line 197
+console.log('📍 Step 3: Verify special characters are properly encoded');
+
+```
+
+---
+
+## 206. user uploads text and generates embeddings
+
+**Source:** [`__tests__/playwright/dashboard/training/02-upload-text.spec.ts`](/__tests__/playwright/dashboard/training/02-upload-text.spec.ts)
+
+**Total Steps:** 3
+
+**Workflow Steps:**
+
+| Step | Action | Target | Value | Expected Outcome |
+|------|--------|--------|-------|------------------|
+| 1 | log |  |  | 📍 Step 1: Upload text content |
+| 2 | log |  |  | 📍 Step 2: Verify text appears in list |
+| 3 | log |  |  | 📍 Step 3: Wait for embedding generation to complete |
+
+**Code Reference:**
+
+```typescript
+// Line 45
+console.log('📍 Step 1: Upload text content');
+
+// Line 48
+console.log('📍 Step 2: Verify text appears in list');
+
+// Line 51
+console.log('📍 Step 3: Wait for embedding generation to complete');
+
+```
+
+---
+
+## 207. short text (< 200 chars)
+
+**Source:** [`__tests__/playwright/dashboard/training/02-upload-text.spec.ts`](/__tests__/playwright/dashboard/training/02-upload-text.spec.ts)
+
+**Total Steps:** 2
+
+**Workflow Steps:**
+
+| Step | Action | Target | Value | Expected Outcome |
+|------|--------|--------|-------|------------------|
+| 1 | log |  |  | 📍 Step 1: Upload short text |
+| 2 | log |  |  | 📍 Step 2: Verify text appears in full (not truncated) |
+
+**Code Reference:**
+
+```typescript
+// Line 62
+console.log('📍 Step 1: Upload short text');
+
+// Line 65
+console.log('📍 Step 2: Verify text appears in full (not truncated)');
+
+```
+
+---
+
+## 208. long text (> 200 chars, truncated preview)
+
+**Source:** [`__tests__/playwright/dashboard/training/02-upload-text.spec.ts`](/__tests__/playwright/dashboard/training/02-upload-text.spec.ts)
+
+**Total Steps:** 2
+
+**Workflow Steps:**
+
+| Step | Action | Target | Value | Expected Outcome |
+|------|--------|--------|-------|------------------|
+| 1 | log |  |  | 📍 Step 2: Verify text appears with preview |
+| 2 | log |  |  | 📍 Step 3: Verify text is present (CSS truncate handles overflow) |
+
+**Code Reference:**
+
+```typescript
+// Line 84
+console.log('📍 Step 2: Verify text appears with preview');
+
+// Line 89
+console.log('📍 Step 3: Verify text is present (CSS truncate handles overflow)');
+
+```
+
+---
+
+## 209. empty text validation
+
+**Source:** [`__tests__/playwright/dashboard/training/02-upload-text.spec.ts`](/__tests__/playwright/dashboard/training/02-upload-text.spec.ts)
+
+**Total Steps:** 5
+
+**Workflow Steps:**
+
+| Step | Action | Target | Value | Expected Outcome |
+|------|--------|--------|-------|------------------|
+| 1 | log |  |  | 📍 Step 1: Switch to Text tab |
+| 2 | log |  |  | 📍 Step 2: Try to submit empty text |
+| 3 | log |  |  | 📍 Step 3: Verify submit button is disabled or shows validation error |
+| 4 | click |  |  |  |
+| 5 | wait | `1000` |  |  |
+
+**Code Reference:**
+
+```typescript
+// Line 103
+console.log('📍 Step 1: Switch to Text tab');
+
+// Line 106
+console.log('📍 Step 2: Try to submit empty text');
+
+// Line 113
+console.log('📍 Step 3: Verify submit button is disabled or shows validation error');
+
+// Line 121
+await submitButton.click();
+
+// Line 122
+await page.waitForTimeout(1000);
+
+```
+
+---
+
+## 210. multiple text submissions
+
+**Source:** [`__tests__/playwright/dashboard/training/02-upload-text.spec.ts`](/__tests__/playwright/dashboard/training/02-upload-text.spec.ts)
+
+**Total Steps:** 4
+
+**Workflow Steps:**
+
+| Step | Action | Target | Value | Expected Outcome |
+|------|--------|--------|-------|------------------|
+| 1 | log |  |  | 📍 Step 1: Submit multiple text entries |
+| 2 | wait | `1000` |  |  |
+| 3 | log |  |  | 📍 Step 2: Verify all texts appear in list |
+| 4 | log |  |  | 📍 Step 3: Verify list contains at least 3 items |
+
+**Code Reference:**
+
+```typescript
+// Line 148
+console.log('📍 Step 1: Submit multiple text entries');
+
+// Line 151
+await page.waitForTimeout(1000);
+
+// Line 154
+console.log('📍 Step 2: Verify all texts appear in list');
+
+// Line 160
+console.log('📍 Step 3: Verify list contains at least 3 items');
+
+```
+
+---
+
+## 211. user uploads URL and processes to completion
+
+**Source:** [`__tests__/playwright/dashboard/training/01-upload-url.spec.ts`](/__tests__/playwright/dashboard/training/01-upload-url.spec.ts)
+
+**Total Steps:** 3
+
+**Workflow Steps:**
+
+| Step | Action | Target | Value | Expected Outcome |
+|------|--------|--------|-------|------------------|
+| 1 | log |  |  | 📍 Step 1: Upload URL without https:// |
+| 2 | log |  |  | 📍 Step 2: Verify URL appears in list (normalized with https://) |
+| 3 | log |  |  | 📍 Step 3: Wait for scraping to complete |
+
+**Code Reference:**
+
+```typescript
+// Line 43
+console.log('📍 Step 1: Upload URL without https://');
+
+// Line 46
+console.log('📍 Step 2: Verify URL appears in list (normalized with https://)');
+
+// Line 49
+console.log('📍 Step 3: Wait for scraping to complete');
+
+```
+
+---
+
+## 212. URL normalization (auto-adds https://)
+
+**Source:** [`__tests__/playwright/dashboard/training/01-upload-url.spec.ts`](/__tests__/playwright/dashboard/training/01-upload-url.spec.ts)
+
+**Total Steps:** 2
+
+**Workflow Steps:**
+
+| Step | Action | Target | Value | Expected Outcome |
+|------|--------|--------|-------|------------------|
+| 1 | log |  |  | 📍 Step 1: Submit URL without protocol |
+| 2 | log |  |  | 📍 Step 2: Verify URL is normalized to https:// |
+
+**Code Reference:**
+
+```typescript
+// Line 59
+console.log('📍 Step 1: Submit URL without protocol');
+
+// Line 62
+console.log('📍 Step 2: Verify URL is normalized to https://');
+
+```
+
+---
+
+## 213. scraping failure handling
+
+**Source:** [`__tests__/playwright/dashboard/training/01-upload-url.spec.ts`](/__tests__/playwright/dashboard/training/01-upload-url.spec.ts)
+
+**Total Steps:** 4
+
+**Workflow Steps:**
+
+| Step | Action | Target | Value | Expected Outcome |
+|------|--------|--------|-------|------------------|
+| 1 | log |  |  | 📍 Step 1: Submit invalid URL |
+| 2 | log |  |  | 📍 Step 2: Wait for item to appear |
+| 3 | log |  |  | 📍 Step 3: Check for error state or removal |
+| 4 | wait | `5000` |  |  |
+
+**Code Reference:**
+
+```typescript
+// Line 78
+console.log('📍 Step 1: Submit invalid URL');
+
+// Line 81
+console.log('📍 Step 2: Wait for item to appear');
+
+// Line 84
+console.log('📍 Step 3: Check for error state or removal');
+
+// Line 86
+await page.waitForTimeout(5000);
+
+```
+
+---
+
+## 214. multiple URL submissions
+
+**Source:** [`__tests__/playwright/dashboard/training/01-upload-url.spec.ts`](/__tests__/playwright/dashboard/training/01-upload-url.spec.ts)
+
+**Total Steps:** 4
+
+**Workflow Steps:**
+
+| Step | Action | Target | Value | Expected Outcome |
+|------|--------|--------|-------|------------------|
+| 1 | log |  |  | 📍 Step 1: Submit multiple URLs |
+| 2 | wait | `1000` |  |  |
+| 3 | log |  |  | 📍 Step 2: Verify all URLs appear in list |
+| 4 | log |  |  | 📍 Step 3: Verify list contains at least 3 items |
+
+**Code Reference:**
+
+```typescript
+// Line 114
+console.log('📍 Step 1: Submit multiple URLs');
+
+// Line 117
+await page.waitForTimeout(1000);
+
+// Line 120
+console.log('📍 Step 2: Verify all URLs appear in list');
+
+// Line 127
+console.log('📍 Step 3: Verify list contains at least 3 items');
+
+```
+
+---
+
+## 215. English to Spanish translation
 
 **Source:** [`__tests__/playwright/advanced-features/multi-language/translation.spec.ts`](/__tests__/playwright/advanced-features/multi-language/translation.spec.ts)
 
@@ -5690,7 +7283,7 @@ await page.waitForTimeout(5000);
 
 ---
 
-## 169. UI updates immediately on language change
+## 216. UI updates immediately on language change
 
 **Source:** [`__tests__/playwright/advanced-features/multi-language/translation.spec.ts`](/__tests__/playwright/advanced-features/multi-language/translation.spec.ts)
 
@@ -5712,7 +7305,7 @@ await page.goto(`${BASE_URL}/test-widget`, { waitUntil: 'networkidle' });
 
 ---
 
-## 170. RTL languages display correctly (Arabic)
+## 217. RTL languages display correctly (Arabic)
 
 **Source:** [`__tests__/playwright/advanced-features/multi-language/rtl-support.spec.ts`](/__tests__/playwright/advanced-features/multi-language/rtl-support.spec.ts)
 
@@ -5770,7 +7363,7 @@ console.log('📍 Step 6: Verify send button present');
 
 ---
 
-## 171. Hebrew (RTL) text rendering
+## 218. Hebrew (RTL) text rendering
 
 **Source:** [`__tests__/playwright/advanced-features/multi-language/rtl-support.spec.ts`](/__tests__/playwright/advanced-features/multi-language/rtl-support.spec.ts)
 
@@ -5804,7 +7397,7 @@ await inputField.fill('שלום, איך אני יכול לעזור?');
 
 ---
 
-## 172. RTL layout persists across language changes
+## 219. RTL layout persists across language changes
 
 **Source:** [`__tests__/playwright/advanced-features/multi-language/rtl-support.spec.ts`](/__tests__/playwright/advanced-features/multi-language/rtl-support.spec.ts)
 
@@ -5842,7 +7435,7 @@ await page.waitForTimeout(2000);
 
 ---
 
-## 173. locale preference persists in localStorage
+## 220. locale preference persists in localStorage
 
 **Source:** [`__tests__/playwright/advanced-features/multi-language/locale-formatting.spec.ts`](/__tests__/playwright/advanced-features/multi-language/locale-formatting.spec.ts)
 
@@ -5864,7 +7457,7 @@ await page.goto(`${BASE_URL}/test-widget`, { waitUntil: 'networkidle' });
 
 ---
 
-## 174. multiple locales can be switched
+## 221. multiple locales can be switched
 
 **Source:** [`__tests__/playwright/advanced-features/multi-language/locale-formatting.spec.ts`](/__tests__/playwright/advanced-features/multi-language/locale-formatting.spec.ts)
 
@@ -5886,7 +7479,7 @@ await page.goto(`${BASE_URL}/test-widget`, { waitUntil: 'networkidle' });
 
 ---
 
-## 175. invalid locale handled gracefully
+## 222. invalid locale handled gracefully
 
 **Source:** [`__tests__/playwright/advanced-features/multi-language/locale-formatting.spec.ts`](/__tests__/playwright/advanced-features/multi-language/locale-formatting.spec.ts)
 
@@ -5908,7 +7501,7 @@ await page.goto(`${BASE_URL}/test-widget`, { waitUntil: 'networkidle' });
 
 ---
 
-## 176. language switching preserves conversation history
+## 223. language switching preserves conversation history
 
 **Source:** [`__tests__/playwright/advanced-features/multi-language/language-switching.spec.ts`](/__tests__/playwright/advanced-features/multi-language/language-switching.spec.ts)
 
@@ -5968,7 +7561,7 @@ await page.waitForTimeout(5000);
 
 ---
 
-## 177. language persists after page reload
+## 224. language persists after page reload
 
 **Source:** [`__tests__/playwright/advanced-features/multi-language/language-switching.spec.ts`](/__tests__/playwright/advanced-features/multi-language/language-switching.spec.ts)
 
@@ -6006,7 +7599,7 @@ console.log('📍 Step 4: Verify UI shows Spanish after reload');
 
 ---
 
-## 178. rapid language switches handled correctly
+## 225. rapid language switches handled correctly
 
 **Source:** [`__tests__/playwright/advanced-features/multi-language/language-switching.spec.ts`](/__tests__/playwright/advanced-features/multi-language/language-switching.spec.ts)
 
@@ -6032,7 +7625,7 @@ await page.waitForTimeout(500);
 
 ---
 
-## 179. browser locale auto-detection
+## 226. browser locale auto-detection
 
 **Source:** [`__tests__/playwright/advanced-features/multi-language/language-detection.spec.ts`](/__tests__/playwright/advanced-features/multi-language/language-detection.spec.ts)
 
@@ -6074,7 +7667,7 @@ console.log('📍 Step 4: Check if UI adapted to browser locale');
 
 ---
 
-## 180. complete language workflow: English → Spanish → Arabic (RTL)
+## 227. complete language workflow: English → Spanish → Arabic (RTL)
 
 **Source:** [`__tests__/playwright/advanced-features/multi-language/complete-workflow.spec.ts`](/__tests__/playwright/advanced-features/multi-language/complete-workflow.spec.ts)
 
@@ -6137,7 +7730,7 @@ await page.waitForTimeout(5000);
 
 ---
 
-## 181. abandoned conversation → detection → schedule → send
+## 228. abandoned conversation → detection → schedule → send
 
 **Source:** [`__tests__/playwright/advanced-features/automated-follow-ups/workflow.spec.ts`](/__tests__/playwright/advanced-features/automated-follow-ups/workflow.spec.ts)
 
@@ -6155,7 +7748,7 @@ await page.waitForTimeout(5000);
 
 ---
 
-## 182. sends high-priority low-satisfaction follow-up
+## 229. sends high-priority low-satisfaction follow-up
 
 **Source:** [`__tests__/playwright/advanced-features/automated-follow-ups/priority-follow-ups.spec.ts`](/__tests__/playwright/advanced-features/automated-follow-ups/priority-follow-ups.spec.ts)
 
@@ -6173,7 +7766,7 @@ await page.waitForTimeout(5000);
 
 ---
 
-## 183. respects follow-up attempt limits
+## 230. respects follow-up attempt limits
 
 **Source:** [`__tests__/playwright/advanced-features/automated-follow-ups/edge-cases.spec.ts`](/__tests__/playwright/advanced-features/automated-follow-ups/edge-cases.spec.ts)
 
@@ -6191,7 +7784,7 @@ await page.waitForTimeout(5000);
 
 ---
 
-## 184. supports multiple scheduling windows
+## 231. supports multiple scheduling windows
 
 **Source:** [`__tests__/playwright/advanced-features/automated-follow-ups/edge-cases.spec.ts`](/__tests__/playwright/advanced-features/automated-follow-ups/edge-cases.spec.ts)
 
@@ -6209,7 +7802,7 @@ await page.waitForTimeout(5000);
 
 ---
 
-## 185. handles email vs in-app channel routing
+## 232. handles email vs in-app channel routing
 
 **Source:** [`__tests__/playwright/advanced-features/automated-follow-ups/edge-cases.spec.ts`](/__tests__/playwright/advanced-features/automated-follow-ups/edge-cases.spec.ts)
 
@@ -6227,7 +7820,7 @@ await page.waitForTimeout(5000);
 
 ---
 
-## 186. should track add-to-cart operation with full analytics
+## 233. should track add-to-cart operation with full analytics
 
 **Source:** [`__tests__/playwright/advanced-features/automated-follow-ups/cart-operations-with-analytics.spec.ts`](/__tests__/playwright/advanced-features/automated-follow-ups/cart-operations-with-analytics.spec.ts)
 
@@ -6288,7 +7881,7 @@ await page.waitForTimeout(3000);
 
 ---
 
-## 187. should track multi-step cart journey with session continuity
+## 234. should track multi-step cart journey with session continuity
 
 **Source:** [`__tests__/playwright/advanced-features/automated-follow-ups/cart-operations-with-analytics.spec.ts`](/__tests__/playwright/advanced-features/automated-follow-ups/cart-operations-with-analytics.spec.ts)
 
@@ -6352,7 +7945,7 @@ await input.fill('Also add product BP-001 to cart');
 
 ---
 
-## 188. should calculate accurate session duration
+## 235. should calculate accurate session duration
 
 **Source:** [`__tests__/playwright/advanced-features/automated-follow-ups/cart-operations-with-analytics.spec.ts`](/__tests__/playwright/advanced-features/automated-follow-ups/cart-operations-with-analytics.spec.ts)
 
@@ -6412,7 +8005,7 @@ await input.fill('Show cart again');
 
 ---
 
-## 189. should track operation failures with error messages
+## 236. should track operation failures with error messages
 
 **Source:** [`__tests__/playwright/advanced-features/automated-follow-ups/cart-operations-with-analytics.spec.ts`](/__tests__/playwright/advanced-features/automated-follow-ups/cart-operations-with-analytics.spec.ts)
 
@@ -6450,7 +8043,7 @@ await page.waitForTimeout(3000);
 
 ---
 
-## 190. should support analytics aggregation by platform
+## 237. should support analytics aggregation by platform
 
 **Source:** [`__tests__/playwright/advanced-features/automated-follow-ups/cart-operations-with-analytics.spec.ts`](/__tests__/playwright/advanced-features/automated-follow-ups/cart-operations-with-analytics.spec.ts)
 
@@ -6468,7 +8061,7 @@ await page.waitForTimeout(3000);
 
 ---
 
-## 191. pending follow-up cancelled when user returns
+## 238. pending follow-up cancelled when user returns
 
 **Source:** [`__tests__/playwright/advanced-features/automated-follow-ups/cancellation.spec.ts`](/__tests__/playwright/advanced-features/automated-follow-ups/cancellation.spec.ts)
 
@@ -6486,7 +8079,7 @@ await page.waitForTimeout(3000);
 
 ---
 
-## 192. tracks response metrics across channels
+## 239. tracks response metrics across channels
 
 **Source:** [`__tests__/playwright/advanced-features/automated-follow-ups/analytics.spec.ts`](/__tests__/playwright/advanced-features/automated-follow-ups/analytics.spec.ts)
 
@@ -6528,8 +8121,12 @@ await page.waitForTimeout(3000);
 - `/dashboard/analytics`
 - `/dashboard/telemetry`
 - `/widget-test`
+- `100`
 - `1000`
+- `10000`
 - `1500`
+- `15000`
+- `200`
 - `2000`
 - `300`
 - `3000`
@@ -6538,6 +8135,7 @@ await page.waitForTimeout(3000);
 - `45`
 - `500`
 - `5000`
+- `8000`
 - `Add product A4VTG90 to cart`
 - `Add product INVALID_PRODUCT_ID to cart`
 - `Add product to cart`
@@ -6566,6 +8164,7 @@ await page.waitForTimeout(3000);
 - `Show me my cart`
 - `Show me product A4VTG90 and add it to my cart`
 - `Show me your best products`
+- `Show me your products`
 - `Show me your widgets`
 - `TEST_DEMO_SITE`
 - `TEST_DOMAIN`
@@ -6613,6 +8212,7 @@ await page.waitForTimeout(3000);
 - `newdomain.com`
 - `nonexistent-session`
 - `order`
+- `searchQuery`
 - `secondMessage`
 - `session-123`
 - `session-abc-123`
@@ -6631,8 +8231,10 @@ await page.waitForTimeout(3000);
     }`
 - `{ state: 'attached', timeout: 10000 }`
 - `{ state: 'attached', timeout: 15000 }`
+- `{ state: 'visible' }`
 - `{ state: 'visible', timeout: 10000 }`
 - `{ state: 'visible', timeout: 5000 }`
+- `{ state: 'visible', timeout: 60000 }`
 - `{ timeout: 15000 }`
 - `שלום, איך אני יכול לעזור?`
 - `مرحبا، كيف يمكنني مساعدتك؟`

@@ -386,4 +386,4 @@ describe('ShopifyAPIClient', () => {
       }
     });
   });
-} as any);
+});

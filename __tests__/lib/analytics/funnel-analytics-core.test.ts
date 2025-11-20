@@ -1,24 +1,21 @@
 /**
- * Funnel Analytics Tests
+ * Funnel Analytics Tests - Core Functionality
  *
- * Comprehensive test coverage for customer journey funnel tracking
- * Tests all functions in lib/analytics/funnel-analytics.ts
+ * Tests for basic funnel tracking operations (chat, cart, purchase stages)
  */
 
-import { describe, it, expect, jest, beforeEach } from '@jest/globals';
+import { describe, it, expect, jest, beforeEach, afterEach } from '@jest/globals';
 import type { SupabaseClient } from '@supabase/supabase-js';
 import {
   recordChatStage,
   recordCartStage,
   recordPurchaseStage,
-  getFunnelMetrics,
-  getFunnelTrends,
 } from '@/lib/analytics/funnel-analytics';
 
 // Mock dependencies
 jest.mock('@/lib/supabase-server');
 
-describe('Funnel Analytics', () => {
+describe('Funnel Analytics - Core', () => {
   let mockSupabase: jest.Mocked<SupabaseClient>;
 
   beforeEach(() => {
@@ -30,8 +27,14 @@ describe('Funnel Analytics', () => {
     } as any;
 
     // Mock createServiceRoleClient to return our mock
+    // eslint-disable-next-line @typescript-eslint/no-require-imports
     const { createServiceRoleClient } = require('@/lib/supabase-server');
     (createServiceRoleClient as jest.Mock).mockResolvedValue(mockSupabase);
+  });
+
+  afterEach(() => {
+    // Restore any spies
+    jest.restoreAllMocks();
   });
 
   describe('recordChatStage', () => {
@@ -91,21 +94,6 @@ describe('Funnel Analytics', () => {
       await recordChatStage('conv-1', 'user@test.com', 'example.com');
 
       expect(insertedData.current_stage).toBe('chat');
-    });
-
-    it('handles database errors gracefully', async () => {
-      mockSupabase.from = jest.fn().mockReturnValue({
-        insert: jest.fn().mockReturnValue({
-          select: jest.fn().mockReturnValue({
-            single: jest.fn().mockResolvedValue({ data: null, error: { message: 'Insert failed' } }),
-          }),
-        }),
-      }) as any;
-
-      const result = await recordChatStage('conv-1', 'user@test.com', 'example.com');
-
-      expect(result.success).toBe(false);
-      expect(result.funnelId).toBeUndefined();
     });
   });
 
@@ -174,11 +162,13 @@ describe('Funnel Analytics', () => {
       }) as any;
 
       // Mock current time to be 5 minutes after chat start
-      jest.spyOn(Date, 'now').mockReturnValue(new Date('2024-01-01T10:05:00Z').getTime());
+      const dateNowSpy = jest.spyOn(Date, 'now').mockReturnValue(new Date('2024-01-01T10:05:00Z').getTime());
 
       await recordCartStage('conv-1', 'user@test.com', 'cart-123', 100, 1, 'medium');
 
       expect(updateData.time_to_cart).toBe(300); // 5 minutes in seconds
+
+      dateNowSpy.mockRestore();
     });
 
     it('creates new funnel entry if chat stage not found', async () => {
@@ -202,33 +192,6 @@ describe('Funnel Analytics', () => {
 
       expect(result.success).toBe(true);
       expect(insertMock).toHaveBeenCalled();
-    });
-
-    it('handles all priority levels', async () => {
-      const priorities: Array<'high' | 'medium' | 'low'> = ['high', 'medium', 'low'];
-
-      for (const priority of priorities) {
-        let updateData: any;
-
-        mockSupabase.from = jest.fn().mockReturnValue({
-          select: jest.fn().mockReturnThis(),
-          eq: jest.fn().mockReturnThis(),
-          single: jest.fn().mockResolvedValue({
-            data: { id: 'funnel-1', chat_started_at: '2024-01-01T10:00:00Z' },
-            error: null,
-          }),
-          update: jest.fn((data) => {
-            updateData = data;
-            return {
-              eq: jest.fn().mockResolvedValue({ error: null }),
-            };
-          }),
-        }) as any;
-
-        await recordCartStage('conv-1', 'user@test.com', 'cart-123', 100, 1, priority);
-
-        expect(updateData.cart_priority).toBe(priority);
-      }
     });
   });
 
@@ -294,11 +257,13 @@ describe('Funnel Analytics', () => {
       }) as any;
 
       // Mock current time to be 30 minutes after chat start
-      jest.spyOn(Date, 'now').mockReturnValue(new Date('2024-01-01T10:30:00Z').getTime());
+      const dateNowSpy = jest.spyOn(Date, 'now').mockReturnValue(new Date('2024-01-01T10:30:00Z').getTime());
 
       await recordPurchaseStage('conv-1', 'user@test.com', 'order-123', 100, 0.8, 'session_match');
 
       expect(updateData.time_to_purchase).toBe(1800); // 30 minutes in seconds
+
+      dateNowSpy.mockRestore();
     });
 
     it('calculates cart_to_purchase_time when cart stage exists', async () => {
@@ -323,32 +288,13 @@ describe('Funnel Analytics', () => {
       }) as any;
 
       // Mock current time to be 20 minutes after cart creation
-      jest.spyOn(Date, 'now').mockReturnValue(new Date('2024-01-01T10:30:00Z').getTime());
+      const dateNowSpy = jest.spyOn(Date, 'now').mockReturnValue(new Date('2024-01-01T10:30:00Z').getTime());
 
       await recordPurchaseStage('conv-1', 'user@test.com', 'order-123', 100, 0.9, 'session_match');
 
       expect(updateData.cart_to_purchase_time).toBe(1200); // 20 minutes in seconds
-    });
 
-    it('returns failure when funnel entry not found', async () => {
-      mockSupabase.from = jest.fn().mockReturnValue({
-        select: jest.fn().mockReturnThis(),
-        eq: jest.fn().mockReturnThis(),
-        single: jest.fn().mockResolvedValue({ data: null, error: null }),
-      }) as any;
-
-      const result = await recordPurchaseStage(
-        'conv-1',
-        'user@test.com',
-        'order-123',
-        100,
-        0.8,
-        'session_match'
-      );
-
-      expect(result.success).toBe(false);
+      dateNowSpy.mockRestore();
     });
   });
-
-  // See funnel-analytics-metrics.test.ts for getFunnelMetrics and getFunnelTrends tests
 });

@@ -47,9 +47,7 @@ describe('SKU Lookup Failure Scenarios', () => {
       expect(mockProvider.getProductDetails).toHaveBeenCalledWith('MU110667601');
     });
 
-    it('should log explicitly when SKU not found', async () => {
-      const consoleLogSpy = jest.spyOn(console, 'log').mockImplementation();
-
+    it('should return error result when SKU not found', async () => {
       const mockProvider = {
         platform: 'woocommerce',
         getProductDetails: jest.fn().mockResolvedValue(null),
@@ -60,22 +58,18 @@ describe('SKU Lookup Failure Scenarios', () => {
         searchSimilarContent: jest.fn().mockResolvedValue([]),
       };
 
-      await executeGetProductDetails(
+      const result = await executeGetProductDetails(
         'ABC123XYZ',
         true,
         'test.com',
         mockDeps
       );
 
-      // Should log the specific product query that wasn't found
-      expect(consoleLogSpy).toHaveBeenCalledWith(
-        expect.stringContaining('woocommerce product not found'),
-      );
-      expect(consoleLogSpy).toHaveBeenCalledWith(
-        expect.stringContaining('ABC123XYZ')
-      );
-
-      consoleLogSpy.mockRestore();
+      // Should return error result with not-found status
+      expect(result.success).toBe(false);
+      expect(result.source).toBe('woocommerce-not-found');
+      expect(result.errorMessage).toContain('ABC123XYZ');
+      expect(result.errorMessage).toContain('not found');
     });
   });
 

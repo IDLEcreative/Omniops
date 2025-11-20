@@ -25,6 +25,7 @@ describe('Alert Threshold Checker - Read Operations', () => {
       rpc: jest.fn(),
     } as any;
 
+    // eslint-disable-next-line @typescript-eslint/no-require-imports
     const { createServiceRoleClient } = require('@/lib/supabase-server');
     (createServiceRoleClient as jest.Mock).mockResolvedValue(mockSupabase);
   });

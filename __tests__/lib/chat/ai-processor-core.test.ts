@@ -8,12 +8,8 @@
 import { describe, it, expect, jest, beforeEach } from '@jest/globals';
 import { processAIConversation } from '@/lib/chat/ai-processor';
 
-jest.mock('@/lib/chat/get-available-tools');
-jest.mock('@/lib/chat/ai-processor-tool-executor');
 jest.mock('@/lib/chat/shopping-message-transformer');
 
-import { getAvailableTools, checkToolAvailability, getToolInstructions } from '@/lib/chat/get-available-tools';
-import { executeToolCallsParallel, formatToolResultsForAI } from '@/lib/chat/ai-processor-tool-executor';
 import {
   createMockOpenAIClient,
   createMockTelemetry,
@@ -25,8 +21,7 @@ import {
   createTextResponse
 } from './ai-processor-setup';
 
-// TODO: Fix mock setup issue with getAvailableTools - temporarily skipped to allow push
-describe.skip('AI Processor - Core Functionality', () => {
+describe('AI Processor - Core Functionality', () => {
   let mockOpenAIClient: ReturnType<typeof createMockOpenAIClient>;
   let mockTelemetry: ReturnType<typeof createMockTelemetry>;
   let mockDependencies: ReturnType<typeof createMockDependencies>;
@@ -39,13 +34,6 @@ describe.skip('AI Processor - Core Functionality', () => {
     mockTelemetry = createMockTelemetry();
     mockDependencies = createMockDependencies();
     baseParams = createBaseParams(mockOpenAIClient, mockTelemetry, mockDependencies);
-
-    (getAvailableTools as jest.Mock).mockResolvedValue([]);
-    (checkToolAvailability as jest.Mock).mockResolvedValue({
-      hasWooCommerce: false,
-      hasShopify: false
-    });
-    (getToolInstructions as jest.Mock).mockReturnValue('');
   });
 
   describe('Basic Message Processing', () => {
@@ -83,7 +71,7 @@ describe.skip('AI Processor - Core Functionality', () => {
 
     it('should add tool availability instructions to system message', async () => {
       const toolInstructions = '⚠️ E-commerce operations are NOT available.';
-      (getToolInstructions as jest.Mock).mockReturnValue(toolInstructions);
+      (mockDependencies.getToolInstructions as jest.Mock).mockReturnValue(toolInstructions);
 
       (mockOpenAIClient.chat.completions.create as jest.Mock).mockResolvedValue({
         choices: [{
@@ -99,7 +87,7 @@ describe.skip('AI Processor - Core Functionality', () => {
 
   describe('ReAct Loop - Tool Execution', () => {
     it('should execute tools and iterate until AI responds', async () => {
-      (getAvailableTools as jest.Mock).mockResolvedValue([mockSearchTool]);
+      (mockDependencies.getAvailableTools as jest.Mock).mockResolvedValue([mockSearchTool]);
 
       (mockOpenAIClient.chat.completions.create as jest.Mock)
         .mockResolvedValueOnce({
@@ -117,7 +105,7 @@ describe.skip('AI Processor - Core Functionality', () => {
           }]
         });
 
-      (executeToolCallsParallel as jest.Mock).mockResolvedValue([
+      (mockDependencies.executeToolCallsParallel as jest.Mock).mockResolvedValue([
         {
           toolCall: { id: 'call_1' },
           toolName: 'search_website_content',
@@ -136,7 +124,7 @@ describe.skip('AI Processor - Core Functionality', () => {
         }
       ]);
 
-      (formatToolResultsForAI as jest.Mock).mockReturnValue([
+      (mockDependencies.formatToolResultsForAI as jest.Mock).mockReturnValue([
         { tool_call_id: 'call_1', content: 'Found: Test Product' }
       ]);
 
@@ -146,7 +134,7 @@ describe.skip('AI Processor - Core Functionality', () => {
       expect(result.finalResponse).toBe('I found some information about the test product.');
       expect(result.allSearchResults).toHaveLength(1);
       expect(result.searchLog).toHaveLength(1);
-      expect(executeToolCallsParallel).toHaveBeenCalledWith(
+      expect(mockDependencies.executeToolCallsParallel).toHaveBeenCalledWith(
         expect.any(Array),
         'example.com',
         10000,
@@ -156,7 +144,7 @@ describe.skip('AI Processor - Core Functionality', () => {
     });
 
     it('should execute multiple tools in parallel', async () => {
-      (getAvailableTools as jest.Mock).mockResolvedValue([mockSearchTool, mockCategorySearchTool]);
+      (mockDependencies.getAvailableTools as jest.Mock).mockResolvedValue([mockSearchTool, mockCategorySearchTool]);
 
       (mockOpenAIClient.chat.completions.create as jest.Mock)
         .mockResolvedValueOnce({
@@ -177,7 +165,7 @@ describe.skip('AI Processor - Core Functionality', () => {
           }]
         });
 
-      (executeToolCallsParallel as jest.Mock).mockResolvedValue([
+      (mockDependencies.executeToolCallsParallel as jest.Mock).mockResolvedValue([
         {
           toolCall: { id: 'call_1' },
           toolName: 'search_website_content',
@@ -194,7 +182,7 @@ describe.skip('AI Processor - Core Functionality', () => {
         }
       ]);
 
-      (formatToolResultsForAI as jest.Mock).mockReturnValue([
+      (mockDependencies.formatToolResultsForAI as jest.Mock).mockReturnValue([
         { tool_call_id: 'call_1', content: 'Result 1' },
         { tool_call_id: 'call_2', content: 'Result 2' }
       ]);
@@ -206,19 +194,19 @@ describe.skip('AI Processor - Core Functionality', () => {
     });
 
     it('should respect max iterations limit', async () => {
-      (getAvailableTools as jest.Mock).mockResolvedValue([mockSearchTool]);
+      (mockDependencies.getAvailableTools as jest.Mock).mockResolvedValue([mockSearchTool]);
 
       (mockOpenAIClient.chat.completions.create as jest.Mock).mockResolvedValue({
         choices: [{
           message: {
             role: 'assistant',
-            content: 'Still searching...',
+            content: null, // Null content triggers fallback message
             tool_calls: [createToolCallResponse('search_website_content', { query: 'test' })]
           }
         }]
       });
 
-      (executeToolCallsParallel as jest.Mock).mockResolvedValue([
+      (mockDependencies.executeToolCallsParallel as jest.Mock).mockResolvedValue([
         {
           toolCall: { id: 'call_1' },
           toolName: 'search_website_content',
@@ -228,7 +216,7 @@ describe.skip('AI Processor - Core Functionality', () => {
         }
       ]);
 
-      (formatToolResultsForAI as jest.Mock).mockReturnValue([
+      (mockDependencies.formatToolResultsForAI as jest.Mock).mockReturnValue([
         { tool_call_id: 'call_1', content: 'No results' }
       ]);
 

@@ -8,12 +8,8 @@
 import { describe, it, expect, jest, beforeEach } from '@jest/globals';
 import { processAIConversation } from '@/lib/chat/ai-processor';
 
-jest.mock('@/lib/chat/get-available-tools');
-jest.mock('@/lib/chat/ai-processor-tool-executor');
 jest.mock('@/lib/chat/shopping-message-transformer');
 
-import { getAvailableTools, checkToolAvailability, getToolInstructions } from '@/lib/chat/get-available-tools';
-import { executeToolCallsParallel, formatToolResultsForAI } from '@/lib/chat/ai-processor-tool-executor';
 import {
   transformWooCommerceProducts,
   transformShopifyProducts,

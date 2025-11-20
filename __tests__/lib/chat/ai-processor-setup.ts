@@ -36,7 +36,14 @@ export function createMockDependencies() {
   return {
     getCommerceProvider: jest.fn(),
     searchSimilarContent: jest.fn(),
-    sanitizeOutboundLinks: jest.fn((text: string) => text)
+    sanitizeOutboundLinks: jest.fn((text: string) => text),
+    // Tool management mocks (for dependency injection)
+    getAvailableTools: jest.fn().mockResolvedValue([]),
+    checkToolAvailability: jest.fn().mockResolvedValue({ hasWooCommerce: false, hasShopify: false }),
+    getToolInstructions: jest.fn().mockReturnValue(''),
+    // Tool execution mocks (for dependency injection)
+    executeToolCallsParallel: jest.fn().mockResolvedValue([]),
+    formatToolResultsForAI: jest.fn().mockReturnValue([])
   };
 }
 
