@@ -112,6 +112,7 @@ describe('/api/chat - Error Handling', () => {
       const requestBody = {
         message: 'Hello',
         session_id: 'test-session-123',
+        domain: 'test.com',
       }
 
       const response = await POST(createRequest(requestBody), {
