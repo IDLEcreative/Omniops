@@ -1,4 +1,4 @@
-**Last Updated:** 2025-11-18 (Documentation audit: updated statistics and fixed references)
+**Last Updated:** 2025-11-22 (Merged test coverage expansion and MAKER framework)
 **Verified Accurate For:** v0.1.0
 
 # CLAUDE.md
@@ -6,10 +6,10 @@
 **AI Assistant Instructions for Omniops Codebase**
 
 **📊 Metadata:**
-- **Last Updated:** 2025-11-18
+- **Last Updated:** 2025-11-22
 - **Version:** v0.1.0
 - **File Purpose:** Primary instruction set for Claude Code AI assistant
-- **Critical Sections:** Lines 6-165 (brand-agnostic, file placement), 1101-1171 (agents MUST read CLAUDE.md), 1142-1281 (fix issues, create tests)
+- **Critical Sections:** Lines 6-165 (brand-agnostic, file placement), 1101-1171 (agents MUST read CLAUDE.md), 1142-1281 (fix issues, create tests), 1730-1862 (MAKER framework for cost optimization)
 - **Total MUST/NEVER Rules:** 53 directives
 - **Line Count:** ~2,600 lines (exempt from 300 LOC rule - must be fully loaded into AI memory)
 - **Estimated Parse Time:** 30 seconds
@@ -35,7 +35,6 @@
 7. **[Line 787]** Deploy agent immediately when encountering ANY issue
 8. **[Line 879]** Deploy testing agent immediately after completing any code
 9. **[Line 1152]** ALWAYS validate fixes with actual commands (`npm test`, `npm run build`)
-10. **[Line 2056]** 🆕 ALL NEW FILES MUST include AI-friendly headers (63% token savings, 13:1 ROI)
 
 **NEVER Rules (Prohibited Actions):**
 1. **[Line 10-17]** NEVER hardcode brand-specific data (Thompson's, pumps, etc.) in production code
@@ -52,7 +51,6 @@
 4. **[Line 879-892]** ALWAYS deploy testing agent after: new features, bug fixes, refactors, API endpoints, components
 5. **[Line 1060]** ALWAYS use standardized agent prompt templates
 6. **[Line 1152]** ALWAYS validate with concrete commands, never assume fixes work
-7. **[Line 2056]** 🆕 ALWAYS add AI-friendly headers to new files (see AI-Friendly File Headers section)
 
 **Auto-Trigger Rules (Do Without User Permission):**
 1. **[Line 759-782]** Auto-deploy parallel agents for: 2+ independent categories, 20+ files, >30min tasks, >10K tokens
@@ -268,6 +266,7 @@ for (const item of items) {
 | **Agent Rules** 🚨 | "agents MUST read", "CLAUDE.md first", "agent prompt template" | [#critical-all-agents-must-read-claudemd-first](#-critical-all-agents-must-read-claudemd-first) |
 | **Agent Deployment** | "Deploy agent", "parallel", "Fix Issues Immediately" | [#fix-issues](#fix-issues-immediately-with-agents) |
 | **Pod Orchestration** 🆕 | "pod", "domain-based", "specialized agents", "large-scale" | [docs/02-GUIDES/GUIDE_POD_ORCHESTRATION_PATTERN.md](docs/02-GUIDES/GUIDE_POD_ORCHESTRATION_PATTERN.md) |
+| **MAKER Framework** 🆕 | "Haiku", "voting", "cost savings", "decomposition", "80-90%" | [#maker-framework](#maker-framework-haiku-optimization-for-80-90-cost-savings) |
 | **Testing** | "Hard to Test", "dependency injection", "mock", "Create Tests" | [#testing-philosophy](#testing--code-quality-philosophy) |
 | **Performance** | "O(n²)", "algorithmic complexity", "optimization" | [#performance-guidelines](#performance-guidelines) |
 | **Security** | "credentials", "encryption", "RLS", "GDPR" | [#security](#security--privacy) |
@@ -282,7 +281,8 @@ for (const item of items) {
 #agent-orchestration--parallelization → Line 743
 #fix-issues-immediately-with-agents → Line 785
 #create-comprehensive-tests → Line 877
-#testing--code-quality-philosophy → Line 1130
+#maker-framework-haiku-optimization-for-80-90-cost-savings → Line 1730 🆕 NEW
+#testing--code-quality-philosophy → Line 1865
 #performance-guidelines → Line 1605
 ```
 
@@ -383,7 +383,7 @@ When creating ANY file, you MUST follow these placement rules:
 - `.dockerignore`
 
 **Environment/Git Files:**
-- `.env.example` (covers all environments: development, Docker, monitoring)
+- `.env.example`, `.env.docker.example`, `.env.monitoring.example`
 - `.gitignore`, `.eslintignore`, `.vercelignore`
 - `.mcp.json`
 
@@ -918,7 +918,7 @@ See [REFERENCE_DATABASE_SCHEMA.md](docs/09-REFERENCE/REFERENCE_DATABASE_SCHEMA.m
 
 ### Documentation Coverage
 
-**Total README Files:** 205 across all directories
+**Total README Files:** 109 across all directories
 
 | Category | READMEs | Status |
 |----------|---------|--------|
@@ -953,7 +953,7 @@ See [REFERENCE_DATABASE_SCHEMA.md](docs/09-REFERENCE/REFERENCE_DATABASE_SCHEMA.m
 - [types/README.md](types/README.md) - TypeScript type definitions
 
 **Testing Documentation:**
-- [__tests__/README.md](__tests__/README.md) - Complete test suite (1,048+ tests)
+- [__tests__/README.md](__tests__/README.md) - Complete test suite (1,210+ tests)
 - [__tests__/components/README.md](__tests__/components/README.md) - Component tests (138 tests)
 - [__tests__/lib/agents/README.md](__tests__/lib/agents/README.md) - AI agent tests (80+ tests)
 - [__tests__/mocks/README.md](__tests__/mocks/README.md) - MSW setup guide
@@ -1050,7 +1050,6 @@ See [REFERENCE_DATABASE_SCHEMA.md](docs/09-REFERENCE/REFERENCE_DATABASE_SCHEMA.m
   - ✅ Proven: 72% time savings, 100% success rate (Wave 10: 29 files, 8 pods)
   - 🔧 Ready-to-use pod templates (test refactoring, scripts, production code)
   - 📊 Adaptive scaling (split pods when needed: S → S1, S2, S3)
-  - ⚠️ **Pod Orchestrators** (orchestrators WITHIN pods): See below for usage guidelines
 - **[Orchestration Archive](docs/10-ANALYSIS/ANALYSIS_PARALLEL_AGENT_ORCHESTRATION.md)** - Complete 4-week case study with week-by-week breakdown (reference/archive)
 - **[Agent Hierarchy Guide](.claude/AGENT_HIERARCHY.md)** - Three-tier agent system (Architect → Plan → Explore) and when to use each type
 
@@ -1187,133 +1186,6 @@ When you identify a task suitable for parallel agents:
 - **Large-Scale Refactoring** (20+ files, domain-based) → **Pod Orchestration** 🆕 - 5-8 pods, Sonnet, 65-75% savings
 - **Dependency Updates** (15+ packages) → Scenario 1 (line 494) - 4 agents, Haiku, 88-92% savings
 - **File Refactoring** (30+ files, uniform) → Scenario 2 (line 548) - 3 agents, Opus, 60-75% savings
-
-#### 🎯 Pod Orchestrators: When to Add Orchestration WITHIN Pods
-
-**Test Results:** [POD_ORCHESTRATOR_TEST_RESULTS.md](ARCHIVE/completion-reports-2025-11/POD_ORCHESTRATOR_TEST_RESULTS.md) (2025-11-19)
-
-**Concept:** A pod orchestrator is an agent WITHIN a pod that manages sub-agents, consolidates their reports, and returns a single summary to Main Claude.
-
-**Benefits:**
-- ✅ 90% context savings (tested: 7,950 tokens → 750 tokens)
-- ✅ Excellent for 50-100+ file campaigns
-- ✅ Main Claude gets concise summaries instead of detailed reports
-
-**Risks (CRITICAL):**
-- ❌ Information loss: 70-100% on critical details
-- ❌ Severity downgrading (Critical → Important)
-- ❌ Loss of file:line references
-- ❌ Code examples eliminated
-- ❌ Main Claude can't verify or implement specific fixes
-
-**Decision Matrix: When to Use Pod Orchestrators**
-
-| Pod Size | Approach | Rationale |
-|----------|----------|-----------|
-| **1-7 files** | Direct pod agent | Too small, overhead > benefit |
-| **8-15 files** | Direct pod agent | Manageable context load |
-| **15-25 files** | **Consider orchestrator** | If complexity is LOW (research/docs) |
-| **25+ files** | **Use orchestrator with safeguards** | Context protection needed |
-
-**Critical Safeguards (MANDATORY for Pod Orchestrators):**
-
-```markdown
-## Pod Orchestrator Mission Template (Information Fidelity Focus)
-
-**CRITICAL RULES - NEVER VIOLATE:**
-
-1. **Preserve Critical Issues Verbatim (100%)**
-   - ✅ COPY critical issues exactly as written by sub-agents
-   - ✅ PRESERVE file:line references
-   - ✅ PRESERVE severity (Critical/Warning/Info)
-   - ✅ PRESERVE code examples if provided
-   - ❌ DO NOT summarize or rephrase critical issues
-   - ❌ DO NOT downgrade severity
-
-2. **Severity-Tiered Consolidation**
-   ```
-   Critical issues: Copy verbatim (0% summarization)
-   Warnings: Preserve file refs, may group similar (25% summarization)
-   Info: May summarize patterns (75% summarization)
-   ```
-
-3. **Mandatory Verification Checklist**
-   Before submitting consolidated report:
-   - [ ] Counted critical issues in each sub-agent report
-   - [ ] Verified same count in my consolidated report
-   - [ ] All critical issues have file:line references
-   - [ ] No critical issues downgraded to "Important" or "Minor"
-   - [ ] Main Claude can make decisions from my report
-
-**Report Structure:**
-
-### Critical Issues (EXACT COPY FROM SUB-AGENTS)
-[Domain] [File:Line] [Exact issue description]
-[Code example if provided]
-
-### Important Findings (Can group similar issues)
-- [Domain] [Pattern] affecting files X, Y, Z (preserve file names)
-
-### Minor Issues (Summary only)
-- [Count] files have [general pattern]
-
-**Token Budget:**
-- Critical section: No limit (preserve everything)
-- Important section: ~400-600 tokens
-- Minor section: ~100-200 tokens
-```
-
-**When to Use Pod Orchestrators (Decision Tree):**
-
-```
-Task requires 20+ files in single pod?
-├─ NO → Use direct pod agent
-└─ YES → Continue...
-
-Is this security-critical or bug-fixing work?
-├─ YES → Use direct pod agent (need file:line precision)
-└─ NO → Continue...
-
-Is this research/analysis/documentation work?
-├─ YES → Use pod orchestrator with safeguards ✅
-└─ NO → Use direct pod agent (implementation needs specifics)
-```
-
-**Safe Use Cases for Pod Orchestrators:**
-- ✅ Documentation quality analysis (low stakes)
-- ✅ Pattern identification across many files
-- ✅ Code exploration / research tasks
-- ✅ Style guide validation (non-critical)
-
-**Unsafe Use Cases (NEVER use orchestrators):**
-- ❌ Security vulnerability detection
-- ❌ Critical bug fixing
-- ❌ Code changes requiring file:line precision
-- ❌ Compliance/audit work requiring detailed trail
-
-**Hybrid Approach (Recommended for 50-100 Files):**
-
-```typescript
-Main Claude
-  ├─> Pod L (Library) - DIRECT (4 files, critical code)
-  ├─> Pod A (API) - DIRECT (5 files, security critical)
-  │
-  ├─> Pod S Orchestrator (15 files, scripts - low stakes)
-  │   ├─> Sub-Pod S1 (5 largest scripts)
-  │   ├─> Sub-Pod S2 (5 medium scripts)
-  │   └─> Sub-Pod S3 (5 smaller scripts)
-  │
-  └─> Pod D Orchestrator (20 files, documentation)
-      ├─> Sub-Pod D1 (API docs)
-      ├─> Sub-Pod D2 (Guide docs)
-      └─> Sub-Pod D3 (Reference docs)
-```
-
-**Test Results Reference:**
-- Context savings: 90.6% (7,950 → 750 tokens)
-- Critical info preserved: 0% (ALL lost - failed without safeguards)
-- With safeguards (untested): Expected 80-90% critical preservation
-- Full report: [POD_ORCHESTRATOR_TEST_RESULTS.md](ARCHIVE/completion-reports-2025-11/POD_ORCHESTRATOR_TEST_RESULTS.md)
 
 **📝 AFTER Deploying Agents - Update the Archive:**
 
@@ -1857,6 +1729,141 @@ const verificationAgent = {
 
 ---
 
+### MAKER FRAMEWORK: HAIKU OPTIMIZATION FOR 80-90% COST SAVINGS
+
+**CRITICAL:** Use the MAKER framework to achieve 80-90% cost reduction by replacing expensive Opus/Sonnet agents with voting-based Haiku orchestration.
+
+**Based on:** [arXiv:2511.09030 - "Solving a Million-Step LLM Task with Zero Errors"](https://arxiv.org/abs/2511.09030)
+
+**Key Insight:** "State-of-the-art reasoning models are NOT required; relatively small non-reasoning models suffice."
+
+**Translation:** Use 3-5× Haiku agents ($0.00025/1K) with voting instead of 1× Opus ($0.015/1K) = **60-95% savings + higher accuracy!**
+
+#### MAKER Components
+
+**MAKER = Massively Decomposed Agentic Processes (MDAPs)**
+
+1. **Maximal Decomposition** - Break complex tasks into minimal microagent subtasks
+2. **Error Correction** - Run 3-5 Haiku attempts, use first-to-ahead-by-K voting
+3. **Red-flagging** - Detect correlated errors, escalate to Sonnet/Opus only when needed
+
+#### When to Use MAKER (Automatic Decision)
+
+**✅ PERFECT for MAKER (Use Haiku Voting):**
+- ESLint/linting fixes across many files (70-80% savings)
+- Dependency updates by category (75-85% savings)
+- File refactoring into modules (80-90% savings)
+- Import/export updates (75-80% savings)
+- Type definition extraction (80-90% savings)
+- Test file creation (70-85% savings)
+- Dead code removal (75-85% savings)
+
+**⚠️ CONDITIONAL (Try Haiku, escalate if needed):**
+- Medium complexity refactoring
+- API endpoint creation
+- Database schema changes
+- Performance optimization
+
+**❌ NOT RECOMMENDED (Use Sonnet/Opus directly):**
+- Architecture decisions (use Opus)
+- Novel algorithm development (use Opus)
+- Complex debugging (use Sonnet)
+- Business logic design (use Opus)
+
+#### Quick Example
+
+```typescript
+// ❌ Traditional (Expensive)
+Task({
+  model: 'opus', // $0.015 per 1K tokens
+  description: 'Refactor 500 LOC file',
+  prompt: 'Split lib/analytics.ts into modules'
+});
+// Cost: ~$0.075, Time: 20 min, Success: 90%
+
+// ✅ MAKER (10× Cheaper)
+// Decompose into 6 microagents, run 3 Haiku attempts each
+const microagents = [
+  'Extract types to types/analytics.ts',
+  'Extract validators to utils/validators.ts',
+  'Extract API client to lib/api-client.ts',
+  // ... 3 more microagents
+];
+
+// Each microagent runs with voting
+for (const micro of microagents) {
+  const [r1, r2, r3] = await Promise.all([
+    runHaikuAgent(micro, 'a1'),
+    runHaikuAgent(micro, 'a2'),
+    runHaikuAgent(micro, 'a3'),
+  ]);
+
+  const winner = firstToAheadByK([r1, r2, r3], K=2);
+  if (!winner) escalateToSonnet(micro);
+}
+// Cost: ~$0.009, Time: 15 min, Success: 99%
+// Savings: 88% cheaper + higher accuracy!
+```
+
+#### Cost Comparison
+
+| Task | Traditional | MAKER | Savings |
+|------|------------|-------|---------|
+| ESLint fixes (20 files) | 1 Sonnet = $0.060 | 3× Haiku = $0.015 | **75%** |
+| File refactor (10 files) | 1 Opus = $0.600 | 3× Haiku = $0.090 | **85%** |
+| LOC campaign (29 files) | 8 Sonnet = $0.360 | Haiku voting = $0.050 | **86%** |
+
+#### Implementation Resources
+
+**📚 Complete Documentation:**
+- [GUIDE_MAKER_FRAMEWORK_HAIKU_OPTIMIZATION.md](docs/02-GUIDES/GUIDE_MAKER_FRAMEWORK_HAIKU_OPTIMIZATION.md) - Complete strategy (15 min read)
+- [.claude/agents/maker-haiku-voting.md](.claude/agents/maker-haiku-voting.md) - Agent template
+- [scripts/maker/README.md](scripts/maker/README.md) - Quick start guide
+
+**🧪 Testing Tools:**
+```bash
+# Demonstrate voting algorithm
+npx tsx scripts/maker/voting-system.ts
+
+# Real-world example (ESLint fixes)
+npx tsx scripts/maker/example-eslint-voting.ts
+```
+
+**🎯 Decision Framework:**
+
+1. **Can task be decomposed into <10 independent microagents?**
+   - YES → Use MAKER
+   - NO → Use traditional agent
+
+2. **Is each microagent simple enough for Haiku?**
+   - YES → Use MAKER
+   - NO → Decompose further or use Sonnet
+
+3. **Is cost sensitivity high?**
+   - YES → Use MAKER (80-90% savings)
+   - NO → Traditional approach acceptable
+
+4. **Is task repetitive/parallelizable?**
+   - YES → MAKER excels here
+   - NO → Traditional may be faster
+
+**Automatic Triggers for MAKER:**
+- Bulk file operations (>5 files, similar pattern)
+- Dependency updates by category
+- Import/export refactoring
+- Type extraction/generation
+- ESLint/formatting fixes
+- Test file generation
+
+**The Rule:** If you're about to use Sonnet/Opus for a task that could be decomposed into simple subtasks, you SHOULD use MAKER instead!
+
+**Monthly Savings Estimate:**
+- Traditional: 100 Sonnet tasks + 20 Opus tasks = $4.80
+- MAKER: 300 Haiku agents + 10 Sonnet escalations = $0.80
+- **Savings: $4.00/month per developer = 83% reduction**
+
+---
+
 ### TESTING & CODE QUALITY PHILOSOPHY
 
 **"Hard to Test" = "Poorly Designed"**
@@ -2157,7 +2164,7 @@ docker exec -it omniops-app sh         # Shell into app container
 - `docker-compose.yml` - Production orchestration
 - `docker-compose.dev.yml` - Development orchestration
 - `.dockerignore` - Build exclusions
-- `.env.example` - Environment template (use for all environments)
+- `.env.docker.example` - Environment template
 
 ## Development Workflow
 
@@ -2182,138 +2189,6 @@ docker exec -it omniops-app sh         # Shell into app container
 - API routes use Zod for validation
 - Services use class-based patterns in `lib/`
 - All WooCommerce credentials are encrypted using AES-256
-
-### AI-Friendly File Headers
-**CRITICAL:** All new TypeScript/JavaScript files MUST include AI-optimized headers for fast comprehension.
-
-**Required Sections (Always):**
-```typescript
-/**
- * [File Name] - AI-optimized header for fast comprehension
- *
- * @purpose [One-line description of what this file does]
- *
- * @flow
- *   1. [Step 1: Entry point]
- *   2. → [Step 2: Processing]
- *   3. → [Step 3: Output/return]
- *
- * @keyFunctions
- *   - functionName (line X): Description of what it does
- *   - anotherFunction (line Y): Description
- *
- * @handles
- *   - [What problems this solves]
- *   - [Edge cases handled]
- *
- * @returns [What the module/functions return]
- *
- * @dependencies
- *   - [External packages]
- *   - [Environment variables]
- *
- * @consumers
- *   - [Files that use this module]
- *
- * @totalLines XXX
- * @estimatedTokens XXX (without header), XXX (with header - XX% savings)
- */
-```
-
-**Optional Sections (Add When Relevant):**
-
-**@security** - For API routes, authentication, encryption, data handling:
-```typescript
-/**
- * @security
- *   - Input validation: [Zod schema, sanitization]
- *   - Authentication: [Required/optional, method]
- *   - Authorization: [RLS, permissions]
- *   - Rate limiting: [Limits, strategy]
- *   - Encryption: [What's encrypted, algorithm]
- *   - CSRF protection: [If applicable]
- *   - Compliance: [GDPR, CCPA requirements]
- */
-```
-
-**@performance** - For complex operations, APIs, data processing:
-```typescript
-/**
- * @performance
- *   - Complexity: [O(n), O(n²), etc.]
- *   - Bottlenecks: [Slow operations with timing]
- *   - Expected timing: [Response times, processing duration]
- *   - Concurrency: [Max concurrent operations]
- *   - Memory: [Usage estimates]
- *   - Optimizations: [Caching, batching, etc.]
- */
-```
-
-**@knownIssues** - For files with limitations, edge cases, bugs:
-```typescript
-/**
- * @knownIssues
- *   - [Limitation 1]: [Description + workaround]
- *   - [Edge case]: [When it fails, how to handle]
- *   - [Known bug]: Link to GitHub issue #XXX
- *   - [API limits]: [Rate limits, size limits]
- */
-```
-
-**@testingStrategy** - For all files (helps write tests faster):
-```typescript
-/**
- * @testingStrategy
- *   - [Mock strategy]: [What to mock, how]
- *   - [Dependency injection]: [Factory patterns, test doubles]
- *   - [Test file]: __tests__/path/to/file.test.ts
- *   - [Verification]: [What to verify, assertions]
- */
-```
-
-**@configuration** - For API routes, runtime settings:
-```typescript
-/**
- * @configuration
- *   - runtime: [nodejs/edge]
- *   - maxDuration: [Timeout in seconds]
- *   - [Other Next.js config]
- */
-```
-
-**Component-Specific Sections:**
-
-For React components, add:
-```typescript
-/**
- * @keyComponents
- *   - Header: [Description]
- *   - Body: [Description]
- *   - Footer: [Description]
- *
- * @stateManagement
- *   - useState/useCustomHook: [State variables]
- *   - Props: [Key props and their purpose]
- */
-```
-
-**Examples:**
-- See `lib/embeddings.ts` for core library pattern
-- See `app/api/chat/route.ts` for API route pattern (includes @security, @performance, @knownIssues)
-- See `components/ChatWidget.tsx` for React component pattern
-- See `lib/encryption.ts` for security-critical file pattern
-
-**Benefits:**
-- ✅ 63% token reduction when reading files
-- ✅ 30-second comprehension (vs 2-3 minutes)
-- ✅ Security audit in 30 seconds
-- ✅ Performance expectations instant
-- ✅ Known limitations documented
-- ✅ Testing strategy clear
-
-**Validation:** 23 files currently use this pattern with proven 13:1 ROI (90 hours/year saved vs 7 hours/year maintenance).
-
-**Reference:** See `docs/10-ANALYSIS/ANALYSIS_AI_FRIENDLY_HEADERS_ENHANCEMENT_COMPLETE.md` for full implementation details
 
 ### Testing Approach
 - Unit tests for business logic (`lib/`)
