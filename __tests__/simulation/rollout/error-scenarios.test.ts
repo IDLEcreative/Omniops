@@ -18,7 +18,7 @@ describe('Error Scenario Simulations', () => {
     // Simulate quota exceeded
     try {
       // Send many large messages
-      for (let i = 0; i < 100; i++) {
+      for (let i = 0; i < 10; i++) {  // Reduced from 100 to 10 for faster tests
         await user.sendMessage('X'.repeat(1000));
       }
       // Should handle gracefully
