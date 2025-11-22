@@ -1,4 +1,4 @@
-import { useEffect, useCallback, useState } from 'react';
+import { useEffect, useCallback, useState, useRef } from 'react';
 import type { PrivacySettings } from './usePrivacySettings';
 
 export interface UseParentCommunicationProps {
@@ -55,6 +55,26 @@ export function useParentCommunication({
   const [error, setError] = useState<Error | null>(null);
   const [messagesReceived, setMessagesReceived] = useState<number>(0);
   const [lastMessageType, setLastMessageType] = useState<string | null>(null);
+
+  // Use refs to access latest values without triggering re-renders
+  // This prevents infinite loop where handleMessage updates state → re-render → new handleMessage → repeat
+  const conversationIdRef = useRef(conversationId);
+  const isOpenRef = useRef(isOpen);
+  const sessionIdRef = useRef(sessionId);
+
+  // Keep refs in sync with props
+  useEffect(() => {
+    conversationIdRef.current = conversationId;
+  }, [conversationId]);
+
+  useEffect(() => {
+    isOpenRef.current = isOpen;
+  }, [isOpen]);
+
+  useEffect(() => {
+    sessionIdRef.current = sessionId;
+  }, [sessionId]);
+
   // Create memoized message handler with security and validation
   const handleMessage = useCallback(
     (event: MessageEvent) => {
@@ -147,21 +167,22 @@ export function useParentCommunication({
               const { sessionId: storedSessionId, conversationId: storedConversationId, widgetOpen } =
                 event.data.storedData;
 
-              if (storedSessionId && typeof storedSessionId === 'string' && !sessionId) {
+              // Use refs to access latest values without creating dependency
+              if (storedSessionId && typeof storedSessionId === 'string' && !sessionIdRef.current) {
                 if (process.env.NODE_ENV === 'development') {
                   console.log('[useParentCommunication] Restored session ID from parent:', storedSessionId);
                 }
                 setSessionId(storedSessionId);
               }
 
-              if (storedConversationId && typeof storedConversationId === 'string' && !conversationId) {
+              if (storedConversationId && typeof storedConversationId === 'string' && !conversationIdRef.current) {
                 if (process.env.NODE_ENV === 'development') {
                   console.log('[useParentCommunication] Restored conversation ID from parent:', storedConversationId);
                 }
                 setConversationId(storedConversationId);
               }
 
-              if (widgetOpen === true && !isOpen) {
+              if (widgetOpen === true && !isOpenRef.current) {
                 if (process.env.NODE_ENV === 'development') {
                   console.log('[useParentCommunication] Widget was open, restoring state');
                 }
@@ -210,9 +231,8 @@ export function useParentCommunication({
       }
     },
     [
-      conversationId,
-      isOpen,
-      sessionId,
+      // Removed conversationId, isOpen, sessionId from dependencies
+      // These are now accessed via refs to prevent infinite loop
       setPrivacySettings,
       setWoocommerceEnabled,
       setStoreDomain,
