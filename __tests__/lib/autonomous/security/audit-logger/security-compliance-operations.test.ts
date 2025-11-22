@@ -3,6 +3,11 @@
  * Tests compliance audit support, performance, scalability, and error handling
  */
 
+// Mock Supabase server before imports (Jest hoisting requirement)
+jest.mock('@/lib/supabase/server', () => ({
+  createServiceRoleClientSync: jest.fn(() => null), // Return null to test error handling
+}));
+
 import { describe, it, expect, jest, beforeEach } from '@jest/globals';
 import { AuditLogger } from '@/lib/autonomous/security/audit-logger';
 import { createMockSupabaseClient } from '@/__tests__/utils/audit/mock-supabase';
