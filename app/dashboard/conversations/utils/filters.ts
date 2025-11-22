@@ -17,7 +17,15 @@ export function useFilteredConversations(
     let filtered = data.recent;
 
     if (activeTab !== 'all') {
-      filtered = filtered.filter(conv => conv.status === activeTab);
+      if (activeTab === 'human_requested') {
+        // Filter for conversations where user requested human help
+        filtered = filtered.filter(conv =>
+          conv.status === 'waiting' &&
+          (conv.metadata as any)?.assigned_to_human === true
+        );
+      } else {
+        filtered = filtered.filter(conv => conv.status === activeTab);
+      }
     }
 
     if (searchTerm.trim()) {
