@@ -49,8 +49,8 @@ const playwrightConfig = {
   webServer: {
     command: 'npm run dev',
     url: 'http://localhost:3000',
-    timeout: 120000, // 2 minutes for initial compilation
-    reuseExistingServer: !process.env.CI,
+    timeout: 180000, // 3 minutes for initial compilation and recovery
+    reuseExistingServer: true, // Always reuse to prevent restarts during test runs
     stdout: 'pipe',
     stderr: 'pipe',
   },
