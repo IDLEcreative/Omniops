@@ -10,6 +10,27 @@ import { processAIConversation } from '@/lib/chat/ai-processor';
 
 jest.mock('@/lib/chat/shopping-message-transformer');
 
+// Create mocks before the module is required
+const mockGetAvailableTools = jest.fn();
+const mockCheckToolAvailability = jest.fn();
+const mockGetToolInstructions = jest.fn();
+const mockExecuteToolCallsParallel = jest.fn();
+const mockFormatToolResultsForAI = jest.fn();
+
+jest.mock('@/lib/chat/get-available-tools', () => ({
+  getAvailableTools: mockGetAvailableTools,
+  checkToolAvailability: mockCheckToolAvailability,
+  getToolInstructions: mockGetToolInstructions,
+}));
+
+jest.mock('@/lib/chat/ai-processor-tool-executor', () => ({
+  executeToolCallsParallel: mockExecuteToolCallsParallel,
+}));
+
+jest.mock('@/lib/chat/tool-executor-formatters', () => ({
+  formatToolResultsForAI: mockFormatToolResultsForAI,
+}));
+
 import {
   createMockOpenAIClient,
   createMockTelemetry,
@@ -34,12 +55,12 @@ describe('AI Processor - Telemetry & Configuration', () => {
     mockDependencies = createMockDependencies();
     baseParams = createBaseParams(mockOpenAIClient, mockTelemetry, mockDependencies);
 
-    (getAvailableTools as jest.Mock).mockResolvedValue([]);
-    (checkToolAvailability as jest.Mock).mockResolvedValue({
+    mockGetAvailableTools.mockResolvedValue([]);
+    mockCheckToolAvailability.mockResolvedValue({
       hasWooCommerce: false,
       hasShopify: false
     });
-    (getToolInstructions as jest.Mock).mockReturnValue('');
+    mockGetToolInstructions.mockReturnValue('');
   });
 
   describe('Response Formatting', () => {
@@ -136,7 +157,7 @@ describe('AI Processor - Telemetry & Configuration', () => {
     });
 
     it('should track each iteration', async () => {
-      (getAvailableTools as jest.Mock).mockResolvedValue([mockSearchTool]);
+      mockGetAvailableTools.mockResolvedValue([mockSearchTool]);
 
       (mockOpenAIClient.chat.completions.create as jest.Mock)
         .mockResolvedValueOnce({
@@ -154,7 +175,7 @@ describe('AI Processor - Telemetry & Configuration', () => {
           }]
         });
 
-      (executeToolCallsParallel as jest.Mock).mockResolvedValue([
+      mockExecuteToolCallsParallel.mockResolvedValue([
         {
           toolCall: { id: 'call_1' },
           toolName: 'search_website_content',
@@ -164,7 +185,7 @@ describe('AI Processor - Telemetry & Configuration', () => {
         }
       ]);
 
-      (formatToolResultsForAI as jest.Mock).mockReturnValue([
+      mockFormatToolResultsForAI.mockReturnValue([
         { tool_call_id: 'call_1', content: 'Result' }
       ]);
 
@@ -175,7 +196,7 @@ describe('AI Processor - Telemetry & Configuration', () => {
     });
 
     it('should track search executions', async () => {
-      (getAvailableTools as jest.Mock).mockResolvedValue([mockSearchTool]);
+      mockGetAvailableTools.mockResolvedValue([mockSearchTool]);
 
       (mockOpenAIClient.chat.completions.create as jest.Mock)
         .mockResolvedValueOnce({
@@ -193,7 +214,7 @@ describe('AI Processor - Telemetry & Configuration', () => {
           }]
         });
 
-      (executeToolCallsParallel as jest.Mock).mockResolvedValue([
+      mockExecuteToolCallsParallel.mockResolvedValue([
         {
           toolCall: { id: 'call_1' },
           toolName: 'search_website_content',
@@ -210,7 +231,7 @@ describe('AI Processor - Telemetry & Configuration', () => {
         }
       ]);
 
-      (formatToolResultsForAI as jest.Mock).mockReturnValue([
+      mockFormatToolResultsForAI.mockReturnValue([
         { tool_call_id: 'call_1', content: 'Results found' }
       ]);
 
