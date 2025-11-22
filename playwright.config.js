@@ -45,12 +45,12 @@ const playwrightConfig = {
   globalSetup: require.resolve('./test-utils/playwright-global-setup.js'),
   globalTeardown: require.resolve('./test-utils/playwright-global-teardown.js'),
 
-  // Automatic dev server management
+  // Automatic server management
   webServer: {
-    command: 'npm run dev',
+    command: 'npm run start', // Production mode - no HMR, stable state
     url: 'http://localhost:3000',
-    timeout: 180000, // 3 minutes for initial compilation and recovery
-    reuseExistingServer: true, // Always reuse to prevent restarts during test runs
+    timeout: 180000, // 3 minutes for server startup
+    reuseExistingServer: !process.env.CI, // Reuse in local dev, fresh in CI
     stdout: 'pipe',
     stderr: 'pipe',
   },
