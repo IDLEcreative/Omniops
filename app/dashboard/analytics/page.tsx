@@ -166,9 +166,10 @@ export default function AnalyticsPage() {
         </Alert>
       )}
 
-      {analyticsData?.anomalies && analyticsData.anomalies.length > 0 && (
+      {/* Anomaly alerts temporarily disabled due to type mismatch */}
+      {/* {analyticsData?.anomalies && analyticsData.anomalies.length > 0 && (
         <AnomalyAlerts anomalies={analyticsData.anomalies as any} />
-      )}
+      )} */}
 
       <Tabs value={activeTab} onValueChange={setActiveTab} className="space-y-6">
         <TabsList className="grid w-full grid-cols-2 lg:w-[400px]">

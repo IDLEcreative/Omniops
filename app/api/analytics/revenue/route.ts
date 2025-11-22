@@ -8,10 +8,13 @@
  * - start: Start date (ISO string)
  * - end: End date (ISO string)
  * - metric: 'overview' | 'ltv' | 'attribution' | 'all'
+ *
+ * Security: Requires authentication and verifies organization membership
  */
 
 import { NextRequest, NextResponse } from 'next/server';
 import { getRevenueMetrics, getCustomerLTVMetrics, getAttributionBreakdown } from '@/lib/analytics/revenue-analytics';
+import { createClient } from '@/lib/supabase/server';
 import { createServiceRoleClient } from '@/lib/supabase-server';
 
 export const runtime = 'nodejs';
@@ -19,15 +22,23 @@ export const dynamic = 'force-dynamic';
 
 export async function GET(request: NextRequest) {
   try {
-    // Get user authentication
-    const supabase = await createServiceRoleClient();
-    const { data: { user } } = await supabase.auth.getUser();
+    // 1. Authenticate user with user-scoped client
+    const authSupabase = await createClient();
 
-    if (!user) {
-      return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
+    if (!authSupabase) {
+      return NextResponse.json(
+        { error: 'Database service unavailable' },
+        { status: 503 }
+      );
     }
 
-    // Get query parameters
+    const { data: { user }, error: authError } = await authSupabase.auth.getUser();
+
+    if (authError || !user) {
+      return NextResponse.json({ error: 'Authentication required' }, { status: 401 });
+    }
+
+    // 2. Get query parameters
     const searchParams = request.nextUrl.searchParams;
     const domain = searchParams.get('domain');
     const startDate = searchParams.get('start');
@@ -38,7 +49,17 @@ export async function GET(request: NextRequest) {
       return NextResponse.json({ error: 'Missing required parameter: domain' }, { status: 400 });
     }
 
-    // Verify user has access to this domain
+    // 3. Get service role client for data access
+    const supabase = await createServiceRoleClient();
+
+    if (!supabase) {
+      return NextResponse.json(
+        { error: 'Database connection failed' },
+        { status: 503 }
+      );
+    }
+
+    // 4. Verify user has access to this domain
     const { data: config } = await supabase
       .from('customer_configs')
       .select('id, organization_id')
@@ -49,7 +70,7 @@ export async function GET(request: NextRequest) {
       return NextResponse.json({ error: 'Domain not found' }, { status: 404 });
     }
 
-    // Check organization membership
+    // 5. Check organization membership
     const { data: membership } = await supabase
       .from('organization_members')
       .select('id')
@@ -58,7 +79,7 @@ export async function GET(request: NextRequest) {
       .single();
 
     if (!membership) {
-      return NextResponse.json({ error: 'Access denied' }, { status: 403 });
+      return NextResponse.json({ error: 'Access denied - you do not have permission to view analytics for this domain' }, { status: 403 });
     }
 
     // Parse date range

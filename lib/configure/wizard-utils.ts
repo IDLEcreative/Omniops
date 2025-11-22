@@ -4,6 +4,7 @@
  */
 
 import { Moon, Sun, Sparkles, LucideIcon } from 'lucide-react';
+import { sanitizeConfigString } from '@/lib/sanitize-json';
 
 export interface ThemePreset {
   name: string;
@@ -151,9 +152,7 @@ export default function RootLayout({ children }) {
           id="chat-widget-config"
           strategy="afterInteractive"
           dangerouslySetInnerHTML={{
-            __html: \`
-              window.ChatWidgetConfig = ${configString};
-            \`,
+            __html: \`window.ChatWidgetConfig = ${sanitizeConfigString(minimalConfig)};\`,
           }}
         />
         <Script

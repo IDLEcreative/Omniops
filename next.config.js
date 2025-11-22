@@ -14,7 +14,8 @@ const nextConfig = {
     ignoreDuringBuilds: true
   },
   typescript: {
-    // Skip TypeScript checking during builds
+    // TODO: Re-enable strict type checking after fixing all type definition errors
+    // See: Security audit recommendation for gradual TypeScript migration
     ignoreBuildErrors: true
   },
   
@@ -36,14 +37,26 @@ const nextConfig = {
       ...config.resolve.alias,
       '@': path.resolve(__dirname),
     };
-    
+
+    // Exclude canvas binary from client-side bundles (used by isomorphic-dompurify)
+    // Canvas is only needed for server-side rendering
+    if (!isServer) {
+      config.resolve.fallback = {
+        ...config.resolve.fallback,
+        canvas: false,
+        fs: false,
+        path: false,
+        crypto: false,
+      };
+    }
+
     // Memory optimizations for development
     if (dev) {
       config.watchOptions = {
         ...config.watchOptions,
         ignored: ['**/node_modules/**', '**/.git/**', '**/.next/**'],
       };
-      
+
       // Reduce memory usage in development
       config.optimization = {
         ...config.optimization,
@@ -51,43 +64,20 @@ const nextConfig = {
         removeEmptyChunks: false,
         splitChunks: false,
       };
-      
+
       // Limit parallel builds to reduce memory
       config.parallelism = 2;
     }
-    
+
     return config;
   },
   
   // Headers for caching static assets
   async headers() {
     return [
-      // CRITICAL: CORS headers for API routes (must come first, before generic headers)
-      {
-        source: '/api/:path*',
-        headers: [
-          {
-            key: 'Access-Control-Allow-Origin',
-            value: '*', // Allow all origins for widget embedding
-          },
-          {
-            key: 'Access-Control-Allow-Methods',
-            value: 'GET, POST, PUT, DELETE, OPTIONS',
-          },
-          {
-            key: 'Access-Control-Allow-Headers',
-            value: 'Content-Type, Authorization, X-Requested-With',
-          },
-          {
-            key: 'Access-Control-Allow-Credentials',
-            value: 'true',
-          },
-          {
-            key: 'Access-Control-Max-Age',
-            value: '86400', // 24 hours
-          },
-        ],
-      },
+      // NOTE: CORS for API routes is now handled by middleware.ts
+      // This allows dynamic CORS based on endpoint sensitivity (public vs admin)
+      // See lib/security/cors-config.ts for CORS logic
       {
         source: '/(.*)',
         headers: [

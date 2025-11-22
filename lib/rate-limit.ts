@@ -138,12 +138,12 @@ export async function checkRateLimit(
     }
 
   } catch (error) {
-    // Log error but allow request (fail-open for availability)
-    console.error('[Rate Limit] Redis error, allowing request:', error);
+    // SECURITY: Fail closed on Redis errors to prevent rate limit bypass
+    console.error('[Rate Limit] Redis error, BLOCKING request:', error);
 
     return {
-      allowed: true,
-      remaining: maxRequests - 1,
+      allowed: false,
+      remaining: 0,
       resetTime
     };
   }

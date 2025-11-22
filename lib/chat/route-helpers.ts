@@ -6,14 +6,29 @@
 import { NextResponse } from 'next/server';
 import type { SupabaseClient } from '@/types/supabase';
 
-export function getCorsHeaders(origin: string | null): Record<string, string> {
+// Allowed origins for CORS (security: restrict to known domains)
+const ALLOWED_ORIGINS = [
+  process.env.NEXT_PUBLIC_APP_URL,
+  'https://omniops.co.uk',
+  'https://www.omniops.co.uk',
+].filter(Boolean); // Remove undefined values
+
+export function getCorsHeaders(origin: string | null, isPublicWidgetEndpoint: boolean = true): Record<string, string> {
   const headers: Record<string, string> = {
     'Access-Control-Allow-Methods': 'POST, OPTIONS',
     'Access-Control-Allow-Headers': 'Content-Type, Authorization',
   };
 
-  headers['Access-Control-Allow-Origin'] = origin || '*';
-  headers['Access-Control-Allow-Credentials'] = 'true';
+  // Only allow specific origins for authenticated endpoints
+  if (origin && ALLOWED_ORIGINS.includes(origin)) {
+    headers['Access-Control-Allow-Origin'] = origin;
+    headers['Access-Control-Allow-Credentials'] = 'true';
+  } else if (isPublicWidgetEndpoint) {
+    // Widget endpoints can use * (no credentials) for embedding
+    headers['Access-Control-Allow-Origin'] = '*';
+    // Don't set credentials for wildcard origin
+  }
+  // If origin not in allowlist and not public endpoint, don't set CORS headers (blocked)
 
   return headers;
 }
