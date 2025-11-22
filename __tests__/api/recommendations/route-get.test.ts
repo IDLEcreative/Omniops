@@ -7,20 +7,17 @@
 
 import { describe, it, expect, jest, beforeEach } from '@jest/globals';
 import { NextRequest } from 'next/server';
+import * as engine from '@/lib/recommendations/engine';
 
-const mockGetRecommendations = jest.fn();
-const mockTrackEvent = jest.fn();
-const mockGetMetrics = jest.fn();
-
-jest.mock('@/lib/recommendations/engine', () => ({
-  getRecommendations: mockGetRecommendations,
-  trackRecommendationEvent: mockTrackEvent,
-  getRecommendationMetrics: mockGetMetrics,
-}));
+// Create spies on the engine module
+const mockGetRecommendations = jest.spyOn(engine, 'getRecommendations') as jest.MockedFunction<typeof engine.getRecommendations>;
+const mockTrackEvent = jest.spyOn(engine, 'trackRecommendationEvent') as jest.MockedFunction<typeof engine.trackRecommendationEvent>;
+const mockGetMetrics = jest.spyOn(engine, 'getRecommendationMetrics') as jest.MockedFunction<typeof engine.getRecommendationMetrics>;
 
 import { GET } from '@/app/api/recommendations/route';
 
 describe('GET /api/recommendations', () => {
+
   beforeEach(() => {
     jest.clearAllMocks();
   });

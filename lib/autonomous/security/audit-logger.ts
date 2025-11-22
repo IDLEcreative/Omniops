@@ -8,6 +8,7 @@
  */
 
 import type { SupabaseClient } from '@supabase/supabase-js';
+import { createServiceRoleClientSync } from '@/lib/supabase/server';
 import type { AuditStepData, AuditRecord, OperationSummary } from './audit-logger-types';
 
 export type { AuditStepData, AuditRecord, OperationSummary } from './audit-logger-types';
@@ -91,8 +92,6 @@ export class AuditLogger {
     client?: SupabaseClient | null,
     operations?: Partial<AuditOperations>
   ) {
-    // Import here to avoid circular dependency
-    const { createServiceRoleClientSync } = require('@/lib/supabase/server');
     this.supabase = client || createServiceRoleClientSync();
 
     // Use provided operations or defaults

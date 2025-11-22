@@ -84,6 +84,12 @@ export const TrainingDataList = memo(function TrainingDataList({
     const config = typeConfig[item.type] || { icon: FileText, color: 'text-gray-600', bg: 'bg-gray-100' };
     const Icon = config.icon;
 
+    // For URL-type items, display the source URL (from metadata or content)
+    // For other types, display the content
+    const displayText = item.type === 'url'
+      ? (item.metadata?.url || item.content)
+      : item.content;
+
     return (
       <div
         className="group flex items-center justify-between py-2 px-3 border-b hover:bg-muted/50 transition-colors"
@@ -91,7 +97,7 @@ export const TrainingDataList = memo(function TrainingDataList({
       >
         <div className="flex items-center gap-2 flex-1 min-w-0">
           <Icon className={cn('h-3 w-3 flex-shrink-0', config.color)} />
-          <p className="text-sm truncate flex-1">{item.content}</p>
+          <p className="text-sm truncate flex-1">{displayText}</p>
           <span className="text-xs text-muted-foreground flex-shrink-0">
             {new Date(item.createdAt).toLocaleDateString()}
           </span>

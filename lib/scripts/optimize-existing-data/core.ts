@@ -8,7 +8,7 @@ import * as fs from 'fs/promises';
 import * as path from 'path';
 import type { MigrationConfig, MigrationProgress, OptimizationResult } from './types';
 
-export { MigrationConfig, MigrationProgress, OptimizationResult } from './types';
+export type { MigrationConfig, MigrationProgress, OptimizationResult } from './types';
 
 export class DataOptimizer {
   private supabase: any;

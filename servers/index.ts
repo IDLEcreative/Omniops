@@ -25,8 +25,22 @@ export const serverRegistry = {
 };
 
 // Export all server categories
-export * from "./search";
-export * from "./commerce";
+export {
+  searchProducts,
+  searchProductsMetadata,
+  searchByCategory,
+  searchByCategoryMetadata,
+  categoryMetadata as searchCategoryMetadata
+} from "./search";
+export {
+  lookupOrder,
+  lookupOrderMetadata,
+  getProductDetails,
+  getProductDetailsMetadata,
+  woocommerceOperations,
+  woocommerceOperationsMetadata,
+  categoryMetadata as commerceCategoryMetadata
+} from "./commerce";
 export * from "./content";
 export * from "./shared/types";
 export * from "./shared/validation";

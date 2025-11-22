@@ -78,7 +78,7 @@ export default function TrainingPage() {
     setIsLoading(true);
 
     const normalizedUrl = normalizeUrl(url);
-    const optimisticItem = createOptimisticItem('url', normalizedUrl);
+    const optimisticItem = createOptimisticItem('url', normalizedUrl, { url: normalizedUrl });
     setTrainingData(prev => [optimisticItem, ...prev]);
 
     try {
@@ -86,7 +86,8 @@ export default function TrainingPage() {
       setTrainingData(prev =>
         updateOptimisticItem(prev, optimisticItem.id, {
           id: data.id,
-          status: data.status as 'pending' | 'processing' | 'completed' | 'error'
+          status: data.status as 'pending' | 'processing' | 'completed' | 'error',
+          metadata: { ...data.metadata, url: normalizedUrl }
         })
       );
     } catch (error) {
@@ -97,7 +98,6 @@ export default function TrainingPage() {
           status: 'error'
         })
       );
-      alert(`Failed to scrape URL: ${error instanceof Error ? error.message : 'Unknown error'}`);
     }
     setIsLoading(false);
   };

@@ -3,7 +3,7 @@ import { ScenarioRunner } from './scenarios';
 import { LoadTestFormatter } from './formatters';
 import type { LoadTestConfig, LoadTestMetrics } from './types';
 
-export { LoadTestConfig, LoadTestMetrics } from './types';
+export type { LoadTestConfig, LoadTestMetrics } from './types';
 export { VirtualUser } from './virtual-user';
 
 export class LoadTestOrchestrator {

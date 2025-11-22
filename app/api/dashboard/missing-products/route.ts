@@ -53,7 +53,7 @@ export async function GET(request: NextRequest) {
     const conversationIds = Array.from(new Set(messages?.map(m => m.conversation_id) || []));
 
     // Step 2: Fetch ALL relevant user messages in a single query
-    let userMessagesByConversation = new Map<string, any[]>();
+    const userMessagesByConversation = new Map<string, any[]>();
 
     if (conversationIds.length > 0) {
       const { data: allUserMessages, error: batchError } = await supabase!

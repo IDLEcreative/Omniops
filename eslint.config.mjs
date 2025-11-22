@@ -120,6 +120,7 @@ const eslintConfig = [
     files: [
       "lib/supabase/**/*",
       "lib/db-optimization/**/*",
+      "lib/autonomous/**/*",
       "app/api/dashboard/analytics/route.ts"
     ],
     rules: {
