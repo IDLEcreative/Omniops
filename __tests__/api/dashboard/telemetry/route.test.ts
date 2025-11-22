@@ -2,7 +2,11 @@ import { describe, it, expect, beforeEach, jest } from '@jest/globals';
 import { NextRequest } from 'next/server';
 import { GET } from '@/app/api/dashboard/telemetry/route';
 
-jest.mock('@/lib/chat-telemetry');
+jest.mock('@/lib/chat-telemetry', () => ({
+  telemetryManager: {
+    getAllMetrics: jest.fn()
+  }
+}));
 
 import { createServiceRoleClient } from '@/lib/supabase-server';
 import { telemetryManager } from '@/lib/chat-telemetry';
