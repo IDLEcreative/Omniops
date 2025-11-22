@@ -8,6 +8,7 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { createClient, createServiceRoleClient } from '@/lib/supabase-server';
 import { z } from 'zod';
+import { notifyHumanRequest } from '@/lib/notifications/human-request-notifier';
 
 interface RouteParams {
   params: Promise<{ id: string }>;
@@ -124,8 +125,19 @@ export async function POST(
       );
     }
 
-    // TODO: Trigger notification to support team (Phase 3)
-    // await notifyHumanRequest({ conversationId, domain_id: conversation.domain_id, reason });
+    // Send notification to support team
+    const notificationResult = await notifyHumanRequest({
+      conversationId,
+      domainId: conversation.domain_id,
+      lastMessage,
+      reason,
+      requestedAt,
+    });
+
+    if (!notificationResult.success) {
+      console.error('[RequestHuman] Failed to send notifications:', notificationResult.error);
+      // Don't fail the request if notification fails - the metadata is already updated
+    }
 
     console.log(`[RequestHuman] Human help requested for conversation ${conversationId}`);
 

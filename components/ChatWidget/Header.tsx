@@ -7,6 +7,7 @@ export interface HeaderProps {
   highContrast: boolean;
   onToggleHighContrast: () => void;
   onClose: () => void;
+  humanAssigned?: boolean;
   // Configuration-driven styling props
   appearance?: {
     headerBackgroundColor?: string;
@@ -22,6 +23,7 @@ export function Header({
   highContrast,
   onToggleHighContrast,
   onClose,
+  humanAssigned = false,
   appearance,
 }: HeaderProps) {
   // Use config-driven colors with fallbacks to current hardcoded values
@@ -40,8 +42,11 @@ export function Header({
       }`}
     >
       <div className="flex items-center gap-3 flex-1 min-w-0">
-        {/* Online status indicator */}
-        <div className="w-2.5 h-2.5 bg-green-500 rounded-full flex-shrink-0" aria-label="Online" />
+        {/* Online status indicator - shows orange when human assigned */}
+        <div
+          className={`w-2.5 h-2.5 ${humanAssigned ? 'bg-orange-500' : 'bg-green-500'} rounded-full flex-shrink-0`}
+          aria-label={humanAssigned ? 'Human agent assigned' : 'Online'}
+        />
         <div className="min-w-0 flex-1">
           <h3
             style={{ color: highContrast ? undefined : textColor }}
@@ -50,7 +55,7 @@ export function Header({
             {headerTitle}
           </h3>
           <p className="text-sm text-gray-400 opacity-90">
-            {headerSubtitle}
+            {humanAssigned ? '👤 Human Agent Assigned' : headerSubtitle}
           </p>
         </div>
       </div>
