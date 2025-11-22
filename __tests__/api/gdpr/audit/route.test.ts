@@ -25,12 +25,18 @@ const buildSupabaseMock = (entries: AuditEntry[] = []) => {
   const builder: MockBuilder = {
     select: jest.fn(() => builder),
     order: jest.fn(() => builder),
-    range: jest.fn(() => Promise.resolve({ data: entries, error: null, count: entries.length })),
+    range: jest.fn(() => builder),
     eq: jest.fn(() => builder),
     gte: jest.fn(() => builder),
     lte: jest.fn(() => builder),
     ilike: jest.fn(() => builder),
   };
+
+  // Make the builder thenable so it can be awaited
+  Object.assign(builder, {
+    then: (resolve: (value: { data: AuditEntry[]; error: null; count: number }) => void) =>
+      Promise.resolve({ data: entries, error: null, count: entries.length }).then(resolve),
+  });
 
   return {
     from: jest.fn(() => builder),
