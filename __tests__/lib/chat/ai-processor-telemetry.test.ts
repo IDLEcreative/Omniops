@@ -175,7 +175,8 @@ describe('AI Processor - Telemetry & Configuration', () => {
           }]
         });
 
-      mockExecuteToolCallsParallel.mockResolvedValue([
+      // Configure the dependency injection mock (not the module-level mock)
+      mockDependencies.executeToolCallsParallel.mockResolvedValue([
         {
           toolCall: { id: 'call_1' },
           toolName: 'search_website_content',
@@ -185,7 +186,7 @@ describe('AI Processor - Telemetry & Configuration', () => {
         }
       ]);
 
-      mockFormatToolResultsForAI.mockReturnValue([
+      mockDependencies.formatToolResultsForAI.mockReturnValue([
         { tool_call_id: 'call_1', content: 'Result' }
       ]);
 
@@ -214,7 +215,8 @@ describe('AI Processor - Telemetry & Configuration', () => {
           }]
         });
 
-      mockExecuteToolCallsParallel.mockResolvedValue([
+      // Configure the dependency injection mock (not the module-level mock)
+      mockDependencies.executeToolCallsParallel.mockResolvedValue([
         {
           toolCall: { id: 'call_1' },
           toolName: 'search_website_content',
@@ -231,7 +233,7 @@ describe('AI Processor - Telemetry & Configuration', () => {
         }
       ]);
 
-      mockFormatToolResultsForAI.mockReturnValue([
+      mockDependencies.formatToolResultsForAI.mockReturnValue([
         { tool_call_id: 'call_1', content: 'Results found' }
       ]);
 
