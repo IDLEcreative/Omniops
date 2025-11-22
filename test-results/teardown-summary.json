@@ -1,0 +1,14 @@
+{
+  "teardownTime": "2025-11-22T21:04:42.380Z",
+  "setupTime": "2025-11-22T21:04:25.460Z",
+  "duration": 16920,
+  "testResultsPath": "/Users/jamesguy/Omniops/test-results",
+  "generatedFiles": [
+    "browser-availability.json",
+    "screenshots",
+    "setup-timestamp.txt",
+    "shopping-mobile-shopping-c-14a74-rt-via-mobile-shopping-feed-chromium",
+    "traces",
+    "videos"
+  ]
+}
