@@ -10,6 +10,7 @@ import type { ChatWidgetFeatureFlags } from '@/lib/chat-widget/default-config';
 
 /**
  * Fetch customer-specific feature flag overrides from database
+ * @deprecated Use getOrganizationOverride instead - customer_id is legacy
  */
 export async function getCustomerOverride(
   customerId: string
@@ -21,7 +22,7 @@ export async function getCustomerOverride(
     const { data, error } = await supabase
       .from('customer_feature_flags')
       .select('flags')
-      .eq('customer_id', customerId)
+      .eq('organization_id', customerId) // Support legacy parameter name but query organization_id
       .single();
 
     if (error || !data) {
@@ -64,6 +65,7 @@ export async function getOrganizationOverride(
 
 /**
  * Save customer-specific feature flags to database
+ * @deprecated Use saveOrganizationFlags instead - customer_id is legacy
  */
 export async function saveCustomerFlags(
   customerId: string,
@@ -79,7 +81,7 @@ export async function saveCustomerFlags(
     const { error } = await supabase
       .from('customer_feature_flags')
       .upsert({
-        customer_id: customerId,
+        organization_id: customerId, // Support legacy parameter name but use organization_id
         flags,
         updated_at: new Date().toISOString(),
         updated_by: changedBy,

@@ -155,13 +155,13 @@ async function handleIncomingMessage(messaging: any) {
     return;
   }
 
-  console.log('✅ Found customer:', matchingCreds.customer_id);
+  console.log('✅ Found organization:', matchingCreds.organization_id);
 
   // Get or create conversation
   const { data: conversationData, error: convError } = await supabase
     .from('conversations')
     .select('*')
-    .eq('customer_id', matchingCreds.customer_id)
+    .eq('organization_id', matchingCreds.organization_id)
     .eq('channel', 'instagram')
     .eq('external_user_id', senderId)
     .order('created_at', { ascending: false })
@@ -179,7 +179,7 @@ async function handleIncomingMessage(messaging: any) {
     console.log('📍 Creating new Instagram conversation');
 
     // Get sender's Instagram profile
-    const instagramCreds = await getInstagramCredentials(matchingCreds.customer_id);
+    const instagramCreds = await getInstagramCredentials(matchingCreds.organization_id);
     if (!instagramCreds) {
       console.error('❌ Failed to load Instagram credentials');
       return;
@@ -198,7 +198,7 @@ async function handleIncomingMessage(messaging: any) {
     const { data: newConv, error: createError } = await supabase
       .from('conversations')
       .insert({
-        customer_id: matchingCreds.customer_id,
+        organization_id: matchingCreds.organization_id,
         channel: 'instagram',
         external_user_id: senderId,
         external_username: profile.username,
@@ -241,7 +241,7 @@ async function handleIncomingMessage(messaging: any) {
   const { data: customerConfig, error: configError } = await supabase
     .from('customer_configs')
     .select('*')
-    .eq('id', matchingCreds.customer_id)
+    .eq('organization_id', matchingCreds.organization_id)
     .single();
 
   if (configError || !customerConfig) {
@@ -306,7 +306,7 @@ async function handleIncomingMessage(messaging: any) {
     console.log('✅ AI response generated:', aiResponse.substring(0, 100) + '...');
 
     // Send response via Instagram
-    const instagramCreds = await getInstagramCredentials(matchingCreds.customer_id);
+    const instagramCreds = await getInstagramCredentials(matchingCreds.organization_id);
     if (!instagramCreds) {
       console.error('❌ Failed to load Instagram credentials for sending');
       return;
@@ -333,7 +333,7 @@ async function handleIncomingMessage(messaging: any) {
         last_message_at: new Date().toISOString(),
         last_webhook_at: new Date().toISOString(),
       })
-      .eq('customer_id', matchingCreds.customer_id);
+      .eq('organization_id', matchingCreds.organization_id);
 
     console.log('✅ Instagram message flow complete');
 
@@ -342,7 +342,7 @@ async function handleIncomingMessage(messaging: any) {
 
     // Send error message to user
     try {
-      const instagramCreds = await getInstagramCredentials(matchingCreds.customer_id);
+      const instagramCreds = await getInstagramCredentials(matchingCreds.organization_id);
       if (instagramCreds) {
         const api = new InstagramAPI(instagramCreds);
         await api.sendMessage(
