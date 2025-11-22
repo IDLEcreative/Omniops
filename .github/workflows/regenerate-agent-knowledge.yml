@@ -45,9 +45,7 @@ jobs:
           git add docs/10-ANALYSIS/WORKFLOWS_FROM_E2E_TESTS.md
           git add docs/10-ANALYSIS/AGENT_KNOWLEDGE_BASE.md
           git add docs/10-ANALYSIS/AGENT_KNOWLEDGE_BASE.json
-          git commit -m "docs: auto-regenerate agent knowledge base from E2E tests
-
-[skip ci] Automated by regenerate-agent-knowledge workflow"
+          git commit -m "docs: auto-regenerate agent knowledge base from E2E tests [skip ci]"
 
       - name: Push changes
         if: steps.verify_diff.outputs.changed == 'true'
