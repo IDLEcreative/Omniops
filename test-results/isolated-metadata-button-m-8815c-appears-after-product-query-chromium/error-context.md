@@ -1,0 +1,42 @@
+# Page snapshot
+
+```yaml
+- generic [ref=e1]:
+  - generic [ref=e6]: Test Mode
+  - region "Notifications alt+T"
+  - alert [ref=e7]
+  - iframe [active] [ref=e8]:
+    - dialog "Chat support widget" [ref=f1e3]:
+      - generic [ref=f1e4]:
+        - generic [ref=f1e5]:
+          - generic "Online" [ref=f1e6]
+          - generic [ref=f1e7]:
+            - heading "Support" [level=3] [ref=f1e8]
+            - paragraph [ref=f1e9]: Online - We typically reply instantly
+        - generic [ref=f1e10]:
+          - button "Toggle high contrast mode. Currently off" [ref=f1e11] [cursor=pointer]:
+            - img [ref=f1e12]
+          - button "Close chat widget" [ref=f1e15] [cursor=pointer]:
+            - img [ref=f1e16]
+      - log "Chat messages" [ref=f1e19]:
+        - 'article "You said: Do you have any pumps in stock?" [ref=f1e21]':
+          - generic [ref=f1e22]: Do you have any pumps in stock?
+          - generic [ref=f1e24]: Sent at 11:40:32 PM
+        - article [ref=f1e26]:
+          - generic [ref=f1e28]:
+            - text: "Thanks — I searched the site for pumps. What I found on the website: - Pumps category page:"
+            - link "Pumps, PTO's & Switches" [ref=f1e29] [cursor=pointer]:
+              - /url: https://www.thompsonseparts.co.uk/product-category/pumps-ptos-switches/
+            - text: "— this lists pump-related products and parts. - Example product page:"
+            - link "GEAR PUMP NPLA 40 DX 3H UNI" [ref=f1e30] [cursor=pointer]:
+              - /url: https://www.thompsonseparts.co.uk/product/gear-pump-npla-40-dx-3h-uni/
+            - text: "Note about live inventory: I also ran a live product search in the store catalog but it didn’t return any matching items for the keyword “pump.” That may mean the catalog search needs a more specific model/SKU or the product listings are only on the website pages (not indexed by the catalog search yet). How would you like to proceed? - I can search the store catalog again for specific types (hydraulic, gear, centrifugal, submersible) or for a model/SKU if you have one — then I’ll check stock and price. - Or I can list the pump-related items shown on the Pumps category page so you can pick which one you want me to check availability for. Which option would you prefer?"
+          - generic [ref=f1e31]: Sent at 11:40:47 PM
+      - generic [ref=f1e33]:
+        - generic [ref=f1e34]: Type your message...
+        - textbox "Type your message..." [ref=f1e35]
+        - 'button "Change text size. Current: normal" [ref=f1e36]':
+          - img [ref=f1e37]
+        - button "Send" [disabled] [ref=f1e39]:
+          - img [ref=f1e40]
+```

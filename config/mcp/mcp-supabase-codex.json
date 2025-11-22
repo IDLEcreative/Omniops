@@ -1,0 +1,17 @@
+{
+  "mcpServers": {
+    "supabase-codex": {
+      "command": "npx",
+      "args": [
+        "-y",
+        "@supabase/mcp-server-supabase",
+        "--project-ref=birugqyuqhiahxvxeyqg"
+      ],
+      "env": {
+        "SUPABASE_URL": "https://birugqyuqhiahxvxeyqg.supabase.co",
+        "SUPABASE_SERVICE_ROLE_KEY": "sb_secret_cvw2bGj0SUTHbyWRyUL9ag_bzLZO6-3",
+        "SUPABASE_ACCESS_TOKEN": "sbp_f30783ba26b0a6ae2bba917988553bd1d5f76d97"
+      }
+    }
+  }
+}

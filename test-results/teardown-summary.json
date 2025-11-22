@@ -1,13 +1,13 @@
 {
-  "teardownTime": "2025-11-22T21:04:42.380Z",
-  "setupTime": "2025-11-22T21:04:25.460Z",
-  "duration": 16920,
+  "teardownTime": "2025-11-22T23:41:31.400Z",
+  "setupTime": "2025-11-22T23:40:23.162Z",
+  "duration": 68238,
   "testResultsPath": "/Users/jamesguy/Omniops/test-results",
   "generatedFiles": [
     "browser-availability.json",
+    "isolated-metadata-button-m-8815c-appears-after-product-query-chromium",
     "screenshots",
     "setup-timestamp.txt",
-    "shopping-mobile-shopping-c-14a74-rt-via-mobile-shopping-feed-chromium",
     "traces",
     "videos"
   ]

@@ -74,26 +74,14 @@ test.describe('Mobile Shopping Core Flows', () => {
       });
     }
 
-    console.log('✅ Chat widget ready');
+    console.log('✅ Chat widget ready and opened');
 
-    console.log('📍 Step 4: Click open button to open widget');
-    const openButton = iframe.locator('button[aria-label*="chat" i]').first();
-    await openButton.waitFor({ state: 'visible', timeout: 10000 });
-
-    // Use JavaScript evaluation to click the button directly (bypasses Playwright click issues)
-    await openButton.evaluate((button: HTMLButtonElement) => {
-      console.log('[E2E] Clicking button via JavaScript');
-      button.click();
-    });
-
-    // Wait for widget to open
-    await page.waitForTimeout(1000);
-
-    // Verify widget actually opened by checking for input field
-    console.log('📍 Step 4a: Verify widget opened (check for input field)');
+    // Widget is already open from waitForChatWidget() - no need to click button again
+    // Verify input field is visible to confirm widget is open
+    console.log('📍 Step 4: Verify widget is open (check for input field)');
     const inputField = iframe.locator('textarea, input[type="text"]');
     await inputField.waitFor({ state: 'visible', timeout: 5000 });
-    console.log('✅ Widget opened successfully');
+    console.log('✅ Widget confirmed open');
 
     console.log('📍 Step 5: Using real Thompson\'s Parts API (www.thompsonseparts.co.uk)');
     // Mock disabled - using real API with Thompson's account
