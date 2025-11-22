@@ -125,7 +125,7 @@ export async function POST(
   const corsHeaders = getCorsHeaders(origin);
 
   // Extract deps from context (defaults to defaultDependencies if not provided)
-  const deps = context.deps || defaultDependencies;
+  const deps = context?.deps || defaultDependencies;
 
   // Merge with defaults for any missing dependencies
   const {
