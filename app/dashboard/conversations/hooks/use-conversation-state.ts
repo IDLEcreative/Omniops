@@ -12,7 +12,7 @@ export function useConversationState() {
   const [searchTerm, setSearchTerm] = useState("");
   const [refreshing, setRefreshing] = useState(false);
   const [mainView, setMainView] = useState<'conversations' | 'analytics'>('conversations');
-  const [activeTab, setActiveTab] = useState<'all' | 'active' | 'waiting' | 'resolved'>('all');
+  const [activeTab, setActiveTab] = useState<'all' | 'active' | 'waiting' | 'resolved' | 'human_requested'>('all');
   const [advancedFilters, setAdvancedFilters] = useState<AdvancedFilterState>({
     languages: [],
     customerType: "all",

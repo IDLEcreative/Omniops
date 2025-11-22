@@ -7,7 +7,12 @@
     "typing": "AI is typing...",
     "error": "Something went wrong. Please try again.",
     "retry": "Retry",
-    "newConversation": "New Conversation"
+    "newConversation": "New Conversation",
+    "requestHuman": "Need Human Help?",
+    "requestingHuman": "Requesting Help...",
+    "humanRequested": "Human agent requested",
+    "humanAssigned": "Human Agent Assigned",
+    "waitingForHuman": "A human agent will be with you shortly..."
   },
   "settings": {
     "title": "Settings",

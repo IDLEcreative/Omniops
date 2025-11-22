@@ -41,6 +41,13 @@ interface ConversationListItemProps {
     status: "active" | "waiting" | "resolved";
     customerName: string | null;
     message: string;
+    metadata?: {
+      assigned_to_human?: boolean;
+      requested_human_at?: string;
+      frustration_detected?: boolean;
+      human_request_reason?: string;
+      [key: string]: any;
+    };
   };
   isSelected: boolean;
   onSelect: () => void;
@@ -120,6 +127,24 @@ function ConversationListItemComponent({
               </Badge>
             </div>
           </div>
+
+          {/* User Requested Human Help Indicator */}
+          {conversation.metadata?.assigned_to_human && conversation.metadata?.requested_human_at && (
+            <div className="flex items-center gap-2 mt-0.5">
+              <Badge variant="destructive" className="text-xs px-1.5 py-0">
+                🙋 User Requested
+              </Badge>
+              <span className="text-xs text-orange-600 font-medium">
+                🕐 {formatRelativeTime(conversation.metadata.requested_human_at)}
+              </span>
+              {conversation.metadata?.frustration_detected && (
+                <span className="text-xs text-red-600" title="User showing frustration">
+                  ⚠️
+                </span>
+              )}
+            </div>
+          )}
+
           <p className="line-clamp-1 text-xs text-muted-foreground">
             {conversation.message.length > 60
               ? conversation.message.substring(0, 60) + "..."

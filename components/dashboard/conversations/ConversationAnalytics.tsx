@@ -9,6 +9,9 @@ import { ResponseTimeChart } from './analytics/ResponseTimeChart';
 import { VolumeByHourChart } from './analytics/VolumeByHourChart';
 import { StatusOverTimeChart } from './analytics/StatusOverTimeChart';
 import { MessageLengthChart } from './analytics/MessageLengthChart';
+import { HandoffSummaryCards } from './analytics/HandoffSummaryCards';
+import { HandoffVolumeChart } from './analytics/HandoffVolumeChart';
+import { SLAPerformanceChart } from './analytics/SLAPerformanceChart';
 import { generateCSVContent, downloadCSV } from '@/lib/analytics/conversation-analytics-helpers';
 
 export interface ResponseTimeTrend {
@@ -33,11 +36,24 @@ export interface MessageLengthDist {
   count: number;
 }
 
+export interface HandoffMetrics {
+  totalRequests: number;
+  avgResponseTime: number;
+  requestsOverTime: { date: string; count: number }[];
+  slaPerformance: {
+    within5min: number;
+    within15min: number;
+    within30min: number;
+    over30min: number;
+  };
+}
+
 export interface AnalyticsData {
   responseTimeTrend: ResponseTimeTrend[];
   volumeByHour: VolumeByHour[];
   statusOverTime: StatusOverTime[];
   messageLengthDist: MessageLengthDist[];
+  handoffMetrics: HandoffMetrics;
 }
 
 interface ConversationAnalyticsProps {
@@ -120,6 +136,7 @@ export function ConversationAnalytics({ days }: ConversationAnalyticsProps) {
           <TabsTrigger value="volume">Volume</TabsTrigger>
           <TabsTrigger value="status">Status Trends</TabsTrigger>
           <TabsTrigger value="distribution">Distribution</TabsTrigger>
+          <TabsTrigger value="handoff">🚨 Human Handoff</TabsTrigger>
         </TabsList>
 
         <TabsContent value="response-time">
@@ -136,6 +153,14 @@ export function ConversationAnalytics({ days }: ConversationAnalyticsProps) {
 
         <TabsContent value="distribution">
           <MessageLengthChart data={data.messageLengthDist} />
+        </TabsContent>
+
+        <TabsContent value="handoff" className="space-y-4">
+          <HandoffSummaryCards data={data.handoffMetrics} />
+          <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
+            <HandoffVolumeChart data={data.handoffMetrics.requestsOverTime} />
+            <SLAPerformanceChart data={data.handoffMetrics.slaPerformance} />
+          </div>
         </TabsContent>
       </Tabs>
 

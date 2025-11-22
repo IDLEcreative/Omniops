@@ -5,13 +5,16 @@
 "use client";
 
 import { useEffect, useMemo, useRef, useCallback } from "react";
+import { useRouter } from "next/navigation";
 import { Alert, AlertDescription } from "@/components/ui/alert";
 import { useRealtimeConversations } from "@/hooks/use-realtime-conversations";
+import { useHumanRequestSubscription } from "@/hooks/use-human-request-subscription";
 import { ConversationMetricsCards } from "@/components/dashboard/conversations/ConversationMetricsCards";
 import { ConversationsPageHeader } from "@/components/dashboard/conversations/ConversationsPageHeader";
 import { ConversationMainContainer } from "@/components/dashboard/conversations/ConversationMainContainer";
 import { BulkActionBar } from "@/components/dashboard/conversations/BulkActionBar";
 import { ConversationAnalytics } from "@/components/dashboard/conversations/ConversationAnalytics";
+import { showHumanRequestToast } from "@/components/dashboard/conversations/HumanRequestToast";
 import { useKeyboardShortcuts } from "@/hooks/use-keyboard-shortcuts";
 import { RANGE_TO_DAYS } from "@/lib/conversations/constants";
 import { useConversationState, useBulkSelection, useConversationNavigation } from "./hooks";
@@ -20,6 +23,7 @@ import { useConversationShortcuts } from "./utils/keyboard-shortcuts";
 
 export default function ConversationsPage() {
   const searchInputRef = useRef<HTMLInputElement>(null);
+  const router = useRouter();
 
   const {
     selectedRange,
@@ -38,6 +42,18 @@ export default function ConversationsPage() {
     setAdvancedFilters,
     clearConversationSelection
   } = useConversationState();
+
+  // Real-time human request notifications
+  useHumanRequestSubscription({
+    onNewRequest: (event) => {
+      showHumanRequestToast(event, router);
+      // Refresh conversations to show updated badge count
+      refresh();
+    },
+    enableBrowserNotifications: true,
+    enableToast: true,
+    enableSoundAlert: false, // Can be made configurable in user settings
+  });
 
   const {
     selectionMode,

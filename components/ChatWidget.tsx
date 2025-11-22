@@ -87,6 +87,9 @@ export default function ChatWidget({
   // Icon state management for hover and active states
   const [iconState, setIconState] = useState<IconState>('normal');
 
+  // Human help request state
+  const [humanRequested, setHumanRequested] = useState(false);
+
   const {
     messages,
     setMessages,
@@ -213,6 +216,62 @@ export default function ChatWidget({
     setFontSize(sizes[(currentIndex + 1) % sizes.length] || 'normal');
   }, [fontSize, setFontSize]);
 
+  // Handle request for human assistance
+  const handleRequestHuman = useCallback(async () => {
+    if (!conversationId || humanRequested) {
+      console.log('[ChatWidget] Cannot request human - no conversation or already requested');
+      return;
+    }
+
+    console.log('[ChatWidget] Requesting human help for conversation:', conversationId);
+
+    try {
+      const response = await fetch(`/api/conversations/${conversationId}/request-human`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          reason: 'User requested human assistance',
+          lastUserMessage: messages.filter(m => m.role === 'user').pop()?.content
+        }),
+      });
+
+      const data = await response.json();
+
+      if (response.ok) {
+        console.log('[ChatWidget] Human help requested successfully:', data);
+        setHumanRequested(true);
+
+        // Add system message to chat
+        const systemMessage: Message = {
+          id: `system_${Date.now()}`,
+          conversation_id: conversationId,
+          role: 'assistant',
+          content: '✅ **Request received!** A human agent will be with you shortly. We appreciate your patience.',
+          created_at: new Date().toISOString(),
+          metadata: { system_message: true, human_requested: true }
+        };
+        setMessages(prev => [...prev, systemMessage]);
+
+        // Analytics
+        if (window.parent !== window) {
+          const parentOrigin = document.referrer ? new URL(document.referrer).origin :
+                               (window.location.ancestorOrigins && window.location.ancestorOrigins[0]) || '*';
+          window.parent.postMessage({
+            type: 'analytics',
+            event: 'human_help_requested',
+            label: conversationId,
+          }, parentOrigin);
+        }
+      } else {
+        console.error('[ChatWidget] Failed to request human help:', data.error);
+        alert('Failed to request human assistance. Please try again.');
+      }
+    } catch (error) {
+      console.error('[ChatWidget] Error requesting human help:', error);
+      alert('An error occurred. Please try again.');
+    }
+  }, [conversationId, humanRequested, messages, setMessages]);
+
   if (!mounted) {
     return null;
   }
@@ -277,6 +336,7 @@ export default function ChatWidget({
         highContrast={highContrast}
         onToggleHighContrast={() => setHighContrast(!highContrast)}
         onClose={() => setIsOpen(false)}
+        humanAssigned={humanRequested}
         appearance={demoConfig?.appearance}
       />
 
@@ -301,6 +361,10 @@ export default function ChatWidget({
         onInputChange={setInput}
         onSend={sendMessage}
         onFontSizeChange={handleFontSizeChange}
+        conversationId={conversationId}
+        messageCount={messages.length}
+        humanRequested={humanRequested}
+        onRequestHuman={handleRequestHuman}
         appearance={demoConfig?.appearance}
       />
     </div>
