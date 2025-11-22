@@ -10,7 +10,7 @@
 import { Page } from 'playwright';
 import { AutonomousAgent, TaskStep } from '../core/base-agent';
 import { WorkflowRegistry } from '../core/workflow-registry';
-import { getCredential } from '@/lib/autonomous/security/credential-vault';
+import { getCredentialVault } from '@/lib/autonomous/security/credential-vault';
 
 // ============================================================================
 // Types
@@ -32,11 +32,13 @@ export interface ShopifySetupResult {
 
 export class ShopifySetupAgent extends AutonomousAgent {
   private storeUrl: string;
+  private vault: ReturnType<typeof getCredentialVault> | undefined;
 
-  constructor(storeUrl: string) {
+  constructor(storeUrl: string, vault?: ReturnType<typeof getCredentialVault>) {
     super();
     // Normalize store URL to myshopify.com format if needed
     this.storeUrl = this.normalizeStoreUrl(storeUrl);
+    this.vault = vault;
   }
 
   /**
@@ -81,9 +83,10 @@ export class ShopifySetupAgent extends AutonomousAgent {
    */
   async getCredentials(organizationId: string): Promise<Record<string, string>> {
     try {
-      // Get admin credentials from vault
-      const adminEmail = await getCredential(organizationId, 'shopify', 'admin_email');
-      const adminPass = await getCredential(organizationId, 'shopify', 'admin_password');
+      // Get admin credentials from vault (use injected vault for testing, otherwise get singleton)
+      const vault = this.vault || getCredentialVault();
+      const adminEmail = await vault.get(organizationId, 'shopify', 'admin_email');
+      const adminPass = await vault.get(organizationId, 'shopify', 'admin_password');
 
       if (!adminEmail || !adminPass) {
         throw new Error('Shopify admin credentials not found in vault');

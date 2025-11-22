@@ -1,49 +1,41 @@
 import { describe, it, expect, jest, beforeEach } from '@jest/globals';
 
-// Create mock functions BEFORE jest.mock() (proven pattern from tier-2-alternative-formats.test.ts)
-const mockGetCredential = jest.fn();
-const mockStoreCredential = jest.fn();
-const mockDeleteCredential = jest.fn();
+// Create mock vault instance
+const mockVaultGet = jest.fn();
+const mockVaultInstance = {
+  get: mockVaultGet,
+  store: jest.fn(),
+  delete: jest.fn(),
+  list: jest.fn(),
+  rotate: jest.fn(),
+  verify: jest.fn(),
+  markStaleCredentialsForRotation: jest.fn(),
+  getCredentialsRequiringRotation: jest.fn(),
+};
 
-// Mock BOTH modules (credential-vault re-exports from credential-vault-helpers)
-jest.mock('@/lib/autonomous/security/credential-vault-helpers', () => ({
-  __esModule: true,
-  getCredential: mockGetCredential,
-  storeCredential: mockStoreCredential,
-  deleteCredential: mockDeleteCredential,
-}));
-
-jest.mock('@/lib/autonomous/security/credential-vault', () => ({
-  __esModule: true,
-  getCredential: mockGetCredential,
-  storeCredential: mockStoreCredential,
-  deleteCredential: mockDeleteCredential,
-  getCredentialVault: jest.fn(),
-  CredentialVault: jest.fn(),
-}));
-
-// Import ShopifySetupAgent after mocks are applied
+// Import ShopifySetupAgent
 import { ShopifySetupAgent } from '@/lib/autonomous/agents/shopify-setup-agent';
 
 describe('ShopifySetupAgent.getCredentials', () => {
   const organizationId = 'org-123';
   const storeUrl = 'https://demo.myshopify.com';
-  let agent: typeof ShopifySetupAgent;
+  let agent: ShopifySetupAgent;
 
   beforeEach(() => {
     jest.clearAllMocks();
-    agent = new ShopifySetupAgent(storeUrl);
+    // Inject the mock vault instance into the agent
+    agent = new ShopifySetupAgent(storeUrl, mockVaultInstance as any);
   });
 
   it('retrieves Shopify admin credentials from vault', async () => {
-    mockGetCredential
+    mockVaultGet
       .mockResolvedValueOnce({ value: 'admin@test.com' })
       .mockResolvedValueOnce({ value: 'secure-password' });
 
     const credentials = await agent.getCredentials(organizationId);
 
-    expect(mockGetCredential).toHaveBeenNthCalledWith(1, organizationId, 'shopify', 'admin_email');
-    expect(mockGetCredential).toHaveBeenNthCalledWith(2, organizationId, 'shopify', 'admin_password');
+    expect(mockVaultGet).toHaveBeenNthCalledWith(1, organizationId, 'shopify', 'admin_email');
+    expect(mockVaultGet).toHaveBeenNthCalledWith(2, organizationId, 'shopify', 'admin_password');
     expect(credentials).toEqual({
       adminEmail: 'admin@test.com',
       adminPassword: 'secure-password',
@@ -52,7 +44,7 @@ describe('ShopifySetupAgent.getCredentials', () => {
   });
 
   it('throws when email credential missing', async () => {
-    mockGetCredential
+    mockVaultGet
       .mockResolvedValueOnce(null)
       .mockResolvedValueOnce({ value: 'secure-password' });
 
@@ -62,7 +54,7 @@ describe('ShopifySetupAgent.getCredentials', () => {
   });
 
   it('throws when password credential missing', async () => {
-    mockGetCredential
+    mockVaultGet
       .mockResolvedValueOnce({ value: 'admin@test.com' })
       .mockResolvedValueOnce(null);
 
@@ -72,7 +64,7 @@ describe('ShopifySetupAgent.getCredentials', () => {
   });
 
   it('surface vault connection errors', async () => {
-    mockGetCredential.mockRejectedValue(new Error('Vault connection error'));
+    mockVaultGet.mockRejectedValue(new Error('Vault connection error'));
 
     await expect(agent.getCredentials(organizationId)).rejects.toThrow('Vault connection error');
   });
