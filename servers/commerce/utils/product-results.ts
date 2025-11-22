@@ -27,7 +27,7 @@ export async function buildSuccessResult(
     category: 'commerce',
     customerId: context.customerId || 'unknown',
     status: 'success',
-    resultCount: strategyResult.results.length,
+    resultCount: strategyResult.results?.length || 0,
     executionTime: context.executionTime,
     timestamp: new Date().toISOString()
   });
@@ -96,7 +96,8 @@ export async function buildNotFoundResult(
 export async function buildErrorResult(
   error: Error | unknown,
   context: ResultContext,
-  source: string = 'error'
+  source: string = 'error',
+  errorCode: string = 'PROVIDER_ERROR'
 ): Promise<ToolResult<GetProductDetailsOutput>> {
   const errorMessage = error instanceof Error ? error.message : 'Unknown error occurred';
 
@@ -120,7 +121,7 @@ export async function buildErrorResult(
       errorMessage
     },
     error: {
-      code: 'PROVIDER_ERROR',
+      code: errorCode,
       message: errorMessage,
       details: error
     },

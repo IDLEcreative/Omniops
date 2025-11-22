@@ -118,6 +118,7 @@ export async function getProductDetails(
   context: ExecutionContext
 ): Promise<ToolResult<GetProductDetailsOutput>> {
   const timer = new PerformanceTimer();
+  let providerError: Error | null = null;
 
   try {
     const validatedInput = validateInput(getProductDetailsInputSchema, input);
@@ -171,8 +172,9 @@ export async function getProductDetails(
           executionTime: timer.elapsed()
         }, query);
       }
-    } catch (providerError) {
+    } catch (err) {
       console.log(`[MCP getProductDetails] Provider error, trying fallback strategies`);
+      providerError = err instanceof Error ? err : new Error(String(err));
 
       // STRATEGY 2: Try exact match on provider error
       const exactMatch = await tryExactMatchStrategy(query, normalizedDomain);
@@ -182,6 +184,12 @@ export async function getProductDetails(
           executionTime: timer.elapsed()
         }, 'exact-match-after-error');
       }
+
+      // If exact match didn't find anything, return the provider error
+      return buildErrorResult(providerError, {
+        customerId: context.customerId,
+        executionTime: timer.elapsed()
+      }, 'error', 'PROVIDER_ERROR');
     }
 
     // STRATEGY 2: No provider available - try exact match for SKUs
@@ -210,10 +218,14 @@ export async function getProductDetails(
   } catch (error) {
     console.error('[MCP getProductDetails] Error:', error);
 
+    // If original error was from provider, use PROVIDER_ERROR code
+    // Otherwise use GET_PRODUCT_DETAILS_ERROR for search/database errors
+    const errorCode = providerError ? 'PROVIDER_ERROR' : 'GET_PRODUCT_DETAILS_ERROR';
+
     return buildErrorResult(error, {
       customerId: context.customerId,
       executionTime: timer.elapsed()
-    });
+    }, 'error', errorCode);
   }
 }
 
