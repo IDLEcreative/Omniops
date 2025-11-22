@@ -22,24 +22,76 @@ describe('Chat API - Malformed Tool Arguments', () => {
     // Setup Supabase mocks
     mockSupabaseClient = {
       from: jest.fn((table: string) => {
-        const mockChain = {
+        // Handle different tables with appropriate mock data
+        if (table === 'conversations') {
+          return {
+            select: jest.fn().mockReturnThis(),
+            insert: jest.fn(() => ({
+              select: jest.fn().mockReturnThis(),
+              single: jest.fn().mockResolvedValue({
+                data: { id: 'test-conv-id' },
+                error: null
+              }),
+            })),
+            update: jest.fn().mockReturnThis(),
+            eq: jest.fn().mockReturnThis(),
+            single: jest.fn().mockResolvedValue({
+              data: { id: 'test-conv-id', metadata: {} },
+              error: null
+            }),
+          }
+        } else if (table === 'messages') {
+          return {
+            select: jest.fn().mockReturnThis(),
+            insert: jest.fn(() => ({
+              select: jest.fn().mockReturnThis(),
+              single: jest.fn().mockResolvedValue({
+                data: { id: 'test-message-id', metadata: {} },
+                error: null
+              }),
+            })),
+            eq: jest.fn().mockReturnThis(),
+            order: jest.fn().mockReturnThis(),
+            limit: jest.fn().mockResolvedValue({ data: [], error: null }),
+          }
+        } else if (table === 'domains') {
+          return {
+            select: jest.fn().mockReturnThis(),
+            eq: jest.fn().mockReturnThis(),
+            single: jest.fn().mockResolvedValue({
+              data: { id: 'test-domain-id', domain: 'example.com' },
+              error: null
+            }),
+          }
+        } else if (table === 'customer_sessions') {
+          return {
+            select: jest.fn().mockReturnThis(),
+            eq: jest.fn().mockReturnThis(),
+            single: jest.fn().mockResolvedValue({
+              data: null, // No session data - funnel tracking will skip
+              error: null
+            }),
+          }
+        }
+
+        // Default mock for any other table
+        return {
           select: jest.fn().mockReturnThis(),
           insert: jest.fn().mockReturnThis(),
           eq: jest.fn().mockReturnThis(),
           order: jest.fn().mockReturnThis(),
           limit: jest.fn().mockReturnThis(),
-          single: jest.fn().mockResolvedValue({
-            data: table === 'conversations' ? { id: 'test-conv-id' } : null,
-            error: null
-          }),
+          single: jest.fn().mockResolvedValue({ data: null, error: null }),
         }
-        return mockChain
       }),
+      auth: {
+        getUser: jest.fn().mockResolvedValue({ data: { user: null }, error: null }),
+        getSession: jest.fn().mockResolvedValue({ data: { session: null }, error: null }),
+      },
     }
 
     const supabaseModule = jest.requireMock('@/lib/supabase-server')
-    supabaseModule.createServiceRoleClient = jest.fn().mockResolvedValue(mockSupabaseClient)
-    supabaseModule.validateSupabaseEnv = jest.fn().mockReturnValue(true)
+    supabaseModule.__setMockSupabaseClient(mockSupabaseClient)
 
     // Setup rate limit mock
     const rateLimitModule = jest.requireMock('@/lib/rate-limit')
@@ -84,7 +136,7 @@ describe('Chat API - Malformed Tool Arguments', () => {
     }
 
     const OpenAI = jest.requireMock('openai')
-    OpenAI.default = jest.fn(() => mockOpenAIInstance)
+    OpenAI.mockImplementationOnce(() => mockOpenAIInstance)
 
     // Setup other mocks
     const embeddingsModule = jest.requireMock('@/lib/embeddings')
