@@ -141,12 +141,12 @@ describe('Follow-up Analytics Metrics', () => {
 
       const analytics = await getFollowUpAnalytics(mockSupabase);
 
-      expect(analytics.trends[0].date).toBe('2024-01-01');
-      expect(analytics.trends[0].count).toBe(2);
-      expect(analytics.trends[1].date).toBe('2024-01-02');
-      expect(analytics.trends[1].count).toBe(2);
-      expect(analytics.trends[2].date).toBe('2024-01-03');
-      expect(analytics.trends[2].count).toBe(1);
+      expect(analytics.trend[0].date).toBe('2024-01-01');
+      expect(analytics.trend[0].sent).toBe(2);
+      expect(analytics.trend[1].date).toBe('2024-01-02');
+      expect(analytics.trend[1].sent).toBe(2);
+      expect(analytics.trend[2].date).toBe('2024-01-03');
+      expect(analytics.trend[2].sent).toBe(1);
     });
 
     it('handles empty trend and channel data', async () => {
@@ -159,8 +159,9 @@ describe('Follow-up Analytics Metrics', () => {
       const analytics = await getFollowUpAnalytics(mockSupabase);
 
       expect(analytics.overall.total_sent).toBe(0);
-      expect(analytics.trends).toHaveLength(0);
-      expect(analytics.by_channel).toEqual({});
+      expect(analytics.trend).toHaveLength(0);
+      expect(analytics.by_channel.email.total_sent).toBe(0);
+      expect(analytics.by_channel.in_app.total_sent).toBe(0);
     });
 
     it('handles Supabase errors gracefully', async () => {
