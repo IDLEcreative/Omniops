@@ -13,11 +13,37 @@ export async function waitForChatWidget(page: Page, timeout = 15000): Promise<Fr
   console.log('📍 Waiting for chat widget to load...');
 
   const widgetIframe = page.locator('iframe#chat-widget-iframe, iframe[title*="chat" i]');
-  await widgetIframe.waitFor({ state: 'attached', timeout });
-  await page.waitForTimeout(3000); // Allow widget to initialize
 
-  console.log('✅ Chat widget loaded');
-  return page.frameLocator('iframe#chat-widget-iframe, iframe[title*="chat" i]');
+  // First wait for iframe to be attached to DOM
+  await widgetIframe.waitFor({ state: 'attached', timeout });
+  console.log('✅ Chat widget iframe attached to DOM');
+
+  // Wait for iframe to load (onload event will set display: block)
+  // We use a custom wait that checks for visibility since iframe.onload sets display: block
+  await page.waitForFunction(
+    () => {
+      const iframe = document.querySelector('iframe#chat-widget-iframe') as HTMLIFrameElement;
+      return iframe && iframe.style.display !== 'none';
+    },
+    { timeout }
+  );
+  console.log('✅ Chat widget iframe visible');
+
+  // Allow widget to fully initialize
+  await page.waitForTimeout(3000);
+
+  const frameLocator = page.frameLocator('iframe#chat-widget-iframe, iframe[title*="chat" i]');
+
+  // Widget starts minimized - click the chat button to open it
+  console.log('📍 Opening chat widget...');
+  const chatButton = frameLocator.locator('button[aria-label*="chat" i], button[class*="chat-button"], button').first();
+  await chatButton.waitFor({ state: 'visible', timeout: 5000 });
+  // Use force:true to click even if button is animating
+  await chatButton.click({ force: true });
+  await page.waitForTimeout(2000); // Wait for open animation
+
+  console.log('✅ Chat widget opened and ready');
+  return frameLocator;
 }
 
 /**
