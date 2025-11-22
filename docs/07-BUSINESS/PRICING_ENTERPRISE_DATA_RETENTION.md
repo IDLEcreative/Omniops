@@ -13,6 +13,8 @@ Defines tiered data retention policies that enable enterprises to pay for extend
 
 ## 📊 Retention Tiers
 
+**IMPORTANT:** Extended retention (>90 days) is an **Enterprise-exclusive feature**. This is a key differentiator that justifies premium pricing.
+
 ### **Free Tier** (Up to 100 conversations/month)
 
 | Data Type | Retention | Storage Cost |
@@ -62,6 +64,27 @@ Defines tiered data retention policies that enable enterprises to pay for extend
 - ✅ Dedicated database instance (optional, +$200/month)
 
 **Target:** Large enterprises, regulated industries, compliance-heavy customers
+
+---
+
+## 🎯 Why Extended Retention is Enterprise-Only
+
+**Strategic Positioning:**
+1. **Clear Value Differentiation** - Enterprise tier offers tangible benefits (4x longer retention)
+2. **Justifies Premium Pricing** - $299/month base makes sense when customers get compliance features
+3. **Natural Upsell Path** - Pro customers hitting 90-day limit have clear upgrade incentive
+4. **Cost Protection** - Free/Pro tiers stay profitable by limiting storage costs
+5. **Enterprise Expectations** - Large companies expect and are willing to pay for audit trails
+
+**What Happens if Pro Customers Ask for Longer Retention?**
+- ✅ **Response:** "Extended retention is an Enterprise feature - it includes 365-day retention, automated exports, and compliance reporting. Would you like to see a demo?"
+- ❌ **Never:** Offer extended retention as an addon to Pro tier (undermines Enterprise value)
+
+**Enforcement:**
+- Database cleanup runs daily based on subscription tier
+- Pro tier: Auto-deletes at 90 days (no exceptions)
+- Enterprise tier: Configurable up to 7 years
+- Downgrade protection: Export all data before tier change
 
 ---
 
