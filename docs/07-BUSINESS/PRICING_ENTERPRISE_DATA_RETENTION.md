@@ -13,9 +13,9 @@ Defines tiered data retention policies that enable enterprises to pay for extend
 
 ## 📊 Retention Tiers
 
-**IMPORTANT:** Extended retention (>90 days) is an **Enterprise-exclusive feature**. This is a key differentiator that justifies premium pricing.
+**IMPORTANT:** Extended retention (>90 days) is an **Enterprise-exclusive feature**. This is a critical differentiator that justifies the premium £10,000/month pricing.
 
-### **Free Tier** (Up to 100 conversations/month)
+### **Small Business Tier** (£500/month - 2,500 conversations/month)
 
 | Data Type | Retention | Storage Cost |
 |-----------|-----------|--------------|
@@ -25,11 +25,11 @@ Defines tiered data retention policies that enable enterprises to pay for extend
 | Scrape Stats (aggregated) | 90 days | Included |
 | Analytics | 30 days | Included |
 
-**Target:** Small businesses, trials, personal projects
+**Target:** Startups, growing businesses (5-15 employees, 20k-100k monthly visitors)
 
 ---
 
-### **Pro Tier** ($49/month - Up to 1,000 conversations/month)
+### **SME Tier** (£1,000/month - 5,000 conversations/month) ⭐ Most Popular
 
 | Data Type | Retention | Storage Cost |
 |-----------|-----------|--------------|
@@ -40,28 +40,47 @@ Defines tiered data retention policies that enable enterprises to pay for extend
 | Analytics | 90 days | Included |
 | GDPR Export | On-demand | Included |
 
-**Target:** Growing businesses, standard SaaS customers
+**Target:** Established businesses (15-50 employees, 100k-500k monthly visitors)
 
 ---
 
-### **Enterprise Tier** (Custom pricing - Starts at $299/month)
+### **Mid-Market Tier** (£5,000/month - 25,000 conversations/month)
 
 | Data Type | Retention | Storage Cost |
 |-----------|-----------|--------------|
-| Message Queue | 7 days | +$5/month |
-| Conversations | 365 days (1 year) | +$20/month |
-| Scrape Jobs (raw) | 180 days (6 months) | +$30/month |
+| Message Queue | 24 hours | Included |
+| Conversations | 180 days (6 months) | Included |
+| Scrape Jobs (raw) | 60 days (2 months) | Included |
 | Scrape Stats (aggregated) | Forever | Included |
-| Analytics | 365 days | +$15/month |
-| GDPR Export | Automated daily | +$10/month |
-| **Total Extended Retention** | | **+$80/month** |
+| Analytics | 180 days | Included |
+| GDPR Export | Automated weekly | Included |
 
-**Additional Enterprise Features:**
-- ✅ Configurable retention per data type
+**Target:** Large operations (50-250 employees, 500k-2M monthly visitors)
+
+---
+
+### **Enterprise Tier** (£10,000/month - 100,000 conversations/month)
+
+| Data Type | Retention | Notes |
+|-----------|-----------|-------|
+| Message Queue | 7 days | Included |
+| Conversations | 365 days (1 year) | **Included** |
+| Scrape Jobs (raw) | 180 days (6 months) | **Included** |
+| Scrape Stats (aggregated) | Forever | **Included** |
+| Analytics | 365 days | **Included** |
+| GDPR Export | Automated daily | **Included** |
+| **Extended Retention** | | **All Included in Base Price** |
+
+**All Enterprise Features Included:**
+- ✅ **365-day retention** across all data types (vs 90 days in Pro)
+- ✅ Configurable retention per data type (up to 7 years)
 - ✅ Automated data archival to customer's S3 bucket
 - ✅ Point-in-time recovery (up to 30 days)
-- ✅ Compliance reporting (SOC 2, HIPAA)
-- ✅ Dedicated database instance (optional, +$200/month)
+- ✅ Compliance reporting (SOC 2, HIPAA, GDPR)
+- ✅ Dedicated database instance (optional upgrade)
+- ✅ Priority support (2-hour SLA)
+- ✅ Custom integration support
+- ✅ White-label options
 
 **Target:** Large enterprises, regulated industries, compliance-heavy customers
 
@@ -69,22 +88,35 @@ Defines tiered data retention policies that enable enterprises to pay for extend
 
 ## 🎯 Why Extended Retention is Enterprise-Only
 
-**Strategic Positioning:**
-1. **Clear Value Differentiation** - Enterprise tier offers tangible benefits (4x longer retention)
-2. **Justifies Premium Pricing** - $299/month base makes sense when customers get compliance features
-3. **Natural Upsell Path** - Pro customers hitting 90-day limit have clear upgrade incentive
-4. **Cost Protection** - Free/Pro tiers stay profitable by limiting storage costs
-5. **Enterprise Expectations** - Large companies expect and are willing to pay for audit trails
+**Critical for Premium Pricing Justification:**
 
-**What Happens if Pro Customers Ask for Longer Retention?**
-- ✅ **Response:** "Extended retention is an Enterprise feature - it includes 365-day retention, automated exports, and compliance reporting. Would you like to see a demo?"
-- ❌ **Never:** Offer extended retention as an addon to Pro tier (undermines Enterprise value)
+At **£10,000/month (£120,000/year)**, Enterprise customers expect enterprise-grade features. Extended retention is a key justification for this premium pricing.
+
+**Strategic Positioning:**
+1. **Clear Value Differentiation** - Enterprise gets 365-day retention vs 90 days in SME (4x longer)
+2. **Justifies £120K/year Price Point** - Compliance features, audit trails, and data sovereignty are worth it
+3. **Natural Upsell Path** - Mid-Market customers hitting 180-day limit must upgrade (£5k → £10k/month)
+4. **Cost Protection** - Lower tiers stay profitable by limiting storage costs
+5. **Enterprise Expectations** - Companies spending £120K/year expect unlimited retention options
+
+**The £10K/month Conversation:**
+
+When prospects question the £10,000/month price:
+
+✅ **Response Script:**
+> "Our Enterprise tier includes 365-day data retention, unlimited scraping history, and full compliance reporting. For comparison, hiring 15-30 customer service reps would cost £23,540/month. Plus, with Enterprise retention, you have complete audit trails for compliance (HIPAA, SOX, GDPR) which your regulators require. Most enterprises save their annual subscription cost in the first quarter from CS cost reduction alone."
+
+**What Happens if Mid-Market Customers Ask for Longer Retention?**
+- ✅ **Response:** "Extended retention beyond 180 days is an Enterprise-only feature. At £5,000/month, Mid-Market gets excellent value for 25,000 conversations. However, if you need audit trails beyond 6 months for compliance, Enterprise at £10,000/month includes 365-day retention, automated daily exports to your S3 bucket, and point-in-time recovery. Most regulated industries require this level of data governance. Would you like to discuss your compliance requirements?"
+- ❌ **Never:** Offer extended retention as an addon to Mid-Market tier (undermines £10k/month Enterprise value)
 
 **Enforcement:**
 - Database cleanup runs daily based on subscription tier
-- Pro tier: Auto-deletes at 90 days (no exceptions)
-- Enterprise tier: Configurable up to 7 years
-- Downgrade protection: Export all data before tier change
+- Small Business: Auto-deletes at 30 days (no exceptions)
+- SME: Auto-deletes at 90 days (no exceptions)
+- Mid-Market: Auto-deletes at 180 days (no exceptions)
+- Enterprise: Configurable 365 days - 7 years (compliance requirement dependent)
+- Downgrade protection: Full data export provided before tier change
 
 ---
 
