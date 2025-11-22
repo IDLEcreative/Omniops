@@ -3,6 +3,7 @@ import { createClient } from '@/lib/supabase-server';
 import { encrypt } from '@/lib/encryption';
 import { withCSRF } from '@/lib/middleware/csrf';
 import { logger } from '@/lib/logger';
+import { checkEnhancedRateLimit, getClientIp, createRateLimitResponse } from '@/lib/rate-limit-enhanced';
 
 // Input validation constants
 const MAX_URL_LENGTH = 2048;
@@ -12,10 +13,21 @@ const MAX_KEY_LENGTH = 255;
  * GET /api/woocommerce/configure
  * Fetch existing WooCommerce configuration for the authenticated user's organization
  *
- * Security: Only returns URL, never returns credentials
+ * Security: Only returns URL, never returns credentials, rate limited
  */
 export async function GET(request: NextRequest) {
   try {
+    // 0. Check rate limit FIRST
+    const ip = getClientIp(request.headers);
+    const rateLimitResult = await checkEnhancedRateLimit({
+      ip,
+      endpoint: '/api/woocommerce/configure',
+    });
+
+    if (!rateLimitResult.allowed) {
+      return createRateLimitResponse(rateLimitResult);
+    }
+
     const supabase = await createClient();
 
     if (!supabase) {
@@ -89,10 +101,21 @@ export async function GET(request: NextRequest) {
  *
  * Body: { url, consumerKey, consumerSecret }
  *
- * Security: Encrypts consumer key and secret before storage
+ * Security: Encrypts consumer key and secret before storage, rate limited
  */
 async function handlePost(request: NextRequest) {
   try {
+    // 0. Check rate limit FIRST
+    const ip = getClientIp(request.headers);
+    const rateLimitResult = await checkEnhancedRateLimit({
+      ip,
+      endpoint: '/api/woocommerce/configure',
+    });
+
+    if (!rateLimitResult.allowed) {
+      return createRateLimitResponse(rateLimitResult);
+    }
+
     // Validate Content-Type
     const contentType = request.headers.get('content-type');
     if (!contentType?.includes('application/json')) {

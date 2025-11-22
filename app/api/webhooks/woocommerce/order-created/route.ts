@@ -13,6 +13,7 @@ import { recordCartStage, recordPurchaseStage } from '@/lib/analytics/funnel-ana
 import { createServiceRoleClient } from '@/lib/supabase-server';
 import { checkRateLimit } from '@/lib/rate-limit';
 import { validateWebhookEvent, logWebhookEvent } from '@/lib/webhooks/replay-prevention';
+import { logSecurityEvent } from '@/lib/security/event-logger';
 import type { WooCommerceOrderWebhook, CartPriority } from '@/types/purchase-attribution';
 
 export const runtime = 'nodejs';
@@ -28,6 +29,16 @@ export async function POST(request: NextRequest) {
   const { allowed } = await checkRateLimit(clientIp, 100, 60 * 1000);
 
   if (!allowed) {
+    // Log rate limit exceeded
+    await logSecurityEvent({
+      type: 'rate_limit_exceeded',
+      severity: 'medium',
+      ip: clientIp,
+      userAgent: request.headers.get('user-agent') || undefined,
+      endpoint: '/api/webhooks/woocommerce/order-created',
+      metadata: { limit: 100, window: '60s' },
+    });
+
     return NextResponse.json({ error: 'Too Many Requests' }, { status: 429 });
   }
 
@@ -94,6 +105,20 @@ export async function POST(request: NextRequest) {
 
     if (!isValid) {
       console.error('[WooCommerce Webhook] Invalid signature');
+
+      // Log invalid webhook signature
+      await logSecurityEvent({
+        type: 'invalid_webhook_signature',
+        severity: 'critical',
+        ip: clientIp,
+        userAgent: request.headers.get('user-agent') || undefined,
+        endpoint: '/api/webhooks/woocommerce/order-created',
+        metadata: {
+          domain,
+          source: headers['x-wc-webhook-source'],
+        },
+      });
+
       return NextResponse.json(
         { error: 'Invalid signature' },
         { status: 401 }
@@ -119,6 +144,22 @@ export async function POST(request: NextRequest) {
         eventId,
         reason: replayCheck.reason,
       });
+
+      // Log replay attack detection
+      await logSecurityEvent({
+        type: 'replay_attack_detected',
+        severity: 'high',
+        ip: clientIp,
+        userAgent: request.headers.get('user-agent') || undefined,
+        endpoint: '/api/webhooks/woocommerce/order-created',
+        metadata: {
+          eventId,
+          reason: replayCheck.reason,
+          domain,
+          source: headers['x-wc-webhook-source'],
+        },
+      });
+
       return NextResponse.json(
         { error: replayCheck.reason },
         { status: 400 }

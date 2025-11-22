@@ -1,10 +1,19 @@
 import { NextResponse, type NextRequest } from 'next/server'
 import { updateSession } from '@/lib/supabase/middleware'
 import { getCorsHeaders } from '@/lib/security/cors-config'
+import { isIPBlocked } from '@/lib/security/event-logger'
 
 export async function middleware(request: NextRequest) {
   const { pathname } = request.nextUrl
   const origin = request.headers.get('origin');
+
+  // ========================================
+  // SECURITY: Extract client IP for security checks
+  // ========================================
+  const clientIP = request.headers.get('x-forwarded-for')?.split(',')[0]?.trim() ||
+                   request.headers.get('x-real-ip') ||
+                   request.ip ||
+                   'unknown';
 
   // ========================================
   // CRITICAL: Handle ALL OPTIONS requests immediately (CORS preflight)
@@ -16,6 +25,20 @@ export async function middleware(request: NextRequest) {
     return new NextResponse(null, {
       status: 204,
       headers: corsHeaders,
+    });
+  }
+
+  // ========================================
+  // SECURITY: Block banned IPs immediately (after OPTIONS)
+  // ========================================
+  if (clientIP !== 'unknown' && await isIPBlocked(clientIP)) {
+    console.warn('[Middleware] Blocked IP attempt:', clientIP, pathname);
+    return new NextResponse('Access Denied', {
+      status: 403,
+      headers: {
+        'Content-Type': 'text/plain',
+        'X-Blocked-Reason': 'Security violation - IP temporarily blocked',
+      },
     });
   }
 

@@ -2,7 +2,7 @@
  * Shopify Configuration API Endpoint
  * Handles saving and updating Shopify credentials
  *
- * Security: Requires authentication, CSRF protection, and organization membership
+ * Security: Requires authentication, CSRF protection, request signing, rate limiting, and organization membership
  */
 
 import { NextRequest, NextResponse } from 'next/server';
@@ -11,6 +11,9 @@ import { createServiceRoleClient } from '@/lib/supabase-server';
 import { encrypt } from '@/lib/encryption';
 import { withCSRF } from '@/lib/middleware/csrf';
 import { logger } from '@/lib/logger';
+import { checkEnhancedRateLimit, getClientIp, createRateLimitResponse } from '@/lib/rate-limit-enhanced';
+import { verifySignature, getSigningSecret } from '@/lib/security/request-signing';
+import { logSecurityEvent } from '@/lib/security/event-logger';
 
 // Input validation constants
 const MAX_SHOP_LENGTH = 255;
@@ -19,6 +22,17 @@ const MAX_DOMAIN_LENGTH = 255;
 
 async function handlePost(request: NextRequest) {
   try {
+    // 0. Check rate limit FIRST
+    const ip = getClientIp(request.headers);
+    const rateLimitResult = await checkEnhancedRateLimit({
+      ip,
+      endpoint: '/api/shopify/configure',
+    });
+
+    if (!rateLimitResult.allowed) {
+      return createRateLimitResponse(rateLimitResult);
+    }
+
     // Validate Content-Type
     const contentType = request.headers.get('content-type');
     if (!contentType?.includes('application/json')) {
@@ -49,7 +63,39 @@ async function handlePost(request: NextRequest) {
 
     // 2. Parse and validate request
     const body = await request.json();
-    const { shop, accessToken, domain } = body;
+
+    // 2.5. Verify request signature to prevent tampering
+    const secret = getSigningSecret();
+    const verification = verifySignature(body, secret);
+
+    if (!verification.valid) {
+      // Log invalid signature attempt
+      const clientIP = request.headers.get('x-forwarded-for')?.split(',')[0]?.trim() ||
+                       request.headers.get('x-real-ip') ||
+                       'unknown';
+
+      await logSecurityEvent({
+        type: 'invalid_signature',
+        severity: 'critical',
+        userId: user.id,
+        ip: clientIP,
+        userAgent: request.headers.get('user-agent') || undefined,
+        endpoint: '/api/shopify/configure',
+        metadata: {
+          error: verification.error,
+          shop: body.payload?.shop || body.shop || 'unknown'
+        },
+      });
+
+      return NextResponse.json(
+        { success: false, error: verification.error || 'Invalid request signature' },
+        { status: 401 }
+      );
+    }
+
+    // Extract payload from signed request
+    const requestData = body.payload || body;
+    const { shop, accessToken, domain } = requestData;
 
     // Validate required fields
     if (!shop || !accessToken) {
@@ -209,6 +255,26 @@ async function handlePost(request: NextRequest) {
       }
     }
 
+    // Log successful credential update (audit trail)
+    const clientIP = request.headers.get('x-forwarded-for')?.split(',')[0]?.trim() ||
+                     request.headers.get('x-real-ip') ||
+                     'unknown';
+
+    await logSecurityEvent({
+      type: 'credential_update',
+      severity: 'low',
+      userId: user.id,
+      ip: clientIP,
+      userAgent: request.headers.get('user-agent') || undefined,
+      endpoint: '/api/shopify/configure',
+      metadata: {
+        domain: customerDomain,
+        shop,
+        action: existing ? 'update' : 'create',
+        organizationId: existing?.organization_id,
+      },
+    });
+
     return NextResponse.json({
       success: true,
       message: 'Shopify configuration saved successfully',
@@ -230,6 +296,17 @@ export const POST = withCSRF(handlePost);
 
 export async function GET(request: Request) {
   try {
+    // 0. Check rate limit FIRST
+    const ip = getClientIp(request.headers);
+    const rateLimitResult = await checkEnhancedRateLimit({
+      ip,
+      endpoint: '/api/shopify/configure',
+    });
+
+    if (!rateLimitResult.allowed) {
+      return createRateLimitResponse(rateLimitResult);
+    }
+
     // 1. Authenticate user
     const authSupabase = await createClient();
 

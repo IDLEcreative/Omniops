@@ -3,22 +3,36 @@ import { headers } from 'next/headers';
 import Stripe from 'stripe';
 import { createServiceRoleClient } from '@/lib/supabase-server';
 import stripe from '@/lib/stripe-client';
-import { checkRateLimit } from '@/lib/rate-limit';
+import { checkEnhancedRateLimit, getClientIp, createRateLimitResponse } from '@/lib/rate-limit-enhanced';
+import { logSecurityEvent } from '@/lib/security/event-logger';
 
 const WEBHOOK_SECRET = process.env.STRIPE_WEBHOOK_SECRET!;
 const EVENT_TOLERANCE_SECONDS = 300; // 5 minutes
 
 export async function POST(request: NextRequest) {
-  // SECURITY: Rate limit webhook endpoint (100 requests per minute per IP)
-  const forwardedFor = request.headers.get('x-forwarded-for');
-  const clientIp = forwardedFor?.split(',')[0]?.trim() ||
-                   request.headers.get('x-real-ip') ||
-                   'unknown';
+  // SECURITY: Rate limit webhook endpoint using enhanced rate limiting
+  const ip = getClientIp(request.headers);
+  const rateLimitResult = await checkEnhancedRateLimit({
+    ip,
+    endpoint: '/api/stripe/webhook',
+  });
 
-  const { allowed } = await checkRateLimit(clientIp, 100, 60 * 1000);
+  if (!rateLimitResult.allowed) {
+    // Log rate limit exceeded
+    await logSecurityEvent({
+      type: 'rate_limit_exceeded',
+      severity: 'medium',
+      ip,
+      userAgent: request.headers.get('user-agent') || undefined,
+      endpoint: '/api/stripe/webhook',
+      metadata: {
+        limit: rateLimitResult.limit,
+        remaining: rateLimitResult.remaining,
+        resetTime: rateLimitResult.resetTime,
+      },
+    });
 
-  if (!allowed) {
-    return NextResponse.json({ error: 'Too Many Requests' }, { status: 429 });
+    return createRateLimitResponse(rateLimitResult);
   }
 
   const body = await request.text();
@@ -35,6 +49,19 @@ export async function POST(request: NextRequest) {
     event = stripe.webhooks.constructEvent(body, signature, WEBHOOK_SECRET);
   } catch (error) {
     console.error('Webhook signature verification failed:', error);
+
+    // Log invalid webhook signature
+    await logSecurityEvent({
+      type: 'invalid_signature',
+      severity: 'critical',
+      ip,
+      userAgent: request.headers.get('user-agent') || undefined,
+      endpoint: '/api/stripe/webhook',
+      metadata: {
+        error: error instanceof Error ? error.message : 'Unknown error',
+      },
+    });
+
     return NextResponse.json({ error: 'Invalid signature' }, { status: 400 });
   }
 
@@ -47,6 +74,23 @@ export async function POST(request: NextRequest) {
       eventId: event.id,
       difference: Math.abs(currentTime - eventTime),
     });
+
+    // Log potential replay attack
+    await logSecurityEvent({
+      type: 'replay_attack_detected',
+      severity: 'high',
+      ip,
+      userAgent: request.headers.get('user-agent') || undefined,
+      endpoint: '/api/stripe/webhook',
+      metadata: {
+        eventId: event.id,
+        eventTime,
+        currentTime,
+        difference: Math.abs(currentTime - eventTime),
+        tolerance: EVENT_TOLERANCE_SECONDS,
+      },
+    });
+
     return NextResponse.json(
       { error: 'Event timestamp outside tolerance window' },
       { status: 400 }

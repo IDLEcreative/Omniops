@@ -2,6 +2,8 @@ import { NextRequest, NextResponse } from 'next/server';
 import { createClient } from '@/lib/supabase/server';
 import { createServiceRoleClient } from '@/lib/supabase/server';
 import { withCSRF } from '@/lib/middleware/csrf';
+import { verifySignature, getSigningSecret } from '@/lib/security/request-signing';
+import { checkEnhancedRateLimit, getClientIp, createRateLimitResponse } from '@/lib/rate-limit-enhanced';
 import { z } from 'zod';
 
 // Input validation schema
@@ -14,10 +16,21 @@ const PrivacyDeleteSchema = z.object({
  * POST /api/privacy/delete
  * Delete all user data for GDPR/CCPA compliance
  *
- * Security: Requires authentication AND CSRF token
+ * Security: Requires authentication, CSRF token, request signature, AND rate limiting
  * Users can only delete their own data
  */
 async function handlePost(request: NextRequest) {
+  // 0. Check rate limit FIRST (before expensive operations)
+  const ip = getClientIp(request.headers);
+  const rateLimitResult = await checkEnhancedRateLimit({
+    ip,
+    endpoint: '/api/privacy/delete',
+  });
+
+  if (!rateLimitResult.allowed) {
+    return createRateLimitResponse(rateLimitResult);
+  }
+
   // 1. Authenticate user
   const supabase = await createClient();
 
@@ -36,6 +49,17 @@ async function handlePost(request: NextRequest) {
     );
   }
 
+  // 1.5. Check user-specific rate limit (more strict)
+  const userRateLimitResult = await checkEnhancedRateLimit({
+    ip,
+    userId: user.id,
+    endpoint: '/api/privacy/delete',
+  });
+
+  if (!userRateLimitResult.allowed) {
+    return createRateLimitResponse(userRateLimitResult);
+  }
+
   // 2. Get service role client for data deletion
   const serviceSupabase = await createServiceRoleClient();
 
@@ -48,8 +72,22 @@ async function handlePost(request: NextRequest) {
   try {
     const body = await request.json();
 
+    // 2.5. Verify request signature to prevent tampering
+    const secret = getSigningSecret();
+    const verification = verifySignature(body, secret);
+
+    if (!verification.valid) {
+      return NextResponse.json(
+        { error: verification.error || 'Invalid request signature' },
+        { status: 401 }
+      );
+    }
+
+    // Extract payload from signed request
+    const requestData = body.payload || body;
+
     // 3. Validate input using Zod schema
-    const validationResult = PrivacyDeleteSchema.safeParse(body);
+    const validationResult = PrivacyDeleteSchema.safeParse(requestData);
 
     if (!validationResult.success) {
       return NextResponse.json(

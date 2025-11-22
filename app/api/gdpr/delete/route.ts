@@ -2,6 +2,8 @@ import { NextRequest, NextResponse } from 'next/server';
 export const runtime = 'nodejs'
 export const dynamic = 'force-dynamic'
 import { createServiceRoleClient } from '@/lib/supabase-server';
+import { verifySignature, getSigningSecret } from '@/lib/security/request-signing';
+import { logSecurityEvent } from '@/lib/security/event-logger';
 import { z } from 'zod';
 
 const DeleteRequestSchema = z.object({
@@ -15,8 +17,39 @@ export async function POST(request: NextRequest) {
   try {
     const body = await request.json();
 
+    // Verify request signature to prevent tampering
+    const secret = getSigningSecret();
+    const verification = verifySignature(body, secret);
+
+    if (!verification.valid) {
+      // Log invalid signature attempt
+      const clientIP = request.headers.get('x-forwarded-for')?.split(',')[0]?.trim() ||
+                       request.headers.get('x-real-ip') ||
+                       'unknown';
+
+      await logSecurityEvent({
+        type: 'invalid_signature',
+        severity: 'critical',
+        ip: clientIP,
+        userAgent: request.headers.get('user-agent') || undefined,
+        endpoint: '/api/gdpr/delete',
+        metadata: {
+          error: verification.error,
+          domain: body.payload?.domain || body.domain || 'unknown'
+        },
+      });
+
+      return NextResponse.json(
+        { error: verification.error || 'Invalid request signature' },
+        { status: 401 }
+      );
+    }
+
+    // Extract payload from signed request
+    const requestData = body.payload || body;
+
     // Validate request body
-    const validationResult = DeleteRequestSchema.safeParse(body);
+    const validationResult = DeleteRequestSchema.safeParse(requestData);
     if (!validationResult.success) {
       return NextResponse.json(
         { error: 'Invalid request data', details: validationResult.error.errors },
@@ -216,6 +249,26 @@ export async function POST(request: NextRequest) {
       status: 'completed',
       deleted_count: conversationIds.length,
       message: `Deleted ${conversationIds.length} conversation(s) and related data.`,
+    });
+
+    // Log successful GDPR deletion for security audit
+    const clientIP = request.headers.get('x-forwarded-for')?.split(',')[0]?.trim() ||
+                     request.headers.get('x-real-ip') ||
+                     'unknown';
+
+    await logSecurityEvent({
+      type: 'suspicious_activity',
+      severity: 'medium',
+      ip: clientIP,
+      userAgent: request.headers.get('user-agent') || undefined,
+      endpoint: '/api/gdpr/delete',
+      metadata: {
+        domain,
+        session_id,
+        email,
+        deleted_count: conversationIds.length,
+        actor: actorHeader,
+      },
     });
 
     return NextResponse.json({

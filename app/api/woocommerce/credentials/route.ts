@@ -3,15 +3,28 @@ import { createClient } from '@/lib/supabase/server';
 import { createServiceRoleClient } from '@/lib/supabase-server';
 import { decrypt, isEncrypted } from '@/lib/encryption';
 import { logger } from '@/lib/logger';
+import { logSecurityEvent } from '@/lib/security/event-logger';
+import { checkEnhancedRateLimit, getClientIp, createRateLimitResponse } from '@/lib/rate-limit-enhanced';
 
 /**
  * GET /api/woocommerce/credentials?domain=xxx
  * Fetch decrypted WooCommerce credentials for authenticated users
  *
- * Security: Requires authentication and verifies organization membership
+ * Security: Requires authentication, rate limiting, and verifies organization membership
  */
 export async function GET(request: NextRequest) {
   try {
+    // 0. Check rate limit FIRST (before expensive operations)
+    const ip = getClientIp(request.headers);
+    const rateLimitResult = await checkEnhancedRateLimit({
+      ip,
+      endpoint: '/api/woocommerce/credentials',
+    });
+
+    if (!rateLimitResult.allowed) {
+      return createRateLimitResponse(rateLimitResult);
+    }
+
     // 1. Authenticate user
     const supabase = await createClient();
 
@@ -25,10 +38,35 @@ export async function GET(request: NextRequest) {
     const { data: { user }, error: authError } = await supabase.auth.getUser();
 
     if (authError || !user) {
+      // Log unauthorized access attempt
+      const clientIP = request.headers.get('x-forwarded-for')?.split(',')[0]?.trim() ||
+                       request.headers.get('x-real-ip') ||
+                       'unknown';
+
+      await logSecurityEvent({
+        type: 'unauthorized_access',
+        severity: 'high',
+        ip: clientIP,
+        userAgent: request.headers.get('user-agent') || undefined,
+        endpoint: '/api/woocommerce/credentials',
+        metadata: { domain: new URL(request.url).searchParams.get('domain') || 'unknown' },
+      });
+
       return NextResponse.json(
         { success: false, error: 'Authentication required' },
         { status: 401 }
       );
+    }
+
+    // 1.5. Check user-specific rate limit (more strict)
+    const userRateLimitResult = await checkEnhancedRateLimit({
+      ip,
+      userId: user.id,
+      endpoint: '/api/woocommerce/credentials',
+    });
+
+    if (!userRateLimitResult.allowed) {
+      return createRateLimitResponse(userRateLimitResult);
     }
 
     // 2. Get and validate domain parameter
@@ -75,6 +113,25 @@ export async function GET(request: NextRequest) {
       .single();
 
     if (!membership) {
+      // Log forbidden access attempt
+      const clientIP = request.headers.get('x-forwarded-for')?.split(',')[0]?.trim() ||
+                       request.headers.get('x-real-ip') ||
+                       'unknown';
+
+      await logSecurityEvent({
+        type: 'unauthorized_access',
+        severity: 'high',
+        userId: user.id,
+        ip: clientIP,
+        userAgent: request.headers.get('user-agent') || undefined,
+        endpoint: '/api/woocommerce/credentials',
+        metadata: {
+          domain,
+          organizationId: config.organization_id,
+          reason: 'User not member of organization'
+        },
+      });
+
       return NextResponse.json({
         success: false,
         error: 'Access denied - you do not have permission to access this domain',
@@ -109,6 +166,21 @@ export async function GET(request: NextRequest) {
         error: 'Failed to process credentials',
       }, { status: 500 });
     }
+
+    // Log successful credential access (audit trail)
+    const clientIP = request.headers.get('x-forwarded-for')?.split(',')[0]?.trim() ||
+                     request.headers.get('x-real-ip') ||
+                     'unknown';
+
+    await logSecurityEvent({
+      type: 'credential_access',
+      severity: 'low',
+      userId: user.id,
+      ip: clientIP,
+      userAgent: request.headers.get('user-agent') || undefined,
+      endpoint: '/api/woocommerce/credentials',
+      metadata: { domain, organizationId: config.organization_id },
+    });
 
     return NextResponse.json({
       success: true,

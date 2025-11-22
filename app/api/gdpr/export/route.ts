@@ -3,6 +3,8 @@ export const runtime = 'nodejs'
 export const dynamic = 'force-dynamic'
 import { createClient } from '@/lib/supabase/server';
 import { createServiceRoleClient } from '@/lib/supabase-server';
+import { verifySignature, getSigningSecret } from '@/lib/security/request-signing';
+import { checkEnhancedRateLimit, getClientIp, createRateLimitResponse } from '@/lib/rate-limit-enhanced';
 import { z } from 'zod';
 
 const ExportRequestSchema = z.object({
@@ -13,6 +15,17 @@ const ExportRequestSchema = z.object({
 
 export async function POST(request: NextRequest) {
   try {
+    // 0. Check rate limit FIRST (before expensive operations)
+    const ip = getClientIp(request.headers);
+    const rateLimitResult = await checkEnhancedRateLimit({
+      ip,
+      endpoint: '/api/gdpr/export',
+    });
+
+    if (!rateLimitResult.allowed) {
+      return createRateLimitResponse(rateLimitResult);
+    }
+
     // 1. Authenticate user
     const supabase = await createClient();
 
@@ -32,9 +45,35 @@ export async function POST(request: NextRequest) {
       );
     }
 
+    // 1.5. Check user-specific rate limit (more strict)
+    const userRateLimitResult = await checkEnhancedRateLimit({
+      ip,
+      userId: user.id,
+      endpoint: '/api/gdpr/export',
+    });
+
+    if (!userRateLimitResult.allowed) {
+      return createRateLimitResponse(userRateLimitResult);
+    }
+
     // 2. Parse and validate request
     const body = await request.json();
-    const { session_id, email, domain } = ExportRequestSchema.parse(body);
+
+    // 2.5. Verify request signature to prevent tampering
+    const secret = getSigningSecret();
+    const verification = verifySignature(body, secret);
+
+    if (!verification.valid) {
+      return NextResponse.json(
+        { error: verification.error || 'Invalid request signature' },
+        { status: 401 }
+      );
+    }
+
+    // Extract payload from signed request
+    const requestData = body.payload || body;
+
+    const { session_id, email, domain } = ExportRequestSchema.parse(requestData);
     const actorHeader = request.headers.get('x-actor');
 
     if (!session_id && !email) {

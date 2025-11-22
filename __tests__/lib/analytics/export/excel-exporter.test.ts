@@ -1,13 +1,11 @@
 import { describe, it, expect, beforeEach, jest } from '@jest/globals';
 import type { MessageAnalytics } from '@/lib/dashboard/analytics';
 import type { UserAnalyticsResult } from '@/lib/dashboard/analytics/user-analytics';
-import * as XLSX from 'xlsx';
+import ExcelJS from 'exceljs';
 
 // Create spy variables
-let mockBookNew: jest.SpyInstance;
-let mockAoaToSheet: jest.SpyInstance;
-let mockBookAppendSheet: jest.SpyInstance;
-let mockWrite: jest.SpyInstance;
+let mockAddWorksheet: jest.SpyInstance;
+let mockWriteBuffer: jest.SpyInstance;
 
 // Import after dependencies
 import { exportToExcel, generateExcelFilename, type ExcelExportOptions } from '@/lib/analytics/export/excel-exporter';
@@ -91,15 +89,24 @@ const createMockUserAnalytics = (overrides: Partial<UserAnalyticsResult> = {}): 
 
 describe('Excel Exporter', () => {
   beforeEach(() => {
-    // Set up spies for XLSX functions with proper behavior simulation
-    mockBookNew = jest.spyOn(XLSX.utils, 'book_new').mockReturnValue({ SheetNames: [], Sheets: {} } as any);
-    mockAoaToSheet = jest.spyOn(XLSX.utils, 'aoa_to_sheet').mockImplementation((data) => ({ data, type: 'sheet' } as any));
-    // Mock book_append_sheet to actually add sheets to the workbook (simulate real behavior)
-    mockBookAppendSheet = jest.spyOn(XLSX.utils, 'book_append_sheet').mockImplementation((workbook, sheet, name) => {
-      workbook.SheetNames.push(name);
-      workbook.Sheets[name] = sheet;
-    });
-    mockWrite = jest.spyOn(XLSX, 'write').mockReturnValue(Buffer.from('mock-excel-data') as any);
+    // Set up spies for ExcelJS functions with proper behavior simulation
+    const mockWorksheet = {
+      addRow: jest.fn().mockReturnValue({
+        font: undefined,
+        fill: undefined
+      }),
+      getRow: jest.fn().mockReturnValue({
+        font: undefined,
+        fill: undefined
+      }),
+      getColumn: jest.fn().mockReturnValue({
+        width: 20
+      }),
+      columns: []
+    };
+
+    mockAddWorksheet = jest.spyOn(ExcelJS.Workbook.prototype, 'addWorksheet').mockReturnValue(mockWorksheet as any);
+    mockWriteBuffer = jest.spyOn(ExcelJS.Workbook.prototype.xlsx, 'writeBuffer').mockResolvedValue(Buffer.from('mock-excel-data') as any);
   });
 
   afterEach(() => {
@@ -113,19 +120,16 @@ describe('Excel Exporter', () => {
 
       const buffer = await exportToExcel(messageAnalytics, userAnalytics);
 
-      // Verify workbook creation
-      expect(mockBookNew).toHaveBeenCalled();
-
-      // Verify sheets were created
-      expect(mockAoaToSheet).toHaveBeenCalled();
-      expect(mockBookAppendSheet).toHaveBeenCalled();
+      // Verify sheets were created (Summary + Message Analytics + User Analytics + Daily Metrics + Top Queries + Languages)
+      expect(mockAddWorksheet).toHaveBeenCalled();
+      expect(mockAddWorksheet.mock.calls.length).toBeGreaterThanOrEqual(1);
 
       // Verify buffer is returned
       expect(buffer).toBeInstanceOf(Buffer);
-
-      // Note: mockWrite might not be called if XLSX.write is being called directly
-      // This is acceptable as long as a valid buffer is returned
       expect(buffer.length).toBeGreaterThan(0);
+
+      // Verify writeBuffer was called
+      expect(mockWriteBuffer).toHaveBeenCalled();
     });
 
     it('should create Summary sheet with overview metrics', async () => {
