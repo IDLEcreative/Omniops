@@ -610,6 +610,7 @@ This is a General purpose AI-powered customer service chat widget built with Nex
 - **[Conversation Accuracy](docs/CONVERSATION_ACCURACY_IMPROVEMENTS.md)** - Metadata tracking system for 86% conversation accuracy
 - **[Hallucination Prevention](docs/HALLUCINATION_PREVENTION.md)** - Anti-hallucination safeguards and testing
 - **[Docker Setup](docs/00-GETTING-STARTED/SETUP_DOCKER_PRODUCTION.md)** - Complete Docker configuration and commands
+- **[Lessons Learned](docs/10-ANALYSIS/ANALYSIS_LESSONS_LEARNED.md)** - Universal development knowledge: 12 lessons across React, Testing, Performance, Security, Database, DevOps, API, and AI
 
 ---
 

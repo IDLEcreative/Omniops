@@ -70,6 +70,14 @@ describe('POST /api/gdpr/delete', () => {
             })),
           };
         }
+        if (table === 'chat_telemetry') {
+          return {
+            delete: jest.fn(() => ({
+              eq: jest.fn(() => Promise.resolve({ data: null, error: null })),
+              in: jest.fn(() => Promise.resolve({ data: null, error: null })),
+            })),
+          };
+        }
         if (table === 'gdpr_audit_log') {
           return {
             insert: jest.fn(() => Promise.resolve({ data: null, error: null })),
@@ -107,6 +115,20 @@ describe('POST /api/gdpr/delete', () => {
             })),
             delete: jest.fn(() => ({
               in: jest.fn(() => Promise.resolve({ data: null, error: null })),
+            })),
+          };
+        }
+        if (table === 'chat_telemetry') {
+          return {
+            delete: jest.fn(() => ({
+              in: jest.fn(() => Promise.resolve({ data: null, error: null })),
+            })),
+          };
+        }
+        if (table === 'purchase_attributions') {
+          return {
+            delete: jest.fn(() => ({
+              eq: jest.fn(() => Promise.resolve({ data: null, error: null })),
             })),
           };
         }
