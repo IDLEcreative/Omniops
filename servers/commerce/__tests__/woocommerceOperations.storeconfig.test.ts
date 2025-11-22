@@ -4,6 +4,10 @@
  * Coverage: All store config operations (4 tests)
  */
 
+// Mock dependencies before imports (Jest hoisting requirement)
+jest.mock('@/lib/chat/woocommerce-tool');
+jest.mock('@/lib/chat/tool-handlers/domain-utils');
+
 import { woocommerceOperations } from '../woocommerceOperations';
 import {
   mockContext,
