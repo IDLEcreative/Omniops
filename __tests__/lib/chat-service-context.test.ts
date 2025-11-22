@@ -19,7 +19,8 @@ describe('ChatService - Context Enhancement', () => {
     }
 
     __setMockSupabaseClient(mockSupabaseClient)
-    chatService = new ChatService()
+    // Pass mockSupabaseClient to ChatService constructor
+    chatService = new ChatService(mockSupabaseClient)
 
     // Clear mocks AFTER setting up Supabase client
     mockSupabaseClient.from.mockClear()
