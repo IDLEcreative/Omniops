@@ -76,7 +76,16 @@ export function exportAnalyticsToCSV(
   filename: string = 'analytics-report'
 ) {
   const rows = transformAnalyticsToRows(data, dateRange);
-  const csv = Papa.unparse(rows);
+
+  // Define all columns to ensure Papa.unparse includes them all
+  const columns = [
+    'Type', 'Date', 'Response Time (s)', 'Satisfaction Score', 'Resolution Rate (%)',
+    'Total Messages', 'User Messages', 'Positive Messages', 'Negative Messages',
+    'Avg Messages/Day', 'Positive', 'Negative', 'Neutral', 'Total',
+    'Rank', 'Query', 'Count', 'Percentage (%)', 'Language'
+  ];
+
+  const csv = Papa.unparse(rows, { columns });
 
   // Trigger download in browser
   const blob = new Blob([csv], { type: 'text/csv;charset=utf-8;' });
@@ -97,5 +106,14 @@ export function generateCSVContent(
   dateRange: { start: string; end: string }
 ): string {
   const rows = transformAnalyticsToRows(data, dateRange);
-  return Papa.unparse(rows);
+
+  // Define all columns to ensure Papa.unparse includes them all
+  const columns = [
+    'Type', 'Date', 'Response Time (s)', 'Satisfaction Score', 'Resolution Rate (%)',
+    'Total Messages', 'User Messages', 'Positive Messages', 'Negative Messages',
+    'Avg Messages/Day', 'Positive', 'Negative', 'Neutral', 'Total',
+    'Rank', 'Query', 'Count', 'Percentage (%)', 'Language'
+  ];
+
+  return Papa.unparse(rows, { columns });
 }
