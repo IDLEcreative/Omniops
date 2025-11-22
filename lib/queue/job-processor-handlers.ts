@@ -1,7 +1,7 @@
 import { Job } from 'bullmq';
 import { JobData, FullCrawlJobData } from './queue-manager';
-import { scrapePage, checkCrawlStatus } from '../scraper-api';
-import { crawlWebsiteWithCleanup } from '../scraper-with-cleanup';
+import { scrapePage, checkCrawlStatus } from '@/lib/scraper-api';
+import { crawlWebsiteWithCleanup } from '@/lib/scraper-with-cleanup';
 import { JobResult, ProgressUpdate } from './job-processor-types';
 import { updateProgress } from './job-processor-utils';
 

@@ -1,6 +1,6 @@
 # AI Agent Knowledge Base
 
-**Generated:** 2025-11-16T19:38:29.628Z
+**Generated:** 2025-11-19T15:59:18.178Z
 **Purpose:** This document teaches AI agents how to operate the application autonomously
 
 ---
@@ -21,7 +21,7 @@
 
 ---
 
-## 🎯 Available Workflows (192)
+## 🎯 Available Workflows (239)
 
 ### 1. renders metrics and rollup health badge
 
@@ -466,14 +466,14 @@
 
 ---
 
-... 182 more workflows available in JSON export
+... 229 more workflows available in JSON export
 
 ## 🎨 UI Element Catalog (0)
 
 Common UI elements you will interact with:
 
 
-## 🔌 API Reference (27)
+## 🔌 API Reference (29)
 
 ### `/api/dashboard/telemetry**`
 - **Purpose:** Application API endpoint
@@ -489,7 +489,7 @@ Common UI elements you will interact with:
 
 ### `/api/chat`
 - **Purpose:** Process chat messages and return AI responses
-- **Used in:** should load widget, open programmatically, and send message with session metadata, should enforce rate limits and allow retry after cooldown, should handle network timeout and allow successful retry, should add and configure domain successfully, should maintain context across multiple conversation turns
+- **Used in:** should load widget, open programmatically, and send message with session metadata, should filter products by multiple criteria, should sort search results by different criteria, should handle "no results" with helpful suggestions, should paginate large result sets, should measure search performance, should respond to chat messages within 3 seconds (p95), should handle large conversations without degradation (50+ messages), should handle concurrent message burst without errors, should not leak memory over extended usage, should enforce rate limits and allow retry after cooldown, should handle network timeout and allow successful retry, should add and configure domain successfully, should maintain context across multiple conversation turns
 
 ### `/api/dashboard/analytics**`
 - **Purpose:** Retrieve analytics data
@@ -535,6 +535,10 @@ Common UI elements you will interact with:
 - **Purpose:** Application API endpoint
 - **Used in:** should add and configure domain successfully
 
+### `/api/dashboard/analytics`
+- **Purpose:** Retrieve analytics data
+- **Used in:** should enable comparison mode and display change indicators, should manually refresh analytics data
+
 ### `/api/analytics/export?format=csv&days={days}`
 - **Purpose:** Retrieve analytics data
 - **Used in:** Export workflow documentation for AI agents
@@ -550,6 +554,10 @@ Common UI elements you will interact with:
 ### `/api/dashboard/analytics?days={days}`
 - **Purpose:** Retrieve analytics data
 - **Used in:** Export workflow documentation for AI agents
+
+### `/api/analytics/intelligence`
+- **Purpose:** Retrieve analytics data
+- **Used in:** should manually refresh analytics data
 
 ### `/api/demo/scrape`
 - **Purpose:** Initiate web scraping job
@@ -586,7 +594,7 @@ Common UI elements you will interact with:
 
 ## 🔄 Common Patterns
 
-### 1. State Verification (130 uses)
+### 1. State Verification (161 uses)
 Verify expected state or element visibility
 
 **Example:**
@@ -594,7 +602,7 @@ Verify expected state or element visibility
 await expect(element).toBeVisible();
 ```
 
-### 2. Page Navigation (64 uses)
+### 2. Page Navigation (83 uses)
 Navigate to a URL and wait for page load
 
 **Example:**

@@ -2,9 +2,11 @@
  * Shared test setup for event-aggregator tests
  */
 
+// eslint-disable-next-line prefer-const
 export let mockSupabaseClient: any;
 
 // Create the mock Supabase client first
+// eslint-disable-next-line prefer-const
 mockSupabaseClient = {
   from: jest.fn()
 };

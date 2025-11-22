@@ -139,8 +139,15 @@ const customJestConfig = {
     },
   },
   // Worker configuration to prevent crashes
-  maxWorkers: 2, // Use only 2 workers to prevent memory exhaustion (was 50%)
+  // SIGKILL FIX: Use serial execution (maxWorkers=1) to prevent Jest worker memory crashes
+  // Tests affected: shopify-dynamic.test.ts, threshold-checker-*.test.ts
+  // Trade-off: ~20% slower test runs, but eliminates all SIGKILL crashes
+  maxWorkers: 1, // Serial execution - prevents SIGKILL from memory pressure (was 2)
   workerIdleMemoryLimit: '1024MB', // Kill workers if they exceed 1GB idle memory
+
+  // Force cleanup between test files to prevent memory accumulation
+  forceExit: true, // Force Jest to exit after all tests complete
+  detectLeaks: false, // Don't detect memory leaks (too strict for our use case)
 }
 
 // createJestConfig is exported this way to ensure that next/jest can load the Next.js config which is async

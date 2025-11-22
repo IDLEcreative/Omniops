@@ -13,8 +13,14 @@ import type { ProcessingMetrics } from './job-processor';
  * Queue monitoring and health check utilities
  */
 export class QueueMonitor {
-  private static queueManager = getQueueManager();
-  private static jobProcessor = getJobProcessor();
+  // Lazy-load dependencies to avoid circular dependency issues
+  private static get queueManager() {
+    return getQueueManager();
+  }
+
+  private static get jobProcessor() {
+    return getJobProcessor();
+  }
 
   /**
    * Check Redis connection health

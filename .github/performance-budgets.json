@@ -1,0 +1,81 @@
+{
+  "budgets": {
+    "api": {
+      "chat-endpoint-load": {
+        "p50": 1500,
+        "p95": 2000,
+        "p99": 3000,
+        "errorRate": 5,
+        "throughput": 10
+      },
+      "search-endpoint-load": {
+        "p50": 300,
+        "p95": 500,
+        "p99": 800,
+        "errorRate": 1,
+        "throughput": 20
+      },
+      "scrape-endpoint-load": {
+        "p50": 800,
+        "p95": 1000,
+        "p99": 1500,
+        "errorRate": 5,
+        "throughput": 5
+      }
+    },
+    "queue": {
+      "job-processing-throughput": {
+        "throughput": 50,
+        "p95": 2000,
+        "errorRate": 5
+      },
+      "concurrent-workers": {
+        "scalingEfficiency": 0.8,
+        "p95": 3000
+      }
+    },
+    "integration": {
+      "end-to-end-purchase": {
+        "p95": 5000,
+        "p99": 7000,
+        "errorRate": 1
+      },
+      "woocommerce-sync": {
+        "maxDuration": 30000,
+        "p95": 25000,
+        "errorRate": 2
+      },
+      "concurrent-customers": {
+        "isolationScore": 1.0,
+        "maxDegradation": 0.1,
+        "p95": 3000
+      }
+    },
+    "dashboard": {
+      "dashboard-queries": {
+        "p50": 500,
+        "p95": 1000,
+        "p99": 1500,
+        "errorRate": 1
+      }
+    }
+  },
+  "alerts": {
+    "email": ["team@omniops.co.uk"],
+    "slack": {
+      "enabled": false,
+      "webhook": "",
+      "channel": "#performance-alerts"
+    },
+    "github": {
+      "enabled": true,
+      "createIssue": true,
+      "assignees": []
+    }
+  },
+  "thresholds": {
+    "warningMultiplier": 0.9,
+    "criticalMultiplier": 1.0,
+    "trendDegradation": 0.15
+  }
+}

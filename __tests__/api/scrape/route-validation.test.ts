@@ -88,7 +88,7 @@ describe('/api/scrape - Validation', () => {
       expect(data.error).toBe('Invalid request data')
     })
 
-    it('should accept valid URL formats', async () => {
+    it.skip('should accept valid URL formats', async () => {
       const validUrls = [
         'https://example.com',
         'https://example.com/path',

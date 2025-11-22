@@ -1,0 +1,66 @@
+
+> customer-service-agent@0.1.0 pretest
+> npm run cleanup:processes || true
+
+
+> customer-service-agent@0.1.0 cleanup:processes
+> bash scripts/cleanup-processes.sh
+
+🧹 Cleaning up processes...
+
+Checking for runaway Jest workers...
+⚠️  Found high-CPU Jest workers: 12170
+✅ Killed runaway Jest workers
+
+Checking for duplicate MCP servers...
+✅ MCP server count is normal (0)
+
+Checking for orphaned Next.js processes...
+✅ No orphaned processes found
+
+======================================
+Process Status:
+======================================
+Jest workers:    0
+MCP servers:     0
+Next.js servers: 0
+======================================
+
+✅ Cleanup complete!
+
+> customer-service-agent@0.1.0 test
+> NODE_OPTIONS='--max-old-space-size=4096 --expose-gc' jest --bail --passWithNoTests __tests__/performance/queue/ --verbose --maxWorkers=1
+
+  console.log
+    [Fetch API] ensureFetch called, E2E_TEST=undefined, typeof fetch=undefined
+
+      at log (test-utils/jest-msw/fetch-api.js:309:11)
+
+  console.log
+    [Fetch API] Setting up mock fetch (returns empty {})
+
+      at log (test-utils/jest-msw/fetch-api.js:337:11)
+
+FAIL __tests__/performance/queue/concurrent-workers.test.ts
+  ● Test suite failed to run
+
+    A jest worker process (pid=12554) was terminated by another process: signal=SIGKILL, exitCode=null. Operating system logs may contain more information on why this occurred.
+
+      at ChildProcessWorker._onExit (node_modules/jest-worker/build/workers/ChildProcessWorker.js:370:23)
+
+PASS __tests__/performance/queue/job-processing-throughput.test.ts (45.433 s)
+  Queue Job Processing Throughput
+    Single Worker Performance
+      ✓ should process >50 jobs/second with single worker (10531 ms)
+    Concurrent Worker Performance
+      ✓ should scale throughput with worker count (19675 ms)
+    Large Queue Performance
+      ✓ should maintain throughput with 5000+ jobs (12884 ms)
+    Job Priority Handling
+      ✓ should process high-priority jobs faster (262 ms)
+
+Test Suites: 1 failed, 1 passed, 2 total
+Tests:       4 passed, 4 total
+Snapshots:   0 total
+Time:        59.928 s
+Ran all test suites matching /__tests__\/performance\/queue\//i.

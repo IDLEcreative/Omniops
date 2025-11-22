@@ -1,0 +1,66 @@
+
+> customer-service-agent@0.1.0 pretest
+> npm run cleanup:processes || true
+
+
+> customer-service-agent@0.1.0 cleanup:processes
+> bash scripts/cleanup-processes.sh
+
+🧹 Cleaning up processes...
+
+Checking for runaway Jest workers...
+✅ No runaway Jest workers found
+
+Checking for duplicate MCP servers...
+✅ MCP server count is normal (0)
+
+Checking for orphaned Next.js processes...
+✅ No orphaned processes found
+
+======================================
+Process Status:
+======================================
+Jest workers:    0
+MCP servers:     0
+Next.js servers: 0
+======================================
+
+✅ Cleanup complete!
+
+> customer-service-agent@0.1.0 test
+> NODE_OPTIONS='--max-old-space-size=4096 --expose-gc' jest --bail --passWithNoTests __tests__/performance/api/ --verbose --maxWorkers=1
+
+FAIL __tests__/performance/api/chat-endpoint-load.test.ts
+  ● Test suite failed to run
+
+    A jest worker process (pid=10546) was terminated by another process: signal=SIGKILL, exitCode=null. Operating system logs may contain more information on why this occurred.
+
+      at ChildProcessWorker._onExit (node_modules/jest-worker/build/workers/ChildProcessWorker.js:370:23)
+
+PASS __tests__/performance/api/scrape-endpoint-load.test.ts
+  Scrape API Load Tests
+    Scrape Job Creation
+      ✓ should handle 5 concurrent scrape job requests (136 ms)
+    Scrape Status Checks
+      ✓ should handle high-frequency status polling (348 ms)
+    Memory Leak Detection
+      ✓ should not leak memory during sustained scraping (62 ms)
+    Concurrent Domain Scraping
+      ✓ should handle multiple domains simultaneously (91 ms)
+
+PASS __tests__/performance/api/search-endpoint-load.test.ts
+  Search API Load Tests
+    Simple Product Search
+      ✓ should handle 20 concurrent searches with p95 < 500ms (231 ms)
+    Complex Vector Search
+      ✓ should maintain performance with semantic search (113 ms)
+    Hybrid Search Performance
+      ✓ should efficiently combine keyword and vector search (157 ms)
+    Filter Performance
+      ✓ should handle filtered searches efficiently (103 ms)
+
+Test Suites: 1 failed, 2 passed, 3 total
+Tests:       8 passed, 8 total
+Snapshots:   0 total
+Time:        10.5 s
+Ran all test suites matching /__tests__\/performance\/api\//i.
