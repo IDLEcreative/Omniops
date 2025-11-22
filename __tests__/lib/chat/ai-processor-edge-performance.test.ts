@@ -106,7 +106,7 @@ describe('AI Processor - Edge Cases: Performance', () => {
 
   describe('Concurrent Operations', () => {
     it('should handle rapid tool call responses', async () => {
-      (getAvailableTools as jest.Mock).mockResolvedValue([
+      mockDependencies.getAvailableTools.mockResolvedValue([
         { type: 'function', function: { name: 'search_website_content', description: '', parameters: {} } }
       ]);
 
@@ -134,7 +134,7 @@ describe('AI Processor - Edge Cases: Performance', () => {
           }]
         });
 
-      (executeToolCallsParallel as jest.Mock).mockResolvedValue([
+      mockDependencies.executeToolCallsParallel.mockResolvedValue([
         {
           toolCall: { id: 'call_1' },
           toolName: 'search_website_content',
@@ -158,7 +158,7 @@ describe('AI Processor - Edge Cases: Performance', () => {
         }
       ]);
 
-      (formatToolResultsForAI as jest.Mock).mockReturnValue([
+      mockDependencies.formatToolResultsForAI.mockReturnValue([
         { tool_call_id: 'call_1', content: 'Result A' },
         { tool_call_id: 'call_2', content: 'Result B' },
         { tool_call_id: 'call_3', content: 'Result C' }
@@ -172,7 +172,7 @@ describe('AI Processor - Edge Cases: Performance', () => {
 
   describe('Memory & Performance', () => {
     it('should not accumulate excessive data', async () => {
-      (getAvailableTools as jest.Mock).mockResolvedValue([
+      mockDependencies.getAvailableTools.mockResolvedValue([
         { type: 'function', function: { name: 'search_website_content', description: '', parameters: {} } }
       ]);
 
@@ -201,7 +201,7 @@ describe('AI Processor - Edge Cases: Performance', () => {
         similarity: 0.9
       }));
 
-      (executeToolCallsParallel as jest.Mock).mockResolvedValue([
+      mockDependencies.executeToolCallsParallel.mockResolvedValue([
         {
           toolCall: { id: 'call_1' },
           toolName: 'search_website_content',
@@ -215,7 +215,7 @@ describe('AI Processor - Edge Cases: Performance', () => {
         }
       ]);
 
-      (formatToolResultsForAI as jest.Mock).mockReturnValue([
+      mockDependencies.formatToolResultsForAI.mockReturnValue([
         { tool_call_id: 'call_1', content: 'Many results found' }
       ]);
 
