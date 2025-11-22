@@ -1,5 +1,5 @@
-import { RefObject, useEffect } from 'react';
-import { Send, Type } from 'lucide-react';
+import { RefObject, useEffect, useState } from 'react';
+import { Send, Type, UserPlus } from 'lucide-react';
 import { useTranslation } from './hooks/useTranslation';
 
 export interface InputAreaProps {
@@ -11,6 +11,11 @@ export interface InputAreaProps {
   onInputChange: (value: string) => void;
   onSend: () => void;
   onFontSizeChange: () => void;
+  // Human help request props
+  conversationId?: string;
+  messageCount?: number;
+  humanRequested?: boolean;
+  onRequestHuman?: () => Promise<void>;
   // Configuration-driven styling props
   appearance?: {
     inputAreaBackgroundColor?: string;
@@ -33,10 +38,37 @@ export function InputArea({
   onInputChange,
   onSend,
   onFontSizeChange,
+  conversationId,
+  messageCount = 0,
+  humanRequested = false,
+  onRequestHuman,
   appearance,
 }: InputAreaProps) {
   // Translation hook for i18n support
   const { t } = useTranslation();
+
+  // State for human help request
+  const [requestingHuman, setRequestingHuman] = useState(false);
+
+  // Show "Request Human Help" button if:
+  // - Conversation has started (conversationId exists)
+  // - At least 2 messages exchanged (user and bot)
+  // - Not already requested
+  const showHumanHelpButton = conversationId && messageCount >= 2 && !humanRequested && onRequestHuman;
+
+  // Handle request human help
+  const handleRequestHuman = async () => {
+    if (!onRequestHuman || requestingHuman) return;
+
+    setRequestingHuman(true);
+    try {
+      await onRequestHuman();
+    } catch (error) {
+      console.error('[InputArea] Failed to request human help:', error);
+    } finally {
+      setRequestingHuman(false);
+    }
+  };
 
   // Use config-driven colors with fallbacks to current hardcoded values
   const inputAreaBgColor = appearance?.inputAreaBackgroundColor || '#111111';
@@ -77,6 +109,19 @@ export function InputArea({
       }}
       className={`px-3 sm:px-4 py-3 border-t ${highContrast ? 'border-t-2 border-white bg-black' : ''}`}
     >
+      {/* Request Human Help Button */}
+      {showHumanHelpButton && (
+        <button
+          onClick={handleRequestHuman}
+          disabled={requestingHuman}
+          className="w-full mb-2 px-3 py-2 text-xs sm:text-sm flex items-center justify-center gap-2 bg-blue-600 hover:bg-blue-700 disabled:bg-blue-800 disabled:opacity-50 text-white rounded-lg transition-colors duration-200 focus:outline-none focus:ring-2 focus:ring-blue-500"
+          aria-label="Request human assistance"
+        >
+          <UserPlus className="h-4 w-4" aria-hidden="true" />
+          <span>{requestingHuman ? t('chat.requestingHuman') : t('chat.requestHuman')}</span>
+        </button>
+      )}
+
       <div className="flex gap-2 items-center">
         <label htmlFor="chat-input" className="sr-only">{t('chat.placeholder')}</label>
         <textarea
