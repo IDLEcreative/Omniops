@@ -78,15 +78,49 @@ jobs:
           echo "NEXT_PUBLIC_SUPABASE_URL=${{ secrets.NEXT_PUBLIC_SUPABASE_URL }}" >> $GITHUB_ENV
           echo "NEXT_PUBLIC_SUPABASE_ANON_KEY=${{ secrets.NEXT_PUBLIC_SUPABASE_ANON_KEY }}" >> $GITHUB_ENV
           echo "SUPABASE_SERVICE_ROLE_KEY=${{ secrets.SUPABASE_SERVICE_ROLE_KEY }}" >> $GITHUB_ENV
+          echo "TEST_USER_EMAIL=test@omniops.test" >> $GITHUB_ENV
+          echo "TEST_USER_PASSWORD=test_password_123_secure" >> $GITHUB_ENV
+          echo "OPENAI_API_KEY=${{ secrets.OPENAI_API_KEY }}" >> $GITHUB_ENV
+          # Create .env.local for the application
+          cat > .env.local << EOF
+          NEXT_PUBLIC_SUPABASE_URL=${{ secrets.NEXT_PUBLIC_SUPABASE_URL }}
+          NEXT_PUBLIC_SUPABASE_ANON_KEY=${{ secrets.NEXT_PUBLIC_SUPABASE_ANON_KEY }}
+          SUPABASE_SERVICE_ROLE_KEY=${{ secrets.SUPABASE_SERVICE_ROLE_KEY }}
+          OPENAI_API_KEY=${{ secrets.OPENAI_API_KEY }}
+          EOF
+          # Create .env.test for Playwright
+          cat > .env.test << EOF
+          TEST_USER_EMAIL=test@omniops.test
+          TEST_USER_PASSWORD=test_password_123_secure
+          BASE_URL=http://localhost:3000
+          EOF
 
       - name: Build application
         run: npm run build
+
+      - name: Setup test user in database
+        run: |
+          echo "Setting up test user in Supabase..."
+          if [ -f scripts/tests/setup-test-user.ts ]; then
+            npx tsx scripts/tests/setup-test-user.ts || echo "Test user may already exist"
+          else
+            echo "Test user setup script not found, skipping..."
+          fi
 
       - name: Start dev server
         run: |
           npm run dev &
           # Wait for server to be ready
           npx wait-on http://localhost:3000 --timeout 60000
+
+      - name: Setup authentication
+        run: |
+          echo "Running authentication setup for E2E tests..."
+          if [ -f __tests__/playwright/setup/auth.setup.ts ]; then
+            npx playwright test --project=setup || echo "Auth setup may have issues, continuing..."
+          else
+            echo "Auth setup not required for this test suite"
+          fi
 
       - name: Run E2E tests (Shard ${{ matrix.shard }}/${{ matrix.total-shards }})
         run: npx playwright test --shard=${{ matrix.shard }}/${{ matrix.total-shards }}
