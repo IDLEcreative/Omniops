@@ -39,6 +39,11 @@ test.describe('Analytics Dashboard - Complete Feature Coverage', () => {
     await setupAnalyticsDashboard(page);
   });
 
+  test.afterEach(async ({ page }) => {
+    // Give server time to recover between tests (prevents exhaustion)
+    await page.waitForTimeout(2000);
+  });
+
   test('should display complete page header with all controls', async ({ page }) => {
     console.log('\n📋 TEST: Page Header & Controls');
     const results = await verifyHeaderControls(page);

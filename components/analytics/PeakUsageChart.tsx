@@ -7,6 +7,11 @@ interface PeakUsageChartProps {
 }
 
 export function PeakUsageChart({ data }: PeakUsageChartProps) {
+  // Add null safety checks
+  if (!data?.hourlyDistribution || !data?.peakHours || !data?.quietHours) {
+    return null;
+  }
+
   const chartData = data.hourlyDistribution.map((hour, index) => ({
     hour: `${index}:00`,
     messages: hour.avgMessages,

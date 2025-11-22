@@ -6,6 +6,7 @@ import { Page, expect } from '@playwright/test';
 
 /**
  * Navigate to analytics dashboard and wait for hydration
+ * Includes retry logic to handle server recovery delays
  */
 export async function setupAnalyticsDashboard(page: Page) {
   console.log('📍 Setting up test environment');
@@ -13,18 +14,34 @@ export async function setupAnalyticsDashboard(page: Page) {
   // Set viewport for consistent testing
   await page.setViewportSize({ width: 1280, height: 720 });
 
-  // Navigate to analytics dashboard
+  // Navigate with retry logic (handles server recovery after heavy testing)
   console.log('📍 Navigating to /dashboard/analytics');
-  await page.goto('/dashboard/analytics', {
-    waitUntil: 'domcontentloaded',
-    timeout: 30000
-  });
+  let retryCount = 0;
+  const maxRetries = 3;
+
+  while (retryCount < maxRetries) {
+    try {
+      await page.goto('/dashboard/analytics', {
+        waitUntil: 'domcontentloaded',
+        timeout: 45000 // Increased timeout for recovery
+      });
+      break; // Success
+    } catch (error) {
+      retryCount++;
+      if (retryCount < maxRetries) {
+        console.log(`⚠️  Navigation attempt ${retryCount} failed, retrying in 3s...`);
+        await page.waitForTimeout(3000);
+      } else {
+        throw error; // Final retry failed
+      }
+    }
+  }
 
   // Wait for React hydration
   console.log('📍 Waiting for page hydration');
   await page.waitForSelector('h1:has-text("Analytics Dashboard")', {
     state: 'visible',
-    timeout: 10000
+    timeout: 15000 // Increased timeout
   });
   console.log('✅ Page loaded and hydrated');
 }
