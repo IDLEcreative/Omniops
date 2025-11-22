@@ -70,19 +70,19 @@ export class InstagramAPI {
 }
 
 /**
- * Load Instagram credentials for a customer from database
- * @param customerId - Customer UUID
+ * Load Instagram credentials for an organization from database
+ * @param organizationId - Organization UUID (parameter named customerId for backward compatibility)
  * @returns Decrypted Instagram credentials or null if not found
  */
 export async function getInstagramCredentials(
-  customerId: string
+  customerId: string // Keep parameter name for backward compatibility, but treat as organizationId
 ): Promise<InstagramCredentials | null> {
   const supabase = await createClient();
 
   const { data, error } = await supabase
     .from('instagram_credentials')
     .select('*')
-    .eq('customer_id', customerId)
+    .eq('organization_id', customerId) // Use organization_id (column will be added in migration)
     .eq('is_active', true)
     .single();
 

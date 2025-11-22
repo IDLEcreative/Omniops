@@ -62,7 +62,7 @@ export async function GET(request: NextRequest) {
     const { data: creds, error: credsError } = await supabase
       .from('instagram_credentials')
       .select('oauth_state')
-      .eq('customer_id', customerId)
+      .eq('organization_id', customerId) // Use organization_id
       .single();
 
     if (credsError || !creds || creds.oauth_state !== stateToken) {
@@ -100,7 +100,7 @@ export async function GET(request: NextRequest) {
         oauth_completed_at: new Date(),
         oauth_state: null, // Clear state after use
       })
-      .eq('customer_id', customerId);
+      .eq('organization_id', customerId); // Use organization_id
 
     if (updateError) {
       console.error('❌ Failed to store credentials:', updateError);

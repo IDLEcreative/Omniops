@@ -2,18 +2,27 @@
  * Feature Flag Storage Layer
  *
  * Purpose: Database operations for feature flag overrides
- * Last Updated: 2025-11-08
+ * Last Updated: 2025-11-22
  */
 
 import { createServiceRoleClientSync } from '@/lib/supabase-server';
 import type { ChatWidgetFeatureFlags } from '@/lib/chat-widget/default-config';
+import { logDeprecationWarning } from '@/lib/utils/deprecation';
 
 /**
  * Fetch customer-specific feature flag overrides from database
+ * @deprecated Use getOrganizationOverride instead - customer_id is legacy
+ * @param customerId - Legacy parameter name, treated as organizationId
  */
 export async function getCustomerOverride(
   customerId: string
 ): Promise<Partial<ChatWidgetFeatureFlags> | null> {
+  // Log deprecation warning
+  logDeprecationWarning(
+    'customer_id',
+    'Function getCustomerOverride() is deprecated. Use getOrganizationOverride() instead.'
+  );
+
   try {
     const supabase = createServiceRoleClientSync();
     if (!supabase) return null;
@@ -21,7 +30,7 @@ export async function getCustomerOverride(
     const { data, error } = await supabase
       .from('customer_feature_flags')
       .select('flags')
-      .eq('customer_id', customerId)
+      .eq('organization_id', customerId) // Support legacy parameter name but query organization_id
       .single();
 
     if (error || !data) {
@@ -64,12 +73,20 @@ export async function getOrganizationOverride(
 
 /**
  * Save customer-specific feature flags to database
+ * @deprecated Use saveOrganizationFlags instead - customer_id is legacy
+ * @param customerId - Legacy parameter name, treated as organizationId
  */
 export async function saveCustomerFlags(
   customerId: string,
   flags: Partial<ChatWidgetFeatureFlags>,
   changedBy?: string
 ): Promise<{ success: boolean; error?: string }> {
+  // Log deprecation warning
+  logDeprecationWarning(
+    'customer_id',
+    'Function saveCustomerFlags() is deprecated. Use saveOrganizationFlags() instead.'
+  );
+
   try {
     const supabase = createServiceRoleClientSync();
     if (!supabase) {
@@ -79,7 +96,7 @@ export async function saveCustomerFlags(
     const { error } = await supabase
       .from('customer_feature_flags')
       .upsert({
-        customer_id: customerId,
+        organization_id: customerId, // Support legacy parameter name but use organization_id
         flags,
         updated_at: new Date().toISOString(),
         updated_by: changedBy,

@@ -59,7 +59,7 @@ export async function handleGet(request: NextRequest) {
       .range(offset, offset + limit - 1)
       .order('created_at', { ascending: false })
 
-    if (customerId) query = query.eq('customer_id', customerId)
+    // Note: customerId parameter removed - organization_id filter is sufficient for tenant isolation
     if (domain) query = query.eq('domain', domain)
 
     const { data: configs, error, count } = await query
