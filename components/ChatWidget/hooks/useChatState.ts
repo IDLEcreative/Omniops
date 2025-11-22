@@ -1,4 +1,4 @@
-import { useState, useEffect, useRef } from 'react';
+import { useState, useEffect, useRef, useCallback } from 'react';
 import { Message } from '@/types';
 import { parentStorage } from '@/lib/chat-widget/parent-storage';
 import { enhancedParentStorage } from '@/lib/chat-widget/parent-storage-enhanced';
@@ -97,6 +97,10 @@ export function useChatState({
   const textareaRef = useRef<HTMLTextAreaElement>(null);
   const [connectionState, setConnectionState] = useState<ConnectionState>('connecting');
 
+  // Race condition prevention: Track when a message send is in progress
+  // This prevents loadPreviousMessages from overwriting fresh messages during AI processing
+  const isSendingRef = useRef(false);
+
   // Choose storage adapter based on feature flag
   const storage = useEnhancedStorage ? (enhancedParentStorage || parentStorage) : parentStorage;
 
@@ -107,6 +111,7 @@ export function useChatState({
     sessionId: session.sessionId,
     demoConfig,
     storage,
+    isSendingRef, // Pass ref to prevent race conditions
   });
   const config = useWidgetConfig({ demoConfig });
   const privacy = usePrivacySettings({
@@ -128,6 +133,25 @@ export function useChatState({
       localStorage.setItem('chat_messages', JSON.stringify(filtered));
     }
   };
+
+  /**
+   * Mark the start of a message send operation.
+   * This prevents loadPreviousMessages from overwriting fresh optimistic updates
+   * with stale database data during AI processing.
+   */
+  const markSendingStart = useCallback(() => {
+    console.log('[useChatState] 🚫 Blocking loadPreviousMessages - message send in progress');
+    isSendingRef.current = true;
+  }, []);
+
+  /**
+   * Mark the end of a message send operation.
+   * Called after onSuccess or onError to allow message loading to resume.
+   */
+  const markSendingEnd = useCallback(() => {
+    console.log('[useChatState] ✅ Unblocking loadPreviousMessages - message send complete');
+    isSendingRef.current = false;
+  }, []);
 
   // Parent window communication hook
   const parentComm = useParentCommunication({
@@ -304,6 +328,9 @@ export function useChatState({
     parentCommError: parentComm.error,
     messagesReceived: parentComm.messagesReceived,
     lastMessageType: parentComm.lastMessageType,
+    // Race condition prevention
+    markSendingStart,
+    markSendingEnd,
     // Local state
     isOpen,
     setIsOpen,
