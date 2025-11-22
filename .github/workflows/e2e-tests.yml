@@ -7,12 +7,29 @@ on:
       - 'app/**'
       - 'components/**'
       - 'lib/**'
+      - 'hooks/**'
+      - 'types/**'
+      - 'public/**'
       - '__tests__/playwright/**'
+      - '__tests__/utils/playwright/**'
       - 'package.json'
       - 'package-lock.json'
+      - 'playwright.config.ts'
+      - 'middleware.ts'
+      - 'next.config.js'
+      - 'tailwind.config.js'
   push:
     branches: [main]
+    paths:
+      - 'app/**'
+      - 'components/**'
+      - 'lib/**'
+      - '__tests__/playwright/**'
   workflow_dispatch:
+  workflow_run:
+    workflows: ["Unit & Integration Tests"]
+    types: [completed]
+    branches: [main, develop]
 
 # Allow only one E2E run per PR
 concurrency:
@@ -27,6 +44,10 @@ jobs:
     name: Playwright E2E Tests
     runs-on: ubuntu-latest
     timeout-minutes: 30
+    # Only run if triggered manually, by PR/push, or if unit tests passed
+    if: |
+      github.event_name != 'workflow_run' ||
+      github.event.workflow_run.conclusion == 'success'
 
     strategy:
       fail-fast: false

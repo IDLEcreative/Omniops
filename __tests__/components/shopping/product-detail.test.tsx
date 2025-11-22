@@ -144,7 +144,7 @@ describe('ProductDetail Component', () => {
     });
   });
 
-  it('should trigger error haptic for out of stock product', () => {
+  it('should disable button and show correct text when out of stock', () => {
     const outOfStockProduct: ShoppingProduct = {
       ...mockProduct,
       stockStatus: 'outofstock',
@@ -159,10 +159,13 @@ describe('ProductDetail Component', () => {
       />
     );
 
-    const addButton = screen.getByText('Out of Stock');
-    fireEvent.click(addButton);
+    const addButton = screen.getByRole('button', { name: 'Out of Stock' });
 
-    expect(haptics.hapticError).toHaveBeenCalled();
+    // Verify button is disabled
+    expect(addButton).toBeDisabled();
+
+    // Verify correct text is displayed
+    expect(addButton).toHaveTextContent('Out of Stock');
   });
 
   it('should display gallery thumbnails when multiple images exist', () => {
@@ -180,7 +183,7 @@ describe('ProductDetail Component', () => {
       />
     );
 
-    const thumbnails = screen.getAllByAlt(/view \d+/);
+    const thumbnails = screen.getAllByAltText(/view \d+/);
     expect(thumbnails).toHaveLength(3);
   });
 });

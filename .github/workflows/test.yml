@@ -1,10 +1,24 @@
-name: Test Suite
+name: Unit & Integration Tests
 
 on:
   push:
     branches: [main, develop]
+    paths-ignore:
+      - 'docs/**'
+      - '*.md'
+      - '.github/workflows/e2e-*.yml'
+      - '.github/workflows/performance-*.yml'
+      - '__tests__/playwright/**'
+      - 'playwright.config.ts'
   pull_request:
     branches: [main, develop]
+    paths-ignore:
+      - 'docs/**'
+      - '*.md'
+      - '.github/workflows/e2e-*.yml'
+      - '.github/workflows/performance-*.yml'
+      - '__tests__/playwright/**'
+      - 'playwright.config.ts'
   workflow_dispatch: # Allow manual trigger
 
 jobs:
@@ -45,30 +59,6 @@ jobs:
         env:
           NODE_OPTIONS: '--max-old-space-size=4096'
 
-      - name: Install Playwright browsers
-        run: npx playwright install --with-deps chromium
-
-      - name: Start dev server (background)
-        run: |
-          npm run dev &
-          echo "Waiting for dev server to be ready..."
-          timeout 60 bash -c 'until curl -s http://localhost:3000 > /dev/null; do sleep 2; done'
-        env:
-          NODE_OPTIONS: '--max-old-space-size=4096'
-
-      - name: Run E2E tests
-        run: npm run test:e2e:chromium
-        env:
-          CI: true
-
-      - name: Upload E2E test results
-        if: always()
-        uses: actions/upload-artifact@v3
-        with:
-          name: playwright-report
-          path: playwright-report/
-          retention-days: 7
-
       - name: Upload coverage reports
         uses: codecov/codecov-action@v3
         if: always()
@@ -80,10 +70,12 @@ jobs:
       - name: Test Summary
         if: always()
         run: |
-          echo "## Test Results" >> $GITHUB_STEP_SUMMARY
+          echo "## Unit & Integration Test Results" >> $GITHUB_STEP_SUMMARY
           echo "" >> $GITHUB_STEP_SUMMARY
           if [ $? -eq 0 ]; then
-            echo "✅ All tests passed!" >> $GITHUB_STEP_SUMMARY
+            echo "✅ All unit and integration tests passed!" >> $GITHUB_STEP_SUMMARY
           else
             echo "❌ Some tests failed. See logs above." >> $GITHUB_STEP_SUMMARY
           fi
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "**Note:** E2E tests run in a separate workflow for better parallelization." >> $GITHUB_STEP_SUMMARY
