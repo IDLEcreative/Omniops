@@ -50,7 +50,7 @@ const playwrightConfig = {
     command: 'npm run start', // Production mode - no HMR, stable state
     url: 'http://localhost:3000',
     timeout: 180000, // 3 minutes for server startup
-    reuseExistingServer: !process.env.CI, // Reuse in local dev, fresh in CI
+    reuseExistingServer: !process.env.CI, // Reuse locally, fresh in CI
     stdout: 'pipe',
     stderr: 'pipe',
   },

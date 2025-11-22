@@ -14,6 +14,22 @@ const createRequest = (body: any) =>
     body: JSON.stringify(body),
   });
 
+// Helper to create mock table with both delete and select operations
+const createTableMock = () => {
+  const selectChain = {
+    eq: jest.fn(() => Promise.resolve({ data: [], error: null, count: 0 })),
+    in: jest.fn(() => Promise.resolve({ data: [], error: null, count: 0 })),
+  };
+  const deleteChain = {
+    eq: jest.fn(() => Promise.resolve({ data: null, error: null })),
+    in: jest.fn(() => Promise.resolve({ data: null, error: null })),
+  };
+  return {
+    select: jest.fn(() => selectChain),
+    delete: jest.fn(() => deleteChain),
+  };
+};
+
 describe('POST /api/gdpr/delete', () => {
   beforeEach(() => {
     jest.resetAllMocks();
@@ -61,23 +77,21 @@ describe('POST /api/gdpr/delete', () => {
     const mockSupabase = {
       from: jest.fn((table: string) => {
         if (table === 'conversations') {
+          const selectChain = {
+            eq: jest.fn(() => Promise.resolve({ data: mockConversations, error: null, count: mockConversations.length })),
+            in: jest.fn(() => Promise.resolve({ data: [], error: null, count: 0 })), // Verification: should return 0 after deletion
+          };
+          const deleteChain = {
+            in: jest.fn(() => Promise.resolve({ data: null, error: null })),
+          };
           return {
-            select: jest.fn(() => ({
-              eq: jest.fn(() => Promise.resolve({ data: mockConversations, error: null })),
-            })),
-            delete: jest.fn(() => ({
-              in: jest.fn(() => Promise.resolve({ data: null, error: null })),
-            })),
+            select: jest.fn(() => selectChain),
+            delete: jest.fn(() => deleteChain),
           };
         }
-        if (table === 'chat_telemetry') {
-          return {
-            delete: jest.fn(() => ({
-              eq: jest.fn(() => Promise.resolve({ data: null, error: null })),
-              in: jest.fn(() => Promise.resolve({ data: null, error: null })),
-            })),
-          };
-        }
+        if (table === 'chat_telemetry') return createTableMock();
+        if (table === 'purchase_attributions') return createTableMock();
+        if (table === 'customer_sessions') return createTableMock();
         if (table === 'gdpr_audit_log') {
           return {
             insert: jest.fn(() => Promise.resolve({ data: null, error: null })),
@@ -109,29 +123,21 @@ describe('POST /api/gdpr/delete', () => {
     const mockSupabase = {
       from: jest.fn((table: string) => {
         if (table === 'conversations') {
+          const selectChain = {
+            eq: jest.fn(() => Promise.resolve({ data: mockConversations, error: null, count: mockConversations.length })),
+            in: jest.fn(() => Promise.resolve({ data: [], error: null, count: 0 })), // Verification: should return 0 after deletion
+          };
+          const deleteChain = {
+            in: jest.fn(() => Promise.resolve({ data: null, error: null })),
+          };
           return {
-            select: jest.fn(() => ({
-              eq: jest.fn(() => Promise.resolve({ data: mockConversations, error: null })),
-            })),
-            delete: jest.fn(() => ({
-              in: jest.fn(() => Promise.resolve({ data: null, error: null })),
-            })),
+            select: jest.fn(() => selectChain),
+            delete: jest.fn(() => deleteChain),
           };
         }
-        if (table === 'chat_telemetry') {
-          return {
-            delete: jest.fn(() => ({
-              in: jest.fn(() => Promise.resolve({ data: null, error: null })),
-            })),
-          };
-        }
-        if (table === 'purchase_attributions') {
-          return {
-            delete: jest.fn(() => ({
-              eq: jest.fn(() => Promise.resolve({ data: null, error: null })),
-            })),
-          };
-        }
+        if (table === 'chat_telemetry') return createTableMock();
+        if (table === 'purchase_attributions') return createTableMock();
+        if (table === 'customer_sessions') return createTableMock();
         if (table === 'gdpr_audit_log') {
           return {
             insert: jest.fn(() => Promise.resolve({ data: null, error: null })),

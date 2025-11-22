@@ -41,7 +41,8 @@ test.describe('Analytics Dashboard - Complete Feature Coverage', () => {
 
   test.afterEach(async ({ page }) => {
     // Give server time to recover between tests (prevents exhaustion)
-    await page.waitForTimeout(2000);
+    // Test 3 makes 3 rapid API calls, so we need extra recovery time
+    await page.waitForTimeout(5000);
   });
 
   test('should display complete page header with all controls', async ({ page }) => {
