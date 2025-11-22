@@ -23,7 +23,7 @@ test.describe('Landing Page Demo Flow E2E', () => {
 
     // Locate demo input field
     const demoUrlInput = page.locator(
-      'input[placeholder*="website" i], input[placeholder*="URL" i], input[placeholder*="demo" i], input[name="demoUrl"], input[name="demo_url"]'
+      'input[type="text"][placeholder*="example.com" i]'
     ).first();
 
     await demoUrlInput.waitFor({ state: 'visible', timeout: 10000 });
@@ -51,7 +51,7 @@ test.describe('Landing Page Demo Flow E2E', () => {
 
     // Start demo scraping
     const startDemoButton = page.locator(
-      'button:has-text("Start Demo"), button:has-text("Try It"), button:has-text("Try Now"), button:has-text("Analyze"), button[type="submit"]'
+      'button:has-text("Try Instant Demo")'
     ).first();
 
     await startDemoButton.click();
@@ -113,14 +113,14 @@ test.describe('Landing Page Demo Flow E2E', () => {
 
     await page.goto(BASE_URL, { waitUntil: 'networkidle' });
 
-    const demoUrlInput = page.locator('input[name="demoUrl"], input[placeholder*="website" i]').first();
+    const demoUrlInput = page.locator('input[type="text"][placeholder*="example.com" i]').first();
     await demoUrlInput.waitFor({ state: 'visible', timeout: 5000 });
 
     const invalidUrls = ['', 'not-a-url', 'javascript:alert(1)', 'http://localhost', 'http://127.0.0.1'];
 
     for (const invalidUrl of invalidUrls) {
       await demoUrlInput.fill(invalidUrl);
-      const startButton = page.locator('button:has-text("Start Demo")').first();
+      const startButton = page.locator('button:has-text("Try Instant Demo")').first();
       await startButton.click();
       await page.waitForTimeout(500);
       await demoUrlInput.clear();

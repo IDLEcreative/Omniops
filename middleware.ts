@@ -135,9 +135,12 @@ export async function middleware(request: NextRequest) {
   // ========================================
   // SECURITY: Add security headers to all responses
   // ========================================
+  const isDevelopment = process.env.NODE_ENV !== 'production';
+
   const scriptSources = [
     "'self'",
-    // Removed 'unsafe-eval' and 'unsafe-inline' for security
+    // Allow inline scripts in development/test for Supabase Auth UI
+    ...(isDevelopment ? ["'unsafe-inline'", "'unsafe-eval'"] : []),
     'https://cdn.jsdelivr.net',
     // CRITICAL: Always allow Vercel tooling (it detects environment automatically)
     'https://vercel.live',

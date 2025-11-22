@@ -1,18 +1,36 @@
 import { Job } from 'bullmq';
 import { JobData, FullCrawlJobData } from './queue-manager';
-import { scrapePage, checkCrawlStatus } from '@/lib/scraper-api';
-import { crawlWebsiteWithCleanup } from '@/lib/scraper-with-cleanup';
+import { scrapePage as defaultScrapePage, checkCrawlStatus as defaultCheckCrawlStatus } from '@/lib/scraper-api';
+import { crawlWebsiteWithCleanup as defaultCrawlWebsiteWithCleanup } from '@/lib/scraper-with-cleanup';
 import { JobResult, ProgressUpdate } from './job-processor-types';
 import { updateProgress } from './job-processor-utils';
 
 /**
- * Process a single page scraping job
+ * Dependency injection interface for scraping functions
+ * Allows mocking in tests and custom implementations
+ */
+export interface ScraperDependencies {
+  scrapePage?: typeof defaultScrapePage;
+  crawlWebsiteWithCleanup?: typeof defaultCrawlWebsiteWithCleanup;
+  checkCrawlStatus?: typeof defaultCheckCrawlStatus;
+}
+
+/**
+ * Process a single page scraping job with dependency injection
+ *
+ * @param job - The BullMQ job instance
+ * @param jobData - Job data containing URL and config
+ * @param deps - Optional dependencies for testing (defaults to real implementations)
  */
 export async function processSinglePageJob(
   job: Job<JobData>,
-  jobData: JobData
+  jobData: JobData,
+  deps: ScraperDependencies = {}
 ): Promise<JobResult> {
   const startTime = Date.now();
+
+  // Use injected dependencies or fall back to defaults
+  const scrapePage = deps.scrapePage || defaultScrapePage;
 
   try {
     const singlePageData = jobData as any; // Type assertion
@@ -22,7 +40,7 @@ export async function processSinglePageJob(
       currentUrl: singlePageData.url,
     });
 
-    // Scrape the page using the existing scraper-api
+    // Scrape the page using the injected or default scraper
     const result = await scrapePage(singlePageData.url, singlePageData.config);
 
     await updateProgress(job, {
@@ -66,14 +84,24 @@ export async function processSinglePageJob(
 }
 
 /**
- * Process a full crawl job
+ * Process a full crawl job with dependency injection
+ *
+ * @param job - The BullMQ job instance
+ * @param jobData - Job data containing URL and config
+ * @param isShuttingDown - Function to check if processor is shutting down
+ * @param deps - Optional dependencies for testing (defaults to real implementations)
  */
 export async function processFullCrawlJob(
   job: Job<JobData>,
   jobData: JobData,
-  isShuttingDown: () => boolean
+  isShuttingDown: () => boolean,
+  deps: ScraperDependencies = {}
 ): Promise<JobResult> {
   const startTime = Date.now();
+
+  // Use injected dependencies or fall back to defaults
+  const crawlWebsiteWithCleanup = deps.crawlWebsiteWithCleanup || defaultCrawlWebsiteWithCleanup;
+  const checkCrawlStatus = deps.checkCrawlStatus || defaultCheckCrawlStatus;
 
   try {
     await updateProgress(job, {
@@ -82,7 +110,7 @@ export async function processFullCrawlJob(
       currentUrl: (jobData as FullCrawlJobData).url,
     });
 
-    // Start the crawl using the existing scraper-api
+    // Start the crawl using the injected or default crawler
     const crawlResult = await crawlWebsiteWithCleanup((jobData as FullCrawlJobData).url, {
       ...(jobData as any).config,
       onProgress: async (progress: any) => {
@@ -157,13 +185,22 @@ export async function processFullCrawlJob(
 }
 
 /**
- * Process a refresh job
+ * Process a refresh job with dependency injection
+ *
+ * @param job - The BullMQ job instance
+ * @param jobData - Job data containing URLs and config
+ * @param deps - Optional dependencies for testing (defaults to real implementations)
  */
 export async function processRefreshJob(
   job: Job<JobData>,
-  jobData: JobData
+  jobData: JobData,
+  deps: ScraperDependencies = {}
 ): Promise<JobResult> {
   const startTime = Date.now();
+
+  // Use injected dependencies or fall back to defaults
+  const scrapePage = deps.scrapePage || defaultScrapePage;
+  const crawlWebsiteWithCleanup = deps.crawlWebsiteWithCleanup || defaultCrawlWebsiteWithCleanup;
 
   const refreshData = jobData as any; // Type assertion
   try {

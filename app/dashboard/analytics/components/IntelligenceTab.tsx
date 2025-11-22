@@ -32,7 +32,7 @@ export function IntelligenceTab({ loading, data, goals = [] }: IntelligenceTabPr
 
   return (
     <>
-      {data.summary && data.summary.insights.length > 0 && (
+      {data.summary?.insights?.length > 0 && (
         <div className="space-y-4">
           <h3 className="text-lg font-semibold flex items-center gap-2">
             <TrendingUp className="h-5 w-5" />
@@ -67,7 +67,7 @@ export function IntelligenceTab({ loading, data, goals = [] }: IntelligenceTabPr
         <PeakUsageChart data={data.peakUsage} />
       )}
 
-      {data.contentGaps && data.contentGaps.unansweredQueries.length > 0 && (
+      {data.contentGaps?.unansweredQueries?.length > 0 && (
         <div className="space-y-4">
           <h3 className="text-lg font-semibold">Content Gaps</h3>
           <div className="p-4 bg-muted rounded-lg">

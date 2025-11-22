@@ -15,6 +15,7 @@ import {
   processSinglePageJob,
   processFullCrawlJob,
   processRefreshJob,
+  ScraperDependencies,
 } from './job-processor-handlers';
 
 /**
@@ -86,16 +87,19 @@ export class JobProcessor {
   private config: JobProcessorConfig;
   private metrics: ProcessingMetrics;
   private isShuttingDown = false;
+  private dependencies: ScraperDependencies;
 
   constructor(
     queueName: string = 'scraper-queue',
-    config?: Partial<JobProcessorConfig>
+    config?: Partial<JobProcessorConfig>,
+    dependencies: ScraperDependencies = {}
   ) {
     this.config = {
       ...getDefaultConfig(),
       ...config,
     };
 
+    this.dependencies = dependencies;
     this.metrics = createInitialMetrics();
 
     // Lazy initialization - only create Redis connection when needed
@@ -192,15 +196,15 @@ export class JobProcessor {
 
       switch (jobData.type) {
         case 'single-page':
-          result = await processSinglePageJob(job, jobData);
+          result = await processSinglePageJob(job, jobData, this.dependencies);
           break;
 
         case 'full-crawl':
-          result = await processFullCrawlJob(job, jobData, () => this.isShuttingDown);
+          result = await processFullCrawlJob(job, jobData, () => this.isShuttingDown, this.dependencies);
           break;
 
         case 'refresh':
-          result = await processRefreshJob(job, jobData);
+          result = await processRefreshJob(job, jobData, this.dependencies);
           break;
 
         default:

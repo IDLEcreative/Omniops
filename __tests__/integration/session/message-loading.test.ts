@@ -8,7 +8,7 @@
  * - Fetch is skipped without session ID
  */
 
-import { describe, it, expect, beforeEach, jest } from '@jest/globals';
+import { describe, it, expect, beforeEach, jest, afterEach } from '@jest/globals';
 import {
   TEST_CONVERSATION_ID,
   TEST_SESSION_ID,
@@ -22,12 +22,20 @@ import {
   DEFAULT_FETCH_OPTIONS,
 } from '../../utils/session/fetch-helpers';
 
-const mockFetch = jest.fn();
-global.fetch = mockFetch as any;
-
 describe('Message Loading from API', () => {
+  const mockFetch = jest.fn();
+  let originalFetch: typeof global.fetch;
+
   beforeEach(() => {
+    // Save original fetch and replace with mock
+    originalFetch = global.fetch;
+    global.fetch = mockFetch as any;
     jest.clearAllMocks();
+  });
+
+  afterEach(() => {
+    // Restore original fetch
+    global.fetch = originalFetch;
   });
 
   it('should fetch messages for valid conversation', async () => {

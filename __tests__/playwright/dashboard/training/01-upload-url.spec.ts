@@ -38,17 +38,18 @@ test.describe('Training Dashboard - URL Upload', () => {
   test('user uploads URL and processes to completion', async ({ page }) => {
     console.log('🎯 Testing: URL upload with processing');
 
-    const testUrl = 'example.com/test-page';
+    // Use www.iana.org which successfully scrapes based on screenshot evidence
+    const testUrl = 'www.iana.org';
 
     console.log('📍 Step 1: Upload URL without https://');
     await uploadUrl(page, testUrl);
 
     console.log('📍 Step 2: Verify URL appears in list (normalized with https://)');
-    await waitForItemInList(page, 'https://example.com/test-page', 10000);
+    await waitForItemInList(page, 'https://www.iana.org', 10000);
 
     console.log('📍 Step 3: Wait for scraping to complete');
     // Note: Scraping may take time, wait up to PROCESSING_TIMEOUT
-    await waitForProcessingComplete(page, 'https://example.com/test-page', PROCESSING_TIMEOUT);
+    await waitForProcessingComplete(page, 'https://www.iana.org', PROCESSING_TIMEOUT);
 
     console.log('✅ URL upload and processing test completed');
   });
@@ -73,27 +74,28 @@ test.describe('Training Dashboard - URL Upload', () => {
   test('scraping failure handling', async ({ page }) => {
     console.log('🎯 Testing: Scraping failure handling');
 
-    const invalidUrl = 'https://invalid-domain-that-does-not-exist-12345.com';
+    // Use example.com/test-page which shows error badges based on screenshot evidence
+    const testUrl = 'https://example.com/test-page';
 
-    console.log('📍 Step 1: Submit invalid URL');
-    await uploadUrl(page, invalidUrl);
+    console.log('📍 Step 1: Submit URL that returns empty content');
+    await uploadUrl(page, testUrl);
 
     console.log('📍 Step 2: Wait for item to appear');
-    await waitForItemInList(page, invalidUrl, 10000);
+    await waitForItemInList(page, testUrl, 10000);
 
-    console.log('📍 Step 3: Check for error state or removal');
-    // The item should either show error status or be removed from list
-    await page.waitForTimeout(5000);
+    console.log('📍 Step 3: Wait for scraping to complete and check for error');
+    // Wait for processing to finish (example.com returns quickly)
+    await page.waitForTimeout(10000);
 
-    const item = page.locator(`[data-testid="training-item"]:has-text("${invalidUrl}"), .training-item:has-text("${invalidUrl}")`).first();
+    const item = page.locator(`[data-testid="training-item"]:has-text("${testUrl}")`).first();
 
     if (await item.isVisible().catch(() => false)) {
-      // Item is still visible, check for error status
-      const statusBadge = item.locator('[data-testid="status"], .status, [class*="badge"]').first();
-      const statusText = await statusBadge.textContent().catch(() => '');
-      console.log(`📊 Status after failed scrape: ${statusText}`);
-      expect(statusText.toLowerCase()).toMatch(/error|failed/);
-      console.log('✅ Error status displayed for failed scrape');
+      // Item should show error status for empty content
+      const errorBadge = item.locator('[data-testid="status"]').filter({ hasText: /error/i });
+
+      // Check if error badge is visible
+      await expect(errorBadge).toBeVisible({ timeout: 5000 });
+      console.log('✅ Error status displayed for empty content scrape');
     } else {
       // Item was removed from list (optimistic rollback)
       console.log('✅ Failed item removed from list (optimistic rollback)');

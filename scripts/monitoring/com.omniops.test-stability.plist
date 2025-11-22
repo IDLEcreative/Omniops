@@ -1,0 +1,63 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+<plist version="1.0">
+<dict>
+    <key>Label</key>
+    <string>com.omniops.test-stability</string>
+
+    <key>ProgramArguments</key>
+    <array>
+        <string>/bin/bash</string>
+        <string>/Users/jamesguy/Omniops/scripts/monitoring/weekly-test-stability-check.sh</string>
+    </array>
+
+    <key>WorkingDirectory</key>
+    <string>/Users/jamesguy/Omniops</string>
+
+    <!-- Run every Monday at 9:00 AM -->
+    <key>StartCalendarInterval</key>
+    <dict>
+        <key>Weekday</key>
+        <integer>1</integer>
+        <key>Hour</key>
+        <integer>9</integer>
+        <key>Minute</key>
+        <integer>0</integer>
+    </dict>
+
+    <key>StandardOutPath</key>
+    <string>/Users/jamesguy/Omniops/logs/test-stability/launchd-stdout.log</string>
+
+    <key>StandardErrorPath</key>
+    <string>/Users/jamesguy/Omniops/logs/test-stability/launchd-stderr.log</string>
+
+    <key>RunAtLoad</key>
+    <false/>
+
+    <key>KeepAlive</key>
+    <false/>
+</dict>
+</plist>
+
+<!--
+Installation Instructions:
+
+1. Copy this file to ~/Library/LaunchAgents/:
+   cp scripts/monitoring/com.omniops.test-stability.plist ~/Library/LaunchAgents/
+
+2. Load the agent:
+   launchctl load ~/Library/LaunchAgents/com.omniops.test-stability.plist
+
+3. Verify it's loaded:
+   launchctl list | grep test-stability
+
+4. To run immediately (test):
+   launchctl start com.omniops.test-stability
+
+5. To unload (disable):
+   launchctl unload ~/Library/LaunchAgents/com.omniops.test-stability.plist
+
+6. Check logs:
+   tail -f logs/test-stability/launchd-stdout.log
+   tail -f logs/test-stability/launchd-stderr.log
+-->

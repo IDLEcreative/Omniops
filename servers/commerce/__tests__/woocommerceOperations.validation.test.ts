@@ -4,6 +4,10 @@
  * Coverage: Input validation (10 tests) and context validation (3 tests)
  */
 
+// CRITICAL: Mock modules BEFORE any imports
+jest.mock('@/lib/chat/woocommerce-tool');
+jest.mock('@/lib/chat/tool-handlers/domain-utils');
+
 import { woocommerceOperations } from '../woocommerceOperations';
 import { ExecutionContext } from '../../shared/types';
 import {

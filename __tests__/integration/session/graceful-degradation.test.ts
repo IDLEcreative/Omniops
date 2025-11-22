@@ -36,7 +36,7 @@ describe('Graceful Degradation without localStorage', () => {
     (global as any).localStorage = mockStorage;
 
     try {
-      localStorage.setItem('chat_conversation_id', 'conv-123');
+      (global as any).localStorage.setItem('chat_conversation_id', 'conv-123');
     } catch (error) {
       // Should catch error and continue
       expect(error).toBeDefined();
@@ -61,7 +61,7 @@ describe('Graceful Degradation without localStorage', () => {
     (global as any).localStorage = mockStorage;
 
     try {
-      const value = localStorage.getItem('chat_conversation_id');
+      const value = (global as any).localStorage.getItem('chat_conversation_id');
       expect(value).toBeNull();
     } catch (error) {
       // Should handle gracefully
@@ -101,13 +101,13 @@ describe('Graceful Degradation without localStorage', () => {
     (global as any).localStorage = mockStorage;
 
     try {
-      localStorage.setItem('chat_conversation_id', 'conv-123');
+      (global as any).localStorage.setItem('chat_conversation_id', 'conv-123');
     } catch (error) {
       // Should handle error and continue
       expect(error).toBeDefined();
     }
 
     // Application should degrade gracefully
-    expect(localStorage.getItem('chat_conversation_id')).toBeNull();
+    expect((global as any).localStorage.getItem('chat_conversation_id')).toBeNull();
   });
 });

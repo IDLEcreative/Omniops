@@ -8,6 +8,10 @@ interface ConversionFunnelChartProps {
 }
 
 export function ConversionFunnelChart({ data }: ConversionFunnelChartProps) {
+  if (!data?.stages) {
+    return null;
+  }
+
   const maxCount = Math.max(...data.stages.map(s => s.enteredCount), 1);
 
   return (

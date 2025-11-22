@@ -21,17 +21,37 @@ export function setupWindowMock(): {
   window: any;
   mockPostMessage: jest.Mock;
 } {
-  delete (global as any).window;
   const mockPostMessage = jest.fn();
-  (global as any).window = {
-    location: {
-      origin: 'http://localhost:3000',
-      search: '',
-    },
-    parent: {
-      postMessage: mockPostMessage,
-    },
-  };
+
+  // In jsdom environment, window and document already exist
+  // We just need to mock specific properties
+  if (typeof window !== 'undefined') {
+    // Mock window.parent.postMessage
+    Object.defineProperty(window, 'parent', {
+      value: { postMessage: mockPostMessage },
+      writable: true,
+      configurable: true,
+    });
+
+    // Mock window.location.ancestorOrigins
+    if (window.location) {
+      Object.defineProperty(window.location, 'ancestorOrigins', {
+        value: null,
+        writable: true,
+        configurable: true,
+      });
+    }
+  }
+
+  // Mock document.referrer
+  if (typeof document !== 'undefined') {
+    Object.defineProperty(document, 'referrer', {
+      value: 'http://localhost:3000',
+      writable: true,
+      configurable: true,
+    });
+  }
+
   return {
     window: global.window,
     mockPostMessage,
@@ -73,6 +93,19 @@ export function cleanupTestEnvironment(context: TestContext): void {
  */
 export function setURLSearchParams(search: string): void {
   global.window.location.search = search;
+}
+
+/**
+ * Set document.referrer for testing parent origin detection
+ */
+export function setDocumentReferrer(referrer: string): void {
+  if (typeof document !== 'undefined') {
+    Object.defineProperty(document, 'referrer', {
+      value: referrer,
+      writable: true,
+      configurable: true,
+    });
+  }
 }
 
 /**

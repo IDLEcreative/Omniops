@@ -6,18 +6,26 @@
  */
 
 import { ExecutionContext } from '../../shared/types';
-import { executeWooCommerceOperation } from '@/lib/chat/woocommerce-tool';
-import { normalizeDomain } from '@/lib/chat/tool-handlers/domain-utils';
 
-// Mock dependencies
-jest.mock('@/lib/chat/woocommerce-tool');
-jest.mock('@/lib/chat/tool-handlers/domain-utils');
+// Mock dependencies BEFORE imports
+jest.mock('@/lib/chat/woocommerce-tool', () => ({
+  executeWooCommerceOperation: jest.fn(),
+  WOOCOMMERCE_TOOL: {},
+  formatWooCommerceResponse: jest.fn()
+}));
+jest.mock('@/lib/chat/tool-handlers/domain-utils', () => ({
+  normalizeDomain: jest.fn()
+}));
 jest.mock('../../shared/utils/logger', () => ({
   logToolExecution: jest.fn(),
   PerformanceTimer: jest.fn().mockImplementation(() => ({
     elapsed: jest.fn().mockReturnValue(150)
   }))
 }));
+
+// NOW import the mocked functions
+import { executeWooCommerceOperation } from '@/lib/chat/woocommerce-tool';
+import { normalizeDomain } from '@/lib/chat/tool-handlers/domain-utils';
 
 // Export mocked functions for use in test files
 export const mockExecuteWooCommerceOperation = executeWooCommerceOperation as jest.MockedFunction<typeof executeWooCommerceOperation>;
@@ -39,6 +47,14 @@ export function setupMocks() {
     return domain?.replace(/^https?:\/\//, '').replace(/^www\./, '').toLowerCase() || '';
   });
   mockNormalizeDomain.mockReturnValue('thompsonseparts.co.uk');
+
+  // Set up default successful mock for executeWooCommerceOperation
+  // Tests can override this with more specific mocks
+  mockExecuteWooCommerceOperation.mockResolvedValue({
+    success: true,
+    data: {},
+    message: 'Operation successful'
+  });
 }
 
 // Common test data generators

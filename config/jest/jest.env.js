@@ -14,6 +14,6 @@ process.env.OPENAI_API_KEY = 'test-openai-key'
 process.env.DISABLE_REAL_REQUESTS = 'true'
 
 // Memory and performance settings for tests
-process.env.NODE_OPTIONS = '--max-old-space-size=4096'
+process.env.NODE_OPTIONS = '--max-old-space-size=8192'
 
 console.log('📋 Test environment variables loaded')

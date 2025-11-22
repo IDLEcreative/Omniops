@@ -7,7 +7,7 @@
  * - Valid session IDs are accepted
  */
 
-import { describe, it, expect, beforeEach, jest } from '@jest/globals';
+import { describe, it, expect, beforeEach, jest, afterEach } from '@jest/globals';
 import { MockStorage } from '../../utils/session/mock-storage';
 import {
   TEST_CONVERSATION_ID,
@@ -21,19 +21,24 @@ import {
   DEFAULT_FETCH_OPTIONS,
 } from '../../utils/session/fetch-helpers';
 
-const mockFetch = jest.fn();
-global.fetch = mockFetch as any;
-
 describe('Session ID Validation', () => {
+  const mockFetch = jest.fn();
+  let originalFetch: typeof global.fetch;
   let localStorage: MockStorage;
 
   beforeEach(() => {
+    // Save original fetch and replace with mock
+    originalFetch = global.fetch;
+    global.fetch = mockFetch as any;
+
     localStorage = new MockStorage();
     (global as any).localStorage = localStorage;
     jest.clearAllMocks();
   });
 
   afterEach(() => {
+    // Restore original fetch
+    global.fetch = originalFetch;
     localStorage.clear();
   });
 

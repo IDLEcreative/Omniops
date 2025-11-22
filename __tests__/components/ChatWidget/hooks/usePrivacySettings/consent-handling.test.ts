@@ -10,6 +10,7 @@ import { usePrivacySettings } from '@/components/ChatWidget/hooks/usePrivacySett
 import {
   setupTestEnvironment,
   cleanupTestEnvironment,
+  setDocumentReferrer,
   type TestContext,
 } from '__tests__/utils/privacy/test-setup';
 
@@ -52,8 +53,9 @@ describe('usePrivacySettings - handleConsent Function', () => {
     );
   });
 
-  it('should use correct targetOrigin from environment variable', () => {
-    process.env.NEXT_PUBLIC_APP_URL = 'https://example.com';
+  it('should use correct targetOrigin from document.referrer', () => {
+    // Set document.referrer to simulate iframe parent
+    setDocumentReferrer('https://example.com');
 
     const { result } = renderHook(() => usePrivacySettings({}));
 
