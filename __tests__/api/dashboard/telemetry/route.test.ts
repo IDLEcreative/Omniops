@@ -62,7 +62,10 @@ const createRequest = (query: string) =>
 
 describe('GET /api/dashboard/telemetry', () => {
   beforeEach(() => {
-    jest.resetAllMocks();
+    // Don't use jest.resetAllMocks() - it breaks the mock factory functions
+    mockGetAllMetrics.mockClear();
+    mockCreateServiceRoleClient.mockClear();
+
     mockGetAllMetrics.mockReturnValue({
       summary: { totalCostUSD: 0.123456 },
       sessions: [
