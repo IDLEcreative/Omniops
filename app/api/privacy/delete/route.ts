@@ -1,76 +1,120 @@
-import { NextRequest, NextResponse } from 'next/server';
-import { createServiceRoleClient } from '@/lib/supabase/server';
-import { withCSRF } from '@/lib/middleware/csrf';
-
 /**
  * POST /api/privacy/delete
- * Delete all user data for GDPR/CCPA compliance
+ * Request account deletion with 30-day cooling-off period
+ * Complies with GDPR Article 17 (Right to be Forgotten)
  *
- * CSRF PROTECTED: Requires valid CSRF token in X-CSRF-Token header
+ * User must:
+ * 1. Authenticate with their password
+ * 2. Confirm deletion request
+ * 3. Wait 30 days before deletion is executed
+ * 4. Can cancel deletion request within 30-day period
  */
-async function handlePost(request: NextRequest) {
-  // Initialize Supabase client inside the function
-  const supabase = await createServiceRoleClient();
 
-  if (!supabase) {
-    return NextResponse.json({
-      error: 'Database service is currently unavailable'
-    }, { status: 503 });
-  }
+import { NextRequest, NextResponse } from 'next/server';
+export const runtime = 'nodejs';
+export const dynamic = 'force-dynamic';
 
+import { createClient } from '@/lib/supabase/server';
+import { createAccountDeletionRequest, getPendingDeletionRequest } from '@/lib/privacy/account-deletion';
+import { z } from 'zod';
+import { structuredLogger } from '@/lib/monitoring/logger';
+import { captureError } from '@/lib/monitoring/sentry';
+
+const DeletionRequestSchema = z.object({
+  password: z.string().min(1, 'Password is required'),
+  confirm: z.boolean().refine(v => v === true, 'Deletion must be confirmed'),
+});
+
+export async function POST(request: NextRequest) {
   try {
-    const { userId } = await request.json();
-
-    if (!userId) {
+    const supabase = await createClient();
+    if (!supabase) {
       return NextResponse.json(
-        { error: 'User ID is required' },
+        { error: 'Database unavailable' },
+        { status: 503 }
+      );
+    }
+
+    // Authenticate user
+    const { data: { user }, error: authError } = await supabase.auth.getUser();
+    if (authError || !user) {
+      return NextResponse.json(
+        { error: 'Unauthorized' },
+        { status: 401 }
+      );
+    }
+
+    // Validate request body
+    const body = await request.json();
+    const validation = DeletionRequestSchema.safeParse(body);
+    if (!validation.success) {
+      return NextResponse.json(
+        { error: 'Invalid request', details: validation.error.errors },
         { status: 400 }
       );
     }
 
-    // Delete user's chat messages
-    const { error: messagesError } = await supabase
-      .from('messages')
-      .delete()
-      .eq('session_id', userId);
-
-    if (messagesError) {
-      console.error('Error deleting messages:', messagesError);
-      throw messagesError;
+    // Check if user already has pending deletion
+    const existingRequest = await getPendingDeletionRequest(user.id);
+    if (existingRequest) {
+      return NextResponse.json(
+        {
+          error: 'Deletion already scheduled',
+          scheduled_for: existingRequest.scheduled_for,
+          days_remaining: Math.ceil(
+            (new Date(existingRequest.scheduled_for).getTime() - Date.now()) /
+            (1000 * 60 * 60 * 24)
+          ),
+        },
+        { status: 409 }
+      );
     }
 
-    // Delete user's conversations
-    const { error: conversationsError } = await supabase
-      .from('conversations')
-      .delete()
-      .eq('session_id', userId);
+    // Verify password by attempting to sign in
+    const { error: signInError } = await supabase.auth.signInWithPassword({
+      email: user.email!,
+      password: validation.data.password,
+    });
 
-    if (conversationsError) {
-      console.error('Error deleting conversations:', conversationsError);
-      throw conversationsError;
+    if (signInError) {
+      return NextResponse.json(
+        { error: 'Invalid password' },
+        { status: 403 }
+      );
     }
 
-    // Log the deletion request for compliance
-    await supabase.from('privacy_requests').insert({
-      user_id: userId,
-      request_type: 'deletion',
-      status: 'completed',
-      completed_at: new Date().toISOString(),
+    // Create scheduled deletion request (30 days from now)
+    const scheduledDate = new Date();
+    scheduledDate.setDate(scheduledDate.getDate() + 30);
+
+    const clientIp = request.headers.get('x-forwarded-for')?.split(',')[0] ||
+      request.headers.get('x-real-ip') ||
+      'unknown';
+
+    await createAccountDeletionRequest({
+      user_id: user.id,
+      scheduled_for: scheduledDate.toISOString(),
+      ip_address: clientIp,
     });
 
     return NextResponse.json({
       success: true,
-      message: 'All user data has been deleted successfully',
+      message: 'Account deletion scheduled',
+      scheduled_for: scheduledDate.toISOString(),
+      days_until_deletion: 30,
+      can_cancel_until: scheduledDate.toISOString(),
     });
-
   } catch (error) {
-    console.error('Privacy deletion error:', error);
+    structuredLogger.error('Account deletion error', {
+      error: String(error)
+    }, error instanceof Error ? error : undefined);
+    captureError(error, {
+      operation: 'account-deletion',
+      endpoint: '/api/privacy/delete'
+    });
     return NextResponse.json(
-      { error: 'Failed to delete user data' },
+      { error: 'Failed to schedule deletion' },
       { status: 500 }
     );
   }
 }
-
-// Export POST handler with CSRF protection
-export const POST = withCSRF(handlePost);

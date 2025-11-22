@@ -4,6 +4,8 @@ export const dynamic = 'force-dynamic'
 export const maxDuration = 60; // 60 seconds for chat completions (AI processing can take 15-30s)
 import { validateSupabaseEnv } from '@/lib/supabase-server';
 import { ChatTelemetry, telemetryManager } from '@/lib/chat-telemetry';
+import { structuredLogger } from '@/lib/monitoring/logger';
+import { captureError } from '@/lib/monitoring/sentry';
 
 // Core chat modules
 import { processAIConversation } from '@/lib/chat/ai-processor';
@@ -59,7 +61,14 @@ export async function POST(
   try {
     // Check critical environment variables
     if (!validateSupabaseEnv() || !process.env.OPENAI_API_KEY) {
-      console.error('[Chat API] Service configuration incomplete');
+      structuredLogger.error('[Chat API] Service configuration incomplete', {
+        supabaseConfigured: validateSupabaseEnv(),
+        openaiConfigured: !!process.env.OPENAI_API_KEY
+      });
+      captureError(new Error('Chat service configuration incomplete'), {
+        operation: 'chat-api',
+        endpoint: '/api/chat'
+      });
       return NextResponse.json(
         {
           error: 'Service temporarily unavailable',
@@ -106,7 +115,9 @@ export async function POST(
       });
     } catch (telemetryError) {
       // Telemetry should not break the main flow
-      console.warn('Failed to initialize telemetry:', telemetryError);
+      structuredLogger.warn('Failed to initialize telemetry', {
+        error: String(telemetryError)
+      });
     }
 
     // Check rate limit (uses extracted helper)
@@ -156,7 +167,9 @@ export async function POST(
         ? ConversationMetadataManager.deserialize(JSON.stringify(convMetadata.metadata))
         : new ConversationMetadataManager();
     } catch (error) {
-      console.error('[Chat API] Failed to deserialize metadata, starting fresh:', error);
+      structuredLogger.error('[Chat API] Failed to deserialize metadata, starting fresh', {
+        conversationId
+      }, error instanceof Error ? error : undefined);
       telemetry?.log('error', 'conversation', 'Metadata deserialization failed', {
         error: error instanceof Error ? error.message : String(error),
         conversationId
@@ -193,7 +206,7 @@ export async function POST(
     const isMobile = clientMobileDetection !== undefined ? clientMobileDetection : userAgentMobile;
 
     if (isMobile) {
-      console.log('[Chat API] Mobile device detected - shopping feed mode enabled', {
+      structuredLogger.info('[Chat API] Mobile device detected - shopping feed mode enabled', {
         clientDetection: clientMobileDetection,
         userAgentDetection: userAgentMobile,
         userAgent: userAgent.substring(0, 100)

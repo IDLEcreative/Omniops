@@ -15,8 +15,10 @@ export function Footer() {
           <div>
             <h3 className="font-semibold mb-3">Legal</h3>
             <ul className="space-y-2 text-sm text-muted-foreground">
-              <li><Link href="/privacy" className="hover:text-foreground">Privacy Policy</Link></li>
-              <li><Link href="/terms" className="hover:text-foreground">Terms of Service</Link></li>
+              <li><Link href="/legal/terms" className="hover:text-foreground">Terms of Service</Link></li>
+              <li><Link href="/legal/privacy" className="hover:text-foreground">Privacy Policy</Link></li>
+              <li><Link href="/legal/cookies" className="hover:text-foreground">Cookie Policy</Link></li>
+              <li><Link href="/dashboard/privacy" className="hover:text-foreground">Your Privacy Rights</Link></li>
             </ul>
           </div>
         </div>

@@ -8,12 +8,14 @@ import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from '@/components/ui/card'
+import { TermsAcceptanceCheckbox } from '@/components/auth/terms-acceptance-checkbox'
 import { ChevronLeft } from 'lucide-react'
 
 export default function SignupPage() {
   const [email, setEmail] = useState('')
   const [password, setPassword] = useState('')
   const [confirmPassword, setConfirmPassword] = useState('')
+  const [termsAccepted, setTermsAccepted] = useState(false)
   const [error, setError] = useState<string | null>(null)
   const [loading, setLoading] = useState(false)
   const [success, setSuccess] = useState(false)
@@ -23,6 +25,11 @@ export default function SignupPage() {
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
     setError(null)
+
+    if (!termsAccepted) {
+      setError('You must accept the Terms of Service and Privacy Policy to continue')
+      return
+    }
 
     if (password !== confirmPassword) {
       setError('Passwords do not match')
@@ -116,6 +123,11 @@ export default function SignupPage() {
                 required
               />
             </div>
+            <TermsAcceptanceCheckbox
+              checked={termsAccepted}
+              onChange={setTermsAccepted}
+              error={error && !termsAccepted ? error : undefined}
+            />
             {error && (
               <p className="text-sm text-red-600">{error}</p>
             )}

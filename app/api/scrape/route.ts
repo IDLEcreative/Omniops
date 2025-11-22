@@ -10,6 +10,8 @@ import {
 } from './handlers';
 import { withCSRF } from '@/lib/middleware/csrf';
 import { checkExpensiveOpRateLimit } from '@/lib/rate-limit';
+import { structuredLogger } from '@/lib/monitoring/logger';
+import { captureError } from '@/lib/monitoring/sentry';
 
 export const runtime = 'nodejs';
 export const dynamic = 'force-dynamic';
@@ -81,7 +83,8 @@ async function handlePost(request: NextRequest) {
       return await handleWebsiteCrawl(scrapeRequest, supabase, organizationId, userId);
     }
   } catch (error) {
-    console.error('Scrape API error:', error);
+    structuredLogger.error('Scrape API error', { error: String(error) }, error instanceof Error ? error : undefined);
+    captureError(error, { operation: 'scrape-api', endpoint: '/api/scrape' });
 
     if (error instanceof z.ZodError) {
       return NextResponse.json(
@@ -156,7 +159,7 @@ async function getOrganizationId(userSupabase: any): Promise<string | undefined>
     if (error instanceof Error && error.message.includes('Insufficient permissions')) {
       throw error;
     }
-    console.log('Could not get organization ID, proceeding without owned domains');
+    structuredLogger.warn('Could not get organization ID', { message: 'proceeding without owned domains' });
   }
 
   return undefined;

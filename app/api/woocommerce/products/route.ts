@@ -3,6 +3,8 @@ export const runtime = 'nodejs';
 export const dynamic = 'force-dynamic';
 import { createServiceRoleClient } from '@/lib/supabase-server';
 import { z } from 'zod';
+import { structuredLogger } from '@/lib/monitoring/logger';
+import { captureError } from '@/lib/monitoring/sentry';
 
 // Request validation
 const ProductsRequestSchema = z.object({
@@ -98,8 +100,14 @@ export async function POST(request: NextRequest) {
     });
 
   } catch (error: any) {
-    console.error('Products fetch error:', error);
-    
+    structuredLogger.error('Products fetch error', {
+      error: error?.message || String(error)
+    }, error instanceof Error ? error : undefined);
+    captureError(error, {
+      operation: 'woocommerce-products',
+      endpoint: '/api/woocommerce/products'
+    });
+
     if (error instanceof z.ZodError) {
       return NextResponse.json(
         { error: 'Invalid request data', details: error.errors },

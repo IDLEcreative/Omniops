@@ -2,6 +2,8 @@ import type { Metadata, Viewport } from "next";
 import { AuthProvider } from "@/components/auth/auth-provider";
 import { ThemeProvider } from "@/components/theme-provider";
 import { SessionTrackerProvider } from "@/components/SessionTrackerProvider";
+import { SentryProvider } from "@/lib/monitoring/sentry-client-provider";
+import { CookieConsentBanner } from "@/components/cookie-consent-banner";
 import { Toaster } from "sonner";
 import "./globals.css";
 
@@ -33,18 +35,21 @@ export default function RootLayout({
           fontFamily: "system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif"
         }}
       >
-        <ThemeProvider
-          attribute="class"
-          defaultTheme="system"
-          enableSystem
-          disableTransitionOnChange
-        >
-          <SessionTrackerProvider />
-          <AuthProvider>
-            {children}
-          </AuthProvider>
-          <Toaster position="top-right" richColors />
-        </ThemeProvider>
+        <SentryProvider>
+          <ThemeProvider
+            attribute="class"
+            defaultTheme="system"
+            enableSystem
+            disableTransitionOnChange
+          >
+            <SessionTrackerProvider />
+            <AuthProvider>
+              {children}
+            </AuthProvider>
+            <CookieConsentBanner />
+            <Toaster position="top-right" richColors />
+          </ThemeProvider>
+        </SentryProvider>
       </body>
     </html>
   );
