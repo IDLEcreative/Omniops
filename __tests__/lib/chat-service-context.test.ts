@@ -8,8 +8,6 @@ describe('ChatService - Context Enhancement', () => {
   let mockSupabaseClient: any
 
   beforeEach(() => {
-    jest.clearAllMocks()
-
     mockSupabaseClient = {
       from: jest.fn(),
       auth: {
@@ -22,6 +20,9 @@ describe('ChatService - Context Enhancement', () => {
 
     __setMockSupabaseClient(mockSupabaseClient)
     chatService = new ChatService()
+
+    // Clear mocks AFTER setting up Supabase client
+    mockSupabaseClient.from.mockClear()
   })
 
   describe('updateSessionMetadata', () => {
