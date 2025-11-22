@@ -17,11 +17,28 @@ export type { WooCommerceOperationParams, WooCommerceOperationResult } from './w
 /**
  * Execute a WooCommerce operation
  * Main entry point for WooCommerce tool execution with analytics tracking
+ *
+ * Refactored to support optional dependency injection for testing
+ *
+ * @param operation - Operation type to execute
+ * @param params - Operation parameters
+ * @param domain - Customer domain
+ * @param wcClient - Optional WooCommerce client for testing (if not provided, creates from domain)
+ *
+ * @example
+ * // Production usage
+ * const result = await executeWooCommerceOperation('get_products', params, 'example.com');
+ *
+ * @example
+ * // Testing usage
+ * const mockClient = createMockWooCommerceClient();
+ * const result = await executeWooCommerceOperation('get_products', params, 'example.com', mockClient);
  */
 export async function executeWooCommerceOperation(
   operation: string,
   params: WooCommerceOperationParams,
-  domain: string
+  domain: string,
+  wcClient?: any // WooCommerceAPI type - optional for dependency injection
 ): Promise<WooCommerceOperationResult> {
   const start = Date.now();
   console.log(`[WooCommerce Agent] Executing: ${operation}`, params);
@@ -30,7 +47,8 @@ export async function executeWooCommerceOperation(
     // Get customer config ID for analytics
     const configId = await getCustomerConfigId(domain);
 
-    const wc = await getDynamicWooCommerceClient(domain);
+    // Use injected client if provided (for testing), otherwise create from domain
+    const wc = wcClient || await getDynamicWooCommerceClient(domain);
 
     if (!wc) {
       // Track configuration error
