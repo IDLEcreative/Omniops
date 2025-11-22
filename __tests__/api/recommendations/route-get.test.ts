@@ -7,19 +7,30 @@
 
 import { describe, it, expect, jest, beforeEach } from '@jest/globals';
 import { NextRequest } from 'next/server';
-import * as engine from '@/lib/recommendations/engine';
 
-// Create spies on the engine module
-const mockGetRecommendations = jest.spyOn(engine, 'getRecommendations') as jest.MockedFunction<typeof engine.getRecommendations>;
-const mockTrackEvent = jest.spyOn(engine, 'trackRecommendationEvent') as jest.MockedFunction<typeof engine.trackRecommendationEvent>;
-const mockGetMetrics = jest.spyOn(engine, 'getRecommendationMetrics') as jest.MockedFunction<typeof engine.getRecommendationMetrics>;
+// Mock Supabase first (required by recommendations engine)
+jest.mock('@/lib/supabase/server', () => ({
+  createClient: jest.fn(),
+  createServiceRoleClient: jest.fn(),
+}));
+
+// Mock the engine module with a factory
+jest.mock('@/lib/recommendations/engine', () => ({
+  getRecommendations: jest.fn(),
+  trackRecommendationEvent: jest.fn(),
+  getRecommendationMetrics: jest.fn(),
+}));
 
 import { GET } from '@/app/api/recommendations/route';
 
 describe('GET /api/recommendations', () => {
+  // Get mocked module
+  let engineModule: any;
 
   beforeEach(() => {
     jest.clearAllMocks();
+    // Get the mocked module
+    engineModule = jest.requireMock('@/lib/recommendations/engine');
   });
 
   describe('Success Cases', () => {
@@ -37,7 +48,7 @@ describe('GET /api/recommendations', () => {
         executionTime: 150,
       };
 
-      mockGetRecommendations.mockResolvedValue(mockResult);
+      engineModule.getRecommendations.mockResolvedValue(mockResult);
 
       const request = new NextRequest(
         'http://localhost:3000/api/recommendations?domainId=550e8400-e29b-41d4-a716-446655440000&limit=5'
@@ -52,7 +63,7 @@ describe('GET /api/recommendations', () => {
     });
 
     it('should default limit to 5', async () => {
-      mockGetRecommendations.mockResolvedValue({
+      engineModule.getRecommendations.mockResolvedValue({
         recommendations: [],
         algorithm: 'hybrid',
         executionTime: 100,
@@ -64,7 +75,7 @@ describe('GET /api/recommendations', () => {
 
       await GET(request);
 
-      expect(mockGetRecommendations).toHaveBeenCalledWith(
+      expect(engineModule.getRecommendations).toHaveBeenCalledWith(
         expect.objectContaining({ limit: 5 })
       );
     });
@@ -77,7 +88,7 @@ describe('GET /api/recommendations', () => {
         'vector_similarity',
       ];
 
-      mockGetRecommendations.mockResolvedValue({
+      engineModule.getRecommendations.mockResolvedValue({
         recommendations: [],
         algorithm: 'hybrid',
         executionTime: 100,
@@ -94,7 +105,7 @@ describe('GET /api/recommendations', () => {
     });
 
     it('should pass all query parameters to engine', async () => {
-      mockGetRecommendations.mockResolvedValue({
+      engineModule.getRecommendations.mockResolvedValue({
         recommendations: [],
         algorithm: 'hybrid',
         executionTime: 100,
@@ -106,7 +117,7 @@ describe('GET /api/recommendations', () => {
 
       await GET(request);
 
-      expect(mockGetRecommendations).toHaveBeenCalledWith({
+      expect(engineModule.getRecommendations).toHaveBeenCalledWith({
         domainId: '550e8400-e29b-41d4-a716-446655440000',
         sessionId: 'sess-123',
         conversationId: 'conv-456',
@@ -119,7 +130,7 @@ describe('GET /api/recommendations', () => {
     });
 
     it('should parse excludeProductIds as array', async () => {
-      mockGetRecommendations.mockResolvedValue({
+      engineModule.getRecommendations.mockResolvedValue({
         recommendations: [],
         algorithm: 'hybrid',
         executionTime: 100,
@@ -131,7 +142,7 @@ describe('GET /api/recommendations', () => {
 
       await GET(request);
 
-      expect(mockGetRecommendations).toHaveBeenCalledWith(
+      expect(engineModule.getRecommendations).toHaveBeenCalledWith(
         expect.objectContaining({
           excludeProductIds: ['prod-1', 'prod-2', 'prod-3'],
         })
@@ -192,7 +203,7 @@ describe('GET /api/recommendations', () => {
 
   describe('Error Handling', () => {
     it('should handle engine errors with 500 status', async () => {
-      mockGetRecommendations.mockRejectedValue(new Error('Engine failed'));
+      engineModule.getRecommendations.mockRejectedValue(new Error('Engine failed'));
 
       const request = new NextRequest(
         'http://localhost:3000/api/recommendations?domainId=550e8400-e29b-41d4-a716-446655440000'
