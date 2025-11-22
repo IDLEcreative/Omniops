@@ -8,6 +8,7 @@ export interface UseMessageStateProps {
   sessionId: string;
   demoConfig?: ChatWidgetConfig | null;
   storage: StorageAdapter;
+  isSendingRef?: React.MutableRefObject<boolean>; // Track if message send is in progress
 }
 
 export interface MessageState {
@@ -46,6 +47,7 @@ export function useMessageState({
   sessionId,
   demoConfig,
   storage,
+  isSendingRef,
 }: UseMessageStateProps): MessageState {
   const [messages, setMessages] = useState<Message[]>([]);
   const [input, setInput] = useState('');
@@ -65,6 +67,13 @@ export function useMessageState({
    */
   const loadPreviousMessages = useCallback(
     async (convId: string, sessId: string) => {
+      // CRITICAL: Don't load from DB if a message send is in progress
+      // This prevents overwriting fresh optimistic updates with stale DB data
+      if (isSendingRef?.current) {
+        console.log('[useMessageState] ⏸️ Skipping loadPreviousMessages - message send in progress');
+        return;
+      }
+
       if (!convId || !sessId || hasLoadedMessages.current) {
         return;
       }
