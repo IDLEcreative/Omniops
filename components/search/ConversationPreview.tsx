@@ -7,6 +7,7 @@ import { Badge } from '@/components/ui/badge';
 import { ChevronDown, ChevronUp, User, Bot, Mail, Globe } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { format } from 'date-fns';
+import { sanitizeForReact } from '@/lib/sanitize-html';
 
 interface Message {
   messageId: string;
@@ -130,7 +131,7 @@ export function ConversationPreview({
                   <div className="flex-1">
                     <div
                       className="text-sm line-clamp-2"
-                      dangerouslySetInnerHTML={{ __html: message.highlight }}
+                      dangerouslySetInnerHTML={sanitizeForReact(message.highlight)}
                     />
                   </div>
                 </div>
@@ -184,7 +185,7 @@ export function ConversationPreview({
                     >
                       {/* Show highlighted version if available, otherwise full content */}
                       {message.highlight.includes('<mark>') ? (
-                        <div dangerouslySetInnerHTML={{ __html: message.highlight }} />
+                        <div dangerouslySetInnerHTML={sanitizeForReact(message.highlight)} />
                       ) : (
                         <p>{message.content}</p>
                       )}

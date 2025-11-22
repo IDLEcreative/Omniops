@@ -11,12 +11,26 @@ import { parseWooCommerceOrder, shouldTrackWooCommerceOrder } from '@/lib/webhoo
 import { attributePurchaseToConversation } from '@/lib/attribution/purchase-attributor';
 import { recordCartStage, recordPurchaseStage } from '@/lib/analytics/funnel-analytics';
 import { createServiceRoleClient } from '@/lib/supabase-server';
+import { checkRateLimit } from '@/lib/rate-limit';
+import { validateWebhookEvent, logWebhookEvent } from '@/lib/webhooks/replay-prevention';
 import type { WooCommerceOrderWebhook, CartPriority } from '@/types/purchase-attribution';
 
 export const runtime = 'nodejs';
 export const dynamic = 'force-dynamic';
 
 export async function POST(request: NextRequest) {
+  // SECURITY: Rate limit webhook endpoint (100 requests per minute per IP)
+  const forwardedFor = request.headers.get('x-forwarded-for');
+  const clientIp = forwardedFor?.split(',')[0]?.trim() ||
+                   request.headers.get('x-real-ip') ||
+                   'unknown';
+
+  const { allowed } = await checkRateLimit(clientIp, 100, 60 * 1000);
+
+  if (!allowed) {
+    return NextResponse.json({ error: 'Too Many Requests' }, { status: 429 });
+  }
+
   try {
     // Get raw body for signature verification
     const rawBody = await request.text();
@@ -85,6 +99,34 @@ export async function POST(request: NextRequest) {
         { status: 401 }
       );
     }
+
+    // SECURITY: Validate timestamp and check for replay attacks
+    const eventId = payload.id?.toString();
+    const eventTime = payload.date_created ? new Date(payload.date_created).getTime() / 1000 : 0;
+
+    if (!eventId) {
+      console.error('[WooCommerce Webhook] Missing event ID');
+      return NextResponse.json(
+        { error: 'Missing event ID' },
+        { status: 400 }
+      );
+    }
+
+    const replayCheck = await validateWebhookEvent(eventId, eventTime, 'woocommerce_order');
+
+    if (!replayCheck.valid) {
+      console.warn('[WooCommerce Webhook] Replay attack prevented', {
+        eventId,
+        reason: replayCheck.reason,
+      });
+      return NextResponse.json(
+        { error: replayCheck.reason },
+        { status: 400 }
+      );
+    }
+
+    // Log event for audit trail (prevents future replay)
+    await logWebhookEvent(eventId, 'woocommerce_order', payload);
 
     // Check if we should track this order
     if (!shouldTrackWooCommerceOrder(payload)) {

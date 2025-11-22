@@ -21,7 +21,7 @@ const options = {
 };
 
 console.log('Testing model: gpt-5-mini-2025-08-07');
-console.log('API Key:', process.env.OPENAI_API_KEY ? `${process.env.OPENAI_API_KEY.substring(0, 20)}...` : 'NOT FOUND');
+console.log('API Key:', process.env.OPENAI_API_KEY ? '✅ SET' : '❌ NOT FOUND');
 
 const req = https.request(options, (res) => {
   let body = '';

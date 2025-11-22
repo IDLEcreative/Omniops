@@ -5,15 +5,18 @@ services:
     container_name: omniops-redis
     ports:
       - "6379:6379"
+    environment:
+      - REDIS_PASSWORD=${REDIS_PASSWORD}
     volumes:
       - redis-data:/data
       - ./docker/redis.conf:/usr/local/etc/redis/redis.conf
-    command: redis-server /usr/local/etc/redis/redis.conf
+    command: >
+      sh -c "redis-server /usr/local/etc/redis/redis.conf --requirepass \"$$REDIS_PASSWORD\""
     restart: unless-stopped
     networks:
       - omniops-network
     healthcheck:
-      test: ["CMD", "redis-cli", "ping"]
+      test: ["CMD", "redis-cli", "-a", "${REDIS_PASSWORD}", "ping"]
       interval: 10s
       timeout: 5s
       retries: 5
@@ -32,7 +35,8 @@ services:
       - "3000:3000"
     environment:
       - NODE_ENV=production
-      - REDIS_URL=redis://redis:6379
+      - REDIS_URL=redis://:${REDIS_PASSWORD}@redis:6379
+      - REDIS_PASSWORD=${REDIS_PASSWORD}
       # Supabase configuration
       - NEXT_PUBLIC_SUPABASE_URL=${NEXT_PUBLIC_SUPABASE_URL}
       - NEXT_PUBLIC_SUPABASE_ANON_KEY=${NEXT_PUBLIC_SUPABASE_ANON_KEY}

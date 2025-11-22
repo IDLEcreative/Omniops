@@ -192,9 +192,17 @@ export async function POST(
       console.warn('Failed to initialize telemetry:', telemetryError);
     }
 
-    // Check rate limit (uses extracted helper)
+    // SECURITY: Use IP address for rate limiting instead of user-controlled domain
+    const forwardedFor = request.headers.get('x-forwarded-for');
+    const clientIp = forwardedFor?.split(',')[0]?.trim() ||
+                     request.headers.get('x-real-ip') ||
+                     'unknown';
+
+    // Rate limit based on IP + session_id (not user-controlled domain)
+    const rateLimitKey = `${clientIp}:${session_id}`;
+
     const rateLimitError = await checkRateLimit(
-      domain,
+      rateLimitKey,
       request.headers.get('host'),
       rateLimitFn,
       corsHeaders

@@ -3,9 +3,9 @@ import dotenv from 'dotenv';
 dotenv.config({ path: '.env.local' });
 
 console.log('=== WooCommerce Environment Check ===');
-console.log('URL:', process.env.WOOCOMMERCE_URL ? '✓ Set' : '✗ Missing');
-console.log('Consumer Key:', process.env.WOOCOMMERCE_CONSUMER_KEY ? `✓ Set (${process.env.WOOCOMMERCE_CONSUMER_KEY.substring(0, 10)}...)` : '✗ Missing');
-console.log('Consumer Secret:', process.env.WOOCOMMERCE_CONSUMER_SECRET ? `✓ Set (${process.env.WOOCOMMERCE_CONSUMER_SECRET.substring(0, 10)}...)` : '✗ Missing');
+console.log('URL:', process.env.WOOCOMMERCE_URL ? '✅ SET' : '❌ NOT SET');
+console.log('Consumer Key:', process.env.WOOCOMMERCE_CONSUMER_KEY ? '✅ SET' : '❌ NOT SET');
+console.log('Consumer Secret:', process.env.WOOCOMMERCE_CONSUMER_SECRET ? '✅ SET' : '❌ NOT SET');
 
 if (process.env.WOOCOMMERCE_URL && process.env.WOOCOMMERCE_CONSUMER_KEY && process.env.WOOCOMMERCE_CONSUMER_SECRET) {
   console.log('\n=== Testing WooCommerce API Connection ===');

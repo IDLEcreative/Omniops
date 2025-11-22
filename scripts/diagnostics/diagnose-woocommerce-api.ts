@@ -22,8 +22,8 @@ async function diagnoseWooCommerceAPI() {
 
   console.log('\n📋 Step 1: Environment Variables Check');
   console.log('   URL:', credentials.url || '❌ Missing');
-  console.log('   Consumer Key:', credentials.key ? `${credentials.key.substring(0, 15)}...` : '❌ Missing');
-  console.log('   Consumer Secret:', credentials.secret ? `${credentials.secret.substring(0, 15)}...` : '❌ Missing');
+  console.log('   Consumer Key:', credentials.key ? '✅ SET' : '❌ Missing');
+  console.log('   Consumer Secret:', credentials.secret ? '✅ SET' : '❌ Missing');
 
   if (!credentials.url || !credentials.key || !credentials.secret) {
     console.error('\n❌ Missing required credentials');

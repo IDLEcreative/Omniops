@@ -27,6 +27,7 @@ export interface ShopifyCredentials {
   access_token: string;
   store_url: string;
   api_version?: string;
+  webhook_secret?: string; // Dedicated webhook verification secret (different from access_token)
 }
 
 /**

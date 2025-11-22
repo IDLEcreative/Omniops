@@ -22,7 +22,7 @@ export async function GET(request: NextRequest) {
 
   console.log('📍 Instagram webhook verification request received');
   console.log('   Mode:', mode);
-  console.log('   Token matches:', token === process.env.INSTAGRAM_WEBHOOK_VERIFY_TOKEN);
+  console.log('   Token:', token === process.env.INSTAGRAM_WEBHOOK_VERIFY_TOKEN ? '✅ Valid' : '❌ Invalid');
 
   // Verify that mode and token match expected values
   if (mode === 'subscribe' && token === process.env.INSTAGRAM_WEBHOOK_VERIFY_TOKEN) {
@@ -32,8 +32,6 @@ export async function GET(request: NextRequest) {
   }
 
   console.error('❌ Instagram webhook verification failed');
-  console.error('   Expected token:', process.env.INSTAGRAM_WEBHOOK_VERIFY_TOKEN);
-  console.error('   Received token:', token);
 
   return NextResponse.json(
     { error: 'Verification failed' },

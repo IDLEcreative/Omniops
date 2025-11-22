@@ -23,7 +23,7 @@ export function useFilteredConversations(
     if (searchTerm.trim()) {
       const term = searchTerm.toLowerCase();
       filtered = filtered.filter((conversation) => {
-        const messageMatch = conversation.message.toLowerCase().includes(term);
+        const messageMatch = (conversation as any).message?.toLowerCase()?.includes(term) ?? false;
         const customerMatch = (conversation.customerName?.toLowerCase() ?? "").includes(term);
         return messageMatch || customerMatch;
       });
@@ -31,7 +31,7 @@ export function useFilteredConversations(
 
     if (advancedFilters.languages.length > 0) {
       filtered = filtered.filter(conv =>
-        advancedFilters.languages.includes(conv.metadata?.language || 'Unknown')
+        advancedFilters.languages.includes((conv.metadata as any)?.language || 'Unknown')
       );
     }
 

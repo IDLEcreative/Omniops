@@ -14,6 +14,10 @@ export function createIframe(config: WidgetConfig, isMobile: boolean): HTMLIFram
   iframe.title = 'Customer Support Chat';
   iframe.setAttribute('scrolling', 'no');
 
+  // Security: Sandbox attribute to restrict iframe capabilities
+  iframe.setAttribute('sandbox', 'allow-scripts allow-same-origin allow-forms allow-popups');
+  iframe.setAttribute('allow', 'clipboard-write');
+
   // Check if widget should start minimized (default is true)
   const startMinimized = config.appearance.startMinimized ?? true;
 

@@ -1,5 +1,6 @@
 import { NextResponse, type NextRequest } from 'next/server'
 import { updateSession } from '@/lib/supabase/middleware'
+import { getCorsHeaders } from '@/lib/security/cors-config'
 
 export async function middleware(request: NextRequest) {
   const { pathname } = request.nextUrl
@@ -11,15 +12,10 @@ export async function middleware(request: NextRequest) {
   // ========================================
   if (request.method === 'OPTIONS') {
     console.log('[Middleware] OPTIONS request for:', pathname);
+    const corsHeaders = getCorsHeaders(pathname, origin);
     return new NextResponse(null, {
       status: 204,
-      headers: {
-        'Access-Control-Allow-Origin': origin || '*',
-        'Access-Control-Allow-Methods': 'GET, POST, PUT, DELETE, OPTIONS',
-        'Access-Control-Allow-Headers': 'Content-Type, Authorization, X-Requested-With',
-        'Access-Control-Allow-Credentials': 'true',
-        'Access-Control-Max-Age': '86400',
-      },
+      headers: corsHeaders,
     });
   }
 
@@ -34,10 +30,10 @@ export async function middleware(request: NextRequest) {
     console.log('[Middleware] Public API request for:', pathname);
     // Skip ALL processing - return immediately with CORS headers
     const response = NextResponse.next();
-    response.headers.set('Access-Control-Allow-Origin', origin || '*');
-    response.headers.set('Access-Control-Allow-Methods', 'GET, POST, PUT, DELETE, OPTIONS');
-    response.headers.set('Access-Control-Allow-Headers', 'Content-Type, Authorization, X-Requested-With');
-    response.headers.set('Access-Control-Allow-Credentials', 'true');
+    const corsHeaders = getCorsHeaders(pathname, origin);
+    Object.entries(corsHeaders).forEach(([key, value]) => {
+      response.headers.set(key, value);
+    });
     return response;
   }
 
@@ -141,12 +137,13 @@ export async function middleware(request: NextRequest) {
   // ========================================
   const scriptSources = [
     "'self'",
-    "'unsafe-eval'",
-    "'unsafe-inline'",
+    // Removed 'unsafe-eval' and 'unsafe-inline' for security
     'https://cdn.jsdelivr.net',
     // CRITICAL: Always allow Vercel tooling (it detects environment automatically)
     'https://vercel.live',
     'https://*.vercel.live',
+    // Cloudflare Turnstile (CAPTCHA)
+    'https://challenges.cloudflare.com',
   ];
 
   const connectSources = [
@@ -216,11 +213,12 @@ export async function middleware(request: NextRequest) {
     response.headers.set(key, value)
   })
 
-  // Add CORS headers for API routes
+  // Add CORS headers for API routes (using security-based allowlist)
   if (pathname.startsWith('/api/')) {
-    const origin = request.headers.get('origin');
-    response.headers.set('Access-Control-Allow-Origin', origin || '*');
-    response.headers.set('Access-Control-Allow-Credentials', 'true');
+    const corsHeaders = getCorsHeaders(pathname, origin);
+    Object.entries(corsHeaders).forEach(([key, value]) => {
+      response.headers.set(key, value);
+    });
   }
 
   return response

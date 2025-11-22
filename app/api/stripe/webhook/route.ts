@@ -3,10 +3,24 @@ import { headers } from 'next/headers';
 import Stripe from 'stripe';
 import { createServiceRoleClient } from '@/lib/supabase-server';
 import stripe from '@/lib/stripe-client';
+import { checkRateLimit } from '@/lib/rate-limit';
 
 const WEBHOOK_SECRET = process.env.STRIPE_WEBHOOK_SECRET!;
+const EVENT_TOLERANCE_SECONDS = 300; // 5 minutes
 
 export async function POST(request: NextRequest) {
+  // SECURITY: Rate limit webhook endpoint (100 requests per minute per IP)
+  const forwardedFor = request.headers.get('x-forwarded-for');
+  const clientIp = forwardedFor?.split(',')[0]?.trim() ||
+                   request.headers.get('x-real-ip') ||
+                   'unknown';
+
+  const { allowed } = await checkRateLimit(clientIp, 100, 60 * 1000);
+
+  if (!allowed) {
+    return NextResponse.json({ error: 'Too Many Requests' }, { status: 429 });
+  }
+
   const body = await request.text();
   const headersList = await headers();
   const signature = headersList.get('stripe-signature');
@@ -22,6 +36,21 @@ export async function POST(request: NextRequest) {
   } catch (error) {
     console.error('Webhook signature verification failed:', error);
     return NextResponse.json({ error: 'Invalid signature' }, { status: 400 });
+  }
+
+  // SECURITY: Validate event timestamp to prevent replay attacks
+  const eventTime = event.created; // Unix timestamp
+  const currentTime = Math.floor(Date.now() / 1000);
+
+  if (Math.abs(currentTime - eventTime) > EVENT_TOLERANCE_SECONDS) {
+    console.warn('Webhook event outside tolerance window', {
+      eventId: event.id,
+      difference: Math.abs(currentTime - eventTime),
+    });
+    return NextResponse.json(
+      { error: 'Event timestamp outside tolerance window' },
+      { status: 400 }
+    );
   }
 
   const supabase = await createServiceRoleClient();

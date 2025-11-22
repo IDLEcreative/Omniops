@@ -3,6 +3,17 @@
  *
  * Exports analytics data to Excel format (.xlsx)
  * Features: Multiple sheets, formatting, formulas
+ *
+ * ⚠️ SECURITY WARNING:
+ * The 'xlsx' package has known vulnerabilities (CVE-2024-45590, CVE-2023-30533):
+ * - Prototype pollution attack
+ * - ReDoS (Regular Expression Denial of Service)
+ * - No fix available from SheetJS as of 2025-11-18
+ *
+ * Mitigation:
+ * - This module only generates Excel files (write-only), not parsing untrusted input
+ * - Risk is minimal for our use case (export only)
+ * - TODO: Consider migrating to 'exceljs' for better security in future
  */
 
 import * as XLSX from 'xlsx';
