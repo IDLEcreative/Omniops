@@ -26,6 +26,11 @@ describe('ParentStorageAdapter - Iframe Context', () => {
     mockParentPostMessage = jest.fn();
     setupIframeContext(mockParentPostMessage);
     process.env.NEXT_PUBLIC_APP_URL = 'https://example.com';
+    // Mock document.referrer to match expected targetOrigin
+    Object.defineProperty(document, 'referrer', {
+      value: 'https://example.com/parent-page',
+      configurable: true,
+    });
     adapter = new ParentStorageAdapter();
   });
 
@@ -57,12 +62,11 @@ describe('ParentStorageAdapter - Iframe Context', () => {
       );
     });
 
-    it('should use targetOrigin from env or window.location.origin', async () => {
-      process.env.NEXT_PUBLIC_APP_URL = '';
-
-      Object.defineProperty(window, 'location', {
-        value: { origin: 'https://fallback.com' },
-        writable: true,
+    it('should use targetOrigin from referrer or fallback to *', async () => {
+      // Clear the referrer to test fallback
+      Object.defineProperty(document, 'referrer', {
+        value: '',
+        configurable: true,
       });
 
       const newAdapter = new ParentStorageAdapter();
@@ -75,7 +79,7 @@ describe('ParentStorageAdapter - Iframe Context', () => {
           type: 'getFromParentStorage',
           key: 'test-key',
         }),
-        'https://fallback.com'
+        '*'
       );
     });
 
