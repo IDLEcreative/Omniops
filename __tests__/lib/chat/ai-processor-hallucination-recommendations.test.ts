@@ -9,41 +9,26 @@
  */
 
 import { describe, it, expect, jest, beforeEach } from '@jest/globals';
-import OpenAI from 'openai';
 import { processAIConversation } from '@/lib/chat/ai-processor';
 import type { AIProcessorParams } from '@/lib/chat/ai-processor-types';
-import { ChatTelemetry } from '@/lib/chat-telemetry';
-
-
+import {
+  createMockOpenAIClient,
+  createMockTelemetry,
+  createMockDependencies
+} from './ai-processor-setup';
 
 describe('AI Processor - Hallucination Prevention - Recommendations', () => {
-  let mockOpenAIClient: jest.Mocked<OpenAI>;
-  let mockTelemetry: jest.Mocked<ChatTelemetry>;
-  let mockDependencies: any;
+  let mockOpenAIClient: ReturnType<typeof createMockOpenAIClient>;
+  let mockTelemetry: ReturnType<typeof createMockTelemetry>;
+  let mockDependencies: ReturnType<typeof createMockDependencies>;
   let baseParams: AIProcessorParams;
 
   beforeEach(() => {
     jest.clearAllMocks();
 
-    mockOpenAIClient = {
-      chat: {
-        completions: {
-          create: jest.fn()
-        }
-      }
-    } as any;
-
-    mockTelemetry = {
-      log: jest.fn(),
-      trackIteration: jest.fn(),
-      trackSearch: jest.fn()
-    } as any;
-
-    mockDependencies = {
-      getCommerceProvider: jest.fn(),
-      searchSimilarContent: jest.fn(),
-      sanitizeOutboundLinks: jest.fn((text: string) => text)
-    };
+    mockOpenAIClient = createMockOpenAIClient();
+    mockTelemetry = createMockTelemetry();
+    mockDependencies = createMockDependencies();
 
     baseParams = {
       conversationMessages: [
@@ -64,20 +49,13 @@ describe('AI Processor - Hallucination Prevention - Recommendations', () => {
       dependencies: mockDependencies,
       isMobile: false
     };
-
-    (getAvailableTools as jest.Mock).mockResolvedValue([]);
-    (checkToolAvailability as jest.Mock).mockResolvedValue({
-      hasWooCommerce: false,
-      hasShopify: false
-    });
-    (getToolInstructions as jest.Mock).mockReturnValue('');
   });
 
   describe('Installation and Usage - Refer to Documentation', () => {
     it('should not provide detailed installation steps without documentation', async () => {
       baseParams.conversationMessages[1].content = 'How do I install the chute pump on my mixer?';
 
-      (getAvailableTools as jest.Mock).mockResolvedValue([
+      mockDependencies.getAvailableTools.mockResolvedValue([
         { type: 'function', function: { name: 'search_website_content', description: '', parameters: {} } }
       ]);
 
@@ -108,7 +86,7 @@ describe('AI Processor - Hallucination Prevention - Recommendations', () => {
           }]
         });
 
-      (executeToolCallsParallel as jest.Mock).mockResolvedValue([
+      mockDependencies.executeToolCallsParallel.mockResolvedValue([
         {
           toolCall: { id: 'call_1' },
           toolName: 'search_website_content',
@@ -122,7 +100,7 @@ describe('AI Processor - Hallucination Prevention - Recommendations', () => {
         }
       ]);
 
-      (formatToolResultsForAI as jest.Mock).mockReturnValue([
+      mockDependencies.formatToolResultsForAI.mockReturnValue([
         { tool_call_id: 'call_1', content: 'No installation instructions found' }
       ]);
 
@@ -151,7 +129,7 @@ describe('AI Processor - Hallucination Prevention - Recommendations', () => {
     it('should qualify alternative product suggestions', async () => {
       baseParams.conversationMessages[1].content = 'What can I use instead of the A4VTG90 pump?';
 
-      (getAvailableTools as jest.Mock).mockResolvedValue([
+      mockDependencies.getAvailableTools.mockResolvedValue([
         { type: 'function', function: { name: 'search_website_content', description: '', parameters: {} } }
       ]);
 
@@ -182,7 +160,7 @@ describe('AI Processor - Hallucination Prevention - Recommendations', () => {
           }]
         });
 
-      (executeToolCallsParallel as jest.Mock).mockResolvedValue([
+      mockDependencies.executeToolCallsParallel.mockResolvedValue([
         {
           toolCall: { id: 'call_1' },
           toolName: 'search_website_content',
@@ -196,7 +174,7 @@ describe('AI Processor - Hallucination Prevention - Recommendations', () => {
         }
       ]);
 
-      (formatToolResultsForAI as jest.Mock).mockReturnValue([
+      mockDependencies.formatToolResultsForAI.mockReturnValue([
         { tool_call_id: 'call_1', content: 'No alternative pump information found' }
       ]);
 
