@@ -106,6 +106,7 @@ import {
 } from '@/lib/chat/parallel-operations';
 import { handleMCPExecution } from '@/lib/chat/mcp-handler';
 import { saveFinalResponse, buildChatResponse } from '@/lib/chat/response-handler';
+import { shouldSuggestHuman } from '@/lib/ai-frustration-detector';
 
 // Handle preflight OPTIONS requests
 export async function OPTIONS(request: NextRequest) {
@@ -309,7 +310,7 @@ export async function POST(
     });
 
     // MCP CODE EXECUTION: Check if AI response contains executable code (uses extracted handler)
-    const { finalResponse, mcpExecutionMetadata } = await handleMCPExecution(
+    const { finalResponse: mcpResponse, mcpExecutionMetadata } = await handleMCPExecution(
       aiResponse,
       domain,
       domainId ?? null,
@@ -317,6 +318,30 @@ export async function POST(
       session_id,
       telemetry
     );
+
+    // AI FRUSTRATION DETECTION: Check if user needs human assistance
+    const frustrationCheck = shouldSuggestHuman(message, historyData);
+    let finalResponse = mcpResponse;
+
+    if (frustrationCheck.suggest) {
+      console.log('[Chat API] Frustration detected - suggesting human handoff:', {
+        reason: frustrationCheck.reason,
+        conversationId
+      });
+
+      // Append human help suggestion to response
+      finalResponse = `${mcpResponse}\n\n---\n\n${frustrationCheck.addToResponse}`;
+
+      // Track frustration in metadata
+      metadataManager.metadata.frustration_detected = true;
+      metadataManager.metadata.frustration_reason = frustrationCheck.reason;
+      metadataManager.metadata.human_suggested_at = new Date().toISOString();
+
+      telemetry?.log('info', 'conversation', 'Frustration detected - human suggested', {
+        reason: frustrationCheck.reason,
+        conversationId
+      });
+    }
 
     // Save assistant response and metadata (uses extracted helper)
     await saveFinalResponse(

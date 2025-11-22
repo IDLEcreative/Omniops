@@ -35,12 +35,18 @@ export function ConversationTabbedList({
   onToggleSelect,
   onSelectAll,
 }: ConversationTabbedListProps) {
+  // Count human-requested conversations
+  const humanRequestedCount = conversations.filter(conv =>
+    conv.status === 'waiting' &&
+    (conv.metadata as any)?.assigned_to_human === true
+  ).length;
+
   const tabConfigs = [
     { value: 'all' as const, label: 'All', emptyTitle: 'No conversations yet', emptyDescription: 'Conversations will appear here once customers start chatting' },
     { value: 'active' as const, label: 'Active', emptyTitle: 'No active conversations', emptyDescription: 'Active conversations will appear here' },
     { value: 'waiting' as const, label: 'Waiting', emptyTitle: 'No waiting conversations', emptyDescription: 'Conversations awaiting response will appear here' },
     { value: 'resolved' as const, label: 'Resolved', emptyTitle: 'No resolved conversations', emptyDescription: 'Resolved conversations will appear here' },
-    { value: 'human_requested' as const, label: '🚨 Human', emptyTitle: 'No human requests', emptyDescription: 'Conversations where users requested human assistance will appear here' },
+    { value: 'human_requested' as const, label: humanRequestedCount > 0 ? `🚨 Human (${humanRequestedCount})` : '🚨 Human', emptyTitle: 'No human requests', emptyDescription: 'Conversations where users requested human assistance will appear here' },
   ];
 
   return (
