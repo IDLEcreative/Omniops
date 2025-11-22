@@ -2,17 +2,16 @@ import { describe, it, expect, beforeEach, jest } from '@jest/globals';
 import { NextRequest } from 'next/server';
 import { GET } from '@/app/api/dashboard/telemetry/route';
 
-jest.mock('@/lib/chat-telemetry', () => ({
-  telemetryManager: {
-    getAllMetrics: jest.fn()
-  }
-}));
+// Mock the telemetry module
+jest.mock('@/lib/chat-telemetry');
 
 import { createServiceRoleClient } from '@/lib/supabase-server';
 import { telemetryManager } from '@/lib/chat-telemetry';
 
 const mockCreateServiceRoleClient = createServiceRoleClient as jest.MockedFunction<typeof createServiceRoleClient>;
-const mockGetAllMetrics = telemetryManager.getAllMetrics as jest.MockedFunction<typeof telemetryManager.getAllMetrics>;
+
+// Create a proper mock for getAllMetrics
+const mockGetAllMetrics = jest.fn();
 
 type QueryResult<T> = { data: T; error: null };
 
@@ -62,9 +61,10 @@ const createRequest = (query: string) =>
 
 describe('GET /api/dashboard/telemetry', () => {
   beforeEach(() => {
-    // Don't use jest.resetAllMocks() - it breaks the mock factory functions
-    mockGetAllMetrics.mockClear();
-    mockCreateServiceRoleClient.mockClear();
+    jest.clearAllMocks();
+
+    // Assign mock to telemetryManager
+    (telemetryManager as any).getAllMetrics = mockGetAllMetrics;
 
     mockGetAllMetrics.mockReturnValue({
       summary: { totalCostUSD: 0.123456 },
