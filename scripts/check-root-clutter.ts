@@ -75,6 +75,14 @@ const ALLOWED_ROOT_FILES = new Set([
   // Documentation
   'README.md',
   'CLAUDE.md',
+
+  // GitHub standard files
+  'LICENSE',
+  'CODE_OF_CONDUCT.md',
+  'CONTRIBUTING.md',
+
+  // Build tools
+  'Makefile',
 ]);
 
 // Patterns that should NEVER be in root
