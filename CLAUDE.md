@@ -14,6 +14,8 @@
 1. **NEVER hardcode**: company names, products, industries, domains, URLs, emails (multi-tenant system)
 2. **NEVER create files in root** (only config files allowed - see File Placement Matrix below)
 3. **Code files MUST be <300 LOC** (AI instruction files exempt)
+   - **What counts:** Everything - imports, comments, blank lines, code
+   - **Check with:** `scripts/check-loc-compliance.sh` before committing
 4. **ALWAYS read entire file** before making changes
 5. **ALL AGENTS MUST READ CLAUDE.md FIRST** - agents don't inherit project rules
 
@@ -45,6 +47,7 @@
 - 20+ files to modify → Deploy by module
 - Dependency updates → Deploy by category
 - >30 min sequential work → Parallelize
+- **10+ similar files with repetitive patterns** → Use MAKER framework (Haiku voting, 80-90% savings)
 
 ---
 
@@ -222,6 +225,17 @@ npx tsc --noEmit         # TypeScript check
 
 ## 🔧 REFACTORING PATTERNS (For >300 LOC Files)
 
+**🎯 MAKER Framework for Bulk Operations:**
+
+When refactoring **10+ similar files** with repetitive patterns:
+- ✅ **Use MAKER:** 3× Haiku voting = 80-90% cost savings vs Opus/Sonnet
+- ✅ **Perfect for:** ESLint fixes, import updates, type extraction, dead code removal
+- ✅ **Guide:** [GUIDE_MAKER_FRAMEWORK_HAIKU_OPTIMIZATION.md](docs/02-GUIDES/GUIDE_MAKER_FRAMEWORK_HAIKU_OPTIMIZATION.md)
+
+**Example:** 20 files need import standardization
+- Traditional: 1 Sonnet agent = $0.060
+- MAKER: 3× Haiku voting = $0.015 (75% savings)
+
 **Step 1: Identify What to Extract**
 Look for these natural boundaries:
 - **Types/Interfaces** → Move to `types/[module].ts`
@@ -310,21 +324,50 @@ export class AnalyticsService {
 import { AnalyticsService } from '@/lib/analytics'; // Still works!
 ```
 
-**Step 4: Update Imports**
+**Step 4: Create Barrel Export (Optional)**
+
+For libraries with 3+ related exports, create an `index.ts` barrel file:
+
+```typescript
+// lib/analytics/index.ts - Barrel export
+export * from './types';
+export * from './config';
+export * from './validators';
+export { AnalyticsApiClient } from './analytics-client';
+export { AnalyticsService } from './analytics-service';
+
+// Now consumers can import from one place:
+import { AnalyticsService, AnalyticsEvent, ANALYTICS_DEFAULTS } from '@/lib/analytics';
+// Instead of:
+import { AnalyticsService } from '@/lib/analytics/analytics-service';
+import type { AnalyticsEvent } from '@/lib/analytics/types';
+import { ANALYTICS_DEFAULTS } from '@/lib/analytics/config';
+```
+
+**When to Use Barrel Exports:**
+- ✅ Library modules with 3+ related files
+- ✅ Public API surfaces (things consumed externally)
+- ✅ When external consumers import multiple items from this module
+
+**When NOT to Use Barrel Exports:**
+- ❌ Internal-only modules (unnecessary abstraction layer)
+- ❌ Single-file modules (no value, just indirection)
+- ❌ Rapidly changing APIs (barrel exports make refactoring harder)
+
+**Step 5: Update Imports**
 ```typescript
 // Old single import
 import { everything } from './analytics';
 
-// New specific imports
-import type { AnalyticsData } from '@/types/analytics';
-import { ANALYTICS_DEFAULTS } from '@/lib/config/analytics';
-import { validateAnalytics } from '@/lib/validators/analytics';
+// New specific imports (with barrel)
+import type { AnalyticsData } from '@/lib/analytics';
+import { ANALYTICS_DEFAULTS, validateAnalytics } from '@/lib/analytics';
 ```
 
 **When to Use Subdirectory vs. Separate File:**
 - **<5 related files** → Separate files at same level
-- **5-10 related files** → Consider subdirectory
-- **>10 related files** → Definitely use subdirectory
+- **5-10 related files** → Consider subdirectory + barrel export
+- **>10 related files** → Definitely use subdirectory + barrel export
 
 **Common Mistake to Avoid:**
 ❌ Don't create circular dependencies (A imports B, B imports A)
@@ -440,7 +483,7 @@ scripts/check-loc-compliance.sh   # → All files <300 LOC
 
 ---
 
-**Total Lines:** ~445 (within 100-500 range - industry best practice)
-**Latest Improvements:** Added Testing Workflow, Concrete Refactoring Example, Validation Checklist
-**Previous Improvements:** Quick Scenarios, Refactoring Patterns, Agent Template guidance, Guide descriptions
+**Total Lines:** 489 (within 100-500 range - industry best practice)
+**Latest Improvements:** MAKER in Auto-Triggers, Barrel Export Cautions, Enhanced Decision Guidance
+**Previous Improvements:** Barrel Export Pattern, LOC Counting, MAKER Framework, Testing Workflow
 **Next Read:** [.claude/AGENT_ORCHESTRATION.md](.claude/AGENT_ORCHESTRATION.md) for detailed agent rules
